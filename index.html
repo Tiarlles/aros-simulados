@@ -339,7 +339,7 @@ select.fc{cursor:pointer}
         <h2 style="font-family:Fraunces,serif;font-size:22px;font-weight:700">Painel da Coordenação</h2>
         <p style="color:var(--t2);font-size:13px">AROS · Treinamento TSA Oral</p>
       </div>
-      <button class="btn btn-p btn-sm" onclick="openNewSim()">+ Novo Simulado</button>
+      <button class="btn btn-p btn-sm" id="btn-novo-sim" onclick="openNewSimAuth()" style="display:none">+ Novo Simulado</button>
     </div>
 
     <!-- Co tabs -->
@@ -391,29 +391,10 @@ select.fc{cursor:pointer}
 
     <!-- TAB: Professores -->
     <div id="tab-professores" class="hidden">
-      <div style="display:grid;grid-template-columns:320px 1fr;gap:16px;align-items:start">
+      <div style="display:grid;grid-template-columns:1fr;gap:16px;align-items:start">
 
-        <!-- Left: cadastro -->
-        <div class="card">
-          <div class="ch"><h3 class="ct">👨‍🏫 Lista de Professores</h3>
-            <button class="btn btn-g btn-sm" onclick="toggleProfList()" id="btn-toggle-profs">▼ Ver lista</button>
-          </div>
-          <div class="cb">
-            <!-- Collapsed list -->
-            <div id="prof-list-collapsed" style="margin-bottom:12px">
-              <div id="prof-count-badge" style="font-size:13px;color:var(--t2);margin-bottom:10px"></div>
-            </div>
-            <!-- Expanded list -->
-            <div id="prof-global-list" class="hidden" style="margin-bottom:12px"></div>
-            <div style="display:flex;gap:8px">
-              <input class="fc" id="prof-input" placeholder="Nome do professor" style="flex:1" onkeydown="if(event.key==='Enter')addProfGlobal()"/>
-              <button class="btn btn-p btn-sm" onclick="addProfGlobal()">+ Adicionar</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: disponibilidade -->
-        <div>
+        <!-- Right only: disponibilidade -->
+        <div style="grid-column:1/-1">
           <!-- Informar disponibilidade (professor) -->
           <div class="card" style="margin-bottom:16px">
             <div class="ch"><h3 class="ct">📅 Informar Disponibilidade</h3></div>
@@ -473,6 +454,15 @@ select.fc{cursor:pointer}
 
     <!-- TAB: Trocas -->
     <div id="tab-trocas" class="hidden">
+      <!-- Simulado selector (shown when none selected) -->
+      <div id="trocas-no-sim" class="hidden" style="margin-bottom:16px">
+        <div class="al al-i" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <span>Selecione um simulado para ver as trocas:</span>
+          <select class="fc" style="max-width:280px" onchange="if(this.value){document.getElementById('co-sel').value=this.value;selectSim();}">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+      </div>
       <!-- Solicitações ativas -->
       <div class="card" style="margin-bottom:16px">
         <div class="ch"><h3 class="ct">🔄 Solicitações de Troca</h3><span class="badge b-swap" id="sw-badge">0</span></div>
@@ -554,7 +544,7 @@ select.fc{cursor:pointer}
             <h3 style="font-family:Fraunces,serif;font-size:17px;font-weight:700">📝 Checklist de Aplicação</h3>
             <p style="font-size:13px;color:var(--t2)">Selecione o simulado e o aluno para preencher o checklist.</p>
           </div>
-          <button class="btn btn-s btn-sm" onclick="openCkTemplateEditor()">⚙️ Configurar checklist do simulado</button>
+          <button class="btn btn-s btn-sm" onclick="openCkTemplateEditorAuth()">⚙️ Configurar checklist do simulado</button>
           <button class="btn btn-p btn-sm" onclick="openRelatorioView()">📄 Relatórios</button>
         </div>
 
@@ -740,10 +730,50 @@ select.fc{cursor:pointer}
 
     <!-- TAB: Config -->
     <div id="tab-config" class="hidden">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;flex-wrap:wrap">
-        <div class="card">
-          <div class="ch"><h3 class="ct">⚙️ Alterar Senha</h3></div>
-          <div class="cb">
+      <div style="max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:10px">
+
+        <!-- Hidden but functional elements -->
+        <div style="display:none">
+          <input id="cfg-url" type="url"/>
+          <textarea id="ai-prompt"></textarea>
+          <div id="cfg-url-msg"></div>
+          <div id="ai-prompt-msg"></div>
+        </div>
+
+        <!-- 1. Lista de Professores (dropdown) -->
+        <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden">
+          <div onclick="cfgToggle('cfg-profs-body','cfg-profs-arr')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg2);cursor:pointer;user-select:none" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:18px">👨‍🏫</span>
+              <div>
+                <p style="font-weight:700;font-size:15px">Lista de Professores</p>
+                <p style="font-size:12px;color:var(--t2)" id="prof-count-badge">Carregando...</p>
+              </div>
+            </div>
+            <span id="cfg-profs-arr" style="font-size:14px;color:var(--t2);transition:transform .2s">▼</span>
+          </div>
+          <div id="cfg-profs-body" style="display:none;padding:16px 18px;border-top:1px solid var(--border)">
+            <div id="prof-global-list" style="margin-bottom:12px"></div>
+            <div style="display:flex;gap:8px">
+              <input class="fc" id="prof-input" placeholder="Nome do professor" style="flex:1" onkeydown="if(event.key==='Enter')addProfGlobal()"/>
+              <button class="btn btn-p btn-sm" onclick="addProfGlobal()">+ Adicionar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Alterar Senha de Administrador (dropdown) -->
+        <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden">
+          <div onclick="cfgToggle('cfg-senha-body','cfg-senha-arr')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg2);cursor:pointer;user-select:none" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:18px">🔐</span>
+              <div>
+                <p style="font-weight:700;font-size:15px">Alterar Senha de Administrador</p>
+                <p style="font-size:12px;color:var(--t2)">Senha de acesso total ao painel</p>
+              </div>
+            </div>
+            <span id="cfg-senha-arr" style="font-size:14px;color:var(--t2);transition:transform .2s">▼</span>
+          </div>
+          <div id="cfg-senha-body" style="display:none;padding:16px 18px;border-top:1px solid var(--border)">
             <div class="fg">
               <label class="fl">Senha atual</label>
               <div style="position:relative">
@@ -766,33 +796,47 @@ select.fc{cursor:pointer}
               </div>
             </div>
             <div id="cfg-msg" class="hidden"></div>
-            <button class="btn btn-p" onclick="saveCfg()">Salvar senha</button>
+            <button class="btn btn-p" onclick="saveCfg()">💾 Salvar senha</button>
           </div>
         </div>
-        <div class="card">
-          <div class="ch"><h3 class="ct">🔗 URL do Sistema</h3></div>
-          <div class="cb">
-            <p style="font-size:13px;color:var(--t2);margin-bottom:12px">URL base usada nos links enviados por email (ex: links de aceite de troca). Após publicar no GitHub Pages, cole a URL aqui.</p>
-            <div class="fg">
-              <label class="fl">URL do sistema</label>
-              <input class="fc" id="cfg-url" type="url" placeholder="https://aros.anestreview.com.br"/>
+
+        <!-- 3. Configurar Acesso dos Professores (dropdown) -->
+        <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden">
+          <div onclick="cfgToggle('cfg-prof-body','cfg-prof-arr')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg2);cursor:pointer;user-select:none" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:18px">🔑</span>
+              <div>
+                <p style="font-weight:700;font-size:15px">Configurar Acesso dos Professores</p>
+                <p style="font-size:12px;color:var(--t2)">Senha e abas disponíveis para professores</p>
+              </div>
             </div>
-            <div id="cfg-url-msg" class="hidden"></div>
-            <button class="btn btn-p" onclick="saveCfgUrl()">💾 Salvar URL</button>
+            <span id="cfg-prof-arr" style="font-size:14px;color:var(--t2);transition:transform .2s">▼</span>
           </div>
-        </div>
-        <div class="card">
-          <div class="ch"><h3 class="ct">🤖 Prompt de Revisão IA</h3></div>
-          <div class="cb">
-            <p style="font-size:13px;color:var(--t2);margin-bottom:12px">Este prompt será usado para revisar os feedbacks dos professores antes de gerar os relatórios PDF. O sistema enviará cada feedback para o Claude com este prompt.</p>
+          <div id="cfg-prof-body" style="display:none;padding:16px 18px;border-top:1px solid var(--border)">
             <div class="fg">
-              <label class="fl">Prompt de revisão</label>
-              <textarea class="fc" id="ai-prompt" style="min-height:200px;font-size:13px" placeholder="Ex: Revise o seguinte feedback de professor para um aluno de medicina, corrigindo erros gramaticais, tornando o texto mais profissional e removendo qualquer linguagem que possa ser ofensiva ou inadequada. Mantenha o conteúdo técnico e o sentido original. Retorne apenas o texto revisado, sem comentários adicionais."></textarea>
+              <label class="fl">Senha de professores</label>
+              <div style="position:relative">
+                <input class="fc" id="prof-pass-input" type="password" placeholder="Senha de acesso dos professores" style="padding-right:40px"/>
+                <button type="button" onclick="togglePwd('prof-pass-input','eye-prof-pass')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--t2);font-size:16px;padding:4px" id="eye-prof-pass">👁</button>
+              </div>
             </div>
-            <div id="ai-prompt-msg" class="hidden"></div>
-            <button class="btn btn-p" onclick="saveAiPrompt()">💾 Salvar Prompt</button>
+            <div class="fg">
+              <label class="fl">Abas disponíveis para professores</label>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px" id="prof-tabs-config">
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" value="simulados" class="prof-tab-chk" style="width:16px;height:16px;accent-color:var(--accent)"/> 📋 Simulados</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" value="trocas" class="prof-tab-chk" style="width:16px;height:16px;accent-color:var(--accent)"/> 🔄 Trocas</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" value="professores" class="prof-tab-chk" style="width:16px;height:16px;accent-color:var(--accent)"/> 👨‍🏫 Professores</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" value="listas" class="prof-tab-chk" style="width:16px;height:16px;accent-color:var(--accent)"/> 👥 Listas de Alunos</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" value="desempenho" class="prof-tab-chk" style="width:16px;height:16px;accent-color:var(--accent)"/> 📊 Desempenho</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" value="checklist" class="prof-tab-chk" style="width:16px;height:16px;accent-color:var(--accent)"/> 📝 Checklist</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" value="config" class="prof-tab-chk" style="width:16px;height:16px;accent-color:var(--accent)"/> ⚙️ Configurações</label>
+              </div>
+            </div>
+            <div id="prof-cfg-msg" class="hidden" style="margin-top:8px"></div>
+            <button class="btn btn-p" onclick="saveProfCfg()" style="margin-top:8px">💾 Salvar configuração de professores</button>
           </div>
         </div>
+
       </div>
     </div>
 
@@ -1115,7 +1159,7 @@ import { getFirestore,collection,doc,getDoc,getDocs,setDoc,updateDoc,onSnapshot,
 
 const db=getFirestore(initializeApp({apiKey:"AIzaSyDEljxGEKhl6taJEcbQHoAb8QsjWT7fx08",authDomain:"simulados-confirmacao.firebaseapp.com",projectId:"simulados-confirmacao",storageBucket:"simulados-confirmacao.firebasestorage.app",messagingSenderId:"399694193508",appId:"1:399694193508:web:70d7a65d51798045ef1071"}));
 
-const S={view:'aluno',unlocked:false,sims:[],curSim:null,students:[],coDay:'sabado',alDay:'sabado',step:1,cfg:{password:'aros2025'},pendSwap:null,profs:[],listas:[],_id:null,_rSab:[],_rDom:[]};
+const S={view:'aluno',unlocked:false,profUnlocked:false,sims:[],curSim:null,students:[],coDay:'sabado',alDay:'sabado',step:1,cfg:{password:'aros2025',profPassword:'Anestreview1531',profTabs:['simulados','trocas','professores','listas','desempenho','checklist']},pendSwap:null,profs:[],listas:[],_id:null,_rSab:[],_rDom:[]};
 window.S=S;
 
 // helpers
@@ -1225,19 +1269,63 @@ window.esqueceuSenha=async()=>{
 };
 
 window.checkPass=()=>{
-  if(document.getElementById('co-pass').value===S.cfg.password){
-    S.unlocked=true;
+  const val=document.getElementById('co-pass').value;
+  if(val===S.cfg.password){
+    // Full coordinator access
+    S.unlocked=true;S.profUnlocked=false;
     document.getElementById('co-login').classList.add('hidden');
     document.getElementById('co-panel').classList.remove('hidden');
+    // Show all tabs
+    document.querySelectorAll('.co-tab').forEach(b=>b.style.display='');
+    document.getElementById('btn-novo-sim').style.display='';
     popCoSel();renderProfGlobal();renderListasPanel();
-  }else document.getElementById('pass-err').classList.remove('hidden');
+  } else if(val===(S.cfg.profPassword||'Anestreview1531')){
+    // Professor access — limited tabs
+    S.unlocked=true;S.profUnlocked=true;
+    document.getElementById('co-login').classList.add('hidden');
+    document.getElementById('co-panel').classList.remove('hidden');
+    applyProfTabs();
+    popCoSel();renderProfGlobal();renderListasPanel();
+  } else {
+    document.getElementById('pass-err').classList.remove('hidden');
+  }
 };
+
+function applyProfTabs(){
+  const allowed=S.cfg.profTabs||['simulados','trocas','professores','listas','desempenho','checklist'];
+  const allTabs=['simulados','trocas','professores','listas','desempenho','checklist','config'];
+  const tabBtns=document.querySelectorAll('.co-tab');
+  // Map tab buttons to their tab ids
+  const tabMap=['simulados','trocas','professores','listas','desempenho','checklist','config'];
+  tabBtns.forEach((btn,i)=>{
+    const tabId=tabMap[i];
+    btn.style.display=allowed.includes(tabId)?'':'none';
+  });
+  // Switch to professores tab by default for prof login
+  const firstAllowed=allowed.includes('professores')?'professores':(allowed[0]||'simulados');
+  const firstBtn=Array.from(tabBtns).find((_,i)=>tabMap[i]===firstAllowed);
+  if(firstBtn)switchCoTab(firstAllowed,firstBtn);
+}
 
 // co tabs
 window.switchCoTab=(tab,btn)=>{
   ['simulados','trocas','professores','listas','desempenho','checklist','config'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
   document.querySelectorAll('.co-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
+  // Show "Novo Simulado" only on simulados tab
+  const btnNovo=document.getElementById('btn-novo-sim');
+  if(btnNovo)btnNovo.style.display=tab==='simulados'?'':'none';
+  // Show sim selector in trocas tab if no sim selected
+  if(tab==='trocas'){
+    const noSim=document.getElementById('trocas-no-sim');
+    if(noSim){
+      const hasSim=!!S.curSim;
+      noSim.classList.toggle('hidden',hasSim);
+      // Populate selector
+      const sel=noSim.querySelector('select');
+      if(sel){sel.innerHTML='<option value="">Selecione...</option>'+S.sims.map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');}
+    }
+  }
 };
 
 // sim cards (aluno view)
@@ -2080,6 +2168,16 @@ window.deleteSim=async()=>{
 };
 
 // WIZARD
+window.openNewSimAuth=()=>{
+  // If professor access, require coordinator password
+  if(S.profUnlocked){
+    const pwd=prompt('Para criar um novo simulado, digite a senha de administrador:');
+    if(pwd===null)return;
+    if(pwd!==S.cfg.password){alert('Senha incorreta.');return;}
+  }
+  openNewSim();
+};
+
 window.openNewSim=()=>{
   S._id=null;S._rSab=[];S._rDom=[];S.step=1;window._listaSelected=null;
   document.getElementById('msim-t').textContent='Novo Simulado';
@@ -3113,6 +3211,19 @@ window.exportCSV=()=>{
 };
 
 // CONFIG
+window.saveProfCfg=async()=>{
+  const pass=document.getElementById('prof-pass-input')?.value?.trim();
+  const tabs=Array.from(document.querySelectorAll('.prof-tab-chk:checked')).map(c=>c.value);
+  const m=document.getElementById('prof-cfg-msg');
+  if(!pass){m.className='al al-e';m.textContent='Digite a senha de professores.';m.classList.remove('hidden');return;}
+  if(!tabs.length){m.className='al al-e';m.textContent='Selecione ao menos uma aba.';m.classList.remove('hidden');return;}
+  S.cfg.profPassword=pass;
+  S.cfg.profTabs=tabs;
+  await setDoc(doc(db,'config','settings'),S.cfg);
+  m.className='al al-s';m.textContent='✅ Configuração salva!';m.classList.remove('hidden');
+  setTimeout(()=>m.classList.add('hidden'),2000);
+};
+
 window.saveCfgUrl=async()=>{
   const url=(document.getElementById('cfg-url')?.value||'').trim().replace(/\/$/,'');
   const m=document.getElementById('cfg-url-msg');
@@ -3157,6 +3268,11 @@ window.switchCoTab=(tab,btn)=>{
   if(tab==='config'){
     const el=document.getElementById('ai-prompt');if(el&&S._aiPrompt)el.value=S._aiPrompt;
     const urlEl=document.getElementById('cfg-url');if(urlEl&&S.cfg.systemUrl)urlEl.value=S.cfg.systemUrl;
+    // Load prof config
+    const profPassEl=document.getElementById('prof-pass-input');
+    if(profPassEl)profPassEl.value=S.cfg.profPassword||'Anestreview1531';
+    const allowedTabs=S.cfg.profTabs||['simulados','trocas','professores','listas','desempenho','checklist'];
+    document.querySelectorAll('.prof-tab-chk').forEach(chk=>{chk.checked=allowedTabs.includes(chk.value);});
   }
 };
 
@@ -3906,6 +4022,15 @@ window.finalizarChecklist=async()=>{
 
 // ── Template editor ───────────────────────────────────────────────────────────
 let _ckTemplateEdit={casos:[]};
+
+window.openCkTemplateEditorAuth=()=>{
+  if(S.profUnlocked){
+    const pwd=prompt('Para configurar o checklist, digite a senha de administrador:');
+    if(pwd===null)return;
+    if(pwd!==S.cfg.password){alert('Senha incorreta.');return;}
+  }
+  openCkTemplateEditor();
+};
 
 window.openCkTemplateEditor=async()=>{
   const simId=document.getElementById('ck-sim-sel')?.value;
@@ -5293,6 +5418,15 @@ function showTrocaResult(icon,msg,color='var(--text)'){
 }
 
 window.toggleSwapOpt=(bodyId,arrId)=>{
+  const body=document.getElementById(bodyId);
+  const arr=document.getElementById(arrId);
+  if(!body)return;
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  if(arr)arr.style.transform=isOpen?'rotate(0)':'rotate(180deg)';
+};
+
+window.cfgToggle=(bodyId,arrId)=>{
   const body=document.getElementById(bodyId);
   const arr=document.getElementById(arrId);
   if(!body)return;
