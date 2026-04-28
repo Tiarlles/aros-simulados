@@ -5221,8 +5221,9 @@ async function aceitarTrocaDireta(proposta,propostaRef){
   const simId=proposta.simId;
   // Swap the students in Firebase
   const batch=writeBatch(db);
-  batch.update(doc(db,'simulados/'+simId+'/alunos/'+proposta.de.id),{dia:proposta.para.dia,rodada:proposta.para.rodada});
-  batch.update(doc(db,'simulados/'+simId+'/alunos/'+proposta.para.id),{dia:proposta.de.dia,rodada:proposta.de.rodada});
+  const now=new Date().toISOString();
+  batch.update(doc(db,'simulados/'+simId+'/alunos/'+proposta.de.id),{dia:proposta.para.dia,rodada:proposta.para.rodada,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true});
+  batch.update(doc(db,'simulados/'+simId+'/alunos/'+proposta.para.id),{dia:proposta.de.dia,rodada:proposta.de.rodada,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true});
   await batch.commit();
   // Mark as accepted
   await updateDoc(propostaRef,{status:'aceita',resolvidaEm:new Date().toISOString()});
