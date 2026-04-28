@@ -1140,6 +1140,18 @@ async function boot(){
   const t=localStorage.getItem('aros-theme')||'dark';
   document.documentElement.setAttribute('data-theme',t);
   document.getElementById('theme-btn').textContent=t==='dark'?'🌙':'☀️';
+  // Check for troca token AFTER full init
+  const _params=new URLSearchParams(window.location.search);
+  const _token=_params.get('troca');
+  const _acao=_params.get('acao');
+  if(_token&&_acao){
+    const _loadDiv=document.createElement('div');
+    _loadDiv.style.cssText='position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:40px;text-align:center';
+    _loadDiv.innerHTML='<div style="font-size:48px;margin-bottom:16px">🔄</div><h2 style="font-family:Fraunces,serif;font-size:22px;color:var(--accent)">Verificando proposta de troca...</h2>';
+    document.body.appendChild(_loadDiv);
+    try{await checkTrocaToken();}catch(err){showTrocaResult('❌','Erro: '+err.message);}
+    _loadDiv.remove();
+  }
 }
 boot();
 
