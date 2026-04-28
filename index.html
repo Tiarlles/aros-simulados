@@ -554,7 +554,7 @@ select.fc{cursor:pointer}
             <h3 style="font-family:Fraunces,serif;font-size:17px;font-weight:700">📝 Checklist de Aplicação</h3>
             <p style="font-size:13px;color:var(--t2)">Selecione o simulado e o aluno para preencher o checklist.</p>
           </div>
-          <button class="btn btn-s btn-sm" onclick="openCkTemplateEditor()">⚙️ Editar Template</button>
+          <button class="btn btn-s btn-sm" onclick="openCkTemplateEditor()">⚙️ Configurar checklist do simulado</button>
           <button class="btn btn-p btn-sm" onclick="openRelatorioView()">📄 Relatórios</button>
         </div>
 
@@ -562,16 +562,12 @@ select.fc{cursor:pointer}
         <div class="g2" style="margin-bottom:16px">
           <div class="fg">
             <label class="fl">Simulado</label>
-            <select class="fc" id="ck-sim-sel" onchange="loadCkSim()">
+            <select class="fc" id="ck-sim-sel" onchange="loadCkSim()" style="max-width:400px">
               <option value="">Selecione...</option>
             </select>
           </div>
-          <div class="fg">
-            <label class="fl">Professor Examinador</label>
-            <select class="fc" id="ck-prof-sel">
-              <option value="">Selecione seu nome...</option>
-            </select>
-          </div>
+          <!-- Hidden prof sel still used by disponibilidade -->
+          <select id="ck-prof-sel" style="display:none"></select>
         </div>
 
         <!-- Student list -->
@@ -580,7 +576,7 @@ select.fc{cursor:pointer}
             <span class="search-icon" style="font-size:14px">🔍</span>
             <input class="search-input" id="ck-search" placeholder="Buscar aluno..." oninput="filterCkStudents()" style="padding:8px 8px 8px 36px;font-size:13px;border-radius:8px"/>
           </div>
-          <div id="ck-students-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px"></div>
+          <div id="ck-students-grid" style="display:flex;flex-direction:column;gap:6px"></div>
         </div>
         <div id="ck-no-template" class="hidden">
           <div class="al al-i">Este simulado ainda não tem template de checklist. Clique em <strong>⚙️ Editar Template</strong> para criar.</div>
@@ -592,7 +588,7 @@ select.fc{cursor:pointer}
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
           <button class="btn btn-s btn-sm" onclick="backToCkHome()">← Voltar</button>
           <div id="ck-fill-header" style="flex:1"></div>
-          <button class="btn btn-p btn-sm" onclick="finalizarChecklist()">✅ Finalizar e Calcular Nota</button>
+          <button class="btn btn-p btn-sm" onclick="finalizarChecklist()" id="btn-finalizar-ck" disabled style="opacity:.4;cursor:not-allowed">✅ Finalizar e Calcular Nota</button>
         </div>
         <div id="ck-casos-wrap"></div>
 
@@ -733,7 +729,7 @@ select.fc{cursor:pointer}
       <div id="ck-template-editor" class="hidden">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
           <button class="btn btn-s btn-sm" onclick="backToCkHome()">← Voltar</button>
-          <h3 style="font-family:Fraunces,serif;font-size:17px;font-weight:700;flex:1">⚙️ Template do Checklist</h3>
+          <h3 style="font-family:Fraunces,serif;font-size:17px;font-weight:700;flex:1">⚙️ Configuração do Checklist</h3>
           <button class="btn btn-p btn-sm" onclick="saveCkTemplate()">💾 Salvar Template</button>
         </div>
         <div class="al al-i" style="margin-bottom:16px">Configure os casos, perguntas e itens do checklist. Este template será usado para todos os alunos do simulado selecionado.</div>
@@ -771,6 +767,18 @@ select.fc{cursor:pointer}
             </div>
             <div id="cfg-msg" class="hidden"></div>
             <button class="btn btn-p" onclick="saveCfg()">Salvar senha</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><h3 class="ct">🔗 URL do Sistema</h3></div>
+          <div class="cb">
+            <p style="font-size:13px;color:var(--t2);margin-bottom:12px">URL base usada nos links enviados por email (ex: links de aceite de troca). Após publicar no GitHub Pages, cole a URL aqui.</p>
+            <div class="fg">
+              <label class="fl">URL do sistema</label>
+              <input class="fc" id="cfg-url" type="url" placeholder="https://aros.anestreview.com.br"/>
+            </div>
+            <div id="cfg-url-msg" class="hidden"></div>
+            <button class="btn btn-p" onclick="saveCfgUrl()">💾 Salvar URL</button>
           </div>
         </div>
         <div class="card">
@@ -945,6 +953,34 @@ select.fc{cursor:pointer}
     </div>
     <div class="m-foot">
       <button class="btn btn-s" onclick="CM('modal-mover')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Identificação Professor por Caso ══ -->
+<div class="mo hidden" id="modal-prof-caso">
+  <div class="md" style="max-width:420px">
+    <div class="mh">
+      <div>
+        <div class="m-title" id="prof-caso-title">Identificação do Avaliador</div>
+        <div class="m-sub" id="prof-caso-sub"></div>
+      </div>
+      <button class="m-close" onclick="CM('modal-prof-caso')">✕</button>
+    </div>
+    <div class="m-body">
+      <div id="prof-caso-aviso" class="hidden" style="margin-bottom:14px"></div>
+      <p id="prof-caso-hint" style="font-size:13px;color:var(--t2);margin-bottom:14px">Selecione seu nome para registrar como avaliador deste caso:</p>
+      <div class="fg">
+        <label class="fl">Professor Examinador</label>
+        <select class="fc" id="prof-caso-sel">
+          <option value="">Selecione seu nome...</option>
+        </select>
+      </div>
+      <div id="prof-caso-err" class="al al-e hidden">Selecione seu nome antes de continuar.</div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-prof-caso')">Cancelar</button>
+      <button class="btn btn-p" onclick="confirmarProfCaso()">Iniciar Avaliação →</button>
     </div>
   </div>
 </div>
@@ -1432,12 +1468,58 @@ window.openResp=(sid,type)=>{
 };
 
 function buildSwapExtra(sH,dH){
-  return`<div class="fg"><label class="fl">Horários disponíveis para troca</label>
-    <p style="font-size:12px;color:var(--t2);margin-bottom:8px">Selecione todos que você pode:</p>
-    ${sH.length?`<p style="font-size:12px;font-weight:600;margin-bottom:4px;color:var(--t2)">📅 Sábado</p><div>${sH.map((h,i)=>`<span class="chip" data-dia="sabado" data-rod="${i+1}" onclick="this.classList.toggle('on')">${h}</span>`).join('')}</div>`:''}
-    ${dH.length?`<p style="font-size:12px;font-weight:600;margin:8px 0 4px;color:var(--t2)">📅 Domingo</p><div>${dH.map((h,i)=>`<span class="chip" data-dia="domingo" data-rod="${i+1}" onclick="this.classList.toggle('on')">${h}</span>`).join('')}</div>`:''}
-  </div><div class="fg"><label class="fl">Observação (opcional)</label><textarea class="fc" id="ro" style="min-height:60px"></textarea></div>`;
+  return`
+  <!-- Option A: Via Coordenação (dropdown) -->
+  <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px">
+    <div onclick="toggleSwapOpt('swap-coord-body','arr-swap-coord')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg3);cursor:pointer;user-select:none"
+      onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
+      <div>
+        <p style="font-size:13px;font-weight:700">🏫 Via Coordenação</p>
+        <p style="font-size:12px;color:var(--t2)">Informe os horários disponíveis e a coordenação tentará a troca.</p>
+      </div>
+      <span id="arr-swap-coord" style="font-size:13px;color:var(--t2);margin-left:10px;flex-shrink:0">▶</span>
+    </div>
+    <div id="swap-coord-body" style="display:none;padding:14px">
+      <div class="fg"><label class="fl">Horários que você pode:</label>
+        ${sH.length?`<p style="font-size:12px;font-weight:600;margin-bottom:4px;color:var(--t2)">📅 Sábado</p><div>${sH.map((h,i)=>`<span class="chip" data-dia="sabado" data-rod="${i+1}" onclick="this.classList.toggle('on')">${h}</span>`).join('')}</div>`:''}
+        ${dH.length?`<p style="font-size:12px;font-weight:600;margin:8px 0 4px;color:var(--t2)">📅 Domingo</p><div>${dH.map((h,i)=>`<span class="chip" data-dia="domingo" data-rod="${i+1}" onclick="this.classList.toggle('on')">${h}</span>`).join('')}</div>`:''}
+      </div>
+      <div class="fg"><label class="fl">Observação (opcional)</label><textarea class="fc" id="ro" style="min-height:50px"></textarea></div>
+    </div>
+  </div>
+
+  <!-- Option B: Propor diretamente (dropdown) -->
+  <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden">
+    <div onclick="toggleSwapOpt('swap-direto-body','arr-swap-direto')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg3);cursor:pointer;user-select:none"
+      onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
+      <div>
+        <p style="font-size:13px;font-weight:700">🤝 Propor diretamente a um colega</p>
+        <p style="font-size:12px;color:var(--t2)">O colega receberá um e-mail para aceitar ou recusar.</p>
+      </div>
+      <span id="arr-swap-direto" style="font-size:13px;color:var(--t2);margin-left:10px;flex-shrink:0">▶</span>
+    </div>
+    <div id="swap-direto-body" style="display:none;padding:14px">
+      <div class="fg">
+        <label class="fl">Horário que você QUER:</label>
+        ${sH.length?`<p style="font-size:12px;font-weight:600;margin-bottom:4px;color:var(--t2)">📅 Sábado</p><div>${sH.map((h,i)=>`<span class="chip chip-direct" data-dia="sabado" data-rod="${i+1}" onclick="selecionarHorarioDireto(this)">${h}</span>`).join('')}</div>`:''}
+        ${dH.length?`<p style="font-size:12px;font-weight:600;margin:8px 0 4px;color:var(--t2)">📅 Domingo</p><div>${dH.map((h,i)=>`<span class="chip chip-direct" data-dia="domingo" data-rod="${i+1}" onclick="selecionarHorarioDireto(this)">${h}</span>`).join('')}</div>`:''}
+      </div>
+      <div id="troca-direta-colega" class="hidden" style="margin-top:10px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs)"></div>
+      <div id="troca-direta-empty" class="hidden" style="margin-top:8px">
+        <div class="al al-i" style="font-size:12px">Nenhum aluno escalado neste horário.</div>
+      </div>
+    </div>
+  </div>`;
 }
+
+window.toggleSwapOpt=(bodyId,arrId)=>{
+  const body=document.getElementById(bodyId);
+  const arr=document.getElementById(arrId);
+  if(!body)return;
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  if(arr)arr.textContent=isOpen?'▶':'▼';
+};
 
 window.selectRespType=(btn,t)=>{
   window._pr.selectedType=t;
@@ -2996,6 +3078,16 @@ window.exportCSV=()=>{
 };
 
 // CONFIG
+window.saveCfgUrl=async()=>{
+  const url=(document.getElementById('cfg-url')?.value||'').trim().replace(/\/$/,'');
+  const m=document.getElementById('cfg-url-msg');
+  if(!url){m.className='al al-e';m.textContent='Digite uma URL válida.';m.classList.remove('hidden');return;}
+  S.cfg.systemUrl=url;
+  await setDoc(doc(db,'config','settings'),S.cfg);
+  m.className='al al-s';m.textContent='✅ URL salva!';m.classList.remove('hidden');
+  setTimeout(()=>m.classList.add('hidden'),2000);
+};
+
 window.saveCfg=async()=>{
   const op=document.getElementById('op').value;
   const np=document.getElementById('np').value;
@@ -3027,7 +3119,10 @@ window.togglePwd=(inputId,btnId)=>{
 const _origSwitchCoTab3=window.switchCoTab;
 window.switchCoTab=(tab,btn)=>{
   _origSwitchCoTab3(tab,btn);
-  if(tab==='config'){const el=document.getElementById('ai-prompt');if(el&&S._aiPrompt)el.value=S._aiPrompt;}
+  if(tab==='config'){
+    const el=document.getElementById('ai-prompt');if(el&&S._aiPrompt)el.value=S._aiPrompt;
+    const urlEl=document.getElementById('cfg-url');if(urlEl&&S.cfg.systemUrl)urlEl.value=S.cfg.systemUrl;
+  }
 };
 
 
@@ -3038,10 +3133,8 @@ let _ckSimId=null, _ckStudentId=null, _ckTemplate=null, _ckStudents=[], _ckRespo
 const HABILIDADES=['Domínio do Conteúdo','Raciocínio Lógico','Estruturação da Resposta','Controle Emocional','Gestão de Tempo'];
 
 function initChecklistTab(){
-  // Populate sim selector
   const sel=document.getElementById('ck-sim-sel');
   if(sel){sel.innerHTML='<option value="">Selecione...</option>'+S.sims.map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');}
-  // Populate prof selector
   const ps=document.getElementById('ck-prof-sel');
   if(ps){ps.innerHTML='<option value="">Selecione seu nome...</option>'+S.profs.map(p=>`<option value="${p}">${p}</option>`).join('');}
   showCkView('ck-home');
@@ -3086,6 +3179,21 @@ window.loadCkSim=async()=>{
   renderCkStudents(_ckStudents);
 };
 
+
+// ── Reload respostas from Firebase and update student list ───────────────────
+async function reloadRespostasAndRender(){
+  // Preserve current student's in-memory data (just saved — Firebase may lag)
+  const currentId=_ckStudentId;
+  const currentResp=currentId?_ckRespostas[currentId]:null;
+  try{
+    const rSnap=await getDocs(collection(db,`checklists/${_ckSimId}/respostas`));
+    _ckRespostas={};rSnap.docs.forEach(d=>{_ckRespostas[d.id]={...d.data()};});
+  }catch(e){}
+  // Restore current student's fresh in-memory data (overrides potentially stale Firebase read)
+  if(currentId&&currentResp)_ckRespostas[currentId]=currentResp;
+  renderCkStudents(_ckStudents);
+}
+
 window.filterCkStudents=()=>{
   const q=(document.getElementById('ck-search')?.value||'').toLowerCase();
   renderCkStudents(_ckStudents.filter(s=>s.nome.toLowerCase().includes(q)));
@@ -3093,38 +3201,56 @@ window.filterCkStudents=()=>{
 
 function renderCkStudents(list){
   const grid=document.getElementById('ck-students-grid');if(!grid)return;
-  grid.innerHTML=list.map(s=>{
+  const sorted=[...list].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  grid.innerHTML=sorted.map((s,idx)=>{
     const resp=_ckRespostas[s.id];
     const done=resp&&resp.finalizado;
     const nota=resp?.notaCriar;
-    return`<div onclick="openCkFill('${s.id}')" style="background:var(--bg2);border:1px solid ${done?'var(--green)':'var(--border)'};border-radius:var(--r);padding:14px 16px;cursor:pointer;transition:all .2s"
-      onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='${done?'var(--green)':'var(--border)'  }';this.style.transform=''">
-      <div style="font-weight:700;font-size:14px;margin-bottom:4px">${s.nome}</div>
-      <div style="font-size:12px;color:var(--t2)">${s.dia==='sabado'?'Sábado':'Domingo'} · ${getH(s.dia,s.rodada)}</div>
-      <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
-        ${done?`<span class="badge bc">✔ Finalizado</span><span style="font-size:12px;font-weight:700;color:var(--green)">${nota?.toFixed(1)||''}pts</span>`
-              :`<span class="badge bp">${resp?'Em andamento':'Não iniciado'}</span>`}
+    // Check if any caso has real data
+    // Only check casos that exist in the CURRENT template (ignore leftover data from old templates)
+    const templateCasos=(_ckTemplate?.casos||[]);
+    const temDados=resp&&templateCasos.some((_,ci)=>{
+      const c=resp.casos?.[ci];if(!c)return false;
+      return Object.keys(c.itens||{}).length>0||Object.values(c.habilidades||{}).some(v=>v>0)||(c.feedback||'').trim().length>0||c.savedAt;
+    });
+    const emAndamento=resp&&!resp.finalizado&&temDados;
+    // Border/badge: finalizado=green, emAndamento=yellow, naoIniciado=neutral
+    const borderColor=done?'var(--green)':emAndamento?'var(--yellow)':'var(--border)';
+    const statusBadge=done
+      ?`<span class="badge b-conf">✔ Finalizado</span><span style="font-size:13px;font-weight:800;color:var(--green);margin-left:6px">${nota?.toFixed(1)||''}pts</span>`
+      :emAndamento
+      ?`<span style="background:var(--yl);color:var(--yellow);border:1px solid rgba(210,153,34,.4);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600">⏳ Em andamento</span>`
+      :`<span style="background:var(--bg3);color:var(--t2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600">Não iniciado</span>`;
+    return`<div onclick="openCkFill('${s.id}')" 
+      style="background:var(--bg2);border:1.5px solid ${borderColor};border-radius:var(--rs);padding:12px 16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:space-between;gap:12px"
+      onmouseover="this.style.background='var(--bg3)';this.style.borderColor='var(--accent)'"
+      onmouseout="this.style.background='var(--bg2)';this.style.borderColor='${borderColor}'">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
+        <span style="font-size:13px;font-weight:700;color:var(--t3);min-width:24px">${idx+1}.</span>
+        <div style="min-width:0">
+          <p style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.nome}</p>
+
+        </div>
       </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">${statusBadge}</div>
     </div>`;
   }).join('');
 }
 
 // ── Open checklist fill ───────────────────────────────────────────────────────
 window.openCkFill=async(studentId)=>{
-  const prof=document.getElementById('ck-prof-sel')?.value;
-  if(!prof){alert('Selecione seu nome na lista de professores antes de continuar.');return;}
   _ckStudentId=studentId;
   const s=_ckStudents.find(x=>x.id===studentId);
 
   // Load or init respostas
-  let resp=_ckRespostas[studentId]||{casos:{},feedbackGeral:'',prof,finalizado:false};
+  let resp=_ckRespostas[studentId]||{casos:{},feedbackGeral:'',prof:'',finalizado:false};
   _ckRespostas[studentId]=resp;
 
   document.getElementById('ck-fill-header').innerHTML=`
     <div>
       <p style="font-size:11px;color:var(--t2);margin-bottom:2px">PREENCHENDO CHECKLIST DE</p>
       <p style="font-family:Fraunces,serif;font-size:18px;font-weight:700">${s.nome}</p>
-      <p style="font-size:12px;color:var(--t2)">Prof. Examinador: <strong>${prof}</strong></p>
+      <p style="font-size:12px;color:var(--t2)">${s.dia==='sabado'?'Sábado':'Domingo'} · ${getH(s.dia,s.rodada)}</p>
     </div>`;
 
   renderCkCasos(resp);
@@ -3136,49 +3262,139 @@ window.openCkFill=async(studentId)=>{
   showCkView('ck-fill');
 };
 
+function casoSalvo(resp,ci){
+  const cr=resp.casos?.[ci];
+  if(!cr)return false;
+  const temItem=Object.keys(cr.itens||{}).length>0;
+  const temHab=Object.values(cr.habilidades||{}).some(v=>v>0);
+  const temFb=(cr.feedback||'').trim().length>0;
+  return cr.savedAt&&(temItem||temHab||temFb);
+}
+function casoPendente(resp,ci){
+  const cr=resp.casos?.[ci];
+  return cr?.savedAt&&cr?.temPendencia===true;
+}
+
 function renderCkCasos(resp){
   const template=_ckTemplate;const casos=template.casos||[];
   const ptsPorCaso=100/casos.length;
   const wrap=document.getElementById('ck-casos-wrap');if(!wrap)return;
+  // Preserve which casos are open
+  const openCasos=new Set(window._openCkCasos||[]);
   wrap.innerHTML='';
+
+  // Update finalizar button: only enable when all cases complete AND all items filled
+  setTimeout(()=>{
+    const btnF=document.getElementById('btn-finalizar-ck');
+    if(!btnF)return;
+    const totalCasos=casos.length;
+    const savedCount=casos.filter((_,ci)=>casoSalvo(resp,ci)).length;
+    // Check all items filled in all cases
+    let allItemsFilled=true;
+    casos.forEach((caso,ci)=>{
+      const cr=resp.casos?.[ci]||{};
+      (caso.perguntas||[]).forEach((perg,pi)=>{
+        (perg.itens||[]).forEach((_,ii)=>{
+          if(!cr.itens?.[`${pi}_${ii}`])allItemsFilled=false;
+        });
+      });
+    });
+    const allDone=savedCount===totalCasos&&allItemsFilled;
+    btnF.disabled=!allDone;
+    btnF.style.opacity=allDone?'1':'0.4';
+    btnF.style.cursor=allDone?'pointer':'not-allowed';
+    if(allDone){
+      btnF.textContent='✅ Finalizar e Calcular Nota';
+    } else {
+      btnF.textContent=savedCount===totalCasos
+        ?'⚠️ Preencha todos os itens'
+        :`⏳ Aguardando casos (${savedCount}/${totalCasos})`;
+    }
+  },50);
 
   casos.forEach((caso,ci)=>{
     const casoResp=resp.casos[ci]||{itens:{},habilidades:{},feedback:''};
     resp.casos[ci]=casoResp;
     const perguntas=caso.perguntas||[];
-    let totalItens=perguntas.reduce((s,p)=>(s+(p.itens||[]).length),0);
+    const totalItens=perguntas.reduce((s,p)=>(s+(p.itens||[]).length),0);
     const ptsPorItem=totalItens>0?ptsPorCaso/totalItens:0;
+    const salvo=casoSalvo(resp,ci);
+    const pendente=casoPendente(resp,ci);
+    const cr=resp.casos?.[ci]||{};
+    const temQualquerDado=Object.keys(cr.itens||{}).length>0||Object.values(cr.habilidades||{}).some(v=>v>0)||(cr.feedback||'').trim().length>0;
+    // Status: finalizado (saved+complete) | emAndamento (any data) | naoAvaliado (empty)
+    const casoStatus=salvo&&!pendente?'finalizado':temQualquerDado?'emAndamento':'naoAvaliado';
+    const isOpen=openCasos.has(ci);
 
     const card=document.createElement('div');
-    card.className='card';card.style.marginBottom='16px';
+    card.style.marginBottom='10px';
+    card.style.borderRadius='var(--r)';
+    card.style.overflow='hidden';
+    card.style.border='2px solid '+(casoStatus==='finalizado'?'var(--green)':casoStatus==='emAndamento'?'var(--yellow)':'var(--border)');
+    card.style.transition='border-color .3s';
 
-    // Header
-    let hdr=`<div class="ch" style="background:var(--bg3)">
-      <h3 class="ct" style="font-size:15px">Caso ${ci+1}: ${caso.nome||'Caso Clínico'}</h3>
-      <span style="font-size:12px;color:var(--t2)">${ptsPorCaso.toFixed(1)} pontos · ${totalItens} iten${totalItens!==1?'s':''}</span>
+    const hdrBg=casoStatus==='finalizado'?'var(--gl)':casoStatus==='emAndamento'?'var(--yl)':'var(--bg3)';
+    const profCaso=casoResp.prof||'';
+    let hdr=`<div onclick="toggleCkCaso(${ci})" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:${hdrBg};cursor:pointer;user-select:none;transition:background .2s"
+      onmouseover="this.style.background='${salvo?'rgba(63,185,80,.2)':'var(--bg4)'}'" onmouseout="this.style.background='${hdrBg}'">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:18px">${casoStatus==='finalizado'?'✅':casoStatus==='emAndamento'?'🟡':'⬜'}</span>
+        <div>
+          <p style="font-family:Fraunces,serif;font-size:15px;font-weight:700;color:${casoStatus==='finalizado'?'var(--green)':casoStatus==='emAndamento'?'var(--yellow)':'var(--text)'}">Caso ${ci+1}: ${caso.nome||'Caso Clínico'}</p>
+          <p style="font-size:12px;color:var(--t2)">${ptsPorCaso.toFixed(1)} pontos · ${totalItens} iten${totalItens!==1?'s':''}
+            ${casoStatus==='finalizado'?' · <strong style="color:var(--green)">✅ Finalizado</strong>':casoStatus==='emAndamento'?' · <strong style="color:var(--yellow)">⏳ Em andamento</strong>':' · <span style="color:var(--t3)">Não avaliado</span>'}</p>
+          ${profCaso?`<p class="caso-prof-label" style="font-size:11px;color:var(--t2);margin-top:2px">Prof. Examinador: <strong>${profCaso}</strong></p>`:''}
+        </div>
+      </div>
+      <span id="ck-arr-${ci}" style="font-size:14px;color:var(--t2);transition:transform .2s;display:inline-block;transform:${isOpen?'rotate(180deg)':'rotate(0)'}">▼</span>
     </div>`;
 
-    // Perguntas e itens
-    let body='<div style="padding:16px 20px">';
+    // Body (collapsible)
+    let body=`<div id="ck-body-${ci}" style="display:${isOpen?'block':'none'};padding:16px 20px;background:var(--bg2)">`;
+
     perguntas.forEach((perg,pi)=>{
       const itens=perg.itens||[];
-      const ptsPorItemPerg=itens.length>0?ptsPorCaso/totalItens:0;
-      body+=`<div style="margin-bottom:16px">
-        <p style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Pergunta ${pi+1}${perg.titulo?': '+perg.titulo:''}</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px">`;
+      const pergId=`ck-perg-${ci}-${pi}`;
+      const itensMarcados=itens.filter((_,ii)=>casoResp.itens[`${pi}_${ii}`]).length;
+      const pergCompleta=itens.length>0&&itensMarcados===itens.length;
+      const pergParcial=itensMarcados>0&&itensMarcados<itens.length;
+      const pergStatusLabel=pergCompleta
+        ?'<span style="font-size:11px;color:var(--green);font-weight:600">✓ Preenchido</span>'
+        :pergParcial
+        ?`<span style="font-size:11px;color:var(--yellow);font-weight:600">⚠ Parcial (${itensMarcados}/${itens.length})</span>`
+        :'<span style="font-size:11px;color:var(--red);font-weight:600">● Pendente</span>';
+      const pergBorder=pergCompleta?'var(--green)':pergParcial?'var(--yellow)':'var(--border)';
+      body+=`<div style="margin-bottom:10px;border:1.5px solid ${pergBorder};border-radius:var(--rs);overflow:hidden;transition:border-color .3s">
+        <div onclick="toggleCkPerg('${pergId}')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);cursor:pointer;user-select:none"
+          onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
+          <span style="font-size:13px;font-weight:700;color:var(--text)">Pergunta ${pi+1}${perg.titulo?': '+perg.titulo:''}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="perg-status-lbl" style="font-size:11px;font-weight:600;color:${pergCompleta?'var(--green)':pergParcial?'var(--yellow)':'var(--red)'}">${pergCompleta?'✓ Preenchido':pergParcial?`⚠ Parcial (${itensMarcados}/${itens.length})`:'● Pendente'}</span>
+            <span id="arr-${pergId}" style="font-size:12px;color:var(--t2);transition:transform .2s;display:inline-block">▼</span>
+          </div>
+        </div>
+        <div id="${pergId}" style="display:none">
+          <div style="display:flex;justify-content:flex-end;padding:6px 14px 0">
+            <button class="btn btn-d btn-sm" style="font-size:11px" onclick="resetCkPergunta(${ci},${pi})">🗑️ Resetar Pergunta ${pi+1}</button>
+          </div>`;
       itens.forEach((item,ii)=>{
         const key=`${pi}_${ii}`;
         const val=casoResp.itens[key]||'';
-        const pts=ptsPorItemPerg;
-        body+=`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px">
-          <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px">Item ${item.label||String.fromCharCode(65+ii)} <span style="font-weight:400">(${pts.toFixed(2)}pts)</span></div>
-          ${item.descricao?`<p style="font-size:12px;color:var(--text);margin-bottom:8px">${item.descricao}</p>`:''}
-          <div style="display:flex;gap:6px">
+        const pts=totalItens>0?ptsPorCaso/totalItens:0;
+        const lbl=item.label||String.fromCharCode(65+ii);
+        const valColor=val==='certo'?'var(--green)':val==='parcial'?'var(--yellow)':val==='errado'?'var(--red)':'var(--t3)';
+        const valBg=val==='certo'?'var(--gl)':val==='parcial'?'var(--yl)':val==='errado'?'var(--rl)':'transparent';
+        body+=`<div id="ck-item-row-${ci}-${pi}-${ii}" style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--border);background:${valBg};transition:background .2s">
+          <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+            <span id="ck-item-lbl-${ci}-${pi}-${ii}" style="font-size:13px;font-weight:800;color:${valColor};min-width:20px">${lbl}</span>
+            ${item.descricao?`<span style="font-size:13px;color:var(--text)">${item.descricao}</span>`:`<span style="font-size:12px;color:var(--t2)">(${pts.toFixed(2)} pts)</span>`}
+          </div>
+          <div style="display:flex;gap:5px;flex-shrink:0">
             ${['certo','parcial','errado'].map(v=>`<button onclick="setCkItem(${ci},${pi},${ii},'${v}')"
-              style="flex:1;padding:5px 4px;border-radius:6px;border:2px solid ${val===v?(v==='certo'?'var(--green)':v==='parcial'?'var(--yellow)':'var(--red)'):'var(--border)'};
+              style="padding:5px 10px;border-radius:6px;border:2px solid ${val===v?(v==='certo'?'var(--green)':v==='parcial'?'var(--yellow)':'var(--red)'):'var(--border)'};
               background:${val===v?(v==='certo'?'var(--gl)':v==='parcial'?'var(--yl)':'var(--rl)'):'transparent'};
               color:${val===v?(v==='certo'?'var(--green)':v==='parcial'?'var(--yellow)':'var(--red)'):'var(--t2)'};
-              font-size:11px;font-weight:700;cursor:pointer;transition:all .2s">
+              font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap">
               ${v==='certo'?'✓ Certo':v==='parcial'?'½ Parcial':'✗ Errado'}
             </button>`).join('')}
           </div>
@@ -3187,34 +3403,81 @@ function renderCkCasos(resp){
       body+='</div></div>';
     });
 
-    // Habilidades
-    body+=`<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-      <p style="font-size:13px;font-weight:700;margin-bottom:12px">📊 Avaliação de Habilidades (1–5)</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">`;
+    // Habilidades (collapsible)
+    const habId=`ck-hab-${ci}`;
+    const temHabSalvo=Object.values(casoResp.habilidades||{}).some(v=>v>0);
+    const habDescs={
+      'Domínio do Conteúdo':'O quanto o aluno demonstra saber o conteúdo que foi cobrado.',
+      'Raciocínio Lógico':'Capacidade de analisar, interpretar e avaliar as informações de forma lógica e coerente durante as respostas.',
+      'Estruturação da Resposta':'Como o aluno organizou seu conhecimento/pensamento e externou isso para o examinador.',
+      'Controle Emocional':'Como o aluno geriu e regulou suas emoções quando pressionado ou quando não sabia a resposta.',
+      'Gestão de Tempo':'Como o aluno organizou o tempo disponível dentro de cada estação.'
+    };
+    const habColors=['','#e74c3c','#e67e22','#f1c40f','#2ecc71','#27ae60'];
+    body+=`<div style="margin-top:10px;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden">
+      <div onclick="toggleCkPerg('${habId}')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);cursor:pointer;user-select:none"
+        onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
+        <span style="font-size:13px;font-weight:700;color:var(--text)">📊 Avaliação de Habilidades (1–5)</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="ck-hab-status-${ci}" style="font-size:11px;font-weight:600;color:${temHabSalvo?'var(--green)':'var(--yellow)'}">${temHabSalvo?'✓ Preenchido':'⚠ Pendente'}</span>
+          <span id="arr-${habId}" style="font-size:12px;color:var(--t2);transition:transform .2s;display:inline-block">▼</span>
+        </div>
+      </div>
+      <div id="${habId}" style="display:none;padding:12px 14px">
+        <div style="display:flex;flex-direction:column;gap:8px">`;
     HABILIDADES.forEach((hab,hi)=>{
       const hval=casoResp.habilidades[hi]||0;
-      body+=`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px">
-        <p style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:8px">${hab}</p>
+      const desc=habDescs[hab]||'';
+      body+=`<div style="display:flex;align-items:center;gap:12px;padding:8px 10px;background:var(--bg3);border-radius:var(--rs)">
+        <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:140px">
+          <span style="font-size:13px;color:var(--text)">${hab}</span>
+          ${desc?`<span class="ck-hab-info" title="${desc}"
+            style="width:16px;height:16px;border-radius:50%;background:var(--bg4);border:1px solid var(--border);
+            color:var(--t2);font-size:10px;font-weight:700;cursor:help;display:inline-flex;align-items:center;
+            justify-content:center;flex-shrink:0;position:relative"
+            onmouseover="showHabTooltip(event,'${desc.replace(/'/g,'&#39;')}')"
+            onmouseout="hideHabTooltip()">i</span>`:''}
+        </div>
         <div style="display:flex;gap:4px">
-          ${[1,2,3,4,5].map(n=>`<button onclick="setCkHab(${ci},${hi},${n})"
-            style="flex:1;padding:5px;border-radius:5px;border:2px solid ${hval>=n?'var(--accent)':'var(--border)'};
-            background:${hval>=n?'var(--accent-dim)':'transparent'};
-            color:${hval>=n?'var(--accent)':'var(--t2)'};font-size:13px;font-weight:700;cursor:pointer;transition:all .2s">${n}</button>`).join('')}
+          ${[1,2,3,4,5].map(n=>{
+            const active=hval>=n;
+            const color=active?habColors[n]:'transparent';
+            const border=active?habColors[n]:'var(--border)';
+            return`<button onclick="setCkHab(${ci},${hi},${n})"
+              style="width:36px;height:36px;border-radius:6px;border:2px solid ${border};
+              background:${active?color+'22':'transparent'};
+              color:${active?habColors[n]:'var(--t2)'};font-size:14px;font-weight:700;cursor:pointer;transition:all .2s">${n}</button>`;
+          }).join('')}
         </div>
       </div>`;
     });
-    body+='</div></div>';
+    body+='</div></div></div>';
 
-    // Feedback do professor por caso
-    body+=`<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-      <label style="font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">💬 Feedback do Caso ${ci+1}</label>
-      <textarea class="fc" id="ck-fb-caso-${ci}" style="min-height:80px" placeholder="Comentários sobre este caso clínico..."
-        oninput="setCkFeedbackCaso(${ci},this.value)">${casoResp.feedback||''}</textarea>
+    // Feedback (collapsible)
+    const fbId=`ck-fb-wrap-${ci}`;
+    const temFbSalvo=(casoResp.feedback||'').trim().length>0;
+    body+=`<div style="margin-top:10px;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden">
+      <div onclick="toggleCkPerg('${fbId}')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);cursor:pointer;user-select:none"
+        onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
+        <span style="font-size:13px;font-weight:700;color:var(--text)">💬 Feedback do Caso ${ci+1}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="fb-status-${ci}" style="font-size:11px;font-weight:600;color:${temFbSalvo?'var(--green)':'var(--yellow)'}">${temFbSalvo?'✓ Preenchido':'⚠ Pendente'}</span>
+          <span id="arr-${fbId}" style="font-size:12px;color:var(--t2);transition:transform .2s;display:inline-block">▼</span>
+        </div>
+      </div>
+      <div id="${fbId}" style="display:none;padding:12px 14px">
+        <textarea class="fc" id="ck-fb-caso-${ci}" style="min-height:100px" placeholder="Comentários sobre este caso clínico..."
+          oninput="setCkFeedbackCaso(${ci},this.value)">${casoResp.feedback||''}</textarea>
+      </div>
     </div>`;
 
-    // Save per case button
-    body+=`<div style="margin-top:12px;text-align:right">
-      <button class="btn btn-s btn-sm" onclick="saveCkCaso(${ci})">💾 Salvar Caso ${ci+1}</button>
+    // Save + Reset buttons
+    body+=`<div style="margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <button class="btn btn-d btn-sm" onclick="resetCkCaso(${ci})" style="font-size:12px">🗑️ Resetar avaliação</button>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="ck-save-msg-${ci}" style="font-size:13px;color:var(--green);display:none">✅ Caso salvo com sucesso!</span>
+        <button class="btn btn-p btn-sm" onclick="saveCkCaso(${ci})">💾 Salvar Caso ${ci+1}</button>
+      </div>
     </div>`;
 
     body+='</div>';
@@ -3223,27 +3486,262 @@ function renderCkCasos(resp){
   });
 }
 
+window._openCkCasos=[];
+
+window.toggleCkPerg=(id)=>{
+  const el=document.getElementById(id);
+  const arr=document.getElementById('arr-'+id);
+  if(!el)return;
+  const isOpen=el.style.display!=='none';
+  el.style.display=isOpen?'none':'block';
+  if(arr)arr.style.transform=isOpen?'rotate(0)':'rotate(180deg)';
+};
+window.toggleCkCaso=(ci)=>{
+  const body=document.getElementById(`ck-body-${ci}`);
+  const arr=document.getElementById(`ck-arr-${ci}`);
+  if(!body)return;
+  const isOpen=body.style.display!=='none';
+  if(isOpen){
+    // Close
+    body.style.display='none';
+    if(arr)arr.style.transform='rotate(0)';
+    window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
+  } else {
+    // Always ask professor to identify — show warning if another prof already assumed
+    const resp=_ckRespostas[_ckStudentId];
+    const profAtual=resp?.casos?.[ci]?.prof||'';
+    window._pendingCkCaso=ci;
+    const template=_ckTemplate;
+    const caso=template?.casos?.[ci];
+    const s=_ckStudents.find(x=>x.id===_ckStudentId);
+    document.getElementById('prof-caso-title').textContent='Caso '+(ci+1)+': '+(caso?.nome||'Caso Clínico');
+    document.getElementById('prof-caso-sub').textContent=s?.nome||'';
+    document.getElementById('prof-caso-err').classList.add('hidden');
+    // Show or hide warning about existing professor
+    const aviso=document.getElementById('prof-caso-aviso');
+    const hint=document.getElementById('prof-caso-hint');
+    if(profAtual){
+      aviso.className='al al-e';
+      aviso.innerHTML='⚠️ <strong>'+profAtual+'</strong> já assumiu este caso como examinador.<br><span style="font-size:12px">Se você prosseguir, substituirá o examinador atual.</span>';
+      aviso.classList.remove('hidden');
+      if(hint)hint.textContent='Se desejar assumir este caso, selecione seu nome:';
+    } else {
+      aviso.classList.add('hidden');
+      if(hint)hint.textContent='Selecione seu nome para registrar como avaliador deste caso:';
+    }
+    // Populate prof selector
+    const sel=document.getElementById('prof-caso-sel');
+    sel.innerHTML='<option value="">Selecione seu nome...</option>'+S.profs.map(p=>`<option value="${p}">${p}</option>`).join('');
+    sel.value='';
+    document.getElementById('modal-prof-caso').classList.remove('hidden');
+  }
+};
+
+window.confirmarProfCaso=()=>{
+  const prof=document.getElementById('prof-caso-sel')?.value;
+  if(!prof){document.getElementById('prof-caso-err').classList.remove('hidden');return;}
+  CM('modal-prof-caso');
+  const ci=window._pendingCkCaso;
+  // Save professor for this case
+  const resp=_ckRespostas[_ckStudentId];
+  if(resp){
+    if(!resp.casos[ci])resp.casos[ci]={itens:{},habilidades:{},feedback:''};
+    resp.casos[ci].prof=prof;
+  }
+  // Open the caso
+  const body=document.getElementById(`ck-body-${ci}`);
+  const arr=document.getElementById(`ck-arr-${ci}`);
+  if(body){body.style.display='block';if(arr)arr.style.transform='rotate(180deg)';}
+  if(!window._openCkCasos.includes(ci))window._openCkCasos.push(ci);
+  // Update header to show prof name for this case
+  renderCkCasoHeader(ci,resp,prof);
+};
+
+function renderCkCasoHeader(ci,resp,prof){
+  // Find the caso card header and update to show professor name
+  const casos=document.getElementById('ck-casos-wrap')?.children;
+  if(!casos||!casos[ci])return;
+  const hdr=casos[ci].querySelector('div[onclick]');
+  if(!hdr)return;
+  const profSpan=hdr.querySelector('.caso-prof-label');
+  if(profSpan){profSpan.textContent='Prof: '+prof;return;}
+  // Add prof label
+  const infoDiv=hdr.querySelector('div > div');
+  if(infoDiv){
+    const span=document.createElement('p');
+    span.className='caso-prof-label';
+    span.style.cssText='font-size:11px;color:var(--t2);margin-top:2px';
+    span.textContent='Prof. Examinador: '+prof;
+    infoDiv.appendChild(span);
+  }
+};
+
 // ── Item/Hab setters ──────────────────────────────────────────────────────────
 window.setCkItem=(ci,pi,ii,val)=>{
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
   if(!resp.casos[ci])resp.casos[ci]={itens:{},habilidades:{},feedback:''};
   resp.casos[ci].itens[`${pi}_${ii}`]=val;
-  renderCkCasos(resp);
-  document.getElementById('ck-feedback-geral').value=resp.feedbackGeral||'';
+  // Update button styles in-place without full re-render
+  updateCkItemButtons(ci,pi,ii,val);
 };
 
 window.setCkHab=(ci,hi,val)=>{
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
   if(!resp.casos[ci])resp.casos[ci]={itens:{},habilidades:{},feedback:''};
   resp.casos[ci].habilidades[hi]=val;
-  renderCkCasos(resp);
-  document.getElementById('ck-feedback-geral').value=resp.feedbackGeral||'';
+  updateCkHabButtons(ci,hi,val);
+  // Update habilidades section header status dynamically
+  updateHabStatus(ci,resp);
+  updateCasoStatusDom(ci);
+  updateFinalizarBtn();
 };
+
+function updateHabStatus(ci,resp){
+  const statusSpan=document.getElementById('ck-hab-status-'+ci);
+  if(!statusSpan)return;
+  const habs=resp.casos?.[ci]?.habilidades||{};
+  const total=HABILIDADES.length;
+  const filled=Object.values(habs).filter(v=>v>0).length;
+  const allFilled=filled>=total;
+  statusSpan.textContent=allFilled?'✓ Preenchido':'⚠ Pendente';
+  statusSpan.style.color=allFilled?'var(--green)':'var(--yellow)';
+}
+
+function updateCkItemButtons(ci,pi,ii,val){
+  const colors={certo:'var(--green)',parcial:'var(--yellow)',errado:'var(--red)'};
+  const bgs={certo:'var(--gl)',parcial:'var(--yl)',errado:'var(--rl)'};
+
+  // Update row background using unique id
+  const row=document.getElementById(`ck-item-row-${ci}-${pi}-${ii}`);
+  if(row){
+    row.style.background=val?(bgs[val]||'transparent'):'transparent';
+  }
+  // Update label color using unique id
+  const lbl=document.getElementById(`ck-item-lbl-${ci}-${pi}-${ii}`);
+  if(lbl)lbl.style.color=val?(colors[val]||'var(--t3)'):'var(--t3)';
+
+  // Update button styles — only buttons inside ck-body-ci for this specific item
+  const body=document.getElementById(`ck-body-${ci}`);if(!body)return;
+  const btns=body.querySelectorAll(`button[onclick^="setCkItem(${ci},${pi},${ii},'"]`);
+  btns.forEach(btn=>{
+    const m=btn.getAttribute('onclick').match(/'([a-z]+)'\)$/);
+    const bVal=m?m[1]:null;
+    const active=bVal===val;
+    btn.style.borderColor=active?(colors[bVal]||'var(--border)'):'var(--border)';
+    btn.style.background=active?(bgs[bVal]||'transparent'):'transparent';
+    btn.style.color=active?(colors[bVal]||'var(--t2)'):'var(--t2)';
+  });
+
+  // Update pergunta header status dynamically
+  updatePergStatus(ci,pi);
+  // Update caso border/status dynamically
+  updateCasoStatusDom(ci);
+  updateFinalizarBtn();
+}
+
+function updateCkHabButtons(ci,hi,val){
+  const habColors=['','#e74c3c','#e67e22','#f1c40f','#2ecc71','#27ae60'];
+  const body=document.getElementById(`ck-body-${ci}`);if(!body)return;
+  const btns=body.querySelectorAll(`[onclick^="setCkHab(${ci},${hi},"]`);
+  btns.forEach(btn=>{
+    const n=parseInt(btn.getAttribute('onclick').match(/,(\d+)\)$/)?.[1]);
+    const active=n<=val;
+    const color=active?habColors[n]:'transparent';
+    btn.style.borderColor=active?habColors[n]:'var(--border)';
+    btn.style.background=active?habColors[n]+'22':'transparent';
+    btn.style.color=active?habColors[n]:'var(--t2)';
+  });
+}
+
+
+function updateCasoStatusDom(ci){
+  const resp=_ckRespostas[_ckStudentId];if(!resp)return;
+  const cr=resp.casos?.[ci]||{};
+  const salvo=casoSalvo(resp,ci);
+  const pendente=casoPendente(resp,ci);
+  const temQualquerDado=Object.keys(cr.itens||{}).length>0||Object.values(cr.habilidades||{}).some(v=>v>0)||(cr.feedback||'').trim().length>0;
+  const casoStatus=salvo&&!pendente?'finalizado':temQualquerDado?'emAndamento':'naoAvaliado';
+  // Find the card (nth child in ck-casos-wrap)
+  const wrap=document.getElementById('ck-casos-wrap');if(!wrap)return;
+  const card=wrap.children[ci];if(!card)return;
+  card.style.borderColor=casoStatus==='finalizado'?'var(--green)':casoStatus==='emAndamento'?'var(--yellow)':'var(--border)';
+  // Update header bg
+  const hdr=card.querySelector('div[onclick]');
+  if(hdr)hdr.style.background=casoStatus==='finalizado'?'var(--gl)':casoStatus==='emAndamento'?'var(--yl)':'var(--bg3)';
+  // Update icon
+  const icon=card.querySelector('span[style*="font-size:18px"]');
+  if(icon)icon.textContent=casoStatus==='finalizado'?'✅':casoStatus==='emAndamento'?'🟡':'⬜';
+  // Update status text in subtitle
+  const sub=card.querySelector('p[style*="12px"]');
+  if(sub){
+    // Keep pts/itens, update status part
+    const base=sub.textContent.split('·').slice(0,2).join('·').trim();
+    sub.innerHTML=base+(casoStatus==='finalizado'?' · <strong style="color:var(--green)">✅ Finalizado</strong>':casoStatus==='emAndamento'?' · <strong style="color:var(--yellow)">⏳ Em andamento</strong>':' · <span style="color:var(--t3)">Não avaliado</span>');
+  }
+}
+
+function updatePergStatus(ci,pi){
+  const resp=_ckRespostas[_ckStudentId];if(!resp)return;
+  const template=_ckTemplate;
+  const perg=template?.casos?.[ci]?.perguntas?.[pi];if(!perg)return;
+  const itens=perg.itens||[];
+  const cr=resp.casos?.[ci]||{};
+  const marcados=itens.filter((_,ii)=>cr.itens?.[`${pi}_${ii}`]).length;
+  const total=itens.length;
+  const completa=total>0&&marcados===total;
+  const parcial=marcados>0&&marcados<total;
+
+  // Find the pergunta container in the DOM
+  const pergId=`ck-perg-${ci}-${pi}`;
+  const pergWrap=document.getElementById(pergId)?.parentElement;
+  if(!pergWrap)return;
+
+  // Update border color
+  const border=completa?'var(--green)':parcial?'var(--yellow)':'var(--yellow)';
+  pergWrap.style.borderColor=border;
+  pergWrap.style.borderWidth='1.5px';
+
+  // Update status label in header
+  const header=pergWrap.querySelector('div[onclick]');
+  if(!header)return;
+  const statusSpan=header.querySelector('.perg-status-lbl');
+  if(statusSpan){
+    if(completa){statusSpan.textContent='✓ Preenchido';statusSpan.style.color='var(--green)';}
+    else if(parcial){statusSpan.textContent='⚠ Parcial ('+marcados+'/'+total+')';statusSpan.style.color='var(--yellow)';}
+    else{statusSpan.textContent='⚠ Pendente';statusSpan.style.color='var(--yellow)';}
+  }
+}
+
+function updateFinalizarBtn(){
+  const btnF=document.getElementById('btn-finalizar-ck');if(!btnF)return;
+  const resp=_ckRespostas[_ckStudentId];if(!resp)return;
+  const template=_ckTemplate;const casos=template?.casos||[];
+  let allFilled=true;
+  casos.forEach((caso,ci)=>{
+    if(!casoSalvo(resp,ci))allFilled=false;
+    (caso.perguntas||[]).forEach((perg,pi)=>{
+      (perg.itens||[]).forEach((_,ii)=>{
+        if(!resp.casos?.[ci]?.itens?.[`${pi}_${ii}`])allFilled=false;
+      });
+    });
+  });
+  btnF.disabled=!allFilled;
+  btnF.style.opacity=allFilled?'1':'0.4';
+  btnF.style.cursor=allFilled?'pointer':'not-allowed';
+  const savedCount=casos.filter((_,ci)=>casoSalvo(resp,ci)).length;
+  if(allFilled)btnF.textContent='✅ Finalizar e Calcular Nota';
+  else if(savedCount===casos.length)btnF.textContent='⚠️ Preencha todos os itens';
+  else btnF.textContent=`⏳ Aguardando casos (${savedCount}/${casos.length})`;
+}
 
 window.setCkFeedbackCaso=(ci,val)=>{
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
   if(!resp.casos[ci])resp.casos[ci]={itens:{},habilidades:{},feedback:''};
   resp.casos[ci].feedback=val;
+  // Update feedback header status via unique id
+  const temFb=val.trim().length>0;
+  const fbLbl=document.getElementById('fb-status-'+ci);
+  if(fbLbl){fbLbl.textContent=temFb?'✓ Preenchido':'⚠ Pendente';fbLbl.style.color=temFb?'var(--green)':'var(--yellow)';}
 };
 
 window.autoSaveFeedbackGeral=()=>{
@@ -3255,13 +3753,60 @@ window.autoSaveFeedbackGeral=()=>{
 window.saveCkCaso=async(ci)=>{
   if(!_ckSimId||!_ckStudentId)return;
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
-  resp.prof=document.getElementById('ck-prof-sel')?.value||resp.prof||'';
+  const cr=resp.casos?.[ci]||{};
+
+  // Check for pending items (warn but allow saving)
+  const template=_ckTemplate;const caso=template?.casos?.[ci];
+  const perguntas=caso?.perguntas||[];
+  const itensFaltando=[];
+  perguntas.forEach((perg,pi)=>{
+    (perg.itens||[]).forEach((_,ii)=>{
+      if(!cr.itens?.[`${pi}_${ii}`]){
+        const lbl=String.fromCharCode(65+ii);
+        itensFaltando.push(`Pergunta ${pi+1} - Item ${lbl}`);
+      }
+    });
+  });
+  const temPendencia=itensFaltando.length>0;
+  if(temPendencia){
+    const continuar=confirm('Há itens não preenchidos:\n\n'+itensFaltando.join('\n')+'\n\nDeseja salvar mesmo assim? O caso ficará marcado como pendente.');
+    if(!continuar)return;
+  }
+
+  const temHab=Object.values(cr.habilidades||{}).some(v=>v>0);
+  const fbVal=(document.getElementById(`ck-fb-caso-${ci}`)?.value||cr.feedback||'').trim();
+  const temFb=fbVal.length>0;
+
+  // Warn if no feedback
+  if(!temFb){
+    const continuar=confirm('Você não fez o feedback descritivo do caso.\nDeseja salvar mesmo assim?');
+    if(!continuar)return;
+  }
+
+  // Update feedback from textarea
+  const fbEl=document.getElementById(`ck-fb-caso-${ci}`);
+  if(fbEl&&resp.casos[ci])resp.casos[ci].feedback=fbEl.value;
+
+  resp.prof=resp.casos?.[ci]?.prof||resp.prof||'';
   resp.updatedAt=new Date().toISOString();
+  if(!resp.casos[ci])resp.casos[ci]={itens:{},habilidades:{},feedback:''};
+  resp.casos[ci].savedAt=new Date().toISOString();
+  resp.casos[ci].temPendencia=temPendencia;
+
   try{
     await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),resp,{merge:true});
-    // Brief feedback
-    const btn=event?.target;if(btn){const orig=btn.textContent;btn.textContent='✅ Salvo!';setTimeout(()=>{btn.textContent=orig;},1200);}
-  }catch(e){console.error('Save caso error:',e);}
+    // Show success message, close caso, re-render
+    const msgEl=document.getElementById(`ck-save-msg-${ci}`);
+    if(msgEl){msgEl.style.display='inline';setTimeout(()=>{msgEl.style.display='none';},2000);}
+    // Close this caso after short delay
+    setTimeout(()=>{
+      window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
+      renderCkCasos(resp);
+      document.getElementById('ck-feedback-geral').value=resp.feedbackGeral||'';
+      // Reload from Firebase so student list is accurate
+      reloadRespostasAndRender();
+    },800);
+  }catch(e){console.error('Save caso error:',e);alert('Erro ao salvar. Tente novamente.');}
 };
 
 // ── Calculate & finalize ──────────────────────────────────────────────────────
@@ -3270,8 +3815,16 @@ window.finalizarChecklist=async()=>{
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
   const template=_ckTemplate;const casos=template.casos||[];
   const ptsPorCaso=100/casos.length;
-  let totalPts=0;
 
+  // Check all casos are saved
+  const casosFaltando=casos.map((_,ci)=>ci).filter(ci=>!casoSalvo(resp,ci));
+  if(casosFaltando.length>0){
+    const nomes=casosFaltando.map(ci=>`Caso ${ci+1}: ${casos[ci].nome||'Caso Clínico'}`).join('\n');
+    alert('Ainda há ' + (casosFaltando.length>1?'casos':'caso') + ' não avaliado' + (casosFaltando.length>1?'s':'') + ':\n\n' + nomes + '\n\nFinalize todos os casos antes de calcular a nota.');
+    return;
+  }
+
+  let totalPts=0;
   casos.forEach((caso,ci)=>{
     const casoResp=resp.casos[ci]||{itens:{}};
     const perguntas=caso.perguntas||[];
@@ -3292,7 +3845,7 @@ window.finalizarChecklist=async()=>{
   resp.notaCriar=nota;
   resp.finalizado=true;
   resp.feedbackGeral=document.getElementById('ck-feedback-geral')?.value||'';
-  resp.prof=document.getElementById('ck-prof-sel')?.value||resp.prof||'';
+  resp.prof=resp.prof||'';
   resp.updatedAt=new Date().toISOString();
 
   // Save to checklists
@@ -3312,8 +3865,8 @@ window.finalizarChecklist=async()=>{
   // Update UI
   document.getElementById('ck-nota-resultado').classList.remove('hidden');
   document.getElementById('ck-nota-val').textContent=nota.toFixed(1);
-  renderCkStudents(_ckStudents);
-  alert(`✅ Nota CRIAR lançada: ${nota.toFixed(1)} pontos`);
+  await reloadRespostasAndRender();
+  alert('✅ Nota CRIAR lançada: '+nota.toFixed(1)+' pontos');
 };
 
 // ── Template editor ───────────────────────────────────────────────────────────
@@ -3332,61 +3885,199 @@ window.openCkTemplateEditor=async()=>{
   showCkView('ck-template-editor');
 };
 
+// ── Template Editor ──────────────────────────────────────────────────────────
+const _tplOpen={casos:new Set(),perguntas:new Set()};
+
 function renderTemplateEditor(){
   const wrap=document.getElementById('ck-template-casos');if(!wrap)return;
   wrap.innerHTML='';
   (_ckTemplateEdit.casos||[]).forEach((caso,ci)=>{
     const card=document.createElement('div');
-    card.className='card';card.style.marginBottom='14px';
+    card.style.cssText='margin-bottom:12px;border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg2)';
+    const casoOpen=_tplOpen.casos.has(ci);
     const perguntas=caso.perguntas||[];
-    let body=`<div class="ch" style="background:var(--bg3)">
-      <div style="display:flex;align-items:center;gap:10px;flex:1">
-        <span style="font-weight:700;font-size:14px;white-space:nowrap">Caso ${ci+1}</span>
-        <input value="${caso.nome||''}" placeholder="Nome do caso clínico" oninput="_ckTemplateEdit.casos[${ci}].nome=this.value"
-          style="flex:1;border:none;background:transparent;font-family:inherit;font-size:14px;font-weight:600;outline:none;color:var(--text)"/>
-      </div>
-      <button class="btn btn-d btn-sm" onclick="rmCkCaso(${ci})">✕ Remover</button>
+
+    let html=`
+    <!-- Caso header with inline editable name -->
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg3)">
+      <span onclick="tplToggleCaso(${ci})" style="font-size:15px;cursor:pointer;padding:2px 6px;border-radius:4px" title="Expandir/recolher">${casoOpen?'▼':'▶'}</span>
+      <span style="font-weight:700;font-size:14px;color:var(--t2);white-space:nowrap">Caso ${ci+1} —</span>
+      <input id="tpl-hdr-caso-${ci}" value="${caso.nome||''}" placeholder="Nome do caso clínico"
+        oninput="_ckTemplateEdit.casos[${ci}].nome=this.value"
+        onblur="autoSaveCkTemplate()"
+        onclick="event.stopPropagation()"
+        style="flex:1;border:none;background:transparent;font-family:inherit;font-size:14px;font-weight:600;outline:none;color:var(--text);min-width:0"/>
+      <span style="font-size:12px;color:var(--t2);white-space:nowrap">${perguntas.length} pergunta${perguntas.length!==1?'s':''}</span>
+      <button class="btn btn-d btn-sm" onclick="rmCkCaso(${ci})" style="font-size:11px">✕ Remover</button>
     </div>
-    <div style="padding:16px 20px">`;
+
+    <!-- Caso body -->
+    <div id="tpl-caso-${ci}" style="display:${casoOpen?'block':'none'};padding:14px 16px">`;
+
     perguntas.forEach((perg,pi)=>{
       const itens=perg.itens||[];
-      body+=`<div style="margin-bottom:14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <span style="font-size:12px;font-weight:700;color:var(--t2);white-space:nowrap">Pergunta ${pi+1}</span>
-          <input value="${perg.titulo||''}" placeholder="Título da pergunta (opcional)" oninput="_ckTemplateEdit.casos[${ci}].perguntas[${pi}].titulo=this.value"
-            style="flex:1;border:none;background:transparent;font-family:inherit;font-size:13px;outline:none;color:var(--text)"/>
-          <button class="btn btn-d btn-sm" onclick="rmCkPergunta(${ci},${pi})">✕</button>
+      const pergKey=`${ci}-${pi}`;
+      const pergOpen=_tplOpen.perguntas.has(pergKey);
+      html+=`
+      <div style="margin-bottom:10px;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden">
+        <!-- Pergunta header with inline editable title -->
+        <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--bg3)">
+          <span onclick="tplTogglePerg('${pergKey}')" style="font-size:12px;cursor:pointer;padding:2px 5px;border-radius:4px" title="Expandir/recolher">${pergOpen?'▼':'▶'}</span>
+          <span style="font-size:12px;font-weight:700;color:var(--t2);white-space:nowrap">Pergunta ${pi+1} —</span>
+          <input id="tpl-hdr-perg-${pergKey}" value="${perg.titulo||''}" placeholder="Título da pergunta (opcional)"
+            oninput="_ckTemplateEdit.casos[${ci}].perguntas[${pi}].titulo=this.value"
+            onblur="autoSaveCkTemplate()"
+            onclick="event.stopPropagation()"
+            style="flex:1;border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;outline:none;color:var(--text);min-width:0"/>
+          <span style="font-size:11px;color:var(--t2);white-space:nowrap">${itens.length} iten${itens.length!==1?'s':''}</span>
+          <button class="btn btn-d btn-sm" onclick="rmCkPergunta(${ci},${pi})" style="font-size:10px">✕</button>
         </div>
-        <div id="ck-itens-${ci}-${pi}" style="display:flex;flex-direction:column;gap:6px">`;
+        <!-- Pergunta body -->
+        <div id="tpl-perg-${pergKey}" style="display:${pergOpen?'block':'none'};padding:12px 14px">
+          <!-- Paste area -->
+          <div style="margin-bottom:10px">
+            <label class="fl">📋 Colar itens em massa (opcional)</label>
+            <div style="display:flex;gap:8px;align-items:flex-start">
+              <textarea id="tpl-paste-${ci}-${pi}" class="fc" style="min-height:80px;font-size:12px;flex:1"
+                placeholder="Cole os itens aqui. Ex:&#10;A. Bradicardia sinusal&#10;B. Eixo de P normal&#10;C. Intervalo PR aumentado"></textarea>
+              <button class="btn btn-p btn-sm" style="white-space:nowrap;margin-top:2px" onclick="parsePastedItens(${ci},${pi})">⚡ Importar</button>
+            </div>
+          </div>
+          <!-- Items list -->
+          <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">`;
       itens.forEach((item,ii)=>{
         const lbl=String.fromCharCode(65+ii);
-        body+=`<div style="display:flex;gap:8px;align-items:center">
-          <span style="font-size:12px;font-weight:700;color:var(--accent);min-width:20px">${lbl}</span>
-          <input value="${item.descricao||''}" placeholder="Descrição do item (opcional)"
+        html+=`<div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:12px;font-weight:800;color:var(--accent);min-width:20px;text-align:center">${lbl}</span>
+          <input value="${(item.descricao||'').replace(/"/g,'&quot;')}" placeholder="Descrição do item"
             oninput="_ckTemplateEdit.casos[${ci}].perguntas[${pi}].itens[${ii}].descricao=this.value"
-            style="flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:5px;background:var(--bg2);font-family:inherit;font-size:12px;outline:none;color:var(--text)"/>
+            style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:5px;background:var(--bg2);font-family:inherit;font-size:12px;outline:none;color:var(--text)"/>
           <button class="btn btn-g btn-sm" onclick="rmCkItem(${ci},${pi},${ii})">✕</button>
         </div>`;
       });
-      body+=`</div>
-        <button class="btn btn-g btn-sm" style="margin-top:8px" onclick="addCkItem(${ci},${pi})">+ Item</button>
+      html+=`</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-s btn-sm" onclick="addCkItem(${ci},${pi})">+ Item</button>
+            <button class="btn btn-p btn-sm" onclick="saveCkPergunta(${ci},${pi})">💾 Salvar Pergunta ${pi+1}</button>
+          </div>
+        </div>
       </div>`;
     });
-    body+=`<button class="btn btn-s btn-sm" onclick="addCkPergunta(${ci})">+ Pergunta</button></div>`;
-    card.innerHTML=body;
+
+    html+=`
+      <button class="btn btn-s btn-sm" style="margin-top:10px" onclick="addCkPergunta(${ci})">+ Adicionar Pergunta</button>
+    </div>`;
+    card.innerHTML=html;
     wrap.appendChild(card);
   });
 }
 
-window.addCkCaso=()=>{_ckTemplateEdit.casos.push({nome:'',perguntas:[]});renderTemplateEditor();};
-window.rmCkCaso=ci=>{if(!confirm('Remover este caso?'))return;_ckTemplateEdit.casos.splice(ci,1);renderTemplateEditor();};
-window.addCkPergunta=ci=>{_ckTemplateEdit.casos[ci].perguntas.push({titulo:'',itens:[]});renderTemplateEditor();};
-window.rmCkPergunta=(ci,pi)=>{_ckTemplateEdit.casos[ci].perguntas.splice(pi,1);renderTemplateEditor();};
-window.addCkItem=(ci,pi)=>{_ckTemplateEdit.casos[ci].perguntas[pi].itens.push({label:'',descricao:''});renderTemplateEditor();};
-window.rmCkItem=(ci,pi,ii)=>{_ckTemplateEdit.casos[ci].perguntas[pi].itens.splice(ii,1);renderTemplateEditor();};
+window.tplToggleCaso=(ci)=>{
+  const body=document.getElementById(`tpl-caso-${ci}`);
+  const arrow=event?.currentTarget?.querySelector?.('span')||event?.target;
+  if(!body)return;
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  if(isOpen)_tplOpen.casos.delete(ci); else _tplOpen.casos.add(ci);
+  // Update arrow in the header
+  const header=body.previousElementSibling;
+  if(header){
+    const arrowSpan=header.querySelector('span[onclick]');
+    if(arrowSpan)arrowSpan.textContent=isOpen?'▶':'▼';
+  }
+};
+window.tplTogglePerg=(key)=>{
+  const body=document.getElementById(`tpl-perg-${key}`);
+  if(!body)return;
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  if(isOpen)_tplOpen.perguntas.delete(key); else _tplOpen.perguntas.add(key);
+  // Update arrow in the header
+  const header=body.previousElementSibling;
+  if(header){
+    const arrowSpan=header.querySelector('span[onclick]');
+    if(arrowSpan)arrowSpan.textContent=isOpen?'▶':'▼';
+  }
+};
+
+// ── Sync DOM values into _ckTemplateEdit before re-render ──────────────────
+function syncTplFromDOM(){
+  (_ckTemplateEdit.casos||[]).forEach((caso,ci)=>{
+    const nomeEl=document.getElementById('tpl-hdr-caso-'+ci);
+    if(nomeEl)caso.nome=nomeEl.value;
+    (caso.perguntas||[]).forEach((perg,pi)=>{
+      const key=ci+'-'+pi;
+      const tituloEl=document.getElementById('tpl-hdr-perg-'+key);
+      if(tituloEl)perg.titulo=tituloEl.value;
+      const itemInputs=document.querySelectorAll('#tpl-perg-'+key+' div[style*="flex-direction:column"] input');
+      itemInputs.forEach((inp,ii)=>{if(perg.itens[ii])perg.itens[ii].descricao=inp.value;});
+    });
+  });
+}
+
+window.addCkCaso=()=>{
+  syncTplFromDOM();
+  const ci=(_ckTemplateEdit.casos||[]).length;
+  _ckTemplateEdit.casos.push({nome:'',perguntas:[]});
+  _tplOpen.casos.add(ci);
+  renderTemplateEditor();
+};
+window.rmCkCaso=ci=>{syncTplFromDOM();if(!confirm('Remover este caso?'))return;_ckTemplateEdit.casos.splice(ci,1);renderTemplateEditor();};
+window.addCkPergunta=ci=>{
+  syncTplFromDOM();
+  const pi=(_ckTemplateEdit.casos[ci].perguntas||[]).length;
+  _ckTemplateEdit.casos[ci].perguntas.push({titulo:'',itens:[]});
+  _tplOpen.perguntas.add(`${ci}-${pi}`);
+  renderTemplateEditor();
+};
+window.rmCkPergunta=(ci,pi)=>{syncTplFromDOM();_ckTemplateEdit.casos[ci].perguntas.splice(pi,1);renderTemplateEditor();};
+window.addCkItem=(ci,pi)=>{syncTplFromDOM();_ckTemplateEdit.casos[ci].perguntas[pi].itens.push({label:'',descricao:''});renderTemplateEditor();};
+window.rmCkItem=(ci,pi,ii)=>{syncTplFromDOM();_ckTemplateEdit.casos[ci].perguntas[pi].itens.splice(ii,1);renderTemplateEditor();};
+
+// Parse pasted items like "A. Description" or "A) Description"
+window.parsePastedItens=(ci,pi)=>{
+  const ta=document.getElementById(`tpl-paste-${ci}-${pi}`);
+  if(!ta||!ta.value.trim()){alert('Cole os itens antes de importar.');return;}
+  const lines=ta.value.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  const parsed=[];
+  lines.forEach(line=>{
+    // Match patterns: "A. text", "A) text", "A - text", "A: text"
+    const m=line.match(/^([A-Za-z])[.)\-:\s]+(.+)$/);
+    if(m){parsed.push({label:m[1].toUpperCase(),descricao:m[2].trim()});}
+    else if(line.length>0){parsed.push({label:'',descricao:line});}
+  });
+  if(!parsed.length){alert('Nenhum item reconhecido. Use o formato: A. Descrição');return;}
+  syncTplFromDOM();
+  _ckTemplateEdit.casos[ci].perguntas[pi].itens=[..._ckTemplateEdit.casos[ci].perguntas[pi].itens,...parsed];
+  ta.value='';
+  renderTemplateEditor();
+  alert(parsed.length+' iten'+( parsed.length!==1?'s':'')+' importado'+(parsed.length!==1?'s':'')+'!');
+};
+
+// Save individual pergunta
+window.autoSaveCkTemplate=async()=>{
+  if(!_ckSimId)return;
+  try{
+    const template=JSON.parse(JSON.stringify(_ckTemplateEdit));
+    await setDoc(doc(db,`checklists/${_ckSimId}/meta/template`),template);
+    _ckTemplate=template;
+  }catch(e){console.warn('autoSave error',e);}
+};
+
+window.saveCkPergunta=async(ci,pi)=>{
+  if(!_ckSimId){alert('Selecione um simulado.');return;}
+  syncTplFromDOM();
+  const template=JSON.parse(JSON.stringify(_ckTemplateEdit));
+  await setDoc(doc(db,'checklists/'+_ckSimId+'/meta/template'),template);
+  _ckTemplate=template;
+  const btn=event?.target;
+  if(btn){const o=btn.textContent;btn.textContent='✅ Salvo!';btn.style.background='var(--green)';
+    setTimeout(()=>{btn.textContent=o;btn.style.background='';},1500);}
+};
 
 window.saveCkTemplate=async()=>{
   if(!_ckSimId){alert('Selecione um simulado.');return;}
+  syncTplFromDOM();
   const template=JSON.parse(JSON.stringify(_ckTemplateEdit));
   await setDoc(doc(db,`checklists/${_ckSimId}/meta/template`),template);
   _ckTemplate=template;
@@ -4259,6 +4950,313 @@ window._initProfTab=()=>{
   renderProfGlobal();
   const cobSel=document.getElementById('cob-sim-sel');
   if(cobSel){cobSel.innerHTML='<option value="">Selecione simulado...</option>'+S.sims.map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');}
+};
+
+
+// ── Reset caso (requires admin password) ─────────────────────────────────────
+window.resetCkCaso=async(ci)=>{
+  const template=_ckTemplate;
+  const caso=template?.casos?.[ci];
+  const nomeAluno=_ckStudents.find(s=>s.id===_ckStudentId)?.nome||'este aluno';
+  const nomeCaso=caso?.nome||('Caso '+(ci+1));
+  const confirmWord=prompt('Para confirmar o reset de "'+nomeCaso+'" de '+nomeAluno+', digite a palavra:\n\nRESETAR');
+  if(confirmWord===null)return;
+  if(confirmWord.trim().toUpperCase()!=='RESETAR'){alert('Palavra incorreta. Digite exatamente: RESETAR');return;}
+  const resp=_ckRespostas[_ckStudentId];
+  if(!resp)return;
+  resp.casos[ci]={itens:{},habilidades:{},feedback:'',prof:''}; // prof cleared on reset
+  delete resp.casos[ci].savedAt;
+  resp.finalizado=false;
+  delete resp.notaCriar;
+  // Also clean up any orphaned cases not in current template
+  const tplLen=(_ckTemplate?.casos||[]).length;
+  Object.keys(resp.casos||{}).forEach(k=>{if(parseInt(k)>=tplLen)delete resp.casos[k];});
+  // Use setDoc WITHOUT merge to fully overwrite
+  await setDoc(doc(db,'checklists/'+_ckSimId+'/respostas/'+_ckStudentId),resp);
+  _ckRespostas[_ckStudentId]=resp;
+  window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
+  renderCkCasos(resp);
+  document.getElementById('ck-feedback-geral').value=resp.feedbackGeral||'';
+  document.getElementById('ck-nota-resultado').classList.add('hidden');
+  reloadRespostasAndRender();
+};
+
+
+// Auto-save template on blur (name/title edits)
+let _autoSaveTimer=null;
+window.autoSaveCkTemplate=()=>{
+  syncTplFromDOM();
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer=setTimeout(async()=>{
+    if(!_ckSimId)return;
+    const template=JSON.parse(JSON.stringify(_ckTemplateEdit));
+    await setDoc(doc(db,'checklists/'+_ckSimId+'/meta/template'),template);
+    _ckTemplate=template;
+    // Brief visual feedback
+    const btn=document.querySelector('[onclick="saveCkTemplate()"]');
+    if(btn){const o=btn.textContent;btn.textContent='✅ Salvo';setTimeout(()=>btn.textContent=o,1200);}
+  },800);
+};
+
+
+// ── Habilidade tooltip ────────────────────────────────────────────────────────
+let _habTooltipEl=null;
+window.showHabTooltip=(e,text)=>{
+  hideHabTooltip();
+  const tip=document.createElement('div');
+  tip.id='hab-tooltip';
+  tip.style.cssText='position:fixed;z-index:9999;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;max-width:280px;font-size:12px;color:var(--text);box-shadow:var(--shl);pointer-events:none;line-height:1.5';
+  tip.textContent=text;
+  document.body.appendChild(tip);
+  _habTooltipEl=tip;
+  const r=e.target.getBoundingClientRect();
+  let top=r.bottom+6;let left=r.left;
+  if(top+120>window.innerHeight)top=r.top-120;
+  if(left+300>window.innerWidth)left=window.innerWidth-310;
+  tip.style.top=top+'px';tip.style.left=Math.max(10,left)+'px';
+};
+window.hideHabTooltip=()=>{
+  if(_habTooltipEl){_habTooltipEl.remove();_habTooltipEl=null;}
+  const old=document.getElementById('hab-tooltip');if(old)old.remove();
+};
+
+// ── Reset pergunta (requires admin password) ──────────────────────────────────
+window.resetCkPergunta=async(ci,pi)=>{
+  const template=_ckTemplate;
+  const perg=template?.casos?.[ci]?.perguntas?.[pi];
+  const nomePerg=perg?.titulo||('Pergunta '+(pi+1));
+  const nomeAluno=_ckStudents.find(s=>s.id===_ckStudentId)?.nome||'este aluno';
+  const confirmWord=prompt('Para confirmar o reset de "'+nomePerg+'" de '+nomeAluno+', digite a palavra:\n\nRESETAR');
+  if(confirmWord===null)return;
+  if(confirmWord.trim().toUpperCase()!=='RESETAR'){alert('Palavra incorreta. Digite exatamente: RESETAR');return;}
+  const resp=_ckRespostas[_ckStudentId];if(!resp)return;
+  if(!resp.casos[ci])return;
+  const itensToReset=Object.keys(resp.casos[ci].itens||{}).filter(k=>k.startsWith(pi+'_'));
+  itensToReset.forEach(k=>delete resp.casos[ci].itens[k]);
+  delete resp.casos[ci].savedAt;
+  delete resp.casos[ci].temPendencia;
+  // Clear prof assignment when resetting a pergunta
+  resp.casos[ci].prof='';
+  resp.finalizado=false;delete resp.notaCriar;
+  // Use setDoc WITHOUT merge to fully overwrite (merge:true keeps old nested fields)
+  await setDoc(doc(db,'checklists/'+_ckSimId+'/respostas/'+_ckStudentId),resp);
+  _ckRespostas[_ckStudentId]=resp;
+  window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
+  renderCkCasos(resp);
+  document.getElementById('ck-feedback-geral').value=resp.feedbackGeral||'';
+  document.getElementById('ck-nota-resultado').classList.add('hidden');
+  reloadRespostasAndRender();
+};
+
+
+// ── Troca Direta entre Alunos ─────────────────────────────────────────────────
+window._trocaDireta={targetDia:null,targetRod:null,targetStudent:null};
+
+window.selecionarHorarioDireto=(el)=>{
+  document.querySelectorAll('.chip-direct.on').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  const dia=el.dataset.dia;const rod=parseInt(el.dataset.rod);
+  window._trocaDireta.targetDia=dia;window._trocaDireta.targetRod=rod;
+  window._trocaDireta.targetStudent=null;
+  const me=S.students.find(x=>x.id===window._pr?.sid);
+  // Find ALL students in that slot (excluding me)
+  const targets=S.students.filter(x=>x.dia===dia&&x.rodada===rod&&x.id!==(me?.id));
+  const box=document.getElementById('troca-direta-colega');
+  const emptyBox=document.getElementById('troca-direta-empty');
+  if(targets.length===0){
+    box?.classList.add('hidden');
+    emptyBox?.classList.remove('hidden');
+  } else {
+    emptyBox?.classList.add('hidden');
+    // Show list of all students in that slot
+    const listHtml=targets.map(t=>{
+      const email=getStudentRegisteredEmail(t)||'';
+      const temEmail=email&&email.includes('@');
+      return`<div onclick="escolherColegaTroca('${t.id}')" id="troca-colega-${t.id}"
+        style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--rs);cursor:pointer;border:2px solid transparent;transition:all .2s;margin-bottom:6px"
+        onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--bg3)'"
+        onmouseout="if(!this.classList.contains('selected')){this.style.borderColor='transparent';this.style.background=''}">
+        <span style="font-size:18px">👤</span>
+        <div style="flex:1">
+          <p style="font-size:13px;font-weight:700">${t.nome}</p>
+          <p style="font-size:11px;color:${temEmail?'var(--t2)':'var(--red)'}">${temEmail?email:'⚠️ Sem email cadastrado'}</p>
+        </div>
+        ${!temEmail?'<span style="font-size:11px;color:var(--red)">Não disponível</span>':''}
+      </div>`;
+    }).join('');
+    box.innerHTML=`<p style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Escolha o colega:</p>
+      ${listHtml}
+      <div id="troca-direta-btn-wrap" class="hidden" style="margin-top:8px">
+        <button class="btn btn-p" style="width:100%" onclick="enviarPropostaDireta()">📨 Enviar Proposta por Email</button>
+      </div>`;
+    box?.classList.remove('hidden');
+  }
+};
+
+window.escolherColegaTroca=(targetId)=>{
+  const target=S.students.find(x=>x.id===targetId);
+  if(!target)return;
+  const email=getStudentRegisteredEmail(target);
+  if(!email||!email.includes('@')){alert('Este colega não tem email cadastrado.');return;}
+  // Deselect all, select this one
+  document.querySelectorAll('[id^="troca-colega-"]').forEach(el=>{
+    el.classList.remove('selected');
+    el.style.borderColor='transparent';
+    el.style.background='';
+  });
+  const el=document.getElementById('troca-colega-'+targetId);
+  if(el){el.classList.add('selected');el.style.borderColor='var(--accent)';el.style.background='var(--accent-dim)';}
+  window._trocaDireta.targetStudent=target;
+  document.getElementById('troca-direta-btn-wrap')?.classList.remove('hidden');
+};
+
+window.enviarPropostaDireta=async()=>{
+  const me=S.students.find(x=>x.id===window._pr?.sid);
+  const target=window._trocaDireta.targetStudent;
+  if(!me||!target){alert('Selecione um horário antes.');return;}
+  const emailMe=document.getElementById('re')?.value?.trim();
+  if(!emailMe||!emailMe.includes('@')){alert('Informe seu e-mail primeiro.');return;}
+  // Validate email
+  const regEmail=getStudentRegisteredEmail(me);
+  if(regEmail&&emailMe.toLowerCase()!==regEmail.toLowerCase()){
+    const el=document.getElementById('re-err');
+    if(el){el.textContent='E-mail não corresponde ao cadastrado.';el.classList.remove('hidden');}
+    return;
+  }
+  const targetEmail=getStudentRegisteredEmail(target);
+  if(!targetEmail){alert('O colega '+target.nome+' não tem e-mail cadastrado. Não é possível enviar a proposta.');return;}
+  // Generate unique token
+  const token=Math.random().toString(36).slice(2)+Date.now().toString(36);
+  const expires=new Date(Date.now()+48*3600*1000).toISOString();
+  const hMe=getH(me.dia,me.rodada);
+  const hTarget=getH(target.dia,target.rodada);
+  const proposta={
+    token,
+    status:'pendente',
+    de:{id:me.id,nome:me.nome,email:emailMe,dia:me.dia,rodada:me.rodada,horario:hMe},
+    para:{id:target.id,nome:target.nome,email:targetEmail,dia:target.dia,rodada:target.rodada,horario:hTarget},
+    simId:S.curSim.id,simNome:S.curSim.nome,
+    criadaEm:new Date().toISOString(),
+    expiresAt:expires
+  };
+  // Save to Firebase
+  // Save at top-level path for easy lookup by token
+  await setDoc(doc(db,'trocasDiretas/'+token),proposta);
+  // Build accept/reject URL
+  const baseUrl=(S.cfg.systemUrl||window.location.href.split('?')[0]).replace(/\/$/,'');
+  const linkAceitar=baseUrl+'?troca='+token+'&acao=aceitar';
+  const linkRecusar=baseUrl+'?troca='+token+'&acao=recusar';
+  // Send email to target
+  const msg='Olá, '+target.nome+'!\n\n'+
+    me.nome+' está propondo uma troca de horário com você no '+proposta.simNome+'.\n\n'+
+    '▸ Horário de '+me.nome+': '+hMe+' ('+(me.dia==='sabado'?'Sábado':'Domingo')+')\n'+
+    '▸ Seu horário atual: '+hTarget+' ('+(target.dia==='sabado'?'Sábado':'Domingo')+')\n\n'+
+    'Se aceitar, seu novo horário será: '+hMe+' ('+(me.dia==='sabado'?'Sábado':'Domingo')+')\n\n'+
+    '━━━━━━━━━━━━━━━━━━━━━━━━\n'+
+    '✅ Para ACEITAR a troca, clique no link abaixo:\n'+linkAceitar+'\n\n'+
+    '❌ Para RECUSAR a troca, clique no link abaixo:\n'+linkRecusar+'\n'+
+    '━━━━━━━━━━━━━━━━━━━━━━━━\n\n'+
+    '⏰ Esta proposta expira em 48 horas.\n'+
+    'Se não responder, a troca não será realizada.';
+  try{
+    await emailjs.send('service_j2d3kfk','template_syr8rqn',{
+      to_email:targetEmail,
+      to_name:target.nome,
+      assunto:'🔄 Proposta de troca de horário — '+proposta.simNome,
+      requester_name:me.nome,
+      sim_nome:proposta.simNome,
+      horario_requester:hMe+' ('+(me.dia==='sabado'?'Sábado':'Domingo')+')',
+      horario_target:hTarget+' ('+(target.dia==='sabado'?'Sábado':'Domingo')+')',
+      link_aceitar:linkAceitar,
+      link_recusar:linkRecusar
+    });
+    alert('✅ Proposta enviada para '+target.nome+'!\nEle(a) tem 48h para aceitar ou recusar.');
+    CM('modal-resp');
+  }catch(e){
+    alert('Erro ao enviar email: '+e.message+'. A proposta foi salva mas o email falhou.');
+    CM('modal-resp');
+  }
+};
+
+// ── Check URL for troca token on page load ────────────────────────────────────
+async function checkTrocaToken(){
+  const params=new URLSearchParams(window.location.search);
+  const token=params.get('troca');
+  const acao=params.get('acao');
+  if(!token||!acao)return;
+  // Direct lookup by token
+  let proposta=null;let propostaRef=null;
+  try{
+    const snap=await getDoc(doc(db,'trocasDiretas/'+token));
+    if(snap.exists()){proposta=snap.data();propostaRef=snap.ref;}
+  }catch(e){showTrocaResult('❌','Erro ao buscar proposta: '+e.message);return;}
+  if(!proposta){showTrocaResult('❌','Proposta não encontrada ou token inválido.');return;}
+  if(proposta.status!=='pendente'){
+    showTrocaResult('ℹ️','Esta proposta já foi '+(proposta.status==='aceita'?'aceita':'recusada')+'.','var(--blue)');return;
+  }
+  if(new Date()>new Date(proposta.expiresAt)){
+    await updateDoc(propostaRef,{status:'expirada'});
+    showTrocaResult('⏰','Esta proposta expirou.','var(--yellow)');return;
+  }
+  if(acao==='aceitar'){
+    await aceitarTrocaDireta(proposta,propostaRef);
+  } else if(acao==='recusar'){
+    await recusarTrocaDireta(proposta,propostaRef);
+  }
+}
+
+async function aceitarTrocaDireta(proposta,propostaRef){
+  const simId=proposta.simId;
+  // Swap the students in Firebase
+  const batch=writeBatch(db);
+  batch.update(doc(db,'simulados/'+simId+'/alunos/'+proposta.de.id),{dia:proposta.para.dia,rodada:proposta.para.rodada});
+  batch.update(doc(db,'simulados/'+simId+'/alunos/'+proposta.para.id),{dia:proposta.de.dia,rodada:proposta.de.rodada});
+  await batch.commit();
+  // Mark as accepted
+  await updateDoc(propostaRef,{status:'aceita',resolvidaEm:new Date().toISOString()});
+  // Send confirmation emails to both
+  const msg='A troca de horário no '+proposta.simNome+' foi confirmada!\n\n'+
+    '▸ '+proposta.de.nome+': agora no horário '+proposta.para.horario+' ('+(proposta.para.dia==='sabado'?'Sábado':'Domingo')+')\n'+
+    '▸ '+proposta.para.nome+': agora no horário '+proposta.de.horario+' ('+(proposta.de.dia==='sabado'?'Sábado':'Domingo')+')';
+  try{
+    await emailjs.send('service_j2d3kfk','template_r0vjejs',{to_email:proposta.de.email,nome:proposta.de.nome,assunto:'✅ Troca confirmada — '+proposta.simNome,mensagem:msg,simulado:proposta.simNome,dia:'',horario:''});
+    await emailjs.send('service_j2d3kfk','template_r0vjejs',{to_email:proposta.para.email,nome:proposta.para.nome,assunto:'✅ Troca confirmada — '+proposta.simNome,mensagem:msg,simulado:proposta.simNome,dia:'',horario:''});
+  }catch(e){}
+  showTrocaResult('✅','Troca aceita com sucesso!\n\nVocê agora está no horário '+proposta.de.horario+' ('+(proposta.de.dia==='sabado'?'Sábado':'Domingo')+').\nAmbos receberão um email de confirmação.','var(--green)');
+}
+
+async function recusarTrocaDireta(proposta,propostaRef){
+  await updateDoc(propostaRef,{status:'recusada',resolvidaEm:new Date().toISOString()});
+  // Notify requester
+  try{
+    await emailjs.send('service_j2d3kfk','template_r0vjejs',{
+      to_email:proposta.de.email,nome:proposta.de.nome,
+      assunto:'❌ Proposta de troca recusada — '+proposta.simNome,
+      mensagem:proposta.para.nome+' recusou sua proposta de troca de horário no '+proposta.simNome+'.\n\nSeu horário continua sendo '+proposta.de.horario+' ('+(proposta.de.dia==='sabado'?'Sábado':'Domingo')+').',
+      simulado:proposta.simNome,dia:'',horario:''
+    });
+  }catch(e){}
+  showTrocaResult('❌','Você recusou a proposta de troca.\n'+proposta.de.nome+' será notificado.','var(--red)');
+}
+
+function showTrocaResult(icon,msg,color='var(--text)'){
+  // Show result overlay
+  const div=document.createElement('div');
+  div.style.cssText='position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:40px;text-align:center';
+  div.innerHTML='<div style="font-size:64px;margin-bottom:16px">'+icon+'</div>'+
+    '<h2 style="font-family:Fraunces,serif;font-size:24px;color:'+color+';margin-bottom:12px">AROS · Troca de Horário</h2>'+
+    '<p style="font-size:16px;color:var(--text);max-width:400px;line-height:1.6;white-space:pre-line">'+msg+'</p>'+
+    '<button onclick="window.location.href=window.location.pathname" class="btn btn-p" style="margin-top:32px">Ir para o sistema</button>';
+  document.body.appendChild(div);
+}
+
+window.toggleSwapOpt=(bodyId,arrId)=>{
+  const body=document.getElementById(bodyId);
+  const arr=document.getElementById(arrId);
+  if(!body)return;
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  if(arr)arr.style.transform=isOpen?'rotate(0)':'rotate(180deg)';
 };
 
 // MODAL HELPERS
