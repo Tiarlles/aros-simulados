@@ -1104,7 +1104,7 @@ select.fc{cursor:pointer}
   <div class="md" style="max-width:520px">
     <div class="mh"><div><div class="m-title">🔄 Gerenciar Troca</div><div class="m-sub" id="sw-sub"></div></div><button class="m-close" onclick="CM('modal-swap')">✕</button></div>
     <div class="m-body" id="sw-body"></div>
-    <div class="m-foot"><button class="btn btn-s" onclick="CM('modal-swap')">Fechar</button><button class="btn btn-p" onclick="doSwap()">✅ Confirmar Troca</button></div>
+    <div class="m-foot"><button class="btn btn-d btn-sm" onclick="deletarSolicitacaoTroca()" id="btn-del-swap" style="margin-right:auto">🗑️ Deletar Solicitação</button><button class="btn btn-s" onclick="CM('modal-swap')">Fechar</button><button class="btn btn-p" onclick="doSwap()">✅ Confirmar Troca</button></div>
   </div>
 </div>
 
@@ -1472,7 +1472,7 @@ window.openResp=(sid,type)=>{
   body+=`<div id="re-err" class="al al-e hidden"></div>
     <div style="display:flex;gap:8px;margin-top:12px">
       <button class="btn btn-s" style="flex:1" onclick="CM('modal-resp')">Cancelar</button>
-      <button class="btn btn-p" style="flex:2" onclick="subResp()">Confirmar</button>
+      <button class="btn btn-p" style="flex:2" id="btn-sub-resp" onclick="subResp()">Confirmar</button>
     </div>`;
 
   document.getElementById('r-body').innerHTML=body;
@@ -1905,7 +1905,9 @@ function renderSwapPanel(){
   renderHistMsg();
 }
 
+window._swapStudentId=null;
 window.openSwapAction=id=>{
+  window._swapStudentId=id;
   const s=S.students.find(x=>x.id===id);if(!s)return;
   S.pendSwap=s;
   const h=getH(s.dia,s.rodada);
@@ -2014,6 +2016,27 @@ window.doMatchedSwap=async(id1,id2)=>{
   const novoH2=getH(d1,r1);const novoD2=d1==='sabado'?'Sábado':'Domingo';
   if(s1.email)await emailjs.send('service_j2d3kfk','template_r0vjejs',{to_email:s1.email,nome:s1.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD1} · ${novoH1}`,simulado:S.curSim.nome,dia:novoD1,horario:novoH1}).catch(e=>console.error(e));
   if(s2.email)await emailjs.send('service_j2d3kfk','template_r0vjejs',{to_email:s2.email,nome:s2.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD2} · ${novoH2}`,simulado:S.curSim.nome,dia:novoD2,horario:novoH2}).catch(e=>console.error(e));
+};
+
+
+// ── Deletar solicitação de troca ─────────────────────────────────────────────
+window.deletarSolicitacaoTroca=async()=>{
+  const id=window._swapStudentId;
+  const s=S.students.find(x=>x.id===id);
+  if(!s){alert('Aluno não encontrado.');return;}
+  const word=prompt('Para deletar a solicitação de troca de '+s.nome+', confirme digitando a palavra abaixo:\n\nDELETAR');
+  if(word===null)return;
+  if(word.trim().toUpperCase()!=='DELETAR'){alert('Palavra incorreta. Digite exatamente: DELETAR');return;}
+  // Reset student status to pending and clear swap data
+  await updateDoc(doc(db,'simulados/'+S.curSim.id+'/alunos/'+id),{
+    status:'pending',
+    swapSlots:[],
+    obs:'',
+    respondedAt:null,
+    email:null
+  });
+  CM('modal-swap');
+  alert('✅ Solicitação de troca de '+s.nome+' foi deletada. Status voltou para aguardando.');
 };
 
 window.doSwap=async()=>{
@@ -5067,6 +5090,9 @@ window._trocaDireta={targetDia:null,targetRod:null,targetStudent:null};
 window.selecionarHorarioDireto=(el)=>{
   document.querySelectorAll('.chip-direct.on').forEach(c=>c.classList.remove('on'));
   el.classList.add('on');
+  // Restore Confirmar button when new slot selected (colega not yet chosen)
+  const btnSub=document.getElementById('btn-sub-resp');
+  if(btnSub)btnSub.style.display='';
   const dia=el.dataset.dia;const rod=parseInt(el.dataset.rod);
   window._trocaDireta.targetDia=dia;window._trocaDireta.targetRod=rod;
   window._trocaDireta.targetStudent=null;
@@ -5120,6 +5146,9 @@ window.escolherColegaTroca=(targetId)=>{
   if(el){el.classList.add('selected');el.style.borderColor='var(--accent)';el.style.background='var(--accent-dim)';}
   window._trocaDireta.targetStudent=target;
   document.getElementById('troca-direta-btn-wrap')?.classList.remove('hidden');
+  // Hide the main Confirmar button — use Enviar Proposta instead
+  const btnSub=document.getElementById('btn-sub-resp');
+  if(btnSub){btnSub.style.display='none';}
 };
 
 window.enviarPropostaDireta=async()=>{
