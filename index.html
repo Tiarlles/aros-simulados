@@ -149,6 +149,12 @@ select.fc{cursor:pointer}
 .day-tab{padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--t2);border-radius:20px;transition:all .2s;font-family:'Plus Jakarta Sans',sans-serif}
 .day-tab.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow)}
 
+/* ═══ STATUS FILTER ═══ */
+.status-filter{padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--t2);border-radius:16px;transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif}
+.status-filter:hover{border-color:var(--border2);color:var(--text)}
+.status-filter.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pos-row.dimmed{opacity:.22;filter:grayscale(.7)}
+
 /* ═══ ROUND CARDS ═══ */
 .rc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:12px;transition:border-color .2s}
 .rc.drag-over{border-color:var(--accent);box-shadow:0 0 16px var(--accent-glow)}
@@ -382,8 +388,16 @@ select.fc{cursor:pointer}
             <button class="day-tab on" onclick="switchCoDay('sabado',this)">📅 Sábado</button>
             <button class="day-tab" onclick="switchCoDay('domingo',this)">📅 Domingo</button>
           </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+            <button class="status-filter on" data-filter="all" onclick="setCoStatusFilter('all',this)">Todos</button>
+            <button class="status-filter" data-filter="confirmed" onclick="setCoStatusFilter('confirmed',this)">✅ Confirmado</button>
+            <button class="status-filter" data-filter="pending" onclick="setCoStatusFilter('pending',this)">⏳ Pendente</button>
+            <button class="status-filter" data-filter="swap" onclick="setCoStatusFilter('swap',this)">🔄 Troca</button>
+            <button class="status-filter" data-filter="absent" onclick="setCoStatusFilter('absent',this)">❌ Não vai</button>
+          </div>
           <div id="rds-sab"></div>
           <div id="rds-dom" class="hidden"></div>
+          <div id="co-not-going" class="hidden" style="margin-top:24px"></div>
         </div>
       </div>
       <div id="co-empty" class="es"><div class="ei">📋</div><p>Selecione ou crie um simulado.</p></div>
@@ -392,26 +406,29 @@ select.fc{cursor:pointer}
     <!-- TAB: Professores -->
     <div id="tab-professores" class="hidden">
       <div style="display:grid;grid-template-columns:1fr;gap:16px;align-items:start">
-
-        <!-- Right only: disponibilidade -->
         <div style="grid-column:1/-1">
+
+          <!-- Shared simulado selector (applies to both panels below) -->
+          <div class="card" style="margin-bottom:16px">
+            <div class="cb">
+              <div class="fg" style="margin:0">
+                <label class="fl">Simulado</label>
+                <select class="fc" id="prof-sim-sel" onchange="onProfSimChange()">
+                  <option value="">Selecione um simulado...</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
           <!-- Informar disponibilidade (professor) -->
           <div class="card" style="margin-bottom:16px">
             <div class="ch"><h3 class="ct">📅 Informar Disponibilidade</h3></div>
             <div class="cb">
-              <div class="g2" style="margin-bottom:14px">
-                <div class="fg">
-                  <label class="fl">Professor</label>
-                  <select class="fc" id="disp-prof-sel" onchange="loadDispSim()">
-                    <option value="">Selecione seu nome...</option>
-                  </select>
-                </div>
-                <div class="fg">
-                  <label class="fl">Simulado</label>
-                  <select class="fc" id="disp-sim-sel" onchange="loadDispSim()">
-                    <option value="">Selecione o simulado...</option>
-                  </select>
-                </div>
+              <div class="fg" style="margin-bottom:14px">
+                <label class="fl">Professor</label>
+                <select class="fc" id="disp-prof-sel" onchange="loadDispSim()">
+                  <option value="">Selecione seu nome...</option>
+                </select>
               </div>
               <div id="disp-turnos" class="hidden">
                 <p style="font-size:13px;font-weight:600;margin-bottom:12px">Marque os turnos em que pode participar:</p>
@@ -422,6 +439,7 @@ select.fc{cursor:pointer}
                 </div>
                 <div id="disp-msg" class="hidden" style="margin-top:10px"></div>
               </div>
+              <div id="disp-no-sim" style="font-size:13px;color:var(--t2);padding:6px 0">Selecione um simulado acima para informar a disponibilidade.</div>
             </div>
           </div>
 
@@ -429,12 +447,7 @@ select.fc{cursor:pointer}
           <div class="card">
             <div class="ch">
               <h3 class="ct">🗓️ Cobertura de Professores</h3>
-              <div style="display:flex;gap:8px">
-                <select class="fc btn-sm" id="cob-sim-sel" onchange="renderCobertura()" style="max-width:200px">
-                  <option value="">Selecione simulado...</option>
-                </select>
-                <button class="btn btn-p btn-sm" onclick="distribuirProfs()">⚡ Distribuir</button>
-              </div>
+              <button class="btn btn-p btn-sm" onclick="distribuirProfs()">⚡ Distribuir</button>
             </div>
             <div class="cb" id="cob-body">
               <div class="es" style="padding:24px"><div class="ei">🗓️</div><p>Selecione um simulado para ver a cobertura.</p></div>
@@ -539,13 +552,15 @@ select.fc{cursor:pointer}
     <div id="tab-checklist" class="hidden">
       <!-- Sub-views -->
       <div id="ck-home">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
           <div>
             <h3 style="font-family:Fraunces,serif;font-size:17px;font-weight:700">📝 Checklist de Aplicação</h3>
             <p style="font-size:13px;color:var(--t2)">Selecione o simulado e o aluno para preencher o checklist.</p>
           </div>
-          <button class="btn btn-s btn-sm" onclick="openCkTemplateEditorAuth()">⚙️ Configurar checklist do simulado</button>
-          <button class="btn btn-p btn-sm" onclick="openRelatorioView()">📄 Relatórios</button>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+            <button onclick="openCkTemplateEditorAuth()" style="white-space:nowrap;background:var(--bg3);color:var(--text);border:1.5px solid var(--border);padding:9px 18px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:all .2s" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">⚙️ Configurar checklist do simulado</button>
+            <button class="hidden" id="btn-feedback-geral" onclick="openFeedbackGeralModal()" style="white-space:nowrap;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;padding:9px 18px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(79,70,229,.3);transition:all .2s">💬 Contribuir com Feedback Geral</button>
+          </div>
         </div>
 
         <!-- Sim selector -->
@@ -573,23 +588,27 @@ select.fc{cursor:pointer}
         </div>
       </div>
 
+      <!-- Bloco selection view -->
+      <div id="ck-blocos" class="hidden">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+          <button class="btn btn-s btn-sm" onclick="backToCkHome()">← Voltar</button>
+          <div id="ck-blocos-header" style="flex:1"></div>
+          <button class="btn btn-p btn-sm hidden" id="btn-gerar-relatorio" onclick="gerarFeedbackAluno(_ckStudentId)" style="white-space:nowrap;background:linear-gradient(135deg,#1e3a5f,#2563eb)">🔖 Gerar Feedback</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="ck-blocos-grid"></div>
+      </div>
+
       <!-- Checklist fill view -->
       <div id="ck-fill" class="hidden">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-          <button class="btn btn-s btn-sm" onclick="backToCkHome()">← Voltar</button>
+          <button class="btn btn-s btn-sm" onclick="backFromCkFill()">← Voltar</button>
           <div id="ck-fill-header" style="flex:1"></div>
-          <button class="btn btn-p btn-sm" onclick="finalizarChecklist()" id="btn-finalizar-ck" disabled style="opacity:.4;cursor:not-allowed">✅ Finalizar e Calcular Nota</button>
+          <button class="btn btn-p btn-sm" onclick="finalizarChecklist()" id="btn-finalizar-ck" style="display:none">🔄 Recalcular Nota</button>
         </div>
         <div id="ck-casos-wrap"></div>
 
-        <!-- Feedback Geral (coordenação) -->
-        <div class="card" style="margin-top:16px">
-          <div class="ch"><h3 class="ct">📋 Feedback Geral (Coordenação)</h3></div>
-          <div class="cb">
-            <p style="font-size:13px;color:var(--t2);margin-bottom:10px">Resumo consolidado para envio ao aluno após o simulado.</p>
-            <textarea class="fc" id="ck-feedback-geral" style="min-height:120px" placeholder="Feedback geral do aluno neste simulado..." oninput="autoSaveFeedbackGeral()"></textarea>
-          </div>
-        </div>
+        <!-- Feedback Geral (hidden, kept for compatibility) -->
+        <div style="display:none"><textarea id="ck-feedback-geral"></textarea></div>
 
         <!-- Nota calculada -->
         <div id="ck-nota-resultado" class="hidden" style="margin-top:16px">
@@ -604,44 +623,14 @@ select.fc{cursor:pointer}
       </div>
 
       <!-- Relatório view -->
-      <div id="ck-relatorio" class="hidden">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-          <button class="btn btn-s btn-sm" onclick="backToCkHome()">← Voltar</button>
-          <h3 style="font-family:Fraunces,serif;font-size:17px;font-weight:700;flex:1">📄 Relatório Individual</h3>
-        </div>
-        <div class="g2" style="margin-bottom:16px">
-          <div class="fg">
-            <label class="fl">Simulado</label>
-            <select class="fc" id="rel-sim-sel" onchange="loadRelSim()">
-              <option value="">Selecione...</option>
-            </select>
-          </div>
-          <div class="fg">
-            <label class="fl">Lista de Alunos</label>
-            <select class="fc" id="rel-lista-sel">
-              <option value="">Selecione...</option>
-            </select>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
-          <div class="search-wrap" style="margin:0;flex:1;min-width:200px">
-            <span class="search-icon" style="font-size:14px">🔍</span>
-            <input class="search-input" id="rel-search" placeholder="Buscar aluno..." oninput="filterRelAlunos()" style="padding:8px 8px 8px 36px;font-size:13px;border-radius:8px"/>
-          </div>
-          <button class="btn btn-p btn-sm" onclick="gerarRelatorioLote()">📦 Gerar Todos em Lote</button>
-        </div>
-        <div id="rel-alunos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px"></div>
-      </div>
-
       <!-- Prévia Editável do Relatório -->
       <div id="ck-preview" class="hidden">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-          <button class="btn btn-s btn-sm" onclick="showCkView('ck-relatorio')">← Voltar</button>
+          <button class="btn btn-s btn-sm" onclick="backToCkHome()">← Voltar</button>
           <div style="flex:1">
             <h3 style="font-family:Fraunces,serif;font-size:17px;font-weight:700">✏️ Prévia Editável do Relatório</h3>
             <p style="font-size:13px;color:var(--t2)">Revise e edite qualquer campo antes de gerar o PDF final.</p>
           </div>
-          <button class="btn btn-p" onclick="confirmarGerarPDF()">📄 Gerar PDF Final</button>
         </div>
 
         <!-- Preview card — A4-like -->
@@ -683,9 +672,9 @@ select.fc{cursor:pointer}
             </div>
 
             <!-- Habilidades -->
-            <div style="margin-bottom:18px">
-              <p style="font-size:10px;font-weight:700;color:#2f81f7;letter-spacing:.6px;text-transform:uppercase;margin-bottom:10px">AVALIAÇÃO DE HABILIDADES (MÉDIA)</p>
-              <div id="prev-habs" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
+            <div style="margin-bottom:14px">
+              <p style="font-size:10px;font-weight:700;color:#2f81f7;letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px">AVALIAÇÃO DE HABILIDADES (MÉDIA)</p>
+              <div id="prev-habs" style="display:grid;grid-template-columns:1fr 1fr;gap:3px"></div>
             </div>
 
             <!-- Feedbacks por caso (editáveis) -->
@@ -710,7 +699,7 @@ select.fc{cursor:pointer}
         </div><!-- /preview-card -->
 
         <div style="max-width:780px;margin:20px auto 40px;display:flex;justify-content:flex-end;gap:10px">
-          <button class="btn btn-s" onclick="showCkView('ck-relatorio')">← Voltar</button>
+          <button class="btn btn-s" onclick="backToCkHome()">← Voltar</button>
           <button class="btn btn-p" onclick="confirmarGerarPDF()">📄 Gerar PDF Final</button>
         </div>
       </div>
@@ -735,9 +724,75 @@ select.fc{cursor:pointer}
         <!-- Hidden but functional elements -->
         <div style="display:none">
           <input id="cfg-url" type="url"/>
-          <textarea id="ai-prompt"></textarea>
           <div id="cfg-url-msg"></div>
           <div id="ai-prompt-msg"></div>
+        </div>
+
+        <!-- Feedback Geral das Contribuições -->
+        <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden">
+          <div onclick="cfgToggle('cfg-fg-body','cfg-fg-arr');if(!document.getElementById('cfg-fg-body').style.display||document.getElementById('cfg-fg-body').style.display==='block')loadFeedbackGeralConfig()" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg2);cursor:pointer;user-select:none" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:18px">💬</span>
+              <div>
+                <p style="font-weight:700;font-size:15px">Feedback Geral dos Professores</p>
+                <p style="font-size:12px;color:var(--t2)">Veja e gerencie as contribuições enviadas por cada professor</p>
+              </div>
+            </div>
+            <span id="cfg-fg-arr" style="font-size:14px;color:var(--t2);transition:transform .2s">▼</span>
+          </div>
+          <div id="cfg-fg-body" style="display:none;padding:16px 18px;border-top:1px solid var(--border)">
+            <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+              <div class="fg" style="flex:1;min-width:180px;margin-bottom:0">
+                <label class="fl">Simulado</label>
+                <select class="fc" id="cfg-fg-sim" onchange="loadFeedbackGeralConfig()">
+                  <option value="">Selecione...</option>
+                </select>
+              </div>
+
+            </div>
+            <div id="cfg-fg-list" style="display:flex;flex-direction:column;gap:10px">
+              <p style="font-size:13px;color:var(--t2)">Selecione um simulado para ver as contribuições.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Prompt dropdown -->
+        <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden">
+          <div onclick="cfgToggle('cfg-ai-body','cfg-ai-arr')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg2);cursor:pointer;user-select:none" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:18px">🤖</span>
+              <div>
+                <p style="font-weight:700;font-size:15px">Prompt de IA para Feedbacks</p>
+                <p style="font-size:12px;color:var(--t2)">Enriquece e filtra os feedbacks antes de gerar relatórios PDF</p>
+              </div>
+            </div>
+            <span id="cfg-ai-arr" style="font-size:14px;color:var(--t2);transition:transform .2s">▼</span>
+          </div>
+          <div id="cfg-ai-body" style="display:none;padding:16px 18px;border-top:1px solid var(--border)">
+            <div class="fg">
+              <label class="fl">Chave de API Google Gemini</label>
+              <div style="position:relative">
+                <input class="fc" id="anthropic-api-key" type="password" placeholder="AIzaSy..." style="padding-right:40px;font-family:monospace"/>
+                <button type="button" onclick="togglePwd('anthropic-api-key','eye-api-key')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--t2);font-size:16px;padding:4px" id="eye-api-key">👁</button>
+              </div>
+              <p style="font-size:11px;color:var(--t2);margin-top:4px">Necessária para processar feedbacks com IA. Pegue em <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent)">aistudio.google.com/apikey</a>. Armazenada apenas no Firebase.</p>
+            </div>
+            <div class="fg">
+              <label class="fl">Prompt de revisão (feedback por caso)</label>
+              <textarea class="fc" id="ai-prompt" style="min-height:140px;font-size:13px" placeholder="Ex: Revise o seguinte feedback de professor para um aluno de medicina, corrigindo erros gramaticais, tornando o texto mais profissional e removendo qualquer linguagem ofensiva. Mantenha o conteúdo técnico e o sentido original. Retorne apenas o texto revisado, sem comentários adicionais."></textarea>
+              <p style="font-size:11px;color:var(--t2);margin-top:4px">Usado para revisar o feedback de cada caso individual antes de exibir o PDF.</p>
+            </div>
+            <div class="fg">
+              <label class="fl">Prompt do Feedback Geral</label>
+              <textarea class="fc" id="ai-prompt-geral" style="min-height:140px;font-size:13px" placeholder="Ex: Você receberá várias contribuições de professores sobre o desempenho dos alunos no simulado. Consolide as contribuições em um texto único, coeso e em primeira pessoa do plural (nós, equipe AROS), destacando padrões e pontos de melhoria. Retorne apenas o texto final, sem comentários adicionais."></textarea>
+              <p style="font-size:11px;color:var(--t2);margin-top:4px">Usado quando o coordenador clica em <strong>Gerar com IA</strong> no modal de Feedback Geral, para consolidar as contribuições dos professores em um texto único.</p>
+            </div>
+            <div id="ai-prompt-msg" class="hidden" style="margin-bottom:10px"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-p" id="btn-save-ai" onclick="saveAiPrompt()">💾 Salvar configuração de IA</button>
+              <button class="btn btn-s" id="btn-test-ai" onclick="testAiConnection()">🧪 Testar IA</button>
+            </div>
+          </div>
         </div>
 
         <!-- 1. Lista de Professores (dropdown) -->
@@ -842,6 +897,34 @@ select.fc{cursor:pointer}
 
   </div>
 </div>
+
+<!-- ══ MODAL: Feedback Geral ══ -->
+<div class="mo hidden" id="modal-feedback-geral">
+  <div class="md" style="max-width:540px">
+    <div class="mh">
+      <div><div class="m-title">💬 Contribuir com Feedback Geral</div><div class="m-sub" id="fg-modal-sub"></div></div>
+      <button class="m-close" onclick="CM('modal-feedback-geral')">✕</button>
+    </div>
+    <div class="m-body">
+      <div class="fg">
+        <label class="fl">Professor</label>
+        <select class="fc" id="fg-prof-sel">
+          <option value="">Selecione seu nome...</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">Feedback geral sobre o simulado</label>
+        <textarea class="fc" id="fg-texto" style="min-height:140px" placeholder="Escreva aqui seu feedback geral sobre a performance deste aluno no simulado..."></textarea>
+      </div>
+      <div id="fg-err" class="al al-e hidden">Selecione seu nome e escreva um feedback.</div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-feedback-geral')">Cancelar</button>
+      <button class="btn btn-p" onclick="salvarFeedbackGeral()">💾 Enviar contribuição</button>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <!-- ══ TIME PICKER ══ -->
@@ -1152,6 +1235,14 @@ select.fc{cursor:pointer}
   </div>
 </div>
 
+<!-- ══ MODAL: Pick available slot (return to escala) ══ -->
+<div class="mo hidden" id="modal-pick-slot">
+  <div class="md" style="max-width:520px">
+    <div class="mh"><div><div class="m-title">📅 Voltar para a escala</div><div class="m-sub" id="ps-sub"></div></div><button class="m-close" onclick="CM('modal-pick-slot')">✕</button></div>
+    <div class="m-body" id="ps-body"></div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore,collection,doc,getDoc,getDocs,setDoc,updateDoc,onSnapshot,deleteDoc,writeBatch }
@@ -1249,7 +1340,7 @@ window.esqueceuSenha=async()=>{
   msgEl.textContent='⏳ Enviando senha por e-mail...';
   msgEl.classList.remove('hidden');
   try{
-    await emailjs.send('service_j2d3kfk','template_r0vjejs',{
+    await emailjs.send('service_exyoa4r','template_r0vjejs',{
       to_email:'tiarllesmiller@gmail.com',
       nome:'Coordenação AROS',
       assunto:'🔑 Senha de acesso ao painel AROS',
@@ -1377,11 +1468,40 @@ window.backToCards=()=>{
 
 // escala aluno
 function renderEscala(){
-  const sab=S.students.filter(s=>s.dia==='sabado').sort((a,b)=>a.rodada-b.rodada);
-  const dom=S.students.filter(s=>s.dia==='domingo').sort((a,b)=>a.rodada-b.rodada);
+  const sab=S.students.filter(s=>s.dia==='sabado'&&s.status!=='absent').sort((a,b)=>a.rodada-b.rodada);
+  const dom=S.students.filter(s=>s.dia==='domingo'&&s.status!=='absent').sort((a,b)=>a.rodada-b.rodada);
   const exp=S.curSim?.deadline&&new Date()>new Date(S.curSim.deadline);
   document.getElementById('al-list-sab').innerHTML=renderAlunoDay(sab,exp,window._allExpanded||false);
   document.getElementById('al-list-dom').innerHTML=renderAlunoDay(dom,exp,window._allExpanded||false);
+}
+
+function renderNotGoingPanel(containerId,exp,isCoord){
+  const el=document.getElementById(containerId);if(!el)return;
+  const naoVao=S.students.filter(s=>s.status==='absent').sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  if(!naoVao.length){el.classList.add('hidden');el.innerHTML='';return;}
+  el.classList.remove('hidden');
+  const rows=naoVao.map(s=>{
+    const ts=s.respondedAt?fDT(s.respondedAt):'—';
+    const orig=s.originalDia&&s.originalRodada?`${s.originalDia==='sabado'?'Sáb':'Dom'} · ${getH(s.originalDia,s.originalRodada)}`:'';
+    const btn=exp?'<span style="font-size:11px;color:var(--t2)">Prazo encerrado</span>':
+      `<button class="btn btn-s btn-sm" onclick="openPickSlot('${s.id}')">📅 Voltar para a escala</button>`;
+    return`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px;flex-wrap:wrap">
+      <div style="flex:1;min-width:180px">
+        <p style="font-weight:700;font-size:14px">${s.nome}</p>
+        <p style="font-size:11px;color:var(--t2);margin-top:2px">${orig?'Vaga liberada: '+orig+' · ':''}Marcado em ${ts}</p>
+      </div>
+      ${btn}
+    </div>`;
+  }).join('');
+  el.innerHTML=`<details class="card" style="overflow:visible">
+    <summary style="padding:14px 20px;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:revert">
+      <span style="font-family:Fraunces,serif;font-size:16px;font-weight:600">❌ Não vão participar</span>
+      <span class="badge b-abs">${naoVao.length}</span>
+    </summary>
+    <div style="padding:0 20px 16px 20px;border-top:1px solid var(--border)">
+      <div style="padding-top:12px">${rows}</div>
+    </div>
+  </details>`;
 }
 
 function renderAlunoDay(list,exp,expandAll=false){
@@ -1426,10 +1546,10 @@ window.toggleExpandAll=()=>{
   window._allExpanded=!window._allExpanded;
   const btn=document.getElementById('btn-expand-all');
   if(btn)btn.textContent=window._allExpanded?'⊟ Recolher todos':'⊞ Expandir todos';
-  // Re-render current day
+  // Re-render current day (exclude absent students — they go in dedicated panel)
   const exp=S.curSim?.deadline&&new Date()>new Date(S.curSim.deadline);
-  const sab=S.students.filter(s=>s.dia==='sabado').sort((a,b)=>a.rodada-b.rodada);
-  const dom=S.students.filter(s=>s.dia==='domingo').sort((a,b)=>a.rodada-b.rodada);
+  const sab=S.students.filter(s=>s.dia==='sabado'&&s.status!=='absent').sort((a,b)=>a.rodada-b.rodada);
+  const dom=S.students.filter(s=>s.dia==='domingo'&&s.status!=='absent').sort((a,b)=>a.rodada-b.rodada);
   if(window._allExpanded)window._expandedRods=new Set([...sab,...dom].map(s=>`rod-body-${s.dia}-${s.rodada}`));
   else window._expandedRods=new Set();
   document.getElementById('al-list-sab').innerHTML=renderAlunoDay(sab,exp,window._allExpanded);
@@ -1453,20 +1573,16 @@ window.searchAluno=()=>{
   const q=(document.getElementById('al-search').value||'').toLowerCase().trim();
   const exp=S.curSim?.deadline&&new Date()>new Date(S.curSim.deadline);
   if(!q){
-    // Reset: re-render with collapsed state
-    const sab=S.students.filter(s=>s.dia==='sabado').sort((a,b)=>a.rodada-b.rodada);
-    const dom=S.students.filter(s=>s.dia==='domingo').sort((a,b)=>a.rodada-b.rodada);
+    const sab=S.students.filter(s=>s.dia==='sabado'&&s.status!=='absent').sort((a,b)=>a.rodada-b.rodada);
+    const dom=S.students.filter(s=>s.dia==='domingo'&&s.status!=='absent').sort((a,b)=>a.rodada-b.rodada);
     document.getElementById('al-list-sab').innerHTML=renderAlunoDay(sab,exp,window._allExpanded);
     document.getElementById('al-list-dom').innerHTML=renderAlunoDay(dom,exp,window._allExpanded);
     return;
   }
-  // Find matching students
-  const sab=S.students.filter(s=>s.dia==='sabado'&&s.nome.toLowerCase().includes(q));
-  const dom=S.students.filter(s=>s.dia==='domingo'&&s.nome.toLowerCase().includes(q));
-  // When searching, always expand matching rounds
+  const sab=S.students.filter(s=>s.dia==='sabado'&&s.status!=='absent'&&s.nome.toLowerCase().includes(q));
+  const dom=S.students.filter(s=>s.dia==='domingo'&&s.status!=='absent'&&s.nome.toLowerCase().includes(q));
   document.getElementById('al-list-sab').innerHTML=renderAlunoDay(sab,exp,true);
   document.getElementById('al-list-dom').innerHTML=renderAlunoDay(dom,exp,true);
-  // Auto-switch to correct tab
   if(sab.length&&!dom.length){switchAlunoDay('sabado',document.getElementById('al-tab-sab'));}
   else if(dom.length&&!sab.length){switchAlunoDay('domingo',document.getElementById('al-tab-dom'));}
 };
@@ -1656,11 +1772,17 @@ window.subResp=async()=>{
   }
   errEl.classList.add('hidden');
 
-  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),{
+  const updateData={
     status:actualType,email,respondedAt:new Date().toISOString(),
     emailCadastrado:email,
     ...(actualType==='swap'?{swapSlots,obs}:{swapSlots:[],obs:'',swapResolved:false})
-  });
+  };
+  // When student marks "Não irei", vacate the slot but keep original for record
+  if(actualType==='absent'){
+    if(s.dia&&s.rodada){updateData.originalDia=s.dia;updateData.originalRodada=s.rodada;}
+    updateData.dia=null;updateData.rodada=null;updateData.posicao=null;
+  }
+  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),updateData);
   sendEmail(actualType,s,email);
 
   const icons={confirmed:'✅',absent:'😔',swap:'🔄'};
@@ -1679,7 +1801,7 @@ async function sendEmail(type,s,email,extraMsg){
   const dia=s.dia==='sabado'?`Sábado${S.curSim.dataSab?' '+fD(S.curSim.dataSab):''}`:`Domingo${S.curSim.dataDom?' '+fD(S.curSim.dataDom):''}`;
   const msgs={confirmed:'Sua presença no simulado foi CONFIRMADA com sucesso! ✅\n\nEstamos te esperando. Prepare-se bem!',absent:'Registramos que você NÃO irá participar do simulado.\n\nSeu horário será disponibilizado para outros alunos. Se mudar de ideia, entre em contato com a coordenação.',swap:'Recebemos sua solicitação de TROCA de horário. 🔄\n\nSua solicitação foi encaminhada para a coordenação, que entrará em contato em breve.',swapDone:extraMsg||''};
   const subj={confirmed:'✅ Presença Confirmada · AROS Simulado',absent:'❌ Ausência Registrada · AROS Simulado',swap:'🔄 Solicitação de Troca Recebida · AROS Simulado',swapDone:'✅ Troca Efetivada · AROS Simulado'};
-  try{await emailjs.send('service_j2d3kfk','template_r0vjejs',{to_email:email,nome:s.nome,assunto:subj[type],mensagem:msgs[type],simulado:S.curSim.nome,dia,horario:h});}
+  try{await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:email,nome:s.nome,assunto:subj[type],mensagem:msgs[type],simulado:S.curSim.nome,dia,horario:h});}
   catch(e){console.error('EmailJS:',e);}
 }
 
@@ -1849,6 +1971,10 @@ function renderCoSched(){
     });
     con.innerHTML=html;
   });
+  applyCoStatusFilter();
+  // Render "Não vão participar" panel below
+  const expCoord=S.curSim?.deadline&&new Date()>new Date(S.curSim.deadline);
+  renderNotGoingPanel('co-not-going',expCoord,true);
 }
 
 window.saveProf=async(key,val)=>{
@@ -1920,24 +2046,26 @@ function updateStats(){
 
 // SWAP PANEL
 function renderSwapPanel(){
-  const swaps=S.students.filter(s=>s.status==='swap');
+  // Sort swaps oldest-first by respondedAt
+  const swaps=S.students.filter(s=>s.status==='swap')
+    .sort((a,b)=>{
+      const da=a.respondedAt?new Date(a.respondedAt).getTime():0;
+      const db=b.respondedAt?new Date(b.respondedAt).getTime():0;
+      return da-db;
+    });
   const swBadge=document.getElementById('sw-badge');if(swBadge)swBadge.textContent=swaps.length?`${swaps.length} solicitação${swaps.length!==1?'ões':''}`:'';
   const tabBtn=document.getElementById('tab-trocas-btn');if(tabBtn)tabBtn.textContent=swaps.length?`🔄 Trocas (${swaps.length})`:`🔄 Trocas`;
   const swl=document.getElementById('sw-list');if(!swl)return;
   if(!swaps.length){swl.innerHTML='<div class="es" style="padding:32px"><div class="ei">✅</div><p>Nenhuma solicitação pendente.</p></div>';return;}
 
-  // Detect perfect matched swaps:
-  // s1 is at slot X, s2 is at slot Y
-  // s1 wants Y (has Y in swapSlots), s2 wants X (has X in swapSlots)
+  // Detect perfect matched swaps (oldest first kept by sort above)
   const matchPairs=[];const usedInMatch=new Set();
   swaps.forEach(s1=>{
     if(usedInMatch.has(s1.id))return;
     swaps.forEach(s2=>{
-      if(s1.id>=s2.id)return;
+      if(s1.id===s2.id)return;
       if(usedInMatch.has(s2.id))return;
-      // s1 wants s2's current slot
       const s1WantsS2=(s1.swapSlots||[]).some(sl=>sl.dia===s2.dia&&sl.rodada===s2.rodada);
-      // s2 wants s1's current slot
       const s2WantsS1=(s2.swapSlots||[]).some(sl=>sl.dia===s1.dia&&sl.rodada===s1.rodada);
       if(s1WantsS2&&s2WantsS1){
         matchPairs.push([s1,s2]);
@@ -1958,34 +2086,26 @@ function renderSwapPanel(){
         <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px">
           <p style="font-weight:700;font-size:14px">${s1.nome}</p>
           <p style="font-size:12px;color:var(--t2)">${s1.dia==='sabado'?'Sáb':'Dom'} · ${h1}</p>
-          ${s1.email?`<p style="font-size:11px;color:var(--t2)">📧 ${s1.email}</p>`:''}
         </div>
         <div style="text-align:center;color:var(--orange);font-size:24px">⇄</div>
         <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px">
           <p style="font-weight:700;font-size:14px">${s2.nome}</p>
           <p style="font-size:12px;color:var(--t2)">${s2.dia==='sabado'?'Sáb':'Dom'} · ${h2}</p>
-          ${s2.email?`<p style="font-size:11px;color:var(--t2)">📧 ${s2.email}</p>`:''}
         </div>
       </div>
       <button class="btn btn-p" style="width:100%" onclick="doMatchedSwap('${s1.id}','${s2.id}')">✅ Confirmar Troca Casada</button>
     </div>`;
   });
 
-  // Individual (non-matched)
+  // Individual (non-matched) — compact: just name + timestamp + manage button
   swaps.filter(s=>!matchIds.has(s.id)).forEach(s=>{
-    const h=getH(s.dia,s.rodada);
-    const chips=(s.swapSlots||[]).map(sl=>`<span class="swap-slot-chip">${sl.dia==='sabado'?'Sáb':'Dom'} ${getH(sl.dia,sl.rodada)}</span>`).join('');
-    html+=`<div class="swap-card" style="margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-        <div><p style="font-weight:700;font-size:15px">${s.nome}</p>
-          <p style="font-size:12px;color:var(--t2)">Atual: ${s.dia==='sabado'?'Sábado':'Domingo'} · ${h}</p>
-          ${s.email?`<p style="font-size:12px;color:var(--t2)">📧 ${s.email}</p>`:''}
-          ${s.obs?`<p style="font-size:12px;color:var(--t2)">💬 ${s.obs}</p>`:''}
-        </div>
-        <button class="btn btn-p btn-sm" onclick="openSwapAction('${s.id}')">Gerenciar</button>
+    const ts=s.respondedAt?fDT(s.respondedAt):'—';
+    html+=`<div class="swap-card" style="margin-bottom:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div style="flex:1;min-width:180px">
+        <p style="font-weight:700;font-size:14px;line-height:1.3">${s.nome}</p>
+        <p style="font-size:11px;color:var(--t2);margin-top:2px">Solicitado em ${ts}</p>
       </div>
-      <p style="font-size:11px;color:var(--t2);margin-bottom:4px">Pode participar em:</p>
-      <div>${chips||'<span style="font-size:12px;color:var(--t3)">Nenhum horário informado</span>'}</div>
+      <button class="btn btn-p btn-sm" onclick="openSwapAction('${s.id}')">Gerenciar</button>
     </div>`;
   });
   swl.innerHTML=html;
@@ -2077,7 +2197,79 @@ window.openSwapAction=id=>{
   document.getElementById('modal-swap').classList.remove('hidden');
 };
 
-window.pickSlot=(rod,dia)=>{document.getElementById('sw-d').value=dia;refreshSwRods();document.getElementById('sw-r').value=rod;};
+window.openPickSlot=(studentId)=>{
+  const s=S.students.find(x=>x.id===studentId);
+  if(!s){alert('Aluno não encontrado.');return;}
+  window._pickSlotStudent=s;
+  document.getElementById('ps-sub').textContent=s.nome;
+  // Compute vacancies per round (excluding absent students who don't occupy slots)
+  const lim=getLim();
+  const buildList=(dia,rods)=>{
+    if(!rods||!rods.length)return'';
+    const rows=rods.map((r,i)=>{
+      const rn=i+1;
+      const cnt=S.students.filter(x=>x.dia===dia&&x.rodada===rn&&x.status!=='absent').length;
+      const vag=lim-cnt;
+      const has=vag>0;
+      return`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:${has?'var(--gl)':'var(--bg3)'};border:1px solid ${has?'rgba(63,185,80,.3)':'var(--border)'};border-radius:var(--rs);margin-bottom:6px">
+        <span style="font-weight:600;font-size:13px;color:${has?'var(--green)':'var(--t3)'}">
+          ${dia==='sabado'?'📅 Sábado':'📅 Domingo'} · ${r.horario}
+          <span style="font-size:11px;font-weight:400;margin-left:6px">${has?`(${vag} vaga${vag>1?'s':''})`:'(sem vaga)'}</span>
+        </span>
+        ${has
+          ?`<button class="btn btn-p btn-sm" onclick="confirmPickSlot('${dia}',${rn})">Escolher</button>`
+          :`<span style="font-size:11px;color:var(--t3)">Indisponível</span>`}
+      </div>`;
+    }).join('');
+    return rows;
+  };
+  const sabHTML=buildList('sabado',S.curSim?.rodadasSab||[]);
+  const domHTML=buildList('domingo',S.curSim?.rodadasDom||[]);
+  const anyVag=S.students&&[...((S.curSim?.rodadasSab||[]).map((_,i)=>['sabado',i+1])),...((S.curSim?.rodadasDom||[]).map((_,i)=>['domingo',i+1]))].some(([d,rn])=>S.students.filter(x=>x.dia===d&&x.rodada===rn&&x.status!=='absent').length<lim);
+  document.getElementById('ps-body').innerHTML=`
+    <p style="font-size:13px;color:var(--t2);margin-bottom:14px">Escolha um horário disponível para voltar à escala. Você receberá um e-mail de confirmação.</p>
+    ${!anyVag?'<div class="al al-e">❌ Sem vagas disponíveis em nenhum horário no momento.</div>':''}
+    ${sabHTML?'<p style="font-size:11px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;margin:10px 0 6px">Sábado</p>'+sabHTML:''}
+    ${domHTML?'<p style="font-size:11px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;margin:14px 0 6px">Domingo</p>'+domHTML:''}
+  `;
+  document.getElementById('modal-pick-slot').classList.remove('hidden');
+};
+
+window.confirmPickSlot=async(dia,rodada)=>{
+  const s=window._pickSlotStudent;if(!s)return;
+  const lim=getLim();
+  const cnt=S.students.filter(x=>x.dia===dia&&x.rodada===rodada&&x.status!=='absent').length;
+  if(cnt>=lim){alert('Esta rodada acabou de ficar cheia. Escolha outra.');return;}
+  const novoH=getH(dia,rodada);const novoD=dia==='sabado'?'Sábado':'Domingo';
+  if(!confirm(`Confirmar volta para ${novoD} · ${novoH}?\n\nVocê passará para o status "Confirmado" e receberá um e-mail de confirmação.`))return;
+  const email=s.emailCadastrado||s.email||'';
+  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${s.id}`),{
+    status:'confirmed',dia,rodada,posicao:null,
+    respondedAt:new Date().toISOString(),
+    email:email||null,
+    originalDia:null,originalRodada:null
+  });
+  // Send confirmation email if we have one
+  if(email){
+    const sCopy={...s,dia,rodada,nome:s.nome};
+    sendEmail('confirmed',sCopy,email);
+  }
+  CM('modal-pick-slot');
+};
+
+window.pickSlot=async(rod,dia)=>{
+  const s=S.pendSwap;if(!s)return;
+  const lim=getLim();const inSlot=S.students.filter(x=>x.dia===dia&&x.rodada===rod&&x.id!==s.id).length;
+  if(inSlot>=lim){alert('Rodada cheia.');return;}
+  const novoH=getH(dia,rod);const novoD=dia==='sabado'?'Sábado':'Domingo';
+  if(!confirm(`Mover ${s.nome} para ${novoD} · ${novoH}?`))return;
+  // Sync dropdowns to keep UI consistent
+  document.getElementById('sw-d').value=dia;
+  refreshSwRods();
+  document.getElementById('sw-r').value=rod;
+  // Execute the swap
+  await window.doSwap();
+};
 window.refreshSwRods=()=>{
   const dia=document.getElementById('sw-d').value;
   const r=getRods(dia);const lim=getLim();const s=S.pendSwap;
@@ -2102,8 +2294,8 @@ window.doMatchedSwap=async(id1,id2)=>{
   await batch.commit();
   const novoH1=getH(d2,r2);const novoD1=d2==='sabado'?'Sábado':'Domingo';
   const novoH2=getH(d1,r1);const novoD2=d1==='sabado'?'Sábado':'Domingo';
-  if(s1.email)await emailjs.send('service_j2d3kfk','template_r0vjejs',{to_email:s1.email,nome:s1.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD1} · ${novoH1}`,simulado:S.curSim.nome,dia:novoD1,horario:novoH1}).catch(e=>console.error(e));
-  if(s2.email)await emailjs.send('service_j2d3kfk','template_r0vjejs',{to_email:s2.email,nome:s2.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD2} · ${novoH2}`,simulado:S.curSim.nome,dia:novoD2,horario:novoH2}).catch(e=>console.error(e));
+  if(s1.email)await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:s1.email,nome:s1.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD1} · ${novoH1}`,simulado:S.curSim.nome,dia:novoD1,horario:novoH1}).catch(e=>console.error(e));
+  if(s2.email)await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:s2.email,nome:s2.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD2} · ${novoH2}`,simulado:S.curSim.nome,dia:novoD2,horario:novoH2}).catch(e=>console.error(e));
 };
 
 
@@ -2135,7 +2327,7 @@ window.doSwap=async()=>{
   if(inSlot>=lim){msgEl.className='al al-e';msgEl.textContent=`Rodada cheia (${lim}).`;msgEl.classList.remove('hidden');return;}
   const novoH=getH(dia,rodada);const novoD=dia==='sabado'?'Sábado':'Domingo';
   await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${s.id}`),{dia,rodada,posicao:null,status:'confirmed',respondedAt:new Date().toISOString(),swapResolved:true});
-  if(s.email){const msg=`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD} · ${novoH}`;await emailjs.send('service_j2d3kfk','template_r0vjejs',{to_email:s.email,nome:s.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:msg,simulado:S.curSim.nome,dia:novoD,horario:novoH}).catch(()=>{});}
+  if(s.email){const msg=`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD} · ${novoH}`;await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:s.email,nome:s.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:msg,simulado:S.curSim.nome,dia:novoD,horario:novoH}).catch(()=>{});}
   msgEl.className='al al-s';msgEl.textContent='✅ Troca realizada e e-mail enviado!';msgEl.classList.remove('hidden');
   setTimeout(()=>CM('modal-swap'),1400);
 };
@@ -2360,7 +2552,7 @@ window.sincronizarLista=async()=>{
   if(!lista){alert('Lista não encontrada.');return;}
   const alunos=(lista.alunos||[]).map(a=>typeof a==='object'?a:{nome:a,email:'',matricula:''});
   if(!alunos.length){alert('Lista vazia.');return;}
-  if(!S._id||!S.students?.length){alert('Nenhum aluno na escala.');return;}
+  if(!S._id||!S.curSim){alert('Nenhum simulado selecionado.');return;}
 
   // Build lookup maps from lista
   const byMat={}, byNome={};
@@ -2369,46 +2561,88 @@ window.sincronizarLista=async()=>{
     byNome[a.nome.toLowerCase().trim()]=a;
   });
 
-  // Find students in escala that need updating
-  const updates=[];
-  S.students.forEach(s=>{
+  const existing=S.students||[];
+  const existingNomesLower=new Set(existing.map(s=>s.nome.toLowerCase().trim()));
+  const existingMatriculas=new Set(existing.map(s=>s.matriculaRef).filter(Boolean));
+
+  // 1) Find renames (matching student exists with different name)
+  const renames=[];
+  existing.forEach(s=>{
     let match=null;
-    // 1. Try match by matricula (most reliable)
-    if(s.emailCadastrado){
-      // emailCadastrado was used as key, try matching by it
-    }
-    // Try matricula stored on student
-    if(!match&&s.matriculaRef&&byMat[s.matriculaRef]){
-      match=byMat[s.matriculaRef];
-    }
-    // 2. Try fuzzy match by nome (same name)
-    if(!match){
-      match=byNome[s.nome.toLowerCase().trim()];
-    }
+    if(s.matriculaRef&&byMat[s.matriculaRef])match=byMat[s.matriculaRef];
+    if(!match)match=byNome[s.nome.toLowerCase().trim()];
     if(match&&match.nome&&match.nome.trim()!==s.nome.trim()){
-      updates.push({id:s.id,oldNome:s.nome,newNome:match.nome.trim(),
+      renames.push({id:s.id,oldNome:s.nome,newNome:match.nome.trim(),
         email:match.email||s.emailCadastrado||'',
         matricula:match.matricula||''});
     }
   });
 
-  if(!updates.length){
-    alert('✅ Nenhuma diferença encontrada. Os nomes já estão atualizados!');return;
+  // 2) Find new students (in lista but not in escala)
+  const adicoes=alunos.filter(a=>{
+    const nameMatch=existingNomesLower.has(a.nome.toLowerCase().trim());
+    const matMatch=a.matricula&&existingMatriculas.has(a.matricula.trim());
+    return !nameMatch&&!matMatch;
+  });
+
+  // 3) Compute vacant slots (NEVER replaces existing students)
+  const lim=S.curSim.limite||8;
+  const rSab=S.curSim.rodadasSab||[];
+  const rDom=S.curSim.rodadasDom||[];
+  const slots=[];
+  rSab.forEach((_,i)=>{for(let j=0;j<lim;j++)slots.push({dia:'sabado',rodada:i+1});});
+  rDom.forEach((_,i)=>{for(let j=0;j<lim;j++)slots.push({dia:'domingo',rodada:i+1});});
+  const occupiedCount={};
+  existing.forEach(s=>{if(s.dia&&s.rodada){const k=`${s.dia}-${s.rodada}`;occupiedCount[k]=(occupiedCount[k]||0)+1;}});
+  const availSlots=[];
+  rSab.forEach((_,i)=>{const rn=i+1;const cnt=occupiedCount[`sabado-${rn}`]||0;for(let j=0;j<lim-cnt;j++)availSlots.push({dia:'sabado',rodada:rn});});
+  rDom.forEach((_,i)=>{const rn=i+1;const cnt=occupiedCount[`domingo-${rn}`]||0;for(let j=0;j<lim-cnt;j++)availSlots.push({dia:'domingo',rodada:rn});});
+
+  // 4) Validate capacity for new students
+  if(adicoes.length>availSlots.length){
+    alert(`❌ Sem vagas suficientes.\n\nA lista tem ${adicoes.length} aluno(s) novo(s) para adicionar, mas a escala só tem ${availSlots.length} vaga(s) livre(s).\n\nLibere vagas (remova alunos ou adicione mais rodadas) e tente novamente. Nenhuma alteração foi feita.`);
+    return;
   }
 
-  // Show preview
-  const preview=updates.map(u=>`• "${u.oldNome}" → "${u.newNome}"`).join('\n');
-  if(!confirm(`${updates.length} nome${updates.length!==1?'s':''} será${updates.length!==1?'ão':''} atualizado${updates.length!==1?'s':''}:\n\n${preview}\n\nConfirmar?`))return;
+  if(!renames.length&&!adicoes.length){
+    alert('✅ Nada a sincronizar. A escala já reflete a lista.');return;
+  }
 
-  // Apply updates
+  // 5) Build preview
+  const previewLines=[];
+  if(renames.length){
+    previewLines.push(`📝 ${renames.length} renomeação(ões):`);
+    renames.forEach(u=>previewLines.push(`  • "${u.oldNome}" → "${u.newNome}"`));
+  }
+  if(adicoes.length){
+    previewLines.push((renames.length?'\n':'')+`➕ ${adicoes.length} novo(s) aluno(s) em vaga(s) livre(s):`);
+    adicoes.forEach((a,i)=>{
+      const sl=availSlots[i];const dLabel=sl.dia==='sabado'?'Sáb':'Dom';
+      previewLines.push(`  • ${a.nome} → ${dLabel} Rodada ${sl.rodada}`);
+    });
+  }
+  if(!confirm(previewLines.join('\n')+'\n\nConfirmar?'))return;
+
+  // 6) Apply changes — renames first, then additions
   const batch=writeBatch(db);
-  updates.forEach(u=>{
+  renames.forEach(u=>{
     const data={nome:u.newNome};
     if(u.email)data.emailCadastrado=u.email;
+    if(u.matricula)data.matriculaRef=u.matricula;
     batch.update(doc(db,`simulados/${S._id}/alunos/${u.id}`),data);
   });
+  adicoes.forEach((a,i)=>{
+    const sl=availSlots[i];
+    batch.set(doc(collection(db,`simulados/${S._id}/alunos`)),{
+      nome:a.nome,
+      emailCadastrado:a.email||'',
+      matriculaRef:a.matricula||'',
+      dia:sl.dia,rodada:sl.rodada,posicao:null,
+      status:'pending',email:null,respondedAt:null
+    });
+  });
   await batch.commit();
-  alert(`✅ ${updates.length} nome${updates.length!==1?'s':''} atualizado${updates.length!==1?'s':''}!`);
+  alert(`✅ Sincronização concluída.\n${renames.length} renomeado(s), ${adicoes.length} adicionado(s) em vaga(s) livre(s).`);
   CM('modal-sim');
 };
 
@@ -2467,7 +2701,7 @@ async function saveSim(mode){
       await batch.commit();
     }
   } else if(mode==='update'){
-    // Edit mode: add new students from list if provided
+    // Edit mode: add new students from list to vacant slots ONLY (never replaces existing).
     const txtAlunos=document.getElementById('s-alunos').value.trim();
     if(txtAlunos||window._listaSelected){
       const al=parseAlunos();
@@ -2480,23 +2714,24 @@ async function saveSim(mode){
         });
         if(toAdd.length){
           const lim=data.limite;
-          const slots=[];
-          rSab2.forEach((_,i)=>{for(let j=0;j<lim;j++)slots.push({dia:'sabado',rodada:i+1});});
-          rDom2.forEach((_,i)=>{for(let j=0;j<lim;j++)slots.push({dia:'domingo',rodada:i+1});});
-          const usedSlots=existing.map(s=>({dia:s.dia,rodada:s.rodada}));
-          const availSlots=slots.filter(sl=>{
-            const cnt=usedSlots.filter(u=>u.dia===sl.dia&&u.rodada===sl.rodada).length;
-            return cnt<lim;
-          });
-          const batch=writeBatch(db);
-          toAdd.slice(0,availSlots.length).forEach((a,i)=>{
-            const nome=typeof a==='object'?a.nome:a;
-            const emailCadastrado=typeof a==='object'?a.email||'':'';
-            batch.set(doc(collection(db,`simulados/${id}/alunos`)),{nome,emailCadastrado,...availSlots[i],status:'pending',email:null,respondedAt:null,posicao:null});
-          });
-          await batch.commit();
-          if(toAdd.length>availSlots.length)alert(`${availSlots.length} de ${toAdd.length} alunos adicionados — sem vagas para os demais.`);
-          else alert(`${toAdd.length} aluno${toAdd.length!==1?'s':''} adicionado${toAdd.length!==1?'s':''} com sucesso!`);
+          const usedCount={};
+          existing.forEach(s=>{if(s.dia&&s.rodada){const k=`${s.dia}-${s.rodada}`;usedCount[k]=(usedCount[k]||0)+1;}});
+          const availSlots=[];
+          rSab2.forEach((_,i)=>{const rn=i+1;const cnt=usedCount[`sabado-${rn}`]||0;for(let j=0;j<lim-cnt;j++)availSlots.push({dia:'sabado',rodada:rn});});
+          rDom2.forEach((_,i)=>{const rn=i+1;const cnt=usedCount[`domingo-${rn}`]||0;for(let j=0;j<lim-cnt;j++)availSlots.push({dia:'domingo',rodada:rn});});
+          if(toAdd.length>availSlots.length){
+            alert(`❌ Sem vagas suficientes.\n\nA lista tem ${toAdd.length} aluno(s) novo(s), mas só há ${availSlots.length} vaga(s) livre(s) na escala.\n\nNenhum aluno foi adicionado. Libere vagas (remova alunos ou adicione mais rodadas) e tente novamente.`);
+          } else {
+            const batch=writeBatch(db);
+            toAdd.forEach((a,i)=>{
+              const nome=typeof a==='object'?a.nome:a;
+              const emailCadastrado=typeof a==='object'?a.email||'':'';
+              const matriculaRef=typeof a==='object'?a.matricula||'':'';
+              batch.set(doc(collection(db,`simulados/${id}/alunos`)),{nome,emailCadastrado,matriculaRef,...availSlots[i],status:'pending',email:null,respondedAt:null,posicao:null});
+            });
+            await batch.commit();
+            alert(`✅ ${toAdd.length} aluno${toAdd.length!==1?'s':''} adicionado${toAdd.length!==1?'s':''} em vaga${toAdd.length!==1?'s':''} livre${toAdd.length!==1?'s':''}.`);
+          }
         } else {
           alert('Todos os alunos da lista já estão escalados.');
         }
@@ -2558,12 +2793,20 @@ function renderProfGlobal(){
   // Populate prof selector for disponibilidade
   const ps=document.getElementById('disp-prof-sel');
   if(ps){ps.innerHTML='<option value="">Selecione seu nome...</option>'+S.profs.map(p=>`<option value="${p}">${p}</option>`).join('');}
-  // Populate sim selectors
-  const ss=document.getElementById('disp-sim-sel');
-  if(ss){ss.innerHTML='<option value="">Selecione o simulado...</option>'+S.sims.map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');}
-  const cs=document.getElementById('cob-sim-sel');
-  if(cs){const prev=cs.value;cs.innerHTML='<option value="">Selecione simulado...</option>'+S.sims.map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');if(prev)cs.value=prev;}
+  // Populate single sim selector shared between disponibilidade and cobertura
+  const ss=document.getElementById('prof-sim-sel');
+  if(ss){const prev=ss.value;ss.innerHTML='<option value="">Selecione um simulado...</option>'+S.sims.map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');if(prev)ss.value=prev;}
 }
+
+window.onProfSimChange=()=>{
+  const simId=document.getElementById('prof-sim-sel')?.value;
+  const noSim=document.getElementById('disp-no-sim');
+  if(noSim)noSim.style.display=simId?'none':'';
+  // Hide turnos panel if no sim selected
+  if(!simId){const dt=document.getElementById('disp-turnos');if(dt)dt.classList.add('hidden');}
+  loadDispSim();
+  renderCobertura();
+};
 
 window.toggleProfList=()=>{
   const list=document.getElementById('prof-global-list');
@@ -2759,6 +3002,36 @@ window.deleteLista=async id=>{if(!confirm('Excluir esta lista?'))return;await de
 
 // DAY SWITCHES
 window.switchCoDay=(day,btn)=>{document.querySelectorAll('#co-sched .day-tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');document.getElementById('rds-sab').classList.toggle('hidden',day!=='sabado');document.getElementById('rds-dom').classList.toggle('hidden',day!=='domingo');};
+
+S.coStatusFilter='all';
+window.setCoStatusFilter=(filter,btn)=>{
+  S.coStatusFilter=filter;
+  document.querySelectorAll('.status-filter').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  applyCoStatusFilter();
+};
+function applyCoStatusFilter(){
+  const f=S.coStatusFilter||'all';
+  document.querySelectorAll('#co-sched .pos-row').forEach(row=>{
+    if(f==='all'){row.classList.remove('dimmed');return;}
+    // Read status from inline background style applied in renderCoSched (loose match)
+    const id=row.id||'';
+    // Find the student associated with this pos-row by parsing the id "pos-{dia}-{rn}-{p}"
+    const m=id.match(/^pos-(sabado|domingo)-(\d+)-(\d+)$/);
+    if(!m){row.classList.remove('dimmed');return;}
+    const dia=m[1],rn=parseInt(m[2]),p=parseInt(m[3]);
+    const sts=S.students.filter(s=>s.dia===dia&&s.rodada===rn);
+    let a=sts.find(s=>s.posicao===p);
+    if(!a){
+      const assignedPos=new Set(sts.filter(s=>s.posicao).map(s=>s.posicao));
+      const unpos=sts.filter(s=>!s.posicao).sort((x,y)=>x.nome.localeCompare(y.nome,'pt-BR'));
+      let fillIdx=0;for(let pp=1;pp<=p;pp++){if(!assignedPos.has(pp)&&pp<p)fillIdx++;}
+      a=!assignedPos.has(p)?unpos[fillIdx]||null:null;
+    }
+    const matches=a&&a.status===f;
+    row.classList.toggle('dimmed',!matches);
+  });
+}
 
 
 // ── HISTÓRICO & MENSAGEM WHATSAPP ─────────────────────────────────────────────
@@ -3271,6 +3544,10 @@ window.switchCoTab=(tab,btn)=>{
     // Load prof config
     const profPassEl=document.getElementById('prof-pass-input');
     if(profPassEl)profPassEl.value=S.cfg.profPassword||'Anestreview1531';
+    const aiPromptEl=document.getElementById('ai-prompt');
+    if(aiPromptEl)aiPromptEl.value=S.cfg.aiPrompt||S._aiPrompt||'';
+    const apiKeyEl=document.getElementById('anthropic-api-key');
+    if(apiKeyEl&&S.cfg.aiKey)apiKeyEl.value=S.cfg.aiKey;
     const allowedTabs=S.cfg.profTabs||['simulados','trocas','professores','listas','desempenho','checklist'];
     document.querySelectorAll('.prof-tab-chk').forEach(chk=>{chk.checked=allowedTabs.includes(chk.value);});
   }
@@ -3292,11 +3569,29 @@ function initChecklistTab(){
 }
 
 function showCkView(id){
-  ['ck-home','ck-fill','ck-template-editor','ck-relatorio','ck-preview'].forEach(v=>document.getElementById(v)?.classList.add('hidden'));
+  ['ck-home','ck-fill','ck-blocos','ck-template-editor','ck-preview'].forEach(v=>document.getElementById(v)?.classList.add('hidden'));
   document.getElementById(id)?.classList.remove('hidden');
 }
 
 window.backToCkHome=()=>showCkView('ck-home');
+
+function updateBlocoCardStatus(){
+  // Called after any caso status change — updates the live bloco card if visible
+  if(!_ckBloco||!_ckStudentId)return;
+  const resp=_ckRespostas[_ckStudentId];if(!resp)return;
+  const tpl=window._ckTemplateCurrent||_ckTemplate?.[_ckBloco]||{casos:[]};
+  const blocoResp=resp[_ckBloco];if(!blocoResp)return;
+  const bSt=getBlocoStatus(blocoResp,tpl);
+  // Update student list row if visible
+  renderCkStudents(_ckStudents);
+}
+
+window.backFromCkFill=()=>{
+  if(_ckBloco&&_ckStudentId){
+    renderBlocoCards(_ckStudentId); // re-render with latest data
+    showCkView('ck-blocos');
+  }else{showCkView('ck-home');}
+};
 
 // ── Load sim students for checklist ──────────────────────────────────────────
 window.loadCkSim=async()=>{
@@ -3305,15 +3600,25 @@ window.loadCkSim=async()=>{
   const noTpl=document.getElementById('ck-no-template');
   if(!_ckSimId){studentList?.classList.add('hidden');noTpl?.classList.add('hidden');return;}
 
-  // Load template
+  // Load both block templates
   try{
-    const snap=await getDoc(doc(db,`checklists/${_ckSimId}/meta/template`));
-    _ckTemplate=snap.exists()?snap.data():null;
-  }catch(e){_ckTemplate=null;}
+    const [snapCriar,snapOral]=await Promise.all([
+      getDoc(doc(db,`checklists/${_ckSimId}/meta/templateCriar`)),
+      getDoc(doc(db,`checklists/${_ckSimId}/meta/templateOral`))
+    ]);
+    _ckTemplate={
+      criar: snapCriar.exists()?snapCriar.data():{casos:[]},
+      oral: snapOral.exists()?snapOral.data():{casos:[]}
+    };
+  }catch(e){_ckTemplate={criar:{casos:[]},oral:{casos:[]}};}
 
-  if(!_ckTemplate||!(_ckTemplate.casos||[]).length){
+  const hasCriar=(_ckTemplate.criar?.casos||[]).length>0;
+  const hasOral=(_ckTemplate.oral?.casos||[]).length>0;
+  if(!hasCriar&&!hasOral){
     studentList?.classList.add('hidden');noTpl?.classList.remove('hidden');return;
   }
+  // Show feedback geral button when sim is selected
+  document.getElementById('btn-feedback-geral')?.classList.remove('hidden');
   noTpl?.classList.add('hidden');
 
   // Load students
@@ -3323,7 +3628,16 @@ window.loadCkSim=async()=>{
   // Load existing respostas
   try{
     const rSnap=await getDocs(collection(db,`checklists/${_ckSimId}/respostas`));
-    _ckRespostas={};rSnap.docs.forEach(d=>{_ckRespostas[d.id]={...d.data()};});
+    _ckRespostas={};rSnap.docs.forEach(d=>{
+      let data={...d.data()};
+      // Migrate flat format → {criar:{...}, oral:{...}}
+      if(!data.criar&&!data.oral&&data.casos){
+        data={criar:{casos:data.casos||{},finalizado:data.finalizado||false,notaCriar:data.notaCriar},oral:{casos:{},finalizado:false}};
+      }
+      if(!data.criar)data.criar={casos:{},finalizado:false};
+      if(!data.oral)data.oral={casos:{},finalizado:false};
+      _ckRespostas[d.id]=data;
+    });
   }catch(e){_ckRespostas={};}
 
   studentList?.classList.remove('hidden');
@@ -3338,7 +3652,16 @@ async function reloadRespostasAndRender(){
   const currentResp=currentId?_ckRespostas[currentId]:null;
   try{
     const rSnap=await getDocs(collection(db,`checklists/${_ckSimId}/respostas`));
-    _ckRespostas={};rSnap.docs.forEach(d=>{_ckRespostas[d.id]={...d.data()};});
+    _ckRespostas={};rSnap.docs.forEach(d=>{
+      let data={...d.data()};
+      // Migrate flat format → {criar:{...}, oral:{...}}
+      if(!data.criar&&!data.oral&&data.casos){
+        data={criar:{casos:data.casos||{},finalizado:data.finalizado||false,notaCriar:data.notaCriar},oral:{casos:{},finalizado:false}};
+      }
+      if(!data.criar)data.criar={casos:{},finalizado:false};
+      if(!data.oral)data.oral={casos:{},finalizado:false};
+      _ckRespostas[d.id]=data;
+    });
   }catch(e){}
   // Restore current student's fresh in-memory data (overrides potentially stale Firebase read)
   if(currentId&&currentResp)_ckRespostas[currentId]=currentResp;
@@ -3355,20 +3678,20 @@ function renderCkStudents(list){
   const sorted=[...list].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
   grid.innerHTML=sorted.map((s,idx)=>{
     const resp=_ckRespostas[s.id];
-    const done=resp&&resp.finalizado;
-    const nota=resp?.notaCriar;
+    const blocoSt=(b)=>getBlocoStatus(resp?.[b],_ckTemplate?.[b]);
+    const stCriar=resp?blocoSt('criar'):'red';
+    const stOral=resp?blocoSt('oral'):'red';
+    const done=stCriar==='green'&&stOral==='green';
+    const nota=resp?.criar?.notaCriar;
     // Check if any caso has real data
-    // Only check casos that exist in the CURRENT template (ignore leftover data from old templates)
-    const templateCasos=(_ckTemplate?.casos||[]);
-    const temDados=resp&&templateCasos.some((_,ci)=>{
-      const c=resp.casos?.[ci];if(!c)return false;
-      return Object.keys(c.itens||{}).length>0||Object.values(c.habilidades||{}).some(v=>v>0)||(c.feedback||'').trim().length>0||c.savedAt;
-    });
-    const emAndamento=resp&&!resp.finalizado&&temDados;
+    const emAndamento=resp&&!done&&(stCriar!=='red'||stOral!=='red');
     // Border/badge: finalizado=green, emAndamento=yellow, naoIniciado=neutral
+    // Determine overall student status from both blocos
+    const overallSt=done?'green':emAndamento?'yellow':'red';
+    const isNaoIniciado=!resp||(!emAndamento&&!done);
     const borderColor=done?'var(--green)':emAndamento?'var(--yellow)':'var(--border)';
     const statusBadge=done
-      ?`<span class="badge b-conf">✔ Finalizado</span><span style="font-size:13px;font-weight:800;color:var(--green);margin-left:6px">${nota?.toFixed(1)||''}pts</span>`
+      ?`<span class="badge b-conf">✔ Finalizado</span><button onclick="event.stopPropagation();gerarFeedbackAluno('${s.id}')" class="btn btn-p btn-sm" style="font-size:11px;padding:3px 10px;margin-left:8px;background:linear-gradient(135deg,#1e3a5f,#2563eb)">🔖 Gerar Feedback</button>`
       :emAndamento
       ?`<span style="background:var(--yl);color:var(--yellow);border:1px solid rgba(210,153,34,.4);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600">⏳ Em andamento</span>`
       :`<span style="background:var(--bg3);color:var(--t2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600">Não iniciado</span>`;
@@ -3392,27 +3715,147 @@ function renderCkStudents(list){
 window.openCkFill=async(studentId)=>{
   _ckStudentId=studentId;
   const s=_ckStudents.find(x=>x.id===studentId);
-
-  // Load or init respostas
-  let resp=_ckRespostas[studentId]||{casos:{},feedbackGeral:'',prof:'',finalizado:false};
-  _ckRespostas[studentId]=resp;
-
-  document.getElementById('ck-fill-header').innerHTML=`
-    <div>
-      <p style="font-size:11px;color:var(--t2);margin-bottom:2px">PREENCHENDO CHECKLIST DE</p>
-      <p style="font-family:Fraunces,serif;font-size:18px;font-weight:700">${s.nome}</p>
-      <p style="font-size:12px;color:var(--t2)">${s.dia==='sabado'?'Sábado':'Domingo'} · ${getH(s.dia,s.rodada)}</p>
-    </div>`;
-
-  renderCkCasos(resp);
-  document.getElementById('ck-feedback-geral').value=resp.feedbackGeral||'';
-  document.getElementById('ck-nota-resultado').classList.toggle('hidden',!resp.finalizado);
-  if(resp.finalizado&&resp.notaCriar!==undefined){
-    document.getElementById('ck-nota-val').textContent=resp.notaCriar.toFixed(1);
+  // Load or init respostas with dois blocos
+  if(!_ckRespostas[studentId]){
+    _ckRespostas[studentId]={criar:{casos:{},finalizado:false},oral:{casos:{},finalizado:false}};
+  } else {
+    // Migrate old format
+    const r=_ckRespostas[studentId];
+    if(!r.criar&&!r.oral){
+      _ckRespostas[studentId]={criar:{casos:r.casos||{},finalizado:r.finalizado||false,notaCriar:r.notaCriar},oral:{casos:{},finalizado:false}};
+    }
+    if(!_ckRespostas[studentId].criar)_ckRespostas[studentId].criar={casos:{},finalizado:false};
+    if(!_ckRespostas[studentId].oral)_ckRespostas[studentId].oral={casos:{},finalizado:false};
   }
-  showCkView('ck-fill');
+  // Show bloco selection view
+  document.getElementById('ck-blocos-header').innerHTML=`
+    <div>
+      <p style="font-size:11px;color:var(--t2);margin-bottom:2px">CHECKLIST DE</p>
+      <p style="font-family:Fraunces,serif;font-size:18px;font-weight:700">${s.nome}</p>
+    </div>`;
+  renderBlocoCards(studentId);
+  showCkView('ck-blocos');
 };
 
+function renderBlocoCards(studentId){
+  const resp=_ckRespostas[studentId];
+  const grid=document.getElementById('ck-blocos-grid');if(!grid)return;
+  const blocos=[
+    {key:'criar',label:'📋 Bloco CRIAR / Simulação',color:'var(--blue)',bg:'var(--bl)',tpl:_ckTemplate?.criar},
+    {key:'oral',label:'🎙️ Bloco Oral Online',color:'var(--green)',bg:'var(--gl)',tpl:_ckTemplate?.oral}
+  ];
+  updateRelatorioBtnVisibility();
+  grid.innerHTML=blocos.map(b=>{
+    const r=resp[b.key]||{};
+    const casos=(b.tpl?.casos||[]);
+    const totalCasos=casos.length;
+    const nota=b.key==='criar'?r.notaCriar:r.notaOral;
+    const bSt=totalCasos?getBlocoStatus(r,b.tpl):'red';
+    const status=bSt==='green'?'✅ Finalizado':bSt==='red'?'Não iniciado':'⏳ Em andamento';
+    const borderColor=statusColor(bSt);
+    const disabled=!totalCasos;
+    const clickAttr=disabled?'':('onclick="openCkBloco(\''+b.key+'\')"');
+    const hoverAttr=disabled?'':('onmouseover="this.style.borderColor=\''+b.color+'\'" onmouseout="this.style.borderColor=\''+borderColor+'\'"');
+    return`<div ${clickAttr} ${hoverAttr}
+      style="border:2px solid ${borderColor};border-radius:var(--r);padding:24px;cursor:${disabled?'default':'pointer'};transition:all .2s;opacity:${disabled?'.5':'1'};background:${statusBg(bSt)}">
+      <p style="font-size:17px;font-weight:800;margin-bottom:8px">${b.label}</p>
+      <p style="font-size:13px;color:var(--t2);margin-bottom:12px">${totalCasos} caso${totalCasos!==1?'s':''} · ${disabled?'Sem template configurado':status}</p>
+      ${bSt==='green'&&nota!==undefined?`<p style="font-size:24px;font-weight:800;color:var(--green)">${nota.toFixed(1)} pts</p>`:''}
+      ${(!disabled&&bSt!=='green')?`<p style="font-size:12px;color:${statusColor(bSt)}">Status: ${status}</p>`:''}
+    </div>`;
+  }).join('');
+}
+
+let _ckBloco=null; // 'criar' or 'oral'
+let _sessionProfCasos=new Set(); // tracks {blocoKey:ci} identified THIS session
+window.openCkBloco=(bloco)=>{
+  try{
+  _ckBloco=bloco;
+  _sessionProfCasos=new Set(); // reset session on entering bloco
+  const s=_ckStudents.find(x=>x.id===_ckStudentId);
+  const resp=_ckRespostas[_ckStudentId];
+  // Ensure bloco resp exists
+  if(!resp[bloco])resp[bloco]={casos:{},finalizado:false};
+  const blocoResp=resp[bloco];
+  // Set template for this bloco
+  window._ckTemplateCurrent=bloco==='criar'?_ckTemplate?.criar:_ckTemplate?.oral;
+  if(!window._ckTemplateCurrent)window._ckTemplateCurrent={casos:[]};
+  document.getElementById('ck-fill-header').innerHTML=
+    '<div><p style="font-size:11px;color:var(--t2);margin-bottom:2px">'+(bloco==='criar'?'📋 BLOCO CRIAR':'🎙️ BLOCO ORAL')+' — '+(s?.nome||'')+'</p>'+
+    '<p style="font-family:Fraunces,serif;font-size:16px;font-weight:700">'+(bloco==='criar'?'CRIAR / Simulação':'Oral Online')+'</p></div>';
+  renderCkCasos(blocoResp);
+  document.getElementById('ck-nota-resultado')?.classList.toggle('hidden',!blocoResp.finalizado);
+  if(blocoResp.finalizado){
+    const nota=bloco==='criar'?blocoResp.notaCriar:blocoResp.notaOral;
+    if(nota!==undefined&&document.getElementById('ck-nota-val'))
+      document.getElementById('ck-nota-val').textContent=nota.toFixed(1);
+  }
+  showCkView('ck-fill');
+  }catch(err){console.error('openCkBloco error:',err);alert('Erro ao abrir bloco: '+err.message);}
+};
+
+
+
+// Remove undefined values recursively (Firestore doesn't accept undefined)
+function removeUndefined(obj){
+  if(Array.isArray(obj))return obj.map(removeUndefined);
+  if(obj&&typeof obj==='object'){
+    const clean={};
+    Object.keys(obj).forEach(k=>{if(obj[k]!==undefined)clean[k]=removeUndefined(obj[k]);});
+    return clean;
+  }
+  return obj;
+}
+
+// ── Status helpers (green/yellow/red) ────────────────────────────────────────
+function statusColor(s){return s==='green'?'var(--green)':s==='yellow'?'var(--yellow)':'var(--red)';}
+function statusBg(s){return s==='green'?'var(--gl)':s==='yellow'?'var(--yl)':'var(--rl)';}
+function statusLabel(s,labels){
+  labels=labels||{green:'✓ Preenchido',yellow:'⚠ Parcial',red:'● Pendente'};
+  return '<span style="font-size:11px;font-weight:600;color:'+statusColor(s)+'">'+labels[s]+'</span>';
+}
+
+function getPergStatus(cr,perg,pi){
+  const itens=perg.itens||[];
+  if(!itens.length)return 'green';
+  const marked=itens.filter((_,ii)=>!!cr.itens?.[pi+'_'+ii]).length;
+  if(marked===itens.length)return 'green';
+  if(marked>0)return 'yellow';
+  return 'red';
+}
+function getHabStatus(cr){
+  const total=HABILIDADES.length;
+  const filled=Object.values(cr.habilidades||{}).filter(v=>v>0).length;
+  if(filled===total)return 'green';
+  if(filled>0)return 'yellow';
+  return 'red';
+}
+function getFbStatus(cr){return(cr.feedback||'').trim().length>0?'green':'red';}
+function getCasoStatus(cr,caso){
+  if(!cr||!caso)return 'red';
+  const pergs=(caso.perguntas||[]).map((p,pi)=>getPergStatus(cr,p,pi));
+  const all=[...pergs,getHabStatus(cr),getFbStatus(cr)];
+  if(all.every(s=>s==='green'))return 'green';
+  if(all.every(s=>s==='red'))return 'red';
+  return 'yellow';
+}
+function getBlocoStatus(blocoResp,template){
+  const casos=template?.casos||[];
+  if(!casos.length)return 'red';
+  const stats=casos.map((caso,ci)=>getCasoStatus(blocoResp?.casos?.[ci],caso));
+  if(stats.every(s=>s==='green'))return 'green';
+  if(stats.every(s=>s==='red'))return 'red';
+  return 'yellow';
+}
+
+function casoItensCompletos(resp,ci,template){
+  // Check all items in this caso are marked
+  const caso=template?.casos?.[ci];if(!caso)return true;
+  const cr=resp.casos?.[ci]||{};
+  return (caso.perguntas||[]).every((perg,pi)=>
+    (perg.itens||[]).every((_,ii)=>!!cr.itens?.[pi+'_'+ii])
+  );
+}
 function casoSalvo(resp,ci){
   const cr=resp.casos?.[ci];
   if(!cr)return false;
@@ -3427,7 +3870,7 @@ function casoPendente(resp,ci){
 }
 
 function renderCkCasos(resp){
-  const template=_ckTemplate;const casos=template.casos||[];
+  const template=window._ckTemplateCurrent||_ckTemplate?.criar||_ckTemplate;const casos=template?.casos||[];
   const ptsPorCaso=100/casos.length;
   const wrap=document.getElementById('ck-casos-wrap');if(!wrap)return;
   // Preserve which casos are open
@@ -3469,31 +3912,29 @@ function renderCkCasos(resp){
     const perguntas=caso.perguntas||[];
     const totalItens=perguntas.reduce((s,p)=>(s+(p.itens||[]).length),0);
     const ptsPorItem=totalItens>0?ptsPorCaso/totalItens:0;
-    const salvo=casoSalvo(resp,ci);
-    const pendente=casoPendente(resp,ci);
     const cr=resp.casos?.[ci]||{};
-    const temQualquerDado=Object.keys(cr.itens||{}).length>0||Object.values(cr.habilidades||{}).some(v=>v>0)||(cr.feedback||'').trim().length>0;
-    // Status: finalizado (saved+complete) | emAndamento (any data) | naoAvaliado (empty)
-    const casoStatus=salvo&&!pendente?'finalizado':temQualquerDado?'emAndamento':'naoAvaliado';
+    const tplNow=window._ckTemplateCurrent||_ckTemplate?.criar||_ckTemplate;
+    const casoSt=getCasoStatus(cr,tplNow?.casos?.[ci]);
     const isOpen=openCasos.has(ci);
+    const casoStatus=casoSt==='green'?'finalizado':casoSt==='red'?'naoAvaliado':'emAndamento';
 
     const card=document.createElement('div');
     card.style.marginBottom='10px';
     card.style.borderRadius='var(--r)';
     card.style.overflow='hidden';
-    card.style.border='2px solid '+(casoStatus==='finalizado'?'var(--green)':casoStatus==='emAndamento'?'var(--yellow)':'var(--border)');
+    card.style.border='2px solid '+statusColor(casoSt);
     card.style.transition='border-color .3s';
 
-    const hdrBg=casoStatus==='finalizado'?'var(--gl)':casoStatus==='emAndamento'?'var(--yl)':'var(--bg3)';
+    const hdrBg=statusBg(casoSt);
     const profCaso=casoResp.prof||'';
     let hdr=`<div onclick="toggleCkCaso(${ci})" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:${hdrBg};cursor:pointer;user-select:none;transition:background .2s"
-      onmouseover="this.style.background='${salvo?'rgba(63,185,80,.2)':'var(--bg4)'}'" onmouseout="this.style.background='${hdrBg}'">
+      onmouseover="this.style.background='${casoSt==='green'?'rgba(63,185,80,.2)':'var(--bg4)'}'" onmouseout="this.style.background='${hdrBg}'">
       <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:18px">${casoStatus==='finalizado'?'✅':casoStatus==='emAndamento'?'🟡':'⬜'}</span>
+        <span style="font-size:18px">${casoSt==='green'?'✅':casoSt==='red'?'⬜':'🟡'}</span>
         <div>
-          <p style="font-family:Fraunces,serif;font-size:15px;font-weight:700;color:${casoStatus==='finalizado'?'var(--green)':casoStatus==='emAndamento'?'var(--yellow)':'var(--text)'}">Caso ${ci+1}: ${caso.nome||'Caso Clínico'}</p>
+          <p style="font-family:Fraunces,serif;font-size:15px;font-weight:700;color:${statusColor(casoSt)}">Caso ${ci+1}: ${caso.nome||'Caso Clínico'}</p>
           <p style="font-size:12px;color:var(--t2)">${ptsPorCaso.toFixed(1)} pontos · ${totalItens} iten${totalItens!==1?'s':''}
-            ${casoStatus==='finalizado'?' · <strong style="color:var(--green)">✅ Finalizado</strong>':casoStatus==='emAndamento'?' · <strong style="color:var(--yellow)">⏳ Em andamento</strong>':' · <span style="color:var(--t3)">Não avaliado</span>'}</p>
+            ${casoSt==='green'?' · <strong style="color:var(--green)">✅ Finalizado</strong>':casoSt==='yellow'?' · <strong style="color:var(--yellow)">⏳ Em andamento</strong>':' · <span style="color:var(--red)">● Pendente</span>'}</p>
           ${profCaso?`<p class="caso-prof-label" style="font-size:11px;color:var(--t2);margin-top:2px">Prof. Examinador: <strong>${profCaso}</strong></p>`:''}
         </div>
       </div>
@@ -3509,11 +3950,9 @@ function renderCkCasos(resp){
       const itensMarcados=itens.filter((_,ii)=>casoResp.itens[`${pi}_${ii}`]).length;
       const pergCompleta=itens.length>0&&itensMarcados===itens.length;
       const pergParcial=itensMarcados>0&&itensMarcados<itens.length;
-      const pergStatusLabel=pergCompleta
-        ?'<span style="font-size:11px;color:var(--green);font-weight:600">✓ Preenchido</span>'
-        :pergParcial
-        ?`<span style="font-size:11px;color:var(--yellow);font-weight:600">⚠ Parcial (${itensMarcados}/${itens.length})</span>`
-        :'<span style="font-size:11px;color:var(--red);font-weight:600">● Pendente</span>';
+      const pergSt=getPergStatus(casoResp,perg,pi);
+      const pergStatusLabel=`<span id="perg-st-${ci}-${pi}" style="font-size:11px;font-weight:600;color:${statusColor(pergSt)}">`+
+        (pergSt==='green'?'✓ Preenchido':pergSt==='yellow'?`⚠ Parcial (${itensMarcados}/${itens.length})`:'● Pendente')+'</span>';
       const pergBorder=pergCompleta?'var(--green)':pergParcial?'var(--yellow)':'var(--border)';
       body+=`<div style="margin-bottom:10px;border:1.5px solid ${pergBorder};border-radius:var(--rs);overflow:hidden;transition:border-color .3s">
         <div onclick="toggleCkPerg('${pergId}')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);cursor:pointer;user-select:none"
@@ -3570,7 +4009,7 @@ function renderCkCasos(resp){
         onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
         <span style="font-size:13px;font-weight:700;color:var(--text)">📊 Avaliação de Habilidades (1–5)</span>
         <div style="display:flex;align-items:center;gap:8px">
-          <span id="ck-hab-status-${ci}" style="font-size:11px;font-weight:600;color:${temHabSalvo?'var(--green)':'var(--yellow)'}">${temHabSalvo?'✓ Preenchido':'⚠ Pendente'}</span>
+          <span id="ck-hab-status-${ci}" style="font-size:11px;font-weight:600;color:${statusColor(getHabStatus(casoResp))}">${getHabStatus(casoResp)==='green'?'✓ Preenchido':getHabStatus(casoResp)==='yellow'?'⚠ Parcial':'● Pendente'}</span>
           <span id="arr-${habId}" style="font-size:12px;color:var(--t2);transition:transform .2s;display:inline-block">▼</span>
         </div>
       </div>
@@ -3612,12 +4051,13 @@ function renderCkCasos(resp){
         onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
         <span style="font-size:13px;font-weight:700;color:var(--text)">💬 Feedback do Caso ${ci+1}</span>
         <div style="display:flex;align-items:center;gap:8px">
-          <span id="fb-status-${ci}" style="font-size:11px;font-weight:600;color:${temFbSalvo?'var(--green)':'var(--yellow)'}">${temFbSalvo?'✓ Preenchido':'⚠ Pendente'}</span>
+          <span id="fb-status-${ci}" style="font-size:11px;font-weight:600;color:${getFbStatus(casoResp)==='green'?'var(--green)':'var(--red)'}">${getFbStatus(casoResp)==='green'?'✓ Preenchido':'● Pendente'}</span>
           <span id="arr-${fbId}" style="font-size:12px;color:var(--t2);transition:transform .2s;display:inline-block">▼</span>
         </div>
       </div>
       <div id="${fbId}" style="display:none;padding:12px 14px">
         <textarea class="fc" id="ck-fb-caso-${ci}" style="min-height:100px" placeholder="Comentários sobre este caso clínico..."
+          onfocus="requireProfForCaso(${ci},()=>{})"
           oninput="setCkFeedbackCaso(${ci},this.value)">${casoResp.feedback||''}</textarea>
       </div>
     </div>`;
@@ -3647,6 +4087,37 @@ window.toggleCkPerg=(id)=>{
   el.style.display=isOpen?'none':'block';
   if(arr)arr.style.transform=isOpen?'rotate(0)':'rotate(180deg)';
 };
+
+// ── Check/request professor identification before editing ─────────────────────
+function requireProfForCaso(ci, callback){
+  const resp=_ckRespostas[_ckStudentId];
+  const blocoKey=_ckBloco||'criar';
+  const blocoResp=resp?.[blocoKey];
+  if(!blocoResp)return;
+  const profAtual=blocoResp.casos?.[ci]?.prof||'';
+  const sessionKey=blocoKey+':'+ci;
+  if(_sessionProfCasos.has(sessionKey)){
+    // Already identified this session — proceed directly
+    callback();
+    return;
+  }
+  // Show identification modal
+  window._pendingCkCaso=ci;
+  window._pendingCkCallback=callback;
+  const template=window._ckTemplateCurrent||_ckTemplate?.criar||_ckTemplate;
+  const caso=template?.casos?.[ci];
+  const s=_ckStudents.find(x=>x.id===_ckStudentId);
+  document.getElementById('prof-caso-title').textContent='Caso '+(ci+1)+': '+(caso?.nome||'Caso Clínico');
+  document.getElementById('prof-caso-sub').textContent=s?.nome||'';
+  document.getElementById('prof-caso-err').classList.add('hidden');
+  document.getElementById('prof-caso-aviso').classList.add('hidden');
+  document.getElementById('prof-caso-hint').textContent='Para registrar sua avaliação, selecione seu nome:';
+  const sel=document.getElementById('prof-caso-sel');
+  sel.innerHTML='<option value="">Selecione seu nome...</option>'+S.profs.map(p=>`<option value="${p}">${p}</option>`).join('');
+  sel.value='';
+  document.getElementById('modal-prof-caso').classList.remove('hidden');
+}
+
 window.toggleCkCaso=(ci)=>{
   const body=document.getElementById(`ck-body-${ci}`);
   const arr=document.getElementById(`ck-arr-${ci}`);
@@ -3658,33 +4129,10 @@ window.toggleCkCaso=(ci)=>{
     if(arr)arr.style.transform='rotate(0)';
     window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
   } else {
-    // Always ask professor to identify — show warning if another prof already assumed
-    const resp=_ckRespostas[_ckStudentId];
-    const profAtual=resp?.casos?.[ci]?.prof||'';
-    window._pendingCkCaso=ci;
-    const template=_ckTemplate;
-    const caso=template?.casos?.[ci];
-    const s=_ckStudents.find(x=>x.id===_ckStudentId);
-    document.getElementById('prof-caso-title').textContent='Caso '+(ci+1)+': '+(caso?.nome||'Caso Clínico');
-    document.getElementById('prof-caso-sub').textContent=s?.nome||'';
-    document.getElementById('prof-caso-err').classList.add('hidden');
-    // Show or hide warning about existing professor
-    const aviso=document.getElementById('prof-caso-aviso');
-    const hint=document.getElementById('prof-caso-hint');
-    if(profAtual){
-      aviso.className='al al-e';
-      aviso.innerHTML='⚠️ <strong>'+profAtual+'</strong> já assumiu este caso como examinador.<br><span style="font-size:12px">Se você prosseguir, substituirá o examinador atual.</span>';
-      aviso.classList.remove('hidden');
-      if(hint)hint.textContent='Se desejar assumir este caso, selecione seu nome:';
-    } else {
-      aviso.classList.add('hidden');
-      if(hint)hint.textContent='Selecione seu nome para registrar como avaliador deste caso:';
-    }
-    // Populate prof selector
-    const sel=document.getElementById('prof-caso-sel');
-    sel.innerHTML='<option value="">Selecione seu nome...</option>'+S.profs.map(p=>`<option value="${p}">${p}</option>`).join('');
-    sel.value='';
-    document.getElementById('modal-prof-caso').classList.remove('hidden');
+    // Open directly in read-only — prof identifies only when editing
+    body.style.display='block';
+    if(arr)arr.style.transform='rotate(180deg)';
+    if(!window._openCkCasos.includes(ci))window._openCkCasos.push(ci);
   }
 };
 
@@ -3693,19 +4141,26 @@ window.confirmarProfCaso=()=>{
   if(!prof){document.getElementById('prof-caso-err').classList.remove('hidden');return;}
   CM('modal-prof-caso');
   const ci=window._pendingCkCaso;
-  // Save professor for this case
+  // Save professor for this case in the correct bloco
   const resp=_ckRespostas[_ckStudentId];
-  if(resp){
-    if(!resp.casos[ci])resp.casos[ci]={itens:{},habilidades:{},feedback:''};
-    resp.casos[ci].prof=prof;
+  const blocoKey=_ckBloco||'criar';
+  const blocoResp=resp?.[blocoKey];
+  if(blocoResp){
+    if(!blocoResp.casos[ci])blocoResp.casos[ci]={itens:{},habilidades:{},feedback:''};
+    blocoResp.casos[ci].prof=prof;
   }
-  // Open the caso
-  const body=document.getElementById(`ck-body-${ci}`);
-  const arr=document.getElementById(`ck-arr-${ci}`);
-  if(body){body.style.display='block';if(arr)arr.style.transform='rotate(180deg)';}
-  if(!window._openCkCasos.includes(ci))window._openCkCasos.push(ci);
-  // Update header to show prof name for this case
-  renderCkCasoHeader(ci,resp,prof);
+  // Re-render to show prof name in header
+  renderCkCasos(blocoResp);
+  // Ensure caso is open
+  setTimeout(()=>{
+    const body=document.getElementById('ck-body-'+ci);
+    const arr=document.getElementById('ck-arr-'+ci);
+    if(body&&body.style.display==='none'){body.style.display='block';if(arr)arr.style.transform='rotate(180deg)';}
+    if(!window._openCkCasos.includes(ci))window._openCkCasos.push(ci);
+    // Execute the pending edit action
+    const sk=(_ckBloco||'criar')+':'+ci;_sessionProfCasos.add(sk);
+    if(window._pendingCkCallback){window._pendingCkCallback();window._pendingCkCallback=null;}
+  },50);
 };
 
 function renderCkCasoHeader(ci,resp,prof){
@@ -3729,33 +4184,38 @@ function renderCkCasoHeader(ci,resp,prof){
 
 // ── Item/Hab setters ──────────────────────────────────────────────────────────
 window.setCkItem=(ci,pi,ii,val)=>{
-  const resp=_ckRespostas[_ckStudentId];if(!resp)return;
-  if(!resp.casos[ci])resp.casos[ci]={itens:{},habilidades:{},feedback:''};
-  resp.casos[ci].itens[`${pi}_${ii}`]=val;
-  // Update button styles in-place without full re-render
-  updateCkItemButtons(ci,pi,ii,val);
+  requireProfForCaso(ci,()=>{
+    const resp=_ckRespostas[_ckStudentId];if(!resp)return;
+    const blocoResp=resp[_ckBloco||'criar'];if(!blocoResp)return;
+    if(!blocoResp.casos[ci])blocoResp.casos[ci]={itens:{},habilidades:{},feedback:''};
+    blocoResp.casos[ci].itens[`${pi}_${ii}`]=val;
+    updateCkItemButtons(ci,pi,ii,val);
+    updatePergStatus(ci,pi);
+    updateCasoStatusDom(ci);
+    updateFinalizarBtn();
+  });
 };
 
 window.setCkHab=(ci,hi,val)=>{
-  const resp=_ckRespostas[_ckStudentId];if(!resp)return;
-  if(!resp.casos[ci])resp.casos[ci]={itens:{},habilidades:{},feedback:''};
-  resp.casos[ci].habilidades[hi]=val;
-  updateCkHabButtons(ci,hi,val);
-  // Update habilidades section header status dynamically
-  updateHabStatus(ci,resp);
-  updateCasoStatusDom(ci);
-  updateFinalizarBtn();
+  requireProfForCaso(ci,()=>{
+    const resp=_ckRespostas[_ckStudentId];if(!resp)return;
+    const blocoResp=resp[_ckBloco||'criar'];if(!blocoResp)return;
+    if(!blocoResp.casos[ci])blocoResp.casos[ci]={itens:{},habilidades:{},feedback:''};
+    blocoResp.casos[ci].habilidades[hi]=val;
+    updateCkHabButtons(ci,hi,val);
+    updateHabStatus(ci,blocoResp);
+    updateCasoStatusDom(ci);
+    updateFinalizarBtn();
+  });
 };
 
 function updateHabStatus(ci,resp){
   const statusSpan=document.getElementById('ck-hab-status-'+ci);
   if(!statusSpan)return;
-  const habs=resp.casos?.[ci]?.habilidades||{};
-  const total=HABILIDADES.length;
-  const filled=Object.values(habs).filter(v=>v>0).length;
-  const allFilled=filled>=total;
-  statusSpan.textContent=allFilled?'✓ Preenchido':'⚠ Pendente';
-  statusSpan.style.color=allFilled?'var(--green)':'var(--yellow)';
+  const cr=resp.casos?.[ci]||{};
+  const hs=getHabStatus(cr);
+  statusSpan.textContent=hs==='green'?'✓ Preenchido':hs==='yellow'?'⚠ Parcial':'● Pendente';
+  statusSpan.style.color=statusColor(hs);
 }
 
 function updateCkItemButtons(ci,pi,ii,val){
@@ -3783,11 +4243,6 @@ function updateCkItemButtons(ci,pi,ii,val){
     btn.style.color=active?(colors[bVal]||'var(--t2)'):'var(--t2)';
   });
 
-  // Update pergunta header status dynamically
-  updatePergStatus(ci,pi);
-  // Update caso border/status dynamically
-  updateCasoStatusDom(ci);
-  updateFinalizarBtn();
 }
 
 function updateCkHabButtons(ci,hi,val){
@@ -3807,11 +4262,11 @@ function updateCkHabButtons(ci,hi,val){
 
 function updateCasoStatusDom(ci){
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
-  const cr=resp.casos?.[ci]||{};
-  const salvo=casoSalvo(resp,ci);
-  const pendente=casoPendente(resp,ci);
-  const temQualquerDado=Object.keys(cr.itens||{}).length>0||Object.values(cr.habilidades||{}).some(v=>v>0)||(cr.feedback||'').trim().length>0;
-  const casoStatus=salvo&&!pendente?'finalizado':temQualquerDado?'emAndamento':'naoAvaliado';
+  const blocoResp3=resp[_ckBloco||'criar'];if(!blocoResp3)return;
+  const cr=blocoResp3.casos?.[ci]||{};
+  const tpl=window._ckTemplateCurrent||_ckTemplate?.criar||_ckTemplate;
+  const casoSt2=getCasoStatus(cr,tpl?.casos?.[ci]);
+  const casoStatus=casoSt2==='green'?'finalizado':casoSt2==='red'?'naoAvaliado':'emAndamento';
   // Find the card (nth child in ck-casos-wrap)
   const wrap=document.getElementById('ck-casos-wrap');if(!wrap)return;
   const card=wrap.children[ci];if(!card)return;
@@ -3856,39 +4311,43 @@ function updatePergStatus(ci,pi){
   const header=pergWrap.querySelector('div[onclick]');
   if(!header)return;
   const statusSpan=header.querySelector('.perg-status-lbl');
-  if(statusSpan){
-    if(completa){statusSpan.textContent='✓ Preenchido';statusSpan.style.color='var(--green)';}
-    else if(parcial){statusSpan.textContent='⚠ Parcial ('+marcados+'/'+total+')';statusSpan.style.color='var(--yellow)';}
-    else{statusSpan.textContent='⚠ Pendente';statusSpan.style.color='var(--yellow)';}
+  const ps=completa?'green':parcial?'yellow':'red';
+  // Update status span by id
+  const pergStEl=document.getElementById('perg-st-'+ci+'-'+pi);
+  if(pergStEl){
+    pergStEl.textContent=completa?'✓ Preenchido':parcial?'⚠ Parcial ('+marcados+'/'+total+')':'● Pendente';
+    pergStEl.style.color=statusColor(ps);
   }
+  // Update pergunta wrapper border
+  const pergWrapEl=document.getElementById('ck-perg-'+ci+'-'+pi)?.closest('[style*="border:1.5px"]');
+  if(pergWrapEl)pergWrapEl.style.borderColor=statusColor(ps);
 }
 
 function updateFinalizarBtn(){
   const btnF=document.getElementById('btn-finalizar-ck');if(!btnF)return;
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
-  const template=_ckTemplate;const casos=template?.casos||[];
-  let allFilled=true;
-  casos.forEach((caso,ci)=>{
-    if(!casoSalvo(resp,ci))allFilled=false;
-    (caso.perguntas||[]).forEach((perg,pi)=>{
-      (perg.itens||[]).forEach((_,ii)=>{
-        if(!resp.casos?.[ci]?.itens?.[`${pi}_${ii}`])allFilled=false;
-      });
-    });
-  });
-  btnF.disabled=!allFilled;
-  btnF.style.opacity=allFilled?'1':'0.4';
-  btnF.style.cursor=allFilled?'pointer':'not-allowed';
-  const savedCount=casos.filter((_,ci)=>casoSalvo(resp,ci)).length;
-  if(allFilled)btnF.textContent='✅ Finalizar e Calcular Nota';
-  else if(savedCount===casos.length)btnF.textContent='⚠️ Preencha todos os itens';
-  else btnF.textContent=`⏳ Aguardando casos (${savedCount}/${casos.length})`;
+  const blocoResp=resp[_ckBloco||'criar'];if(!blocoResp)return;
+  const template=window._ckTemplateCurrent||_ckTemplate?.criar||_ckTemplate;
+  const casos=template?.casos||[];
+  if(!casos.length)return;
+  const bSt=getBlocoStatus(blocoResp,template);
+  // Always show button, enable when all cases are green
+  btnF.style.display='';
+  if(bSt==='green'){
+    btnF.textContent='🔄 Recalcular Nota';
+    btnF.disabled=false;btnF.style.opacity='1';btnF.style.cursor='pointer';
+  } else {
+    const savedCount=casos.filter((_,ci)=>casoSalvo(blocoResp,ci)).length;
+    btnF.textContent='⏳ Aguardando casos ('+savedCount+'/'+casos.length+')';
+    btnF.disabled=true;btnF.style.opacity='0.4';btnF.style.cursor='not-allowed';
+  }
 }
 
 window.setCkFeedbackCaso=(ci,val)=>{
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
-  if(!resp.casos[ci])resp.casos[ci]={itens:{},habilidades:{},feedback:''};
-  resp.casos[ci].feedback=val;
+  const blocoResp=resp[_ckBloco||'criar'];if(!blocoResp)return;
+  if(!blocoResp.casos[ci])blocoResp.casos[ci]={itens:{},habilidades:{},feedback:''};
+  blocoResp.casos[ci].feedback=val;
   // Update feedback header status via unique id
   const temFb=val.trim().length>0;
   const fbLbl=document.getElementById('fb-status-'+ci);
@@ -3904,10 +4363,12 @@ window.autoSaveFeedbackGeral=()=>{
 window.saveCkCaso=async(ci)=>{
   if(!_ckSimId||!_ckStudentId)return;
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
-  const cr=resp.casos?.[ci]||{};
+  const blocoKey=_ckBloco||'criar';
+  const blocoResp=resp[blocoKey];if(!blocoResp)return;
+  const cr=blocoResp.casos?.[ci]||{};
 
   // Check for pending items (warn but allow saving)
-  const template=_ckTemplate;const caso=template?.casos?.[ci];
+  const template=window._ckTemplateCurrent||_ckTemplate?.criar||_ckTemplate;const caso=template?.casos?.[ci];
   const perguntas=caso?.perguntas||[];
   const itensFaltando=[];
   perguntas.forEach((perg,pi)=>{
@@ -3936,48 +4397,48 @@ window.saveCkCaso=async(ci)=>{
 
   // Update feedback from textarea
   const fbEl=document.getElementById(`ck-fb-caso-${ci}`);
-  if(fbEl&&resp.casos[ci])resp.casos[ci].feedback=fbEl.value;
+  if(fbEl&&blocoResp.casos[ci])blocoResp.casos[ci].feedback=fbEl.value;
 
-  resp.prof=resp.casos?.[ci]?.prof||resp.prof||'';
+  blocoResp.prof=blocoResp.casos?.[ci]?.prof||blocoResp.prof||'';
   resp.updatedAt=new Date().toISOString();
-  if(!resp.casos[ci])resp.casos[ci]={itens:{},habilidades:{},feedback:''};
-  resp.casos[ci].savedAt=new Date().toISOString();
-  resp.casos[ci].temPendencia=temPendencia;
+  if(!blocoResp.casos[ci])blocoResp.casos[ci]={itens:{},habilidades:{},feedback:''};
+  blocoResp.casos[ci].savedAt=new Date().toISOString();
+  blocoResp.casos[ci].temPendencia=temPendencia;
 
   try{
-    await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),resp,{merge:true});
+    await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),removeUndefined(resp),{merge:true});
     // Show success message, close caso, re-render
     const msgEl=document.getElementById(`ck-save-msg-${ci}`);
     if(msgEl){msgEl.style.display='inline';setTimeout(()=>{msgEl.style.display='none';},2000);}
     // Close this caso after short delay
-    setTimeout(()=>{
+    setTimeout(async()=>{
       window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
-      renderCkCasos(resp);
-      document.getElementById('ck-feedback-geral').value=resp.feedbackGeral||'';
-      // Reload from Firebase so student list is accurate
+      renderCkCasos(blocoResp);
+      // Auto-calculate if all cases in bloco are now green
+      const tplNow=window._ckTemplateCurrent||_ckTemplate?.[_ckBloco||'criar']||{casos:[]};
+      if(getBlocoStatus(blocoResp,tplNow)==='green'){
+        await finalizarChecklist(true); // silent=true → no alert
+      }
       reloadRespostasAndRender();
     },800);
-  }catch(e){console.error('Save caso error:',e);alert('Erro ao salvar. Tente novamente.');}
+  }catch(e){console.error('Save caso error:',e);alert('Erro ao salvar: '+e.message);}
 };
 
 // ── Calculate & finalize ──────────────────────────────────────────────────────
-window.finalizarChecklist=async()=>{
-  if(!_ckSimId||!_ckStudentId)return;
+window.finalizarChecklist=async(silent=false)=>{
+  if(!_ckSimId||!_ckStudentId||!_ckBloco)return;
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
-  const template=_ckTemplate;const casos=template.casos||[];
-  const ptsPorCaso=100/casos.length;
+  const blocoKey=_ckBloco;
+  const blocoResp=resp[blocoKey];if(!blocoResp)return;
+  const template=window._ckTemplateCurrent||_ckTemplate?.[blocoKey];
+  const casos=template?.casos||[];
+  const ptsPorCaso=casos.length?100/casos.length:0;
 
-  // Check all casos are saved
-  const casosFaltando=casos.map((_,ci)=>ci).filter(ci=>!casoSalvo(resp,ci));
-  if(casosFaltando.length>0){
-    const nomes=casosFaltando.map(ci=>`Caso ${ci+1}: ${casos[ci].nome||'Caso Clínico'}`).join('\n');
-    alert('Ainda há ' + (casosFaltando.length>1?'casos':'caso') + ' não avaliado' + (casosFaltando.length>1?'s':'') + ':\n\n' + nomes + '\n\nFinalize todos os casos antes de calcular a nota.');
-    return;
-  }
+  // (Button only enabled when all cases are green — no extra check needed)
 
   let totalPts=0;
   casos.forEach((caso,ci)=>{
-    const casoResp=resp.casos[ci]||{itens:{}};
+    const casoResp=blocoResp.casos[ci]||{itens:{}};
     const perguntas=caso.perguntas||[];
     const totalItens=perguntas.reduce((s,p)=>(s+(p.itens||[]).length),0);
     const ptsPorItem=totalItens>0?ptsPorCaso/totalItens:0;
@@ -3993,35 +4454,55 @@ window.finalizarChecklist=async()=>{
   });
 
   const nota=Math.round(totalPts*10)/10;
-  resp.notaCriar=nota;
-  resp.finalizado=true;
-  resp.feedbackGeral=document.getElementById('ck-feedback-geral')?.value||'';
-  resp.prof=resp.prof||'';
+  if(blocoKey==='criar')blocoResp.notaCriar=nota;
+  else blocoResp.notaOral=nota;
+  blocoResp.finalizado=true;
   resp.updatedAt=new Date().toISOString();
 
   // Save to checklists
-  await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),resp,{merge:true});
+  await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),removeUndefined(resp),{merge:true});
   _ckRespostas[_ckStudentId]=resp;
 
-  // Save nota to desempenho (notas collection) - linked by student matricula or nome
+  // Save nota to desempenho
   const student=_ckStudents.find(s=>s.id===_ckStudentId);
   if(student){
     const lista=S.listas.find(l=>(l.alunos||[]).some(a=>(typeof a==='object'?a.nome:a).toLowerCase().trim()===student.nome.toLowerCase().trim()));
     const alunoData=lista?(lista.alunos||[]).find(a=>(typeof a==='object'?a.nome:a).toLowerCase().trim()===student.nome.toLowerCase().trim()):null;
     const mat=typeof alunoData==='object'?alunoData?.matricula||'':'' ;
     const key=mat||student.nome.toLowerCase().trim();
-    await setDoc(doc(db,`notas/${_ckSimId}/alunos/${key}`),{criar:nota,updatedAt:new Date().toISOString()},{merge:true});
+    const notaField=blocoKey==='criar'?{criar:nota}:{oral:nota};
+    await setDoc(doc(db,`notas/${_ckSimId}/alunos/${key}`),{...notaField,updatedAt:new Date().toISOString()},{merge:true});
   }
 
   // Update UI
   document.getElementById('ck-nota-resultado').classList.remove('hidden');
   document.getElementById('ck-nota-val').textContent=nota.toFixed(1);
   await reloadRespostasAndRender();
-  alert('✅ Nota CRIAR lançada: '+nota.toFixed(1)+' pontos');
+  // Refresh bloco cards
+  renderBlocoCards(_ckStudentId);
+  if(!silent){
+    const blocoLabel=blocoKey==='criar'?'CRIAR':'Oral Online';
+    alert('✅ Nota '+blocoLabel+' lançada: '+nota.toFixed(1)+' pontos');
+  }
 };
 
 // ── Template editor ───────────────────────────────────────────────────────────
 let _ckTemplateEdit={casos:[]};
+let _ckTemplateEditCriar={casos:[]};
+let _ckTemplateEditOral={casos:[]};
+let _ckBlocoEdit='criar';
+
+window.switchBlocoEdit=(bloco,btn)=>{
+  syncTplFromDOM();
+  _ckBlocoEdit=bloco;
+  _ckTemplateEdit=bloco==='criar'?_ckTemplateEditCriar:_ckTemplateEditOral;
+  document.getElementById('btn-bloco-criar')?.classList.toggle('btn-p',bloco==='criar');
+  document.getElementById('btn-bloco-criar')?.classList.toggle('btn-s',bloco!=='criar');
+  document.getElementById('btn-bloco-oral')?.classList.toggle('btn-p',bloco==='oral');
+  document.getElementById('btn-bloco-oral')?.classList.toggle('btn-s',bloco!=='oral');
+  _tplOpen.casos=new Set();_tplOpen.perguntas=new Set();
+  renderTemplateEditor();
+};
 
 window.openCkTemplateEditorAuth=()=>{
   if(S.profUnlocked){
@@ -4037,10 +4518,17 @@ window.openCkTemplateEditor=async()=>{
   if(!simId){alert('Selecione um simulado primeiro.');return;}
   _ckSimId=simId;
   // Load existing template
+  // Load both block templates for editing
   try{
-    const snap=await getDoc(doc(db,`checklists/${simId}/meta/template`));
-    _ckTemplateEdit=snap.exists()?JSON.parse(JSON.stringify(snap.data())):{casos:[]};
-  }catch(e){_ckTemplateEdit={casos:[]};}
+    const [snapCriar,snapOral]=await Promise.all([
+      getDoc(doc(db,`checklists/${simId}/meta/templateCriar`)),
+      getDoc(doc(db,`checklists/${simId}/meta/templateOral`))
+    ]);
+    _ckTemplateEditCriar=snapCriar.exists()?JSON.parse(JSON.stringify(snapCriar.data())):{casos:[]};
+    _ckTemplateEditOral=snapOral.exists()?JSON.parse(JSON.stringify(snapOral.data())):{casos:[]};
+  }catch(e){_ckTemplateEditCriar={casos:[]};_ckTemplateEditOral={casos:[]};}
+  _ckTemplateEdit=_ckTemplateEditCriar; // default to criar for existing functions
+  _ckBlocoEdit='criar';
   renderTemplateEditor();
   showCkView('ck-template-editor');
 };
@@ -4050,8 +4538,15 @@ const _tplOpen={casos:new Set(),perguntas:new Set()};
 
 function renderTemplateEditor(){
   const wrap=document.getElementById('ck-template-casos');if(!wrap)return;
-  wrap.innerHTML='';
-  (_ckTemplateEdit.casos||[]).forEach((caso,ci)=>{
+  // Show block selector tabs
+  wrap.innerHTML=`<div style="display:flex;gap:10px;margin-bottom:16px">
+    <button onclick="switchBlocoEdit('criar',this)" id="btn-bloco-criar" class="btn ${(_ckBlocoEdit||'criar')==='criar'?'btn-p':'btn-s'}" style="flex:1">📋 CRIAR / Simulação</button>
+    <button onclick="switchBlocoEdit('oral',this)" id="btn-bloco-oral" class="btn ${(_ckBlocoEdit||'criar')==='oral'?'btn-p':'btn-s'}" style="flex:1">🎙️ Oral Online</button>
+  </div><div id="ck-blocos-tpl-wrap"></div>`;
+  const blocoWrap=document.getElementById('ck-blocos-tpl-wrap');
+  const activeTpl=(_ckBlocoEdit||'criar')==='criar'?_ckTemplateEditCriar:_ckTemplateEditOral;
+  _ckTemplateEdit=activeTpl;
+  (activeTpl.casos||[]).forEach((caso,ci)=>{
     const card=document.createElement('div');
     card.style.cssText='margin-bottom:12px;border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg2)';
     const casoOpen=_tplOpen.casos.has(ci);
@@ -4128,7 +4623,7 @@ function renderTemplateEditor(){
       <button class="btn btn-s btn-sm" style="margin-top:10px" onclick="addCkPergunta(${ci})">+ Adicionar Pergunta</button>
     </div>`;
     card.innerHTML=html;
-    wrap.appendChild(card);
+    (document.getElementById('ck-blocos-tpl-wrap')||wrap).appendChild(card);
   });
 }
 
@@ -4227,9 +4722,10 @@ window.autoSaveCkTemplate=async()=>{
 window.saveCkPergunta=async(ci,pi)=>{
   if(!_ckSimId){alert('Selecione um simulado.');return;}
   syncTplFromDOM();
+  const blocoPath='checklists/'+_ckSimId+'/meta/template'+(_ckBlocoEdit==='oral'?'Oral':'Criar');
   const template=JSON.parse(JSON.stringify(_ckTemplateEdit));
-  await setDoc(doc(db,'checklists/'+_ckSimId+'/meta/template'),template);
-  _ckTemplate=template;
+  await setDoc(doc(db,blocoPath),template);
+  if(_ckBlocoEdit==='oral')_ckTemplate.oral=template;else _ckTemplate.criar=template;
   const btn=event?.target;
   if(btn){const o=btn.textContent;btn.textContent='✅ Salvo!';btn.style.background='var(--green)';
     setTimeout(()=>{btn.textContent=o;btn.style.background='';},1500);}
@@ -4238,10 +4734,14 @@ window.saveCkPergunta=async(ci,pi)=>{
 window.saveCkTemplate=async()=>{
   if(!_ckSimId){alert('Selecione um simulado.');return;}
   syncTplFromDOM();
-  const template=JSON.parse(JSON.stringify(_ckTemplateEdit));
-  await setDoc(doc(db,`checklists/${_ckSimId}/meta/template`),template);
-  _ckTemplate=template;
-  alert('✅ Template salvo!');
+  const criar=JSON.parse(JSON.stringify(_ckTemplateEditCriar));
+  const oral=JSON.parse(JSON.stringify(_ckTemplateEditOral));
+  await Promise.all([
+    setDoc(doc(db,`checklists/${_ckSimId}/meta/templateCriar`),criar),
+    setDoc(doc(db,`checklists/${_ckSimId}/meta/templateOral`),oral)
+  ]);
+  _ckTemplate={criar,oral};
+  alert('✅ Templates salvos!');
   backToCkHome();
   await loadCkSim();
 };
@@ -4251,472 +4751,218 @@ window.saveCkTemplate=async()=>{
 // ══════════════════════════════════════════════════════════════
 // RELATÓRIO PDF
 // ══════════════════════════════════════════════════════════════
-let _relSimId=null, _relAlunos=[], _relAllData={};
 
 // ── Load AI Prompt from Firebase ─────────────────────────────────────────────
 async function loadAiPrompt(){
   try{
     const snap=await getDoc(doc(db,'config','aiPrompt'));
     if(snap.exists()){
-      S._aiPrompt=snap.data().prompt||'';
+      const d=snap.data();
+      S._aiPrompt=d.prompt||'';
+      S._aiPromptGeral=d.promptGeral||'';
       const el=document.getElementById('ai-prompt');
       if(el)el.value=S._aiPrompt;
+      const elG=document.getElementById('ai-prompt-geral');
+      if(elG)elG.value=S._aiPromptGeral;
     }
   }catch(e){}
 }
 
 window.saveAiPrompt=async()=>{
   const prompt=document.getElementById('ai-prompt')?.value||'';
-  await setDoc(doc(db,'config','aiPrompt'),{prompt,updatedAt:new Date().toISOString()});
-  S._aiPrompt=prompt;
+  const promptGeral=document.getElementById('ai-prompt-geral')?.value||'';
+  const apiKey=document.getElementById('anthropic-api-key')?.value.trim()||'';
+  const btn=document.getElementById('btn-save-ai');
   const m=document.getElementById('ai-prompt-msg');
-  if(m){m.className='al al-s';m.textContent='✅ Prompt salvo!';m.classList.remove('hidden');setTimeout(()=>m.classList.add('hidden'),2000);}
+  const orig=btn?.innerHTML;
+  if(btn){btn.innerHTML='⏳ Salvando...';btn.disabled=true;}
+  try{
+    await setDoc(doc(db,'config','aiPrompt'),{prompt,promptGeral,updatedAt:new Date().toISOString()});
+    S._aiPrompt=prompt;
+    S._aiPromptGeral=promptGeral;
+    S.cfg.aiKey=apiKey;
+    await setDoc(doc(db,'config','settings'),S.cfg);
+    if(btn){btn.innerHTML='✅ Salvo!';btn.style.background='var(--green)';}
+    if(m){m.className='al al-s';m.textContent='✅ Configuração de IA salva com sucesso!';m.classList.remove('hidden');}
+    setTimeout(()=>{
+      if(btn){btn.innerHTML=orig;btn.style.background='';btn.disabled=false;}
+      if(m)m.classList.add('hidden');
+    },2500);
+  }catch(err){
+    if(btn){btn.innerHTML=orig;btn.disabled=false;}
+    if(m){m.className='al al-e';m.textContent='❌ Erro ao salvar: '+err.message;m.classList.remove('hidden');}
+  }
 };
 
-// ── Review feedback with AI ───────────────────────────────────────────────────
-async function reviewFeedbackWithAI(text){
-  if(!text||!text.trim())return text;
-  const prompt=S._aiPrompt||'Revise o seguinte feedback de professor para um aluno de medicina, corrigindo erros gramaticais e removendo qualquer linguagem inadequada. Retorne apenas o texto revisado.';
+window.testAiConnection=async()=>{
+  const apiKey=document.getElementById('anthropic-api-key')?.value.trim()||'';
+  const btn=document.getElementById('btn-test-ai');
+  const m=document.getElementById('ai-prompt-msg');
+  const orig=btn?.innerHTML;
+  if(!apiKey){
+    if(m){m.className='al al-e';m.textContent='⚠️ Cole a chave da API no campo acima antes de testar.';m.classList.remove('hidden');setTimeout(()=>m.classList.add('hidden'),3500);}
+    return;
+  }
+  if(btn){btn.innerHTML='⏳ Testando...';btn.disabled=true;}
+  if(m){m.className='al al-i';m.textContent='Enviando requisição de teste para o Gemini...';m.classList.remove('hidden');}
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    const t0=performance.now();
+    const response=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{role:'user',content:`${prompt}\n\nFeedback:\n${text}`}]
-      })
+      body:JSON.stringify({contents:[{parts:[{text:'Responda apenas "OK" se você está funcionando.'}]}],generationConfig:{maxOutputTokens:20,temperature:0}})
     });
-    const data=await resp.json();
-    return data.content?.[0]?.text||text;
-  }catch(e){console.error('AI review error:',e);return text;}
-}
-
-// ── Open relatorio view ───────────────────────────────────────────────────────
-window.openRelatorioView=()=>{
-  const sel=document.getElementById('rel-sim-sel');
-  if(sel)sel.innerHTML='<option value="">Selecione...</option>'+S.sims.map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');
-  const lsel=document.getElementById('rel-lista-sel');
-  if(lsel)lsel.innerHTML='<option value="">Selecione...</option>'+S.listas.map(l=>`<option value="${l.id}">${l.nome}</option>`).join('');
-  showCkView('ck-relatorio');
-};
-
-window.loadRelSim=async()=>{
-  _relSimId=document.getElementById('rel-sim-sel')?.value;
-  if(!_relSimId){document.getElementById('rel-alunos-grid').innerHTML='';return;}
-  // Load students
-  const snap=await getDocs(collection(db,`simulados/${_relSimId}/alunos`));
-  _relAlunos=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
-  renderRelAlunos(_relAlunos);
-};
-
-window.filterRelAlunos=()=>{
-  const q=(document.getElementById('rel-search')?.value||'').toLowerCase();
-  renderRelAlunos(_relAlunos.filter(s=>s.nome.toLowerCase().includes(q)));
-};
-
-function renderRelAlunos(list){
-  const grid=document.getElementById('rel-alunos-grid');if(!grid)return;
-  grid.innerHTML=list.map(s=>`
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px">
-      <div>
-        <p style="font-weight:700;font-size:14px">${s.nome}</p>
-        <p style="font-size:12px;color:var(--t2)">${s.dia==='sabado'?'Sábado':'Domingo'} · ${getH(s.dia,s.rodada)}</p>
-      </div>
-      <button class="btn btn-p btn-sm" onclick="gerarRelatorioIndividual('${s.id}')">📄 PDF</button>
-    </div>`).join('');
-}
-
-// ── Gather all data for one student ──────────────────────────────────────────
-async function gatherStudentData(simId, studentId, student){
-  const listaId=document.getElementById('rel-lista-sel')?.value;
-  const lista=listaId?S.listas.find(l=>l.id===listaId):S.listas[0];
-  const alunoLista=lista?(lista.alunos||[]).find(a=>{
-    const n=typeof a==='object'?a.nome:a;
-    return n.toLowerCase().trim()===student.nome.toLowerCase().trim();
-  }):null;
-  const mat=typeof alunoLista==='object'?alunoLista?.matricula||'—':'—';
-
-  // Load notas from all sims
-  const allSims=[...S.sims].sort((a,b)=>(a.dataSab||a.dataDom||'').localeCompare(b.dataSab||b.dataDom||''));
-  const historico=[];
-  for(const sim of allSims){
-    const notasSnap=await loadNotas(sim.id);
-    const n=notasSnap[mat]||notasSnap[student.nome.toLowerCase().trim()]||null;
-    if(n)historico.push({simNome:sim.nome,notaFinal:n.notaFinal,criar:n.criar,oral:n.oral});
-    else historico.push({simNome:sim.nome,notaFinal:null,criar:null,oral:null});
+    const ms=Math.round(performance.now()-t0);
+    if(!response.ok){
+      const errBody=await response.text();
+      let msg='Erro '+response.status;
+      try{const j=JSON.parse(errBody);if(j.error?.message)msg=j.error.message;}catch(e){}
+      throw new Error(msg);
+    }
+    const data=await response.json();
+    const reply=data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||'';
+    if(!reply)throw new Error('Resposta vazia da IA.');
+    if(m){m.className='al al-s';m.textContent=`✅ Conexão OK! Resposta da IA: "${reply.slice(0,80)}" (${ms}ms)`;m.classList.remove('hidden');setTimeout(()=>m.classList.add('hidden'),5000);}
+    if(btn){btn.innerHTML='✅ OK';btn.style.background='var(--green)';btn.style.color='#fff';btn.style.borderColor='var(--green)';}
+    setTimeout(()=>{if(btn){btn.innerHTML=orig;btn.style.background='';btn.style.color='';btn.style.borderColor='';btn.disabled=false;}},2500);
+  }catch(err){
+    if(m){m.className='al al-e';m.textContent='❌ Falha no teste: '+err.message;m.classList.remove('hidden');}
+    if(btn){btn.innerHTML=orig;btn.disabled=false;}
   }
+};
 
-  // Load checklist resposta
-  let ckResp=null;
-  try{
-    const ckSnap=await getDoc(doc(db,`checklists/${simId}/respostas/${studentId}`));
-    if(ckSnap.exists())ckResp=ckSnap.data();
-  }catch(e){}
-
-  // Load template
-  let ckTemplate=null;
-  try{
-    const tSnap=await getDoc(doc(db,`checklists/${simId}/meta/template`));
-    if(tSnap.exists())ckTemplate=tSnap.data();
-  }catch(e){}
-
-  // Load class average for current sim
-  const curNotas=await loadNotas(simId);
-  const turmaNotas=Object.values(curNotas).map(n=>parseFloat(n.notaFinal)).filter(n=>!isNaN(n));
-  const mediaTurma=turmaNotas.length?(turmaNotas.reduce((a,b)=>a+b,0)/turmaNotas.length):null;
-
-  // Compute habilidades average across casos
-  const habMedias=Array(5).fill(0).map((_,hi)=>{
-    const vals=(ckResp?.casos?Object.values(ckResp.casos).map(c=>c.habilidades?.[hi]||0).filter(v=>v>0):[]);
-    return vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):0;
-  });
-
-  return {student,mat,historico,ckResp,ckTemplate,mediaTurma,habMedias,
-    simAtual:S.sims.find(s=>s.id===simId)};
-}
-
-// ── Generate individual PDF ───────────────────────────────────────────────────
-// Current preview data
+// Current preview data (used by Flow B preview/PDF)
 let _previewData=null;
 
-window.gerarRelatorioIndividual=async(studentId)=>{
-  if(!_relSimId){alert('Selecione um simulado.');return;}
-  const student=_relAlunos.find(s=>s.id===studentId);if(!student)return;
-  const btn=event?.target;const o=btn?.innerHTML;
-  if(btn){btn.innerHTML='⏳ Preparando...';btn.disabled=true;}
-  try{
-    const data=await gatherStudentData(_relSimId,studentId,student);
-    // Review feedbacks with AI
-    data.feedbacksCasosRevisados=[];
-    if(data.ckResp&&data.ckTemplate){
-      for(let ci=0;ci<(data.ckTemplate.casos||[]).length;ci++){
-        const caso=data.ckTemplate.casos[ci];
-        const fb=data.ckResp.casos?.[ci]?.feedback||'';
-        const rev=fb?await reviewFeedbackWithAI(fb):fb;
-        data.feedbacksCasosRevisados.push({nome:caso.nome||`Caso ${ci+1}`,feedback:rev});
-      }
-    }
-    data.feedbackGeralRevisado=data.ckResp?.feedbackGeral
-      ?await reviewFeedbackWithAI(data.ckResp.feedbackGeral):'';
-    _previewData=[data];
-    abrirPreview(data);
-  }finally{if(btn){btn.innerHTML=o;btn.disabled=false;}}
-};
-
-window.gerarRelatorioLote=async()=>{
-  if(!_relSimId){alert('Selecione um simulado.');return;}
-  if(!_relAlunos.length){alert('Carregue os alunos primeiro.');return;}
-  const btn=event?.target;const o=btn?.innerHTML;
-  if(btn){btn.innerHTML='⏳ Revisando feedbacks...';btn.disabled=true;}
-  try{
-    const allData=await Promise.all(_relAlunos.map(s=>gatherStudentData(_relSimId,s.id,s)));
-    for(const data of allData){
-      data.feedbacksCasosRevisados=[];
-      if(data.ckResp&&data.ckTemplate){
-        for(let ci=0;ci<(data.ckTemplate.casos||[]).length;ci++){
-          const caso=data.ckTemplate.casos[ci];
-          const fb=data.ckResp.casos?.[ci]?.feedback||'';
-          const rev=fb?await reviewFeedbackWithAI(fb):fb;
-          data.feedbacksCasosRevisados.push({nome:caso.nome||`Caso ${ci+1}`,feedback:rev});
-        }
-      }
-      data.feedbackGeralRevisado=data.ckResp?.feedbackGeral
-        ?await reviewFeedbackWithAI(data.ckResp.feedbackGeral):'';
-    }
-    _previewData=allData;
-    // For lote: show first student's preview, then PDF includes all
-    abrirPreview(allData[0],true);
-  }finally{if(btn){btn.innerHTML=o;btn.disabled=false;}}
-};
-
-let _isLote=false;
-function abrirPreview(data,isLote=false){
-  _isLote=isLote;
-  const HABS=['Domínio do Conteúdo','Raciocínio Lógico','Estruturação da Resposta','Controle Emocional','Gestão de Tempo'];
-
-  // Fill static fields
-  document.getElementById('prev-sim-nome').textContent=data.simAtual?.nome||'Simulado';
-  document.getElementById('prev-nome').textContent=data.student.nome;
-  document.getElementById('prev-mat').textContent=data.mat;
-  document.getElementById('prev-date').textContent='Gerado em '+new Date().toLocaleDateString('pt-BR');
-
-  // Logo
-  const logoEl=document.getElementById('prev-logo');
-  const logoImg=document.querySelector('header .logo img');
-  if(logoEl&&logoImg){const img=document.createElement('img');img.src=logoImg.src;img.style.cssText='height:36px;object-fit:contain';logoEl.innerHTML='';logoEl.appendChild(img);}
-
-  // Notas
-  const curHist=data.historico.find(h=>h.simNome===data.simAtual?.nome)||{};
-  const notasEl=document.getElementById('prev-notas');
-  const notaFinal=curHist.notaFinal;
-  [{l:'CRIAR',v:curHist.criar},{l:'ORAL ONLINE',v:curHist.oral},{l:'NOTA FINAL',v:notaFinal},{l:'MÉDIA TURMA',v:data.mediaTurma}].forEach(n=>{
-    const cor=n.l==='NOTA FINAL'&&n.v!=null?(parseFloat(n.v)>=60?'#1a6b3c':'#8b1a1a'):'#1a1714';
-    notasEl.innerHTML+=`<div style="padding:8px;background:#fff;border-radius:6px">
-      <p style="font-size:10px;color:#8b949e;font-weight:600;margin-bottom:4px">${n.l}</p>
-      <p style="font-size:20px;font-weight:800;color:${cor}">${n.v!=null?parseFloat(n.v).toFixed(1):'—'}</p>
-    </div>`;
-  });
-
-  // Chart
-  const canvas=document.getElementById('prev-chart');
-  const histComNota=data.historico.filter(h=>h.notaFinal!=null);
-  if(canvas&&histComNota.length>1){
-    canvas.width=canvas.offsetWidth||700;canvas.height=80;
-    const ctx=canvas.getContext('2d');
-    const cW=canvas.width,cH=canvas.height,pad=28;
-    ctx.fillStyle='#f6f8fa';ctx.fillRect(0,0,cW,cH);
-    // Grid & 60 line
-    ctx.strokeStyle='#d0d7de';ctx.lineWidth=0.5;
-    [40,60,80].forEach(v=>{const y=cH-pad-(v/100)*(cH-2*pad);ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(cW-pad,y);ctx.stroke();ctx.fillStyle='#8b949e';ctx.font='8px sans-serif';ctx.fillText(v,2,y+3);});
-    ctx.strokeStyle='#d29922';ctx.lineWidth=1;
-    const y60=cH-pad-(60/100)*(cH-2*pad);ctx.beginPath();ctx.moveTo(pad,y60);ctx.lineTo(cW-pad,y60);ctx.stroke();
-    // Line
-    const pts=histComNota.map((h,i)=>({
-      x:pad+(i/(histComNota.length-1||1))*(cW-2*pad),
-      y:cH-pad-(parseFloat(h.notaFinal)/100)*(cH-2*pad),v:parseFloat(h.notaFinal),nome:h.simNome
-    }));
-    ctx.strokeStyle='#2f81f7';ctx.lineWidth=2;ctx.beginPath();
-    pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();
-    pts.forEach(p=>{
-      ctx.fillStyle=p.v>=60?'#1a6b3c':'#8b1a1a';ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle=p.v>=60?'#1a6b3c':'#8b1a1a';ctx.font='bold 9px sans-serif';ctx.fillText(p.v.toFixed(1),p.x-8,p.y-7);
-      ctx.fillStyle='#8b949e';ctx.font='7px sans-serif';
-      const lbl=p.nome.length>10?p.nome.slice(0,10)+'…':p.nome;
-      ctx.fillText(lbl,p.x-16,cH-4);
-    });
-  } else if(canvas){
-    const ctx=canvas.getContext('2d');ctx.fillStyle='#f6f8fa';ctx.fillRect(0,0,canvas.width,80);
-    ctx.fillStyle='#8b949e';ctx.font='12px sans-serif';ctx.fillText('Dados insuficientes para gráfico',20,44);
+function buildReportEmailBody(d){
+  const simNome=d.simAtual?.nome||'Simulado';
+  const fmt=v=>v!=null&&!isNaN(v)?parseFloat(v).toFixed(1):'—';
+  const habNames=['Domínio do Conteúdo','Raciocínio Lógico','Estruturação da Resposta','Controle Emocional','Gestão de Tempo'];
+  const lines=[];
+  lines.push(`Olá ${d.student.nome},`,'');
+  lines.push(`Segue o feedback do seu desempenho no simulado ${simNome}.`,'');
+  lines.push('📊 RESULTADO DO SIMULADO');
+  lines.push(`• CRIAR / Simulação: ${fmt(d.notaCriar)}`);
+  lines.push(`• Oral Online: ${fmt(d.notaOral)}`);
+  lines.push(`• Nota Geral: ${fmt(d.notaFinal)}`);
+  if(d.mediaTurma!=null)lines.push(`• Média da Turma: ${fmt(d.mediaTurma)}`);
+  lines.push('');
+  const casos=(d.feedbacksCasosRevisados||[]).filter(c=>(c.feedback||'').trim());
+  if(casos.length){
+    lines.push('📝 FEEDBACK POR CASO','');
+    casos.forEach(c=>{lines.push(c.nome);lines.push(c.feedback);lines.push('');});
   }
-
-  // Habilidades
-  const habsEl=document.getElementById('prev-habs');habsEl.innerHTML='';
-  const starColor='#2f81f7';
-  data.habMedias.forEach((val,i)=>{
-    const stars=[1,2,3,4,5].map(n=>`<span style="color:${n<=Math.round(val)?starColor:'#d0d7de'};font-size:16px">★</span>`).join('');
-    habsEl.innerHTML+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:#f6f8fa;border-radius:6px">
-      <span style="font-size:12px;font-weight:600;color:#1a1714">${HABS[i]}</span>
-      <div style="display:flex;align-items:center;gap:4px">${stars}<span style="font-size:12px;font-weight:700;color:${starColor};margin-left:4px">${val>0?val.toFixed(1):'—'}</span></div>
-    </div>`;
-  });
-
-  // Feedbacks por caso (editáveis)
-  const fbCasosEl=document.getElementById('prev-feedbacks-casos');fbCasosEl.innerHTML='';
-  (data.feedbacksCasosRevisados||[]).forEach((fc2,i)=>{
-    fbCasosEl.innerHTML+=`<div style="margin-bottom:12px">
-      <p style="font-size:12px;font-weight:700;color:#1a1714;margin-bottom:5px">${fc2.nome}</p>
-      <textarea id="prev-fb-caso-${i}" style="width:100%;border:1px solid #d0d7de;border-radius:6px;padding:9px;font-family:inherit;font-size:13px;line-height:1.6;resize:vertical;min-height:70px;background:#fff;outline:none;box-sizing:border-box">${fc2.feedback||''}</textarea>
-    </div>`;
-  });
-
-  // Feedback geral
-  document.getElementById('prev-feedback-geral').value=data.feedbackGeralRevisado||'';
-
-  // Lote notice
-  if(isLote){
-    const notice=document.createElement('div');
-    notice.className='al al-i';notice.style.marginBottom='16px';
-    notice.innerHTML=`<strong>Modo lote:</strong> Você está visualizando o relatório de <strong>${data.student.nome}</strong>. O PDF final incluirá todos os ${_previewData.length} alunos. Edições aqui afetam apenas este aluno.`;
-    document.getElementById('preview-card').before(notice);
+  if((d.feedbackGeralRevisado||'').trim()){
+    lines.push('💬 FEEDBACK GERAL');
+    lines.push(d.feedbackGeralRevisado);
+    lines.push('');
   }
-
-  showCkView('ck-preview');
+  lines.push('📊 AVALIAÇÃO DE HABILIDADES (média)');
+  (d.habMedias||[]).forEach((v,i)=>{lines.push(`• ${habNames[i]}: ${v>0?v.toFixed(1)+'/5':'—'}`);});
+  lines.push('','Atenciosamente,','Equipe AnestReview · AROS');
+  return lines.join('\n');
 }
 
 window.confirmarGerarPDF=async()=>{
   if(!_previewData)return;
-  const btn=event?.target;const o=btn?.innerHTML;
-  if(btn){btn.innerHTML='⏳ Gerando PDF...';btn.disabled=true;}
-  try{
-    // Collect edited values from preview
-    const firstData=_previewData[0];
-    // Update feedbacks from textareas for the first (or only) student
-    (firstData.feedbacksCasosRevisados||[]).forEach((_,i)=>{
-      const el=document.getElementById(`prev-fb-caso-${i}`);
-      if(el)firstData.feedbacksCasosRevisados[i].feedback=el.value;
-    });
-    firstData.feedbackGeralRevisado=document.getElementById('prev-feedback-geral')?.value||'';
-    await gerarPDF(_previewData);
-  }finally{if(btn){btn.innerHTML=o;btn.disabled=false;}}
+  const firstData=_previewData[0];
+  // Collect edited values from preview
+  (firstData.feedbacksCasosRevisados||[]).forEach((_,i)=>{
+    const el=document.getElementById(`prev-fb-caso-${i}`);
+    if(el)firstData.feedbacksCasosRevisados[i].feedback=el.value;
+  });
+  firstData.feedbackGeralRevisado=document.getElementById('prev-feedback-geral')?.value||'';
+  // Build HTML for print/PDF
+  const w=window.open('','_blank');
+  if(!w){alert('Permita popups para gerar o PDF.');return;}
+  w.document.write(montarHTMLRelatorio(firstData));
+  w.document.close();
+  // Wire email button (auto-send via EmailJS)
+  w.document.getElementById('btn-email')?.addEventListener('click',async(ev)=>{
+    const btn=ev.currentTarget;
+    const email=firstData.email||'';
+    if(!email){w.alert('Email do aluno não encontrado na lista de alunos.');return;}
+    if(!w.confirm(`Enviar relatório por email para ${firstData.student.nome}\n(${email})?`))return;
+    const orig=btn.innerHTML;btn.innerHTML='⏳ Enviando...';btn.disabled=true;
+    try{
+      const simNome=firstData.simAtual?.nome||'Simulado';
+      await emailjs.send('service_exyoa4r','template_r0vjejs',{
+        to_email:email,
+        nome:firstData.student.nome,
+        assunto:`Feedback do Simulado — ${simNome}`,
+        mensagem:buildReportEmailBody(firstData),
+        simulado:simNome,
+        dia:'',
+        horario:''
+      });
+      w.alert('✅ Email enviado para '+email);
+      btn.innerHTML='✅ Email enviado';btn.style.background='#1a7f37';
+    }catch(err){
+      console.error('EmailJS error:',err);
+      w.alert('❌ Erro ao enviar email: '+(err?.text||err?.message||err));
+      btn.innerHTML=orig;btn.disabled=false;
+    }
+  });
+  setTimeout(()=>w.focus(),300);
 };
 
-// ── Generate PDF (jsPDF) ──────────────────────────────────────────────────────
-async function gerarPDF(studentsData){
-  // Load jsPDF
-  if(!window.jspdf){
-    await new Promise((res,rej)=>{
-      const s=document.createElement('script');
-      s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-      s.onload=res;s.onerror=rej;document.head.appendChild(s);
-    });
-  }
+function histChartSVG(historico,currentSimNome){
+  const pts=historico.filter(h=>h.notaFinal!=null).map(h=>({nome:h.simNome,nota:parseFloat(h.notaFinal),atual:h.simNome===currentSimNome}));
+  if(!pts.length)return '<p style="font-size:11px;color:#6b7280;text-align:center;padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;margin:0">Ainda não há histórico de simulados anteriores para exibir.</p>';
+  const W=700,H=130,padL=30,padR=14,padT=12,padB=30;
+  const innerH=H-padT-padB;
+  const yAt=v=>padT+innerH-(v/100)*innerH;
+  const xAt=i=>pts.length===1?(W-padR+padL)/2:padL+(i/(pts.length-1))*(W-padL-padR);
+  let grid='';
+  [0,40,60,80,100].forEach(v=>{
+    const y=yAt(v);
+    grid+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#e5e7eb" stroke-width="0.5"/>`;
+    grid+=`<text x="${padL-4}" y="${y+3}" font-size="8" fill="#9ca3af" text-anchor="end">${v}</text>`;
+  });
+  grid+=`<line x1="${padL}" y1="${yAt(60)}" x2="${W-padR}" y2="${yAt(60)}" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,3"/>`;
+  let path='';pts.forEach((p,i)=>{path+=(i===0?'M':'L')+xAt(i)+','+yAt(p.nota);});
+  let marks='';pts.forEach((p,i)=>{
+    const x=xAt(i),y=yAt(p.nota);
+    const color=p.nota>=60?'#1a7f37':'#cf222e';
+    marks+=`<circle cx="${x}" cy="${y}" r="${p.atual?4:3}" fill="${color}"${p.atual?' stroke="#1e3a5f" stroke-width="1.2"':''}/>`;
+    marks+=`<text x="${x}" y="${y-7}" font-size="9" font-weight="700" fill="${color}" text-anchor="middle">${p.nota.toFixed(1)}</text>`;
+    const lbl=p.nome.length>14?p.nome.slice(0,14)+'…':p.nome;
+    marks+=`<text x="${x}" y="${H-padB+13}" font-size="8" fill="#6b7280" text-anchor="middle"${p.atual?' font-weight="700"':''}>${p.atual?'★ ':''}${lbl}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;max-height:140px;display:block" xmlns="http://www.w3.org/2000/svg">${grid}<path d="${path}" fill="none" stroke="#2563eb" stroke-width="1.4"/>${marks}</svg>`;
+}
 
-  const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W=210,H=297,M=14; // margins
-
-  for(let idx=0;idx<studentsData.length;idx++){
-    if(idx>0)pdf.addPage();
-    const d=studentsData[idx];
-
-    // Use pre-reviewed feedbacks from preview (already edited by user)
-    const feedbacksCasos=d.feedbacksCasosRevisados||[];
-    const feedbackGeral=d.feedbackGeralRevisado||'';
-
-    let y=M;
-    const lh=6; // line height
-    const fc=(r,g,b)=>pdf.setTextColor(r,g,b);
-    const ff=(s,sz)=>{pdf.setFont('helvetica',s);pdf.setFontSize(sz);};
-
-    // ── HEADER ──
-    // Logo (base64 embedded)
-    try{
-      pdf.addImage('data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA','PNG',M,y,40,14);
-    }catch(e){}
-    ff('bold',14);fc(47,129,247);
-    pdf.text('AROS · Treinamento TSA Oral',M+44,y+5);
-    ff('normal',9);fc(100,100,100);
-    pdf.text(d.simAtual?.nome||'Simulado',M+44,y+10);
-    y+=18;
-
-    // Divider
-    pdf.setDrawColor(47,129,247);pdf.setLineWidth(0.8);
-    pdf.line(M,y,W-M,y);y+=5;
-
-    // ── IDENTIFICAÇÃO ──
-    ff('bold',11);fc(30,30,30);
-    pdf.text(`${d.student.nome}`,M,y);
-    ff('normal',10);fc(100,100,100);
-    pdf.text(`Matrícula: ${d.mat}`,W-M-40,y);
-    y+=8;
-
-    // ── SIMULADO ATUAL ──
-    const curHist=d.historico[d.historico.findIndex(h=>h.simNome===d.simAtual?.nome)];
-    const notaFinal=curHist?.notaFinal;
-    const notaCriar=curHist?.criar;
-    const notaOral=curHist?.oral;
-
-    pdf.setFillColor(240,244,255);pdf.roundedRect(M,y,W-2*M,18,2,2,'F');
-    ff('bold',9);fc(47,129,247);pdf.text('RESULTADO DO SIMULADO',M+3,y+5);
-    ff('normal',10);fc(30,30,30);
-    const cols=[
-      {l:'CRIAR',v:notaCriar!=null?notaCriar.toFixed(1):'—'},
-      {l:'ORAL ONLINE',v:notaOral!=null?notaOral.toFixed(1):'—'},
-      {l:'NOTA FINAL',v:notaFinal!=null?notaFinal.toFixed(1):'—'},
-      {l:'MÉDIA TURMA',v:d.mediaTurma!=null?d.mediaTurma.toFixed(1):'—'},
-    ];
-    cols.forEach((c,i)=>{
-      const cx=M+4+(i*(W-2*M-8)/4);
-      ff('bold',11);
-      const vColor=c.l==='NOTA FINAL'&&notaFinal!=null?(notaFinal>=60?[26,107,60]:[139,26,26]):[30,30,30];
-      fc(...vColor);pdf.text(c.v,cx,y+14);
-      ff('normal',7);fc(100,100,100);pdf.text(c.l,cx,y+10);
-    });
-    y+=22;
-
-    // ── GRÁFICO EVOLUÇÃO ──
-    const histComNota=d.historico.filter(h=>h.notaFinal!=null);
-    if(histComNota.length>1){
-      ff('bold',9);fc(47,129,247);pdf.text('EVOLUÇÃO DAS NOTAS',M,y);y+=3;
-      const gW=W-2*M,gH=28,gX=M,gY=y;
-      // Background
-      pdf.setFillColor(248,250,252);pdf.rect(gX,gY,gW,gH,'F');
-      pdf.setDrawColor(220,220,220);pdf.setLineWidth(0.3);pdf.rect(gX,gY,gW,gH);
-      // Grid lines at 40, 60, 80
-      [40,60,80].forEach(v=>{
-        const ly2=gY+gH-(v/100)*gH;
-        pdf.setDrawColor(200,200,200);pdf.setLineWidth(0.2);
-        pdf.line(gX,ly2,gX+gW,ly2);
-        ff('normal',6);fc(150,150,150);pdf.text(v.toString(),gX-6,ly2+1);
-      });
-      // 60 line bold
-      const y60=gY+gH-(60/100)*gH;
-      pdf.setDrawColor(255,200,0);pdf.setLineWidth(0.4);pdf.line(gX,y60,gX+gW,y60);
-
-      // Plot line
-      const pts=histComNota.map((h,i)=>({
-        x:gX+4+(i/(histComNota.length-1||1))*(gW-8),
-        y:gY+gH-(parseFloat(h.notaFinal)/100)*gH,
-        v:h.notaFinal,nome:h.simNome
-      }));
-      // Line
-      pdf.setDrawColor(47,129,247);pdf.setLineWidth(0.8);
-      for(let i=1;i<pts.length;i++)pdf.line(pts[i-1].x,pts[i-1].y,pts[i].x,pts[i].y);
-      // Dots + labels
-      pts.forEach(p=>{
-        const isGreen=parseFloat(p.v)>=60;
-        pdf.setFillColor(isGreen?26:200,isGreen?107:50,isGreen?60:50);
-        pdf.circle(p.x,p.y,1.5,'F');
-        ff('bold',7);fc(isGreen?26:200,isGreen?107:50,isGreen?60:50);
-        pdf.text(parseFloat(p.v).toFixed(1),p.x-3,p.y-3);
-        ff('normal',5.5);fc(120,120,120);
-        const label=p.nome.length>8?p.nome.substring(0,8)+'…':p.nome;
-        pdf.text(label,p.x-4,gY+gH+4);
-      });
-      y+=gH+8;
-    }
-
-    // ── HABILIDADES ──
-    ff('bold',9);fc(47,129,247);pdf.text('AVALIAÇÃO DE HABILIDADES',M,y);y+=2;
-    const habNames=['Domínio do Conteúdo','Raciocínio Lógico','Estruturação da Resposta','Controle Emocional','Gestão de Tempo'];
-    d.habMedias.forEach((val,i)=>{
-      const barW=(W-2*M-50)/1;
-      ff('normal',8);fc(60,60,60);pdf.text(habNames[i],M,y+3);
-      // Stars
-      const sx=M+55;
-      for(let s=1;s<=5;s++){
-        fc(s<=Math.round(val)?47:200,s<=Math.round(val)?129:200,s<=Math.round(val)?247:210);
-        pdf.text('★',sx+(s-1)*6,y+3);
-      }
-      ff('bold',8);fc(47,129,247);
-      pdf.text(val>0?val.toFixed(1):'—',sx+32,y+3);
-      y+=5;
-    });
-    y+=3;
-
-    // ── FEEDBACKS POR CASO ──
-    if(feedbacksCasos.length){
-      ff('bold',9);fc(47,129,247);pdf.text('FEEDBACK POR CASO',M,y);y+=2;
-      pdf.setDrawColor(200,220,255);pdf.setLineWidth(0.3);pdf.line(M,y,W-M,y);y+=3;
-      feedbacksCasos.forEach(fc2=>{
-        if(!fc2.feedback)return;
-        ff('bold',8);fc(30,30,30);pdf.text(fc2.nome,M,y);y+=4;
-        ff('normal',8);fc(70,70,70);
-        const lines=pdf.splitTextToSize(fc2.feedback,W-2*M-2);
-        lines.forEach(line=>{
-          if(y>H-22){pdf.addPage();y=M;}
-          pdf.text(line,M+2,y);y+=4;
-        });
-        y+=2;
-      });
-    }
-
-    // ── FEEDBACK GERAL ──
-    if(feedbackGeral){
-      if(y>H-40){pdf.addPage();y=M;}
-      pdf.setFillColor(240,244,255);pdf.roundedRect(M,y,W-2*M,6,1,1,'F');
-      ff('bold',9);fc(47,129,247);pdf.text('FEEDBACK GERAL',M+2,y+4);y+=9;
-      ff('normal',8);fc(70,70,70);
-      const lines=pdf.splitTextToSize(feedbackGeral,W-2*M-2);
-      lines.forEach(line=>{
-        if(y>H-16){pdf.addPage();y=M;}
-        pdf.text(line,M+2,y);y+=4;
-      });
-    }
-
-    // ── FOOTER ──
-    ff('normal',7);fc(150,150,150);
-    pdf.text('AnestReview · AROS · Treinamento TSA Oral',M,H-8);
-    pdf.text(`Gerado em ${new Date().toLocaleDateString('pt-BR')}`,W-M-30,H-8);
-    pdf.setDrawColor(47,129,247);pdf.setLineWidth(0.4);pdf.line(M,H-11,W-M,H-11);
-  }
-
-  // Save
-  const fname=studentsData.length===1
-    ?`relatorio_${studentsData[0].student.nome.replace(/\s+/g,'_')}.pdf`
-    :'relatorios_AROS.pdf';
-  pdf.save(fname);
+function montarHTMLRelatorio(d){
+  const habStars=v=>'★'.repeat(Math.round(v))+'☆'.repeat(5-Math.round(v));
+  const simNome=d.simAtual?.nome||'Simulado';
+  return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório — ${d.student.nome}</title>
+<style>@page{size:A4;margin:0}html,body{margin:0;padding:0}body{font-family:Arial,sans-serif;color:#1f2937;font-size:11px;line-height:1.4;padding:8mm 10mm}.header{background:linear-gradient(135deg,#1e3a5f,#2563eb);color:white;padding:12px 16px;border-radius:6px;margin-bottom:10px}.header h1{margin:0 0 2px 0;font-size:17px;font-weight:800}.header p{margin:0;opacity:.85;font-size:10px}.nota-box{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}.nota-card{flex:1;min-width:80px;border-radius:6px;padding:6px 8px;text-align:center;border:1px solid #e5e7eb}.nota-card.main{border-color:#2563eb;background:#eff6ff}.valor{font-size:18px;font-weight:800;color:#2563eb;line-height:1.1}.label{font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;margin-top:2px}.section{margin-bottom:9px}.section h2{font-size:12px;font-weight:700;color:#1e3a5f;border-bottom:1.5px solid #e5e7eb;padding-bottom:3px;margin:0 0 6px 0}.caso-item{margin-bottom:6px;border-left:2.5px solid #3b82f6;padding-left:8px}.caso-item h4{margin:0 0 2px 0;font-size:11px;font-weight:700;color:#1e3a5f}.caso-item p{margin:2px 0;font-size:10.5px;line-height:1.4}.fg-box{background:#f9fafb;border-radius:6px;padding:8px 10px;border:1px solid #e5e7eb;white-space:pre-wrap;line-height:1.45;font-size:10.5px}table{width:100%;border-collapse:collapse;font-size:10px}.footer{margin-top:10px;text-align:center;font-size:9px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:5px}.no-print{margin-top:12px;text-align:center;display:flex;gap:10px;justify-content:center}@media print{.no-print{display:none}body{padding:6mm 8mm}}</style>
+</head><body>
+<div class="header"><h1>${d.student.nome}</h1><p>Matrícula: ${d.mat} &nbsp;|&nbsp; AROS · Treinamento TSA Oral &nbsp;|&nbsp; ${simNome}</p></div>
+<div class="nota-box">
+${d.notaFinal!==undefined?`<div class="nota-card main"><div class="valor">${d.notaFinal.toFixed(1)}</div><div class="label">Nota Geral</div></div>`:''}
+${d.notaCriar!==undefined?`<div class="nota-card"><div class="valor" style="font-size:14px">${d.notaCriar.toFixed(1)}</div><div class="label">CRIAR / Simulação</div></div>`:''}
+${d.notaOral!==undefined?`<div class="nota-card"><div class="valor" style="font-size:14px">${d.notaOral.toFixed(1)}</div><div class="label">Oral Online</div></div>`:''}
+${d.mediaTurma?`<div class="nota-card"><div class="valor" style="font-size:14px">${d.mediaTurma.toFixed(1)}</div><div class="label">Média Turma</div></div>`:''}
+</div>
+<div class="section"><h2>📊 Histórico de Simulados</h2>
+${histChartSVG(d.historico,simNome)}
+</div>
+<div class="section"><h2>📝 Feedback por Caso</h2>
+${d.feedbacksCasosRevisados.map(c=>`<div class="caso-item"><h4>${c.nome}</h4><p>${c.feedback}</p></div>`).join('')}
+</div>
+${(d.feedbackGeralRevisado||'').trim()?`<div class="section"><h2>💬 Feedback Geral</h2><div class="fg-box">${d.feedbackGeralRevisado}</div></div>`:''}
+<div class="section"><h2>📊 Avaliação de Habilidades (média)</h2>
+<table style="width:auto"><tbody>
+${d.habMedias.map((v,i)=>`<tr><td style="padding:2px 16px 2px 0;color:#374151;white-space:nowrap">${HABILIDADES[i]}</td><td style="color:#2563eb;letter-spacing:1px;padding:2px 12px 2px 0;white-space:nowrap">${habStars(v)}</td><td style="color:#6b7280;padding:2px 0;white-space:nowrap">${v>0?v.toFixed(1)+'/5':'—'}</td></tr>`).join('')}
+</tbody></table>
+</div>
+<div class="footer">AROS · AnestReview</div>
+<div class="no-print">
+  <button id="btn-email" style="background:#059669;color:white;border:none;border-radius:6px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer">📧 Enviar relatório por email</button>
+  <button onclick="window.print()" style="background:#2563eb;color:white;border:none;border-radius:6px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer">🖨️ Salvar como PDF</button>
+</div>
+</body></html>`;
 }
 
 // Load AI prompt on boot
@@ -4893,7 +5139,7 @@ function getTurnos(sim){
 
 // ── Informar disponibilidade (professor) ─────────────────────────────────────
 window.loadDispSim=async()=>{
-  const simId=document.getElementById('disp-sim-sel')?.value;
+  const simId=document.getElementById('prof-sim-sel')?.value;
   const prof=document.getElementById('disp-prof-sel')?.value;
   const sim=S.sims.find(s=>s.id===simId);
   const wrap=document.getElementById('disp-turnos');
@@ -4967,7 +5213,7 @@ window.updateTurnoStyle=(key)=>{
 
 window.salvarDisp=async()=>{
   const prof=document.getElementById('disp-prof-sel')?.value;
-  const simId=document.getElementById('disp-sim-sel')?.value;
+  const simId=document.getElementById('prof-sim-sel')?.value;
   const msgEl=document.getElementById('disp-msg');
   if(!prof){msgEl.className='al al-e';msgEl.textContent='Selecione seu nome.';msgEl.classList.remove('hidden');return;}
   if(!simId){msgEl.className='al al-e';msgEl.textContent='Selecione o simulado.';msgEl.classList.remove('hidden');return;}
@@ -4984,7 +5230,7 @@ window.salvarDisp=async()=>{
   setTimeout(()=>{msgEl.classList.add('hidden');},3000);
 window.salvarNaoPode=async()=>{
   const prof=document.getElementById('disp-prof-sel')?.value;
-  const simId=document.getElementById('disp-sim-sel')?.value;
+  const simId=document.getElementById('prof-sim-sel')?.value;
   const msgEl=document.getElementById('disp-msg');
   if(!prof){msgEl.className='al al-e';msgEl.textContent='Selecione seu nome.';msgEl.classList.remove('hidden');return;}
   if(!simId){msgEl.className='al al-e';msgEl.textContent='Selecione o simulado.';msgEl.classList.remove('hidden');return;}
@@ -5002,18 +5248,18 @@ window.salvarNaoPode=async()=>{
   });
   msgEl.className='al al-s';msgEl.textContent=`✅ Registrado que ${prof} não pode participar.`;msgEl.classList.remove('hidden');
   setTimeout(()=>msgEl.classList.add('hidden'),3000);
-  const cobSel2=document.getElementById('cob-sim-sel');
+  const cobSel2=document.getElementById('prof-sim-sel');
   if(cobSel2&&cobSel2.value===simId)renderCobertura();
 };
 
   // Refresh cobertura if same sim selected
-  const cobSel=document.getElementById('cob-sim-sel');
+  const cobSel=document.getElementById('prof-sim-sel');
   if(cobSel&&cobSel.value===simId)renderCobertura();
 };
 
 // ── Cobertura visual (coordenação) ────────────────────────────────────────────
 window.renderCobertura=async()=>{
-  const simId=document.getElementById('cob-sim-sel')?.value;
+  const simId=document.getElementById('prof-sim-sel')?.value;
   const body=document.getElementById('cob-body');if(!body)return;
   if(!simId){body.innerHTML='<div class="es" style="padding:24px"><div class="ei">🗓️</div><p>Selecione um simulado.</p></div>';return;}
   const sim=S.sims.find(s=>s.id===simId);if(!sim){body.innerHTML='';return;}
@@ -5071,7 +5317,7 @@ window.renderCobertura=async()=>{
 
 // ── Distribuir professores automaticamente ────────────────────────────────────
 window.distribuirProfs=async()=>{
-  const simId=document.getElementById('cob-sim-sel')?.value;
+  const simId=document.getElementById('prof-sim-sel')?.value;
   if(!simId){alert('Selecione um simulado.');return;}
   const sim=S.sims.find(s=>s.id===simId);if(!sim)return;
   if(!confirm(`Distribuir professores automaticamente no simulado "${sim.nome}"?\nIsso sobrescreverá os professores já atribuídos nas rodadas.`))return;
@@ -5108,7 +5354,7 @@ window.distribuirProfs=async()=>{
 // Init when tab opens
 window._initProfTab=()=>{
   renderProfGlobal();
-  const cobSel=document.getElementById('cob-sim-sel');
+  const cobSel=document.getElementById('prof-sim-sel');
   if(cobSel){cobSel.innerHTML='<option value="">Selecione simulado...</option>'+S.sims.map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');}
 };
 
@@ -5122,21 +5368,20 @@ window.resetCkCaso=async(ci)=>{
   const confirmWord=prompt('Para confirmar o reset de "'+nomeCaso+'" de '+nomeAluno+', digite a palavra:\n\nRESETAR');
   if(confirmWord===null)return;
   if(confirmWord.trim().toUpperCase()!=='RESETAR'){alert('Palavra incorreta. Digite exatamente: RESETAR');return;}
-  const resp=_ckRespostas[_ckStudentId];
-  if(!resp)return;
-  resp.casos[ci]={itens:{},habilidades:{},feedback:'',prof:''}; // prof cleared on reset
-  delete resp.casos[ci].savedAt;
-  resp.finalizado=false;
-  delete resp.notaCriar;
-  // Also clean up any orphaned cases not in current template
-  const tplLen=(_ckTemplate?.casos||[]).length;
-  Object.keys(resp.casos||{}).forEach(k=>{if(parseInt(k)>=tplLen)delete resp.casos[k];});
-  // Use setDoc WITHOUT merge to fully overwrite
-  await setDoc(doc(db,'checklists/'+_ckSimId+'/respostas/'+_ckStudentId),resp);
+  const resp=_ckRespostas[_ckStudentId];if(!resp)return;
+  const blocoKey2=_ckBloco||'criar';
+  const blocoResp2=resp[blocoKey2];if(!blocoResp2)return;
+  blocoResp2.casos[ci]={itens:{},habilidades:{},feedback:'',prof:''};
+  blocoResp2.finalizado=false;
+  if(blocoKey2==='criar')delete blocoResp2.notaCriar;else delete blocoResp2.notaOral;
+  // Clean orphaned cases
+  const tplLen=(window._ckTemplateCurrent?.casos||[]).length;
+  Object.keys(blocoResp2.casos||{}).forEach(k=>{if(parseInt(k)>=tplLen)delete blocoResp2.casos[k];});
+  await setDoc(doc(db,'checklists/'+_ckSimId+'/respostas/'+_ckStudentId),removeUndefined(resp));
   _ckRespostas[_ckStudentId]=resp;
   window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
-  renderCkCasos(resp);
-  document.getElementById('ck-feedback-geral').value=resp.feedbackGeral||'';
+  _sessionProfCasos.delete((blocoKey2+':'+ci));
+  renderCkCasos(blocoResp2);
   document.getElementById('ck-nota-resultado').classList.add('hidden');
   reloadRespostasAndRender();
 };
@@ -5190,20 +5435,21 @@ window.resetCkPergunta=async(ci,pi)=>{
   if(confirmWord===null)return;
   if(confirmWord.trim().toUpperCase()!=='RESETAR'){alert('Palavra incorreta. Digite exatamente: RESETAR');return;}
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
-  if(!resp.casos[ci])return;
-  const itensToReset=Object.keys(resp.casos[ci].itens||{}).filter(k=>k.startsWith(pi+'_'));
-  itensToReset.forEach(k=>delete resp.casos[ci].itens[k]);
-  delete resp.casos[ci].savedAt;
-  delete resp.casos[ci].temPendencia;
-  // Clear prof assignment when resetting a pergunta
-  resp.casos[ci].prof='';
-  resp.finalizado=false;delete resp.notaCriar;
-  // Use setDoc WITHOUT merge to fully overwrite (merge:true keeps old nested fields)
-  await setDoc(doc(db,'checklists/'+_ckSimId+'/respostas/'+_ckStudentId),resp);
+  const blocoKey3=_ckBloco||'criar';
+  const blocoResp3=resp[blocoKey3];if(!blocoResp3)return;
+  if(!blocoResp3.casos[ci])return;
+  const itensToReset=Object.keys(blocoResp3.casos[ci].itens||{}).filter(k=>k.startsWith(pi+'_'));
+  itensToReset.forEach(k=>delete blocoResp3.casos[ci].itens[k]);
+  delete blocoResp3.casos[ci].savedAt;
+  delete blocoResp3.casos[ci].temPendencia;
+  blocoResp3.casos[ci].prof='';
+  blocoResp3.finalizado=false;
+  if(blocoKey3==='criar')delete blocoResp3.notaCriar;else delete blocoResp3.notaOral;
+  await setDoc(doc(db,'checklists/'+_ckSimId+'/respostas/'+_ckStudentId),removeUndefined(resp));
   _ckRespostas[_ckStudentId]=resp;
   window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
-  renderCkCasos(resp);
-  document.getElementById('ck-feedback-geral').value=resp.feedbackGeral||'';
+  _sessionProfCasos.delete((blocoKey3+':'+ci));
+  renderCkCasos(blocoResp3);
   document.getElementById('ck-nota-resultado').classList.add('hidden');
   reloadRespostasAndRender();
 };
@@ -5325,7 +5571,7 @@ window.enviarPropostaDireta=async()=>{
     '⏰ Esta proposta expira em 48 horas.\n'+
     'Se não responder, a troca não será realizada.';
   try{
-    await emailjs.send('service_j2d3kfk','template_syr8rqn',{
+    await emailjs.send('service_exyoa4r','template_syr8rqn',{
       to_email:targetEmail,
       to_name:target.nome,
       assunto:'🔄 Proposta de troca de horário — '+proposta.simNome,
@@ -5386,8 +5632,8 @@ async function aceitarTrocaDireta(proposta,propostaRef){
     '▸ '+proposta.de.nome+': agora no horário '+proposta.para.horario+' ('+(proposta.para.dia==='sabado'?'Sábado':'Domingo')+')\n'+
     '▸ '+proposta.para.nome+': agora no horário '+proposta.de.horario+' ('+(proposta.de.dia==='sabado'?'Sábado':'Domingo')+')';
   try{
-    await emailjs.send('service_j2d3kfk','template_r0vjejs',{to_email:proposta.de.email,nome:proposta.de.nome,assunto:'✅ Troca confirmada — '+proposta.simNome,mensagem:msg,simulado:proposta.simNome,dia:'',horario:''});
-    await emailjs.send('service_j2d3kfk','template_r0vjejs',{to_email:proposta.para.email,nome:proposta.para.nome,assunto:'✅ Troca confirmada — '+proposta.simNome,mensagem:msg,simulado:proposta.simNome,dia:'',horario:''});
+    await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:proposta.de.email,nome:proposta.de.nome,assunto:'✅ Troca confirmada — '+proposta.simNome,mensagem:msg,simulado:proposta.simNome,dia:'',horario:''});
+    await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:proposta.para.email,nome:proposta.para.nome,assunto:'✅ Troca confirmada — '+proposta.simNome,mensagem:msg,simulado:proposta.simNome,dia:'',horario:''});
   }catch(e){}
   showTrocaResult('✅','Troca aceita com sucesso!\n\nVocê agora está no horário '+proposta.de.horario+' ('+(proposta.de.dia==='sabado'?'Sábado':'Domingo')+').\nAmbos receberão um email de confirmação.','var(--green)');
 }
@@ -5396,7 +5642,7 @@ async function recusarTrocaDireta(proposta,propostaRef){
   await updateDoc(propostaRef,{status:'recusada',resolvidaEm:new Date().toISOString()});
   // Notify requester
   try{
-    await emailjs.send('service_j2d3kfk','template_r0vjejs',{
+    await emailjs.send('service_exyoa4r','template_r0vjejs',{
       to_email:proposta.de.email,nome:proposta.de.nome,
       assunto:'❌ Proposta de troca recusada — '+proposta.simNome,
       mensagem:proposta.para.nome+' recusou sua proposta de troca de horário no '+proposta.simNome+'.\n\nSeu horário continua sendo '+proposta.de.horario+' ('+(proposta.de.dia==='sabado'?'Sábado':'Domingo')+').',
@@ -5434,6 +5680,346 @@ window.cfgToggle=(bodyId,arrId)=>{
   body.style.display=isOpen?'none':'block';
   if(arr)arr.style.transform=isOpen?'rotate(0)':'rotate(180deg)';
 };
+
+
+// ── Check professor before editing — show modal if needed ────────────────────
+// Returns a Promise that resolves to true if prof is set, false if cancelled
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RELATÓRIO PDF + FEEDBACK GERAL
+// ══════════════════════════════════════════════════════════════════════════════
+
+window.openFeedbackGeralModal=()=>{
+  const s=_ckStudents.find(x=>x.id===_ckStudentId);
+  document.getElementById('fg-modal-sub').textContent=s?.nome||'';
+  const sel=document.getElementById('fg-prof-sel');
+  sel.innerHTML='<option value="">Selecione seu nome...</option>'+S.profs.map(p=>`<option value="${p}">${p}</option>`).join('');
+  document.getElementById('fg-texto').value='';
+  document.getElementById('fg-err').classList.add('hidden');
+  document.getElementById('modal-feedback-geral').classList.remove('hidden');
+};
+
+window.salvarFeedbackGeral=async()=>{
+  const prof=document.getElementById('fg-prof-sel').value;
+  const texto=document.getElementById('fg-texto').value.trim();
+  const errEl=document.getElementById('fg-err');
+  if(!prof||!texto){errEl.classList.remove('hidden');return;}
+  errEl.classList.add('hidden');
+  // Use currently selected sim (from checklist home or curSim)
+  const simId=document.getElementById('ck-sim-sel')?.value||_ckSimId||S.curSim?.id;
+  if(!simId){alert('Selecione um simulado primeiro.');return;}
+  // Store per-simulado only (not per-student)
+  const ref=doc(db,`feedbackGeral/${simId}`);
+  const snap=await getDoc(ref);
+  const existing=snap.exists()?snap.data().contribuicoes||[]:[]; 
+  existing.push({prof,texto,timestamp:new Date().toISOString()});
+  await setDoc(ref,{contribuicoes:existing});
+  CM('modal-feedback-geral');
+  alert('✅ Contribuição enviada!');
+};
+
+function updateRelatorioBtnVisibility(){
+  const btn=document.getElementById('btn-gerar-relatorio');if(!btn)return;
+  const resp=_ckRespostas[_ckStudentId];if(!resp){btn.classList.add('hidden');return;}
+  const stCriar=getBlocoStatus(resp.criar,_ckTemplate?.criar);
+  const stOral=getBlocoStatus(resp.oral,_ckTemplate?.oral);
+  btn.classList.toggle('hidden',!(stCriar==='green'&&stOral==='green'));
+}
+
+async function applyAIPrompt(text,progressCallback){
+  const prompt=S.cfg.aiPrompt||S._aiPrompt||'';
+  const apiKey=S.cfg.aiKey||'';
+  if(!prompt||!apiKey||!text||text==='sem feedback específico')return text;
+  try{
+    progressCallback?.();
+    const response=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt+'\n\n---\n\n'+text}]}],generationConfig:{maxOutputTokens:1000,temperature:0.4}})
+    });
+    if(!response.ok)return text;
+    const data=await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text||text;
+  }catch(e){return text;}
+}
+
+// ── Config: Feedback Geral dos professores ────────────────────────────────────
+window.loadFeedbackGeralConfig=async()=>{
+  const simSel=document.getElementById('cfg-fg-sim');
+  if(simSel&&simSel.options.length<=1){
+    S.sims.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.nome;simSel.appendChild(o);});
+  }
+  const simId=simSel?.value;
+  const list=document.getElementById('cfg-fg-list');
+  if(!simId||!list){if(list)list.innerHTML='<p style="font-size:13px;color:var(--t2)">Selecione um simulado.</p>';return;}
+  list.innerHTML='<p style="font-size:13px;color:var(--t2)">Carregando...</p>';
+  try{
+    const snap=await getDoc(doc(db,`feedbackGeral/${simId}`));
+    const data=snap.exists()?snap.data():{};
+    const contribuicoes=data.contribuicoes||[];
+    const textoFinal=data.textoFinal||'';
+    const updatedAt=data.textoFinalUpdatedAt||'';
+
+    const contribsItems=contribuicoes.map((c,idx)=>`
+        <div style="border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;margin-bottom:6px;background:var(--bg2)">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+              <span style="font-size:12px;font-weight:700;color:var(--accent)">👨‍🏫 ${c.prof}</span>
+              <span style="font-size:11px;color:var(--t2)">${new Date(c.timestamp).toLocaleString('pt-BR')}</span>
+            </div>
+            <p style="font-size:13px;line-height:1.5;margin:0;color:var(--text)">${c.texto}</p>
+          </div>
+          <button onclick="deletarContribFeedback('${simId}',${idx})" style="background:none;border:none;cursor:pointer;color:var(--t2);font-size:16px;padding:2px 6px;flex-shrink:0" title="Remover" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--t2)'">🗑️</button>
+        </div>`).join('');
+
+    const contribsBlock=contribuicoes.length
+      ? `<details style="border:1px solid var(--border);border-radius:var(--rs);margin-bottom:14px;background:var(--bg3)">
+          <summary style="padding:10px 12px;cursor:pointer;user-select:none;font-size:13px;font-weight:600;color:var(--text)">Contribuições dos professores (${contribuicoes.length})</summary>
+          <div style="padding:8px 12px 10px 12px;border-top:1px solid var(--border)">${contribsItems}</div>
+        </details>`
+      : '<p style="font-size:13px;color:var(--t2);margin-bottom:14px">Nenhuma contribuição enviada por professores ainda.</p>';
+
+    list.innerHTML=`
+      ${contribsBlock}
+      <div style="border-top:1px solid var(--border);padding-top:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+          <p style="font-size:12px;font-weight:700;color:var(--t2);letter-spacing:.4px;text-transform:uppercase">Texto consolidado (vai para o PDF)</p>
+          <button class="btn btn-s btn-sm" onclick="gerarFeedbackGeralIA('${simId}')" id="btn-gerar-fg-ia" ${contribuicoes.length?'':'disabled'}>🤖 Gerar com IA</button>
+        </div>
+        <textarea class="fc" id="fg-texto-final" style="min-height:140px;font-size:13px" placeholder="Texto que será exibido no PDF de cada aluno deste simulado. Clique em Gerar com IA para consolidar as contribuições, ou escreva/edite manualmente.">${textoFinal}</textarea>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;flex-wrap:wrap">
+          <p style="font-size:11px;color:var(--t2)" id="fg-texto-final-meta">${updatedAt?'Salvo em '+new Date(updatedAt).toLocaleString('pt-BR'):'Ainda não salvo.'}</p>
+          <button class="btn btn-p btn-sm" onclick="salvarFeedbackGeralFinal('${simId}')">💾 Salvar feedback geral</button>
+        </div>
+        <div id="fg-texto-final-msg" class="hidden" style="margin-top:8px"></div>
+      </div>`;
+  }catch(e){list.innerHTML='<p style="font-size:13px;color:var(--t2)">Erro: '+e.message+'</p>';}
+};
+
+window.gerarFeedbackGeralIA=async(simId)=>{
+  const btn=document.getElementById('btn-gerar-fg-ia');const ta=document.getElementById('fg-texto-final');
+  const msg=document.getElementById('fg-texto-final-msg');
+  if(!btn||!ta)return;
+  const apiKey=S.cfg.aiKey||'';
+  const prompt=S._aiPromptGeral||'';
+  if(!apiKey){if(msg){msg.className='al al-e';msg.textContent='Configure a chave da API Google Gemini primeiro.';msg.classList.remove('hidden');}return;}
+  if(!prompt){if(msg){msg.className='al al-e';msg.textContent='Configure o "Prompt do Feedback Geral" primeiro.';msg.classList.remove('hidden');}return;}
+  const orig=btn.innerHTML;btn.innerHTML='⏳ Gerando...';btn.disabled=true;
+  try{
+    const snap=await getDoc(doc(db,`feedbackGeral/${simId}`));
+    const contribs=snap.exists()?snap.data().contribuicoes||[]:[];
+    if(!contribs.length){if(msg){msg.className='al al-e';msg.textContent='Nenhuma contribuição para consolidar.';msg.classList.remove('hidden');}return;}
+    const combinado=contribs.map(c=>'Prof. '+c.prof+':\n'+c.texto).join('\n\n---\n\n');
+    const response=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt+'\n\n---\n\n'+combinado}]}],generationConfig:{maxOutputTokens:1500,temperature:0.5}})
+    });
+    if(!response.ok){const t=await response.text();throw new Error('API: '+t.slice(0,200));}
+    const dataResp=await response.json();
+    const texto=dataResp.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    if(!texto)throw new Error('Resposta vazia da IA.');
+    ta.value=texto;
+    if(msg){msg.className='al al-s';msg.textContent='✅ Texto gerado. Revise e clique em Salvar.';msg.classList.remove('hidden');setTimeout(()=>msg.classList.add('hidden'),3500);}
+  }catch(e){if(msg){msg.className='al al-e';msg.textContent='Erro: '+e.message;msg.classList.remove('hidden');}}
+  finally{btn.innerHTML=orig;btn.disabled=false;}
+};
+
+window.salvarFeedbackGeralFinal=async(simId)=>{
+  const ta=document.getElementById('fg-texto-final');const msg=document.getElementById('fg-texto-final-msg');
+  if(!ta)return;
+  const textoFinal=ta.value.trim();
+  const ref=doc(db,`feedbackGeral/${simId}`);
+  const snap=await getDoc(ref);
+  const existing=snap.exists()?snap.data():{};
+  const updatedAt=new Date().toISOString();
+  await setDoc(ref,{...existing,textoFinal,textoFinalUpdatedAt:updatedAt});
+  const meta=document.getElementById('fg-texto-final-meta');
+  if(meta)meta.textContent='Salvo em '+new Date(updatedAt).toLocaleString('pt-BR');
+  if(msg){msg.className='al al-s';msg.textContent='✅ Feedback geral salvo!';msg.classList.remove('hidden');setTimeout(()=>msg.classList.add('hidden'),2500);}
+};
+
+window.deletarContribFeedback=async(simId,idx)=>{
+  if(!confirm('Remover esta contribuição?'))return;
+  const ref=doc(db,`feedbackGeral/${simId}`);
+  const snap=await getDoc(ref);if(!snap.exists())return;
+  const contrib=snap.data().contribuicoes||[];
+  contrib.splice(idx,1);
+  await setDoc(ref,{contribuicoes:contrib});
+  loadFeedbackGeralConfig();
+};
+
+
+// ── Gerar Feedback via nova estrutura de blocos ────────────────────────────────
+window.gerarFeedbackAluno=async(studentId)=>{
+  const simId=_ckSimId||document.getElementById('ck-sim-sel')?.value;
+  if(!simId){alert('Selecione um simulado primeiro.');return;}
+  // Get student info
+  let student=_ckStudents.find(s=>s.id===studentId);
+  if(!student){
+    // Load from Firebase if not in memory
+    try{const sSnap=await getDoc(doc(db,`simulados/${simId}/alunos/${studentId}`));if(sSnap.exists())student={id:studentId,...sSnap.data()};}catch(e){}
+  }
+  if(!student){alert('Aluno não encontrado.');return;}
+  const btn=event?.target;const orig=btn?.innerHTML;
+  if(btn){btn.innerHTML='⏳ Preparando...';btn.disabled=true;}
+  try{
+    // Load checklist resp (new bloco format)
+    let ckResp=_ckRespostas[studentId]||null;
+    if(!ckResp){
+      try{
+        const ckSnap=await getDoc(doc(db,`checklists/${simId}/respostas/${studentId}`));
+        if(ckSnap.exists()){
+          let d={...ckSnap.data()};
+          // Migrate if needed
+          if(!d.criar&&!d.oral&&d.casos){d={criar:{casos:d.casos||{},finalizado:d.finalizado||false,notaCriar:d.notaCriar},oral:{casos:{},finalizado:false}};}
+          if(!d.criar)d.criar={casos:{},finalizado:false};
+          if(!d.oral)d.oral={casos:{},finalizado:false};
+          ckResp=d;
+        }
+      }catch(e){}
+    }
+    if(!ckResp){alert('Checklist não encontrado para este aluno.');if(btn){btn.innerHTML=orig;btn.disabled=false;}return;}
+
+    // Load templates (new bloco format)
+    let tplCriar={casos:[]},tplOral={casos:[]};
+    try{
+      const [sc,so]=await Promise.all([
+        getDoc(doc(db,`checklists/${simId}/meta/templateCriar`)),
+        getDoc(doc(db,`checklists/${simId}/meta/templateOral`))
+      ]);
+      if(sc.exists())tplCriar=sc.data();
+      if(so.exists())tplOral=so.data();
+    }catch(e){}
+
+    // Find matricula from lista
+    const lista=S.listas.find(l=>(l.alunos||[]).some(a=>(typeof a==='object'?a.nome:a).toLowerCase().trim()===student.nome.toLowerCase().trim()));
+    const alunoData=lista?(lista.alunos||[]).find(a=>(typeof a==='object'?a.nome:a).toLowerCase().trim()===student.nome.toLowerCase().trim()):null;
+    const mat=typeof alunoData==='object'?alunoData?.matricula||'N/A':'N/A';
+    const email=typeof alunoData==='object'?alunoData?.email||'':'';
+
+    // Load historico de notas
+    const historico=[];
+    const key=mat!=='N/A'?mat:student.nome.toLowerCase().trim();
+    for(const sim of S.sims){
+      try{const nSnap=await getDoc(doc(db,`notas/${sim.id}/alunos/${key}`));
+        const n=nSnap.exists()?nSnap.data():{};
+        historico.push({simNome:sim.nome,criar:n.criar,oral:n.oral,notaFinal:n.criar!==undefined&&n.oral!==undefined?(n.criar+n.oral)/2:n.criar||n.oral||null});
+      }catch(e){historico.push({simNome:sim.nome,criar:null,oral:null,notaFinal:null});}
+    }
+
+    // Habilidades average from both blocos
+    const habMedias=Array(HABILIDADES.length).fill(0).map((_,hi)=>{
+      const vals=[];
+      [...Object.values(ckResp.criar?.casos||{}),...Object.values(ckResp.oral?.casos||{})].forEach(cr=>{const v=cr.habilidades?.[hi];if(v>0)vals.push(v);});
+      return vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):0;
+    });
+
+    // Load feedback geral consolidado (salvo previamente pela coordenação)
+    let fgTexto='';
+    try{const fgSnap=await getDoc(doc(db,`feedbackGeral/${simId}`));
+      if(fgSnap.exists())fgTexto=fgSnap.data().textoFinal||'';
+    }catch(e){}
+
+    // Media da turma (from notas)
+    const simNotas=[];
+    try{const nAll=await getDocs(collection(db,`notas/${simId}/alunos`));nAll.docs.forEach(d=>{const n=d.data();const v=n.criar!==undefined&&n.oral!==undefined?(n.criar+n.oral)/2:n.criar||n.oral;if(v!==undefined)simNotas.push(v);});}catch(e){}
+    const mediaTurma=simNotas.length?simNotas.reduce((a,b)=>a+b,0)/simNotas.length:null;
+
+    // Build feedbacks per case for both blocos
+    const feedbacksCasos=[];
+    for(let ci=0;ci<(tplCriar.casos||[]).length;ci++){
+      const caso=tplCriar.casos[ci];const cr=ckResp.criar?.casos?.[ci]||{};
+      const fbRaw=(cr.feedback||'').trim()||'sem feedback específico';
+      const rev=await applyAIPrompt(fbRaw);
+      feedbacksCasos.push({nome:'[CRIAR] '+(caso.nome||'Caso '+(ci+1)),feedback:rev,prof:cr.prof||''});
+    }
+    for(let ci=0;ci<(tplOral.casos||[]).length;ci++){
+      const caso=tplOral.casos[ci];const cr=ckResp.oral?.casos?.[ci]||{};
+      const fbRaw=(cr.feedback||'').trim()||'sem feedback específico';
+      const rev=await applyAIPrompt(fbRaw);
+      feedbacksCasos.push({nome:'[ORAL] '+(caso.nome||'Caso '+(ci+1)),feedback:rev,prof:cr.prof||''});
+    }
+
+    const fgRev=fgTexto;
+    const notaC=ckResp.criar?.notaCriar;const notaO=ckResp.oral?.notaOral;
+    const notaFinal=notaC!==undefined&&notaO!==undefined?(notaC+notaO)/2:notaC||notaO;
+
+    const data={
+      student,mat,email,historico,
+      ckResp,habMedias,mediaTurma,
+      simAtual:S.sims.find(s=>s.id===simId)||{nome:'Simulado',id:simId},
+      feedbacksCasosRevisados:feedbacksCasos,
+      feedbackGeralRevisado:fgRev,
+      notaCriar:notaC,notaOral:notaO,notaFinal
+    };
+
+    _previewData=[data];
+    _ckStudentId=studentId;
+    _ckSimId=simId;
+    abrirPreviewV2(data);
+  }catch(err){alert('Erro: '+err.message);console.error(err);}
+  finally{if(btn){btn.innerHTML=orig;btn.disabled=false;}}
+};
+
+// ── Preview V2 — uses existing ck-preview but feeds new data ──────────────────
+function abrirPreviewV2(data){
+  // Header
+  document.getElementById('prev-sim-nome').textContent=data.simAtual?.nome||'Simulado';
+  document.getElementById('prev-nome').textContent=data.student.nome;
+  document.getElementById('prev-mat').textContent=data.mat;
+  document.getElementById('prev-date').textContent='';
+
+  // Logo
+  const logoEl=document.getElementById('prev-logo');
+  const logoImg=document.querySelector('header .logo img')||document.querySelector('img[alt*="AROS"]')||document.querySelector('header img');
+  if(logoEl&&logoImg){const img=document.createElement('img');img.src=logoImg.src;img.style.cssText='height:36px;object-fit:contain';logoEl.innerHTML='';logoEl.appendChild(img);}
+
+  // Notas
+  const notasEl=document.getElementById('prev-notas');notasEl.innerHTML='';
+  [{l:'CRIAR',v:data.notaCriar},{l:'ORAL ONLINE',v:data.notaOral},{l:'NOTA GERAL',v:data.notaFinal},{l:'MÉDIA TURMA',v:data.mediaTurma}].forEach(n=>{
+    const cor=n.l==='NOTA GERAL'&&n.v!=null?(n.v>=60?'#1a6b3c':'#8b1a1a'):'#1a1714';
+    notasEl.innerHTML+=`<div style="padding:8px;background:#fff;border-radius:6px"><p style="font-size:10px;color:#8b949e;font-weight:600;margin-bottom:4px">${n.l}</p><p style="font-size:20px;font-weight:800;color:${cor}">${n.v!=null?parseFloat(n.v).toFixed(1)+'pts':'—'}</p></div>`;
+  });
+
+  // Chart (historico)
+  const canvas=document.getElementById('prev-chart');
+  const histComNota=data.historico.filter(h=>h.notaFinal!=null);
+  if(canvas){
+    canvas.width=canvas.offsetWidth||700;canvas.height=80;
+    const ctx=canvas.getContext('2d');ctx.fillStyle='#f6f8fa';ctx.fillRect(0,0,canvas.width,80);
+    if(histComNota.length>1){
+      const cW=canvas.width,cH=80,pad=28;
+      [40,60,80].forEach(v=>{const y=cH-pad-(v/100)*(cH-2*pad);ctx.strokeStyle='#d0d7de';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(cW-pad,y);ctx.stroke();ctx.fillStyle='#8b949e';ctx.font='8px sans-serif';ctx.fillText(v,2,y+3);});
+      const pts=histComNota.map((h,i)=>({x:pad+(i/(histComNota.length-1||1))*(cW-2*pad),y:cH-pad-(h.notaFinal/100)*(cH-2*pad),v:h.notaFinal,nome:h.simNome}));
+      ctx.strokeStyle='#2f81f7';ctx.lineWidth=2;ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();
+      pts.forEach(p=>{ctx.fillStyle=p.v>=60?'#1a6b3c':'#8b1a1a';ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#8b949e';ctx.font='7px sans-serif';ctx.fillText((p.nome||'').slice(0,10),p.x-16,cH-4);});
+    } else {
+      ctx.fillStyle='#8b949e';ctx.font='12px sans-serif';ctx.fillText('Sem histórico anterior',20,44);
+    }
+  }
+
+  // Habilidades
+  const habsEl=document.getElementById('prev-habs');habsEl.innerHTML='';
+  data.habMedias.forEach((val,i)=>{
+    const stars=[1,2,3,4,5].map(n=>`<span style="color:${n<=Math.round(val)?'#2f81f7':'#d0d7de'};font-size:12px">★</span>`).join('');
+    habsEl.innerHTML+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 8px;background:#f6f8fa;border-radius:5px"><span style="font-size:11px;font-weight:600">${HABILIDADES[i]}</span><div style="display:flex;align-items:center;gap:2px">${stars}<span style="font-size:11px;font-weight:700;color:#2f81f7;margin-left:3px">${val>0?val.toFixed(1):'—'}</span></div></div>`;
+  });
+
+  // Feedbacks por caso (editáveis)
+  const fbCasosEl=document.getElementById('prev-feedbacks-casos');fbCasosEl.innerHTML='';
+  data.feedbacksCasosRevisados.forEach((fc,i)=>{
+    fbCasosEl.innerHTML+=`<div style="margin-bottom:12px"><p style="font-size:12px;font-weight:700;color:#1a1714;margin-bottom:5px">${fc.nome}</p><textarea id="prev-fb-caso-${i}" style="width:100%;border:1px solid #d0d7de;border-radius:6px;padding:9px;font-family:inherit;font-size:13px;line-height:1.6;resize:vertical;min-height:70px;box-sizing:border-box">${fc.feedback||''}</textarea></div>`;
+  });
+
+  // Feedback geral (texto salvo previamente pela coordenação)
+  const fgEl=document.getElementById('prev-feedback-geral');
+  fgEl.value=data.feedbackGeralRevisado||'';
+  fgEl.placeholder='Nenhum feedback geral salvo para este simulado. Vá em Configurações → Feedback Geral dos Professores para gerar e salvar.';
+
+  showCkView('ck-preview');
+}
 
 // MODAL HELPERS
 window.CM=id=>document.getElementById(id).classList.add('hidden');
