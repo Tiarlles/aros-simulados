@@ -1263,6 +1263,9 @@ const rDom=()=>S.curSim?.rodadasDom||[];
 const getRods=d=>d==='sabado'?rSab():rDom();
 const getH=(dia,rod)=>getRods(dia)[rod-1]?.horario||`R${rod}`;
 const getLim=()=>S.curSim?.limite||8;
+// Ordem de exibição dentro da rodada: confirmados → swap → pendentes; absent vai pro box dedicado
+const _statusOrder=s=>({confirmed:0,swap:1,pending:2,absent:3}[s]??99);
+const sortByStatusThenName=(a,b)=>{const d=_statusOrder(a.status)-_statusOrder(b.status);return d!==0?d:a.nome.localeCompare(b.nome,'pt-BR');};
 const addMins=(h,m,mins)=>{const t=h*60+m+mins;return{h:Math.floor(t/60)%24,m:t%60}};
 const fHM=(h,m)=>`${String(h).padStart(2,'0')}h${String(m).padStart(2,'0')}`;
 
@@ -1509,7 +1512,7 @@ function renderAlunoDay(list,exp,expandAll=false){
   const byRod={};list.forEach(s=>{if(!byRod[s.rodada])byRod[s.rodada]=[];byRod[s.rodada].push(s);});
   return Object.entries(byRod).sort(([a],[b])=>Number(a)-Number(b)).map(([rod,studs])=>{
     const h=getH(studs[0].dia,parseInt(rod));
-    const sorted=[...studs].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+    const sorted=[...studs].sort(sortByStatusThenName);
     const id=`rod-body-${studs[0].dia}-${rod}`;
     const isOpen=expandAll||window._expandedRods?.has(id);
     return`<div style="margin-bottom:10px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
@@ -1783,13 +1786,34 @@ window.subResp=async()=>{
     updateData.dia=null;updateData.rodada=null;updateData.posicao=null;
   }
   await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),updateData);
-  sendEmail(actualType,s,email);
+
+  // ── Gatilhos de troca automática ───────────────────────────────────────────
+  let autoSwap=null;
+  if(actualType==='swap'){
+    Object.assign(s,{status:'swap',swapSlots,obs,respondedAt:updateData.respondedAt,swapResolved:false,email});
+    autoSwap=await tryAutoSwap(s);
+    if(!autoSwap.ok)autoSwap=await tryAutoMatchedSwap(s);
+  }else if(actualType==='absent'){
+    const liberadoDia=s.dia,liberadoRodada=s.rodada;
+    Object.assign(s,{status:'absent',dia:null,rodada:null,posicao:null,email});
+    if(liberadoDia&&liberadoRodada)await processWaitingQueue(liberadoDia,liberadoRodada);
+  }
+  // Email padrão só vai se a troca NÃO foi auto-efetivada (auto-swap já mandou "Troca Efetivada")
+  if(!(autoSwap&&autoSwap.ok))sendEmail(actualType,s,email);
 
   const icons={confirmed:'✅',absent:'😔',swap:'🔄'};
   const msgs={confirmed:'Presença confirmada!',absent:'Registrado.',swap:'Solicitação enviada!'};
+  let icon=icons[actualType]||'✅';let titulo=msgs[actualType]||'Registrado!';let extra='';
+  if(autoSwap&&autoSwap.ok){
+    icon='✅';titulo=autoSwap.matched?'Troca casada efetivada automaticamente!':'Troca efetivada automaticamente!';
+    const novoD=autoSwap.dia==='sabado'?'Sábado':'Domingo';
+    const linhaPar=autoSwap.matched?`<p style="font-size:13px;margin:4px 0 0;color:var(--t2)">Casamento com <strong>${autoSwap.partner}</strong>.</p>`:'';
+    extra=`<p style="font-size:14px;margin:8px 0 0;color:var(--green);font-weight:600">Você foi alocado para ${novoD} · ${getH(autoSwap.dia,autoSwap.rodada)}.</p>${linhaPar}`;
+  }
   document.getElementById('r-body').innerHTML=`<div style="text-align:center;padding:24px 0">
-    <div class="sc2">${icons[actualType]||'✅'}</div>
-    <p style="font-weight:700;font-size:17px;margin-bottom:6px">${msgs[actualType]||'Registrado!'}</p>
+    <div class="sc2">${icon}</div>
+    <p style="font-weight:700;font-size:17px;margin-bottom:6px">${titulo}</p>
+    ${extra}
     <p style="color:var(--t2);font-size:13px">Confirmação enviada para <strong>${email}</strong>.</p>
     <button class="btn btn-p" style="margin-top:18px" onclick="CM('modal-resp')">Fechar</button>
   </div>`;
@@ -1887,8 +1911,8 @@ function renderCoSched(){
     let html='';
     rods.forEach((rod,idx)=>{
       const rn=idx+1;
-      // Sort students alphabetically
-      const sts=[...S.students.filter(s=>s.dia===dia&&s.rodada===rn)].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+      // Confirmados → swap → pendentes (alfabético dentro de cada grupo)
+      const sts=[...S.students.filter(s=>s.dia===dia&&s.rodada===rn)].sort(sortByStatusThenName);
       const cf=sts.filter(s=>s.status==='confirmed').length;const pe=sts.filter(s=>s.status==='pending'||s.status==='swap').length;const sw=sts.filter(s=>s.status==='swap').length;const vag=lim-sts.length;
 
       // Collect professors already assigned in THIS round (to disable duplicates)
@@ -2281,6 +2305,72 @@ window.refreshSwRods=()=>{
   }).join('');
 };
 
+// ── AUTO-SWAP ENGINE (FIFO) ──────────────────────────────────────────────────
+// Conta TODOS alocados num slot (pending+confirmed+swap ocupam vaga; absent já tem dia=null)
+function countOccupants(dia,rodada,ignoreId){
+  return S.students.filter(s=>s.dia===dia&&s.rodada===rodada&&s.id!==ignoreId).length;
+}
+function hasVacancy(dia,rodada,ignoreId){return countOccupants(dia,rodada,ignoreId)<getLim();}
+async function sendSwapDoneEmail(s,dia,rodada){
+  if(!s.email)return;
+  const novoH=getH(dia,rodada);const novoD=dia==='sabado'?'Sábado':'Domingo';
+  try{await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:s.email,nome:s.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada automaticamente! ✅\n\nVocê foi realocado para: ${novoD} · ${novoH}`,simulado:S.curSim.nome,dia:novoD,horario:novoH});}catch(e){console.error('EmailJS:',e);}
+}
+// Tenta efetivar a troca do aluno na hora — respeita ordem de preferência em swapSlots[].
+// Retorna {ok,dia,rodada} se efetivou, {ok:false} caso contrário.
+async function tryAutoSwap(student){
+  const slots=student.swapSlots||[];
+  const oldDia=student.dia,oldRodada=student.rodada;
+  for(const sl of slots){
+    if(!hasVacancy(sl.dia,sl.rodada,student.id))continue;
+    await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${student.id}`),{dia:sl.dia,rodada:sl.rodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,respondedAt:new Date().toISOString(),originalDia:oldDia||null,originalRodada:oldRodada||null});
+    Object.assign(student,{dia:sl.dia,rodada:sl.rodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,originalDia:oldDia||null,originalRodada:oldRodada||null});
+    await sendSwapDoneEmail(student,sl.dia,sl.rodada);
+    if(oldDia&&oldRodada)await processWaitingQueue(oldDia,oldRodada);
+    return{ok:true,dia:sl.dia,rodada:sl.rodada};
+  }
+  return{ok:false};
+}
+// Tenta encontrar e executar troca CASADA automaticamente.
+// Aluno em Y pediu X; outro em X pediu Y → troca. FIFO desempata se houver múltiplos candidatos.
+async function tryAutoMatchedSwap(student){
+  const stuDia=student.dia,stuRodada=student.rodada;
+  if(!stuDia||!stuRodada)return{ok:false};
+  const mySlots=student.swapSlots||[];
+  const candidatos=S.students
+    .filter(s=>s.id!==student.id&&s.status==='swap'&&!s.swapResolved&&s.dia&&s.rodada
+      &&mySlots.some(sl=>sl.dia===s.dia&&sl.rodada===s.rodada)
+      &&(s.swapSlots||[]).some(sl=>sl.dia===stuDia&&sl.rodada===stuRodada))
+    .sort((a,b)=>{const ta=a.respondedAt?new Date(a.respondedAt).getTime():0;const tb=b.respondedAt?new Date(b.respondedAt).getTime():0;return ta-tb;});
+  if(!candidatos.length)return{ok:false};
+  const partner=candidatos[0];
+  const partDia=partner.dia,partRodada=partner.rodada;
+  const now=new Date().toISOString();
+  const batch=writeBatch(db);
+  batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${student.id}`),{dia:partDia,rodada:partRodada,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,autoEffective:true,originalDia:stuDia,originalRodada:stuRodada});
+  batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${partner.id}`),{dia:stuDia,rodada:stuRodada,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,autoEffective:true,originalDia:partDia,originalRodada:partRodada});
+  await batch.commit();
+  Object.assign(student,{dia:partDia,rodada:partRodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,originalDia:stuDia,originalRodada:stuRodada});
+  Object.assign(partner,{dia:stuDia,rodada:stuRodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,originalDia:partDia,originalRodada:partRodada});
+  await sendSwapDoneEmail(student,partDia,partRodada);
+  await sendSwapDoneEmail(partner,stuDia,stuRodada);
+  return{ok:true,dia:partDia,rodada:partRodada,matched:true,partner:partner.nome};
+}
+
+// Quando uma vaga abre, realoca o solicitante mais antigo (FIFO por respondedAt).
+async function processWaitingQueue(dia,rodada){
+  if(!hasVacancy(dia,rodada,null))return;
+  const fila=S.students
+    .filter(s=>s.status==='swap'&&!s.swapResolved&&(s.swapSlots||[]).some(sl=>sl.dia===dia&&sl.rodada===rodada))
+    .sort((a,b)=>{const ta=a.respondedAt?new Date(a.respondedAt).getTime():0;const tb=b.respondedAt?new Date(b.respondedAt).getTime():0;return ta-tb;});
+  if(!fila.length)return;
+  const c=fila[0];const oldDia=c.dia,oldRodada=c.rodada;
+  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${c.id}`),{dia,rodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,respondedAt:new Date().toISOString(),originalDia:oldDia||null,originalRodada:oldRodada||null});
+  Object.assign(c,{dia,rodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,originalDia:oldDia||null,originalRodada:oldRodada||null});
+  await sendSwapDoneEmail(c,dia,rodada);
+  if(oldDia&&oldRodada)await processWaitingQueue(oldDia,oldRodada);
+}
+
 window.doMatchedSwap=async(id1,id2)=>{
   const s1=S.students.find(x=>x.id===id1);
   const s2=S.students.find(x=>x.id===id2);
@@ -2288,9 +2378,14 @@ window.doMatchedSwap=async(id1,id2)=>{
   if(!confirm(`Confirmar troca entre ${s1.nome} e ${s2.nome}?`))return;
   const now=new Date().toISOString();
   const d1=s1.dia,r1=s1.rodada,d2=s2.dia,r2=s2.rodada;
+  // Hard limit: nenhum dos slots de destino pode estourar (ignora os 2 envolvidos pq um sai e o outro entra)
+  const lim=getLim();
+  const inS1Target=d2&&r2?S.students.filter(x=>x.dia===d2&&x.rodada===r2&&x.id!==id1&&x.id!==id2).length:0;
+  const inS2Target=d1&&r1?S.students.filter(x=>x.dia===d1&&x.rodada===r1&&x.id!==id1&&x.id!==id2).length:0;
+  if(inS1Target>=lim||inS2Target>=lim){alert('Troca cancelada: um dos horários ficaria acima do limite.');return;}
   const batch=writeBatch(db);
-  batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${id1}`),{dia:d2,rodada:r2,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true});
-  batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${id2}`),{dia:d1,rodada:r1,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true});
+  batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${id1}`),{dia:d2,rodada:r2,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,originalDia:d1||null,originalRodada:r1||null});
+  batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${id2}`),{dia:d1,rodada:r1,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,originalDia:d2||null,originalRodada:r2||null});
   await batch.commit();
   const novoH1=getH(d2,r2);const novoD1=d2==='sabado'?'Sábado':'Domingo';
   const novoH2=getH(d1,r1);const novoD2=d1==='sabado'?'Sábado':'Domingo';
@@ -2326,7 +2421,7 @@ window.doSwap=async()=>{
   const msgEl=document.getElementById('sw-msg');
   if(inSlot>=lim){msgEl.className='al al-e';msgEl.textContent=`Rodada cheia (${lim}).`;msgEl.classList.remove('hidden');return;}
   const novoH=getH(dia,rodada);const novoD=dia==='sabado'?'Sábado':'Domingo';
-  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${s.id}`),{dia,rodada,posicao:null,status:'confirmed',respondedAt:new Date().toISOString(),swapResolved:true});
+  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${s.id}`),{dia,rodada,posicao:null,status:'confirmed',respondedAt:new Date().toISOString(),swapResolved:true,originalDia:s.dia||null,originalRodada:s.rodada||null});
   if(s.email){const msg=`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD} · ${novoH}`;await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:s.email,nome:s.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:msg,simulado:S.curSim.nome,dia:novoD,horario:novoH}).catch(()=>{});}
   msgEl.className='al al-s';msgEl.textContent='✅ Troca realizada e e-mail enviado!';msgEl.classList.remove('hidden');
   setTimeout(()=>CM('modal-swap'),1400);
