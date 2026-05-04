@@ -130,11 +130,25 @@ select.fc{cursor:pointer}
 .tp-sep{font-size:32px;font-weight:700;color:var(--t2);margin-bottom:8px}
 .tp-ok{width:100%;margin-top:14px}
 
-/* ═══ COORD PANELS ═══ */
-.co-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:22px}
-.co-tab{padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--t2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;font-family:'Plus Jakarta Sans',sans-serif}
-.co-tab.on{color:var(--accent);border-bottom-color:var(--accent)}
-.co-tab:hover:not(.on){color:var(--text)}
+/* ═══ COORD PANELS — SIDEBAR LAYOUT ═══ */
+.co-layout{display:grid;grid-template-columns:200px 1fr;gap:24px;align-items:start}
+.co-tabs{display:flex;flex-direction:column;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:8px;position:sticky;top:74px}
+.co-tab{padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--t2);border-radius:var(--rs);text-align:left;transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif;width:100%}
+.co-tab.on{background:var(--accent);color:#fff;box-shadow:0 0 12px var(--accent-glow)}
+.co-tab:not(.on):hover{background:var(--bg3);color:var(--text)}
+.co-group{margin-bottom:2px}
+.co-group-header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:transparent;border:none;color:var(--t2);font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;border-radius:var(--rs);transition:background .15s}
+.co-group-header:hover{background:var(--bg3);color:var(--text)}
+.co-caret{font-size:9px;transition:transform .2s;opacity:.7}
+.co-group.collapsed .co-caret{transform:rotate(-90deg)}
+.co-group.collapsed .co-group-body{display:none}
+.co-group-body{display:flex;flex-direction:column;gap:2px;padding:2px 0 4px}
+.co-group.empty{display:none}
+.co-sidebar-foot{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+.co-user-info{padding:8px 12px;font-size:11px;color:var(--t2);line-height:1.4}
+.co-user-info strong{color:var(--text);font-size:13px;display:block;margin-bottom:2px}
+.co-content{min-width:0}
+@media (max-width:760px){.co-layout{grid-template-columns:1fr}.co-tabs{position:static;flex-direction:row;flex-wrap:wrap}.co-tab{flex:1;min-width:120px;text-align:center}}
 
 /* ═══ STATS ═══ */
 .sg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
@@ -203,6 +217,11 @@ select.fc{cursor:pointer}
 .sim-card:hover{border-color:var(--accent);box-shadow:0 0 24px var(--accent-glow);transform:translateY(-2px)}
 .sim-card:hover::before{height:4px}
 .sim-card-title{font-family:'Fraunces',serif;font-size:18px;font-weight:700;margin-bottom:10px}
+.sim-progress{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--bg3);margin:4px 0}
+.sim-progress>div{transition:width .3s}
+.sim-progress-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--t2);margin-top:6px}
+.sim-progress-legend span{display:inline-flex;align-items:center;gap:5px}
+.sim-progress-legend i{width:8px;height:8px;border-radius:2px;display:inline-block}
 .sim-date-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .sim-date-chip{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600}
 .sim-date-chip .lbl{color:var(--t2);font-size:10px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}
@@ -289,6 +308,16 @@ select.fc{cursor:pointer}
 
 <!-- ══════════════ ALUNO VIEW ══════════════ -->
 <div id="view-al">
+  <!-- Box: Solicitar Simulado Extra -->
+  <div style="background:linear-gradient(135deg,var(--accent-dim),var(--bg2));border:1.5px solid var(--accent);border-radius:var(--r);padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div style="font-size:32px">✨</div>
+    <div style="flex:1;min-width:220px">
+      <div style="font-family:Fraunces,serif;font-size:17px;font-weight:700">Precisa de um simulado extra?</div>
+      <div style="color:var(--t2);font-size:13px;margin-top:2px">Escolha o melhor dia e horário para você. A coordenação confirmará o agendamento.</div>
+    </div>
+    <button class="btn btn-p" onclick="openSimExtra()">Solicitar Simulado Extra</button>
+  </div>
+
   <!-- Simulado cards -->
   <div id="sim-cards-wrap"></div>
 
@@ -322,11 +351,14 @@ select.fc{cursor:pointer}
     <div style="font-size:48px;margin-bottom:14px">🔐</div>
     <h2 style="font-family:Fraunces,serif;font-size:21px;margin-bottom:6px">Área da Coordenação</h2>
     <p style="color:var(--t2);margin-bottom:20px;font-size:14px">Digite a senha para acessar.</p>
+    <div style="margin-bottom:8px">
+      <input class="fc" id="co-user" type="text" placeholder="Usuário" autocomplete="username" style="text-align:center" onkeydown="if(event.key==='Enter')checkPass()"/>
+    </div>
     <div style="position:relative;margin-bottom:8px">
-      <input class="fc" id="co-pass" type="password" placeholder="Senha" style="text-align:center;padding-right:40px" onkeydown="if(event.key==='Enter')checkPass()"/>
+      <input class="fc" id="co-pass" type="password" placeholder="Senha" autocomplete="current-password" style="text-align:center;padding-right:40px" onkeydown="if(event.key==='Enter')checkPass()"/>
       <button type="button" onclick="togglePwd('co-pass','eye-login')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--t2);font-size:16px;padding:4px" id="eye-login">👁</button>
     </div>
-    <div id="pass-err" class="al al-e hidden">Senha incorreta.</div>
+    <div id="pass-err" class="al al-e hidden">Usuário ou senha incorretos.</div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <button class="btn btn-s" style="flex:1" onclick="switchView('aluno')">Voltar</button>
       <button class="btn btn-p" style="flex:2" onclick="checkPass()">Entrar</button>
@@ -348,16 +380,17 @@ select.fc{cursor:pointer}
       <button class="btn btn-p btn-sm" id="btn-novo-sim" onclick="openNewSimAuth()" style="display:none">+ Novo Simulado</button>
     </div>
 
-    <!-- Co tabs -->
+    <!-- Layout: sidebar + content -->
+    <div class="co-layout">
+    <!-- Co tabs (sidebar — gerada dinamicamente em renderSidebar()) -->
     <div class="co-tabs">
-      <button class="co-tab on" onclick="switchCoTab('simulados',this)">📋 Simulados</button>
-      <button class="co-tab" onclick="switchCoTab('trocas',this)" id="tab-trocas-btn">🔄 Trocas</button>
-      <button class="co-tab" onclick="switchCoTab('professores',this)">👨‍🏫 Professores</button>
-      <button class="co-tab" onclick="switchCoTab('listas',this)">👥 Listas de Alunos</button>
-      <button class="co-tab" onclick="switchCoTab('desempenho',this)">📊 Desempenho</button>
-      <button class="co-tab" onclick="switchCoTab('checklist',this)">📝 Checklist</button>
-      <button class="co-tab" onclick="switchCoTab('config',this)">⚙️ Configurações</button>
+      <div id="co-tabs-list"></div>
+      <div class="co-sidebar-foot">
+        <div class="co-user-info" id="co-user-info"></div>
+        <button class="btn btn-s btn-sm" onclick="logout()" style="justify-content:center">↪ Sair</button>
+      </div>
     </div>
+    <div class="co-content">
 
     <!-- TAB: Simulados -->
     <div id="tab-simulados">
@@ -393,7 +426,7 @@ select.fc{cursor:pointer}
             <button class="status-filter" data-filter="confirmed" onclick="setCoStatusFilter('confirmed',this)">✅ Confirmado</button>
             <button class="status-filter" data-filter="pending" onclick="setCoStatusFilter('pending',this)">⏳ Pendente</button>
             <button class="status-filter" data-filter="swap" onclick="setCoStatusFilter('swap',this)">🔄 Troca</button>
-            <button class="status-filter" data-filter="absent" onclick="setCoStatusFilter('absent',this)">❌ Não vai</button>
+            <button class="status-filter" data-filter="absent" onclick="setCoStatusFilter('absent',this)">❌ Ausente</button>
           </div>
           <div id="rds-sab"></div>
           <div id="rds-dom" class="hidden"></div>
@@ -463,6 +496,53 @@ select.fc{cursor:pointer}
         <button class="btn btn-p btn-sm" onclick="openNewLista()">+ Nova Lista</button>
       </div>
       <div id="listas-list"></div>
+    </div>
+
+    <!-- TAB: Solicitação Sim Extra -->
+    <div id="tab-extra" class="hidden">
+      <!-- Solicitações recebidas -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="ch">
+          <div class="ct">✨ Solicitações de Simulado Extra</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select class="fc" id="se-filter-status" onchange="renderSolicitacoesExtra()" style="padding:6px 10px;font-size:12px">
+              <option value="todos">Todos</option>
+              <option value="aguardando-pagamento" selected>Aguardando pagamento</option>
+              <option value="pago">Pagos · aguardando agendamento</option>
+              <option value="efetivada">Efetivadas (agendadas)</option>
+              <option value="cancelada">Canceladas</option>
+            </select>
+          </div>
+        </div>
+        <div class="cb" id="solicitacoes-extra-list"></div>
+      </div>
+
+      <!-- Configurações: links, slack, vigente -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="ch"><div class="ct">🔗 Links e integrações</div></div>
+        <div class="cb">
+          <div class="fg"><label class="fl">Lista vigente (alunos elegíveis a se identificar)</label>
+            <select class="fc" id="se-lista-vigente" onchange="saveSimExtraCfg()">
+              <option value="">— Nenhuma lista vigente —</option>
+            </select>
+            <p style="font-size:11px;color:var(--t2);margin-top:4px">Apenas a lista marcada aqui é considerada na busca por alunos no formulário de solicitação.</p>
+          </div>
+          <div class="fg"><label class="fl">Link de compra · ALUNOS</label><input class="fc" id="se-link-aluno" placeholder="https://..." onchange="saveSimExtraCfg()"/></div>
+          <div class="fg"><label class="fl">Link de compra · NÃO-ALUNOS (externos)</label><input class="fc" id="se-link-externo" placeholder="https://..." onchange="saveSimExtraCfg()"/></div>
+          <div class="fg"><label class="fl">Texto/link para casos GRATUITOS</label><textarea class="fc" id="se-link-gratuito" placeholder="Instruções ou link para alunos com cota gratuita..." onchange="saveSimExtraCfg()" style="min-height:60px"></textarea></div>
+          <div class="fg"><label class="fl">Slack Webhook URL (opcional · notifica nova solicitação)</label><input class="fc" id="se-slack" placeholder="https://hooks.slack.com/services/..." onchange="saveSimExtraCfg()"/></div>
+          <div id="se-cfg-msg" class="hidden" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+      <!-- Alunos com quota gratuita -->
+      <div class="card">
+        <div class="ch">
+          <div class="ct">🎟️ Alunos com cota gratuita</div>
+          <button class="btn btn-p btn-sm" onclick="openSimExtraGratuitoModal()">+ Adicionar</button>
+        </div>
+        <div class="cb" id="se-gratuitos-list"></div>
+      </div>
     </div>
 
     <!-- TAB: Trocas -->
@@ -728,6 +808,28 @@ select.fc{cursor:pointer}
           <div id="ai-prompt-msg"></div>
         </div>
 
+        <!-- Personalizar menu lateral -->
+        <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden">
+          <div onclick="cfgToggle('cfg-menu-body','cfg-menu-arr');if(document.getElementById('cfg-menu-body').style.display==='block')renderMenuLabelsForm()" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg2);cursor:pointer;user-select:none" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:18px">📝</span>
+              <div>
+                <p style="font-weight:700;font-size:15px">Personalizar menu lateral</p>
+                <p style="font-size:12px;color:var(--t2)">Renomeie os grupos e abas exibidos na barra lateral</p>
+              </div>
+            </div>
+            <span id="cfg-menu-arr" style="font-size:14px;color:var(--t2);transition:transform .2s">▼</span>
+          </div>
+          <div id="cfg-menu-body" style="display:none;padding:16px 18px;border-top:1px solid var(--border)">
+            <div id="menu-labels-form"></div>
+            <div style="display:flex;gap:8px;margin-top:14px">
+              <button class="btn btn-s btn-sm" onclick="resetMenuLabels()">↺ Restaurar padrão</button>
+              <button class="btn btn-p btn-sm" onclick="saveMenuLabels()" style="margin-left:auto">💾 Salvar</button>
+            </div>
+            <div id="menu-labels-msg" class="hidden" style="margin-top:8px"></div>
+          </div>
+        </div>
+
         <!-- Feedback Geral das Contribuições -->
         <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden">
           <div onclick="cfgToggle('cfg-fg-body','cfg-fg-arr');if(!document.getElementById('cfg-fg-body').style.display||document.getElementById('cfg-fg-body').style.display==='block')loadFeedbackGeralConfig()" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg2);cursor:pointer;user-select:none" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
@@ -895,6 +997,51 @@ select.fc{cursor:pointer}
       </div>
     </div>
 
+    <!-- TAB: Usuários (admin only) -->
+    <div id="tab-usuarios" class="hidden">
+      <div class="card" style="margin-bottom:16px">
+        <div class="ch"><div class="ct">👤 Gerenciamento de Usuários</div>
+          <button class="btn btn-p btn-sm" onclick="openUserModal()">+ Novo usuário</button>
+        </div>
+        <div class="cb">
+          <p style="color:var(--t2);font-size:13px;margin-bottom:14px">Crie e gerencie quem acessa o painel da coordenação. Papéis: <strong>admin</strong> (acesso total), <strong>coordenador</strong> (simulados, trocas, professores, listas, desempenho), <strong>avaliador</strong> (apenas checklist).</p>
+          <div id="users-list"></div>
+        </div>
+      </div>
+    </div>
+
+    </div><!-- /co-content -->
+    </div><!-- /co-layout -->
+
+  </div>
+</div>
+
+<!-- ══ MODAL: Usuário (CRUD) ══ -->
+<div class="mo hidden" id="modal-user">
+  <div class="md" style="max-width:460px">
+    <div class="mh"><div><div class="m-title" id="mu-title">Novo usuário</div><div class="m-sub">Defina credenciais e papel</div></div><button class="m-close" onclick="CM('modal-user')">✕</button></div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">Nome de usuário (login)</label><input class="fc" id="mu-username" placeholder="ex: maria.silva" autocomplete="off"/></div>
+      <div class="fg"><label class="fl">Nome completo</label><input class="fc" id="mu-nome" placeholder="ex: Maria Silva"/></div>
+      <div class="fg"><label class="fl">Senha</label><input class="fc" id="mu-senha" type="text" placeholder="Senha de acesso" autocomplete="new-password"/></div>
+      <div class="fg">
+        <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg3);border-radius:var(--rs);cursor:pointer;border:1.5px solid var(--border)" id="mu-admin-wrap">
+          <input type="checkbox" id="mu-admin" onchange="toggleAdminMode()" style="width:16px;height:16px;cursor:pointer"/>
+          <div><div style="font-weight:700;font-size:13px">Administrador</div><div style="font-size:11px;color:var(--t2)">Acesso total + gerencia usuários · vê automaticamente novas abas</div></div>
+        </label>
+      </div>
+      <div class="fg" id="mu-perms-wrap">
+        <label class="fl">Permissões (abas que o usuário vê)</label>
+        <div id="mu-perms-grid" style="display:flex;flex-direction:column;gap:4px;border:1px solid var(--border);border-radius:var(--rs);padding:10px;background:var(--bg3)"></div>
+        <p style="font-size:11px;color:var(--t2);margin-top:6px">Apenas as abas marcadas serão visíveis. Novas abas criadas no futuro NÃO ficam visíveis automaticamente — só o admin precisa ajustar manualmente.</p>
+      </div>
+      <div id="mu-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-d btn-sm" id="mu-del" onclick="deleteUser()" style="margin-right:auto;display:none">🗑️ Apagar</button>
+      <button class="btn btn-s" onclick="CM('modal-user')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveUser()">💾 Salvar</button>
+    </div>
   </div>
 </div>
 
@@ -1243,6 +1390,80 @@ select.fc{cursor:pointer}
   </div>
 </div>
 
+<!-- ══ MODAL: Aluno gratuito (CRUD) ══ -->
+<div class="mo hidden" id="modal-grat">
+  <div class="md" style="max-width:440px">
+    <div class="mh"><div><div class="m-title" id="mg-title">Cota gratuita</div><div class="m-sub">Aluno que pode solicitar sem pagar</div></div><button class="m-close" onclick="CM('modal-grat')">✕</button></div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">E-mail (chave)</label><input class="fc" id="mg-email" type="email" placeholder="aluno@email.com"/></div>
+      <div class="fg"><label class="fl">Nome (referência)</label><input class="fc" id="mg-nome" placeholder="Nome do aluno"/></div>
+      <div class="fg"><label class="fl">Quantidade de simulados gratuitos</label><input class="fc" id="mg-quota" type="number" min="1" step="1" value="1"/></div>
+      <div class="fg" id="mg-usada-wrap" style="display:none"><label class="fl">Já utilizadas</label><input class="fc" id="mg-usada" type="number" min="0" step="1" value="0"/></div>
+      <div id="mg-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-d btn-sm" id="mg-del" onclick="deleteGratuito()" style="margin-right:auto;display:none">🗑️ Apagar</button>
+      <button class="btn btn-s" onclick="CM('modal-grat')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveGratuito()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Solicitação Sim Extra (multi-step) ══ -->
+<div class="mo hidden" id="modal-sim-extra">
+  <div class="md" style="max-width:560px">
+    <div class="mh"><div><div class="m-title">✨ Solicitar Simulado Extra</div><div class="m-sub" id="se-sub">Identifique-se para começar</div></div><button class="m-close" onclick="CM('modal-sim-extra')">✕</button></div>
+    <div class="m-body">
+      <!-- Stepbar -->
+      <div class="stepbar" style="margin-bottom:18px">
+        <div class="stepbar-i active" id="se-st1">1 · Identificação</div>
+        <div class="stepbar-i" id="se-st2">2 · Dia &amp; horário</div>
+        <div class="stepbar-i" id="se-st3">3 · Confirmação</div>
+      </div>
+
+      <!-- STEP 1: Identificação -->
+      <div id="se-step1">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button class="btn btn-s" id="se-tab-aluno" onclick="seSwitchTab('aluno')" style="flex:1">Sou aluno</button>
+          <button class="btn btn-s" id="se-tab-externo" onclick="seSwitchTab('externo')" style="flex:1">Não sou aluno</button>
+        </div>
+        <div id="se-pane-aluno">
+          <div class="fg">
+            <label class="fl">Busque seu nome ou e-mail</label>
+            <input class="fc" id="se-search" placeholder="Digite parte do nome..." oninput="seFilterAlunos()" autocomplete="off"/>
+          </div>
+          <div id="se-aluno-list" style="max-height:240px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--rs)"></div>
+          <div id="se-aluno-empty" class="hidden" style="padding:24px;text-align:center;color:var(--t2);font-size:13px">Nenhum aluno encontrado.</div>
+          <div id="se-confirm-email-wrap"></div>
+        </div>
+        <div id="se-pane-externo" class="hidden">
+          <div class="fg"><label class="fl">Nome completo</label><input class="fc" id="se-nome" placeholder="Seu nome"/></div>
+          <div class="fg"><label class="fl">E-mail</label><input class="fc" id="se-email" type="email" placeholder="seu@email.com"/></div>
+        </div>
+        <div id="se-err1" class="al al-e hidden" style="margin-top:10px"></div>
+      </div>
+
+      <!-- STEP 2: Dia & horário -->
+      <div id="se-step2" class="hidden">
+        <p style="color:var(--t2);font-size:13px;margin-bottom:12px">Marque até 3 opções de dia e turno. Quanto mais opções, mais fácil agendar.</p>
+        <p style="color:var(--t2);font-size:11px;margin-bottom:12px">Manhã: 07h–12h · Tarde: 12h–17h · Noite: 18h–21h</p>
+        <div id="se-options"></div>
+        <button class="btn btn-s btn-sm" onclick="seAddOption()" id="se-add-opt" style="margin-top:6px">+ Adicionar opção</button>
+        <div id="se-err2" class="al al-e hidden" style="margin-top:10px"></div>
+      </div>
+
+      <!-- STEP 3: Confirmação -->
+      <div id="se-step3" class="hidden">
+        <div id="se-confirmation"></div>
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" id="se-back" onclick="seBack()" style="display:none">← Voltar</button>
+      <button class="btn btn-p" id="se-next" onclick="seNext()">Continuar</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore,collection,doc,getDoc,getDocs,setDoc,updateDoc,onSnapshot,deleteDoc,writeBatch }
@@ -1250,14 +1471,14 @@ import { getFirestore,collection,doc,getDoc,getDocs,setDoc,updateDoc,onSnapshot,
 
 const db=getFirestore(initializeApp({apiKey:"AIzaSyDEljxGEKhl6taJEcbQHoAb8QsjWT7fx08",authDomain:"simulados-confirmacao.firebaseapp.com",projectId:"simulados-confirmacao",storageBucket:"simulados-confirmacao.firebasestorage.app",messagingSenderId:"399694193508",appId:"1:399694193508:web:70d7a65d51798045ef1071"}));
 
-const S={view:'aluno',unlocked:false,profUnlocked:false,sims:[],curSim:null,students:[],coDay:'sabado',alDay:'sabado',step:1,cfg:{password:'aros2025',profPassword:'Anestreview1531',profTabs:['simulados','trocas','professores','listas','desempenho','checklist']},pendSwap:null,profs:[],listas:[],_id:null,_rSab:[],_rDom:[]};
+const S={view:'aluno',unlocked:false,profUnlocked:false,currentUser:null,usuarios:[],sims:[],curSim:null,students:[],coDay:'sabado',alDay:'sabado',step:1,cfg:{password:'aros2025',profPassword:'Anestreview1531',profTabs:['simulados','trocas','professores','listas','desempenho','checklist']},pendSwap:null,profs:[],listas:[],simExtraCfg:{linkPagoAluno:'',linkPagoExterno:'',linkGratuito:'',slackWebhook:'',listaVigenteId:'',alunosGratuitos:[]},solicitacoesExtra:[],simStats:{},_id:null,_rSab:[],_rDom:[]};
 window.S=S;
 
 // helpers
 const uid=()=>Math.random().toString(36).slice(2,10);
 const fDT=iso=>{if(!iso)return'—';const d=new Date(iso);return d.toLocaleDateString('pt-BR')+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})};
 const fD=iso=>{if(!iso)return'';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`};
-const sbadge=s=>({pending:'<span class="badge b-pend">⏳ Pendente</span>',confirmed:'<span class="badge b-conf">✔ Confirmado</span>',absent:'<span class="badge b-abs">✗ Não vai</span>',swap:'<span class="badge b-swap">🔄 Aguardando troca</span>'}[s]||'...');
+const sbadge=s=>({pending:'<span class="badge b-pend">⏳ Pendente</span>',confirmed:'<span class="badge b-conf">✔ Confirmado</span>',absent:'<span class="badge b-abs">✗ Ausente</span>',swap:'<span class="badge b-swap">🔄 Aguardando troca</span>'}[s]||'...');
 const rSab=()=>S.curSim?.rodadasSab||[];
 const rDom=()=>S.curSim?.rodadasDom||[];
 const getRods=d=>d==='sabado'?rSab():rDom();
@@ -1272,7 +1493,7 @@ const fHM=(h,m)=>`${String(h).padStart(2,'0')}h${String(m).padStart(2,'0')}`;
 // boot
 async function boot(){
   try{const s=await getDoc(doc(db,'config','settings'));if(s.exists())Object.assign(S.cfg,s.data());}catch(e){}
-  await Promise.all([loadSims(),loadProfs(),loadListas()]);
+  await Promise.all([loadSims(),loadProfs(),loadListas(),loadUsuarios(),loadMenuLabels(),loadSimExtra()]);
   renderSimCards();
   // apply saved theme
   const t=localStorage.getItem('aros-theme')||'dark';
@@ -1362,53 +1583,713 @@ window.esqueceuSenha=async()=>{
   setTimeout(()=>msgEl.classList.add('hidden'),5000);
 };
 
-window.checkPass=()=>{
-  const val=document.getElementById('co-pass').value;
-  if(val===S.cfg.password){
-    // Full coordinator access
-    S.unlocked=true;S.profUnlocked=false;
-    document.getElementById('co-login').classList.add('hidden');
-    document.getElementById('co-panel').classList.remove('hidden');
-    // Show all tabs
-    document.querySelectorAll('.co-tab').forEach(b=>b.style.display='');
-    document.getElementById('btn-novo-sim').style.display='';
-    popCoSel();renderProfGlobal();renderListasPanel();
-  } else if(val===(S.cfg.profPassword||'Anestreview1531')){
-    // Professor access — limited tabs
-    S.unlocked=true;S.profUnlocked=true;
-    document.getElementById('co-login').classList.add('hidden');
-    document.getElementById('co-panel').classList.remove('hidden');
-    applyProfTabs();
-    popCoSel();renderProfGlobal();renderListasPanel();
-  } else {
-    document.getElementById('pass-err').classList.remove('hidden');
+// ── USUÁRIOS, PERMISSÕES E GRUPOS DE ABAS ────────────────────────────────────
+// Estrutura da sidebar: cada grupo tem id, label e lista de abas (id+label).
+// Para adicionar nova aba: incluir aqui. Usuários NÃO-admin precisam ser editados
+// individualmente para receber acesso a abas novas (apenas admin vê automaticamente).
+const TAB_GROUPS=[
+  {id:'simulados',label:'Simulados',tabs:[
+    {id:'simulados',label:'📋 Simulados'},
+    {id:'trocas',label:'🔄 Trocas'},
+    {id:'extra',label:'✨ Solicitação Sim Extra'},
+    {id:'desempenho',label:'📊 Desempenho'},
+    {id:'checklist',label:'📝 Checklist'}
+  ]},
+  {id:'cadastros',label:'Cadastros',tabs:[
+    {id:'professores',label:'👨‍🏫 Professores'},
+    {id:'listas',label:'👥 Listas de Alunos'}
+  ]},
+  {id:'admin',label:'Administração',tabs:[
+    {id:'usuarios',label:'👤 Usuários'},
+    {id:'config',label:'⚙️ Configurações'}
+  ]}
+];
+const ALL_TABS=TAB_GROUPS.flatMap(g=>g.tabs.map(t=>t.id));
+
+// Labels customizáveis pelo admin (sobrescrevem os defaults de TAB_GROUPS)
+S.menuLabels={groups:{},tabs:{}};
+async function loadMenuLabels(){
+  try{
+    const s=await getDoc(doc(db,'config','menu'));
+    if(s.exists()){const d=s.data();S.menuLabels={groups:d.groups||{},tabs:d.tabs||{}};}
+  }catch(e){console.error('loadMenuLabels:',e);}
+}
+const groupLabel=g=>S.menuLabels.groups[g.id]||g.label;
+const tabLabel=t=>S.menuLabels.tabs[t.id]||t.label;
+
+async function loadUsuarios(){
+  const snap=await getDocs(collection(db,'usuarios'));
+  S.usuarios=snap.docs.map(d=>({id:d.id,...d.data()}));
+  if(!S.usuarios.length){
+    // Bootstrap: cria admin/aros2025 na primeira execução
+    await setDoc(doc(db,'usuarios','admin'),{username:'admin',senha:'aros2025',nome:'Administrador',role:'admin',permissoes:[]});
+    S.usuarios=[{id:'admin',username:'admin',senha:'aros2025',nome:'Administrador',role:'admin',permissoes:[]}];
+  }
+}
+
+// Lista de abas que o usuário vê. Admin sempre vê tudo. Usuários comuns: apenas o que está em permissoes[].
+function userTabs(u){
+  if(!u)return[];
+  if(u.role==='admin')return ALL_TABS;
+  if(Array.isArray(u.permissoes))return u.permissoes;
+  // Compat com cadastros antigos baseados em role 'coordenador'/'avaliador'
+  const legacy={coordenador:['simulados','trocas','professores','listas','desempenho'],avaliador:['checklist']};
+  return legacy[u.role]||[];
+}
+
+function userRoleLabel(u){
+  if(u.role==='admin')return'Administrador';
+  if(Array.isArray(u.permissoes))return`${u.permissoes.length} permiss${u.permissoes.length===1?'ão':'ões'}`;
+  return u.role||'Usuário';
+}
+
+// Renderiza a sidebar agrupada (lê permissões do usuário logado para esconder abas/grupos vazios)
+function renderSidebar(){
+  const container=document.getElementById('co-tabs-list');if(!container)return;
+  const allowed=new Set(userTabs(S.currentUser));
+  const collapsed=new Set(JSON.parse(localStorage.getItem('aros-sidebar-collapsed')||'[]'));
+  container.innerHTML=TAB_GROUPS.map(g=>{
+    const visibleTabs=g.tabs.filter(t=>allowed.has(t.id));
+    if(!visibleTabs.length)return '';
+    const isCollapsed=collapsed.has(g.id);
+    return`<div class="co-group${isCollapsed?' collapsed':''}" data-group="${g.id}">
+      <button class="co-group-header" onclick="toggleGroup('${g.id}')">
+        <span>${groupLabel(g)}</span><span class="co-caret">▾</span>
+      </button>
+      <div class="co-group-body">
+        ${visibleTabs.map(t=>`<button class="co-tab" data-tab="${t.id}" onclick="switchCoTab('${t.id}',this)">${tabLabel(t)}</button>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Renderiza form de edição de labels do menu (admin only)
+window.renderMenuLabelsForm=()=>{
+  const el=document.getElementById('menu-labels-form');if(!el)return;
+  el.innerHTML=TAB_GROUPS.map(g=>`
+    <div style="margin-bottom:18px;padding:12px;background:var(--bg3);border-radius:var(--rs);border:1px solid var(--border)">
+      <div class="fg" style="margin-bottom:10px">
+        <label class="fl">Grupo · padrão: "${g.label}"</label>
+        <input class="fc menu-grp-input" data-group="${g.id}" placeholder="${g.label}" value="${S.menuLabels.groups[g.id]||''}"/>
+      </div>
+      ${g.tabs.map(t=>`
+        <div class="fg" style="margin-bottom:8px;margin-left:14px">
+          <label class="fl" style="font-size:10px">Aba · padrão: "${t.label}"</label>
+          <input class="fc menu-tab-input" data-tab="${t.id}" placeholder="${t.label}" value="${S.menuLabels.tabs[t.id]||''}"/>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+};
+
+window.saveMenuLabels=async()=>{
+  if(S.currentUser?.role!=='admin'){alert('Apenas administradores podem alterar o menu.');return;}
+  const groups={},tabs={};
+  document.querySelectorAll('.menu-grp-input').forEach(i=>{const v=i.value.trim();if(v)groups[i.dataset.group]=v;});
+  document.querySelectorAll('.menu-tab-input').forEach(i=>{const v=i.value.trim();if(v)tabs[i.dataset.tab]=v;});
+  await setDoc(doc(db,'config','menu'),{groups,tabs});
+  S.menuLabels={groups,tabs};
+  renderSidebar();
+  // Re-aplica seleção da aba ativa para manter estado
+  const active=document.querySelector('.co-tab.on');
+  if(active){active.classList.add('on');}
+  const msg=document.getElementById('menu-labels-msg');
+  msg.className='al al-s';msg.textContent='✅ Menu atualizado.';msg.classList.remove('hidden');
+  setTimeout(()=>msg.classList.add('hidden'),2500);
+};
+
+window.resetMenuLabels=async()=>{
+  if(S.currentUser?.role!=='admin'){alert('Apenas administradores podem alterar o menu.');return;}
+  if(!confirm('Restaurar todos os nomes do menu para o padrão?'))return;
+  await setDoc(doc(db,'config','menu'),{groups:{},tabs:{}});
+  S.menuLabels={groups:{},tabs:{}};
+  renderMenuLabelsForm();renderSidebar();
+  const msg=document.getElementById('menu-labels-msg');
+  msg.className='al al-s';msg.textContent='✅ Nomes restaurados.';msg.classList.remove('hidden');
+  setTimeout(()=>msg.classList.add('hidden'),2500);
+};
+
+// ── SOLICITAÇÃO SIMULADO EXTRA ───────────────────────────────────────────────
+const SE_DIAS=['segunda','terca','quarta','quinta','sexta','sabado','domingo'];
+const SE_DIA_LABEL={segunda:'Segunda',terca:'Terça',quarta:'Quarta',quinta:'Quinta',sexta:'Sexta',sabado:'Sábado',domingo:'Domingo'};
+const SE_TURNO_LABEL={manha:'🌅 Manhã (07h–12h)',tarde:'☀️ Tarde (12h–17h)',noite:'🌙 Noite (18h–21h)'};
+
+async function loadSimExtra(){
+  // Config
+  try{
+    const s=await getDoc(doc(db,'config','simExtra'));
+    if(s.exists()){const d=s.data();S.simExtraCfg={...S.simExtraCfg,...d,alunosGratuitos:d.alunosGratuitos||[]};}
+  }catch(e){console.error('loadSimExtra cfg:',e);}
+  // Solicitações
+  try{
+    const snap=await getDocs(collection(db,'solicitacoesExtra'));
+    S.solicitacoesExtra=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){console.error('loadSimExtra reqs:',e);S.solicitacoesExtra=[];}
+}
+
+// === Aluno flow ===
+const _se={step:1,modo:'aluno',selected:null,emailConfirmado:'',opcoes:[{dia:'',turno:''}]};
+window._se=_se;// exposto pra inline handlers (escopo global)
+window.seSetOpt=(i,field,val)=>{if(_se.opcoes[i])_se.opcoes[i][field]=val;};
+
+window.openSimExtra=()=>{
+  _se.step=1;_se.modo='aluno';_se.selected=null;_se.emailConfirmado='';_se.opcoes=[{dia:'',turno:''}];
+  document.getElementById('se-search').value='';
+  document.getElementById('se-nome').value='';
+  document.getElementById('se-email').value='';
+  document.getElementById('se-confirm-email-wrap').innerHTML='';
+  seSwitchTab('aluno');seRenderStep();seFilterAlunos();
+  document.getElementById('modal-sim-extra').classList.remove('hidden');
+};
+
+window.seSwitchTab=(modo)=>{
+  _se.modo=modo;_se.selected=null;_se.emailConfirmado='';
+  document.getElementById('se-tab-aluno').classList.toggle('btn-p',modo==='aluno');
+  document.getElementById('se-tab-aluno').classList.toggle('btn-s',modo!=='aluno');
+  document.getElementById('se-tab-externo').classList.toggle('btn-p',modo==='externo');
+  document.getElementById('se-tab-externo').classList.toggle('btn-s',modo!=='externo');
+  document.getElementById('se-pane-aluno').classList.toggle('hidden',modo!=='aluno');
+  document.getElementById('se-pane-externo').classList.toggle('hidden',modo!=='externo');
+  document.getElementById('se-confirm-email-wrap').innerHTML='';
+  document.getElementById('se-err1').classList.add('hidden');
+};
+
+function seGetVigenteAlunos(){
+  const id=S.simExtraCfg.listaVigenteId;if(!id)return[];
+  const lista=S.listas.find(l=>l.id===id);return lista?(lista.alunos||[]):[];
+}
+
+window.seFilterAlunos=()=>{
+  const q=(document.getElementById('se-search').value||'').toLowerCase().trim();
+  const list=seGetVigenteAlunos();
+  const empty=document.getElementById('se-aluno-empty');
+  const container=document.getElementById('se-aluno-list');
+  if(!list.length){container.innerHTML='';empty.classList.remove('hidden');empty.textContent='Nenhuma lista vigente configurada. Use a opção "Não sou aluno".';return;}
+  const filtered=q?list.filter(a=>(a.nome||'').toLowerCase().includes(q)):list;
+  if(!filtered.length){container.innerHTML='';empty.classList.remove('hidden');empty.textContent='Nenhum aluno encontrado.';return;}
+  empty.classList.add('hidden');
+  // Mostra apenas o nome (sem matrícula nem e-mail)
+  container.innerHTML=filtered.slice(0,80).map(a=>`
+    <div class="se-aluno-item" data-mat="${a.matricula||''}" data-nome="${(a.nome||'').replace(/"/g,'&quot;')}" data-email="${(a.email||'').replace(/"/g,'&quot;')}" onclick="seSelectAluno(this)" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s;font-weight:600;font-size:14px" onmouseover="if(!this.classList.contains('on'))this.style.background='var(--bg3)'" onmouseout="if(!this.classList.contains('on'))this.style.background=''">
+      ${a.nome||'—'}
+    </div>`).join('');
+};
+
+window.seSelectAluno=(el)=>{
+  document.querySelectorAll('.se-aluno-item').forEach(x=>{x.classList.remove('on');x.style.background='';});
+  el.classList.add('on');el.style.background='var(--accent-dim)';
+  _se.selected={matricula:el.dataset.mat,nome:el.dataset.nome,email:el.dataset.email};
+  _se.emailConfirmado='';
+  // Mostra campo de confirmação por e-mail mascarado
+  const wrap=document.getElementById('se-confirm-email-wrap');
+  const masked=el.dataset.email?maskEmail(el.dataset.email):'';
+  if(masked){
+    wrap.innerHTML=`
+      <div class="fg" style="margin-top:14px;margin-bottom:0">
+        <label class="fl">Para confirmar, digite seu e-mail completo</label>
+        <input class="fc" id="se-confirm-email" placeholder="${masked}" autocomplete="email" oninput="_se.emailConfirmado=this.value"/>
+        <p style="font-size:11px;color:var(--t2);margin-top:4px">Dica: seu e-mail cadastrado começa por "<strong>${masked}</strong>"</p>
+      </div>`;
+  }else{
+    wrap.innerHTML=`<div class="al al-e" style="margin-top:14px">Este aluno não tem e-mail cadastrado. Use a opção "Não sou aluno".</div>`;
   }
 };
 
-function applyProfTabs(){
-  const allowed=S.cfg.profTabs||['simulados','trocas','professores','listas','desempenho','checklist'];
-  const allTabs=['simulados','trocas','professores','listas','desempenho','checklist','config'];
-  const tabBtns=document.querySelectorAll('.co-tab');
-  // Map tab buttons to their tab ids
-  const tabMap=['simulados','trocas','professores','listas','desempenho','checklist','config'];
-  tabBtns.forEach((btn,i)=>{
-    const tabId=tabMap[i];
-    btn.style.display=allowed.includes(tabId)?'':'none';
-  });
-  // Switch to professores tab by default for prof login
-  const firstAllowed=allowed.includes('professores')?'professores':(allowed[0]||'simulados');
-  const firstBtn=Array.from(tabBtns).find((_,i)=>tabMap[i]===firstAllowed);
-  if(firstBtn)switchCoTab(firstAllowed,firstBtn);
+function seValidStep1(){
+  const err=document.getElementById('se-err1');err.classList.add('hidden');
+  if(_se.modo==='aluno'){
+    if(!_se.selected){err.textContent='Selecione seu nome na lista.';err.classList.remove('hidden');return false;}
+    if(!_se.selected.email){err.textContent='Este aluno não tem e-mail cadastrado. Use a opção "Não sou aluno".';err.classList.remove('hidden');return false;}
+    const typed=(_se.emailConfirmado||'').trim().toLowerCase();
+    const reg=(_se.selected.email||'').toLowerCase();
+    if(!typed){err.textContent='Digite seu e-mail para confirmar.';err.classList.remove('hidden');return false;}
+    if(typed!==reg){err.innerHTML='❌ E-mail não confere com o cadastrado para <strong>'+_se.selected.nome+'</strong>.';err.classList.remove('hidden');return false;}
+  }else{
+    const nome=document.getElementById('se-nome').value.trim();
+    const email=document.getElementById('se-email').value.trim();
+    if(!nome||!email||!email.includes('@')){err.textContent='Preencha nome e um e-mail válido.';err.classList.remove('hidden');return false;}
+    _se.selected={nome,email,matricula:''};
+  }
+  return true;
 }
+
+function seRenderOptions(){
+  const c=document.getElementById('se-options');
+  c.innerHTML=_se.opcoes.map((o,i)=>`
+    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:end">
+      <div class="fg" style="flex:1;margin:0"><label class="fl">Dia ${i+1}</label>
+        <select class="fc" onchange="seSetOpt(${i},'dia',this.value)">
+          <option value="">— escolha —</option>
+          ${SE_DIAS.map(d=>`<option value="${d}" ${o.dia===d?'selected':''}>${SE_DIA_LABEL[d]}</option>`).join('')}
+        </select>
+      </div>
+      <div class="fg" style="flex:1;margin:0"><label class="fl">Turno</label>
+        <select class="fc" onchange="seSetOpt(${i},'turno',this.value)">
+          <option value="">— escolha —</option>
+          ${Object.keys(SE_TURNO_LABEL).map(t=>`<option value="${t}" ${o.turno===t?'selected':''}>${SE_TURNO_LABEL[t]}</option>`).join('')}
+        </select>
+      </div>
+      ${_se.opcoes.length>1?`<button class="btn btn-g btn-sm" onclick="seRemoveOption(${i})" style="padding:8px 10px">✕</button>`:''}
+    </div>`).join('');
+  document.getElementById('se-add-opt').style.display=_se.opcoes.length>=3?'none':'';
+}
+window.seAddOption=()=>{if(_se.opcoes.length<3){_se.opcoes.push({dia:'',turno:''});seRenderOptions();}};
+window.seRemoveOption=(i)=>{_se.opcoes.splice(i,1);seRenderOptions();};
+
+function seValidStep2(){
+  const err=document.getElementById('se-err2');err.classList.add('hidden');
+  const valid=_se.opcoes.filter(o=>o.dia&&o.turno);
+  if(!valid.length){err.textContent='Marque ao menos 1 opção (dia + turno).';err.classList.remove('hidden');return false;}
+  _se.opcoes=valid;return true;
+}
+
+function seClassifyTipo(){
+  if(_se.modo!=='aluno')return'externo';
+  const email=(_se.selected.email||'').toLowerCase();
+  const grat=(S.simExtraCfg.alunosGratuitos||[]).find(g=>(g.email||'').toLowerCase()===email);
+  if(grat&&(grat.quotaUsada||0)<grat.quotaTotal)return'aluno-gratuito';
+  return'aluno-pago';
+}
+
+function seRenderStep(){
+  const stepbar=[1,2,3].map(n=>{
+    const el=document.getElementById('se-st'+n);
+    el.classList.remove('active','done');
+    if(n<_se.step)el.classList.add('done');
+    if(n===_se.step)el.classList.add('active');
+  });
+  document.getElementById('se-step1').classList.toggle('hidden',_se.step!==1);
+  document.getElementById('se-step2').classList.toggle('hidden',_se.step!==2);
+  document.getElementById('se-step3').classList.toggle('hidden',_se.step!==3);
+  document.getElementById('se-back').style.display=_se.step>1?'':'none';
+  const next=document.getElementById('se-next');
+  if(_se.step===2)seRenderOptions();
+  if(_se.step===3){next.textContent='Confirmar solicitação';}
+  else if(_se.step===2){next.textContent='Continuar →';}
+  else{next.textContent='Continuar →';}
+  // Atualiza subtítulo
+  const sub=document.getElementById('se-sub');
+  sub.textContent=['Identifique-se para começar','Escolha seus dias e turnos','Revise e confirme'][_se.step-1]||'';
+}
+
+window.seBack=()=>{if(_se.step>1){_se.step--;seRenderStep();}};
+
+window.seNext=async()=>{
+  if(_se.step===1){if(!seValidStep1())return;_se.step=2;seRenderStep();return;}
+  if(_se.step===2){if(!seValidStep2())return;_se.step=3;seRenderStep();renderSeConfirmation();return;}
+  if(_se.step===3){await seSubmit();return;}
+};
+
+function renderSeConfirmation(){
+  const tipo=seClassifyTipo();
+  const opcsHtml=_se.opcoes.map(o=>`<li>${SE_DIA_LABEL[o.dia]||o.dia} · ${SE_TURNO_LABEL[o.turno]||o.turno}</li>`).join('');
+  const tipoBadge={'aluno-gratuito':'🎟️ Cota gratuita · sem pagamento','aluno-pago':'💳 Pagamento será solicitado em seguida','externo':'💳 Pagamento será solicitado em seguida'}[tipo];
+  document.getElementById('se-confirmation').innerHTML=`
+    <div style="background:var(--bg3);border-radius:var(--rs);padding:14px;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--t2);font-weight:700;text-transform:uppercase;margin-bottom:4px">Solicitante</div>
+      <div style="font-weight:700">${_se.selected.nome}</div>
+      <div style="font-size:13px;color:var(--t2)">${_se.selected.email}${_se.modo==='aluno'?' · aluno cadastrado':' · externo'}</div>
+    </div>
+    <div style="background:var(--bg3);border-radius:var(--rs);padding:14px;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--t2);font-weight:700;text-transform:uppercase;margin-bottom:6px">Opções de horário</div>
+      <ul style="margin-left:18px;font-size:14px">${opcsHtml}</ul>
+    </div>
+    <div style="background:var(--accent-dim);border:1px solid var(--accent);border-radius:var(--rs);padding:14px;font-size:13px">
+      ${tipoBadge}
+    </div>`;
+}
+
+// Anexa identificador da solicitação no link (Hotmart "xcod" volta no webhook)
+function appendTrackingToLink(url,id){
+  if(!url||!url.startsWith('http'))return url;
+  try{const u=new URL(url);u.searchParams.set('xcod',id);return u.toString();}catch(e){return url;}
+}
+
+async function seSubmit(){
+  const tipo=seClassifyTipo();
+  const id='se_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+  // Gratuitos não passam por pagamento — vão direto pra "pago" e aguardam o professor agendar
+  const initialStatus=tipo==='aluno-gratuito'?'pago':'aguardando-pagamento';
+  const data={
+    id,nome:_se.selected.nome,email:(_se.selected.email||'').toLowerCase(),matricula:_se.selected.matricula||'',
+    isAluno:_se.modo==='aluno',tipo,opcoes:_se.opcoes,status:initialStatus,
+    createdAt:new Date().toISOString()
+  };
+  await setDoc(doc(db,'solicitacoesExtra',id),data);
+  // Incrementa quota usada se gratuita
+  if(tipo==='aluno-gratuito'){
+    const list=S.simExtraCfg.alunosGratuitos||[];
+    const idx=list.findIndex(g=>(g.email||'').toLowerCase()===data.email);
+    if(idx>=0){list[idx].quotaUsada=(list[idx].quotaUsada||0)+1;await setDoc(doc(db,'config','simExtra'),S.simExtraCfg);}
+  }
+  // Slack só notifica na criação se for cota gratuita (pagos esperam confirmação do pagamento)
+  if(tipo==='aluno-gratuito')notifySlackNewSimExtra({id,...data});
+  S.solicitacoesExtra.push({id,...data});
+  // Tela final
+  const cfg=S.simExtraCfg;
+  const rawLink={'aluno-gratuito':cfg.linkGratuito||'','aluno-pago':cfg.linkPagoAluno||'','externo':cfg.linkPagoExterno||''}[tipo];
+  const finalLink=appendTrackingToLink(rawLink,id);
+  let body;
+  if(tipo==='aluno-gratuito'){
+    const linkBlock=finalLink.startsWith('http')?`<a href="${finalLink}" target="_blank" rel="noopener" class="btn btn-p" style="margin-top:14px;text-decoration:none;display:inline-block">Acessar instruções</a>`:(rawLink?`<div style="background:var(--bg3);padding:14px;border-radius:var(--rs);margin-top:14px;white-space:pre-wrap;font-size:13px;text-align:left">${rawLink}</div>`:'');
+    body=`<div style="text-align:center;padding:18px 0">
+      <div style="font-size:48px;margin-bottom:10px">🎟️</div>
+      <h3 style="font-family:Fraunces,serif;font-size:20px;margin-bottom:8px">Solicitação registrada (gratuita)!</h3>
+      <p style="color:var(--t2);font-size:14px;max-width:420px;margin:0 auto">Você usou uma cota gratuita. O professor entrará em contato em até <strong>24 horas</strong> para agendar a aplicação.</p>
+      ${linkBlock}
+    </div>`;
+  }else{
+    const linkBtn=finalLink.startsWith('http')?`<a href="${finalLink}" target="_blank" rel="noopener" class="btn btn-p" style="margin-top:6px;text-decoration:none;display:inline-block">💳 Efetuar pagamento</a>`:`<div style="color:var(--t2);font-size:13px;margin-top:6px">(link de pagamento ainda não configurado — entre em contato com a coordenação)</div>`;
+    body=`<div style="text-align:center;padding:18px 0">
+      <div style="font-size:48px;margin-bottom:10px">✅</div>
+      <h3 style="font-family:Fraunces,serif;font-size:20px;margin-bottom:8px">Solicitação registrada!</h3>
+      <p style="color:var(--t2);font-size:14px;max-width:440px;margin:0 auto 14px">Para concluir, finalize o pagamento no link abaixo. Assim que o pagamento for registrado, o professor entrará em contato em até <strong>24 horas</strong> para agendar a aplicação.</p>
+      ${linkBtn}
+      <p style="color:var(--t3);font-size:11px;margin-top:14px;max-width:420px;margin-left:auto;margin-right:auto">Status atual: <strong>aguardando pagamento</strong>. Você pode fechar esta janela — sua solicitação já foi registrada.</p>
+    </div>`;
+  }
+  document.querySelector('#modal-sim-extra .m-body').innerHTML=body;
+  document.querySelector('#modal-sim-extra .m-foot').innerHTML=`<button class="btn btn-p" onclick="CM('modal-sim-extra')">Fechar</button>`;
+}
+
+// === Slack ===
+function notifySlackNewSimExtra(req){
+  const url=S.simExtraCfg.slackWebhook;if(!url)return;
+  const opcs=req.opcoes.map(o=>`${SE_DIA_LABEL[o.dia]||o.dia} ${SE_TURNO_LABEL[o.turno]||o.turno}`).join(' · ');
+  const text=`🎟️ *Nova solicitação · Cota Gratuita · Simulado Extra*\n• Nome: *${req.nome}*\n• E-mail: ${req.email}\n• Opções: ${opcs}\n• Próximo passo: agendar com o aluno`;
+  fetch(url,{method:'POST',mode:'no-cors',body:JSON.stringify({text})}).catch(e=>console.warn('Slack:',e));
+}
+function notifySlackPaymentReceived(req){
+  const url=S.simExtraCfg.slackWebhook;if(!url)return;
+  const opcs=(req.opcoes||[]).map(o=>`${SE_DIA_LABEL[o.dia]||o.dia} ${SE_TURNO_LABEL[o.turno]||o.turno}`).join(' · ');
+  const text=`💰 *Pagamento confirmado · Simulado Extra*\n• Nome: *${req.nome}*\n• E-mail: ${req.email}\n• Opções: ${opcs}\n• Próximo passo: agendar com o aluno`;
+  fetch(url,{method:'POST',mode:'no-cors',body:JSON.stringify({text})}).catch(e=>console.warn('Slack:',e));
+}
+
+// === Coord flow ===
+window.renderSolicitacoesExtra=()=>{
+  const el=document.getElementById('solicitacoes-extra-list');if(!el)return;
+  const f=document.getElementById('se-filter-status').value;
+  // Compat: solicitações antigas com status='pendente' mapeiam pra 'aguardando-pagamento'
+  const list=[...S.solicitacoesExtra]
+    .map(s=>({...s,status:s.status==='pendente'?'aguardando-pagamento':s.status}))
+    .filter(s=>f==='todos'||s.status===f)
+    .sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  if(!list.length){el.innerHTML='<p style="color:var(--t2);font-size:13px;padding:8px">Nenhuma solicitação.</p>';return;}
+  el.innerHTML=list.map(s=>{
+    const opcs=(s.opcoes||[]).map(o=>`${SE_DIA_LABEL[o.dia]||o.dia} ${SE_TURNO_LABEL[o.turno]||o.turno}`).join(' · ');
+    const tipoBadge={'aluno-gratuito':'<span class="badge b-pend">gratuito</span>','aluno-pago':'<span class="badge b-conf">aluno</span>','externo':'<span class="badge b-swap">externo</span>'}[s.tipo]||'';
+    const statusBadge={
+      'aguardando-pagamento':'<span class="badge b-pend">💳 aguardando pagamento</span>',
+      'pago':'<span class="badge b-match">💰 pago · aguardando agendamento</span>',
+      'efetivada':'<span class="badge b-conf">✔ efetivada</span>',
+      'cancelada':'<span class="badge b-abs">✗ cancelada</span>'
+    }[s.status]||'';
+    let acts='';
+    if(s.status==='aguardando-pagamento'){
+      acts=`<button class="btn btn-s btn-sm" onclick="setSolicitacaoStatus('${s.id}','pago')" title="Marcar pagamento como recebido manualmente">💰 Marcar pago</button>
+            <button class="btn btn-d btn-sm" onclick="setSolicitacaoStatus('${s.id}','cancelada')">✗ Cancelar</button>`;
+    }else if(s.status==='pago'){
+      acts=`<button class="btn btn-s btn-sm" onclick="setSolicitacaoStatus('${s.id}','efetivada')">✓ Efetivar</button>
+            <button class="btn btn-d btn-sm" onclick="setSolicitacaoStatus('${s.id}','cancelada')">✗ Cancelar</button>`;
+    }else{
+      acts=`<button class="btn btn-g btn-sm" onclick="setSolicitacaoStatus('${s.id}','aguardando-pagamento')">↺ Reabrir</button>
+            <button class="btn btn-d btn-sm" onclick="deleteSolicitacao('${s.id}')">🗑️</button>`;
+    }
+    const paidInfo=s.paidAt?`<div style="font-size:11px;color:var(--green);margin-top:2px">💰 Pagamento registrado em ${fDT(s.paidAt)}${s.paidVia?` · via ${s.paidVia}`:''}</div>`:'';
+    return`<div class="aluno-row" style="align-items:flex-start">
+      <div style="flex:1;min-width:220px">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><strong>${s.nome}</strong> ${statusBadge} ${tipoBadge}</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:2px">${s.email}${s.matricula?` · ${s.matricula}`:''}</div>
+        <div style="font-size:13px;margin-top:4px">${opcs}</div>
+        <div style="font-size:11px;color:var(--t2);margin-top:2px">Criada em ${s.createdAt?fDT(s.createdAt):''}</div>
+        ${paidInfo}
+      </div>
+      <div class="aluno-acts">${acts}</div>
+    </div>`;
+  }).join('');
+};
+
+window.setSolicitacaoStatus=async(id,status)=>{
+  const update={status,updatedAt:new Date().toISOString()};
+  if(status==='pago'){update.paidAt=new Date().toISOString();update.paidVia='manual';}
+  await updateDoc(doc(db,'solicitacoesExtra',id),update);
+  const s=S.solicitacoesExtra.find(x=>x.id===id);if(s)Object.assign(s,update);
+  // Notifica Slack quando pagamento for marcado manualmente
+  if(status==='pago'&&s)notifySlackPaymentReceived(s);
+  renderSolicitacoesExtra();
+};
+window.deleteSolicitacao=async(id)=>{
+  if(!confirm('Apagar esta solicitação? Ação não pode ser desfeita.'))return;
+  await deleteDoc(doc(db,'solicitacoesExtra',id));
+  S.solicitacoesExtra=S.solicitacoesExtra.filter(x=>x.id!==id);
+  renderSolicitacoesExtra();
+};
+
+// === Config: links, slack, vigente ===
+window.renderSimExtraCfg=()=>{
+  const cfg=S.simExtraCfg;
+  // Lista vigente dropdown
+  const sel=document.getElementById('se-lista-vigente');
+  if(sel){
+    sel.innerHTML='<option value="">— Nenhuma lista vigente —</option>'+S.listas.map(l=>`<option value="${l.id}" ${cfg.listaVigenteId===l.id?'selected':''}>${l.nome} (${(l.alunos||[]).length} alunos)</option>`).join('');
+  }
+  document.getElementById('se-link-aluno').value=cfg.linkPagoAluno||'';
+  document.getElementById('se-link-externo').value=cfg.linkPagoExterno||'';
+  document.getElementById('se-link-gratuito').value=cfg.linkGratuito||'';
+  document.getElementById('se-slack').value=cfg.slackWebhook||'';
+  renderGratuitos();renderSolicitacoesExtra();
+};
+
+window.saveSimExtraCfg=async()=>{
+  S.simExtraCfg={
+    ...S.simExtraCfg,
+    listaVigenteId:document.getElementById('se-lista-vigente').value,
+    linkPagoAluno:document.getElementById('se-link-aluno').value.trim(),
+    linkPagoExterno:document.getElementById('se-link-externo').value.trim(),
+    linkGratuito:document.getElementById('se-link-gratuito').value.trim(),
+    slackWebhook:document.getElementById('se-slack').value.trim()
+  };
+  await setDoc(doc(db,'config','simExtra'),S.simExtraCfg);
+  const msg=document.getElementById('se-cfg-msg');
+  msg.className='al al-s';msg.textContent='✅ Salvo';msg.classList.remove('hidden');
+  setTimeout(()=>msg.classList.add('hidden'),2000);
+};
+
+// === Alunos gratuitos CRUD ===
+function renderGratuitos(){
+  const el=document.getElementById('se-gratuitos-list');if(!el)return;
+  const list=S.simExtraCfg.alunosGratuitos||[];
+  if(!list.length){el.innerHTML='<p style="color:var(--t2);font-size:13px;padding:8px">Nenhum aluno cadastrado com cota gratuita.</p>';return;}
+  el.innerHTML=list.map((g,i)=>{
+    const restantes=Math.max(0,(g.quotaTotal||0)-(g.quotaUsada||0));
+    return`<div class="aluno-row">
+      <div style="flex:1;min-width:200px">
+        <div style="font-weight:700;font-size:14px">${g.nome||g.email}</div>
+        <div style="font-size:12px;color:var(--t2)">${g.email} · ${g.quotaUsada||0}/${g.quotaTotal||0} usadas (${restantes} restantes)</div>
+      </div>
+      <div class="aluno-acts">
+        <button class="btn btn-s btn-sm" onclick="openSimExtraGratuitoModal(${i})">✏️ Editar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.openSimExtraGratuitoModal=(idx)=>{
+  const isEdit=typeof idx==='number';
+  const g=isEdit?S.simExtraCfg.alunosGratuitos[idx]:null;
+  document.getElementById('mg-title').textContent=isEdit?'Editar cota gratuita':'Nova cota gratuita';
+  document.getElementById('mg-email').value=g?.email||'';
+  document.getElementById('mg-email').disabled=isEdit;
+  document.getElementById('mg-nome').value=g?.nome||'';
+  document.getElementById('mg-quota').value=g?.quotaTotal||1;
+  document.getElementById('mg-usada').value=g?.quotaUsada||0;
+  document.getElementById('mg-usada-wrap').style.display=isEdit?'':'none';
+  document.getElementById('mg-err').classList.add('hidden');
+  document.getElementById('mg-del').style.display=isEdit?'':'none';
+  document.getElementById('modal-grat').dataset.idx=isEdit?idx:'';
+  document.getElementById('modal-grat').classList.remove('hidden');
+};
+
+window.saveGratuito=async()=>{
+  const idxStr=document.getElementById('modal-grat').dataset.idx;
+  const idx=idxStr===''?-1:parseInt(idxStr);
+  const email=document.getElementById('mg-email').value.trim().toLowerCase();
+  const nome=document.getElementById('mg-nome').value.trim();
+  const quotaTotal=parseInt(document.getElementById('mg-quota').value)||0;
+  const quotaUsada=parseInt(document.getElementById('mg-usada').value)||0;
+  const err=document.getElementById('mg-err');
+  if(!email||!email.includes('@')){err.textContent='E-mail válido obrigatório.';err.classList.remove('hidden');return;}
+  if(quotaTotal<1){err.textContent='Quantidade deve ser ≥ 1.';err.classList.remove('hidden');return;}
+  const list=[...(S.simExtraCfg.alunosGratuitos||[])];
+  if(idx<0&&list.some(g=>(g.email||'').toLowerCase()===email)){err.textContent='Já existe entrada com este e-mail.';err.classList.remove('hidden');return;}
+  const entry={email,nome:nome||email,quotaTotal,quotaUsada};
+  if(idx>=0)list[idx]=entry;else list.push(entry);
+  S.simExtraCfg.alunosGratuitos=list;
+  await setDoc(doc(db,'config','simExtra'),S.simExtraCfg);
+  CM('modal-grat');renderGratuitos();
+};
+
+window.deleteGratuito=async()=>{
+  const idx=parseInt(document.getElementById('modal-grat').dataset.idx);
+  if(isNaN(idx))return;
+  if(!confirm('Remover esta entrada?'))return;
+  const list=[...(S.simExtraCfg.alunosGratuitos||[])];
+  list.splice(idx,1);
+  S.simExtraCfg.alunosGratuitos=list;
+  await setDoc(doc(db,'config','simExtra'),S.simExtraCfg);
+  CM('modal-grat');renderGratuitos();
+};
+
+window.toggleGroup=(gid)=>{
+  const el=document.querySelector(`.co-group[data-group="${gid}"]`);if(!el)return;
+  el.classList.toggle('collapsed');
+  const collapsed=Array.from(document.querySelectorAll('.co-group.collapsed')).map(e=>e.dataset.group);
+  localStorage.setItem('aros-sidebar-collapsed',JSON.stringify(collapsed));
+};
+
+function applyTabsByRole(){
+  if(!S.currentUser)return;
+  renderSidebar();
+  const allowed=userTabs(S.currentUser);
+  // Atualiza box de usuário no rodapé da sidebar
+  const info=document.getElementById('co-user-info');
+  if(info)info.innerHTML=`<strong>${S.currentUser.nome||S.currentUser.username}</strong>${userRoleLabel(S.currentUser)}`;
+  // Botão "+ Novo Simulado" só faz sentido para quem tem aba simulados
+  const btnNovo=document.getElementById('btn-novo-sim');
+  if(btnNovo)btnNovo.style.display=allowed.includes('simulados')?'':'none';
+  // Seleciona primeira aba permitida
+  const firstAllowed=allowed[0];
+  if(firstAllowed){
+    const firstBtn=document.querySelector(`.co-tab[data-tab="${firstAllowed}"]`);
+    if(firstBtn)switchCoTab(firstAllowed,firstBtn);
+  }
+}
+
+window.checkPass=async()=>{
+  const usernameEl=document.getElementById('co-user');
+  const passEl=document.getElementById('co-pass');
+  const errEl=document.getElementById('pass-err');
+  const username=(usernameEl?.value||'').trim().toLowerCase();
+  const senha=passEl?.value||'';
+  if(!username||!senha){errEl.textContent='Preencha usuário e senha.';errEl.classList.remove('hidden');return;}
+  // Recarrega usuários antes de validar (pega criações recentes em outras abas)
+  try{await loadUsuarios();}catch(e){console.error(e);}
+  const u=S.usuarios.find(x=>(x.username||x.id||'').toLowerCase()===username&&x.senha===senha);
+  if(!u){errEl.textContent='Usuário ou senha incorretos.';errEl.classList.remove('hidden');return;}
+  errEl.classList.add('hidden');
+  S.currentUser=u;S.unlocked=true;S.profUnlocked=u.role==='avaliador';
+  document.getElementById('co-login').classList.add('hidden');
+  document.getElementById('co-panel').classList.remove('hidden');
+  applyTabsByRole();
+  popCoSel();renderProfGlobal();renderListasPanel();renderUsuarios();
+};
+
+window.logout=()=>{
+  S.currentUser=null;S.unlocked=false;S.profUnlocked=false;
+  document.getElementById('co-panel').classList.add('hidden');
+  document.getElementById('co-login').classList.remove('hidden');
+  const u=document.getElementById('co-user');if(u)u.value='';
+  const p=document.getElementById('co-pass');if(p)p.value='';
+};
+
+// ── CRUD USUÁRIOS ────────────────────────────────────────────────────────────
+function renderUsuarios(){
+  const el=document.getElementById('users-list');if(!el)return;
+  if(!S.usuarios.length){el.innerHTML='<p style="color:var(--t2);font-size:13px">Nenhum usuário cadastrado.</p>';return;}
+  const sorted=[...S.usuarios].sort((a,b)=>{
+    // Admins primeiro, depois alfabético
+    const ad=(a.role==='admin'?0:1)-(b.role==='admin'?0:1);
+    return ad!==0?ad:(a.username||'').localeCompare(b.username||'','pt-BR');
+  });
+  el.innerHTML=sorted.map(u=>{
+    const isMe=S.currentUser&&u.id===S.currentUser.id;
+    const isAdmin=u.role==='admin';
+    const tabs=userTabs(u);
+    const badge=isAdmin?'<span class="badge b-swap">admin · acesso total</span>':`<span class="badge b-conf">${tabs.length} ${tabs.length===1?'aba':'abas'}</span>`;
+    const tabsList=isAdmin?'todas as abas (inclusive futuras)':tabs.map(t=>{
+      const tabDef=TAB_GROUPS.flatMap(g=>g.tabs).find(x=>x.id===t);return tabDef?tabLabel(tabDef):t;
+    }).join(', ')||'<em style="color:var(--t3)">nenhuma</em>';
+    return`<div class="aluno-row">
+      <div style="flex:1;min-width:200px">
+        <div style="font-weight:700;font-size:14px">${u.nome||u.username} ${isMe?'<span style="color:var(--accent);font-size:11px;font-weight:600">(você)</span>':''}</div>
+        <div style="color:var(--t2);font-size:12px;margin-top:2px">@${u.username||u.id} · ${badge}</div>
+        <div style="color:var(--t2);font-size:11px;margin-top:4px">${tabsList}</div>
+      </div>
+      <div class="aluno-acts">
+        <button class="btn btn-s btn-sm" onclick="openUserModal('${u.id}')">✏️ Editar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.openUserModal=(id)=>{
+  const isEdit=!!id;
+  const u=isEdit?S.usuarios.find(x=>x.id===id):null;
+  document.getElementById('mu-title').textContent=isEdit?'Editar usuário':'Novo usuário';
+  document.getElementById('mu-username').value=u?.username||'';
+  document.getElementById('mu-username').disabled=isEdit;// não permite mudar username (é o doc id)
+  document.getElementById('mu-nome').value=u?.nome||'';
+  document.getElementById('mu-senha').value=u?.senha||'';
+  const isAdmin=u?.role==='admin';
+  document.getElementById('mu-admin').checked=isAdmin;
+  // Monta grid de checkboxes a partir de TAB_GROUPS
+  const userPerms=new Set(userTabs(u));
+  const grid=document.getElementById('mu-perms-grid');
+  grid.innerHTML=TAB_GROUPS.map(g=>`
+    <div style="margin-bottom:8px">
+      <div style="font-size:10px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">${groupLabel(g)}</div>
+      ${g.tabs.map(t=>`<label style="display:flex;align-items:center;gap:8px;padding:5px 8px;cursor:pointer;border-radius:6px" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background=''">
+        <input type="checkbox" class="mu-perm" value="${t.id}" ${isAdmin||userPerms.has(t.id)?'checked':''} style="width:14px;height:14px;cursor:pointer"/>
+        <span style="font-size:13px">${tabLabel(t)}</span>
+      </label>`).join('')}
+    </div>
+  `).join('');
+  toggleAdminMode();
+  document.getElementById('mu-err').classList.add('hidden');
+  const delBtn=document.getElementById('mu-del');
+  // Não deixa apagar o próprio usuário logado
+  delBtn.style.display=isEdit&&S.currentUser?.id!==id?'':'none';
+  delBtn.dataset.id=id||'';
+  document.getElementById('modal-user').dataset.editId=id||'';
+  document.getElementById('modal-user').classList.remove('hidden');
+};
+
+// Quando "Administrador" está marcado, o grid de permissões fica desabilitado (admin tem tudo)
+window.toggleAdminMode=()=>{
+  const isAdmin=document.getElementById('mu-admin').checked;
+  const wrap=document.getElementById('mu-perms-wrap');
+  wrap.style.opacity=isAdmin?'.45':'1';
+  wrap.style.pointerEvents=isAdmin?'none':'auto';
+  if(isAdmin)document.querySelectorAll('.mu-perm').forEach(c=>c.checked=true);
+};
+
+window.saveUser=async()=>{
+  const editId=document.getElementById('modal-user').dataset.editId||'';
+  const username=document.getElementById('mu-username').value.trim().toLowerCase();
+  const nome=document.getElementById('mu-nome').value.trim();
+  const senha=document.getElementById('mu-senha').value;
+  const isAdmin=document.getElementById('mu-admin').checked;
+  const permissoes=isAdmin?[]:Array.from(document.querySelectorAll('.mu-perm:checked')).map(c=>c.value);
+  const errEl=document.getElementById('mu-err');
+  if(!username||!senha){errEl.textContent='Preencha usuário e senha.';errEl.classList.remove('hidden');return;}
+  if(!/^[a-z0-9._-]+$/.test(username)){errEl.textContent='Usuário só pode ter letras minúsculas, números, ponto, traço ou underline.';errEl.classList.remove('hidden');return;}
+  if(!editId&&S.usuarios.some(u=>(u.username||u.id)===username)){errEl.textContent='Já existe um usuário com esse nome.';errEl.classList.remove('hidden');return;}
+  if(!isAdmin&&!permissoes.length){errEl.textContent='Marque ao menos uma permissão (ou ative Administrador).';errEl.classList.remove('hidden');return;}
+  const data={username,nome:nome||username,senha,role:isAdmin?'admin':'user',permissoes};
+  await setDoc(doc(db,'usuarios',username),data);
+  await loadUsuarios();
+  // Se editou o próprio usuário logado, atualiza S.currentUser e re-aplica permissões
+  if(editId&&S.currentUser?.id===editId){
+    S.currentUser=S.usuarios.find(u=>u.id===username)||S.currentUser;
+    applyTabsByRole();
+  }
+  CM('modal-user');renderUsuarios();
+};
+
+window.deleteUser=async()=>{
+  const id=document.getElementById('mu-del').dataset.id;
+  if(!id)return;
+  if(S.currentUser?.id===id){alert('Você não pode apagar o próprio usuário enquanto está logado.');return;}
+  const u=S.usuarios.find(x=>x.id===id);if(!u)return;
+  if(!confirm(`Apagar usuário "${u.nome||u.username}"? Esta ação não pode ser desfeita.`))return;
+  // Não permite apagar o último admin
+  const admins=S.usuarios.filter(x=>x.role==='admin');
+  if(u.role==='admin'&&admins.length<=1){alert('Não é possível apagar o único administrador.');return;}
+  await deleteDoc(doc(db,'usuarios',id));
+  await loadUsuarios();
+  CM('modal-user');renderUsuarios();
+};
 
 // co tabs
 window.switchCoTab=(tab,btn)=>{
-  ['simulados','trocas','professores','listas','desempenho','checklist','config'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
+  ['simulados','trocas','professores','listas','desempenho','checklist','config','usuarios','extra'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
   document.querySelectorAll('.co-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   // Show "Novo Simulado" only on simulados tab
   const btnNovo=document.getElementById('btn-novo-sim');
   if(btnNovo)btnNovo.style.display=tab==='simulados'?'':'none';
+  if(tab==='usuarios')renderUsuarios();
   // Show sim selector in trocas tab if no sim selected
   if(tab==='trocas'){
     const noSim=document.getElementById('trocas-no-sim');
@@ -1434,6 +2315,47 @@ function renderSimCards(){
   if(!futures.length){wrap.innerHTML='<div class="es"><div class="ei">📭</div><p>Nenhum simulado com datas futuras disponível.</p></div>';return;}
   wrap.innerHTML='<h2 style="font-family:Fraunces,serif;font-size:20px;font-weight:700;margin-bottom:16px">Simulados Disponíveis</h2>'+
     '<div class="sim-cards">'+futures.map(s=>simCardHTML(s)).join('')+'</div>';
+  // Carrega stats em paralelo e injeta a barra de cada card sem re-render completo
+  futures.forEach(s=>loadSimStats(s.id).then(stats=>renderSimProgressBar(s.id,stats)).catch(e=>console.error('stats:',e)));
+}
+
+// Sempre busca fresh — barra precisa refletir respostas recentes
+async function loadSimStats(simId){
+  const snap=await getDocs(collection(db,`simulados/${simId}/alunos`));
+  const stats={confirmed:0,swap:0,absent:0,pending:0,total:0};
+  snap.docs.forEach(d=>{
+    const a=d.data();stats.total++;
+    if(a.status==='confirmed')stats.confirmed++;
+    else if(a.status==='swap')stats.swap++;
+    else if(a.status==='absent')stats.absent++;
+    else stats.pending++;
+  });
+  S.simStats[simId]=stats;return stats;
+}
+
+function renderSimProgressBar(simId,stats){
+  const el=document.getElementById(`sim-stats-${simId}`);if(!el)return;
+  if(!stats.total){el.innerHTML='<div style="font-size:11px;color:var(--t2);margin-top:4px">Nenhum aluno cadastrado neste simulado.</div>';return;}
+  const responded=stats.confirmed+stats.swap+stats.absent;
+  const pct=Math.round((responded/stats.total)*100);
+  const w=n=>`${(n/stats.total*100).toFixed(2)}%`;
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-top:4px">
+      <span style="font-weight:600">${responded} de ${stats.total} responderam</span>
+      <span style="color:var(--t2);font-weight:700">${pct}%</span>
+    </div>
+    <div class="sim-progress">
+      ${stats.confirmed?`<div style="width:${w(stats.confirmed)};background:var(--green)"></div>`:''}
+      ${stats.swap?`<div style="width:${w(stats.swap)};background:var(--yellow)"></div>`:''}
+      ${stats.absent?`<div style="width:${w(stats.absent)};background:var(--red)"></div>`:''}
+      ${stats.pending?`<div style="width:${w(stats.pending)};background:var(--bg4)"></div>`:''}
+    </div>
+    <div class="sim-progress-legend">
+      ${stats.confirmed?`<span><i style="background:var(--green)"></i>${stats.confirmed} confirmados</span>`:''}
+      ${stats.swap?`<span><i style="background:var(--yellow)"></i>${stats.swap} aguardando troca</span>`:''}
+      ${stats.absent?`<span><i style="background:var(--red)"></i>${stats.absent} ausentes</span>`:''}
+      ${stats.pending?`<span><i style="background:var(--bg4)"></i>${stats.pending} pendentes</span>`:''}
+    </div>`;
 }
 
 function simCardHTML(sim){
@@ -1441,9 +2363,24 @@ function simCardHTML(sim){
   const dl=sim.deadline?new Date(sim.deadline):null;
   const msLeft=dl?dl-now:null;
   const exp=msLeft!==null&&msLeft<0;
-  const near=msLeft!==null&&msLeft>0&&msLeft<48*3600000;
   let dlHTML='';
-  if(dl){const cls=exp?'dl-exp':near?'dl-near':'dl-ok';const icon=exp?'🔒':near?'⚡':'⏰';dlHTML=`<div class="sim-deadline ${cls}" style="margin-top:10px">${icon} ${exp?'Prazo encerrado':'Confirme até'} ${fDT(sim.deadline)}</div>`;}
+  if(dl){
+    const oneDay=24*3600000;
+    const daysLeft=Math.ceil(msLeft/oneDay);
+    const urgent=!exp&&daysLeft<=5;
+    const cls=exp||urgent?'dl-exp':'dl-ok';
+    const icon=exp?'🔒':'⏰';
+    const dataStr=fD((sim.deadline||'').split('T')[0]);
+    let counter;
+    if(exp)counter='Prazo encerrado';
+    else if(daysLeft<=0)counter='Encerra hoje!';
+    else if(daysLeft===1)counter='Falta 1 dia para encerrar!';
+    else counter=`Faltam ${daysLeft} dias para encerrar!`;
+    dlHTML=`<div class="sim-deadline ${cls}" style="margin-top:10px;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 12px">
+      <div>${icon} Data limite para confirmar: ${dataStr}</div>
+      <div style="font-size:11px;font-weight:700;opacity:.92">${counter}</div>
+    </div>`;
+  }
   return`<div class="sim-card" onclick="openEscala('${sim.id}')">
     <div class="sim-card-title">${sim.nome}</div>
     <div class="sim-date-row">
@@ -1451,6 +2388,7 @@ function simCardHTML(sim){
       ${sim.dataDom?`<div class="sim-date-chip"><div class="lbl">Domingo</div><div class="val">${fD(sim.dataDom)}</div></div>`:''}
     </div>
     ${dlHTML}
+    <div id="sim-stats-${sim.id}" style="margin-top:10px"></div>
     ${sim.msg?`<p style="font-size:12px;color:var(--t2);margin-top:8px">${sim.msg}</p>`:''}
   </div>`;
 }
@@ -1498,7 +2436,7 @@ function renderNotGoingPanel(containerId,exp,isCoord){
   }).join('');
   el.innerHTML=`<details class="card" style="overflow:visible">
     <summary style="padding:14px 20px;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:revert">
-      <span style="font-family:Fraunces,serif;font-size:16px;font-weight:600">❌ Não vão participar</span>
+      <span style="font-family:Fraunces,serif;font-size:16px;font-weight:600">❌ Ausentes</span>
       <span class="badge b-abs">${naoVao.length}</span>
     </summary>
     <div style="padding:0 20px 16px 20px;border-top:1px solid var(--border)">
@@ -2456,12 +3394,7 @@ window.deleteSim=async()=>{
 
 // WIZARD
 window.openNewSimAuth=()=>{
-  // If professor access, require coordinator password
-  if(S.profUnlocked){
-    const pwd=prompt('Para criar um novo simulado, digite a senha de administrador:');
-    if(pwd===null)return;
-    if(pwd!==S.cfg.password){alert('Senha incorreta.');return;}
-  }
+  if(!userTabs(S.currentUser).includes('simulados')){alert('Você não tem permissão para criar simulados.');return;}
   openNewSim();
 };
 
@@ -3273,6 +4206,7 @@ window.switchCoTab = (tab, btn) => {
   if(tab==='desempenho'){ popDesempLista(); setTimeout(()=>renderDesempenho(),50); }
   if(tab==='checklist') initChecklistTab();
   if(tab==='professores') window._initProfTab();
+  if(tab==='extra') renderSimExtraCfg();
 };
 
 
@@ -4600,11 +5534,7 @@ window.switchBlocoEdit=(bloco,btn)=>{
 };
 
 window.openCkTemplateEditorAuth=()=>{
-  if(S.profUnlocked){
-    const pwd=prompt('Para configurar o checklist, digite a senha de administrador:');
-    if(pwd===null)return;
-    if(pwd!==S.cfg.password){alert('Senha incorreta.');return;}
-  }
+  if(S.currentUser?.role!=='admin'){alert('Apenas administradores podem configurar o checklist.');return;}
   openCkTemplateEditor();
 };
 
