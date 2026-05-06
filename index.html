@@ -285,6 +285,9 @@ select.fc{cursor:pointer}
 @keyframes su{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:768px){.sg{grid-template-columns:repeat(2,1fr)}.g2,.g3{grid-template-columns:1fr}.sim-cards{grid-template-columns:1fr}}
+.se-collapsible.collapsed .cb{display:none}
+.se-collapsible .se-caret{display:inline-block;transition:transform .2s;margin-right:4px;font-size:11px;color:var(--t2)}
+.se-collapsible.collapsed .se-caret{transform:rotate(-90deg)}
 </style>
 </head>
 <body>
@@ -498,18 +501,31 @@ select.fc{cursor:pointer}
       <div id="listas-list"></div>
     </div>
 
-    <!-- TAB: Solicitação Sim Extra -->
-    <div id="tab-extra" class="hidden">
-      <!-- Solicitações recebidas -->
+    <!-- TAB: Simulados Extras -->
+    <div id="tab-simExtras" class="hidden">
       <div class="card" style="margin-bottom:16px">
         <div class="ch">
-          <div class="ct">✨ Solicitações de Simulado Extra</div>
-          <div style="display:flex;gap:6px;align-items:center">
+          <div class="ct">⭐ Simulados Extras</div>
+          <button class="btn btn-p btn-sm" onclick="openSimExtraEditor()">+ Novo Simulado Extra</button>
+        </div>
+        <div class="cb">
+          <div id="sim-extras-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Solicitação Sim Extra -->
+    <div id="tab-extra" class="hidden">
+      <!-- Solicitações recebidas (colapsável) -->
+      <div class="card se-collapsible" id="se-card-solicitacoes" style="margin-bottom:16px">
+        <div class="ch" style="cursor:pointer;user-select:none" onclick="toggleSeCard('se-card-solicitacoes',event)">
+          <div class="ct"><span class="se-caret">▾</span> ✨ Solicitações de Simulado Extra</div>
+          <div style="display:flex;gap:6px;align-items:center" onclick="event.stopPropagation()">
             <select class="fc" id="se-filter-status" onchange="renderSolicitacoesExtra()" style="padding:6px 10px;font-size:12px">
-              <option value="todos">Todos</option>
-              <option value="aguardando-pagamento" selected>Aguardando pagamento</option>
+              <option value="todos" selected>Todos</option>
+              <option value="aguardando-pagamento">Aguardando pagamento</option>
               <option value="pago">Pagos · aguardando agendamento</option>
-              <option value="efetivada">Efetivadas (agendadas)</option>
+              <option value="efetivada">Agendadas</option>
               <option value="cancelada">Canceladas</option>
             </select>
           </div>
@@ -517,9 +533,20 @@ select.fc{cursor:pointer}
         <div class="cb" id="solicitacoes-extra-list"></div>
       </div>
 
-      <!-- Configurações: links, slack, vigente -->
-      <div class="card" style="margin-bottom:16px">
-        <div class="ch"><div class="ct">🔗 Links e integrações</div></div>
+      <!-- Alunos com quota gratuita (colapsável) -->
+      <div class="card se-collapsible" id="se-card-gratuitos" style="margin-bottom:16px">
+        <div class="ch" style="cursor:pointer;user-select:none" onclick="toggleSeCard('se-card-gratuitos',event)">
+          <div class="ct"><span class="se-caret">▾</span> 🎟️ Alunos com cota gratuita</div>
+          <button class="btn btn-p btn-sm" onclick="event.stopPropagation();openSimExtraGratuitoModal()">+ Adicionar</button>
+        </div>
+        <div class="cb" id="se-gratuitos-list"></div>
+      </div>
+
+      <!-- Configurações: links, slack, vigente (colapsável) -->
+      <div class="card se-collapsible" id="se-card-links">
+        <div class="ch" style="cursor:pointer;user-select:none" onclick="toggleSeCard('se-card-links',event)">
+          <div class="ct"><span class="se-caret">▾</span> 🔗 Links e integrações</div>
+        </div>
         <div class="cb">
           <div class="fg"><label class="fl">Lista vigente (alunos elegíveis a se identificar)</label>
             <select class="fc" id="se-lista-vigente" onchange="saveSimExtraCfg()">
@@ -533,15 +560,6 @@ select.fc{cursor:pointer}
           <div class="fg"><label class="fl">Slack Webhook URL (opcional · notifica nova solicitação)</label><input class="fc" id="se-slack" placeholder="https://hooks.slack.com/services/..." onchange="saveSimExtraCfg()"/></div>
           <div id="se-cfg-msg" class="hidden" style="margin-top:8px"></div>
         </div>
-      </div>
-
-      <!-- Alunos com quota gratuita -->
-      <div class="card">
-        <div class="ch">
-          <div class="ct">🎟️ Alunos com cota gratuita</div>
-          <button class="btn btn-p btn-sm" onclick="openSimExtraGratuitoModal()">+ Adicionar</button>
-        </div>
-        <div class="cb" id="se-gratuitos-list"></div>
       </div>
     </div>
 
@@ -606,7 +624,7 @@ select.fc{cursor:pointer}
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-s btn-sm" onclick="openImportNotas()">📥 Importar Notas XLS</button>
-          <button class="btn btn-s btn-sm" onclick="exportDesempenho()">⬇️ Exportar CSV</button>
+          <button class="btn btn-s btn-sm" onclick="exportDesempenho()">📄 Exportar PDF</button>
         </div>
       </div>
 
@@ -1390,6 +1408,95 @@ select.fc{cursor:pointer}
   </div>
 </div>
 
+<!-- ══ MODAL: Exportar Desempenho (PDF) ══ -->
+<div class="mo hidden" id="modal-export-desemp">
+  <div class="md" style="max-width:520px">
+    <div class="mh"><div><div class="m-title">📄 Exportar Desempenho em PDF</div><div class="m-sub">Selecione as colunas que deseja incluir</div></div><button class="m-close" onclick="CM('modal-export-desemp')">✕</button></div>
+    <div class="m-body">
+      <div id="export-cols-list" style="display:flex;flex-direction:column;gap:6px"></div>
+      <div style="margin-top:14px;padding:10px 12px;background:var(--bg3);border-radius:var(--rs);font-size:12px;color:var(--t2)">
+        💡 No diálogo de impressão, escolha <strong>"Salvar como PDF"</strong> como destino.
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-export-desemp')">Cancelar</button>
+      <button class="btn btn-p" onclick="doExportDesempenhoPDF()">📄 Gerar PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Simulado Extra (criar/editar) ══ -->
+<div class="mo hidden" id="modal-sim-extra-edit">
+  <div class="md" style="max-width:480px">
+    <div class="mh"><div><div class="m-title" id="mse-title">Novo Simulado Extra</div><div class="m-sub">Estes simulados são privados e gerenciados aqui</div></div><button class="m-close" onclick="CM('modal-sim-extra-edit')">✕</button></div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">Nome do simulado</label><input class="fc" id="mse-nome" placeholder="ex: Sim Extra · Maio 2026"/></div>
+      <div class="fg"><label class="fl">Descrição (opcional)</label><textarea class="fc" id="mse-desc" placeholder="Notas internas, conteúdo aplicado, etc." style="min-height:60px"></textarea></div>
+      <div id="mse-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-sim-extra-edit')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveSimExtraEditor()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Gerenciar alunos do Simulado Extra ══ -->
+<div class="mo hidden" id="modal-sim-extra-alunos">
+  <div class="md" style="max-width:680px">
+    <div class="mh"><div><div class="m-title" id="msea-title">Alunos do simulado</div><div class="m-sub" id="msea-sub"></div></div><button class="m-close" onclick="CM('modal-sim-extra-alunos')">✕</button></div>
+    <div class="m-body">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn btn-p btn-sm" onclick="openAddAlunoSimExtra()">+ Adicionar aluno</button>
+      </div>
+      <div id="msea-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Adicionar aluno ao Simulado Extra ══ -->
+<div class="mo hidden" id="modal-add-aluno-extra">
+  <div class="md" style="max-width:560px">
+    <div class="mh"><div><div class="m-title">Adicionar aluno ao simulado</div><div class="m-sub" id="maae-sub"></div></div><button class="m-close" onclick="CM('modal-add-aluno-extra')">✕</button></div>
+    <div class="m-body">
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="btn btn-s" id="maae-tab-sol" onclick="maaeSwitchMode('solicitacao')" style="flex:1">De solicitação paga</button>
+        <button class="btn btn-s" id="maae-tab-man" onclick="maaeSwitchMode('manual')" style="flex:1">Cadastro manual</button>
+      </div>
+
+      <!-- Aba: solicitação paga / cota gratuita -->
+      <div id="maae-pane-sol">
+        <div class="fg"><label class="fl">Aluno (pagamento confirmado ou cota gratuita)</label>
+          <select class="fc" id="maae-sol"></select>
+        </div>
+      </div>
+
+      <!-- Aba: manual -->
+      <div id="maae-pane-man" class="hidden">
+        <div class="fg"><label class="fl">Nome do aluno</label><input class="fc" id="maae-nome" placeholder="Nome completo"/></div>
+        <div class="fg"><label class="fl">Matrícula (opcional)</label><input class="fc" id="maae-mat" placeholder="ex: 2026099"/></div>
+        <div class="fg"><label class="fl">E-mail (opcional)</label><input class="fc" id="maae-email" type="email" placeholder="aluno@email.com"/></div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:14px 0">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="fg" style="flex:1;min-width:140px"><label class="fl">Data agendada *</label><input class="fc" id="maae-data" type="date"/></div>
+        <div class="fg" style="flex:1;min-width:140px"><label class="fl">Horário *</label><input class="fc" id="maae-hora" type="time"/></div>
+      </div>
+      <div class="fg"><label class="fl">Professor (opcional)</label>
+        <select class="fc" id="maae-prof">
+          <option value="">— escolha —</option>
+        </select>
+      </div>
+      <div id="maae-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-add-aluno-extra')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveAddAlunoSimExtra()">💾 Adicionar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODAL: Aluno gratuito (CRUD) ══ -->
 <div class="mo hidden" id="modal-grat">
   <div class="md" style="max-width:440px">
@@ -1443,9 +1550,9 @@ select.fc{cursor:pointer}
         <div id="se-err1" class="al al-e hidden" style="margin-top:10px"></div>
       </div>
 
-      <!-- STEP 2: Dia & horário -->
+      <!-- STEP 2: Data & turno -->
       <div id="se-step2" class="hidden">
-        <p style="color:var(--t2);font-size:13px;margin-bottom:12px">Marque até 3 opções de dia e turno. Quanto mais opções, mais fácil agendar.</p>
+        <p style="color:var(--t2);font-size:13px;margin-bottom:12px">Escolha até 3 opções de data e turno. Quanto mais opções, mais fácil agendar.</p>
         <p style="color:var(--t2);font-size:11px;margin-bottom:12px">Manhã: 07h–12h · Tarde: 12h–17h · Noite: 18h–21h</p>
         <div id="se-options"></div>
         <button class="btn btn-s btn-sm" onclick="seAddOption()" id="se-add-opt" style="margin-top:6px">+ Adicionar opção</button>
@@ -1516,7 +1623,7 @@ boot();
 
 async function loadSims(){
   const snap=await getDocs(collection(db,'simulados'));
-  S.sims=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>a.nome.localeCompare(b.nome));
+  S.sims=snap.docs.map(d=>({id:d.id,...d.data()})).filter(s=>!s.deleted).sort((a,b)=>a.nome.localeCompare(b.nome));
   // Sync curSim with fresh data from sims array
   if(S.curSim){
     const fresh=S.sims.find(s=>s.id===S.curSim.id);
@@ -1592,6 +1699,7 @@ const TAB_GROUPS=[
     {id:'simulados',label:'📋 Simulados'},
     {id:'trocas',label:'🔄 Trocas'},
     {id:'extra',label:'✨ Solicitação Sim Extra'},
+    {id:'simExtras',label:'⭐ Simulados Extras'},
     {id:'desempenho',label:'📊 Desempenho'},
     {id:'checklist',label:'📝 Checklist'}
   ]},
@@ -1710,9 +1818,19 @@ window.resetMenuLabels=async()=>{
 };
 
 // ── SOLICITAÇÃO SIMULADO EXTRA ───────────────────────────────────────────────
-const SE_DIAS=['segunda','terca','quarta','quinta','sexta','sabado','domingo'];
 const SE_DIA_LABEL={segunda:'Segunda',terca:'Terça',quarta:'Quarta',quinta:'Quinta',sexta:'Sexta',sabado:'Sábado',domingo:'Domingo'};
 const SE_TURNO_LABEL={manha:'🌅 Manhã (07h–12h)',tarde:'☀️ Tarde (12h–17h)',noite:'🌙 Noite (18h–21h)'};
+// Formata o campo "dia" da opção. Aceita formato ISO (YYYY-MM-DD, novo) ou nome do dia da semana (legado).
+const fmtDataOpcao=(d)=>{
+  if(!d)return'—';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(d)){
+    const[y,m,day]=d.split('-');
+    const dt=new Date(parseInt(y),parseInt(m)-1,parseInt(day));
+    const semanas=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+    return`${day}/${m}/${y} (${semanas[dt.getDay()]})`;
+  }
+  return SE_DIA_LABEL[d]||d;
+};
 
 async function loadSimExtra(){
   // Config
@@ -1815,13 +1933,13 @@ function seValidStep1(){
 
 function seRenderOptions(){
   const c=document.getElementById('se-options');
+  // Mínima = amanhã (não permite hoje, pra dar tempo do agendamento)
+  const tmrw=new Date();tmrw.setDate(tmrw.getDate()+1);
+  const minDate=tmrw.toISOString().slice(0,10);
   c.innerHTML=_se.opcoes.map((o,i)=>`
     <div style="display:flex;gap:8px;margin-bottom:8px;align-items:end">
-      <div class="fg" style="flex:1;margin:0"><label class="fl">Dia ${i+1}</label>
-        <select class="fc" onchange="seSetOpt(${i},'dia',this.value)">
-          <option value="">— escolha —</option>
-          ${SE_DIAS.map(d=>`<option value="${d}" ${o.dia===d?'selected':''}>${SE_DIA_LABEL[d]}</option>`).join('')}
-        </select>
+      <div class="fg" style="flex:1;margin:0"><label class="fl">Data ${i+1}</label>
+        <input type="date" class="fc" min="${minDate}" value="${o.dia||''}" onchange="seSetOpt(${i},'dia',this.value)"/>
       </div>
       <div class="fg" style="flex:1;margin:0"><label class="fl">Turno</label>
         <select class="fc" onchange="seSetOpt(${i},'turno',this.value)">
@@ -1838,8 +1956,11 @@ window.seRemoveOption=(i)=>{_se.opcoes.splice(i,1);seRenderOptions();};
 
 function seValidStep2(){
   const err=document.getElementById('se-err2');err.classList.add('hidden');
-  const valid=_se.opcoes.filter(o=>o.dia&&o.turno);
-  if(!valid.length){err.textContent='Marque ao menos 1 opção (dia + turno).';err.classList.remove('hidden');return false;}
+  const valid=_se.opcoes.filter(o=>o.dia&&o.turno&&/^\d{4}-\d{2}-\d{2}$/.test(o.dia));
+  if(!valid.length){err.textContent='Selecione ao menos 1 data e turno.';err.classList.remove('hidden');return false;}
+  // Verifica datas duplicadas (mesma data + turno)
+  const chaves=valid.map(o=>`${o.dia}|${o.turno}`);
+  if(new Set(chaves).size!==chaves.length){err.textContent='Você marcou a mesma data + turno mais de uma vez.';err.classList.remove('hidden');return false;}
   _se.opcoes=valid;return true;
 }
 
@@ -1869,7 +1990,7 @@ function seRenderStep(){
   else{next.textContent='Continuar →';}
   // Atualiza subtítulo
   const sub=document.getElementById('se-sub');
-  sub.textContent=['Identifique-se para começar','Escolha seus dias e turnos','Revise e confirme'][_se.step-1]||'';
+  sub.textContent=['Identifique-se para começar','Escolha suas datas e turnos','Revise e confirme'][_se.step-1]||'';
 }
 
 window.seBack=()=>{if(_se.step>1){_se.step--;seRenderStep();}};
@@ -1882,7 +2003,7 @@ window.seNext=async()=>{
 
 function renderSeConfirmation(){
   const tipo=seClassifyTipo();
-  const opcsHtml=_se.opcoes.map(o=>`<li>${SE_DIA_LABEL[o.dia]||o.dia} · ${SE_TURNO_LABEL[o.turno]||o.turno}</li>`).join('');
+  const opcsHtml=_se.opcoes.map(o=>`<li>${fmtDataOpcao(o.dia)} · ${SE_TURNO_LABEL[o.turno]||o.turno}</li>`).join('');
   const tipoBadge={'aluno-gratuito':'🎟️ Cota gratuita · sem pagamento','aluno-pago':'💳 Pagamento será solicitado em seguida','externo':'💳 Pagamento será solicitado em seguida'}[tipo];
   document.getElementById('se-confirmation').innerHTML=`
     <div style="background:var(--bg3);border-radius:var(--rs);padding:14px;margin-bottom:12px">
@@ -1955,13 +2076,13 @@ async function seSubmit(){
 // === Slack ===
 function notifySlackNewSimExtra(req){
   const url=S.simExtraCfg.slackWebhook;if(!url)return;
-  const opcs=req.opcoes.map(o=>`${SE_DIA_LABEL[o.dia]||o.dia} ${SE_TURNO_LABEL[o.turno]||o.turno}`).join(' · ');
+  const opcs=req.opcoes.map(o=>`${fmtDataOpcao(o.dia)} ${SE_TURNO_LABEL[o.turno]||o.turno}`).join(' · ');
   const text=`🎟️ *Nova solicitação · Cota Gratuita · Simulado Extra*\n• Nome: *${req.nome}*\n• E-mail: ${req.email}\n• Opções: ${opcs}\n• Próximo passo: agendar com o aluno`;
   fetch(url,{method:'POST',mode:'no-cors',body:JSON.stringify({text})}).catch(e=>console.warn('Slack:',e));
 }
 function notifySlackPaymentReceived(req){
   const url=S.simExtraCfg.slackWebhook;if(!url)return;
-  const opcs=(req.opcoes||[]).map(o=>`${SE_DIA_LABEL[o.dia]||o.dia} ${SE_TURNO_LABEL[o.turno]||o.turno}`).join(' · ');
+  const opcs=(req.opcoes||[]).map(o=>`${fmtDataOpcao(o.dia)} ${SE_TURNO_LABEL[o.turno]||o.turno}`).join(' · ');
   const text=`💰 *Pagamento confirmado · Simulado Extra*\n• Nome: *${req.nome}*\n• E-mail: ${req.email}\n• Opções: ${opcs}\n• Próximo passo: agendar com o aluno`;
   fetch(url,{method:'POST',mode:'no-cors',body:JSON.stringify({text})}).catch(e=>console.warn('Slack:',e));
 }
@@ -1977,12 +2098,12 @@ window.renderSolicitacoesExtra=()=>{
     .sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
   if(!list.length){el.innerHTML='<p style="color:var(--t2);font-size:13px;padding:8px">Nenhuma solicitação.</p>';return;}
   el.innerHTML=list.map(s=>{
-    const opcs=(s.opcoes||[]).map(o=>`${SE_DIA_LABEL[o.dia]||o.dia} ${SE_TURNO_LABEL[o.turno]||o.turno}`).join(' · ');
+    const opcs=(s.opcoes||[]).map(o=>`${fmtDataOpcao(o.dia)} ${SE_TURNO_LABEL[o.turno]||o.turno}`).join(' · ');
     const tipoBadge={'aluno-gratuito':'<span class="badge b-pend">gratuito</span>','aluno-pago':'<span class="badge b-conf">aluno</span>','externo':'<span class="badge b-swap">externo</span>'}[s.tipo]||'';
     const statusBadge={
       'aguardando-pagamento':'<span class="badge b-pend">💳 aguardando pagamento</span>',
       'pago':'<span class="badge b-match">💰 pago · aguardando agendamento</span>',
-      'efetivada':'<span class="badge b-conf">✔ efetivada</span>',
+      'efetivada':'<span class="badge b-conf">📅 agendada</span>',
       'cancelada':'<span class="badge b-abs">✗ cancelada</span>'
     }[s.status]||'';
     let acts='';
@@ -1990,20 +2111,20 @@ window.renderSolicitacoesExtra=()=>{
       acts=`<button class="btn btn-s btn-sm" onclick="setSolicitacaoStatus('${s.id}','pago')" title="Marcar pagamento como recebido manualmente">💰 Marcar pago</button>
             <button class="btn btn-d btn-sm" onclick="setSolicitacaoStatus('${s.id}','cancelada')">✗ Cancelar</button>`;
     }else if(s.status==='pago'){
-      acts=`<button class="btn btn-s btn-sm" onclick="setSolicitacaoStatus('${s.id}','efetivada')">✓ Efetivar</button>
+      acts=`<button class="btn btn-s btn-sm" onclick="setSolicitacaoStatus('${s.id}','efetivada')">📅 Agendar</button>
             <button class="btn btn-d btn-sm" onclick="setSolicitacaoStatus('${s.id}','cancelada')">✗ Cancelar</button>`;
     }else{
       acts=`<button class="btn btn-g btn-sm" onclick="setSolicitacaoStatus('${s.id}','aguardando-pagamento')">↺ Reabrir</button>
             <button class="btn btn-d btn-sm" onclick="deleteSolicitacao('${s.id}')">🗑️</button>`;
     }
-    const paidInfo=s.paidAt?`<div style="font-size:11px;color:var(--green);margin-top:2px">💰 Pagamento registrado em ${fDT(s.paidAt)}${s.paidVia?` · via ${s.paidVia}`:''}</div>`:'';
+    const agParts=[s.dataAgendada?fmtDataOpcao(s.dataAgendada):'',s.horario||'',s.professor?`👨‍⚕️ ${s.professor}`:''].filter(Boolean);
+    const linha2=s.status==='efetivada'
+      ?(agParts.length?`<div style="font-size:13px;margin-top:4px;color:var(--accent);font-weight:600">📅 ${agParts.join(' · ')}</div>`:'')
+      :`<div style="font-size:13px;margin-top:4px">${opcs}</div>`;
     return`<div class="aluno-row" style="align-items:flex-start">
       <div style="flex:1;min-width:220px">
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><strong>${s.nome}</strong> ${statusBadge} ${tipoBadge}</div>
-        <div style="font-size:12px;color:var(--t2);margin-top:2px">${s.email}${s.matricula?` · ${s.matricula}`:''}</div>
-        <div style="font-size:13px;margin-top:4px">${opcs}</div>
-        <div style="font-size:11px;color:var(--t2);margin-top:2px">Criada em ${s.createdAt?fDT(s.createdAt):''}</div>
-        ${paidInfo}
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><strong>${s.nome}</strong> ${statusBadge}</div>
+        ${linha2}
       </div>
       <div class="aluno-acts">${acts}</div>
     </div>`;
@@ -2119,6 +2240,317 @@ window.deleteGratuito=async()=>{
   S.simExtraCfg.alunosGratuitos=list;
   await setDoc(doc(db,'config','simExtra'),S.simExtraCfg);
   CM('modal-grat');renderGratuitos();
+};
+
+// ── SIMULADOS EXTRAS (gerenciamento) ─────────────────────────────────────────
+// Ficam na mesma coleção `simulados` mas com flag isExtra:true.
+// Não aparecem pra alunos. Notas aparecem no Desempenho mas não contam pra Garantia.
+
+window.renderSimuladosExtras=async()=>{
+  const el=document.getElementById('sim-extras-list');if(!el)return;
+  const extras=S.sims.filter(s=>s.isExtra).sort((a,b)=>(b.criadoEm||'').localeCompare(a.criadoEm||''));
+  if(!extras.length){el.innerHTML='<p style="color:var(--t2);font-size:13px;padding:8px">Nenhum simulado extra cadastrado.</p>';return;}
+  // Conta alunos vinculados em paralelo (assíncrono)
+  el.innerHTML=extras.map(s=>`
+    <div class="aluno-row" style="align-items:flex-start">
+      <div style="flex:1;min-width:240px">
+        <div style="font-weight:700;font-size:14px">${s.nome}</div>
+        ${s.criadoEm?`<div style="font-size:11px;color:var(--t2);margin-top:2px">Criado em ${fDT(s.criadoEm)}</div>`:''}
+        ${s.descricao?`<div style="font-size:12px;color:var(--t2);margin-top:4px;font-style:italic">${s.descricao}</div>`:''}
+        <div style="font-size:11px;color:var(--t2);margin-top:4px" id="se-count-${s.id}">Carregando alunos...</div>
+      </div>
+      <div class="aluno-acts">
+        <button class="btn btn-p btn-sm" onclick="openSimExtraAlunos('${s.id}')">👥 Alunos</button>
+        <button class="btn btn-s btn-sm" onclick="openSimExtraEditor('${s.id}')">✏️ Editar</button>
+        <button class="btn btn-d btn-sm" onclick="deleteSimExtra('${s.id}')" title="Excluir simulado extra">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+  // Carrega contagem de alunos por simulado em paralelo
+  extras.forEach(async s=>{
+    try{
+      const snap=await getDocs(collection(db,`simulados/${s.id}/alunos`));
+      const cnt=snap.docs.length;
+      const c=document.getElementById(`se-count-${s.id}`);
+      if(c)c.textContent=`${cnt} aluno${cnt===1?'':'s'} vinculado${cnt===1?'':'s'}`;
+    }catch(e){console.error(e);}
+  });
+};
+
+// Abre modal de criar/editar simulado extra
+window.openSimExtraEditor=(id)=>{
+  const sim=id?S.sims.find(s=>s.id===id):null;
+  document.getElementById('mse-title').textContent=id?'Editar Simulado Extra':'Novo Simulado Extra';
+  document.getElementById('mse-nome').value=sim?.nome||'';
+  document.getElementById('mse-desc').value=sim?.descricao||'';
+  document.getElementById('mse-err').classList.add('hidden');
+  document.getElementById('modal-sim-extra-edit').dataset.editId=id||'';
+  document.getElementById('modal-sim-extra-edit').classList.remove('hidden');
+};
+
+window.saveSimExtraEditor=async()=>{
+  const editId=document.getElementById('modal-sim-extra-edit').dataset.editId||'';
+  const nome=document.getElementById('mse-nome').value.trim();
+  const descricao=document.getElementById('mse-desc').value.trim();
+  const err=document.getElementById('mse-err');
+  if(!nome){err.textContent='Informe o nome do simulado.';err.classList.remove('hidden');return;}
+  const id=editId||('simext_'+Date.now()+'_'+Math.random().toString(36).slice(2,6));
+  const data={
+    nome,descricao,isExtra:true,
+    ...(editId?{}:{criadoEm:new Date().toISOString()}),
+    updatedAt:new Date().toISOString(),
+  };
+  await setDoc(doc(db,'simulados',id),data,{merge:true});
+  await loadSims();
+  CM('modal-sim-extra-edit');renderSimuladosExtras();
+};
+
+// Modal de gerenciar alunos vinculados ao simulado extra
+window._curSimExtraId=null;
+window.openSimExtraAlunos=async(simId)=>{
+  const sim=S.sims.find(s=>s.id===simId);if(!sim)return;
+  window._curSimExtraId=simId;
+  document.getElementById('msea-title').textContent=`Alunos · ${sim.nome}`;
+  document.getElementById('msea-sub').textContent=sim.descricao||'';
+  document.getElementById('modal-sim-extra-alunos').classList.remove('hidden');
+  await renderSimExtraAlunos();
+};
+
+async function renderSimExtraAlunos(){
+  const simId=window._curSimExtraId;if(!simId)return;
+  const list=document.getElementById('msea-list');
+  list.innerHTML='<div class="ld"><div class="sp"></div> Carregando...</div>';
+  const snap=await getDocs(collection(db,`simulados/${simId}/alunos`));
+  const alunos=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  // Carrega notas
+  const notas=await loadNotas(simId);
+  if(!alunos.length){list.innerHTML='<p style="color:var(--t2);font-size:13px;padding:8px">Nenhum aluno vinculado ainda. Clique em "+ Adicionar aluno".</p>';return;}
+  list.innerHTML=alunos.map(a=>{
+    const mat=(a.matricula||'').toString();
+    const n=notas[mat]||notas[a.id]||null;
+    const nf=n?.notaFinal;
+    const dataAg=a.dataAgendada?fmtDataOpcao(a.dataAgendada):'';
+    const horaAg=a.horario||(a.turno?(SE_TURNO_LABEL[a.turno]||a.turno):'');
+    const profAg=a.professor||'';
+    const agParts=[dataAg,horaAg,profAg?`👨‍⚕️ ${profAg}`:''].filter(Boolean);
+    const agInfo=agParts.length?`<div style="font-size:11px;color:var(--t2);margin-top:2px">${agParts.join(' · ')}</div>`:'';
+    const notaInfo=nf!==null&&nf!==undefined&&!isNaN(parseFloat(nf))
+      ?`<span class="badge ${parseFloat(nf)>=60?'b-conf':'b-abs'}">Nota: ${parseFloat(nf).toFixed(1)}</span>`
+      :'<span class="badge b-pend">Sem nota</span>';
+    return`<div class="aluno-row" style="align-items:flex-start">
+      <div style="flex:1;min-width:200px">
+        <div style="font-weight:700;font-size:14px">${a.nome}</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:1px">${mat?`mat ${mat} · `:''}${a.email||'sem e-mail'}</div>
+        ${agInfo}
+        <div style="margin-top:6px">${notaInfo}</div>
+      </div>
+      <div class="aluno-acts">
+        <button class="btn btn-s btn-sm" onclick="openLancarNota('${simId}','${mat||a.id}','${a.nome.replace(/'/g,"\\'")}')">${nf!==null&&nf!==undefined?'✏️ Editar nota':'➕ Lançar nota'}</button>
+        <button class="btn btn-s btn-sm" onclick="editAlunoSimExtra('${a.id}')" title="Editar agendamento">✏️ Editar</button>
+        <button class="btn btn-d btn-sm" onclick="removeAlunoSimExtra('${a.id}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.openAddAlunoSimExtra=async()=>{
+  const simId=window._curSimExtraId;if(!simId)return;
+  const sim=S.sims.find(s=>s.id===simId);
+  document.getElementById('maae-sub').textContent=sim?.nome||'';
+  // Reset modal state (caso tenha sido usado em modo edit antes)
+  const modal=document.getElementById('modal-add-aluno-extra');
+  delete modal.dataset.editId;
+  const tabsBar=document.querySelector('#modal-add-aluno-extra .m-body > div');
+  if(tabsBar)tabsBar.classList.remove('hidden');
+  // Popula dropdown: solicitações pagas + alunos com cota gratuita
+  const sel=document.getElementById('maae-sol');
+  const pagas=S.solicitacoesExtra.filter(s=>s.status==='pago'||s.status==='efetivada');
+  const gratuitos=(S.simExtraCfg.alunosGratuitos||[]).map((g,i)=>({...g,_idx:i,_restantes:Math.max(0,(g.quotaTotal||0)-(g.quotaUsada||0))}));
+  let html='<option value="">— Selecione —</option>';
+  if(pagas.length){
+    html+='<optgroup label="💰 Pagamento confirmado">'+pagas.map(s=>`<option value="sol:${s.id}">${s.nome} (${s.email}${s.matricula?` · ${s.matricula}`:''})</option>`).join('')+'</optgroup>';
+  }
+  if(gratuitos.length){
+    html+='<optgroup label="🎟️ Cota gratuita">'+gratuitos.map(g=>{
+      const dis=g._restantes<=0?' disabled':'';
+      return`<option value="grat:${g._idx}"${dis}>${g.nome||g.email} (${g.email}) · ${g._restantes}/${g.quotaTotal||0} restantes</option>`;
+    }).join('')+'</optgroup>';
+  }
+  if(!pagas.length&&!gratuitos.length){
+    html='<option value="">— Nenhum aluno disponível —</option>';
+  }
+  sel.innerHTML=html;
+  ['maae-nome','maae-mat','maae-email','maae-data','maae-hora','maae-prof'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  // Popula dropdown de professores
+  const selProf=document.getElementById('maae-prof');
+  if(selProf){
+    selProf.innerHTML='<option value="">— escolha —</option>'+(S.profs||[]).map(p=>`<option value="${p}">${p}</option>`).join('');
+  }
+  document.getElementById('maae-err').classList.add('hidden');
+  maaeSwitchMode('solicitacao');
+  document.getElementById('modal-add-aluno-extra').classList.remove('hidden');
+};
+
+window.maaeSwitchMode=(mode)=>{
+  document.getElementById('maae-pane-sol').classList.toggle('hidden',mode!=='solicitacao');
+  document.getElementById('maae-pane-man').classList.toggle('hidden',mode!=='manual');
+  document.getElementById('maae-tab-sol').classList.toggle('btn-p',mode==='solicitacao');
+  document.getElementById('maae-tab-sol').classList.toggle('btn-s',mode!=='solicitacao');
+  document.getElementById('maae-tab-man').classList.toggle('btn-p',mode==='manual');
+  document.getElementById('maae-tab-man').classList.toggle('btn-s',mode!=='manual');
+  document.getElementById('modal-add-aluno-extra').dataset.mode=mode;
+};
+
+window.editAlunoSimExtra=async(alunoId)=>{
+  const simId=window._curSimExtraId;if(!simId)return;
+  const sim=S.sims.find(s=>s.id===simId);if(!sim)return;
+  const snap=await getDoc(doc(db,`simulados/${simId}/alunos/${alunoId}`));
+  if(!snap.exists()){alert('Aluno não encontrado.');return;}
+  const a={id:snap.id,...snap.data()};
+  const modal=document.getElementById('modal-add-aluno-extra');
+  modal.dataset.mode='edit';
+  modal.dataset.editId=alunoId;
+  document.getElementById('maae-sub').textContent=`${sim.nome} · ${a.nome}`;
+  // Esconde abas e seletores; só mostra data/hora/prof
+  document.getElementById('maae-pane-sol').classList.add('hidden');
+  document.getElementById('maae-pane-man').classList.add('hidden');
+  document.querySelector('#modal-add-aluno-extra .m-body > div').classList.add('hidden'); // tabs
+  document.getElementById('maae-data').value=a.dataAgendada||'';
+  document.getElementById('maae-hora').value=a.horario||'';
+  const selProf=document.getElementById('maae-prof');
+  if(selProf){
+    selProf.innerHTML='<option value="">— escolha —</option>'+(S.profs||[]).map(p=>`<option value="${p}" ${a.professor===p?'selected':''}>${p}</option>`).join('');
+  }
+  document.getElementById('maae-err').classList.add('hidden');
+  modal.classList.remove('hidden');
+};
+
+window.saveAddAlunoSimExtra=async()=>{
+  const simId=window._curSimExtraId;if(!simId)return;
+  const modal=document.getElementById('modal-add-aluno-extra');
+  const mode=modal.dataset.mode||'solicitacao';
+  const err=document.getElementById('maae-err');
+  // ── Modo EDIT: atualiza só data/hora/prof do aluno existente ────────
+  if(mode==='edit'){
+    const editId=modal.dataset.editId;
+    if(!editId){err.textContent='ID do aluno não encontrado.';err.classList.remove('hidden');return;}
+    const dataAgendada=document.getElementById('maae-data').value||'';
+    const horario=document.getElementById('maae-hora').value||'';
+    const professor=document.getElementById('maae-prof').value||'';
+    if(!dataAgendada||!horario){err.textContent='Informe data e horário.';err.classList.remove('hidden');return;}
+    const snap=await getDoc(doc(db,`simulados/${simId}/alunos/${editId}`));
+    if(!snap.exists()){err.textContent='Aluno não encontrado.';err.classList.remove('hidden');return;}
+    const cur=snap.data();
+    await setDoc(doc(db,`simulados/${simId}/alunos/${editId}`),{
+      nome:cur.nome,email:cur.email||'',matricula:cur.matricula||'',
+      dataAgendada,horario,professor,
+      updatedAt:new Date().toISOString(),
+    },{merge:true});
+    if(cur.solicitacaoId){
+      try{
+        await updateDoc(doc(db,'solicitacoesExtra',cur.solicitacaoId),{dataAgendada,horario,professor,updatedAt:new Date().toISOString()});
+        const s=S.solicitacoesExtra.find(x=>x.id===cur.solicitacaoId);if(s){s.dataAgendada=dataAgendada;s.horario=horario;s.professor=professor;}
+      }catch(e){console.warn('update solicitacao falhou',e);}
+    }
+    CM('modal-add-aluno-extra');
+    await renderSimExtraAlunos();
+    return;
+  }
+  let nome='',email='',matricula='',solicitacaoId='',gratuitoIdx=-1;
+  if(mode==='solicitacao'){
+    const val=document.getElementById('maae-sol').value;
+    if(!val){err.textContent='Selecione um aluno.';err.classList.remove('hidden');return;}
+    if(val.startsWith('grat:')){
+      gratuitoIdx=parseInt(val.slice(5),10);
+      const g=(S.simExtraCfg.alunosGratuitos||[])[gratuitoIdx];
+      if(!g){err.textContent='Aluno gratuito não encontrado.';err.classList.remove('hidden');return;}
+      const restantes=Math.max(0,(g.quotaTotal||0)-(g.quotaUsada||0));
+      if(restantes<=0){err.textContent='Este aluno não tem cota restante.';err.classList.remove('hidden');return;}
+      nome=g.nome||g.email;email=g.email||'';matricula=g.matricula||'';
+    }else{
+      solicitacaoId=val.startsWith('sol:')?val.slice(4):val;
+      const sol=S.solicitacoesExtra.find(s=>s.id===solicitacaoId);
+      if(!sol){err.textContent='Solicitação não encontrada.';err.classList.remove('hidden');return;}
+      nome=sol.nome;email=sol.email;matricula=sol.matricula||'';
+    }
+  }else{
+    nome=document.getElementById('maae-nome').value.trim();
+    matricula=document.getElementById('maae-mat').value.trim();
+    email=document.getElementById('maae-email').value.trim();
+    if(!nome){err.textContent='Informe o nome do aluno.';err.classList.remove('hidden');return;}
+  }
+  const dataAgendada=document.getElementById('maae-data').value||'';
+  const horario=document.getElementById('maae-hora').value||'';
+  const professor=document.getElementById('maae-prof').value||'';
+  if(!dataAgendada||!horario){err.textContent='Informe data e horário.';err.classList.remove('hidden');return;}
+  const docId=matricula||('aluno_'+Date.now()+'_'+Math.random().toString(36).slice(2,6));
+  await setDoc(doc(db,`simulados/${simId}/alunos/${docId}`),{
+    nome,email,matricula,
+    dataAgendada,horario,professor,
+    status:'confirmed',presenca:'presente',
+    isExtra:true,solicitacaoId,
+    criadoEm:new Date().toISOString(),
+  },{merge:true});
+  // Se vinculou solicitação, marca ela como efetivada e grava agendamento
+  if(solicitacaoId){
+    await updateDoc(doc(db,'solicitacoesExtra',solicitacaoId),{status:'efetivada',updatedAt:new Date().toISOString(),simExtraId:simId,dataAgendada,horario,professor});
+    const s=S.solicitacoesExtra.find(x=>x.id===solicitacaoId);if(s){s.status='efetivada';s.simExtraId=simId;s.dataAgendada=dataAgendada;s.horario=horario;s.professor=professor;}
+  }
+  // Se veio de cota gratuita, incrementa quotaUsada
+  if(gratuitoIdx>=0){
+    const list=S.simExtraCfg.alunosGratuitos||[];
+    if(list[gratuitoIdx]){
+      list[gratuitoIdx].quotaUsada=(list[gratuitoIdx].quotaUsada||0)+1;
+      S.simExtraCfg.alunosGratuitos=list;
+      await setDoc(doc(db,'config','simExtra'),S.simExtraCfg);
+    }
+  }
+  CM('modal-add-aluno-extra');
+  await renderSimExtraAlunos();
+};
+
+window.deleteSimExtra=async(simId)=>{
+  const sim=S.sims.find(s=>s.id===simId);if(!sim)return;
+  if(!confirm(`Excluir o simulado extra "${sim.nome}"?\n\nEsta ação não pode ser desfeita. Alunos vinculados e notas associadas ficarão inacessíveis.`))return;
+  await setDoc(doc(db,'simulados',simId),{nome:sim.nome,deleted:true,deletedAt:new Date().toISOString()},{merge:true});
+  await loadSims();
+  renderSimuladosExtras();
+};
+
+window.removeAlunoSimExtra=async(alunoId)=>{
+  const simId=window._curSimExtraId;if(!simId)return;
+  if(!confirm('Remover este aluno do simulado extra? As notas dele serão zeradas.'))return;
+  await deleteDoc(doc(db,`simulados/${simId}/alunos/${alunoId}`));
+  // Zera notas (delete bloqueado por regra, então setamos null)
+  try{await setDoc(doc(db,`notas/${simId}/alunos/${alunoId}`),{criar:null,oral:null,notaFinal:null,updatedAt:new Date().toISOString()},{merge:true});}catch(e){}
+  await renderSimExtraAlunos();
+};
+
+// Atalho pra abrir o editor de checklist do simulado extra atual
+window.openCkTemplateSimExtra=()=>{
+  const simId=window._curSimExtraId;if(!simId)return;
+  // Define sim selecionado pra reaproveitar fluxo existente
+  S.curSim=S.sims.find(s=>s.id===simId);
+  CM('modal-sim-extra-alunos');
+  // Tenta abrir editor de template (função existente do checklist)
+  if(typeof window.openCkTemplateEditorAuth==='function')window.openCkTemplateEditorAuth();
+};
+
+window.toggleSeCard=(cardId,ev)=>{
+  if(ev)ev.stopPropagation();
+  const el=document.getElementById(cardId);if(!el)return;
+  el.classList.toggle('collapsed');
+  try{
+    const collapsed=Array.from(document.querySelectorAll('.se-collapsible.collapsed')).map(e=>e.id);
+    localStorage.setItem('aros-se-collapsed',JSON.stringify(collapsed));
+  }catch(e){}
+};
+
+window.applySeCollapsedState=()=>{
+  try{
+    const saved=JSON.parse(localStorage.getItem('aros-se-collapsed')||'[]');
+    saved.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('collapsed');});
+  }catch(e){}
 };
 
 window.toggleGroup=(gid)=>{
@@ -2283,7 +2715,7 @@ window.deleteUser=async()=>{
 
 // co tabs
 window.switchCoTab=(tab,btn)=>{
-  ['simulados','trocas','professores','listas','desempenho','checklist','config','usuarios','extra'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
+  ['simulados','trocas','professores','listas','desempenho','checklist','config','usuarios','extra','simExtras'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
   document.querySelectorAll('.co-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   // Show "Novo Simulado" only on simulados tab
@@ -2298,8 +2730,8 @@ window.switchCoTab=(tab,btn)=>{
       noSim.classList.toggle('hidden',hasSim);
       // Populate selector
       const sel=noSim.querySelector('select');
-      if(sel){sel.innerHTML='<option value="">Selecione...</option>'+S.sims.map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');}
-    }
+      if(sel){sel.innerHTML='<option value="">Selecione...</option>'+S.sims.filter(s=>!s.isExtra).map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');}
+}
   }
 };
 
@@ -2308,6 +2740,7 @@ function renderSimCards(){
   const wrap=document.getElementById('sim-cards-wrap');
   const now=new Date();
   const futures=S.sims.filter(s=>{
+    if(s.isExtra)return false; // simulados extras nunca aparecem pra alunos
     const ds=s.dataSab?new Date(s.dataSab+'T23:59:59'):null;
     const dd=s.dataDom?new Date(s.dataDom+'T23:59:59'):null;
     return (ds&&ds>=now)||(dd&&dd>=now);
@@ -3368,7 +3801,8 @@ window.doSwap=async()=>{
 // COORD SELECT & DELETE
 function popCoSel(){
   const sel=document.getElementById('co-sel');
-  sel.innerHTML='<option value="">Selecione um simulado...</option>'+S.sims.map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');
+  // Aba "Simulados" da coord lista apenas os oficiais (extras ficam na aba própria)
+  sel.innerHTML='<option value="">Selecione um simulado...</option>'+S.sims.filter(s=>!s.isExtra).map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');
 }
 window.selectSim=()=>{
   const id=document.getElementById('co-sel').value;
@@ -4206,7 +4640,8 @@ window.switchCoTab = (tab, btn) => {
   if(tab==='desempenho'){ popDesempLista(); setTimeout(()=>renderDesempenho(),50); }
   if(tab==='checklist') initChecklistTab();
   if(tab==='professores') window._initProfTab();
-  if(tab==='extra') renderSimExtraCfg();
+  if(tab==='extra'){renderSimExtraCfg();applySeCollapsedState();}
+  if(tab==='simExtras') renderSimuladosExtras();
 };
 
 
@@ -4251,6 +4686,26 @@ function popDesempLista(){
 }
 
 // ── Render desempenho table ───────────────────────────────────────────────────
+// Estado de ordenação da tabela de desempenho (cíclica: desc → asc → reset)
+let _desempSort = { col: null, dir: null };
+window.toggleDesempSort = (col) => {
+  if (_desempSort.col !== col) _desempSort = { col, dir: 'desc' };
+  else if (_desempSort.dir === 'desc') _desempSort.dir = 'asc';
+  else if (_desempSort.dir === 'asc') _desempSort = { col: null, dir: null };
+  else _desempSort = { col, dir: 'desc' };
+  renderDesempenho();
+};
+
+// Zera a nota de um aluno (volta ao estado "não lançada")
+window.resetNota = async (simId, mat, nomeAluno) => {
+  if (!confirm(`Zerar a nota de ${nomeAluno}?\n\nOs campos voltarão como se a nota nunca tivesse sido lançada.`)) return;
+  await setDoc(doc(db, `notas/${simId}/alunos/${mat}`), {
+    criar: null, oral: null, notaFinal: null,
+    updatedAt: new Date().toISOString(),
+  }, { merge: true });
+  renderDesempenho();
+};
+
 window.renderDesempenho=async()=>{
   const sel=document.getElementById('desemp-lista-sel');
   if(sel&&!sel.value&&S.listas.length>0) sel.value=S.listas[0].id;
@@ -4264,10 +4719,12 @@ window.renderDesempenho=async()=>{
   if(!lista){wrap.innerHTML='';return;}
 
   let alunos=(lista.alunos||[]).map(a=>typeof a==='object'?a:{nome:a,email:'',matricula:''});
-  alunos.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
   if(q)alunos=alunos.filter(a=>a.nome.toLowerCase().includes(q)||(a.matricula&&a.matricula.toString().includes(q)));
 
-  const sims=[...S.sims].sort((a,b)=>(a.dataSab||a.dataDom||'').localeCompare(b.dataSab||b.dataDom||''));
+  // Oficiais primeiro (por data), extras depois (por criadoEm). Garantia é coluna fixa após sims.
+  const simsOf=S.sims.filter(s=>!s.isExtra).sort((a,b)=>(a.dataSab||a.dataDom||'').localeCompare(b.dataSab||b.dataDom||''));
+  const simsEx=S.sims.filter(s=>s.isExtra).sort((a,b)=>(a.criadoEm||'').localeCompare(b.criadoEm||''));
+  const sims=[...simsOf,...simsEx];
 
   // Load notas per sim
   const allNotas={};
@@ -4296,17 +4753,85 @@ window.renderDesempenho=async()=>{
 
   const thStyle='padding:8px 12px;background:var(--bg3);border:1px solid var(--border);font-size:11px;font-weight:700;color:var(--t2);text-align:center;white-space:nowrap;';
 
-  // Compute class average per sim (nota final of all students)
+  // Compute class average per sim — apenas alunos com criar > 0 E oral > 0
+  // (alunos que zeraram em algum bloco ou não participaram são excluídos)
   const mediasTurma={};
   sims.forEach(sim=>{
-    const notasSim=Object.values(allNotas[sim.id]||{}).map(n=>parseFloat(n.notaFinal)).filter(n=>!isNaN(n));
+    const notasSim=Object.values(allNotas[sim.id]||{})
+      .filter(n=>parseFloat(n.criar)>0&&parseFloat(n.oral)>0)
+      .map(n=>parseFloat(n.notaFinal))
+      .filter(n=>!isNaN(n));
     mediasTurma[sim.id]=notasSim.length?(notasSim.reduce((a,b)=>a+b,0)/notasSim.length):null;
   });
 
+  // Sims "aplicados" = oficiais (não-extras) com data já passada.
+  // Simulados extras NUNCA contam pra Garantia de Aprovação.
+  const _todayISO=new Date().toISOString().slice(0,10);
+  const simsAplicados=sims.filter(sim=>{
+    if(sim.isExtra)return false; // extras nunca contam
+    const ultima=sim.dataDom||sim.dataSab;
+    if(!ultima)return false; // sem data = não conta
+    return ultima<_todayISO;
+  });
+
+  // Status de elegibilidade por aluno: 'elegivel' | 'nao_elegivel' | null (sem dado)
+  // Regra: aluno é elegível se em TODOS os sims aplicados ele tem notaFinal >= 60
+  const elegByMat={};
+  alunos.forEach(a=>{
+    const mat=a.matricula||'';if(!mat){elegByMat[mat]=null;return;}
+    if(!simsAplicados.length){elegByMat[mat]=null;return;}
+    const temPart=simsAplicados.some(sim=>{
+      const v=parseFloat((allNotas[sim.id]||{})[mat]?.notaFinal);
+      return !isNaN(v)&&v>0;
+    });
+    if(!temPart){elegByMat[mat]=null;return;}
+    const todasOk=simsAplicados.every(sim=>{
+      const v=parseFloat((allNotas[sim.id]||{})[mat]?.notaFinal);
+      return !isNaN(v)&&v>=60;
+    });
+    elegByMat[mat]=todasOk?'elegivel':'nao_elegivel';
+  });
+
+  // Aplica ordenação (cíclica: desc → asc → reset alfabético). Alunos sem nota vão pro final.
+  if(_desempSort.col&&_desempSort.dir){
+    // Para colunas string (matricula, nome): ordena alfabeticamente
+    if(_desempSort.col==='matricula'||_desempSort.col==='nome'){
+      const key=_desempSort.col;
+      alunos.sort((a,b)=>{
+        const va=(a[key]||'').toString();const vb=(b[key]||'').toString();
+        const cmp=va.localeCompare(vb,'pt-BR',{numeric:true,sensitivity:'base'});
+        return _desempSort.dir==='desc'?-cmp:cmp;
+      });
+    }else{
+      const getNF=(a)=>{
+        if(_desempSort.col==='media'){
+          // Ordena por elegibilidade: elegivel(2) > nao_elegivel(1) > sem dado(null)
+          const e=elegByMat[a.matricula];
+          return e==='elegivel'?2:e==='nao_elegivel'?1:null;
+        }
+        const n=(allNotas[_desempSort.col]||{})[a.matricula]||null;if(!n)return null;
+        const v=parseFloat(n.notaFinal);return isNaN(v)?null:v;
+      };
+      alunos.sort((a,b)=>{
+        const va=getNF(a),vb=getNF(b);
+        if(va===null&&vb===null)return a.nome.localeCompare(b.nome,'pt-BR');
+        if(va===null)return 1;
+        if(vb===null)return -1;
+        const diff=_desempSort.dir==='desc'?vb-va:va-vb;
+        return diff!==0?diff:a.nome.localeCompare(b.nome,'pt-BR');
+      });
+    }
+  }else{
+    alunos.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  }
+
   const thSims=sims.length?sims.map(s=>{
     const mt=mediasTurma[s.id];
-    return`<th style="${thStyle}min-width:150px">
-      ${s.nome}
+    const isSorted=_desempSort.col===s.id?_desempSort.dir:null;
+    const sortIcon=isSorted==='desc'?' ↓':isSorted==='asc'?' ↑':'';
+    const sortColor=isSorted?'var(--accent)':'var(--t3)';
+    return`<th style="${thStyle}min-width:150px;cursor:pointer;user-select:none" onclick="toggleDesempSort('${s.id}')" title="Ordenar por nota">
+      ${s.nome}<span style="color:${sortColor};font-weight:800;margin-left:3px">${sortIcon||' ⇅'}</span>
       ${mt!==null?`<br><span style="font-size:11px;font-weight:600;color:${mt>=60?'var(--green)':'var(--red)'}">Média turma: ${mt.toFixed(1)}</span>`:''}
     </th>`;
   }).join(''):'<th style="'+thStyle+'min-width:200px">Nenhum simulado criado</th>';
@@ -4340,36 +4865,43 @@ window.renderDesempenho=async()=>{
       const nomeSafe=a.nome.replace(/'/g,"\\'");
       const matKey=mat||nk;
 
+      const btnStyle='font-size:10px;padding:2px 7px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--t2)';
+      const linha2=nc!==null||no!==null?`<div style="font-size:10px;color:var(--t2);margin-top:3px">${nc!==null?`Criar: ${parseFloat(nc).toFixed(1)}`:''}${nc!==null&&no!==null?' · ':''}${no!==null?`Oral: ${parseFloat(no).toFixed(1)}`:''}</div>`:'';
       return `<td style="padding:8px;border:1px solid var(--border);text-align:center;background:${bg}">
-        <div style="font-size:15px;font-weight:800;color:${cor}">${nf!==null?parseFloat(nf).toFixed(1):'—'}</div>
-        <div style="font-size:10px;color:var(--t2);margin-top:2px">${nc!==null?`C:${parseFloat(nc).toFixed(1)}`:''}${nc!==null&&no!==null?' ':''}${no!==null?`O:${parseFloat(no).toFixed(1)}`:''}</div>
-        <button style="font-size:10px;padding:2px 7px;margin-top:3px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--t2)" onclick="openLancarNota('${sim.id}','${matKey}','${nomeSafe}')">${nota===null?'+ Nota':'✏️'}</button>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:nowrap;white-space:nowrap">
+          <span style="font-size:15px;font-weight:800;color:${cor}">${nf!==null?parseFloat(nf).toFixed(1):'—'}</span>
+          <button style="${btnStyle}" onclick="openLancarNota('${sim.id}','${matKey}','${nomeSafe}')" title="${nota===null?'Lançar nota':'Editar nota'}">${nota===null?'+ Nota':'✏️'}</button>
+          ${nota!==null?`<button style="${btnStyle}" onclick="resetNota('${sim.id}','${matKey}','${nomeSafe}')" title="Zerar nota">🗑️</button>`:''}
+        </div>
+        ${linha2}
       </td>`;
     }).join(''):`<td style="padding:8px;border:1px solid var(--border);text-align:center;color:var(--t3)">—</td>`;
 
-    const media=totalNotas.length?(totalNotas.reduce((s,v)=>s+v,0)/totalNotas.length):null;
-    const mediaCor=media!==null?(media>=60?'var(--green)':'var(--red)'):'var(--t2)';
+    const eleg=elegByMat[mat];
+    const garantiaCor=eleg==='elegivel'?'var(--green)':eleg==='nao_elegivel'?'var(--red)':'var(--t2)';
+    const garantiaBg=eleg==='elegivel'?'var(--gl)':eleg==='nao_elegivel'?'var(--rl)':'transparent';
+    const garantiaTxt=eleg==='elegivel'?'Elegível':eleg==='nao_elegivel'?'Não elegível':'—';
 
-    rows+=`<tr style="transition:background .15s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+    rows+=`<tr style="background:var(--bg2);transition:background .15s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
       <td style="padding:8px 12px;border:1px solid var(--border);font-weight:700;color:var(--accent);white-space:nowrap;position:sticky;left:0;background:inherit;z-index:1;min-width:80px">${mat||'—'}</td>
       <td style="padding:8px 12px;border:1px solid var(--border);font-weight:600;white-space:nowrap;position:sticky;left:80px;background:inherit;z-index:1;min-width:200px">${a.nome}</td>
       ${cells}
-      <td style="padding:8px 12px;border:1px solid var(--border);text-align:center;font-weight:800;color:${mediaCor};font-size:16px">${media!==null?media.toFixed(1):'—'}</td>
+      <td style="padding:8px 12px;border:1px solid var(--border);text-align:center;font-weight:800;color:${garantiaCor};background:${garantiaBg};font-size:13px;white-space:nowrap">${garantiaTxt}</td>
     </tr>`;
   });
 
   const tdS='padding:8px 12px;background:var(--bg3);border:1px solid var(--border);font-size:11px;font-weight:700;color:var(--t2);';
   wrap.innerHTML=`
     <div style="font-size:12px;color:var(--t2);margin-bottom:10px;padding:8px 12px;background:var(--bg3);border-radius:var(--rs);border:1px solid var(--border)">
-      <strong>C</strong> = CRIAR/SIMULAÇÃO &nbsp;·&nbsp; <strong>O</strong> = ORAL ONLINE &nbsp;·&nbsp; ✏️ = editar nota
+      <strong>Criar</strong> = CRIAR/SIMULAÇÃO &nbsp;·&nbsp; <strong>Oral</strong> = ORAL ONLINE &nbsp;·&nbsp; ✏️ editar &nbsp;·&nbsp; 🗑️ zerar &nbsp;·&nbsp; clique no cabeçalho da coluna pra ordenar
     </div>
     <div style="overflow-x:auto">
     <table style="border-collapse:collapse;min-width:100%;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px">
       <thead><tr>
-        <th style="${tdS}position:sticky;left:0;z-index:4;min-width:80px">MATRÍCULA</th>
-        <th style="${tdS}position:sticky;left:80px;z-index:4;min-width:200px">NOME</th>
+        <th style="${tdS}position:sticky;left:0;z-index:4;min-width:80px;cursor:pointer;user-select:none" onclick="toggleDesempSort('matricula')" title="Ordenar por matrícula">MATRÍCULA<span style="color:${_desempSort.col==='matricula'?'var(--accent)':'var(--t3)'};font-weight:800;margin-left:3px">${_desempSort.col==='matricula'?(_desempSort.dir==='desc'?' ↓':_desempSort.dir==='asc'?' ↑':' ⇅'):' ⇅'}</span></th>
+        <th style="${tdS}position:sticky;left:80px;z-index:4;min-width:200px;cursor:pointer;user-select:none" onclick="toggleDesempSort('nome')" title="Ordenar por nome">NOME<span style="color:${_desempSort.col==='nome'?'var(--accent)':'var(--t3)'};font-weight:800;margin-left:3px">${_desempSort.col==='nome'?(_desempSort.dir==='desc'?' ↓':_desempSort.dir==='asc'?' ↑':' ⇅'):' ⇅'}</span></th>
         ${thSims}
-        <th style="${tdS}text-align:center;min-width:100px">MÉDIA GERAL</th>
+        <th style="${tdS}text-align:center;min-width:140px;cursor:pointer;user-select:none" onclick="toggleDesempSort('media')" title="Ordenar por média geral (Elegível primeiro = maior média)">GARANTIA DE APROVAÇÃO<span style="color:${_desempSort.col==='media'?'var(--accent)':'var(--t3)'};font-weight:800;margin-left:3px">${_desempSort.col==='media'?(_desempSort.dir==='desc'?' ↓':_desempSort.dir==='asc'?' ↑':' ⇅'):' ⇅'}</span></th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table></div>`;
@@ -4478,8 +5010,183 @@ window.confirmImportNotas=async()=>{
   alert(`${count} registros importados!`);
 };
 
-// ── Export desempenho CSV ─────────────────────────────────────────────────────
+// ── Export desempenho PDF (com seleção de colunas) ────────────────────────────
 window.exportDesempenho=async()=>{
+  const listaId=document.getElementById('desemp-lista-sel')?.value;
+  if(!listaId){alert('Selecione uma lista primeiro.');return;}
+  const _of=S.sims.filter(s=>!s.isExtra).sort((a,b)=>(a.dataSab||a.dataDom||'').localeCompare(b.dataSab||b.dataDom||''));
+  const _ex=S.sims.filter(s=>s.isExtra).sort((a,b)=>(a.criadoEm||'').localeCompare(b.criadoEm||''));
+  const sims=[..._of,..._ex];
+  const cols=[
+    {key:'matricula',label:'Matrícula',default:true},
+    {key:'nome',label:'Nome',default:false},
+    ...sims.map(s=>({key:'sim:'+s.id,label:s.nome,default:true})),
+    {key:'garantia',label:'Garantia de Aprovação',default:true},
+  ];
+  document.getElementById('export-cols-list').innerHTML=cols.map(c=>`
+    <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:var(--rs);cursor:pointer;border:1.5px solid var(--border)">
+      <input type="checkbox" class="export-col-chk" value="${c.key}" ${c.default?'checked':''} style="width:16px;height:16px;cursor:pointer"/>
+      <span style="font-size:13px;font-weight:600">${c.label}</span>
+    </label>
+  `).join('');
+  document.getElementById('modal-export-desemp').classList.remove('hidden');
+};
+
+window.doExportDesempenhoPDF=async()=>{
+  const listaId=document.getElementById('desemp-lista-sel')?.value;
+  const lista=S.listas.find(l=>l.id===listaId);
+  if(!lista){alert('Lista não encontrada.');return;}
+  const selected=Array.from(document.querySelectorAll('.export-col-chk:checked')).map(c=>c.value);
+  if(!selected.length){alert('Selecione ao menos uma coluna.');return;}
+  const _of2=S.sims.filter(s=>!s.isExtra).sort((a,b)=>(a.dataSab||a.dataDom||'').localeCompare(b.dataSab||b.dataDom||''));
+  const _ex2=S.sims.filter(s=>s.isExtra).sort((a,b)=>(a.criadoEm||'').localeCompare(b.criadoEm||''));
+  const sims=[..._of2,..._ex2];
+  const allNotas={};
+  await Promise.all(sims.map(async s=>{allNotas[s.id]=await loadNotas(s.id);}));
+  const _todayISO=new Date().toISOString().slice(0,10);
+  const simsAplicados=sims.filter(s=>{if(s.isExtra)return false;const u=s.dataDom||s.dataSab;return u&&u<_todayISO;});
+
+  // Média da turma por simulado (mesma regra: criar > 0 E oral > 0)
+  const mediasTurma={};
+  sims.forEach(sim=>{
+    const ns=Object.values(allNotas[sim.id]||{})
+      .filter(n=>parseFloat(n.criar)>0&&parseFloat(n.oral)>0)
+      .map(n=>parseFloat(n.notaFinal))
+      .filter(n=>!isNaN(n));
+    mediasTurma[sim.id]=ns.length?(ns.reduce((a,b)=>a+b,0)/ns.length):null;
+  });
+
+  // Elegibilidade por aluno
+  const eleg=mat=>{
+    if(!simsAplicados.length)return null;
+    const temPart=simsAplicados.some(sim=>{const v=parseFloat((allNotas[sim.id]||{})[mat]?.notaFinal);return !isNaN(v)&&v>0;});
+    if(!temPart)return null;
+    const todasOk=simsAplicados.every(sim=>{const v=parseFloat((allNotas[sim.id]||{})[mat]?.notaFinal);return !isNaN(v)&&v>=60;});
+    return todasOk?'elegivel':'nao_elegivel';
+  };
+
+  let alunos=(lista.alunos||[]).map(a=>typeof a==='object'?a:{nome:a,matricula:''});
+
+  // Aplica MESMA ordenação ativa na grade (_desempSort)
+  if(_desempSort.col&&_desempSort.dir){
+    if(_desempSort.col==='matricula'||_desempSort.col==='nome'){
+      const key=_desempSort.col;
+      alunos.sort((a,b)=>{
+        const va=(a[key]||'').toString();const vb=(b[key]||'').toString();
+        const cmp=va.localeCompare(vb,'pt-BR',{numeric:true,sensitivity:'base'});
+        return _desempSort.dir==='desc'?-cmp:cmp;
+      });
+    }else{
+      const getNF=(a)=>{
+        if(_desempSort.col==='media'){const e=eleg(a.matricula);return e==='elegivel'?2:e==='nao_elegivel'?1:null;}
+        const n=(allNotas[_desempSort.col]||{})[a.matricula]||null;if(!n)return null;
+        const v=parseFloat(n.notaFinal);return isNaN(v)?null:v;
+      };
+      alunos.sort((a,b)=>{
+        const va=getNF(a),vb=getNF(b);
+        if(va===null&&vb===null)return a.nome.localeCompare(b.nome,'pt-BR');
+        if(va===null)return 1;
+        if(vb===null)return -1;
+        const diff=_desempSort.dir==='desc'?vb-va:va-vb;
+        return diff!==0?diff:a.nome.localeCompare(b.nome,'pt-BR');
+      });
+    }
+  }else{
+    alunos.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  }
+
+  const colDefs=selected.map(key=>{
+    if(key==='matricula')return{key,label:'Matrícula'};
+    if(key==='nome')return{key,label:'Nome'};
+    if(key==='garantia')return{key,label:'Garantia de Aprovação'};
+    if(key.startsWith('sim:')){const sim=sims.find(x=>x.id===key.slice(4));return{key,label:sim?.nome||'',sim};}
+    return null;
+  }).filter(Boolean);
+
+  const escapeHtml=s=>(s||'').toString().replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  const rowsHtml=alunos.map(a=>{
+    const mat=(a.matricula||'').toString();
+    const e=eleg(mat);
+    return'<tr>'+colDefs.map(c=>{
+      if(c.key==='matricula')return`<td class="td-mat">${escapeHtml(mat)||'—'}</td>`;
+      if(c.key==='nome')return`<td class="td-nome">${escapeHtml(a.nome)}</td>`;
+      if(c.key==='garantia'){
+        const txt=e==='elegivel'?'Elegível':e==='nao_elegivel'?'Não elegível':'—';
+        const cls=e==='elegivel'?'eleg-yes':e==='nao_elegivel'?'eleg-no':'eleg-na';
+        return`<td class="td-eleg ${cls}">${txt}</td>`;
+      }
+      if(c.sim){
+        const n=(allNotas[c.sim.id]||{})[mat];
+        const nf=n?.notaFinal;
+        if(nf===null||nf===undefined||isNaN(parseFloat(nf)))return'<td class="td-empty">—</td>';
+        const v=parseFloat(nf);
+        const nc=parseFloat(n?.criar),no=parseFloat(n?.oral);
+        const cls=v>=60?'nota-ok':'nota-bad';
+        const sub=(!isNaN(nc)||!isNaN(no))?`<div class="td-sub">${!isNaN(nc)?'Criar '+nc.toFixed(1):''}${!isNaN(nc)&&!isNaN(no)?' · ':''}${!isNaN(no)?'Oral '+no.toFixed(1):''}</div>`:'';
+        return`<td class="td-nota ${cls}"><div class="td-main">${v.toFixed(1)}</div>${sub}</td>`;
+      }
+      return'<td>—</td>';
+    }).join('')+'</tr>';
+  }).join('');
+
+  const html=`<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><title>Desempenho · ${escapeHtml(lista.nome)}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1f2328;background:#fff;padding:24px 28px;font-size:12px;line-height:1.4}
+.header{border-bottom:3px solid #2f81f7;padding-bottom:12px;margin-bottom:18px}
+.title{font-size:22px;font-weight:800;letter-spacing:-.3px}
+.subtitle{font-size:13px;color:#656d76;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead th{background:#1f2328;color:#fff;padding:8px 10px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.4px;vertical-align:bottom}
+thead th.center{text-align:center}
+thead th .media-turma{display:block;font-size:9px;font-weight:600;text-transform:none;letter-spacing:0;color:#9ba1a8;margin-top:3px}
+tbody td{padding:7px 10px;border-bottom:1px solid #d0d7de;vertical-align:middle}
+tbody tr:nth-child(odd){background:#f6f8fa}
+.td-mat{font-weight:700;color:#0969da;white-space:nowrap}
+.td-nome{font-weight:600;white-space:nowrap}
+.td-nota{text-align:center;white-space:nowrap}
+.td-nota .td-main{font-size:14px;font-weight:800}
+.td-nota .td-sub{font-size:9px;color:#656d76;margin-top:1px}
+.nota-ok .td-main{color:#1a7f37}
+.nota-bad .td-main{color:#cf222e}
+.td-empty{color:#9ba1a8;text-align:center}
+.td-eleg{text-align:center;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.td-eleg.eleg-yes{color:#1a7f37;background:rgba(26,127,55,.08)}
+.td-eleg.eleg-no{color:#cf222e;background:rgba(207,34,46,.08)}
+.td-eleg.eleg-na{color:#9ba1a8}
+@page{size:A4 landscape;margin:10mm}
+@media print{body{padding:0}}
+</style></head>
+<body>
+<div class="header">
+<div class="title">Desempenho · ${escapeHtml(lista.nome)}</div>
+<div class="subtitle">${alunos.length} alunos · ${simsAplicados.length} simulado${simsAplicados.length===1?'':'s'} aplicado${simsAplicados.length===1?'':'s'}</div>
+</div>
+<table>
+<thead><tr>${colDefs.map(c=>{
+  let extra='';
+  if(c.sim){
+    const mt=mediasTurma[c.sim.id];
+    if(mt!==null)extra=`<span class="media-turma">Média turma: ${mt.toFixed(1)}</span>`;
+  }
+  const isCenter=c.key.startsWith('sim:')||c.key==='garantia';
+  return`<th${isCenter?' class="center"':''}>${escapeHtml(c.label)}${extra}</th>`;
+}).join('')}</tr></thead>
+<tbody>${rowsHtml}</tbody>
+</table>
+<scr`+`ipt>setTimeout(()=>window.print(),300);</scr`+`ipt>
+</body></html>`;
+  const w=window.open('','_blank');
+  if(!w){alert('Permita pop-ups para gerar o PDF.');return;}
+  w.document.write(html);
+  w.document.close();
+  CM('modal-export-desemp');
+};
+
+// === LEGADO (mantido como referência, não usado) ===
+window._exportDesempenhoCSV_legacy=async()=>{
   const listaId=document.getElementById('desemp-lista-sel')?.value;
   if(!listaId){alert('Selecione uma lista primeiro.');return;}
   const lista=S.listas.find(l=>l.id===listaId);
