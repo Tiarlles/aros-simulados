@@ -367,6 +367,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
       <div class="view-tabs">
         <button class="nav-tab on" id="tab-al" onclick="switchView('aluno')">👨‍🎓 Alunos</button>
         <button class="nav-tab" id="tab-co" onclick="switchView('coord')">🛠️ Coordenação</button>
+        <button class="nav-tab" id="tab-mt" onclick="goMentoriaAluno()" title="Mentorias">🎓 Mentorias</button>
       </div>
       <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Alternar tema">🌙</button>
     </div>
@@ -413,6 +414,63 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 </div>
 
 <!-- ══════════════ COORD VIEW ══════════════ -->
+<!-- ══════════════ MENTORIA · VISÃO ALUNO (página dedicada) ══════════════ -->
+<div id="view-mta" class="hidden">
+  <div style="max-width:680px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:28px">
+      <h1 style="font-family:Fraunces,serif;font-size:28px;font-weight:800;letter-spacing:-.5px">🎓 Mentorias</h1>
+      <p style="color:var(--t2);font-size:14px;margin-top:4px">Selecione sua mentoria para ver as clínicas de questões.</p>
+    </div>
+
+    <!-- Step 1: escolher TEA ou TSA -->
+    <div id="mta-step1">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <button onclick="mtaPickTipo('TEA')" style="background:#000;border:2px solid var(--blue);border-radius:14px;padding:0;cursor:pointer;overflow:hidden;transition:all .2s;display:block;width:100%;aspect-ratio:16/9" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(47,129,247,.45)';this.querySelector('img').style.transform='scale(1.04)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='';this.querySelector('img').style.transform='scale(1)'">
+          <img src="assets/mentoria-tea.png" alt="Mentoria TEA" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s"/>
+        </button>
+        <button onclick="mtaPickTipo('TSA')" style="background:#000;border:2px solid var(--orange);border-radius:14px;padding:0;cursor:pointer;overflow:hidden;transition:all .2s;display:block;width:100%;aspect-ratio:16/9" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(251,143,68,.45)';this.querySelector('img').style.transform='scale(1.04)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='';this.querySelector('img').style.transform='scale(1)'">
+          <img src="assets/mentoria-tsa.png" alt="Mentoria TSA" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s"/>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: identificar aluno -->
+    <div id="mta-step2" class="hidden">
+      <button class="btn btn-g btn-sm" onclick="mtaBack(1)" style="margin-bottom:10px">← Voltar</button>
+      <div class="card">
+        <div class="ch"><div class="ct" id="mta-step2-title"></div></div>
+        <div class="cb">
+          <div class="search-wrap" style="margin-bottom:12px">
+            <span class="search-icon">🔍</span>
+            <input class="search-input" id="mta-search" placeholder="Digite seu nome..." oninput="mtaFilterAlunos()" autocomplete="off"/>
+          </div>
+          <div id="mta-aluno-list" style="max-height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--rs)"></div>
+          <div id="mta-aluno-empty" class="hidden" style="padding:24px;text-align:center;color:var(--t2);font-size:13px">Nenhum aluno encontrado.</div>
+          <div id="mta-confirm-email-wrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: clínicas do aluno -->
+    <div id="mta-step3" class="hidden">
+      <button class="btn btn-g btn-sm" onclick="mtaBack(2)" style="margin-bottom:10px">← Voltar</button>
+      <div id="mta-clinicas-wrap"></div>
+    </div>
+
+    <!-- Step 4: solicitar troca -->
+    <div id="mta-step4" class="hidden">
+      <button class="btn btn-g btn-sm" onclick="mtaBack(3)" style="margin-bottom:10px">← Voltar</button>
+      <div class="card">
+        <div class="ch"><div class="ct">🔄 Solicitar Troca</div><div class="m-sub" id="mta-troca-sub"></div></div>
+        <div class="cb">
+          <p style="font-size:13px;color:var(--t2);margin-bottom:12px">Escolha a clínica para a qual você gostaria de ir. Se houver vaga, a troca é confirmada na hora.</p>
+          <div id="mta-troca-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="view-co" class="hidden">
 
   <!-- LOGIN -->
@@ -1087,6 +1145,61 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
       </div>
     </div>
 
+    <!-- TAB: Mentorias -->
+    <div id="tab-mentorias" class="hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h3 style="font-family:Fraunces,serif;font-size:17px;font-weight:700">🎓 Mentorias</h3>
+          <p style="font-size:13px;color:var(--t2)">Grupos, clínicas de questões e trocas (TEA · TSA).</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-p btn-sm" onclick="openMentorGrupo()">+ Novo grupo</button>
+          <button class="btn btn-p btn-sm" onclick="openBlocoClinica()">+ Cadastrar clínica</button>
+        </div>
+      </div>
+
+      <!-- Filtro tipo -->
+      <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="status-filter on" data-mtype="todos" onclick="setMentTypeFilter('todos',this)">Todos</button>
+        <button class="status-filter" data-mtype="TEA" onclick="setMentTypeFilter('TEA',this)">TEA</button>
+        <button class="status-filter" data-mtype="TSA" onclick="setMentTypeFilter('TSA',this)">TSA</button>
+      </div>
+
+      <!-- Trocas pendentes -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="ch" onclick="toggleMentSection('trocas')" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='transparent'" style="cursor:pointer;user-select:none;transition:background .15s">
+          <div class="ct" style="display:flex;align-items:center;gap:10px">
+            <span id="ment-chev-trocas" style="font-size:12px;color:var(--accent);transition:transform .15s;display:inline-block;width:14px">▶</span>
+            🔄 Trocas pendentes
+          </div>
+          <span id="ment-trocas-count" class="badge b-swap">0</span>
+        </div>
+        <div class="cb hidden" id="ment-trocas-list"></div>
+      </div>
+
+      <!-- Clínicas -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="ch" onclick="toggleMentSection('clinicas')" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='transparent'" style="cursor:pointer;user-select:none;transition:background .15s">
+          <div class="ct" style="display:flex;align-items:center;gap:10px">
+            <span id="ment-chev-clinicas" style="font-size:12px;color:var(--accent);transition:transform .15s;display:inline-block;width:14px">▶</span>
+            📅 Clínicas de Questões
+          </div>
+        </div>
+        <div class="cb hidden" id="ment-clinicas-list"></div>
+      </div>
+
+      <!-- Grupos -->
+      <div class="card">
+        <div class="ch" onclick="toggleMentSection('grupos')" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='transparent'" style="cursor:pointer;user-select:none;transition:background .15s">
+          <div class="ct" style="display:flex;align-items:center;gap:10px">
+            <span id="ment-chev-grupos" style="font-size:12px;color:var(--accent);transition:transform .15s;display:inline-block;width:14px">▶</span>
+            👥 Grupos e Mentores
+          </div>
+        </div>
+        <div class="cb hidden" id="ment-grupos-list"></div>
+      </div>
+    </div>
+
     <!-- TAB: Financeiro -->
     <div id="tab-financeiro" class="hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
@@ -1638,6 +1751,99 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
   </div>
 </div>
 
+<!-- ══ MODAL: Cadastrar/editar grupo de mentoria ══ -->
+<div class="mo hidden" id="modal-ment-grupo">
+  <div class="md" style="max-width:680px">
+    <div class="mh"><div><div class="m-title" id="mmg-title">Novo grupo</div><div class="m-sub">Mentor + alunos vinculados (TEA ou TSA)</div></div><button class="m-close" onclick="CM('modal-ment-grupo')">✕</button></div>
+    <div class="m-body">
+      <div class="g2">
+        <div class="fg"><label class="fl">Tipo de mentoria</label>
+          <select class="fc" id="mmg-tipo">
+            <option value="TEA">🟦 TEA</option>
+            <option value="TSA">🟧 TSA</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Mentor (professor)</label>
+          <select class="fc" id="mmg-mentor"></select>
+        </div>
+      </div>
+      <div class="fg">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px">
+          <label class="fl" style="margin:0">Alunos vinculados (um por linha: <em>Nome,email,matrícula</em> — email obrigatório)</label>
+          <div style="display:flex;gap:6px">
+            <button type="button" class="btn btn-s btn-sm" onclick="document.getElementById('mmg-xls-input').click()">📥 Importar XLS</button>
+            <input type="file" id="mmg-xls-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="mmgImportXls(event)"/>
+          </div>
+        </div>
+        <textarea class="fc" id="mmg-alunos" placeholder="João Silva,joao@email.com,2026123&#10;Maria Souza,maria@email.com,2026099" style="min-height:200px;font-family:monospace;font-size:13px"></textarea>
+        <p style="font-size:11px;color:var(--t2);margin-top:4px">Aceita também só "Nome,email" (matrícula opcional). O XLS deve ter colunas <strong>Nome</strong>, <strong>Email</strong> e <strong>Matrícula</strong> (em qualquer ordem; cabeçalho na primeira linha).</p>
+      </div>
+      <div id="mmg-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-d btn-sm" id="mmg-del" onclick="deleteMentorGrupo()" style="margin-right:auto;display:none">🗑️ Apagar</button>
+      <button class="btn btn-s" onclick="CM('modal-ment-grupo')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveMentorGrupo()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Cadastrar/editar bloco mensal ══ -->
+<div class="mo hidden" id="modal-bloco">
+  <div class="md" style="max-width:560px">
+    <div class="mh"><div><div class="m-title" id="mbl-title">Cadastrar clínica</div><div class="m-sub">Tema da clínica e mês de referência</div></div><button class="m-close" onclick="CM('modal-bloco')">✕</button></div>
+    <div class="m-body">
+      <div class="g2">
+        <div class="fg"><label class="fl">Tipo</label>
+          <select class="fc" id="mbl-tipo"><option value="TEA">TEA</option><option value="TSA">TSA</option></select>
+        </div>
+        <div class="fg"><label class="fl">Mês de referência</label>
+          <input class="fc" id="mbl-mes" type="month" placeholder="2026-05"/>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Tema</label>
+        <input class="fc" id="mbl-tema" placeholder="Ex: Obstetrícia"/>
+      </div>
+      <div id="mbl-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-d btn-sm" id="mbl-del" onclick="deleteBlocoClinica()" style="margin-right:auto;display:none">🗑️ Apagar bloco</button>
+      <button class="btn btn-s" onclick="CM('modal-bloco')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveBlocoClinica()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Cadastrar/editar sessão de clínica ══ -->
+<div class="mo hidden" id="modal-clinica">
+  <div class="md" style="max-width:600px">
+    <div class="mh"><div><div class="m-title" id="mcl-title">Nova sessão</div><div class="m-sub" id="mcl-sub">Sessão dentro do bloco</div></div><button class="m-close" onclick="CM('modal-clinica')">✕</button></div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">Mentor responsável</label>
+        <select class="fc" id="mcl-mentor"></select>
+        <p style="font-size:11px;color:var(--t2);margin-top:4px" id="mcl-mentor-info"></p>
+      </div>
+      <div class="fg"><label class="fl">Data e horário</label>
+        <input class="fc" id="mcl-datahora" type="datetime-local"/>
+      </div>
+      <div class="g2">
+        <div class="fg"><label class="fl">Link da reunião (Zoom/Meet)</label>
+          <input class="fc" id="mcl-link" placeholder="https://..."/>
+        </div>
+        <div class="fg"><label class="fl">Limite de alunos</label>
+          <input class="fc" id="mcl-limite" type="number" min="1" step="1" value="20"/>
+        </div>
+      </div>
+      <div id="mcl-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-d btn-sm" id="mcl-del" onclick="deleteClinica()" style="margin-right:auto;display:none">🗑️ Apagar</button>
+      <button class="btn btn-s" onclick="CM('modal-clinica')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveClinica()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODAL: Instruções do simulado (presencial) ══ -->
 <div class="mo hidden" id="modal-sim-instr">
   <div class="md" style="max-width:560px">
@@ -1881,8 +2087,9 @@ const fHM=(h,m)=>`${String(h).padStart(2,'0')}h${String(m).padStart(2,'0')}`;
 // boot
 async function boot(){
   try{const s=await getDoc(doc(db,'config','settings'));if(s.exists())Object.assign(S.cfg,s.data());}catch(e){}
-  await Promise.all([loadSims(),loadProfs(),loadListas(),loadUsuarios(),loadMenuLabels(),loadSimExtra(),loadFinanceiro()]);
+  await Promise.all([loadSims(),loadProfs(),loadListas(),loadUsuarios(),loadMenuLabels(),loadSimExtra(),loadFinanceiro(),loadMentorias(),loadBlocos(),loadClinicas()]);
   renderSimCards();
+  if(typeof _initMentoriaHash==='function')_initMentoriaHash();
   // apply saved theme
   const t=localStorage.getItem('aros-theme')||'dark';
   document.documentElement.setAttribute('data-theme',t);
@@ -1941,9 +2148,285 @@ window.switchView=v=>{
   S.view=v;
   document.getElementById('view-al').classList.toggle('hidden',v!=='aluno');
   document.getElementById('view-co').classList.toggle('hidden',v!=='coord');
+  const mtaEl=document.getElementById('view-mta');if(mtaEl)mtaEl.classList.toggle('hidden',v!=='mentoria');
   document.getElementById('tab-al').classList.toggle('on',v==='aluno');
   document.getElementById('tab-co').classList.toggle('on',v==='coord');
+  const mtBtn=document.getElementById('tab-mt');if(mtBtn)mtBtn.classList.toggle('on',v==='mentoria');
+  // URL sync
+  if(v==='mentoria'&&location.hash!=='#mentorias')history.replaceState(null,'','#mentorias');
+  else if(v!=='mentoria'&&location.hash==='#mentorias')history.replaceState(null,'',location.pathname+location.search);
 };
+
+window.goMentoriaAluno=()=>{
+  switchView('mentoria');
+  mtaReset();
+};
+
+// Roteamento por hash
+window.addEventListener('hashchange',()=>{
+  if(location.hash==='#mentorias')goMentoriaAluno();
+});
+function _initMentoriaHash(){
+  if(location.hash==='#mentorias')goMentoriaAluno();
+}
+
+// === Visão aluno mentoria ===
+S._mta={tipo:null,aluno:null,grupo:null};
+
+window.mtaReset=()=>{
+  S._mta={tipo:null,aluno:null,grupo:null};
+  ['mta-step1','mta-step2','mta-step3','mta-step4'].forEach((id,i)=>{
+    document.getElementById(id).classList.toggle('hidden',i!==0);
+  });
+  const s=document.getElementById('mta-search');if(s)s.value='';
+  const cw=document.getElementById('mta-confirm-email-wrap');if(cw)cw.innerHTML='';
+};
+window.mtaBack=(toStep)=>{
+  if(toStep===1)return mtaReset();
+  ['mta-step1','mta-step2','mta-step3','mta-step4'].forEach((id,i)=>{
+    document.getElementById(id).classList.toggle('hidden',(i+1)!==toStep);
+  });
+};
+
+window.mtaPickTipo=(tipo)=>{
+  S._mta.tipo=tipo;
+  document.getElementById('mta-step2-title').textContent=`Selecione seu nome · Mentoria ${tipo}`;
+  document.getElementById('mta-step1').classList.add('hidden');
+  document.getElementById('mta-step2').classList.remove('hidden');
+  mtaFilterAlunos();
+};
+
+window.mtaFilterAlunos=()=>{
+  const tipo=S._mta.tipo;if(!tipo)return;
+  const q=(document.getElementById('mta-search').value||'').toLowerCase().trim();
+  const grupos=S.mentorias.filter(g=>g.tipo===tipo);
+  const todos=[];
+  grupos.forEach(g=>(g.alunos||[]).forEach(a=>todos.push({...a,_grupo:g})));
+  const filt=q?todos.filter(a=>a.nome.toLowerCase().includes(q)):todos;
+  filt.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  const el=document.getElementById('mta-aluno-list');
+  if(!filt.length){el.innerHTML='';document.getElementById('mta-aluno-empty').classList.remove('hidden');return;}
+  document.getElementById('mta-aluno-empty').classList.add('hidden');
+  el.innerHTML=filt.slice(0,50).map(a=>`<button onclick="mtaPickAluno('${a._grupo.id}','${(a.email||'').replace(/'/g,"\\'")}')" style="display:block;width:100%;text-align:left;background:transparent;border:none;border-bottom:1px solid var(--border);padding:11px 14px;cursor:pointer;font-size:14px;color:var(--text);transition:background .15s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">${a.nome}</button>`).join('');
+};
+
+window.mtaPickAluno=async(grupoId,email)=>{
+  const g=S.mentorias.find(x=>x.id===grupoId);if(!g)return;
+  const a=(g.alunos||[]).find(x=>(x.email||'').toLowerCase()===(email||'').toLowerCase());if(!a){alert('Aluno não encontrado.');return;}
+  S._mta.aluno=a;S._mta.grupo=g;
+  document.getElementById('mta-step2').classList.add('hidden');
+  document.getElementById('mta-step3').classList.remove('hidden');
+  await mtaRenderClinicas();
+};
+
+// Modal reutilizável: pede email cadastrado e chama callback se confere
+window.mtaPedirEmail=(label,callback)=>{
+  const a=S._mta.aluno;if(!a)return;
+  const masked=maskEmail(a.email||'');
+  const old=document.getElementById('modal-mta-email');if(old)old.remove();
+  const html=`<div class="mo" id="modal-mta-email">
+    <div class="md" style="max-width:440px">
+      <div class="mh"><div><div class="m-title">Confirme seu e-mail</div><div class="m-sub">${label}</div></div><button class="m-close" onclick="document.getElementById('modal-mta-email').remove()">✕</button></div>
+      <div class="m-body">
+        <p style="font-size:13px;margin-bottom:6px">Digite seu e-mail cadastrado para autorizar a ação.</p>
+        <p style="font-size:12px;color:var(--t2);margin-bottom:10px">Termina em <strong>${masked}</strong>.</p>
+        <input class="fc" id="mta-email-input" type="email" placeholder="seuemail@email.com" autocomplete="email"/>
+        <div id="mta-email-err" class="al al-e hidden" style="margin-top:10px"></div>
+      </div>
+      <div class="m-foot">
+        <button class="btn btn-s" onclick="document.getElementById('modal-mta-email').remove()">Cancelar</button>
+        <button class="btn btn-p" id="mta-email-go">Confirmar</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend',html);
+  const inp=document.getElementById('mta-email-input');
+  setTimeout(()=>inp.focus(),50);
+  const go=async()=>{
+    const email=(inp.value||'').trim();
+    const err=document.getElementById('mta-email-err');
+    if(!email||!email.includes('@')){err.textContent='Digite um e-mail válido.';err.classList.remove('hidden');return;}
+    if(email.toLowerCase()!==(a.email||'').toLowerCase()){err.textContent='E-mail não confere com o cadastrado.';err.classList.remove('hidden');return;}
+    document.getElementById('modal-mta-email').remove();
+    await callback();
+  };
+  document.getElementById('mta-email-go').onclick=go;
+  inp.onkeydown=e=>{if(e.key==='Enter')go();};
+};
+
+async function mtaRenderClinicas(){
+  const{tipo,aluno,grupo}=S._mta;
+  const wrap=document.getElementById('mta-clinicas-wrap');
+  wrap.innerHTML='<div class="ld"><div class="sp"></div> Carregando clínicas...</div>';
+  // Recarrega clínicas do banco
+  await loadClinicas();
+  // Clínicas do mesmo tipo cujo mentor seja o do aluno OU pra quais o aluno foi alocado (em casos de troca)
+  const minhas=S.clinicas.filter(c=>c.tipo===tipo).sort((a,b)=>(a.dataHora||'').localeCompare(b.dataHora||''));
+  // Carrega alunos das clínicas do tipo
+  const meusEntries=[];
+  for(const c of minhas){
+    const alunos=await loadClinicaAlunos(c.id);
+    const meu=alunos.find(x=>(x.email||'').toLowerCase()===(aluno.email||'').toLowerCase());
+    if(meu)meusEntries.push({clinica:c,registro:meu});
+  }
+  if(!meusEntries.length){
+    wrap.innerHTML=`<div class="card"><div class="cb"><div class="es" style="padding:32px"><div class="ei">📭</div><p>Nenhuma clínica agendada ainda.</p><p style="font-size:12px;margin-top:6px">Mentor: <strong>${grupo.mentorNome}</strong></p></div></div></div>`;
+    return;
+  }
+  const now=new Date().toISOString();
+  wrap.innerHTML=`<h2 style="font-family:Fraunces,serif;font-size:18px;font-weight:700;margin-bottom:14px">Suas clínicas (${tipo})</h2>`+
+    meusEntries.map(({clinica:c,registro:r})=>{
+      const expirada=c.dataHora&&c.dataHora<now.slice(0,16);
+      const cls=r.status==='confirmed'?'status-confirmed':r.status==='swap'?'status-swap':r.status==='absent'?'status-absent':'';
+      let acts='';
+      if(expirada){acts='<span style="font-size:12px;color:var(--t2)">Clínica encerrada</span>';}
+      else if(r.status==='pending'){
+        acts=`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <button class="rb rb-c" onclick="mtaResp('${c.id}','${r.id}','confirmed')">✔ Confirmo</button>
+          <button class="rb rb-a" onclick="mtaResp('${c.id}','${r.id}','absent')">✗ Não vou</button>
+          <button class="rb rb-s" onclick="mtaOpenTroca('${c.id}','${r.id}')">🔄 Trocar</button>
+        </div>`;
+      }else{
+        acts=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${sbadge(r.status)}<button class="rb" style="background:var(--bg3);color:var(--t2);border:1px solid var(--border);padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer" onclick="mtaResp('${c.id}','${r.id}','reset')">✏️ Alterar</button></div>`;
+      }
+      return`<div class="aluno-row ${cls}" style="flex-direction:column;align-items:stretch;gap:8px;padding:14px 16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;width:100%">
+          <div style="flex:1;min-width:200px">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <strong style="font-size:15px">${_temaDeClinica(c)}</strong>${_mentBadge(c.tipo)}
+            </div>
+            <div style="font-size:12px;color:var(--t2);margin-top:2px">📅 ${_fmtClinDataHora(c.dataHora)}${r.respondedAt&&r.status!=='pending'?' · <span style=\"color:var(--t2)\">'+fDT(r.respondedAt)+'</span>':''}</div>
+          </div>
+          ${acts}
+        </div>
+        ${c.link&&r.status==='confirmed'?`<a href="${c.link}" target="_blank" style="font-size:12px;color:var(--accent);font-weight:600">🔗 ${c.link}</a>`:''}
+      </div>`;
+    }).join('');
+}
+
+window.mtaResp=(clinicaId,alunoId,type)=>{
+  // 'reset' (alterar resposta) não pede email novamente
+  if(type==='reset'){return _mtaAplicarResp(clinicaId,alunoId,type);}
+  const labelMap={confirmed:'Confirmar presença na clínica',absent:'Marcar ausência na clínica'};
+  mtaPedirEmail(labelMap[type]||'Confirmar ação',()=>_mtaAplicarResp(clinicaId,alunoId,type));
+};
+
+async function _mtaAplicarResp(clinicaId,alunoId,type){
+  if(type==='reset'){
+    await updateDoc(doc(db,`clinicas/${clinicaId}/alunos/${alunoId}`),{status:'pending',respondedAt:new Date().toISOString(),swapTargetClinicaId:null});
+    _invalidateClinicaAlunos(clinicaId);
+    await mtaRenderClinicas();
+    return;
+  }
+  const a=S._mta.aluno;
+  const update={status:type,email:a.email,emailCadastrado:a.email,respondedAt:new Date().toISOString(),swapTargetClinicaId:null};
+  await updateDoc(doc(db,`clinicas/${clinicaId}/alunos/${alunoId}`),update);
+  _invalidateClinicaAlunos(clinicaId);
+  const c=S.clinicas.find(x=>x.id===clinicaId);
+  let okMail=true;
+  if(type==='confirmed')okMail=await sendEmailMentoria('confirmed',a,c);
+  else if(type==='absent')okMail=await sendEmailMentoria('absent',a,c);
+  if(type==='absent')await tentarPuxarSwapVaga(c);
+  await mtaRenderClinicas();
+  if(type==='confirmed')alert(okMail?`✅ Presença confirmada!\nUm e-mail de confirmação foi enviado para ${a.email}.`:`✅ Presença confirmada!\n⚠️ Falha ao enviar e-mail (verifique sua caixa, pode chegar atrasado).`);
+  else if(type==='absent')alert(okMail?`Ausência registrada.\nUm e-mail foi enviado para ${a.email}.`:`Ausência registrada.\n⚠️ Falha ao enviar e-mail.`);
+}
+
+async function tentarPuxarSwapVaga(clinicaDest){
+  if(!clinicaDest)return;
+  const lim=clinicaDest.limite||20;
+  const alunosDest=await loadClinicaAlunos(clinicaDest.id);
+  const ocup=alunosDest.filter(a=>a.status!=='absent').length;
+  if(ocup>=lim)return;
+  // Busca em outras clínicas alguém com swap pra esta
+  for(const c of S.clinicas){
+    if(c.id===clinicaDest.id)continue;
+    if(c.tipo!==clinicaDest.tipo)continue;
+    const alunos=await loadClinicaAlunos(c.id);
+    const cand=alunos.find(a=>a.status==='swap'&&a.swapTargetClinicaId===clinicaDest.id);
+    if(cand){
+      // Move cand pra clinicaDest
+      const ts=new Date().toISOString();
+      await deleteDoc(doc(db,`clinicas/${c.id}/alunos/${cand.id}`));
+      await setDoc(doc(db,`clinicas/${clinicaDest.id}/alunos/${cand.id}`),{
+        nome:cand.nome,email:cand.email||'',matricula:cand.matricula||'',
+        emailCadastrado:cand.emailCadastrado||cand.email||'',
+        status:'confirmed',respondedAt:ts,originalClinicaId:c.id
+      });
+      _invalidateClinicaAlunos(c.id);_invalidateClinicaAlunos(clinicaDest.id);
+      if(cand.email)sendEmailMentoria('trocaConfirmada',cand,c,clinicaDest);
+      return; // só puxa 1 por vez
+    }
+  }
+}
+
+window.mtaOpenTroca=async(clinicaId,alunoId)=>{
+  const c=S.clinicas.find(x=>x.id===clinicaId);if(!c)return;
+  S._mta.fromClinicaId=clinicaId;S._mta.fromAlunoId=alunoId;
+  document.getElementById('mta-troca-sub').textContent=`De: ${_temaDeClinica(c)} · ${_fmtClinDataHora(c.dataHora)}`;
+  document.getElementById('mta-step3').classList.add('hidden');
+  document.getElementById('mta-step4').classList.remove('hidden');
+  const now=new Date().toISOString();
+  const opcoes=S.clinicas.filter(x=>x.tipo===c.tipo&&x.id!==clinicaId&&(!x.dataHora||x.dataHora>=now.slice(0,16))).sort((a,b)=>(a.dataHora||'').localeCompare(b.dataHora||''));
+  const list=document.getElementById('mta-troca-list');
+  if(!opcoes.length){list.innerHTML='<p style="color:var(--t2);font-size:13px;padding:12px">Nenhuma outra clínica disponível para troca.</p>';return;}
+  // Carrega ocupação
+  const rows=[];
+  for(const o of opcoes){
+    const al=await loadClinicaAlunos(o.id);
+    const ocup=al.filter(x=>x.status!=='absent').length;
+    const lim=o.limite||20;
+    const livre=ocup<lim;
+    rows.push(`<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:${livre?'var(--gl)':'var(--bg3)'};border:1px solid ${livre?'rgba(63,185,80,.3)':'var(--border)'};border-radius:var(--rs);margin-bottom:8px;gap:10px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <strong style="font-size:13px">${o.tema||'(sem tema)'}</strong>
+        <div style="font-size:12px;color:var(--t2);margin-top:2px">👤 ${o.mentorNome} · 📅 ${_fmtClinDataHora(o.dataHora)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;font-weight:700;color:${livre?'var(--green)':'var(--t2)'}">${ocup}/${lim}</span>
+        <button class="btn btn-p btn-sm" onclick="mtaSubmitTroca('${o.id}',${livre})">${livre?'✓ Trocar agora':'Pedir troca'}</button>
+      </div>
+    </div>`);
+  }
+  list.innerHTML=rows.join('');
+};
+
+window.mtaSubmitTroca=(destClinicaId,vagaLivre)=>{
+  mtaPedirEmail(vagaLivre?'Confirmar troca para esta clínica':'Solicitar troca para esta clínica',
+    ()=>_mtaAplicarTroca(destClinicaId,vagaLivre));
+};
+
+async function _mtaAplicarTroca(destClinicaId,vagaLivre){
+  const fromId=S._mta.fromClinicaId,alunoId=S._mta.fromAlunoId;
+  const a=S._mta.aluno;
+  const cFrom=S.clinicas.find(x=>x.id===fromId);
+  const cDest=S.clinicas.find(x=>x.id===destClinicaId);
+  const ts=new Date().toISOString();
+  if(vagaLivre){
+    // Troca direta
+    await deleteDoc(doc(db,`clinicas/${fromId}/alunos/${alunoId}`));
+    await setDoc(doc(db,`clinicas/${destClinicaId}/alunos/${alunoId}`),{
+      nome:a.nome,email:a.email||'',matricula:a.matricula||'',
+      emailCadastrado:a.email||'',
+      status:'confirmed',respondedAt:ts,originalClinicaId:fromId
+    });
+    _invalidateClinicaAlunos(fromId);_invalidateClinicaAlunos(destClinicaId);
+    sendEmailMentoria('trocaConfirmada',a,cFrom,cDest);
+    alert('✅ Troca efetivada!');
+  }else{
+    // Marca como swap; tenta match recíproco
+    await updateDoc(doc(db,`clinicas/${fromId}/alunos/${alunoId}`),{
+      status:'swap',swapTargetClinicaId:destClinicaId,respondedAt:ts
+    });
+    _invalidateClinicaAlunos(fromId);
+    const matched=await tentarMatchTrocaMentoria(cFrom,{...a,id:alunoId,swapTargetClinicaId:destClinicaId,emailCadastrado:a.email});
+    if(matched){alert('✅ Troca casada automaticamente com outro aluno!');}
+    else{sendEmailMentoria('swap',a,cFrom,cDest);alert('🔄 Solicitação de troca registrada. Você será notificado se houver vaga ou match.');}
+  }
+  document.getElementById('mta-step4').classList.add('hidden');
+  document.getElementById('mta-step3').classList.remove('hidden');
+  await mtaRenderClinicas();
+}
 
 
 window.esqueceuSenha=async()=>{
@@ -1987,6 +2470,9 @@ const TAB_GROUPS=[
   {id:'cadastros',label:'Cadastros',tabs:[
     {id:'professores',label:'👨‍🏫 Professores'},
     {id:'listas',label:'👥 Listas de Alunos'}
+  ]},
+  {id:'mentorias',label:'Mentorias',tabs:[
+    {id:'mentorias',label:'🎓 Mentorias'}
   ]},
   {id:'admin',label:'Administração',tabs:[
     {id:'financeiro',label:'💰 Financeiro'},
@@ -2796,6 +3282,764 @@ window.saveAddAlunoSimExtra=async()=>{
 // ════════════════════════════════════════════════════════════════════════════
 // CONTROLE FINANCEIRO
 // ════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
+// MENTORIAS
+// ════════════════════════════════════════════════════════════════════════════
+S.mentorias=[];
+S.clinicas=[];
+S.blocos=[];
+S._clinicasAlunosCache={}; // {clinicaId: [alunos]}
+S._mentTypeFilter='todos';
+S._blocosAbertos=new Set();
+
+async function loadMentorias(){
+  try{
+    const snap=await getDocs(collection(db,'mentorias'));
+    S.mentorias=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){console.error('loadMentorias',e);}
+}
+async function loadBlocos(){
+  try{
+    const snap=await getDocs(collection(db,'blocosClinica'));
+    S.blocos=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.mes||'').localeCompare(a.mes||''));
+  }catch(e){console.error('loadBlocos',e);}
+}
+async function loadClinicas(){
+  try{
+    const snap=await getDocs(collection(db,'clinicas'));
+    S.clinicas=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.dataHora||'').localeCompare(b.dataHora||''));
+  }catch(e){console.error('loadClinicas',e);}
+}
+const _blocoOf=(c)=>c?.blocoId?S.blocos.find(b=>b.id===c.blocoId):null;
+const _temaDeClinica=(c)=>{const b=_blocoOf(c);return b?.tema||c?.tema||'(sem tema)';};
+async function loadClinicaAlunos(clinicaId){
+  const snap=await getDocs(collection(db,`clinicas/${clinicaId}/alunos`));
+  const alunos=snap.docs.map(d=>({id:d.id,...d.data()}));
+  S._clinicasAlunosCache[clinicaId]=alunos;
+  return alunos;
+}
+function _invalidateClinicaAlunos(clinicaId){if(clinicaId)delete S._clinicasAlunosCache[clinicaId];else S._clinicasAlunosCache={};}
+
+// Sincroniza alunos do grupo (mentor) com todas as clínicas vinculadas:
+// - Adiciona novos alunos (status pending)
+// - Remove alunos que saíram do grupo
+// - Atualiza nomes que mudaram
+// Match feito por email (lowercase). Alunos sem email são ignorados.
+async function _sincronizarAlunosMentoria(grupoId){
+  if(!grupoId)return{added:0,removed:0,renamed:0};
+  const g=S.mentorias.find(x=>x.id===grupoId);
+  if(!g)return{added:0,removed:0,renamed:0};
+  const clinicasDoGrupo=S.clinicas.filter(c=>c.mentoriaId===grupoId);
+  if(!clinicasDoGrupo.length)return{added:0,removed:0,renamed:0};
+  let added=0,removed=0,renamed=0;
+  const grpEmails=new Set((g.alunos||[]).map(a=>(a.email||'').toLowerCase()).filter(Boolean));
+  for(const c of clinicasDoGrupo){
+    const alunosClin=await loadClinicaAlunos(c.id);
+    const clinByEmail={};alunosClin.forEach(a=>{const e=(a.email||a.emailCadastrado||'').toLowerCase();if(e)clinByEmail[e]=a;});
+    const batch=writeBatch(db);let touched=false;
+    // Remove quem saiu do grupo
+    for(const a of alunosClin){
+      const e=(a.email||a.emailCadastrado||'').toLowerCase();
+      if(e&&!grpEmails.has(e)){batch.delete(doc(db,`clinicas/${c.id}/alunos/${a.id}`));touched=true;removed++;}
+    }
+    // Adiciona / atualiza
+    for(const a of (g.alunos||[])){
+      const e=(a.email||'').toLowerCase();if(!e)continue;
+      const existente=clinByEmail[e];
+      if(!existente){
+        const aid=(a.matricula||'').toString().trim()||('aln_'+Math.random().toString(36).slice(2,8));
+        batch.set(doc(db,`clinicas/${c.id}/alunos/${aid}`),{
+          nome:a.nome,email:a.email||'',matricula:a.matricula||'',
+          emailCadastrado:a.email||'',
+          status:'pending',respondedAt:null,
+          criadoEm:new Date().toISOString()
+        });
+        touched=true;added++;
+      } else if(existente.nome!==a.nome){
+        batch.update(doc(db,`clinicas/${c.id}/alunos/${existente.id}`),{nome:a.nome});
+        touched=true;renamed++;
+      }
+    }
+    if(touched){await batch.commit();_invalidateClinicaAlunos(c.id);}
+  }
+  return{added,removed,renamed};
+}
+
+// === Helpers ===
+const _mentBadge=(t)=>t==='TEA'?'<span class="badge b-swap">TEA</span>':'<span class="badge b-match">TSA</span>';
+const _fmtClinDataHora=(s)=>{if(!s)return'';const[d,h]=s.split('T');return`${fD(d)}${h?' às '+h.slice(0,5):''}`;};
+
+window.setMentTypeFilter=(t,btn)=>{
+  S._mentTypeFilter=t;
+  document.querySelectorAll('#tab-mentorias .status-filter').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderMentorias();
+};
+
+window.toggleMentSection=(name)=>{
+  const map={trocas:'ment-trocas-list',clinicas:'ment-clinicas-list',grupos:'ment-grupos-list'};
+  const body=document.getElementById(map[name]);if(!body)return;
+  body.classList.toggle('hidden');
+  const chev=document.getElementById('ment-chev-'+name);
+  if(chev)chev.style.transform=body.classList.contains('hidden')?'rotate(0deg)':'rotate(90deg)';
+};
+
+// === Render principal ===
+window.renderMentorias=async()=>{
+  const f=S._mentTypeFilter||'todos';
+  // Garante alunos das clínicas em cache (necessário pra contagem / trocas)
+  await Promise.all(S.clinicas.map(async c=>{if(!S._clinicasAlunosCache[c.id])await loadClinicaAlunos(c.id);}));
+  // === Trocas pendentes ===
+  const trocas=[];
+  S.clinicas.forEach(c=>{
+    const alunos=S._clinicasAlunosCache[c.id]||[];
+    alunos.filter(a=>a.status==='swap'&&a.swapTargetClinicaId).forEach(a=>{
+      trocas.push({...a,clinicaOrigem:c});
+    });
+  });
+  document.getElementById('ment-trocas-count').textContent=trocas.length;
+  const elT=document.getElementById('ment-trocas-list');
+  if(!trocas.length){elT.innerHTML='<p style="color:var(--t2);font-size:13px;padding:8px">Nenhuma troca pendente.</p>';}
+  else{
+    elT.innerHTML=trocas.filter(t=>f==='todos'||t.clinicaOrigem.tipo===f).map(t=>{
+      const dest=S.clinicas.find(x=>x.id===t.swapTargetClinicaId);
+      if(!dest)return'';
+      return`<div class="aluno-row" style="align-items:flex-start">
+        <div style="flex:1;min-width:240px">
+          <div style="font-weight:700;font-size:14px">${t.nome} ${_mentBadge(t.clinicaOrigem.tipo)}</div>
+          <div style="font-size:12px;color:var(--t2);margin-top:2px">${t.email||''}</div>
+          <div style="font-size:13px;margin-top:4px">
+            <strong>De:</strong> ${_temaDeClinica(t.clinicaOrigem)} · ${t.clinicaOrigem.mentorNome} · ${_fmtClinDataHora(t.clinicaOrigem.dataHora)}
+          </div>
+          <div style="font-size:13px;margin-top:2px;color:var(--accent);font-weight:600">
+            <strong>Quer ir para:</strong> ${_temaDeClinica(dest)} · ${dest.mentorNome} · ${_fmtClinDataHora(dest.dataHora)}
+          </div>
+          ${t.respondedAt?`<div style="font-size:11px;color:var(--t2);margin-top:2px">Solicitada em ${fDT(t.respondedAt)}</div>`:''}
+        </div>
+        <div class="aluno-acts">
+          <button class="btn btn-s btn-sm" onclick="forcarTrocaMentoria('${t.clinicaOrigem.id}','${t.id}','${dest.id}')">✓ Forçar troca</button>
+          <button class="btn btn-d btn-sm" onclick="cancelarTrocaMentoria('${t.clinicaOrigem.id}','${t.id}')">✗ Cancelar</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // === Clínicas (agrupadas em blocos mensais) ===
+  const blocoFilt=f==='todos'?S.blocos:S.blocos.filter(b=>b.tipo===f);
+  const elC=document.getElementById('ment-clinicas-list');
+  const sessoesAvulsas=S.clinicas.filter(c=>!c.blocoId&&(f==='todos'||c.tipo===f));
+  if(!blocoFilt.length&&!sessoesAvulsas.length){
+    elC.innerHTML='<p style="color:var(--t2);font-size:13px;padding:8px">Nenhuma clínica cadastrada. Clique em <strong>+ Cadastrar clínica</strong> para começar.</p>';
+  } else {
+    const blocosHtml=blocoFilt.map(b=>_renderBloco(b)).join('');
+    const avulsasHtml=sessoesAvulsas.length?`<div class="card" style="margin-top:10px;border:1px dashed var(--yellow)"><div class="ch"><div class="ct" style="color:var(--yellow)">⚠️ Sessões sem bloco (legado)</div></div><div class="cb">${sessoesAvulsas.map(c=>_renderSessao(c,true)).join('')}</div></div>`:'';
+    elC.innerHTML=blocosHtml+avulsasHtml;
+  }
+
+  // === Grupos ===
+  const grpFilt=f==='todos'?S.mentorias:S.mentorias.filter(g=>g.tipo===f);
+  const elG=document.getElementById('ment-grupos-list');
+  if(!grpFilt.length){elG.innerHTML='<p style="color:var(--t2);font-size:13px;padding:8px">Nenhum grupo cadastrado.</p>';}
+  else{
+    elG.innerHTML=grpFilt.map(g=>{
+      const cnt=(g.alunos||[]).length;
+      return`<div class="aluno-row" style="align-items:flex-start;flex-direction:column;gap:8px;padding:0">
+        <div onclick="toggleGrupoAlunos('${g.id}')" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='transparent'" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;flex-wrap:wrap;cursor:pointer;user-select:none;padding:12px;border-radius:var(--rs);transition:background .15s">
+          <div style="flex:1;min-width:200px;display:flex;align-items:center;gap:10px">
+            <span id="grp-chev-${g.id}" style="font-size:12px;color:var(--accent);transition:transform .15s;display:inline-block;width:14px">▶</span>
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <strong style="font-size:14px">👤 ${g.mentorNome}</strong>${_mentBadge(g.tipo)}
+              </div>
+              <div style="font-size:12px;color:var(--t2);margin-top:2px">${cnt} aluno${cnt!==1?'s':''}</div>
+            </div>
+          </div>
+          <div class="aluno-acts" onclick="event.stopPropagation()">
+            <button class="btn btn-s btn-sm" onclick="toggleGrupoAlunos('${g.id}')">👥 Ver alunos</button>
+            <button class="btn btn-s btn-sm" onclick="openMentorGrupo('${g.id}')">✏️ Editar</button>
+          </div>
+        </div>
+        <div id="grp-alunos-${g.id}" class="hidden" style="width:100%;border-top:1px dashed var(--border);padding-top:10px;margin-top:4px">
+          ${(g.alunos||[]).length?'<div style="display:flex;flex-direction:column;gap:4px">'+(g.alunos||[]).map((a,i)=>`<div class="ment-aluno-row" data-grp="${g.id}" data-idx="${i}" style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:var(--rs);background:var(--bg2);border:1px solid var(--border)"><span class="ment-aluno-nome" onclick="editGrupoAlunoNome('${g.id}',${i})" style="flex:1;font-size:13px;cursor:text;padding:2px 4px;border-radius:4px" title="Clique para editar">${a.nome}</span><button class="btn btn-s btn-sm" onclick="moveGrupoAluno('${g.id}',${i})" style="font-size:11px;padding:3px 8px" title="Mover para outro mentor">↔️</button><button class="btn btn-d btn-sm" onclick="rmGrupoAluno('${g.id}',${i})" style="font-size:11px;padding:3px 8px" title="Excluir">✕</button></div>`).join('')+'</div>':'<p style="color:var(--t2);font-size:12px">Nenhum aluno.</p>'}
+        </div>
+      </div>`;
+    }).join('');
+  }
+};
+
+window.toggleClinicaAlunos=(id)=>{
+  const el=document.getElementById('cln-alunos-'+id);if(!el)return;
+  el.classList.toggle('hidden');
+};
+
+window.toggleBlocoClin=(id)=>{
+  if(S._blocosAbertos.has(id))S._blocosAbertos.delete(id);else S._blocosAbertos.add(id);
+  const body=document.getElementById('blc-body-'+id);
+  const chev=document.getElementById('blc-chev-'+id);
+  if(body)body.classList.toggle('hidden');
+  if(chev)chev.style.transform=S._blocosAbertos.has(id)?'rotate(90deg)':'rotate(0deg)';
+};
+
+function _renderBloco(b){
+  const sessoes=S.clinicas.filter(c=>c.blocoId===b.id).sort((a,b2)=>(a.dataHora||'').localeCompare(b2.dataHora||''));
+  const aberto=S._blocosAbertos.has(b.id);
+  const totSessoes=sessoes.length;
+  const mesLabel=b.mes?_fmtMes(b.mes):'';
+  return`<div class="aluno-row" style="align-items:flex-start;flex-direction:column;gap:8px;padding:0;margin-bottom:8px">
+    <div onclick="toggleBlocoClin('${b.id}')" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='transparent'" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;flex-wrap:wrap;cursor:pointer;user-select:none;padding:12px;border-radius:var(--rs);transition:background .15s">
+      <div style="flex:1;min-width:220px;display:flex;align-items:center;gap:10px">
+        <span id="blc-chev-${b.id}" style="font-size:12px;color:var(--accent);transition:transform .15s;display:inline-block;width:14px;${aberto?'transform:rotate(90deg)':''}">▶</span>
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <strong style="font-size:14px">🩺 ${b.tema||b.titulo||'(sem tema)'}</strong>${_mentBadge(b.tipo)}
+          </div>
+          <div style="font-size:12px;color:var(--t2);margin-top:2px">${mesLabel?'📅 '+mesLabel+' · ':''}${totSessoes} sessã${totSessoes!==1?'oes':'o'}</div>
+        </div>
+      </div>
+      <div class="aluno-acts" onclick="event.stopPropagation()">
+        <button class="btn btn-s btn-sm" onclick="openClinica(null,'${b.id}')">+ Sessão</button>
+        <button class="btn btn-s btn-sm" onclick="openBlocoClinica('${b.id}')">✏️ Editar</button>
+      </div>
+    </div>
+    <div id="blc-body-${b.id}" class="${aberto?'':'hidden'}" style="width:100%;border-top:1px dashed var(--border);padding:10px 12px 4px">
+      ${sessoes.length?sessoes.map(c=>_renderSessao(c,false)).join(''):'<p style="color:var(--t2);font-size:12px;padding:6px 0">Nenhuma sessão cadastrada. Clique em <strong>+ Sessão</strong> para adicionar.</p>'}
+    </div>
+  </div>`;
+}
+
+function _renderSessao(c,isAvulsa){
+  const alunos=S._clinicasAlunosCache[c.id]||[];
+  const cf=alunos.filter(a=>a.status==='confirmed').length;
+  const sw=alunos.filter(a=>a.status==='swap').length;
+  const ab=alunos.filter(a=>a.status==='absent').length;
+  const pe=alunos.filter(a=>a.status==='pending').length;
+  const lim=c.limite||20;
+  const ocup=alunos.filter(a=>a.status!=='absent').length;
+  const cor=ocup>=lim?'var(--red)':ocup>=lim*0.8?'var(--yellow)':'var(--green)';
+  const bg=isAvulsa?'var(--bg3)':'var(--bg2)';
+  return`<div style="background:${bg};border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;margin-bottom:6px">
+    <div onclick="toggleClinicaAlunos('${c.id}')" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'" style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;cursor:pointer;user-select:none;padding:4px;border-radius:var(--rs);transition:background .15s">
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:13px;font-weight:600">👤 ${c.mentorNome}${isAvulsa?' '+_mentBadge(c.tipo):''}</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:2px">📅 ${_fmtClinDataHora(c.dataHora)}</div>
+        ${isAvulsa?`<div style="font-size:11px;color:var(--yellow);margin-top:2px">Tema antigo: ${c.tema||'(sem)'}</div>`:''}
+        ${c.link?`<div style="font-size:11px;color:var(--t2);margin-top:2px" onclick="event.stopPropagation()">🔗 <a href="${c.link}" target="_blank" style="color:var(--accent)">${c.link}</a></div>`:''}
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:16px;font-weight:800;color:${cor}">${ocup}/${lim}</div>
+        <div style="font-size:11px;color:var(--t2)">✅${cf} 🔄${sw} ⏳${pe} ❌${ab}</div>
+      </div>
+    </div>
+    <div class="aluno-acts" style="width:100%;margin-top:6px">
+      <button class="btn btn-s btn-sm" onclick="toggleClinicaAlunos('${c.id}')">👥 Ver alunos</button>
+      <button class="btn btn-s btn-sm" onclick="openClinica('${c.id}')">✏️ Editar</button>
+    </div>
+    <div id="cln-alunos-${c.id}" class="hidden" style="width:100%;border-top:1px dashed var(--border);padding-top:8px;margin-top:6px">
+      ${_renderClinicaAlunos(c,alunos)}
+    </div>
+  </div>`;
+}
+
+const _fmtMes=(s)=>{if(!s)return'';const[y,m]=s.split('-');const mn=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];return`${mn[parseInt(m,10)-1]||m}/${y}`;};
+
+// === CRUD Bloco mensal ===
+window.openBlocoClinica=(id)=>{
+  const b=id?S.blocos.find(x=>x.id===id):null;
+  document.getElementById('mbl-title').textContent=id?'Editar clínica':'Cadastrar clínica';
+  document.getElementById('mbl-tipo').value=b?.tipo||'TSA';
+  document.getElementById('mbl-mes').value=b?.mes||'';
+  document.getElementById('mbl-tema').value=b?.tema||'';
+  document.getElementById('mbl-err').classList.add('hidden');
+  document.getElementById('mbl-del').style.display=id?'':'none';
+  document.getElementById('modal-bloco').dataset.editId=id||'';
+  document.getElementById('modal-bloco').classList.remove('hidden');
+};
+
+window.saveBlocoClinica=async()=>{
+  const editId=document.getElementById('modal-bloco').dataset.editId;
+  const id=editId||('blc_'+Date.now()+'_'+Math.random().toString(36).slice(2,5));
+  const tipo=document.getElementById('mbl-tipo').value;
+  const mes=document.getElementById('mbl-mes').value;
+  const tema=document.getElementById('mbl-tema').value.trim();
+  const err=document.getElementById('mbl-err');
+  if(!tema){err.textContent='Informe o tema.';err.classList.remove('hidden');return;}
+  err.classList.add('hidden');
+  try{
+    await setDoc(doc(db,'blocosClinica',id),{
+      tipo,mes,titulo:tema,tema,
+      updatedAt:new Date().toISOString(),
+      ...(editId?{}:{criadoEm:new Date().toISOString()})
+    },{merge:true});
+  }catch(e){
+    console.error('saveBlocoClinica:',e);
+    err.innerHTML=`❌ Erro ao salvar: <strong>${(e&&e.code)||e.message||e}</strong><br><span style="font-size:11px">Verifique se as Firestore Rules para <code>blocosClinica</code> foram deployadas.</span>`;
+    err.classList.remove('hidden');
+    return;
+  }
+  await loadBlocos();
+  S._blocosAbertos.add(id);
+  CM('modal-bloco');
+  renderMentorias();
+};
+
+window.deleteBlocoClinica=async()=>{
+  const id=document.getElementById('modal-bloco').dataset.editId;
+  if(!id)return;
+  const sessoes=S.clinicas.filter(c=>c.blocoId===id);
+  const msg=sessoes.length?`Apagar este bloco também apaga as ${sessoes.length} sessões dentro dele (com todas as confirmações). Continuar?`:'Apagar este bloco?';
+  if(!confirm(msg))return;
+  const conf=prompt('⚠️ CONFIRMAÇÃO FINAL\n\nDigite EXCLUIR para apagar definitivamente.');
+  if(conf!=='EXCLUIR')return;
+  // apaga sessões e suas subcoleções
+  for(const c of sessoes){
+    const snap=await getDocs(collection(db,`clinicas/${c.id}/alunos`));
+    const batch=writeBatch(db);
+    snap.docs.forEach(d=>batch.delete(d.ref));
+    batch.delete(doc(db,'clinicas',c.id));
+    await batch.commit();
+    _invalidateClinicaAlunos(c.id);
+  }
+  await deleteDoc(doc(db,'blocosClinica',id));
+  await loadBlocos();
+  await loadClinicas();
+  CM('modal-bloco');
+  renderMentorias();
+};
+window.toggleGrupoAlunos=(id)=>{
+  const el=document.getElementById('grp-alunos-'+id);if(!el)return;
+  el.classList.toggle('hidden');
+  const chev=document.getElementById('grp-chev-'+id);
+  if(chev)chev.style.transform=el.classList.contains('hidden')?'rotate(0deg)':'rotate(90deg)';
+};
+
+// === Edição inline do nome do aluno do grupo ===
+window.editGrupoAlunoNome=(grupoId,idx)=>{
+  const row=document.querySelector(`.ment-aluno-row[data-grp="${grupoId}"][data-idx="${idx}"]`);
+  if(!row)return;
+  const span=row.querySelector('.ment-aluno-nome');
+  if(!span||row.querySelector('input.ment-aluno-edit'))return;
+  const original=span.textContent;
+  const inp=document.createElement('input');
+  inp.type='text';inp.value=original;inp.className='ment-aluno-edit fc';
+  inp.style.cssText='flex:1;font-size:13px;padding:2px 6px';
+  span.replaceWith(inp);
+  inp.focus();inp.select();
+  let done=false;
+  const cancel=()=>{
+    if(done)return;done=true;
+    const s=document.createElement('span');
+    s.className='ment-aluno-nome';
+    s.setAttribute('onclick',`editGrupoAlunoNome('${grupoId}',${idx})`);
+    s.style.cssText='flex:1;font-size:13px;cursor:text;padding:2px 4px;border-radius:4px';
+    s.title='Clique para editar';
+    s.textContent=original;
+    inp.replaceWith(s);
+  };
+  const commit=async()=>{
+    if(done)return;
+    const novo=inp.value.trim();
+    if(!novo||novo===original){cancel();return;}
+    done=true;
+    const g=S.mentorias.find(x=>x.id===grupoId);
+    if(!g){cancel();return;}
+    const alunos=(g.alunos||[]).slice();
+    if(!alunos[idx]){cancel();return;}
+    alunos[idx]={...alunos[idx],nome:novo};
+    try{
+      await setDoc(doc(db,'mentorias',grupoId),{alunos,updatedAt:new Date().toISOString()},{merge:true});
+      g.alunos=alunos;
+      await _sincronizarAlunosMentoria(grupoId);
+      renderMentorias();
+      // reabrir dropdown
+      const el=document.getElementById('grp-alunos-'+grupoId);if(el)el.classList.remove('hidden');
+    }catch(e){
+      console.error('editGrupoAlunoNome:',e);
+      alert('Erro ao salvar: '+(e.message||e));
+      cancel();
+    }
+  };
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();commit();}
+    else if(e.key==='Escape'){e.preventDefault();cancel();}
+  });
+  inp.addEventListener('blur',commit);
+};
+
+// === Remover aluno do grupo (dupla confirmação) ===
+window.rmGrupoAluno=async(grupoId,idx)=>{
+  const g=S.mentorias.find(x=>x.id===grupoId);if(!g)return;
+  const aluno=(g.alunos||[])[idx];if(!aluno)return;
+  if(!confirm(`Remover "${aluno.nome}" do grupo de ${g.mentorNome}?`))return;
+  const conf=prompt(`⚠️ CONFIRMAÇÃO FINAL\n\nDigite EXCLUIR para remover "${aluno.nome}" definitivamente.`);
+  if(conf!=='EXCLUIR')return;
+  const alunos=(g.alunos||[]).slice();
+  alunos.splice(idx,1);
+  try{
+    await setDoc(doc(db,'mentorias',grupoId),{alunos,updatedAt:new Date().toISOString()},{merge:true});
+    g.alunos=alunos;
+    await _sincronizarAlunosMentoria(grupoId);
+    renderMentorias();
+    const el=document.getElementById('grp-alunos-'+grupoId);if(el)el.classList.remove('hidden');
+  }catch(e){console.error('rmGrupoAluno:',e);alert('Erro ao remover: '+(e.message||e));}
+};
+
+// === Mover aluno entre grupos ===
+window.moveGrupoAluno=async(grupoId,idx)=>{
+  const g=S.mentorias.find(x=>x.id===grupoId);if(!g)return;
+  const aluno=(g.alunos||[])[idx];if(!aluno)return;
+  const destinos=S.mentorias.filter(x=>x.id!==grupoId);
+  if(!destinos.length){alert('Não há outros grupos para mover.');return;}
+  const lista=destinos.map((d,i)=>`${i+1}. ${d.tipo} · ${d.mentorNome} (${(d.alunos||[]).length})`).join('\n');
+  const escolha=prompt(`Mover "${aluno.nome}" para qual grupo?\n\n${lista}\n\nDigite o número:`);
+  if(!escolha)return;
+  const n=parseInt(escolha,10);
+  if(isNaN(n)||n<1||n>destinos.length){alert('Número inválido.');return;}
+  const dest=destinos[n-1];
+  const origemAlunos=(g.alunos||[]).slice();origemAlunos.splice(idx,1);
+  const destAlunos=(dest.alunos||[]).slice();destAlunos.push(aluno);
+  try{
+    await Promise.all([
+      setDoc(doc(db,'mentorias',grupoId),{alunos:origemAlunos,updatedAt:new Date().toISOString()},{merge:true}),
+      setDoc(doc(db,'mentorias',dest.id),{alunos:destAlunos,updatedAt:new Date().toISOString()},{merge:true}),
+    ]);
+    g.alunos=origemAlunos;dest.alunos=destAlunos;
+    await Promise.all([_sincronizarAlunosMentoria(grupoId),_sincronizarAlunosMentoria(dest.id)]);
+    renderMentorias();
+    const el=document.getElementById('grp-alunos-'+dest.id);if(el)el.classList.remove('hidden');
+  }catch(e){console.error('moveGrupoAluno:',e);alert('Erro ao mover: '+(e.message||e));}
+};
+
+function _renderClinicaAlunos(c,alunos){
+  if(!alunos.length)return'<p style="color:var(--t2);font-size:12px">Nenhum aluno vinculado.</p>';
+  const ord=(a,b)=>{const o={confirmed:0,pending:1,swap:2,absent:3};const da=o[a.status]??4,db=o[b.status]??4;if(da!==db)return da-db;return a.nome.localeCompare(b.nome,'pt-BR');};
+  return alunos.slice().sort(ord).map(a=>{
+    const cls=a.status==='confirmed'?'status-confirmed':a.status==='swap'?'status-swap':a.status==='absent'?'status-absent':'';
+    const podeReset=a.status&&a.status!=='pending';
+    return`<div class="aluno-row ${cls}" style="margin-bottom:5px;padding:8px 12px">
+      <div class="aluno-name" style="font-size:13px">${a.nome}</div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${sbadge(a.status)}${a.respondedAt?`<span style="font-size:10px;color:var(--t2)">${fDT(a.respondedAt)}</span>`:''}
+        ${podeReset?`<button class="btn btn-s btn-sm" onclick="resetClinicaAluno('${c.id}','${a.id}')" style="font-size:10px;padding:2px 7px" title="Resetar resposta">↺ Resetar</button>`:''}
+        <button class="btn btn-d btn-sm" onclick="rmClinicaAluno('${c.id}','${a.id}')" style="font-size:10px;padding:2px 7px" title="Remover">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.rmClinicaAluno=async(clinicaId,alunoId)=>{
+  if(!confirm('Remover este aluno da clínica?'))return;
+  await deleteDoc(doc(db,`clinicas/${clinicaId}/alunos/${alunoId}`));
+  _invalidateClinicaAlunos(clinicaId);
+  await loadClinicaAlunos(clinicaId);
+  renderMentorias();
+};
+
+// Reseta resposta do aluno (status pending) — dupla confirmação
+window.resetClinicaAluno=async(clinicaId,alunoId)=>{
+  const alunos=S._clinicasAlunosCache[clinicaId]||[];
+  const a=alunos.find(x=>x.id===alunoId);
+  const nome=a?a.nome:'este aluno';
+  if(!confirm(`Resetar a resposta de "${nome}"?\nO status volta para PENDENTE e ele poderá responder de novo.`))return;
+  const conf=prompt(`⚠️ CONFIRMAÇÃO FINAL\n\nDigite RESETAR para apagar a resposta de "${nome}".`);
+  if(conf!=='RESETAR')return;
+  await updateDoc(doc(db,`clinicas/${clinicaId}/alunos/${alunoId}`),{
+    status:'pending',respondedAt:null,swapTargetClinicaId:null,
+  });
+  _invalidateClinicaAlunos(clinicaId);
+  await loadClinicaAlunos(clinicaId);
+  renderMentorias();
+};
+
+// === CRUD Grupo (mentor + alunos) ===
+window.openMentorGrupo=(id)=>{
+  const g=id?S.mentorias.find(x=>x.id===id):null;
+  document.getElementById('mmg-title').textContent=id?'Editar grupo':'Novo grupo';
+  document.getElementById('mmg-tipo').value=g?.tipo||'TEA';
+  const sel=document.getElementById('mmg-mentor');
+  sel.innerHTML='<option value="">— escolha —</option>'+(S.profs||[]).map(p=>`<option value="${p}" ${g?.mentorNome===p?'selected':''}>${p}</option>`).join('');
+  const txt=(g?.alunos||[]).map(a=>`${a.nome},${a.email||''}${a.matricula?','+a.matricula:''}`).join('\n');
+  document.getElementById('mmg-alunos').value=txt;
+  document.getElementById('mmg-err').classList.add('hidden');
+  const delBtn=document.getElementById('mmg-del');
+  delBtn.style.display=id?'':'none';
+  document.getElementById('modal-ment-grupo').dataset.editId=id||'';
+  document.getElementById('modal-ment-grupo').classList.remove('hidden');
+};
+
+window.mmgImportXls=(ev)=>{
+  const f=ev.target.files&&ev.target.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    try{
+      const data=new Uint8Array(e.target.result);
+      const wb=XLSX.read(data,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      if(!rows.length){alert('Planilha vazia.');return;}
+      // Detecta colunas (case insensitive, flexível)
+      const norm=s=>(s||'').toString().trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+      const header=rows[0].map(c=>norm(c));
+      const idxNome=header.findIndex(h=>['nome','aluno','name','nome do aluno','nome completo'].includes(h));
+      const idxEmail=header.findIndex(h=>['email','e-mail','mail'].includes(h));
+      const idxMat=header.findIndex(h=>['matricula','mat','matrícula','registro','id'].includes(h));
+      if(idxNome<0||idxEmail<0){
+        alert('Não encontrei as colunas obrigatórias "Nome" e "Email" no cabeçalho.\n\nColunas detectadas: '+header.join(', '));
+        return;
+      }
+      const linhas=[];
+      for(let i=1;i<rows.length;i++){
+        const r=rows[i];if(!r||!r.length)continue;
+        const nome=(r[idxNome]||'').toString().trim();
+        const email=(r[idxEmail]||'').toString().trim();
+        const mat=idxMat>=0?(r[idxMat]||'').toString().trim():'';
+        if(!nome&&!email)continue;
+        linhas.push(`${nome},${email}${mat?','+mat:''}`);
+      }
+      if(!linhas.length){alert('Nenhuma linha válida na planilha.');return;}
+      const ta=document.getElementById('mmg-alunos');
+      // Append ou substituir? Pergunta se já tem conteúdo
+      if(ta.value.trim()&&!confirm(`Já há ${ta.value.trim().split('\n').length} linha(s) na lista. Substituir pelo conteúdo do XLS?\n\nOK = substituir · Cancelar = adicionar ao final`)){
+        ta.value=ta.value.trim()+'\n'+linhas.join('\n');
+      }else{
+        ta.value=linhas.join('\n');
+      }
+      ev.target.value='';
+      alert(`✅ ${linhas.length} aluno(s) importado(s) do XLS.`);
+    }catch(err){console.error(err);alert('Erro ao ler XLS: '+err.message);}
+  };
+  reader.readAsArrayBuffer(f);
+};
+
+window.saveMentorGrupo=async()=>{
+  const id=document.getElementById('modal-ment-grupo').dataset.editId||('mnt_'+Date.now()+'_'+Math.random().toString(36).slice(2,5));
+  const tipo=document.getElementById('mmg-tipo').value;
+  const mentorNome=document.getElementById('mmg-mentor').value;
+  const txt=document.getElementById('mmg-alunos').value;
+  const err=document.getElementById('mmg-err');
+  if(!mentorNome){err.textContent='Escolha o mentor.';err.classList.remove('hidden');return;}
+  // Parse linhas
+  const alunos=[];
+  txt.split(/\n/).forEach(line=>{
+    const parts=line.split(',').map(s=>s.trim());
+    if(!parts[0])return;
+    const a={nome:parts[0],email:parts[1]||'',matricula:parts[2]||''};
+    alunos.push(a);
+  });
+  if(!alunos.length){err.textContent='Cadastre ao menos 1 aluno.';err.classList.remove('hidden');return;}
+  const sem=alunos.find(a=>!a.email||!a.email.includes('@'));
+  if(sem){err.textContent=`Aluno "${sem.nome}" sem e-mail válido.`;err.classList.remove('hidden');return;}
+  // Detecta duplicatas (em outras mentorias) — aluno só pode estar em 1 mentoria
+  const dup=alunos.find(a=>{
+    const e=(a.email||'').toLowerCase();
+    return S.mentorias.some(g=>g.id!==id&&(g.alunos||[]).some(x=>(x.email||'').toLowerCase()===e));
+  });
+  if(dup){err.innerHTML=`E-mail <strong>${dup.email}</strong> já está em outra mentoria. Aluno só pode estar em uma.`;err.classList.remove('hidden');return;}
+  err.classList.add('hidden');
+  try{
+    await setDoc(doc(db,'mentorias',id),{tipo,mentorNome,alunos,updatedAt:new Date().toISOString(),...(document.getElementById('modal-ment-grupo').dataset.editId?{}:{criadoEm:new Date().toISOString()})},{merge:true});
+  }catch(e){
+    console.error('saveMentorGrupo:',e);
+    err.innerHTML=`❌ Erro ao salvar: <strong>${(e&&e.code)||e.message||e}</strong><br><span style="font-size:11px">Provavelmente as Firestore Rules ainda não foram atualizadas em produção (precisa fazer deploy das rules).</span>`;
+    err.classList.remove('hidden');
+    return;
+  }
+  await loadMentorias();
+  CM('modal-ment-grupo');
+  const sync=await _sincronizarAlunosMentoria(id);
+  renderMentorias();
+  if(sync.added||sync.removed||sync.renamed)console.log(`[sync] grupo ${id}: +${sync.added} -${sync.removed} ~${sync.renamed} alunos nas clínicas`);
+};
+
+window.deleteMentorGrupo=async()=>{
+  const id=document.getElementById('modal-ment-grupo').dataset.editId;
+  if(!id)return;
+  if(!confirm('Apagar este grupo? Os alunos vinculados perdem o vínculo. Não desfaz clínicas já criadas.'))return;
+  await deleteDoc(doc(db,'mentorias',id));
+  await loadMentorias();
+  CM('modal-ment-grupo');
+  renderMentorias();
+};
+
+// === CRUD Clínica (sessão dentro de bloco) ===
+window.openClinica=(id,blocoIdNew)=>{
+  const c=id?S.clinicas.find(x=>x.id===id):null;
+  const blocoId=c?.blocoId||blocoIdNew||'';
+  const bloco=blocoId?S.blocos.find(x=>x.id===blocoId):null;
+  if(!id&&!bloco){alert('As sessões só podem ser criadas dentro de uma clínica. Cadastre uma clínica primeiro.');return;}
+  document.getElementById('mcl-title').textContent=id?'Editar sessão':'Nova sessão';
+  document.getElementById('mcl-sub').textContent=bloco?`${bloco.tema||bloco.titulo} · ${bloco.tipo}`:'Sessão dentro do bloco';
+  const sel=document.getElementById('mcl-mentor');
+  // Filtra mentores compatíveis com o tipo do bloco (quando há bloco)
+  const tipoFiltro=bloco?.tipo||c?.tipo;
+  const opts=S.mentorias.filter(g=>!tipoFiltro||g.tipo===tipoFiltro).map(g=>`<option value="${g.id}" ${c?.mentoriaId===g.id?'selected':''}>${g.tipo} · ${g.mentorNome} (${(g.alunos||[]).length} alunos)</option>`).join('');
+  sel.innerHTML='<option value="">— escolha um mentor —</option>'+opts;
+  document.getElementById('mcl-datahora').value=c?.dataHora||'';
+  document.getElementById('mcl-link').value=c?.link||'';
+  document.getElementById('mcl-limite').value=c?.limite||20;
+  document.getElementById('mcl-err').classList.add('hidden');
+  document.getElementById('mcl-mentor-info').textContent='';
+  const delBtn=document.getElementById('mcl-del');
+  delBtn.style.display=id?'':'none';
+  document.getElementById('modal-clinica').dataset.editId=id||'';
+  document.getElementById('modal-clinica').dataset.blocoId=blocoId;
+  sel.onchange=()=>{
+    const g=S.mentorias.find(x=>x.id===sel.value);
+    document.getElementById('mcl-mentor-info').textContent=g?`Ao salvar, ${(g.alunos||[]).length} aluno(s) deste grupo serão automaticamente adicionados como pendentes.`:'';
+  };
+  sel.onchange();
+  document.getElementById('modal-clinica').classList.remove('hidden');
+};
+
+window.saveClinica=async()=>{
+  const editId=document.getElementById('modal-clinica').dataset.editId;
+  const blocoId=document.getElementById('modal-clinica').dataset.blocoId||'';
+  const id=editId||('cln_'+Date.now()+'_'+Math.random().toString(36).slice(2,5));
+  const mentoriaId=document.getElementById('mcl-mentor').value;
+  const dataHora=document.getElementById('mcl-datahora').value;
+  const link=document.getElementById('mcl-link').value.trim();
+  const limite=parseInt(document.getElementById('mcl-limite').value)||20;
+  const err=document.getElementById('mcl-err');
+  const g=S.mentorias.find(x=>x.id===mentoriaId);
+  const bloco=blocoId?S.blocos.find(x=>x.id===blocoId):null;
+  if(!g){err.textContent='Escolha o mentor.';err.classList.remove('hidden');return;}
+  if(!dataHora){err.textContent='Informe data e horário.';err.classList.remove('hidden');return;}
+  err.classList.add('hidden');
+  const data={
+    mentoriaId,tipo:g.tipo,mentorNome:g.mentorNome,
+    blocoId:blocoId||null,
+    tema:bloco?.tema||'',
+    dataHora,link,limite,
+    updatedAt:new Date().toISOString(),
+    ...(editId?{}:{criadoEm:new Date().toISOString()})
+  };
+  await setDoc(doc(db,'clinicas',id),data,{merge:true});
+  // Cria/atualiza alunos da subcoleção (apenas se NEW)
+  if(!editId){
+    const batch=writeBatch(db);
+    (g.alunos||[]).forEach(a=>{
+      const aid=(a.matricula||'').toString().trim()||('aln_'+Math.random().toString(36).slice(2,8));
+      batch.set(doc(db,`clinicas/${id}/alunos/${aid}`),{
+        nome:a.nome,email:a.email||'',matricula:a.matricula||'',
+        emailCadastrado:a.email||'',
+        status:'pending',respondedAt:null,
+        criadoEm:new Date().toISOString()
+      });
+    });
+    await batch.commit();
+  }
+  await loadClinicas();
+  _invalidateClinicaAlunos();
+  CM('modal-clinica');
+  renderMentorias();
+};
+
+window.deleteClinica=async()=>{
+  const id=document.getElementById('modal-clinica').dataset.editId;
+  if(!id)return;
+  if(!confirm('Apagar esta clínica? Todas as confirmações serão perdidas.'))return;
+  // Apaga subcoleção
+  const snap=await getDocs(collection(db,`clinicas/${id}/alunos`));
+  const batch=writeBatch(db);
+  snap.docs.forEach(d=>batch.delete(d.ref));
+  batch.delete(doc(db,'clinicas',id));
+  await batch.commit();
+  await loadClinicas();
+  _invalidateClinicaAlunos(id);
+  CM('modal-clinica');
+  renderMentorias();
+};
+
+// === Trocas ===
+async function tentarMatchTrocaMentoria(clinicaA,alunoA){
+  // alunoA da clinicaA quer ir pra clinicaB (alunoA.swapTargetClinicaId)
+  // Procura alguém da clinicaB que queira ir pra clinicaA (match recíproco)
+  const cBId=alunoA.swapTargetClinicaId;if(!cBId)return false;
+  const alunosB=await loadClinicaAlunos(cBId);
+  const partner=alunosB.find(b=>b.status==='swap'&&b.swapTargetClinicaId===clinicaA.id);
+  if(!partner)return false;
+  // Casa: A vai pra B, B vai pra A
+  const ts=new Date().toISOString();
+  await deleteDoc(doc(db,`clinicas/${clinicaA.id}/alunos/${alunoA.id}`));
+  await deleteDoc(doc(db,`clinicas/${cBId}/alunos/${partner.id}`));
+  await setDoc(doc(db,`clinicas/${cBId}/alunos/${alunoA.id}`),{
+    nome:alunoA.nome,email:alunoA.email||'',matricula:alunoA.matricula||'',
+    emailCadastrado:alunoA.emailCadastrado||alunoA.email||'',
+    status:'confirmed',respondedAt:ts,
+    originalClinicaId:clinicaA.id
+  });
+  await setDoc(doc(db,`clinicas/${clinicaA.id}/alunos/${partner.id}`),{
+    nome:partner.nome,email:partner.email||'',matricula:partner.matricula||'',
+    emailCadastrado:partner.emailCadastrado||partner.email||'',
+    status:'confirmed',respondedAt:ts,
+    originalClinicaId:cBId
+  });
+  _invalidateClinicaAlunos(clinicaA.id);_invalidateClinicaAlunos(cBId);
+  // Notifica os 2
+  const cB=S.clinicas.find(x=>x.id===cBId);
+  if(alunoA.email)sendEmailMentoria('match',alunoA,clinicaA,cB);
+  if(partner.email)sendEmailMentoria('match',partner,cB,clinicaA);
+  return{partner,destino:cB};
+}
+
+window.forcarTrocaMentoria=async(clinicaOrigemId,alunoId,clinicaDestId)=>{
+  if(!confirm('Confirmar a troca manualmente (mesmo sem vaga)?'))return;
+  const alunos=await loadClinicaAlunos(clinicaOrigemId);
+  const a=alunos.find(x=>x.id===alunoId);if(!a)return;
+  const ts=new Date().toISOString();
+  await deleteDoc(doc(db,`clinicas/${clinicaOrigemId}/alunos/${alunoId}`));
+  await setDoc(doc(db,`clinicas/${clinicaDestId}/alunos/${alunoId}`),{
+    nome:a.nome,email:a.email||'',matricula:a.matricula||'',
+    emailCadastrado:a.emailCadastrado||a.email||'',
+    status:'confirmed',respondedAt:ts,
+    originalClinicaId:clinicaOrigemId
+  });
+  _invalidateClinicaAlunos(clinicaOrigemId);_invalidateClinicaAlunos(clinicaDestId);
+  const cOrig=S.clinicas.find(x=>x.id===clinicaOrigemId);
+  const cDest=S.clinicas.find(x=>x.id===clinicaDestId);
+  if(a.email)sendEmailMentoria('trocaConfirmada',a,cOrig,cDest);
+  renderMentorias();
+};
+
+window.cancelarTrocaMentoria=async(clinicaId,alunoId)=>{
+  if(!confirm('Cancelar a solicitação de troca? O aluno volta para "pendente".'))return;
+  await updateDoc(doc(db,`clinicas/${clinicaId}/alunos/${alunoId}`),{
+    status:'pending',swapTargetClinicaId:null,obs:'',respondedAt:new Date().toISOString()
+  });
+  _invalidateClinicaAlunos(clinicaId);
+  renderMentorias();
+};
+
+// === Email ===
+async function sendEmailMentoria(type,aluno,clinicaOrigem,clinicaDest){
+  if(!aluno||!aluno.email){console.warn('[mentoria mail] sem email — ignorado',{type,aluno});return false;}
+  const subjects={
+    confirmed:'✅ Presença Confirmada · Clínica de Questões',
+    absent:'❌ Ausência Registrada · Clínica de Questões',
+    swap:'🔄 Solicitação de Troca · Clínica de Questões',
+    trocaConfirmada:'✅ Troca de Clínica Efetivada',
+    match:'✅ Troca de Clínica Casada Automaticamente',
+  };
+  const fmt=c=>`${_temaDeClinica(c)} · ${c.mentorNome} · ${_fmtClinDataHora(c.dataHora)}`;
+  const msgs={
+    confirmed:`Sua presença na Clínica de Questões foi CONFIRMADA! ✅\n\n${fmt(clinicaOrigem)}\n\n${clinicaOrigem.link?'Link: '+clinicaOrigem.link:''}`,
+    absent:`Registramos sua ausência na Clínica de Questões.\n\n${fmt(clinicaOrigem)}`,
+    swap:`Recebemos sua solicitação de troca para outra clínica.\n\n📌 Atual: ${fmt(clinicaOrigem)}\n📅 Desejada: ${clinicaDest?fmt(clinicaDest):''}\n\nSe houver vaga ou um match recíproco, a troca é efetivada automaticamente.`,
+    trocaConfirmada:`Sua troca foi efetivada! ✅\n\nDe: ${fmt(clinicaOrigem)}\nPara: ${fmt(clinicaDest)}\n\n${clinicaDest?.link?'Link: '+clinicaDest.link:''}`,
+    match:`Sua troca foi casada automaticamente com outro aluno! ✅\n\nVocê foi realocado para: ${fmt(clinicaDest)}\n\n${clinicaDest?.link?'Link: '+clinicaDest.link:''}`,
+  };
+  console.log('[mentoria mail] enviando',{type,to:aluno.email});
+  try{
+    const res=await emailjs.send('service_exyoa4r','template_r0vjejs',{
+      to_email:aluno.email,nome:aluno.nome,
+      assunto:subjects[type],mensagem:msgs[type],
+      simulado:'Mentoria',
+      dia:clinicaOrigem?.dataHora?fD(clinicaOrigem.dataHora.split('T')[0]):'',
+      horario:clinicaOrigem?.dataHora?clinicaOrigem.dataHora.split('T')[1].slice(0,5):'',
+    });
+    console.log('[mentoria mail] enviado OK',res?.status);
+    return true;
+  }catch(e){console.error('[mentoria mail] FALHA',e);return false;}
+}
+
 S.financeiro={profsFin:{},tipos:[],meses:{}};
 const FIN_DEFAULT_TIPOS=[
   {id:'sys-rodada',nome:'Rodada de simulado oficial',valorPadrao:200,system:true},
@@ -3537,7 +4781,7 @@ window.deleteUser=async()=>{
 
 // co tabs
 window.switchCoTab=(tab,btn)=>{
-  ['simulados','trocas','professores','listas','desempenho','checklist','config','usuarios','extra','simExtras','financeiro'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
+  ['simulados','trocas','professores','listas','desempenho','checklist','config','usuarios','extra','simExtras','financeiro','mentorias'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
   document.querySelectorAll('.co-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   // Show "Novo Simulado" only on simulados tab
@@ -3782,7 +5026,8 @@ window.toggleExpandAll=()=>{
   window._allExpanded=!window._allExpanded;
   const btn=document.getElementById('btn-expand-all');
   if(btn)btn.textContent=window._allExpanded?'⊟ Recolher todos':'⊞ Expandir todos';
-  // Re-render current day (exclude absent students — they go in dedicated panel)
+  // Presencial não tem rodada — re-renderiza com o renderer próprio
+  if(S.curSim?.presencial){return renderEscalaPres();}
   const exp=S.curSim?.deadline&&new Date()>new Date(S.curSim.deadline);
   const sab=S.students.filter(s=>s.dia==='sabado'&&s.status!=='absent').sort((a,b)=>a.rodada-b.rodada);
   const dom=S.students.filter(s=>s.dia==='domingo'&&s.status!=='absent').sort((a,b)=>a.rodada-b.rodada);
@@ -4718,9 +5963,19 @@ window.confirmResetStPres=(sid)=>{
 window.moverDiaPres=async(sid)=>{
   const s=S.students.find(x=>x.id===sid);if(!s)return;
   const novoDia=s.dia==='sabado'?'domingo':'sabado';
-  if(!confirm(`Mover ${s.nome} para ${novoDia==='sabado'?'Sábado':'Domingo'}?`))return;
-  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),{dia:novoDia,swapTargetDia:null,swapResolved:true,updatedAt:new Date().toISOString()});
-  s.dia=novoDia;s.swapTargetDia=null;s.swapResolved=true;
+  if(!confirm(`Mover ${s.nome} para ${novoDia==='sabado'?'Sábado':'Domingo'}?\n\nO aluno será automaticamente confirmado no novo dia.`))return;
+  const ts=new Date().toISOString();
+  const update={
+    dia:novoDia,
+    status:'confirmed',
+    swapTargetDia:null,
+    swapResolved:true,
+    originalDia:s.dia,
+    respondedAt:ts,
+    updatedAt:ts,
+  };
+  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),update);
+  Object.assign(s,update);
   renderCoSched();
 };
 
@@ -4807,8 +6062,8 @@ function updateStats(){
 
 // SWAP PANEL
 function renderSwapPanel(){
-  // Sort swaps oldest-first by respondedAt
-  const swaps=S.students.filter(s=>s.status==='swap')
+  // Sort swaps oldest-first by respondedAt — exclui já resolvidos (defesa contra registros legados)
+  const swaps=S.students.filter(s=>s.status==='swap'&&!s.swapResolved)
     .sort((a,b)=>{
       const da=a.respondedAt?new Date(a.respondedAt).getTime():0;
       const db=b.respondedAt?new Date(b.respondedAt).getTime():0;
@@ -4879,8 +6134,47 @@ window.openSwapAction=id=>{
   window._swapStudentId=id;
   const s=S.students.find(x=>x.id===id);if(!s)return;
   S.pendSwap=s;
+
+  // Versão simplificada para simulado presencial (sem rodadas)
+  if(S.curSim?.presencial){
+    const diaAtualLbl=s.dia==='sabado'?'Sábado':'Domingo';
+    const targetDia=s.swapTargetDia||(s.dia==='sabado'?'domingo':'sabado');
+    const targetLbl=targetDia==='sabado'?'Sábado':'Domingo';
+    const dataAtual=s.dia==='sabado'?S.curSim.dataSab:S.curSim.dataDom;
+    const dataTarget=targetDia==='sabado'?S.curSim.dataSab:S.curSim.dataDom;
+    document.getElementById('sw-sub').textContent='';
+    document.getElementById('sw-body').innerHTML=`
+      <div style="background:var(--bl);border:1px solid rgba(47,129,247,.3);border-radius:var(--rs);padding:14px 16px;margin-bottom:14px">
+        <p style="font-size:11px;font-weight:700;color:var(--blue);letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px">Solicitante</p>
+        <p style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:10px">${s.nome}</p>
+        <p style="font-size:11px;font-weight:700;color:var(--blue);letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px">Dia atual</p>
+        <p style="font-size:15px;font-weight:700;color:var(--text)">${diaAtualLbl}${dataAtual?' · '+fD(dataAtual):''}</p>
+      </div>
+      <div style="background:var(--gl);border:1px solid rgba(63,185,80,.3);border-radius:var(--rs);padding:14px 16px;margin-bottom:14px">
+        <p style="font-size:11px;font-weight:700;color:var(--green);letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px">Solicitou troca para</p>
+        <p style="font-size:18px;font-weight:800;color:var(--text)">${targetLbl}${dataTarget?' · '+fD(dataTarget):''}</p>
+        ${s.obs?`<p style="font-size:12px;color:var(--t2);margin-top:8px">💬 ${s.obs}</p>`:''}
+      </div>
+      <div id="sw-msg" class="hidden"></div>`;
+    // Reescreve o footer pra usar handler presencial
+    const foot=document.querySelector('#modal-swap .m-foot');
+    if(foot){
+      foot.innerHTML=`<button class="btn btn-d btn-sm" onclick="deletarSolicitacaoTroca()" style="margin-right:auto">🗑️ Deletar Solicitação</button>
+        <button class="btn btn-s" onclick="CM('modal-swap')">Fechar</button>
+        <button class="btn btn-p" onclick="confirmarTrocaPres()">✅ Confirmar Troca</button>`;
+    }
+    document.getElementById('modal-swap').classList.remove('hidden');
+    return;
+  }
+
   const h=getH(s.dia,s.rodada);
   const diaLabel=s.dia==='sabado'?'Sábado':'Domingo';
+
+  // Restaura footer original (caso modal tenha sido usado em modo presencial antes)
+  const foot=document.querySelector('#modal-swap .m-foot');
+  if(foot){
+    foot.innerHTML=`<button class="btn btn-d btn-sm" onclick="deletarSolicitacaoTroca()" id="btn-del-swap" style="margin-right:auto">🗑️ Deletar Solicitação</button><button class="btn btn-s" onclick="CM('modal-swap')">Fechar</button><button class="btn btn-p" onclick="doSwap()">✅ Confirmar Troca</button>`;
+  }
 
   // Update modal subtitle - just the day/time, name goes in the body header
   document.getElementById('sw-sub').textContent='';
@@ -4956,6 +6250,32 @@ window.openSwapAction=id=>{
     <div id="sw-msg" class="hidden"></div>`;
 
   document.getElementById('modal-swap').classList.remove('hidden');
+};
+
+window.confirmarTrocaPres=async()=>{
+  const sid=window._swapStudentId;
+  const s=S.students.find(x=>x.id===sid);if(!s)return;
+  const targetDia=s.swapTargetDia||(s.dia==='sabado'?'domingo':'sabado');
+  const targetLbl=targetDia==='sabado'?'Sábado':'Domingo';
+  if(!confirm(`Confirmar troca de ${s.nome} para ${targetLbl}?\n\nO aluno será automaticamente confirmado no novo dia.`))return;
+  const ts=new Date().toISOString();
+  const update={
+    dia:targetDia,
+    status:'confirmed',
+    swapTargetDia:null,
+    swapResolved:true,
+    originalDia:s.dia,
+    respondedAt:ts,
+    updatedAt:ts,
+  };
+  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),update);
+  Object.assign(s,update);
+  // E-mail
+  if(s.email){
+    try{await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:s.email,nome:s.nome,assunto:'✅ Troca de dia efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${targetLbl}.`,simulado:S.curSim.nome,dia:targetLbl,horario:''});}catch(e){console.error(e);}
+  }
+  CM('modal-swap');
+  renderCoSched();
 };
 
 window.openPickSlot=(studentId)=>{
@@ -6105,10 +7425,18 @@ function renderHistMsg() {
     msg += `✅ *Trocas efetivadas:*
 
 `;
+    const isPres = !!S.curSim?.presencial;
     efetivadas.forEach(s => {
-      const h = getH(s.dia, s.rodada);
-      msg += `• ${s.nome} → ${fmtDia(s.dia)} ${h}
+      if (isPres) {
+        const dataStr = s.dia === 'sabado' ? S.curSim.dataSab : S.curSim.dataDom;
+        const orig = s.originalDia ? ` (era ${fmtDia(s.originalDia)})` : '';
+        msg += `• ${s.nome} → ${fmtDia(s.dia)}${dataStr ? ' ' + fD(dataStr) : ''}${orig}
 `;
+      } else {
+        const h = getH(s.dia, s.rodada);
+        msg += `• ${s.nome} → ${fmtDia(s.dia)} ${h}
+`;
+      }
     });
   } else {
     msg += `✅ *Trocas efetivadas:*
@@ -6123,10 +7451,17 @@ Nenhuma troca efetivada no período.
     msg += `🔄 *Alunos aguardando troca:*
 
 `;
+    const isPres2 = !!S.curSim?.presencial;
     aguardando.forEach(s => {
-      const h = getH(s.dia, s.rodada);
-      msg += `• ${s.nome} (${fmtDia(s.dia)} ${h})
+      if (isPres2) {
+        const target = s.swapTargetDia ? ` → quer ${fmtDia(s.swapTargetDia)}` : '';
+        msg += `• ${s.nome} (${fmtDia(s.dia)}${target})
 `;
+      } else {
+        const h = getH(s.dia, s.rodada);
+        msg += `• ${s.nome} (${fmtDia(s.dia)} ${h})
+`;
+      }
     });
   } else {
     msg += `🔄 *Alunos aguardando troca:*
@@ -6169,6 +7504,7 @@ window.switchCoTab = (tab, btn) => {
   if(tab==='extra'){renderSimExtraCfg();applySeCollapsedState();}
   if(tab==='simExtras') renderSimuladosExtras();
   if(tab==='financeiro') renderFinanceiro();
+  if(tab==='mentorias') renderMentorias();
 };
 
 
