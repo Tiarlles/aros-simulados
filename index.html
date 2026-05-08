@@ -344,6 +344,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 @keyframes su{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 var(--accent-glow)}50%{box-shadow:0 0 0 6px transparent}}
+@keyframes instr-pulse{0%,100%{box-shadow:0 0 0 0 rgba(210,153,34,.55),0 1px 0 rgba(255,255,255,.08) inset}50%{box-shadow:0 0 0 8px rgba(210,153,34,0),0 1px 0 rgba(255,255,255,.08) inset}}
 
 @media(max-width:768px){.sg{grid-template-columns:repeat(2,1fr)}.g2,.g3{grid-template-columns:1fr}.sim-cards{grid-template-columns:1fr}}
 
@@ -480,7 +481,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
         <div class="ch"><h3 class="ct">📋 Escala</h3>
           <div style="display:flex;gap:7px">
             <button class="btn btn-g btn-sm" onclick="openAddAluno()">+ Aluno</button>
-            <button class="btn btn-g btn-sm" onclick="openEditRodadas()">⏰ Rodadas</button>
+            <button class="btn btn-g btn-sm" onclick="openEditRodadas()">⏰ Configurar Rodadas</button>
             <button class="btn btn-g btn-sm" onclick="exportCSV()">⬇️ CSV</button>
           </div>
         </div>
@@ -489,12 +490,18 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
             <button class="day-tab on" onclick="switchCoDay('sabado',this)">📅 Sábado</button>
             <button class="day-tab" onclick="switchCoDay('domingo',this)">📅 Domingo</button>
           </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
-            <button class="status-filter on" data-filter="all" onclick="setCoStatusFilter('all',this)">Todos</button>
-            <button class="status-filter" data-filter="confirmed" onclick="setCoStatusFilter('confirmed',this)">✅ Confirmado</button>
-            <button class="status-filter" data-filter="pending" onclick="setCoStatusFilter('pending',this)">⏳ Pendente</button>
-            <button class="status-filter" data-filter="swap" onclick="setCoStatusFilter('swap',this)">🔄 Troca</button>
-            <button class="status-filter" data-filter="absent" onclick="setCoStatusFilter('absent',this)">❌ Ausente</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="status-filter on" data-filter="all" onclick="setCoStatusFilter('all',this)">Todos</button>
+              <button class="status-filter" data-filter="confirmed" onclick="setCoStatusFilter('confirmed',this)">✅ Confirmado</button>
+              <button class="status-filter" data-filter="pending" onclick="setCoStatusFilter('pending',this)">⏳ Pendente</button>
+              <button class="status-filter" data-filter="swap" onclick="setCoStatusFilter('swap',this)">🔄 Troca</button>
+              <button class="status-filter" data-filter="absent" onclick="setCoStatusFilter('absent',this)">❌ Ausente</button>
+            </div>
+            <div class="search-wrap" style="margin:0;flex:1;min-width:200px;max-width:340px">
+              <span class="search-icon" style="font-size:13px">🔍</span>
+              <input class="search-input" id="co-sched-search" placeholder="Buscar aluno por nome..." oninput="filterCoSched()" style="padding:8px 14px 8px 36px;font-size:13px;border-radius:999px"/>
+            </div>
           </div>
           <div id="rds-sab"></div>
           <div id="rds-dom" class="hidden"></div>
@@ -1253,6 +1260,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
         <div id="s-pres-cfg" class="hidden">
           <div class="fg"><label class="fl">Prazo de Confirmação</label><input class="fc" id="s-dl-p" type="datetime-local"/></div>
           <div class="fg"><label class="fl">Mensagem para alunos (opcional)</label><input class="fc" id="s-msg-p" placeholder="Ex: Confirme até sexta!"/></div>
+          <div class="fg"><label class="fl">📋 Instruções para os alunos (opcional)</label><textarea class="fc" id="s-instr-p" placeholder="Endereço, horário de chegada, o que levar, vestimenta, estacionamento…" style="min-height:120px"></textarea><p style="font-size:11px;color:var(--t2);margin-top:4px">Aparece como botão no card do aluno. Deixe vazio pra ocultar.</p></div>
         </div>
       </div>
       <!-- Step 2 -->
@@ -1626,6 +1634,69 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
     <div class="m-foot">
       <button class="btn btn-s" onclick="CM('modal-add-aluno-extra')">Cancelar</button>
       <button class="btn btn-p" onclick="saveAddAlunoSimExtra()">💾 Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Instruções do simulado (presencial) ══ -->
+<div class="mo hidden" id="modal-sim-instr">
+  <div class="md" style="max-width:560px">
+    <div class="mh"><div><div class="m-title">📋 Instruções</div><div class="m-sub" id="msi-sub"></div></div><button class="m-close" onclick="CM('modal-sim-instr')">✕</button></div>
+    <div class="m-body">
+      <div id="msi-body" style="font-size:14px;line-height:1.6;white-space:pre-wrap;color:var(--text)"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-p" onclick="CM('modal-sim-instr')">Entendi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Estações (Simulado Presencial · Fase 2) ══ -->
+<div class="mo hidden" id="modal-est-pres">
+  <div class="md" style="max-width:1080px">
+    <div class="mh">
+      <div><div class="m-title" id="mep-title">🎯 Estações</div><div class="m-sub" id="mep-sub"></div></div>
+      <button class="m-close" onclick="CM('modal-est-pres')">✕</button>
+    </div>
+    <div class="m-body">
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button class="btn btn-p" id="mep-tab-conf" onclick="mepSwitchTab('conf')" style="flex:1">⚙️ Configurar</button>
+        <button class="btn btn-s" id="mep-tab-dist" onclick="mepSwitchTab('dist')" style="flex:1">🎲 Distribuir</button>
+      </div>
+
+      <!-- Pane: Configurar -->
+      <div id="mep-pane-conf">
+        <div class="card" style="margin-bottom:14px">
+          <div class="ch"><div class="ct">👥 Grupos</div>
+            <button class="btn btn-p btn-sm" onclick="mepAddGrupo()">+ Adicionar grupo</button>
+          </div>
+          <div class="cb" id="mep-grupos-list"></div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="ct">🛠️ Oficinas</div>
+            <button class="btn btn-p btn-sm" onclick="mepAddOficina()">+ Adicionar oficina</button>
+          </div>
+          <div class="cb" id="mep-oficinas-list"></div>
+        </div>
+      </div>
+
+      <!-- Pane: Distribuir -->
+      <div id="mep-pane-dist" class="hidden">
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-p btn-sm" onclick="mepAutoDistribuir()">🎲 Auto-distribuir</button>
+          <button class="btn btn-s btn-sm" onclick="mepLimparAlocacoes()">🗑️ Limpar alocações</button>
+          <span style="font-size:12px;color:var(--t2);margin-left:auto" id="mep-dist-stats"></span>
+        </div>
+        <div id="mep-pool"></div>
+        <div id="mep-grupos-board"></div>
+        <div id="mep-oficinas-board"></div>
+      </div>
+
+      <div id="mep-msg" class="hidden" style="margin-top:10px"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-est-pres')">Fechar</button>
+      <button class="btn btn-p" onclick="mepSaveConf()">💾 Salvar configuração</button>
     </div>
   </div>
 </div>
@@ -3565,6 +3636,8 @@ function simCardHTML(sim){
       <div style="font-size:11px;font-weight:700;opacity:.92">${counter}</div>
     </div>`;
   }
+  const instrBtn=(sim.presencial&&sim.instrucoes&&sim.instrucoes.trim())
+    ?`<button onclick="event.stopPropagation();openSimInstr('${sim.id}')" style="margin-top:12px;width:100%;padding:11px 16px;background:linear-gradient(180deg,var(--yl),var(--yl));color:var(--yellow);border:2px solid var(--yellow);border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;letter-spacing:.3px;cursor:pointer;text-transform:uppercase;box-shadow:0 0 0 0 rgba(210,153,34,.45),0 1px 0 rgba(255,255,255,.08) inset;animation:instr-pulse 1.6s ease-in-out infinite;transition:transform .15s,box-shadow .25s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📋 Ver instruções importantes</button>`:'';
   return`<div class="sim-card" onclick="openEscala('${sim.id}')">
     <div class="sim-card-title">${sim.nome}</div>
     <div class="sim-date-row">
@@ -3574,6 +3647,7 @@ function simCardHTML(sim){
     ${dlHTML}
     <div id="sim-stats-${sim.id}" style="margin-top:10px"></div>
     ${sim.msg?`<p style="font-size:12px;color:var(--t2);margin-top:8px">${sim.msg}</p>`:''}
+    ${instrBtn}
   </div>`;
 }
 
@@ -3734,6 +3808,22 @@ function alunoRowHTML(s,exp){
 window.searchAluno=()=>{
   const q=(document.getElementById('al-search').value||'').toLowerCase().trim();
   const exp=S.curSim?.deadline&&new Date()>new Date(S.curSim.deadline);
+  // Presencial: usa o renderer próprio (sem rodadas)
+  if(S.curSim?.presencial){
+    const ord=(a,b)=>{const ord2={confirmed:0,swap:1,pending:2};const da=ord2[a.status]??3,db=ord2[b.status]??3;if(da!==db)return da-db;return a.nome.localeCompare(b.nome,'pt-BR');};
+    const filt=s=>s.status!=='absent'&&(!q||s.nome.toLowerCase().includes(q));
+    const sab=S.students.filter(s=>s.dia==='sabado'&&filt(s)).sort(ord);
+    const dom=S.students.filter(s=>s.dia==='domingo'&&filt(s)).sort(ord);
+    const elS=document.getElementById('al-list-sab');
+    const elD=document.getElementById('al-list-dom');
+    if(elS)elS.innerHTML=sab.length?sab.map(s=>presAlunoRow(s,exp)).join(''):'<div class="es" style="padding:32px"><p>Nenhum aluno.</p></div>';
+    if(elD)elD.innerHTML=dom.length?dom.map(s=>presAlunoRow(s,exp)).join(''):'<div class="es" style="padding:32px"><p>Nenhum aluno.</p></div>';
+    if(q){
+      if(sab.length&&!dom.length){switchAlunoDay('sabado',document.getElementById('al-tab-sab'));}
+      else if(dom.length&&!sab.length){switchAlunoDay('domingo',document.getElementById('al-tab-dom'));}
+    }
+    return;
+  }
   if(!q){
     const sab=S.students.filter(s=>s.dia==='sabado'&&s.status!=='absent').sort((a,b)=>a.rodada-b.rodada);
     const dom=S.students.filter(s=>s.dia==='domingo'&&s.status!=='absent').sort((a,b)=>a.rodada-b.rodada);
@@ -4317,9 +4407,9 @@ function renderCoSchedPres(){
     const pe=list.filter(s=>s.status==='pending').length;
     const head=`<div class="rc"><div class="rh">
       <span class="r-time">📅 ${dia==='sabado'?'Sábado':'Domingo'}${data?' · '+fD(data):''}</span>
-      <div style="display:flex;align-items:center;gap:12px">
-        <span style="font-size:12px;color:var(--t2)">${list.length} aluno${list.length!==1?'s':''}</span>
-        <span style="font-size:11px;color:var(--t2)">✅${cf} 🔄${sw} ⏳${pe}</span>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <span style="font-size:12px;color:var(--t2)"><strong style="color:var(--green)">${cf}</strong> confirmado${cf!==1?'s':''} · <strong style="color:var(--yellow)">${pe}</strong> pendente${pe!==1?'s':''}</span>
+        <button class="btn btn-s btn-sm" onclick="openEstacoesPres('${dia}')">🎯 Configurar Estações</button>
         <button class="btn btn-s btn-sm" onclick="openAddPresAluno('${dia}')">+ Aluno</button>
       </div>
     </div>`;
@@ -4346,6 +4436,279 @@ function renderCoSchedPres(){
   const expCoord=S.curSim?.deadline&&new Date()>new Date(S.curSim.deadline);
   renderNotGoingPanel('co-not-going',expCoord,true);
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+// ESTAÇÕES (Simulado Presencial · Fase 2)
+// ════════════════════════════════════════════════════════════════════════════
+window._mep={dia:null,conf:null,tab:'conf'};
+
+function _mepDefaults(){
+  // 3 grupos, 4 profs cada, 8 casos cada (2 por prof)
+  const mkCasos=()=>Array.from({length:8},(_,i)=>({nome:'Caso '+(i+1),horario:''}));
+  const mkGrupo=(i)=>({id:'grp_'+Math.random().toString(36).slice(2,8),nome:'Grupo '+(i+1),profs:['','','',''],casos:mkCasos()});
+  const mkOficina=(i)=>({id:'ofc_'+Math.random().toString(36).slice(2,8),nome:'Oficina '+(i+1),prof:''});
+  return{grupos:[mkGrupo(0),mkGrupo(1),mkGrupo(2)],oficinas:[mkOficina(0),mkOficina(1),mkOficina(2)]};
+}
+
+window.openSimInstr=(simId)=>{
+  const sim=S.sims.find(s=>s.id===simId);
+  if(!sim||!sim.instrucoes)return;
+  document.getElementById('msi-sub').textContent=sim.nome;
+  // Escapa < > pra segurança e mantém quebras (white-space:pre-wrap já cuida)
+  const safe=sim.instrucoes.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  document.getElementById('msi-body').innerHTML=safe;
+  document.getElementById('modal-sim-instr').classList.remove('hidden');
+};
+
+window.openEstacoesPres=(dia)=>{
+  if(!S.curSim||!S.curSim.presencial){alert('Apenas para simulados presenciais.');return;}
+  window._mep.dia=dia;
+  const est=S.curSim.estacoes||{};
+  // Carrega config existente ou usa defaults
+  const cfg=est[dia]?JSON.parse(JSON.stringify(est[dia])):_mepDefaults();
+  // Garante shape (compat com cadastros antigos sem campos)
+  cfg.grupos=(cfg.grupos||[]).map(g=>({
+    id:g.id||'grp_'+Math.random().toString(36).slice(2,8),
+    nome:g.nome||'Grupo',
+    profs:Array.from({length:4},(_,i)=>(g.profs&&g.profs[i])||''),
+    casos:Array.from({length:(g.casos&&g.casos.length)||8},(_,i)=>({
+      nome:(g.casos&&g.casos[i]&&g.casos[i].nome)||('Caso '+(i+1)),
+      horario:(g.casos&&g.casos[i]&&g.casos[i].horario)||''
+    }))
+  }));
+  cfg.oficinas=(cfg.oficinas||[]).map(o=>({
+    id:o.id||'ofc_'+Math.random().toString(36).slice(2,8),
+    nome:o.nome||'Oficina',
+    prof:o.prof||''
+  }));
+  window._mep.conf=cfg;
+  document.getElementById('mep-title').textContent=`🎯 Estações · ${dia==='sabado'?'Sábado':'Domingo'}`;
+  const data=dia==='sabado'?S.curSim.dataSab:S.curSim.dataDom;
+  document.getElementById('mep-sub').textContent=`${S.curSim.nome}${data?' · '+fD(data):''}`;
+  mepSwitchTab('conf');
+  document.getElementById('modal-est-pres').classList.remove('hidden');
+};
+
+window.mepSwitchTab=(tab)=>{
+  window._mep.tab=tab;
+  document.getElementById('mep-pane-conf').classList.toggle('hidden',tab!=='conf');
+  document.getElementById('mep-pane-dist').classList.toggle('hidden',tab!=='dist');
+  document.getElementById('mep-tab-conf').classList.toggle('btn-p',tab==='conf');
+  document.getElementById('mep-tab-conf').classList.toggle('btn-s',tab!=='conf');
+  document.getElementById('mep-tab-dist').classList.toggle('btn-p',tab==='dist');
+  document.getElementById('mep-tab-dist').classList.toggle('btn-s',tab!=='dist');
+  if(tab==='conf')mepRenderConf();else mepRenderDist();
+};
+
+function mepRenderConf(){
+  const cfg=window._mep.conf;
+  // Profs dropdown options
+  const profOpts=(sel)=>'<option value="">— escolha —</option>'+(S.profs||[]).map(p=>`<option value="${p}" ${sel===p?'selected':''}>${p}</option>`).join('');
+  // Grupos
+  const elG=document.getElementById('mep-grupos-list');
+  if(!cfg.grupos.length){elG.innerHTML='<p style="color:var(--t2);padding:8px">Nenhum grupo cadastrado.</p>';}
+  else{
+    elG.innerHTML=cfg.grupos.map((g,gi)=>`
+      <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;background:var(--bg3)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <input class="fc" value="${(g.nome||'').replace(/"/g,'&quot;')}" oninput="_mep.conf.grupos[${gi}].nome=this.value" placeholder="Nome do grupo" style="flex:1;font-weight:700"/>
+          <button class="btn btn-d btn-sm" onclick="mepRmGrupo(${gi})">🗑️</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px">
+          ${[0,1,2,3].map(pi=>`<div><label class="fl">Professor ${pi+1}</label><select class="fc" onchange="_mep.conf.grupos[${gi}].profs[${pi}]=this.value">${profOpts(g.profs[pi])}</select></div>`).join('')}
+        </div>
+        <div style="border-top:1px dashed var(--border);padding-top:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📋 Casos & horários (8)</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+            ${g.casos.map((c,ci)=>`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px">
+              <input class="fc" value="${(c.nome||'').replace(/"/g,'&quot;')}" oninput="_mep.conf.grupos[${gi}].casos[${ci}].nome=this.value" placeholder="Caso ${ci+1}" style="font-size:12px;padding:6px 8px;margin-bottom:5px"/>
+              <input class="fc" type="time" value="${c.horario||''}" oninput="_mep.conf.grupos[${gi}].casos[${ci}].horario=this.value" style="font-size:12px;padding:6px 8px"/>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>`).join('');
+  }
+  // Oficinas
+  const elO=document.getElementById('mep-oficinas-list');
+  if(!cfg.oficinas.length){elO.innerHTML='<p style="color:var(--t2);padding:8px">Nenhuma oficina cadastrada.</p>';}
+  else{
+    elO.innerHTML=cfg.oficinas.map((o,oi)=>`
+      <div style="display:flex;gap:10px;align-items:center;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;flex-wrap:wrap">
+        <input class="fc" value="${(o.nome||'').replace(/"/g,'&quot;')}" oninput="_mep.conf.oficinas[${oi}].nome=this.value" placeholder="Nome" style="flex:1;min-width:180px;font-weight:600"/>
+        <select class="fc" onchange="_mep.conf.oficinas[${oi}].prof=this.value" style="flex:1;min-width:200px">${profOpts(o.prof)}</select>
+        <button class="btn btn-d btn-sm" onclick="mepRmOficina(${oi})">🗑️</button>
+      </div>`).join('');
+  }
+}
+
+window.mepAddGrupo=()=>{
+  const cfg=window._mep.conf;
+  const i=cfg.grupos.length;
+  cfg.grupos.push({id:'grp_'+Math.random().toString(36).slice(2,8),nome:'Grupo '+(i+1),profs:['','','',''],casos:Array.from({length:8},(_,k)=>({nome:'Caso '+(k+1),horario:''}))});
+  mepRenderConf();
+};
+window.mepRmGrupo=(gi)=>{
+  if(!confirm('Remover este grupo?'))return;
+  window._mep.conf.grupos.splice(gi,1);
+  mepRenderConf();
+};
+window.mepAddOficina=()=>{
+  const cfg=window._mep.conf;
+  const i=cfg.oficinas.length;
+  cfg.oficinas.push({id:'ofc_'+Math.random().toString(36).slice(2,8),nome:'Oficina '+(i+1),prof:''});
+  mepRenderConf();
+};
+window.mepRmOficina=(oi)=>{
+  if(!confirm('Remover esta oficina?'))return;
+  window._mep.conf.oficinas.splice(oi,1);
+  mepRenderConf();
+};
+
+window.mepSaveConf=async()=>{
+  const dia=window._mep.dia;const cfg=window._mep.conf;
+  S.curSim.estacoes=S.curSim.estacoes||{};
+  S.curSim.estacoes[dia]=cfg;
+  await setDoc(doc(db,'simulados',S.curSim.id),{estacoes:S.curSim.estacoes},{merge:true});
+  const msg=document.getElementById('mep-msg');
+  msg.className='al al-s';msg.textContent='✅ Configuração salva';msg.classList.remove('hidden');
+  setTimeout(()=>msg.classList.add('hidden'),2000);
+  // Atualiza também no array local
+  const idx=S.sims.findIndex(s=>s.id===S.curSim.id);
+  if(idx>=0)S.sims[idx]=S.curSim;
+  if(window._mep.tab==='dist')mepRenderDist();
+};
+
+// ── Distribuir ────────────────────────────────────────────────────────────────
+function mepRenderDist(){
+  const dia=window._mep.dia;const cfg=window._mep.conf;
+  const confirmados=S.students.filter(s=>s.dia===dia&&s.status!=='absent');
+  // 'absent' considera quem disse "não vou"; para distribuição usamos os ativos no dia
+  const alocados={};
+  confirmados.forEach(s=>{
+    const a=s.alocacao;
+    if(a&&a.id){alocados[a.id]=alocados[a.id]||[];alocados[a.id].push(s);}
+  });
+  const naoAloc=confirmados.filter(s=>!s.alocacao||!s.alocacao.id);
+  // Stats
+  document.getElementById('mep-dist-stats').textContent=`${confirmados.length-naoAloc.length}/${confirmados.length} alocados`;
+  // Pool (não alocados)
+  const poolEl=document.getElementById('mep-pool');
+  poolEl.innerHTML=naoAloc.length?`<div class="card" style="margin-bottom:12px;border-color:rgba(210,153,34,.4)">
+    <div class="ch"><div class="ct">⏳ Não alocados (${naoAloc.length})</div></div>
+    <div class="cb" style="display:flex;flex-wrap:wrap;gap:6px">
+      ${naoAloc.map(s=>_mepChip(s,null)).join('')}
+    </div>
+  </div>`:'';
+  // Grupos board
+  const grpEl=document.getElementById('mep-grupos-board');
+  grpEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:12px">
+    ${cfg.grupos.map(g=>{
+      const list=alocados[g.id]||[];
+      const cap=4;
+      const cor=list.length>=cap?'var(--green)':list.length>0?'var(--yellow)':'var(--t2)';
+      return`<div class="card"><div class="ch" style="padding:10px 14px"><div class="ct" style="font-size:14px">👥 ${g.nome}</div>
+        <span style="font-size:12px;font-weight:700;color:${cor}">${list.length}/${cap}</span>
+      </div><div class="cb" style="padding:10px 14px;min-height:80px;display:flex;flex-wrap:wrap;gap:5px">
+        ${list.length?list.map(s=>_mepChip(s,g.id)).join(''):'<span style="font-size:11px;color:var(--t3);padding:4px">— vazio —</span>'}
+      </div></div>`;
+    }).join('')}
+  </div>`;
+  // Oficinas board
+  const ofcEl=document.getElementById('mep-oficinas-board');
+  ofcEl.innerHTML=cfg.oficinas.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+    ${cfg.oficinas.map(o=>{
+      const list=alocados[o.id]||[];
+      return`<div class="card" style="border-color:rgba(47,129,247,.3)"><div class="ch" style="padding:10px 14px"><div class="ct" style="font-size:14px">🛠️ ${o.nome}</div>
+        <span style="font-size:11px;color:var(--t2)">${list.length} aluno${list.length!==1?'s':''}${o.prof?' · '+o.prof:''}</span>
+      </div><div class="cb" style="padding:10px 14px;min-height:80px;display:flex;flex-wrap:wrap;gap:5px">
+        ${list.length?list.map(s=>_mepChip(s,o.id)).join(''):'<span style="font-size:11px;color:var(--t3);padding:4px">— vazio —</span>'}
+      </div></div>`;
+    }).join('')}
+  </div>`:'';
+}
+
+function _mepChip(s,curId){
+  return`<button class="chip" onclick="mepMoverAluno('${s.id}','${curId||''}')" title="Clique para mover" style="cursor:pointer;font-size:12px">${s.nome}</button>`;
+}
+
+window.mepMoverAluno=async(sid,curId)=>{
+  const cfg=window._mep.conf;
+  const s=S.students.find(x=>x.id===sid);if(!s)return;
+  const opts=[
+    {label:'(remover alocação)',v:'__none__'},
+    ...cfg.grupos.map(g=>({label:'👥 '+g.nome,v:g.id})),
+    ...cfg.oficinas.map(o=>({label:'🛠️ '+o.nome,v:o.id})),
+  ];
+  const choice=prompt(`Mover ${s.nome} para:\n\n${opts.map((o,i)=>`${i+1}. ${o.label}`).join('\n')}\n\nDigite o número:`);
+  if(choice===null)return;
+  const idx=parseInt(choice,10)-1;
+  if(isNaN(idx)||idx<0||idx>=opts.length){alert('Opção inválida.');return;}
+  const v=opts[idx].v;
+  let alocacao=null;
+  if(v!=='__none__'){
+    const isGrupo=cfg.grupos.some(g=>g.id===v);
+    const tipo=isGrupo?'grupo':'oficina';
+    // Verifica capacidade do grupo
+    if(isGrupo){
+      const list=S.students.filter(x=>x.id!==sid&&x.alocacao&&x.alocacao.id===v);
+      if(list.length>=4){if(!confirm(`Grupo já está cheio (4/4). Mover mesmo assim?`))return;}
+    }
+    alocacao={tipo,id:v,dia:window._mep.dia};
+  }
+  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),{alocacao});
+  s.alocacao=alocacao;
+  mepRenderDist();
+};
+
+window.mepAutoDistribuir=async()=>{
+  const dia=window._mep.dia;const cfg=window._mep.conf;
+  if(!cfg.grupos.length){alert('Cadastre ao menos 1 grupo antes de distribuir.');return;}
+  if(!confirm('Auto-distribuir alunos confirmados em grupos (max 4 cada) e oficinas?\n\nIsso sobrescreve alocações existentes.'))return;
+  const confirmados=S.students.filter(s=>s.dia===dia&&s.status!=='absent');
+  // Aleatório
+  const pool=confirmados.slice().sort(()=>Math.random()-0.5);
+  const updates={};
+  // Preenche grupos primeiro (max 4 cada)
+  let i=0;
+  for(const g of cfg.grupos){
+    for(let k=0;k<4&&i<pool.length;k++,i++){
+      updates[pool[i].id]={tipo:'grupo',id:g.id,dia};
+    }
+  }
+  // Restantes vão pras oficinas (round-robin)
+  if(cfg.oficinas.length){
+    let oi=0;
+    while(i<pool.length){
+      updates[pool[i].id]={tipo:'oficina',id:cfg.oficinas[oi%cfg.oficinas.length].id,dia};
+      i++;oi++;
+    }
+  }
+  // Persiste
+  const batch=writeBatch(db);
+  Object.entries(updates).forEach(([sid,al])=>{
+    batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),{alocacao:al});
+  });
+  // Limpa alocacao de quem não foi distribuído (alunos que voltaram a 'absent' por exemplo)
+  S.students.filter(s=>s.dia===dia&&s.alocacao&&!updates[s.id]).forEach(s=>{
+    batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${s.id}`),{alocacao:null});
+  });
+  await batch.commit();
+  // Atualiza local
+  S.students.forEach(s=>{if(updates[s.id])s.alocacao=updates[s.id];else if(s.dia===dia)s.alocacao=null;});
+  mepRenderDist();
+};
+
+window.mepLimparAlocacoes=async()=>{
+  const dia=window._mep.dia;
+  const afetados=S.students.filter(s=>s.dia===dia&&s.alocacao);
+  if(!afetados.length){alert('Nenhuma alocação para limpar.');return;}
+  if(!confirm(`Remover alocação de ${afetados.length} aluno(s) do ${dia==='sabado'?'sábado':'domingo'}?`))return;
+  const batch=writeBatch(db);
+  afetados.forEach(s=>batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${s.id}`),{alocacao:null}));
+  await batch.commit();
+  afetados.forEach(s=>s.alocacao=null);
+  mepRenderDist();
+};
 
 window.confirmResetStPres=(sid)=>{
   const s=S.students.find(x=>x.id===sid);if(!s)return;
@@ -4873,7 +5236,7 @@ window.openNewSimAuth=()=>{
 window.openNewSim=()=>{
   S._id=null;S._rSab=[];S._rDom=[];S.step=1;window._listaSelected=null;
   document.getElementById('msim-t').textContent='Novo Simulado';
-  ['sn','s-ds','s-dd','s-dl','s-dl-p','s-msg','s-msg-p'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['sn','s-ds','s-dd','s-dl','s-dl-p','s-msg','s-msg-p','s-instr-p'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('s-lim').value='8';document.getElementById('s-int').value='40';
   document.getElementById('s-alunos').value='';
   const sa=document.getElementById('s-alunos-sab');if(sa)sa.value='';
@@ -4893,6 +5256,7 @@ window.openEditSim=()=>{
   if(isPres){
     document.getElementById('s-dl-p').value=S.curSim.deadline?S.curSim.deadline.slice(0,16):'';
     document.getElementById('s-msg-p').value=S.curSim.msg||'';
+    document.getElementById('s-instr-p').value=S.curSim.instrucoes||'';
   }else{
     document.getElementById('s-dl').value=S.curSim.deadline?S.curSim.deadline.slice(0,16):'';
     document.getElementById('s-lim').value=S.curSim.limite||8;
@@ -5225,6 +5589,7 @@ async function saveSim(mode){
     limite:isPres?0:(parseInt(document.getElementById('s-lim').value)||8),
     intervalo:isPres?0:(parseInt(document.getElementById('s-int').value)||40),
     msg:isPres?document.getElementById('s-msg-p').value.trim():document.getElementById('s-msg').value.trim(),
+    instrucoes:isPres?(document.getElementById('s-instr-p').value||'').trim():'',
     rodadasSab:rSab2,
     rodadasDom:rDom2,
     presencial:isPres,
@@ -5596,6 +5961,35 @@ window.deleteLista=async id=>{if(!confirm('Excluir esta lista?'))return;await de
 // DAY SWITCHES
 window.switchCoDay=(day,btn)=>{document.querySelectorAll('#co-sched .day-tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');document.getElementById('rds-sab').classList.toggle('hidden',day!=='sabado');document.getElementById('rds-dom').classList.toggle('hidden',day!=='domingo');};
 
+// Busca por nome no schedule da coord (funciona em online e presencial)
+window.filterCoSched=()=>{
+  const inp=document.getElementById('co-sched-search');
+  const q=(inp?.value||'').toLowerCase().normalize('NFKC').trim();
+  const containers=['rds-sab','rds-dom'];
+  containers.forEach(cid=>{
+    const root=document.getElementById(cid);if(!root)return;
+    // Online: cada .pos-row tem .pos-name; presencial: cada .aluno-row tem .aluno-name
+    root.querySelectorAll('.pos-row').forEach(row=>{
+      const n=(row.querySelector('.pos-name')?.textContent||'').toLowerCase().normalize('NFKC');
+      const empty=row.querySelector('.pos-empty');
+      if(!q){row.style.display='';return;}
+      // Não esconde linhas vagas se a busca está ativa? Esconde — só mostra os que batem
+      row.style.display=(n&&n.includes(q))?'':'none';
+    });
+    root.querySelectorAll('.aluno-row').forEach(row=>{
+      const n=(row.querySelector('.aluno-name')?.textContent||'').toLowerCase().normalize('NFKC');
+      if(!q){row.style.display='';return;}
+      row.style.display=n.includes(q)?'':'none';
+    });
+    // Esconde rodadas/dias que ficaram totalmente sem resultado visível (opcional)
+    root.querySelectorAll('.rc').forEach(card=>{
+      if(!q){card.style.display='';return;}
+      const visible=Array.from(card.querySelectorAll('.pos-row, .aluno-row')).some(r=>r.style.display!=='none');
+      card.style.display=visible?'':'none';
+    });
+  });
+};
+
 S.coStatusFilter='all';
 window.setCoStatusFilter=(filter,btn)=>{
   S.coStatusFilter=filter;
@@ -5624,6 +6018,7 @@ function applyCoStatusFilter(){
     const matches=a&&a.status===f;
     row.classList.toggle('dimmed',!matches);
   });
+  if(typeof filterCoSched==='function')filterCoSched();
 }
 
 
