@@ -415,11 +415,53 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 
 <!-- ══════════════ COORD VIEW ══════════════ -->
 <!-- ══════════════ MENTORIA · VISÃO ALUNO (página dedicada) ══════════════ -->
+<style id="mta-modern-styles">
+.mta-shell{--mta-c:#3b82f6;--mta-c2:#60a5fa;--mta-cdim:rgba(59,130,246,.18);position:relative;max-width:720px;margin:0 auto;padding:8px 0 40px}
+.mta-shell[data-tipo="TSA"]{--mta-c:#fb923c;--mta-c2:#fbbf24;--mta-cdim:rgba(251,146,60,.18)}
+.mta-shell::before{content:"";position:absolute;inset:-40px -20px;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%)}
+.mta-shell>*{position:relative;z-index:1}
+.mta-hero{text-align:center;margin-bottom:32px;padding:8px 0}
+.mta-tag{display:inline-block;font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--mta-c);padding:4px 10px;border:1px solid var(--mta-cdim);border-radius:999px;background:var(--mta-cdim);margin-bottom:10px}
+.mta-h1{font-family:Fraunces,serif;font-size:34px;font-weight:800;letter-spacing:-.8px;background:linear-gradient(135deg,#fff 0%,#cbd5e1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1;margin:0}
+.mta-sub{color:var(--t2);font-size:13px;margin-top:8px;font-weight:400}
+.mta-back{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);background:transparent;border:1px solid var(--border);padding:7px 14px;border-radius:8px;cursor:pointer;transition:all .15s;margin-bottom:14px}
+.mta-back:hover{color:var(--mta-c);border-color:var(--mta-c);background:var(--mta-cdim)}
+.mta-card{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0));border:1px solid var(--border);border-radius:18px;padding:0;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);overflow:hidden}
+.mta-card::before{content:"";position:absolute;inset:0;border-radius:18px;padding:1px;background:linear-gradient(135deg,var(--mta-c) 0%,transparent 35%,transparent 65%,var(--mta-c2) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.5}
+.mta-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px;border-bottom:1px solid var(--border);position:relative}
+.mta-card-head::after{content:"";position:absolute;bottom:-1px;left:22px;width:60px;height:1px;background:linear-gradient(90deg,var(--mta-c),transparent)}
+.mta-card-title{font-family:Fraunces,serif;font-size:18px;font-weight:700;color:var(--text);margin:0}
+.mta-card-meta{font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:1.5px;color:var(--mta-c);text-transform:uppercase}
+.mta-card-body{padding:18px 22px}
+.mta-search{position:relative;margin-bottom:14px}
+.mta-search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.55;pointer-events:none}
+.mta-search input{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--border);color:var(--text);padding:13px 16px 13px 42px;border-radius:12px;font-size:14px;font-family:inherit;outline:none;transition:all .18s;font-feature-settings:"tnum"}
+.mta-search input:focus{border-color:var(--mta-c);box-shadow:0 0 0 4px var(--mta-cdim),inset 0 0 24px rgba(0,0,0,.4);background:rgba(0,0,0,.5)}
+.mta-search input::placeholder{color:var(--t2);opacity:.6}
+.mta-list{max-height:380px;overflow-y:auto;border-radius:12px;background:rgba(0,0,0,.2);border:1px solid var(--border);scrollbar-width:thin;scrollbar-color:var(--mta-c) transparent}
+.mta-list::-webkit-scrollbar{width:8px}
+.mta-list::-webkit-scrollbar-thumb{background:var(--mta-cdim);border-radius:4px}
+.mta-list::-webkit-scrollbar-thumb:hover{background:var(--mta-c)}
+.mta-row{display:flex;align-items:center;gap:12px;padding:13px 18px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.04);background:transparent;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;color:var(--text);font-family:inherit;font-size:14px;transition:all .15s;position:relative}
+.mta-row:last-child{border-bottom:none}
+.mta-row::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--mta-c);border-radius:2px;opacity:0;transition:opacity .15s}
+.mta-row:hover{background:linear-gradient(90deg,var(--mta-cdim),transparent 70%);padding-left:24px;color:#fff}
+.mta-row:hover::before{opacity:1}
+.mta-row:hover .mta-row-arrow{opacity:1;transform:translateX(0)}
+.mta-row-name{flex:1;font-weight:500;letter-spacing:.1px}
+.mta-row-arrow{opacity:0;transform:translateX(-6px);transition:all .15s;color:var(--mta-c);font-size:16px;font-weight:700}
+.mta-empty{padding:36px 20px;text-align:center;color:var(--t2);font-size:13px}
+.mta-empty-icon{font-size:32px;opacity:.4;margin-bottom:8px}
+.mta-count{font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:11px;color:var(--t2);text-align:right;margin-top:8px;letter-spacing:.5px}
+.mta-count strong{color:var(--mta-c);font-weight:700}
+</style>
+
 <div id="view-mta" class="hidden">
-  <div style="max-width:680px;margin:0 auto">
-    <div style="text-align:center;margin-bottom:28px">
-      <h1 style="font-family:Fraunces,serif;font-size:28px;font-weight:800;letter-spacing:-.5px">🎓 Mentorias</h1>
-      <p style="color:var(--t2);font-size:14px;margin-top:4px">Selecione sua mentoria para ver as clínicas de questões.</p>
+  <div class="mta-shell" id="mta-shell">
+    <div class="mta-hero">
+      <span class="mta-tag" id="mta-tag">🎓 Mentorias AnestReview</span>
+      <h1 class="mta-h1" id="mta-hero-title">Mentorias</h1>
+      <p class="mta-sub" id="mta-hero-sub">Selecione sua mentoria para ver as clínicas de questões.</p>
     </div>
 
     <!-- Step 1: escolher TEA ou TSA -->
@@ -436,16 +478,20 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 
     <!-- Step 2: identificar aluno -->
     <div id="mta-step2" class="hidden">
-      <button class="btn btn-g btn-sm" onclick="mtaBack(1)" style="margin-bottom:10px">← Voltar</button>
-      <div class="card">
-        <div class="ch"><div class="ct" id="mta-step2-title"></div></div>
-        <div class="cb">
-          <div class="search-wrap" style="margin-bottom:12px">
-            <span class="search-icon">🔍</span>
-            <input class="search-input" id="mta-search" placeholder="Digite seu nome..." oninput="mtaFilterAlunos()" autocomplete="off"/>
+      <button class="mta-back" onclick="mtaBack(1)">← Voltar</button>
+      <div class="mta-card">
+        <div class="mta-card-head">
+          <h2 class="mta-card-title" id="mta-step2-title">Selecione seu nome</h2>
+          <span class="mta-card-meta" id="mta-step2-meta">MENTORIA</span>
+        </div>
+        <div class="mta-card-body">
+          <div class="mta-search">
+            <span class="mta-search-icon">🔍</span>
+            <input id="mta-search" placeholder="Digite seu nome..." oninput="mtaFilterAlunos()" autocomplete="off"/>
           </div>
-          <div id="mta-aluno-list" style="max-height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--rs)"></div>
-          <div id="mta-aluno-empty" class="hidden" style="padding:24px;text-align:center;color:var(--t2);font-size:13px">Nenhum aluno encontrado.</div>
+          <div id="mta-aluno-list" class="mta-list"></div>
+          <div id="mta-aluno-empty" class="hidden mta-empty"><div class="mta-empty-icon">🔎</div>Nenhum aluno encontrado.</div>
+          <div id="mta-aluno-count" class="mta-count"></div>
           <div id="mta-confirm-email-wrap"></div>
         </div>
       </div>
@@ -453,17 +499,20 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 
     <!-- Step 3: clínicas do aluno -->
     <div id="mta-step3" class="hidden">
-      <button class="btn btn-g btn-sm" onclick="mtaBack(2)" style="margin-bottom:10px">← Voltar</button>
+      <button class="mta-back" onclick="mtaBack(2)">← Voltar</button>
       <div id="mta-clinicas-wrap"></div>
     </div>
 
     <!-- Step 4: solicitar troca -->
     <div id="mta-step4" class="hidden">
-      <button class="btn btn-g btn-sm" onclick="mtaBack(3)" style="margin-bottom:10px">← Voltar</button>
-      <div class="card">
-        <div class="ch"><div class="ct">🔄 Solicitar Troca</div><div class="m-sub" id="mta-troca-sub"></div></div>
-        <div class="cb">
-          <p style="font-size:13px;color:var(--t2);margin-bottom:12px">Escolha a clínica para a qual você gostaria de ir. Se houver vaga, a troca é confirmada na hora.</p>
+      <button class="mta-back" onclick="mtaBack(3)">← Voltar</button>
+      <div class="mta-card">
+        <div class="mta-card-head">
+          <h2 class="mta-card-title">🔄 Solicitar Troca</h2>
+          <span class="mta-card-meta" id="mta-troca-sub"></span>
+        </div>
+        <div class="mta-card-body">
+          <p style="font-size:13px;color:var(--t2);margin-bottom:14px">Escolha a clínica de destino. Se houver vaga, a troca é confirmada na hora.</p>
           <div id="mta-troca-list"></div>
         </div>
       </div>
@@ -2190,7 +2239,9 @@ window.mtaBack=(toStep)=>{
 
 window.mtaPickTipo=(tipo)=>{
   S._mta.tipo=tipo;
-  document.getElementById('mta-step2-title').textContent=`Selecione seu nome · Mentoria ${tipo}`;
+  const shell=document.getElementById('mta-shell');if(shell)shell.dataset.tipo=tipo;
+  document.getElementById('mta-step2-title').textContent=`Selecione seu nome`;
+  const meta=document.getElementById('mta-step2-meta');if(meta)meta.textContent=`MENTORIA · ${tipo}`;
   document.getElementById('mta-step1').classList.add('hidden');
   document.getElementById('mta-step2').classList.remove('hidden');
   mtaFilterAlunos();
@@ -2205,9 +2256,18 @@ window.mtaFilterAlunos=()=>{
   const filt=q?todos.filter(a=>a.nome.toLowerCase().includes(q)):todos;
   filt.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
   const el=document.getElementById('mta-aluno-list');
-  if(!filt.length){el.innerHTML='';document.getElementById('mta-aluno-empty').classList.remove('hidden');return;}
+  const cnt=document.getElementById('mta-aluno-count');
+  if(!filt.length){
+    el.innerHTML='';
+    document.getElementById('mta-aluno-empty').classList.remove('hidden');
+    if(cnt)cnt.textContent='';
+    return;
+  }
   document.getElementById('mta-aluno-empty').classList.add('hidden');
-  el.innerHTML=filt.slice(0,50).map(a=>`<button onclick="mtaPickAluno('${a._grupo.id}','${(a.email||'').replace(/'/g,"\\'")}')" style="display:block;width:100%;text-align:left;background:transparent;border:none;border-bottom:1px solid var(--border);padding:11px 14px;cursor:pointer;font-size:14px;color:var(--text);transition:background .15s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">${a.nome}</button>`).join('');
+  const limit=80;
+  const lista=filt.slice(0,limit);
+  el.innerHTML=lista.map(a=>`<button class="mta-row" onclick="mtaPickAluno('${a._grupo.id}','${(a.email||'').replace(/'/g,"\\'")}')"><span class="mta-row-name">${a.nome}</span><span class="mta-row-arrow">›</span></button>`).join('');
+  if(cnt)cnt.innerHTML=`<strong>${lista.length}</strong>${filt.length>limit?` de ${filt.length}`:''} aluno${filt.length!==1?'s':''}`;
 };
 
 window.mtaPickAluno=async(grupoId,email)=>{
@@ -2257,12 +2317,9 @@ window.mtaPedirEmail=(label,callback)=>{
 async function mtaRenderClinicas(){
   const{tipo,aluno,grupo}=S._mta;
   const wrap=document.getElementById('mta-clinicas-wrap');
-  wrap.innerHTML='<div class="ld"><div class="sp"></div> Carregando clínicas...</div>';
-  // Recarrega clínicas do banco
+  wrap.innerHTML='<div class="mta-card"><div class="mta-card-body" style="text-align:center;padding:40px 20px;color:var(--t2)"><div class="sp" style="margin:0 auto 10px"></div> Carregando clínicas...</div></div>';
   await loadClinicas();
-  // Clínicas do mesmo tipo cujo mentor seja o do aluno OU pra quais o aluno foi alocado (em casos de troca)
   const minhas=S.clinicas.filter(c=>c.tipo===tipo).sort((a,b)=>(a.dataHora||'').localeCompare(b.dataHora||''));
-  // Carrega alunos das clínicas do tipo
   const meusEntries=[];
   for(const c of minhas){
     const alunos=await loadClinicaAlunos(c.id);
@@ -2270,38 +2327,55 @@ async function mtaRenderClinicas(){
     if(meu)meusEntries.push({clinica:c,registro:meu});
   }
   if(!meusEntries.length){
-    wrap.innerHTML=`<div class="card"><div class="cb"><div class="es" style="padding:32px"><div class="ei">📭</div><p>Nenhuma clínica agendada ainda.</p><p style="font-size:12px;margin-top:6px">Mentor: <strong>${grupo.mentorNome}</strong></p></div></div></div>`;
+    wrap.innerHTML=`<div class="mta-card"><div class="mta-card-body"><div class="mta-empty"><div class="mta-empty-icon">📭</div>Nenhuma clínica agendada ainda.<div style="font-size:12px;margin-top:6px;opacity:.7">Mentor: <strong>${grupo.mentorNome}</strong></div></div></div></div>`;
     return;
   }
   const now=new Date().toISOString();
-  wrap.innerHTML=`<h2 style="font-family:Fraunces,serif;font-size:18px;font-weight:700;margin-bottom:14px">Suas clínicas (${tipo})</h2>`+
-    meusEntries.map(({clinica:c,registro:r})=>{
-      const expirada=c.dataHora&&c.dataHora<now.slice(0,16);
-      const cls=r.status==='confirmed'?'status-confirmed':r.status==='swap'?'status-swap':r.status==='absent'?'status-absent':'';
-      let acts='';
-      if(expirada){acts='<span style="font-size:12px;color:var(--t2)">Clínica encerrada</span>';}
-      else if(r.status==='pending'){
-        acts=`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-          <button class="rb rb-c" onclick="mtaResp('${c.id}','${r.id}','confirmed')">✔ Confirmo</button>
-          <button class="rb rb-a" onclick="mtaResp('${c.id}','${r.id}','absent')">✗ Não vou</button>
-          <button class="rb rb-s" onclick="mtaOpenTroca('${c.id}','${r.id}')">🔄 Trocar</button>
-        </div>`;
-      }else{
-        acts=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${sbadge(r.status)}<button class="rb" style="background:var(--bg3);color:var(--t2);border:1px solid var(--border);padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer" onclick="mtaResp('${c.id}','${r.id}','reset')">✏️ Alterar</button></div>`;
-      }
-      return`<div class="aluno-row ${cls}" style="flex-direction:column;align-items:stretch;gap:8px;padding:14px 16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;width:100%">
-          <div style="flex:1;min-width:200px">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <strong style="font-size:15px">${_temaDeClinica(c)}</strong>${_mentBadge(c.tipo)}
-            </div>
-            <div style="font-size:12px;color:var(--t2);margin-top:2px">📅 ${_fmtClinDataHora(c.dataHora)}${r.respondedAt&&r.status!=='pending'?' · <span style=\"color:var(--t2)\">'+fDT(r.respondedAt)+'</span>':''}</div>
-          </div>
-          ${acts}
-        </div>
-        ${c.link&&r.status==='confirmed'?`<a href="${c.link}" target="_blank" style="font-size:12px;color:var(--accent);font-weight:600">🔗 ${c.link}</a>`:''}
+  const sH=`<div class="mta-card" style="margin-bottom:0">
+    <div class="mta-card-head">
+      <div>
+        <div class="mta-card-meta" style="margin-bottom:4px">${aluno.nome.toUpperCase()}</div>
+        <h2 class="mta-card-title">Suas clínicas</h2>
+      </div>
+      <span class="mta-card-meta">${meusEntries.length} ${meusEntries.length===1?'sessão':'sessões'}</span>
+    </div>
+  </div>`;
+  const sB=meusEntries.map(({clinica:c,registro:r})=>{
+    const expirada=c.dataHora&&c.dataHora<now.slice(0,16);
+    let stTag='',stColor='var(--t2)';
+    if(r.status==='confirmed'){stTag='✓ CONFIRMADO';stColor='var(--green)';}
+    else if(r.status==='absent'){stTag='✗ AUSENTE';stColor='var(--red)';}
+    else if(r.status==='swap'){stTag='⇄ TROCA SOLICITADA';stColor='var(--yellow)';}
+    else{stTag='● PENDENTE';stColor='var(--mta-c)';}
+    let acts='';
+    if(expirada){acts='<span style="font-family:JetBrains Mono,monospace;font-size:10px;color:var(--t2);letter-spacing:1.5px">CLÍNICA ENCERRADA</span>';}
+    else if(r.status==='pending'){
+      acts=`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <button class="rb rb-c" onclick="mtaResp('${c.id}','${r.id}','confirmed')">✔ Confirmo</button>
+        <button class="rb rb-a" onclick="mtaResp('${c.id}','${r.id}','absent')">✗ Não vou</button>
+        <button class="rb rb-s" onclick="mtaOpenTroca('${c.id}','${r.id}')">🔄 Trocar</button>
       </div>`;
-    }).join('');
+    }else{
+      acts=`<button class="rb" style="background:var(--bg3);color:var(--t2);border:1px solid var(--border);padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer" onclick="mtaResp('${c.id}','${r.id}','reset')">✏️ Alterar resposta</button>`;
+    }
+    return`<div class="mta-card" style="margin-top:12px;border-color:${stColor==='var(--t2)'?'var(--border)':stColor}">
+      <div class="mta-card-body" style="padding:16px 20px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+          <div style="flex:1;min-width:220px">
+            <div style="font-family:JetBrains Mono,monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;color:${stColor};margin-bottom:6px">${stTag}</div>
+            <h3 style="font-family:Fraunces,serif;font-size:18px;font-weight:700;margin:0;line-height:1.2">${_temaDeClinica(c)}</h3>
+            <div style="font-size:12px;color:var(--t2);margin-top:6px;display:flex;gap:14px;flex-wrap:wrap">
+              <span>👤 ${c.mentorNome}</span>
+              <span>📅 ${_fmtClinDataHora(c.dataHora)}</span>
+            </div>
+          </div>
+        </div>
+        ${c.link&&r.status==='confirmed'?`<a href="${c.link}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--mta-c);font-weight:600;text-decoration:none;padding:8px 12px;background:var(--mta-cdim);border-radius:8px;border:1px solid var(--mta-cdim);margin-bottom:10px">🔗 Acessar reunião</a><br/>`:''}
+        <div style="display:flex;justify-content:flex-end">${acts}</div>
+      </div>
+    </div>`;
+  }).join('');
+  wrap.innerHTML=sH+sB;
 }
 
 window.mtaResp=(clinicaId,alunoId,type)=>{
