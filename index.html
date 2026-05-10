@@ -366,7 +366,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
     <div class="header-right">
       <div class="view-tabs">
         <button class="nav-tab on" id="tab-al" onclick="switchView('aluno')">👨‍🎓 Alunos</button>
-        <button class="nav-tab" id="tab-co" onclick="switchView('coord')">🛠️ Coordenação</button>
+        <button class="nav-tab" id="tab-co" onclick="switchView('coord')" style="display:none">🛠️ Coordenação</button>
         <button class="nav-tab" id="tab-mt" onclick="goMentoriaAluno()" title="Mentorias">🎓 Mentorias</button>
       </div>
       <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Alternar tema">🌙</button>
@@ -2276,11 +2276,17 @@ window.goMentoriaAluno=()=>{
 };
 
 // Roteamento por hash
+function _revealCoordTab(){
+  const tco=document.getElementById('tab-co');if(tco)tco.style.display='';
+  switchView('coord');
+}
 window.addEventListener('hashchange',()=>{
   if(location.hash==='#mentorias')goMentoriaAluno();
+  else if(location.hash==='#admin'||location.hash==='#coord')_revealCoordTab();
 });
 function _initMentoriaHash(){
   if(location.hash==='#mentorias')goMentoriaAluno();
+  else if(location.hash==='#admin'||location.hash==='#coord')_revealCoordTab();
 }
 
 // === Visão aluno mentoria ===
