@@ -4322,6 +4322,66 @@ window.confirmarNomeProfRev=(nome)=>{
   renderRevisaoTab();
 };
 
+window.finalizarRevisaoProf=async()=>{
+  // Reaproveita o auto-concordo do navCasoProf(1) — no último caso, novo === idx
+  // (boundary), então só roda o auto-vote e re-renderiza sem avançar.
+  await window.navCasoProf(1);
+  // Marca a revisão como finalizada para este prof (doc especial em comentarios)
+  const r=S._revProfRevisao;
+  if(r&&S._revProfNome){
+    const slug=_profSlug(S._revProfNome);
+    try{
+      await setDoc(doc(db,`revisaoCasos/${r.id}/comentarios/fin_${slug}`),{
+        kind:'finalizado',targetType:'caso',targetId:r.id,
+        profNome:S._revProfNome,finalizadoEm:new Date().toISOString()
+      });
+      await _revLoadComentarios(r.id);
+    }catch(e){console.error('finalizar:',e);}
+  }
+  const old=document.getElementById('rev-fin-modal');if(old)old.remove();
+  const el=document.createElement('div');
+  el.id='rev-fin-modal';
+  el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px';
+  el.innerHTML=`<div onclick="event.stopPropagation()" style="max-width:480px;width:100%;background:var(--bg2);border:2px solid var(--green);border-radius:14px;padding:28px;box-shadow:0 16px 64px rgba(0,0,0,.5);text-align:center">
+    <div style="font-size:54px;margin-bottom:10px">🎉</div>
+    <h2 style="font-family:Fraunces,serif;font-size:22px;font-weight:800;margin-bottom:10px">Revisão finalizada!</h2>
+    <p style="font-size:14px;color:var(--t2);line-height:1.6;margin-bottom:20px">Muito obrigado pela sua contribuição.<br/>Sua revisão foi registrada com sucesso.<br/><br/>Você pode continuar navegando pelos casos pra ajustar votos, ver comentários dos outros revisores ou adicionar novos.</p>
+    <button onclick="document.getElementById('rev-fin-modal').remove()" style="background:var(--green);color:#000;font-weight:700;border:none;padding:10px 28px;border-radius:8px;cursor:pointer;font-size:14px">Entendi</button>
+  </div>`;
+  el.addEventListener('click',(e)=>{if(e.target===el)el.remove();});
+  document.body.appendChild(el);
+};
+
+window.resetarRevisaoProf=async()=>{
+  const r=S._revProfRevisao;if(!r){alert('Nenhuma revisão aberta.');return;}
+  if(!S._revProfNome){alert('Selecione um revisor primeiro.');return;}
+  if(!confirm(`⚠️ Resetar SUA revisão?\n\nTodos os seus votos e comentários nesta revisão serão APAGADOS.\nOs votos/comentários dos outros revisores NÃO são afetados.\n\nEsta ação é irreversível.`))return;
+  const conf=prompt('CONFIRMAÇÃO FINAL\n\nDigite RESETAR para confirmar.');
+  if(conf!=='RESETAR')return;
+  const revId=r.id;
+  const slug=_profSlug(S._revProfNome);
+  const meuNome=S._revProfNome;
+  const batch=writeBatch(db);
+  let removidos=0,atualizados=0;
+  for(const c of S._revProfComentarios){
+    if(c.profNome===meuNome){
+      batch.delete(doc(db,`revisaoCasos/${revId}/comentarios/${c.id}`));
+      removidos++;
+    } else if(c.votos&&c.votos[slug]){
+      const novosVotos={...c.votos};delete novosVotos[slug];
+      batch.set(doc(db,`revisaoCasos/${revId}/comentarios/${c.id}`),{votos:novosVotos,votosAt:new Date().toISOString()},{merge:true});
+      atualizados++;
+    }
+  }
+  if(!removidos&&!atualizados){_revShowToast('Nada para resetar — você ainda não revisou','var(--t2)');return;}
+  try{
+    await batch.commit();
+    await _revLoadComentarios(revId);
+    _revRenderProfEditor(document.getElementById('rev-content'));
+    _revShowToast(`✓ Revisão resetada (${removidos} item${removidos!==1?'s':''} removidos)`,'var(--green)');
+  }catch(e){console.error('resetarRevisaoProf:',e);alert('Erro ao resetar: '+(e.code||e.message));}
+};
+
 window.trocarProfRev=()=>{
   if(!confirm('Trocar de revisor? A sessão atual vai fechar.'))return;
   S._revProfNome=null;
@@ -4354,12 +4414,32 @@ function _revRenderProfList(c){
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <strong style="font-size:14px">${r.simNome||'(simulado)'}</strong>
           <span class="badge" style="background:transparent;border:1px solid var(--green);color:var(--green);font-size:10px;letter-spacing:1px">ABERTA</span>
+          <span id="rev-status-${r.id}" style="font-size:11px;color:var(--t2);font-family:JetBrains Mono,monospace"></span>
         </div>
         <div style="font-size:12px;color:var(--t2);margin-top:4px">📅 Limite para revisar: ${prazoLbl} · ${totCasos} caso${totCasos!==1?'s':''}</div>
       </div>
-      <button class="btn btn-p btn-sm">Iniciar revisão →</button>
+      <button id="rev-btn-${r.id}" class="btn btn-p btn-sm">Iniciar revisão →</button>
     </div>`;
   }).join('');
+  // Carrega progresso por revisão e atualiza os botões assincronamente
+  const slug=_profSlug(S._revProfNome);
+  abertas.forEach(async(r)=>{
+    try{
+      const snap=await getDocs(collection(db,`revisaoCasos/${r.id}/comentarios`));
+      const meus=snap.docs.map(d=>({id:d.id,...d.data()})).filter(d=>d.profNome===S._revProfNome);
+      const finalizou=meus.some(d=>d.kind==='finalizado'||d.id===`fin_${slug}`);
+      const comecou=meus.some(d=>d.kind==='voto'||d.kind==='comentario');
+      const btn=document.getElementById(`rev-btn-${r.id}`);
+      const tag=document.getElementById(`rev-status-${r.id}`);
+      if(finalizou){
+        if(btn){btn.textContent='👁 Visualizar revisão';btn.className='btn btn-s btn-sm';btn.style.background='transparent';btn.style.borderColor='var(--green)';btn.style.color='var(--green)';}
+        if(tag)tag.textContent='• ✓ FINALIZADA';
+      } else if(comecou){
+        if(btn){btn.textContent='▶ Continuar revisão';}
+        if(tag)tag.textContent='• EM ANDAMENTO';
+      }
+    }catch(e){console.warn('progress load',e);}
+  });
 }
 
 window.entrarRevisaoProf=async(revId)=>{
@@ -4397,11 +4477,17 @@ function _revRenderProfEditor(c){
   const finalizado=!!co.casoFinalizado;
   const blocoCor=co.bloco==='oral'?'var(--orange)':'var(--accent)';
   const blocoLabel=co.bloco==='oral'?'🎙️ Oral Online':'🩺 Criar / Simulação';
+  const isLast=idx===casos.length-1;
+  const navButtons=`<button class="btn btn-s" onclick="navCasoProf(-1)" ${idx===0?'disabled':''}>← Anterior</button>
+    ${isLast
+      ?`<button onclick="finalizarRevisaoProf()" style="background:var(--green);color:#000;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:800;letter-spacing:.3px;box-shadow:0 4px 14px -2px rgba(63,185,80,.45)">✓ Finalizar revisão</button>`
+      :`<button class="btn btn-p" onclick="navCasoProf(1)">Próximo →</button>`}`;
   c.innerHTML=`<div style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
     <button class="btn btn-g btn-sm" onclick="sairRevisaoProf()">← Voltar à lista</button>
-    <div style="display:flex;align-items:center;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <div style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--t2);letter-spacing:1px">REVISOR: <strong style="color:var(--text)">${S._revProfNome}</strong></div>
-      <button class="btn btn-s btn-sm" onclick="trocarProfRev()" style="font-size:11px">↻</button>
+      <button class="btn btn-s btn-sm" onclick="trocarProfRev()" style="font-size:11px" title="Trocar revisor">↻</button>
+      <button onclick="resetarRevisaoProf()" title="Apagar todos os seus votos e comentários desta revisão" style="background:transparent;border:1px solid var(--red);color:var(--red);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700">🗑️ Resetar revisão</button>
     </div>
   </div>
   <div class="card" style="margin-bottom:14px">
@@ -4420,6 +4506,9 @@ function _revRenderProfEditor(c){
     <div style="font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;letter-spacing:1.5px;color:${blocoCor};text-transform:uppercase;margin-bottom:10px">${blocoLabel}</div>
     <h2 style="font-family:Fraunces,serif;font-size:20px;font-weight:700;margin-bottom:14px">📋 ${co.nome||'(caso sem nome)'}</h2>
     ${finalizado?'<div style="background:rgba(255,193,7,.15);border:1px solid var(--yellow);color:var(--yellow);padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:13px;font-weight:600">🔒 Caso finalizado pela coordenação. Somente leitura — votos e comentários estão desabilitados.</div>':''}
+    <div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px dashed var(--border);flex-wrap:wrap">
+      ${navButtons}
+    </div>
     <div style="margin-bottom:14px">
       <div style="font-size:11px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">Enunciado</div>
       <div style="padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;white-space:pre-wrap;line-height:1.5;font-size:14px">${co.enunciado||'<em style="color:var(--t2)">(sem enunciado)</em>'}</div>
@@ -4428,9 +4517,7 @@ function _revRenderProfEditor(c){
     </div>
     ${(co.perguntas||[]).map((p,pi)=>_revProfRenderPergunta(r.id,co,p,pi,finalizado)).join('')}
     <div style="display:flex;justify-content:space-between;gap:10px;margin-top:18px;padding-top:14px;border-top:1px dashed var(--border);flex-wrap:wrap">
-      <button class="btn btn-s" onclick="navCasoProf(-1)" ${idx===0?'disabled':''}>← Anterior</button>
-      <button class="btn btn-sm" onclick="concordarSeguirProf()" style="background:var(--green);color:#000;font-weight:700;border:none;padding:8px 16px;border-radius:8px;cursor:pointer">✓ Concordar com tudo e seguir</button>
-      <button class="btn btn-p" onclick="navCasoProf(1)" ${idx===casos.length-1?'disabled':''}>Próximo →</button>
+      ${navButtons}
     </div>
   </div>`;
 }
@@ -4458,7 +4545,7 @@ function _revProfRenderPergunta(revId,co,p,pi,casoFinalizado){
         <div style="display:flex;gap:10px;align-items:flex-start">
           <div style="flex:0 0 36px;font-size:13px;font-weight:700;color:var(--accent);font-family:JetBrains Mono,monospace;text-align:center;padding:6px 0;background:var(--bg3);border:1px solid var(--border);border-radius:6px">${it.label||''}</div>
           <div style="flex:1;font-size:13px;line-height:1.5">${it.descricao||''}</div>
-          ${(it.obs||(it.obsImagens||[]).length)?`<button onclick="event.stopPropagation();showObsCk(this)" data-obs="${(it.obs||'').replace(/"/g,'&quot;').replace(/</g,'&lt;')}" data-obs-imgs="${JSON.stringify(it.obsImagens||[]).replace(/"/g,'&quot;')}" title="${(it.obs||'').replace(/"/g,'&quot;')}" style="background:rgba(255,193,7,.18);border:1px solid var(--yellow);color:var(--yellow);padding:2px 7px;border-radius:6px;cursor:help;font-size:11px;flex-shrink:0">💡${(it.obsImagens||[]).length?'📷':''}</button>`:''}
+          ${(it.obs||(it.obsImagens||[]).length)?`<button onclick="event.stopPropagation();showObsCk(this)" data-obs="${(it.obs||'').replace(/"/g,'&quot;').replace(/</g,'&lt;')}" data-obs-imgs="${JSON.stringify(it.obsImagens||[]).replace(/"/g,'&quot;')}" title="${(it.obs||'').replace(/"/g,'&quot;')}" style="background:var(--yellow);color:#000;border:1.5px solid var(--yellow);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:800;letter-spacing:.5px;flex-shrink:0;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px -2px rgba(255,193,7,.55);text-transform:uppercase">💡${(it.obsImagens||[]).length?'📷':''} Observação · confira!</button>`:''}
         </div>
         ${_revProfRenderTarget(revId,'item',it.id,casoFinalizado)}
       </div>`).join('')}
@@ -4655,9 +4742,42 @@ window.comentarRev=async(targetType,targetId)=>{
 
 window.navCasoProf=async(delta)=>{
   const r=S._revProfRevisao;if(!r)return;
+  // Ao avançar: auto-marca concordo no ENUNCIADO, PERGUNTAS e ITENS do caso
+  // atual sem voto do prof. Silencioso. Não toca em comentários.
+  if(delta>0&&r.status==='aberta'&&S._revProfNome){
+    const coAtual=r.casos[S._revProfCasoIdx];
+    if(coAtual&&!coAtual.casoFinalizado){
+      const revId=r.id;
+      const slug=_profSlug(S._revProfNome);
+      const ts=new Date().toISOString();
+      const targets=[];
+      if(coAtual.id)targets.push({type:'enunciado',id:coAtual.id});
+      (coAtual.perguntas||[]).forEach(p=>{
+        if(p&&p.id)targets.push({type:'pergunta',id:p.id});
+        (p.itens||[]).forEach(it=>{if(it&&it.id)targets.push({type:'item',id:it.id});});
+      });
+      const semVoto=targets.filter(t=>{
+        const docId=`voto_${slug}_${t.type}_${t.id}`;
+        return !S._revProfComentarios.find(c=>c.id===docId);
+      });
+      if(semVoto.length){
+        const results=await Promise.allSettled(semVoto.map(t=>{
+          const docId=`voto_${slug}_${t.type}_${t.id}`;
+          return setDoc(doc(db,`revisaoCasos/${revId}/comentarios/${docId}`),{
+            kind:'voto',targetType:t.type,targetId:t.id,
+            profNome:S._revProfNome,voto:'concordo',criadoEm:ts
+          });
+        }));
+        const fail=results.filter(r=>r.status==='rejected');
+        if(fail.length){
+          fail.forEach((r)=>console.error('[navCasoProf] erro write',semVoto[results.indexOf(r)],r.reason?.code||r.reason?.message||r.reason));
+        }
+        await _revLoadComentarios(revId);
+      }
+    }
+  }
   const novo=Math.max(0,Math.min(S._revProfCasoIdx+delta,(r.casos||[]).length-1));
-  if(novo===S._revProfCasoIdx)return;
-  S._revProfCasoIdx=novo;
+  if(novo!==S._revProfCasoIdx)S._revProfCasoIdx=novo;
   _revRenderProfEditor(document.getElementById('rev-content'));
 };
 
@@ -4799,15 +4919,21 @@ window.excluirRevisao=async(id)=>{
 // (b) pergunta com itensCriar/itensOral (versão intermediária): mescla em itens conforme o bloco do caso
 function _revNormalize(rev){
   const blocoFallback=rev.bloco||'criar';
-  (rev.casos||[]).forEach(co=>{
+  (rev.casos||[]).forEach((co,ci)=>{
     if(!co.bloco)co.bloco=blocoFallback;
-    (co.perguntas||[]).forEach(p=>{
-      if(Array.isArray(p.itens))return; // já no shape novo
-      if(co.bloco==='oral'&&Array.isArray(p.itensOral))p.itens=p.itensOral;
-      else if(Array.isArray(p.itensCriar))p.itens=p.itensCriar;
-      else if(Array.isArray(p.itensOral))p.itens=p.itensOral;
-      else p.itens=[];
-      delete p.itensCriar;delete p.itensOral;
+    if(!co.id)co.id='c_'+ci;
+    (co.perguntas||[]).forEach((p,pi)=>{
+      if(!Array.isArray(p.itens)){
+        if(co.bloco==='oral'&&Array.isArray(p.itensOral))p.itens=p.itensOral;
+        else if(Array.isArray(p.itensCriar))p.itens=p.itensCriar;
+        else if(Array.isArray(p.itensOral))p.itens=p.itensOral;
+        else p.itens=[];
+        delete p.itensCriar;delete p.itensOral;
+      }
+      if(!p.id)p.id='c'+ci+'_p'+pi;
+      (p.itens||[]).forEach((it,ii)=>{
+        if(it&&!it.id)it.id='c'+ci+'_p'+pi+'_i'+ii;
+      });
     });
   });
 }
@@ -4940,9 +5066,10 @@ function _revRenderEditor(c){
       <div class="cb" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
         <div>
           <div style="font-family:Fraunces,serif;font-size:18px;font-weight:700">${simNome}</div>
-          <div style="font-size:12px;color:var(--t2);margin-top:4px">
+          <div style="font-size:12px;color:var(--t2);margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             <span class="badge" style="background:transparent;border:1px solid ${cor};color:${cor};font-size:10px;letter-spacing:1px">${_REV_STATUS_LABEL[r.status]?.toUpperCase()}</span>
-            · Limite: ${r.prazoRevisao?fDT(r.prazoRevisao):'—'}
+            <span>· Limite:</span>
+            <input type="datetime-local" value="${r.prazoRevisao?r.prazoRevisao.slice(0,16):''}" onchange="atualizarPrazoRev(this.value)" title="Editar data limite da revisão" style="font-size:11px;padding:3px 6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);border-radius:5px;font-family:JetBrains Mono,monospace;color-scheme:dark"/>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -5556,6 +5683,19 @@ window.reabrirRevisaoExportada=async()=>{
   await _revFlushSave(true);
   _revShowToast('🔓 Edição reaberta — status: FECHADA','var(--yellow)');
   renderRevisaoTab();
+};
+
+window.atualizarPrazoRev=async(novoPrazo)=>{
+  const r=S._revEdit;if(!r)return;
+  if(!novoPrazo){alert('Defina uma data válida.');return;}
+  r.prazoRevisao=novoPrazo;
+  try{
+    await setDoc(doc(db,'revisaoCasos',r.id),{prazoRevisao:novoPrazo,updatedAt:new Date().toISOString()},{merge:true});
+    // Sincroniza com a lista em memória pra refletir na visão do prof
+    const idx=(S.revisoes||[]).findIndex(x=>x.id===r.id);
+    if(idx>=0)S.revisoes[idx].prazoRevisao=novoPrazo;
+    _revShowToast('✓ Prazo atualizado','var(--green)');
+  }catch(e){console.error('atualizarPrazoRev:',e);alert('Erro ao salvar: '+(e.code||e.message));}
 };
 
 window.fecharRevisao=async()=>{
