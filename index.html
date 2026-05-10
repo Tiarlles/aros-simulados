@@ -1194,6 +1194,18 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
       </div>
     </div>
 
+    <!-- TAB: Revisão de Casos -->
+    <div id="tab-revisao" class="hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h3 style="font-family:Fraunces,serif;font-size:17px;font-weight:700">🔍 Revisão de Casos</h3>
+          <p style="font-size:13px;color:var(--t2)">Revisão colaborativa de casos clínicos antes da aplicação no simulado.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="rev-admin-acts"></div>
+      </div>
+      <div id="rev-content"><p style="color:var(--t2);font-size:13px;padding:12px">Carregando...</p></div>
+    </div>
+
     <!-- TAB: Mentorias -->
     <div id="tab-mentorias" class="hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
@@ -1893,6 +1905,53 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
   </div>
 </div>
 
+<!-- ══ MODAL: Nova revisão de casos ══ -->
+<div class="mo hidden" id="modal-revisao">
+  <div class="md" style="max-width:520px">
+    <div class="mh"><div><div class="m-title" id="mrv-title">Nova revisão</div><div class="m-sub">Cobre gabarito do prof e avaliação do aluno</div></div><button class="m-close" onclick="CM('modal-revisao')">✕</button></div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">Simulado</label>
+        <select class="fc" id="mrv-sim"></select>
+      </div>
+      <div class="fg"><label class="fl">Data limite para revisar</label>
+        <input class="fc" id="mrv-prazo" type="datetime-local"/>
+      </div>
+      <div class="fg" style="display:flex;align-items:center;gap:10px;margin-top:8px">
+        <input type="checkbox" id="mrv-import" checked style="width:18px;height:18px;cursor:pointer"/>
+        <label for="mrv-import" style="font-size:13px;cursor:pointer">Importar casos do template oficial existente (se houver)</label>
+      </div>
+      <div id="mrv-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-revisao')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveNovaRevisao()">💾 Criar revisão</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Importar casos em bloco ══ -->
+<div class="mo hidden" id="modal-import-casos">
+  <div class="md" style="max-width:920px">
+    <div class="mh">
+      <div><div class="m-title">📥 Importar casos em bloco</div><div class="m-sub" id="mic-sub">Cole o texto estruturado abaixo</div></div>
+      <button class="m-close" onclick="CM('modal-import-casos')">✕</button>
+    </div>
+    <div class="m-body">
+      <textarea id="mic-ta" class="fc" rows="14" placeholder="Cole aqui o texto do Word..." style="font-family:JetBrains Mono,monospace;font-size:13px;line-height:1.5;resize:vertical;width:100%"></textarea>
+      <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-s" onclick="previewImportCasos()">🔍 Pré-visualizar</button>
+        <span id="mic-summary" style="font-size:12px;color:var(--t2);font-family:JetBrains Mono,monospace"></span>
+      </div>
+      <div id="mic-preview" style="margin-top:14px;max-height:340px;overflow:auto"></div>
+      <div id="mic-err" class="al al-e hidden" style="margin-top:10px"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-import-casos')">Cancelar</button>
+      <button class="btn btn-p" id="mic-confirm" onclick="confirmImportCasos()">📥 Importar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODAL: Instruções do simulado (presencial) ══ -->
 <div class="mo hidden" id="modal-sim-instr">
   <div class="md" style="max-width:560px">
@@ -2111,8 +2170,13 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore,collection,doc,getDoc,getDocs,setDoc,updateDoc,onSnapshot,deleteDoc,writeBatch }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage,ref as storageRef,uploadBytes,getDownloadURL,deleteObject }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-const db=getFirestore(initializeApp({apiKey:"AIzaSyDEljxGEKhl6taJEcbQHoAb8QsjWT7fx08",authDomain:"simulados-confirmacao.firebaseapp.com",projectId:"simulados-confirmacao",storageBucket:"simulados-confirmacao.firebasestorage.app",messagingSenderId:"399694193508",appId:"1:399694193508:web:70d7a65d51798045ef1071"}));
+const _fbApp=initializeApp({apiKey:"AIzaSyDEljxGEKhl6taJEcbQHoAb8QsjWT7fx08",authDomain:"simulados-confirmacao.firebaseapp.com",projectId:"simulados-confirmacao",storageBucket:"simulados-confirmacao.firebasestorage.app",messagingSenderId:"399694193508",appId:"1:399694193508:web:70d7a65d51798045ef1071"});
+const db=getFirestore(_fbApp);
+const _storage=getStorage(_fbApp);
+window._fbStorage={ref:storageRef,uploadBytes,getDownloadURL,deleteObject,storage:_storage};
 
 const S={view:'aluno',unlocked:false,profUnlocked:false,currentUser:null,usuarios:[],sims:[],curSim:null,students:[],coDay:'sabado',alDay:'sabado',step:1,cfg:{password:'aros2025',profPassword:'Anestreview1531',profTabs:['simulados','trocas','professores','listas','desempenho','checklist']},pendSwap:null,profs:[],listas:[],simExtraCfg:{linkPagoAluno:'',linkPagoExterno:'',linkGratuito:'',slackWebhook:'',listaVigenteId:'',alunosGratuitos:[]},solicitacoesExtra:[],simStats:{},_id:null,_rSab:[],_rDom:[]};
 window.S=S;
@@ -2136,7 +2200,7 @@ const fHM=(h,m)=>`${String(h).padStart(2,'0')}h${String(m).padStart(2,'0')}`;
 // boot
 async function boot(){
   try{const s=await getDoc(doc(db,'config','settings'));if(s.exists())Object.assign(S.cfg,s.data());}catch(e){}
-  await Promise.all([loadSims(),loadProfs(),loadListas(),loadUsuarios(),loadMenuLabels(),loadSimExtra(),loadFinanceiro(),loadMentorias(),loadBlocos(),loadClinicas()]);
+  await Promise.all([loadSims(),loadProfs(),loadListas(),loadUsuarios(),loadMenuLabels(),loadSimExtra(),loadFinanceiro(),loadMentorias(),loadBlocos(),loadClinicas(),loadRevisoes()]);
   renderSimCards();
   if(typeof _initMentoriaHash==='function')_initMentoriaHash();
   // apply saved theme
@@ -2539,7 +2603,8 @@ const TAB_GROUPS=[
     {id:'extra',label:'✨ Solicitação Sim Extra'},
     {id:'simExtras',label:'⭐ Simulados Extras'},
     {id:'desempenho',label:'📊 Desempenho'},
-    {id:'checklist',label:'📝 Checklist'}
+    {id:'checklist',label:'📝 Checklist'},
+    {id:'revisao',label:'🔍 Revisão de Casos'}
   ]},
   {id:'cadastros',label:'Cadastros',tabs:[
     {id:'professores',label:'👨‍🏫 Professores'},
@@ -4114,6 +4179,1797 @@ async function sendEmailMentoria(type,aluno,clinicaOrigem,clinicaDest){
   }catch(e){console.error('[mentoria mail] FALHA',e);return false;}
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// REVISÃO DE CASOS — peer review dos casos clínicos antes de aplicar
+// ════════════════════════════════════════════════════════════════════════════
+S.revisoes=[];
+S._revEdit=null; // revisao sendo editada (in-memory mirror do doc)
+S._revSaveTimer=null;
+const _revUid=(prefix)=>prefix+'_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+async function loadRevisoes(){
+  try{
+    const snap=await getDocs(collection(db,'revisaoCasos'));
+    S.revisoes=snap.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.criadoEm||'').localeCompare(a.criadoEm||''));
+  }catch(e){console.error('loadRevisoes',e);}
+}
+
+const _REV_BLOCO_LABEL={criar:'Gabarito do prof',oral:'Avaliação do aluno'};
+const _REV_STATUS_LABEL={rascunho:'Rascunho',aberta:'Aberta',fechada:'Fechada',exportada:'Exportada'};
+const _REV_STATUS_COR={rascunho:'var(--t2)',aberta:'var(--green)',fechada:'var(--yellow)',exportada:'var(--accent)'};
+
+S._revAdminPreviewProf=false; // admin vendo como prof?
+
+window.toggleAdminPreviewProf=()=>{
+  S._revAdminPreviewProf=!S._revAdminPreviewProf;
+  // limpa estados que dependem do modo
+  S._revEdit=null;
+  S._revProfRevisao=null;S._revProfCasoIdx=0;S._revProfComentarios=[];
+  renderRevisaoTab();
+};
+
+window.renderRevisaoTab=async()=>{
+  await loadRevisoes();
+  const c=document.getElementById('rev-content');if(!c)return;
+  const isAdmin=S.currentUser?.role==='admin';
+  const verComoProf=isAdmin&&S._revAdminPreviewProf;
+  const acts=document.getElementById('rev-admin-acts');
+  if(acts){
+    let html='';
+    if(isAdmin&&!verComoProf)html+='<button class="btn btn-p btn-sm" onclick="openNovaRevisao()">+ Nova revisão</button>';
+    if(isAdmin)html+=`<button class="btn btn-s btn-sm" onclick="toggleAdminPreviewProf()" style="font-size:11px;${verComoProf?'background:var(--orange);color:#000;font-weight:700;border-color:var(--orange)':''}">${verComoProf?'👁 Voltar para visão admin':'👁 Ver como professor'}</button>`;
+    acts.innerHTML=html;
+  }
+  if(!isAdmin||verComoProf){return _revRenderProfView(c);}
+  return _revRenderCoordList(c);
+};
+
+function _revRenderCoordList(c){
+  if(S._revEdit){return _revRenderEditor(c);}
+  if(!S.revisoes.length){
+    c.innerHTML='<p style="color:var(--t2);font-size:13px;padding:12px">Nenhuma revisão criada. Clique em <strong>+ Nova revisão</strong> para começar.</p>';
+    return;
+  }
+  c.innerHTML=S.revisoes.map(r=>{
+    const sim=S.sims.find(s=>s.id===r.simId);
+    const simNome=r.simNome||sim?.nome||'(simulado removido)';
+    const cor=_REV_STATUS_COR[r.status]||'var(--t2)';
+    const totCasos=(r.casos||[]).length;
+    const finalizados=(r.casos||[]).filter(c=>c.casoFinalizado).length;
+    const prazoLbl=r.prazoRevisao?fDT(r.prazoRevisao):'sem prazo';
+    const isLegacy=!!r.bloco;
+    return`<div class="aluno-row" onclick="openRevisaoEditor('${r.id}')" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='transparent'" style="align-items:flex-start;flex-direction:column;gap:8px;margin-bottom:8px;cursor:pointer;user-select:none;transition:background .15s">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;width:100%;flex-wrap:wrap">
+        <div style="flex:1;min-width:240px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <strong style="font-size:14px">${simNome}</strong>
+            <span class="badge" style="background:transparent;border:1px solid ${cor};color:${cor};font-size:10px;letter-spacing:1px">${_REV_STATUS_LABEL[r.status]?.toUpperCase()||'?'}</span>
+            ${isLegacy?`<span class="badge" style="background:transparent;border:1px solid var(--yellow);color:var(--yellow);font-size:10px;letter-spacing:1px" title="Revisão criada antes do refactor — apague e recrie">⚠ LEGADO · ${(r.bloco||'').toUpperCase()}</span>`:''}
+          </div>
+          <div style="font-size:12px;color:var(--t2);margin-top:4px">📅 Limite para revisar: ${prazoLbl} · ${totCasos} caso${totCasos!==1?'s':''}${finalizados?' · '+finalizados+' finalizado'+(finalizados!==1?'s':''):''}</div>
+        </div>
+        <div class="aluno-acts" onclick="event.stopPropagation()">
+          <button class="btn btn-d btn-sm" onclick="excluirRevisao('${r.id}')">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// VISÃO DO PROFESSOR (prof revisor)
+// ─────────────────────────────────────────────────────────────────────
+S._revProfNome=localStorage.getItem('aros_revProfNome')||null;
+S._revProfRevisao=null;          // revisão atualmente em revisão pelo prof
+S._revProfCasoIdx=0;              // índice do caso atual
+S._revProfComentarios=[];         // todos os comentários da revisão atual
+S._revProfItensAbertos=new Set(); // perguntas com itens expandidos
+S._revProfRespAberta=null;         // id do comentário cuja resposta está aberta
+
+const _profSlug=(s)=>(s||'').toString().normalize('NFKD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+const _revKey=(t,id)=>`${t}::${id}`;
+
+async function _revRenderProfView(c){
+  // Step 1: identificar professor
+  if(!S._revProfNome){
+    return _revRenderProfPicker(c);
+  }
+  // Step 3: dentro de uma revisão
+  if(S._revProfRevisao){
+    return _revRenderProfEditor(c);
+  }
+  // Step 2: escolher revisão
+  return _revRenderProfList(c);
+}
+
+function _revRenderProfPicker(c){
+  const profs=(S.profs||[]).slice().sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  c.innerHTML=`<div style="max-width:560px;margin:20px auto;padding:24px;border:1.5px solid var(--border);border-radius:14px;background:linear-gradient(180deg,rgba(47,129,247,.05),var(--bg2));box-shadow:0 8px 32px -12px rgba(47,129,247,.35)">
+    <div style="font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:10px">🔍 Identificação do revisor</div>
+    <h3 style="font-family:Fraunces,serif;font-size:20px;font-weight:700;margin-bottom:6px">Selecione seu nome</h3>
+    <p style="color:var(--t2);font-size:13px;margin-bottom:14px">Sua identificação fica vinculada a todos os votos e comentários que você fizer nesta sessão.</p>
+    <div class="search-wrap" style="margin-bottom:12px">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="rev-prof-search" placeholder="Digite para filtrar..." oninput="_revFilterProfList()" autocomplete="off"/>
+    </div>
+    <div id="rev-prof-list" style="max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--rs)">${_revRenderProfRows(profs)}</div>
+    <p style="font-size:11px;color:var(--t2);margin-top:10px">Não está na lista? Peça à coordenação para te cadastrar em <strong>Cadastros → Professores</strong>.</p>
+  </div>`;
+}
+
+function _revRenderProfRows(profs){
+  if(!profs.length)return'<p style="color:var(--t2);font-size:13px;padding:18px;text-align:center">Nenhum prof encontrado.</p>';
+  return profs.map(p=>`<button onclick="confirmarNomeProfRev('${p.replace(/'/g,"\\'")}')" style="display:block;width:100%;text-align:left;background:transparent;border:none;border-bottom:1px solid var(--border);padding:12px 14px;cursor:pointer;font-size:14px;color:var(--text);transition:background .12s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">${p}</button>`).join('');
+}
+
+window._revFilterProfList=()=>{
+  const q=(document.getElementById('rev-prof-search').value||'').toLowerCase().trim();
+  const profs=(S.profs||[]).filter(p=>!q||p.toLowerCase().includes(q)).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  document.getElementById('rev-prof-list').innerHTML=_revRenderProfRows(profs);
+};
+
+window.confirmarNomeProfRev=(nome)=>{
+  if(!confirm(`Você é "${nome}"?\n\nClique OK pra confirmar — todos os comentários e votos desta sessão ficarão registrados em seu nome.`))return;
+  S._revProfNome=nome;
+  localStorage.setItem('aros_revProfNome',nome);
+  renderRevisaoTab();
+};
+
+window.trocarProfRev=()=>{
+  if(!confirm('Trocar de revisor? A sessão atual vai fechar.'))return;
+  S._revProfNome=null;
+  localStorage.removeItem('aros_revProfNome');
+  S._revProfRevisao=null;S._revProfCasoIdx=0;
+  renderRevisaoTab();
+};
+
+function _revRenderProfList(c){
+  const abertas=(S.revisoes||[]).filter(r=>r.status==='aberta');
+  c.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:Fraunces,serif">${(S._revProfNome||'?').charAt(0).toUpperCase()}</div>
+      <div>
+        <div style="font-size:11px;color:var(--t2);font-family:JetBrains Mono,monospace;letter-spacing:1px;text-transform:uppercase">Revisor</div>
+        <div style="font-weight:700">${S._revProfNome}</div>
+      </div>
+    </div>
+    <button class="btn btn-s btn-sm" onclick="trocarProfRev()" style="font-size:11px">↻ Trocar revisor</button>
+  </div>`;
+  if(!abertas.length){
+    c.innerHTML+='<div style="padding:32px;text-align:center;color:var(--t2);border:1px dashed var(--border);border-radius:var(--rs)"><div style="font-size:32px;opacity:.4;margin-bottom:8px">📭</div>Nenhuma revisão aberta no momento.<div style="font-size:12px;margin-top:6px">Quando o coordenador abrir uma revisão, ela aparece aqui.</div></div>';
+    return;
+  }
+  c.innerHTML+=abertas.map(r=>{
+    const totCasos=(r.casos||[]).length;
+    const prazoLbl=r.prazoRevisao?fDT(r.prazoRevisao):'sem prazo';
+    return`<div onclick="entrarRevisaoProf('${r.id}')" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='transparent'" style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:14px 16px;margin-bottom:8px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:background .15s;flex-wrap:wrap">
+      <div style="flex:1;min-width:240px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <strong style="font-size:14px">${r.simNome||'(simulado)'}</strong>
+          <span class="badge" style="background:transparent;border:1px solid var(--green);color:var(--green);font-size:10px;letter-spacing:1px">ABERTA</span>
+        </div>
+        <div style="font-size:12px;color:var(--t2);margin-top:4px">📅 Limite para revisar: ${prazoLbl} · ${totCasos} caso${totCasos!==1?'s':''}</div>
+      </div>
+      <button class="btn btn-p btn-sm">Iniciar revisão →</button>
+    </div>`;
+  }).join('');
+}
+
+window.entrarRevisaoProf=async(revId)=>{
+  const r=S.revisoes.find(x=>x.id===revId);if(!r)return;
+  const clone=JSON.parse(JSON.stringify(r));
+  _revNormalize(clone);
+  S._revProfRevisao=clone;
+  S._revProfCasoIdx=0;
+  await _revLoadComentarios(revId);
+  renderRevisaoTab();
+};
+
+window.sairRevisaoProf=()=>{
+  S._revProfRevisao=null;S._revProfCasoIdx=0;S._revProfComentarios=[];
+  renderRevisaoTab();
+};
+
+async function _revLoadComentarios(revId){
+  try{
+    const snap=await getDocs(collection(db,`revisaoCasos/${revId}/comentarios`));
+    S._revProfComentarios=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){console.error('loadComentarios',e);S._revProfComentarios=[];}
+}
+
+function _revRenderProfEditor(c){
+  const r=S._revProfRevisao;
+  const casos=r.casos||[];
+  if(!casos.length){
+    c.innerHTML='<p style="color:var(--t2);padding:24px;text-align:center">Esta revisão não tem casos. Volte à lista.</p>';
+    return;
+  }
+  const idx=Math.min(S._revProfCasoIdx,casos.length-1);
+  S._revProfCasoIdx=idx;
+  const co=casos[idx];
+  const finalizado=!!co.casoFinalizado;
+  const blocoCor=co.bloco==='oral'?'var(--orange)':'var(--accent)';
+  const blocoLabel=co.bloco==='oral'?'🎙️ Oral Online':'🩺 Criar / Simulação';
+  c.innerHTML=`<div style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+    <button class="btn btn-g btn-sm" onclick="sairRevisaoProf()">← Voltar à lista</button>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--t2);letter-spacing:1px">REVISOR: <strong style="color:var(--text)">${S._revProfNome}</strong></div>
+      <button class="btn btn-s btn-sm" onclick="trocarProfRev()" style="font-size:11px">↻</button>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="cb">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+        <div>
+          <div style="font-family:Fraunces,serif;font-size:18px;font-weight:700">${r.simNome}</div>
+          <div style="font-size:12px;color:var(--t2);margin-top:2px">📅 Limite: ${r.prazoRevisao?fDT(r.prazoRevisao):'—'}</div>
+        </div>
+        <div style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--t2)">CASO ${idx+1} / ${casos.length}</div>
+      </div>
+      <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,var(--accent),var(--green));width:${((idx+1)/casos.length*100).toFixed(0)}%;transition:width .3s"></div></div>
+    </div>
+  </div>
+  <div style="margin-bottom:18px;padding:16px;border:1.5px solid ${blocoCor.replace('var(--accent)','rgba(47,129,247,.45)').replace('var(--orange)','rgba(251,143,68,.45)')};border-radius:14px;background:linear-gradient(180deg,${co.bloco==='oral'?'rgba(251,143,68,.06)':'rgba(47,129,247,.06)'},rgba(0,0,0,.08));box-shadow:0 8px 32px -12px ${co.bloco==='oral'?'rgba(251,143,68,.35)':'rgba(47,129,247,.35)'}">
+    <div style="font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;letter-spacing:1.5px;color:${blocoCor};text-transform:uppercase;margin-bottom:10px">${blocoLabel}</div>
+    <h2 style="font-family:Fraunces,serif;font-size:20px;font-weight:700;margin-bottom:14px">📋 ${co.nome||'(caso sem nome)'}</h2>
+    ${finalizado?'<div style="background:rgba(255,193,7,.15);border:1px solid var(--yellow);color:var(--yellow);padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:13px;font-weight:600">🔒 Caso finalizado pela coordenação. Somente leitura — votos e comentários estão desabilitados.</div>':''}
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">Enunciado</div>
+      <div style="padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;white-space:pre-wrap;line-height:1.5;font-size:14px">${co.enunciado||'<em style="color:var(--t2)">(sem enunciado)</em>'}</div>
+      ${(co.enunciadoImagens||[]).length?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">${co.enunciadoImagens.map(u=>`<img src="${u}" onclick="openImgLightbox('${u}')" style="max-width:200px;max-height:160px;border:1px solid var(--border);border-radius:8px;cursor:zoom-in"/>`).join('')}</div>`:''}
+      ${_revProfRenderTarget(r.id,'enunciado',co.id,finalizado)}
+    </div>
+    ${(co.perguntas||[]).map((p,pi)=>_revProfRenderPergunta(r.id,co,p,pi,finalizado)).join('')}
+    <div style="display:flex;justify-content:space-between;gap:10px;margin-top:18px;padding-top:14px;border-top:1px dashed var(--border);flex-wrap:wrap">
+      <button class="btn btn-s" onclick="navCasoProf(-1)" ${idx===0?'disabled':''}>← Anterior</button>
+      <button class="btn btn-sm" onclick="concordarSeguirProf()" style="background:var(--green);color:#000;font-weight:700;border:none;padding:8px 16px;border-radius:8px;cursor:pointer">✓ Concordar com tudo e seguir</button>
+      <button class="btn btn-p" onclick="navCasoProf(1)" ${idx===casos.length-1?'disabled':''}>Próximo →</button>
+    </div>
+  </div>`;
+}
+
+function _revProfRenderPergunta(revId,co,p,pi,casoFinalizado){
+  casoFinalizado=casoFinalizado||!!co.casoFinalizado;
+  const itensAbertos=S._revProfItensAbertos.has(p.id);
+  const totItens=(p.itens||[]).length;
+  return`<div style="margin-bottom:14px;padding:14px;border:1.5px solid rgba(47,129,247,.35);border-radius:10px;background:linear-gradient(180deg,rgba(47,129,247,.05),var(--bg2));box-shadow:0 0 0 1px rgba(47,129,247,.08)">
+    <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">
+      <strong style="font-size:13px;color:var(--accent);min-width:60px;font-family:JetBrains Mono,monospace;letter-spacing:.5px">P${pi+1}.</strong>
+      <div style="flex:1;font-size:14px;line-height:1.5">${p.titulo||'<em style="color:var(--t2)">(sem texto)</em>'}</div>
+    </div>
+    ${(p.perguntaImagens||[]).length?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">${p.perguntaImagens.map(u=>`<img src="${u}" onclick="openImgLightbox('${u}')" style="max-width:200px;max-height:160px;border:1px solid var(--border);border-radius:8px;cursor:zoom-in"/>`).join('')}</div>`:''}
+    ${_revProfRenderTarget(revId,'pergunta',p.id,casoFinalizado)}
+    ${totItens?`<div onclick="toggleItensProf('${p.id}')" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:14px 0 6px;padding:8px 10px;cursor:pointer;border-radius:6px;transition:background .15s;user-select:none">
+      <div style="font-size:11px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:var(--accent);transition:transform .15s;display:inline-block;width:14px;${itensAbertos?'transform:rotate(90deg)':''}">▶</span>
+        Itens do checklist · ${totItens}
+      </div>
+      <span style="font-size:11px;color:var(--t2);font-family:JetBrains Mono,monospace">${itensAbertos?'recolher':'expandir'}</span>
+    </div>
+    <div class="${itensAbertos?'':'hidden'}">
+      ${(p.itens||[]).map((it)=>`<div style="margin-bottom:10px;padding:8px 10px;background:rgba(0,0,0,.15);border:1px solid var(--border);border-radius:8px">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="flex:0 0 36px;font-size:13px;font-weight:700;color:var(--accent);font-family:JetBrains Mono,monospace;text-align:center;padding:6px 0;background:var(--bg3);border:1px solid var(--border);border-radius:6px">${it.label||''}</div>
+          <div style="flex:1;font-size:13px;line-height:1.5">${it.descricao||''}</div>
+          ${(it.obs||(it.obsImagens||[]).length)?`<button onclick="event.stopPropagation();showObsCk(this)" data-obs="${(it.obs||'').replace(/"/g,'&quot;').replace(/</g,'&lt;')}" data-obs-imgs="${JSON.stringify(it.obsImagens||[]).replace(/"/g,'&quot;')}" title="${(it.obs||'').replace(/"/g,'&quot;')}" style="background:rgba(255,193,7,.18);border:1px solid var(--yellow);color:var(--yellow);padding:2px 7px;border-radius:6px;cursor:help;font-size:11px;flex-shrink:0">💡${(it.obsImagens||[]).length?'📷':''}</button>`:''}
+        </div>
+        ${_revProfRenderTarget(revId,'item',it.id,casoFinalizado)}
+      </div>`).join('')}
+    </div>`:''}
+  </div>`;
+}
+
+window.toggleItensProf=(pergId)=>{
+  if(S._revProfItensAbertos.has(pergId))S._revProfItensAbertos.delete(pergId);
+  else S._revProfItensAbertos.add(pergId);
+  _revRenderProfEditor(document.getElementById('rev-content'));
+};
+
+window.openImgLightbox=(url)=>{
+  const old=document.getElementById('rev-img-lightbox');if(old)old.remove();
+  const el=document.createElement('div');
+  el.id='rev-img-lightbox';
+  el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out';
+  el.onclick=()=>el.remove();
+  el.innerHTML=`<img src="${url}" style="max-width:96vw;max-height:92vh;border-radius:8px;box-shadow:0 16px 64px rgba(0,0,0,.6)"/><button style="position:fixed;top:18px;right:18px;background:rgba(0,0,0,.6);color:#fff;border:1px solid rgba(255,255,255,.3);width:42px;height:42px;border-radius:50%;font-size:20px;cursor:pointer">✕</button>`;
+  document.body.appendChild(el);
+  const onEsc=(e)=>{if(e.key==='Escape'){el.remove();document.removeEventListener('keydown',onEsc);}};
+  document.addEventListener('keydown',onEsc);
+};
+
+function _revProfRenderTarget(revId,targetType,targetId,casoFinalizado){
+  const all=S._revProfComentarios.filter(c=>c.targetType===targetType&&c.targetId===targetId);
+  const meuVoto=all.find(c=>c.kind==='voto'&&c.profNome===S._revProfNome);
+  const votos=all.filter(c=>c.kind==='voto');
+  const concordo=votos.filter(c=>c.voto==='concordo').length;
+  const discordo=votos.filter(c=>c.voto==='discordo').length;
+  const coments=all.filter(c=>c.kind==='comentario');
+  const topLevel=coments.filter(c=>!c.parentId).sort((a,b)=>(a.criadoEm||'').localeCompare(b.criadoEm||''));
+  const repliesByParent={};
+  coments.filter(c=>c.parentId).forEach(c=>{(repliesByParent[c.parentId]=repliesByParent[c.parentId]||[]).push(c);});
+  Object.values(repliesByParent).forEach(arr=>arr.sort((a,b)=>(a.criadoEm||'').localeCompare(b.criadoEm||'')));
+  const v=meuVoto?.voto;
+  const targetKey=`${targetType}_${targetId}`;
+  if(casoFinalizado){
+    // Read-only: mostra resumo + comentários sem ações
+    if(!all.length)return'';
+    return`<div style="margin-top:10px;padding:10px;background:rgba(0,0,0,.25);border:1px dashed var(--border);border-radius:8px;opacity:.85">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+        ${concordo?`<span style="font-size:12px;color:var(--green);font-weight:700">👍 ${concordo}</span>`:''}
+        ${discordo?`<span style="font-size:12px;color:var(--red);font-weight:700">👎 ${discordo}</span>`:''}
+        ${coments.length?`<span style="font-size:11px;color:var(--t2);font-family:JetBrains Mono,monospace">${coments.length} comentário${coments.length!==1?'s':''}</span>`:''}
+      </div>
+      ${topLevel.length?`<div style="margin:8px 0;display:flex;flex-direction:column;gap:6px">${topLevel.map(cm=>_revRenderComentario(cm,repliesByParent[cm.id]||[],targetType,targetId,true)).join('')}</div>`:''}
+    </div>`;
+  }
+  return`<div style="margin-top:10px;padding:10px;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:8px">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+      <button onclick="votarRev('${targetType}','${targetId}','concordo')" style="background:${v==='concordo'?'var(--green)':'transparent'};color:${v==='concordo'?'#000':'var(--text)'};border:1px solid ${v==='concordo'?'var(--green)':'var(--border)'};padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;transition:all .12s">👍 Concordo${concordo?' · '+concordo:''}</button>
+      <button onclick="votarRev('${targetType}','${targetId}','discordo')" style="background:${v==='discordo'?'var(--red)':'transparent'};color:${v==='discordo'?'#fff':'var(--text)'};border:1px solid ${v==='discordo'?'var(--red)':'var(--border)'};padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;transition:all .12s">👎 Discordo${discordo?' · '+discordo:''}</button>
+      ${coments.length?`<span style="font-size:11px;color:var(--t2);font-family:JetBrains Mono,monospace">${coments.length} comentário${coments.length!==1?'s':''}</span>`:''}
+    </div>
+    ${topLevel.length?`<div style="margin:8px 0;display:flex;flex-direction:column;gap:6px">${topLevel.map(cm=>_revRenderComentario(cm,repliesByParent[cm.id]||[],targetType,targetId,false)).join('')}</div>`:''}
+    <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+      <input id="rev-cmt-${targetKey}" class="fc" style="flex:1;font-size:13px;padding:7px 10px" placeholder="Comentário (opcional)..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();comentarRev('${targetType}','${targetId}');}"/>
+      <button class="btn btn-s btn-sm" onclick="comentarRev('${targetType}','${targetId}')" style="font-size:11px">💬 Adicionar</button>
+    </div>
+  </div>`;
+}
+
+function _revRenderComentario(cm,replies,targetType,targetId,readonly){
+  const meu=cm.profNome===S._revProfNome;
+  const slug=_profSlug(S._revProfNome);
+  const votos=cm.votos||{};
+  const meuV=votos[slug]||null;
+  const cnt={concordo:0,discordo:0};Object.values(votos).forEach(v=>{if(cnt[v]!==undefined)cnt[v]++;});
+  const respAberta=S._revProfRespAberta===cm.id;
+  return`<div style="padding:8px 10px;background:var(--bg3);border-left:3px solid ${meu?'var(--green)':'var(--accent)'};border-radius:6px;font-size:13px">
+    <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:2px">${cm.profNome}${meu?' (você)':''} · ${cm.criadoEm?fDT(cm.criadoEm):''}</div>
+    <div style="white-space:pre-wrap">${(cm.comentario||'').replace(/</g,'&lt;')}</div>
+    ${readonly?(cnt.concordo||cnt.discordo?`<div style="display:flex;gap:8px;margin-top:4px">${cnt.concordo?`<span style="font-size:11px;color:var(--green);font-weight:700">👍 ${cnt.concordo}</span>`:''}${cnt.discordo?`<span style="font-size:11px;color:var(--red);font-weight:700">👎 ${cnt.discordo}</span>`:''}</div>`:''):`<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px">
+      <button onclick="votarComentarioRev('${cm.id}','concordo')" style="background:${meuV==='concordo'?'var(--green)':'transparent'};color:${meuV==='concordo'?'#000':'var(--t2)'};border:1px solid ${meuV==='concordo'?'var(--green)':'var(--border)'};padding:2px 8px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600">👍${cnt.concordo?' '+cnt.concordo:''}</button>
+      <button onclick="votarComentarioRev('${cm.id}','discordo')" style="background:${meuV==='discordo'?'var(--red)':'transparent'};color:${meuV==='discordo'?'#fff':'var(--t2)'};border:1px solid ${meuV==='discordo'?'var(--red)':'var(--border)'};padding:2px 8px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600">👎${cnt.discordo?' '+cnt.discordo:''}</button>
+      <button onclick="toggleResponderRev('${cm.id}')" style="background:transparent;color:var(--t2);border:1px solid var(--border);padding:2px 8px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600">↩️ Responder${replies.length?' · '+replies.length:''}</button>
+    </div>`}
+    ${replies.length?`<div style="margin:8px 0 0 14px;border-left:2px dashed var(--border);padding-left:10px;display:flex;flex-direction:column;gap:6px">${replies.map(r=>{
+      const rMeu=r.profNome===S._revProfNome;
+      return`<div style="padding:6px 8px;background:rgba(0,0,0,.25);border-left:3px solid ${rMeu?'var(--green)':'var(--accent)'};border-radius:6px;font-size:12px">
+        <div style="font-size:10px;font-weight:700;color:var(--accent);margin-bottom:2px">${r.profNome}${rMeu?' (você)':''} · ${r.criadoEm?fDT(r.criadoEm):''}</div>
+        <div style="white-space:pre-wrap">${(r.comentario||'').replace(/</g,'&lt;')}</div>
+      </div>`;
+    }).join('')}</div>`:''}
+    ${respAberta?`<div style="margin:8px 0 0 14px;display:flex;gap:6px;flex-wrap:wrap">
+      <input id="rev-resp-${cm.id}" class="fc" style="flex:1;font-size:12px;padding:6px 10px" placeholder="Sua resposta..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarRespostaRev('${cm.id}','${targetType}','${targetId}');}" autofocus/>
+      <button class="btn btn-p btn-sm" onclick="enviarRespostaRev('${cm.id}','${targetType}','${targetId}')" style="font-size:11px">Enviar</button>
+      <button class="btn btn-s btn-sm" onclick="toggleResponderRev('${cm.id}')" style="font-size:11px">Cancelar</button>
+    </div>`:''}
+  </div>`;
+}
+
+window.votarComentarioRev=async(comentId,voto)=>{
+  if(!S._revProfRevisao||!S._revProfNome)return;
+  const cm=S._revProfComentarios.find(c=>c.id===comentId);if(!cm)return;
+  if(!_profCanInteract(cm.targetType,cm.targetId))return;
+  const revId=S._revProfRevisao.id;
+  const slug=_profSlug(S._revProfNome);
+  const votos={...(cm.votos||{})};
+  if(votos[slug]===voto)delete votos[slug];
+  else votos[slug]=voto;
+  try{
+    await setDoc(doc(db,`revisaoCasos/${revId}/comentarios/${comentId}`),{votos,votosAt:new Date().toISOString()},{merge:true});
+  }catch(e){console.error('votarComentarioRev:',e);alert('Erro ao votar: '+(e.code||e.message));return;}
+  await _revLoadComentarios(revId);
+  _revRenderProfEditor(document.getElementById('rev-content'));
+};
+
+window.toggleResponderRev=(comentId)=>{
+  S._revProfRespAberta=(S._revProfRespAberta===comentId)?null:comentId;
+  _revRenderProfEditor(document.getElementById('rev-content'));
+};
+
+window.enviarRespostaRev=async(parentId,targetType,targetId)=>{
+  if(!_profCanInteract(targetType,targetId))return;
+  if(!S._revProfRevisao||!S._revProfNome)return;
+  const inp=document.getElementById(`rev-resp-${parentId}`);
+  const txt=(inp?.value||'').trim();
+  if(!txt){alert('Digite uma resposta.');return;}
+  const revId=S._revProfRevisao.id;
+  const docId=`cmt_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
+  try{
+    await setDoc(doc(db,`revisaoCasos/${revId}/comentarios/${docId}`),{
+      kind:'comentario',targetType,targetId,parentId,
+      profNome:S._revProfNome,comentario:txt,criadoEm:new Date().toISOString()
+    });
+  }catch(e){console.error('enviarRespostaRev:',e);alert('Erro: '+(e.code||e.message));return;}
+  S._revProfRespAberta=null;
+  await _revLoadComentarios(revId);
+  _revRenderProfEditor(document.getElementById('rev-content'));
+};
+
+function _profCanInteract(targetType,targetId){
+  const r=S._revProfRevisao;
+  if(!r)return false;
+  if(r.status!=='aberta'){alert('Esta revisão não está aberta.');return false;}
+  for(const co of (r.casos||[])){
+    let match=false;
+    if(targetType==='enunciado'&&co.id===targetId)match=true;
+    if(!match)for(const p of (co.perguntas||[])){
+      if(targetType==='pergunta'&&p.id===targetId){match=true;break;}
+      for(const it of (p.itens||[]))if(targetType==='item'&&it.id===targetId){match=true;break;}
+      if(match)break;
+    }
+    if(match){
+      if(co.casoFinalizado){alert('Este caso foi finalizado pela coordenação. Não é possível interagir.');return false;}
+      return true;
+    }
+  }
+  return true; // fallback (ex: comentário em comentário)
+}
+
+window.votarRev=async(targetType,targetId,voto)=>{
+  if(!_profCanInteract(targetType,targetId))return;
+  if(!S._revProfRevisao)return;
+  const revId=S._revProfRevisao.id;
+  const slug=_profSlug(S._revProfNome);
+  const docId=`voto_${slug}_${targetType}_${targetId}`;
+  // Toggle: se já votou no mesmo valor, remove
+  const existente=S._revProfComentarios.find(c=>c.id===docId);
+  const ts=new Date().toISOString();
+  if(existente&&existente.voto===voto){
+    await deleteDoc(doc(db,`revisaoCasos/${revId}/comentarios/${docId}`));
+  } else {
+    await setDoc(doc(db,`revisaoCasos/${revId}/comentarios/${docId}`),{
+      kind:'voto',targetType,targetId,
+      profNome:S._revProfNome,voto,criadoEm:ts
+    });
+  }
+  await _revLoadComentarios(revId);
+  _revRenderProfEditor(document.getElementById('rev-content'));
+};
+
+window.comentarRev=async(targetType,targetId)=>{
+  if(!_profCanInteract(targetType,targetId))return;
+  if(!S._revProfRevisao)return;
+  const targetKey=`${targetType}_${targetId}`;
+  const inp=document.getElementById(`rev-cmt-${targetKey}`);
+  const txt=(inp?.value||'').trim();
+  if(!txt){alert('Digite um comentário.');return;}
+  const revId=S._revProfRevisao.id;
+  const docId=`cmt_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
+  const ts=new Date().toISOString();
+  await setDoc(doc(db,`revisaoCasos/${revId}/comentarios/${docId}`),{
+    kind:'comentario',targetType,targetId,
+    profNome:S._revProfNome,comentario:txt,criadoEm:ts
+  });
+  if(inp)inp.value='';
+  await _revLoadComentarios(revId);
+  _revRenderProfEditor(document.getElementById('rev-content'));
+};
+
+window.navCasoProf=async(delta)=>{
+  const r=S._revProfRevisao;if(!r)return;
+  const novo=Math.max(0,Math.min(S._revProfCasoIdx+delta,(r.casos||[]).length-1));
+  if(novo===S._revProfCasoIdx)return;
+  S._revProfCasoIdx=novo;
+  _revRenderProfEditor(document.getElementById('rev-content'));
+};
+
+window.concordarSeguirProf=async()=>{
+  const r=S._revProfRevisao;if(!r)return;
+  const co=r.casos[S._revProfCasoIdx];if(!co)return;
+  if(co.casoFinalizado){
+    // Caso bloqueado — só avança
+    if(S._revProfCasoIdx<r.casos.length-1){S._revProfCasoIdx++;_revRenderProfEditor(document.getElementById('rev-content'));}
+    return;
+  }
+  if(r.status!=='aberta'){alert('Revisão não está aberta.');return;}
+  if(!confirm('Registrar 👍 concordo em todos os elementos deste caso onde você ainda não votou?'))return;
+  const revId=r.id;
+  // Reúne todos os targets do caso
+  const targets=[{type:'enunciado',id:co.id}];
+  (co.perguntas||[]).forEach(p=>{
+    targets.push({type:'pergunta',id:p.id});
+    (p.itens||[]).forEach(it=>targets.push({type:'item',id:it.id}));
+  });
+  const slug=_profSlug(S._revProfNome);
+  const ts=new Date().toISOString();
+  const batch=writeBatch(db);
+  let added=0;
+  for(const t of targets){
+    const docId=`voto_${slug}_${t.type}_${t.id}`;
+    const ja=S._revProfComentarios.find(c=>c.id===docId);
+    if(!ja){
+      batch.set(doc(db,`revisaoCasos/${revId}/comentarios/${docId}`),{
+        kind:'voto',targetType:t.type,targetId:t.id,
+        profNome:S._revProfNome,voto:'concordo',criadoEm:ts
+      });
+      added++;
+    }
+  }
+  if(added)await batch.commit();
+  await _revLoadComentarios(revId);
+  // Avança automaticamente
+  if(S._revProfCasoIdx<(r.casos||[]).length-1){
+    S._revProfCasoIdx++;
+  }
+  _revRenderProfEditor(document.getElementById('rev-content'));
+};
+
+window.openNovaRevisao=()=>{
+  const sel=document.getElementById('mrv-sim');
+  sel.innerHTML='<option value="">— selecione —</option>'+(S.sims||[]).filter(s=>!s.deleted).map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');
+  document.getElementById('mrv-prazo').value='';
+  document.getElementById('mrv-import').checked=true;
+  document.getElementById('mrv-err').classList.add('hidden');
+  document.getElementById('modal-revisao').classList.remove('hidden');
+};
+
+window.saveNovaRevisao=async()=>{
+  const simId=document.getElementById('mrv-sim').value;
+  const prazoRevisao=document.getElementById('mrv-prazo').value;
+  const importar=document.getElementById('mrv-import').checked;
+  const err=document.getElementById('mrv-err');
+  const sim=S.sims.find(s=>s.id===simId);
+  if(!sim){err.textContent='Selecione um simulado.';err.classList.remove('hidden');return;}
+  if(!prazoRevisao){err.textContent='Defina a data limite para revisar.';err.classList.remove('hidden');return;}
+  const dup=S.revisoes.find(r=>r.simId===simId&&r.status!=='exportada');
+  if(dup){err.innerHTML=`Já existe uma revisão ${_REV_STATUS_LABEL[dup.status]} para este simulado. Apague-a antes de criar outra.`;err.classList.remove('hidden');return;}
+  err.classList.add('hidden');
+  // Importa templateCriar (bloco='criar') e templateOral (bloco='oral'), agrupando todos casos numa lista
+  let casos=[];
+  if(importar){
+    try{
+      const [snapCriar,snapOral]=await Promise.all([
+        getDoc(doc(db,`checklists/${simId}/meta/templateCriar`)),
+        getDoc(doc(db,`checklists/${simId}/meta/templateOral`))
+      ]);
+      const importarTpl=(tpl,bloco)=>{
+        (tpl.casos||[]).forEach((co,idx)=>{
+          casos.push({
+            id:_revUid('caso'),
+            bloco,
+            nome:co.nome||`Caso ${idx+1}`,
+            enunciado:co.enunciado||'',
+            enunciadoImagens:Array.isArray(co.enunciadoImagens)?co.enunciadoImagens:[],
+            casoFinalizado:false,
+            perguntas:(co.perguntas||[]).map(p=>({
+              id:_revUid('perg'),
+              titulo:p.titulo||'',
+              perguntaImagens:Array.isArray(p.perguntaImagens)?p.perguntaImagens:[],
+              itens:(p.itens||[]).map(it=>({id:_revUid('item'),label:it.label||'',descricao:it.descricao||''}))
+            }))
+          });
+        });
+      };
+      if(snapCriar.exists())importarTpl(snapCriar.data(),'criar');
+      if(snapOral.exists())importarTpl(snapOral.data(),'oral');
+    }catch(e){console.warn('Erro ao importar templates:',e);}
+  }
+  const id=_revUid('rev');
+  const ts=new Date().toISOString();
+  // Obs: o snapshot `casosOriginais` é capturado em `abrirRevisao()` (rascunho → aberta).
+  // No rascunho o admin ainda está montando os casos, então não faz sentido fixar baseline aqui.
+  const data={
+    simId,simNome:sim.nome,status:'rascunho',
+    prazoRevisao,casos,
+    criadoEm:ts,updatedAt:ts,
+    criadoPor:S.currentUser?.nome||S.currentUser?.username||'admin'
+  };
+  try{
+    await setDoc(doc(db,'revisaoCasos',id),data);
+  }catch(e){
+    err.innerHTML=`❌ Erro ao salvar: <strong>${e.code||e.message||e}</strong>`;
+    err.classList.remove('hidden');return;
+  }
+  await loadRevisoes();
+  CM('modal-revisao');
+  S._revEdit={id,...data};
+  renderRevisaoTab();
+};
+
+window.excluirRevisao=async(id)=>{
+  const r=S.revisoes.find(x=>x.id===id);if(!r)return;
+  if(!confirm(`Apagar a revisão "${r.simNome} · ${_REV_BLOCO_LABEL[r.bloco]}"? Comentários e histórico também serão removidos.`))return;
+  const conf=prompt('⚠️ CONFIRMAÇÃO FINAL\n\nDigite EXCLUIR para apagar definitivamente.');
+  if(conf!=='EXCLUIR')return;
+  // Apaga subcoleções
+  for(const sub of ['comentarios','historico']){
+    const snap=await getDocs(collection(db,`revisaoCasos/${id}/${sub}`));
+    const batch=writeBatch(db);snap.docs.forEach(d=>batch.delete(d.ref));await batch.commit();
+  }
+  // Apaga imagens do storage
+  for(const co of (r.casos||[])){
+    for(const u of (co.enunciadoImagens||[]))await _revRemoveStorage(u);
+    for(const p of (co.perguntas||[]))for(const u of (p.perguntaImagens||[]))await _revRemoveStorage(u);
+  }
+  await deleteDoc(doc(db,'revisaoCasos',id));
+  await loadRevisoes();
+  renderRevisaoTab();
+};
+
+// Normaliza shapes antigos
+// (a) revisão antiga sem bloco no caso: pega o bloco da revisão (legado) ou 'criar'
+// (b) pergunta com itensCriar/itensOral (versão intermediária): mescla em itens conforme o bloco do caso
+function _revNormalize(rev){
+  const blocoFallback=rev.bloco||'criar';
+  (rev.casos||[]).forEach(co=>{
+    if(!co.bloco)co.bloco=blocoFallback;
+    (co.perguntas||[]).forEach(p=>{
+      if(Array.isArray(p.itens))return; // já no shape novo
+      if(co.bloco==='oral'&&Array.isArray(p.itensOral))p.itens=p.itensOral;
+      else if(Array.isArray(p.itensCriar))p.itens=p.itensCriar;
+      else if(Array.isArray(p.itensOral))p.itens=p.itensOral;
+      else p.itens=[];
+      delete p.itensCriar;delete p.itensOral;
+    });
+  });
+}
+
+S._revEditComentarios=[];
+S._revEditCommentsAbertos=new Set();
+
+async function _revLoadEditComentarios(revId){
+  try{
+    const snap=await getDocs(collection(db,`revisaoCasos/${revId}/comentarios`));
+    S._revEditComentarios=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){console.error('loadEditComentarios',e);S._revEditComentarios=[];}
+}
+
+window.openRevisaoEditor=async(id)=>{
+  const r=S.revisoes.find(x=>x.id===id);if(!r)return;
+  const clone=JSON.parse(JSON.stringify(r));
+  _revNormalize(clone);
+  S._revEdit=clone;
+  await _revLoadEditComentarios(id);
+  renderRevisaoTab();
+};
+
+window.toggleEditComments=(key)=>{
+  if(S._revEditCommentsAbertos.has(key))S._revEditCommentsAbertos.delete(key);
+  else S._revEditCommentsAbertos.add(key);
+  _revRenderCasos();
+};
+
+// Renderiza painel de comentários dos profs sob cada elemento (visão coord)
+function _revEditRenderComments(targetType,targetId){
+  const all=S._revEditComentarios.filter(c=>c.targetType===targetType&&c.targetId===targetId);
+  if(!all.length)return'';
+  const votos=all.filter(c=>c.kind==='voto');
+  const concordo=votos.filter(c=>c.voto==='concordo').length;
+  const discordo=votos.filter(c=>c.voto==='discordo').length;
+  const coments=all.filter(c=>c.kind==='comentario');
+  const topLevel=coments.filter(c=>!c.parentId).sort((a,b)=>(a.criadoEm||'').localeCompare(b.criadoEm||''));
+  const repliesByParent={};
+  coments.filter(c=>c.parentId).forEach(c=>{(repliesByParent[c.parentId]=repliesByParent[c.parentId]||[]).push(c);});
+  Object.values(repliesByParent).forEach(arr=>arr.sort((a,b)=>(a.criadoEm||'').localeCompare(b.criadoEm||'')));
+  const totUnresolved=topLevel.filter(c=>!c.resolvido).length;
+  const key=`${targetType}_${targetId}`;
+  const aberto=S._revEditCommentsAbertos.has(key);
+  // Se tem feedback não resolvido, abre por padrão
+  const hasUnresolved=totUnresolved>0;
+  const showAberto=aberto||(hasUnresolved&&!S._revEditCommentsAbertos.has('__closed_'+key));
+  return`<div style="margin-top:8px;padding:10px;background:rgba(0,0,0,.25);border:1px solid ${hasUnresolved?'var(--yellow)':'var(--border)'};border-radius:8px">
+    <div onclick="toggleEditComments('${key}')" style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;flex-wrap:wrap">
+      <span style="font-size:11px;color:var(--accent);transition:transform .15s;display:inline-block;width:14px;${showAberto?'transform:rotate(90deg)':''}">▶</span>
+      <span style="font-size:11px;font-family:JetBrains Mono,monospace;font-weight:700;letter-spacing:1px;color:${hasUnresolved?'var(--yellow)':'var(--accent)'}">${hasUnresolved?'⚠ ':'💬 '}FEEDBACK DOS PROFS</span>
+      ${concordo?`<span style="font-size:11px;color:var(--green);font-weight:700">👍 ${concordo}</span>`:''}
+      ${discordo?`<span style="font-size:11px;color:var(--red);font-weight:700">👎 ${discordo}</span>`:''}
+      ${topLevel.length?`<span style="font-size:11px;color:var(--t2)">${topLevel.length} comentário${topLevel.length!==1?'s':''}${totUnresolved&&totUnresolved!==topLevel.length?` (${totUnresolved} aberto${totUnresolved!==1?'s':''})`:''}</span>`:''}
+    </div>
+    <div class="${showAberto?'':'hidden'}" style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+      ${topLevel.map(cm=>_revEditRenderCm(cm,repliesByParent[cm.id]||[])).join('')||'<div style="font-size:12px;color:var(--t2);padding:4px 0">Apenas votos, sem comentários textuais.</div>'}
+    </div>
+  </div>`;
+}
+
+function _revEditRenderCm(cm,replies){
+  const resolvido=!!cm.resolvido;
+  return`<div style="padding:8px 10px;background:var(--bg3);border-left:3px solid ${resolvido?'var(--t3)':'var(--accent)'};border-radius:6px;font-size:13px;${resolvido?'opacity:.6':''}">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div style="font-size:11px;font-weight:700;color:var(--accent)">${cm.profNome} · ${cm.criadoEm?fDT(cm.criadoEm):''}</div>
+      <button onclick="toggleResolverCmRev('${cm.id}')" style="background:${resolvido?'var(--green)':'transparent'};color:${resolvido?'#000':'var(--green)'};border:1px solid var(--green);padding:2px 8px;border-radius:5px;cursor:pointer;font-size:10px;font-weight:700">${resolvido?'✓ Resolvido':'Marcar resolvido'}</button>
+    </div>
+    <div style="white-space:pre-wrap;margin-top:4px">${(cm.comentario||'').replace(/</g,'&lt;')}</div>
+    ${replies.length?`<div style="margin:6px 0 0 14px;border-left:2px dashed var(--border);padding-left:10px;display:flex;flex-direction:column;gap:6px">${replies.map(r=>`<div style="padding:6px 8px;background:rgba(0,0,0,.2);border-left:3px solid var(--accent);border-radius:6px;font-size:12px"><div style="font-size:10px;font-weight:700;color:var(--accent);margin-bottom:2px">${r.profNome} · ${r.criadoEm?fDT(r.criadoEm):''}</div><div style="white-space:pre-wrap">${(r.comentario||'').replace(/</g,'&lt;')}</div></div>`).join('')}</div>`:''}
+  </div>`;
+}
+
+window.toggleResolverCmRev=async(cmId)=>{
+  if(!S._revEdit)return;
+  const cm=S._revEditComentarios.find(c=>c.id===cmId);if(!cm)return;
+  const novo=!cm.resolvido;
+  try{
+    await setDoc(doc(db,`revisaoCasos/${S._revEdit.id}/comentarios/${cmId}`),{
+      resolvido:novo,
+      resolvidoPor:novo?(S.currentUser?.nome||S.currentUser?.username||'admin'):null,
+      resolvidoEm:novo?new Date().toISOString():null
+    },{merge:true});
+    cm.resolvido=novo;
+    cm.resolvidoPor=novo?(S.currentUser?.nome||S.currentUser?.username||'admin'):null;
+    cm.resolvidoEm=novo?new Date().toISOString():null;
+  }catch(e){console.error('toggleResolverCmRev',e);alert('Erro: '+(e.code||e.message));return;}
+  _revRenderCasos();
+};
+
+window.fecharRevisaoEditor=async()=>{
+  await _revFlushSave(true);
+  S._revEdit=null;
+  await loadRevisoes();
+  renderRevisaoTab();
+};
+
+// === Auto-save debounced ===
+function _revScheduleSave(){
+  if(S._revSaveTimer)clearTimeout(S._revSaveTimer);
+  const indicator=document.getElementById('rev-save-status');
+  if(indicator){indicator.textContent='● editando...';indicator.style.color='var(--yellow)';}
+  S._revSaveTimer=setTimeout(_revFlushSave,1200);
+}
+async function _revFlushSave(immediate){
+  if(S._revSaveTimer){clearTimeout(S._revSaveTimer);S._revSaveTimer=null;}
+  const r=S._revEdit;if(!r)return;
+  const indicator=document.getElementById('rev-save-status');
+  if(indicator){indicator.textContent='💾 salvando...';indicator.style.color='var(--accent)';}
+  try{
+    const{id,...rest}=r;
+    await setDoc(doc(db,'revisaoCasos',id),{...rest,updatedAt:new Date().toISOString()},{merge:true});
+    if(indicator){indicator.textContent='✓ salvo';indicator.style.color='var(--green)';}
+  }catch(e){
+    console.error('rev save:',e);
+    if(indicator){indicator.textContent='⚠ erro: '+(e.code||e.message);indicator.style.color='var(--red)';}
+  }
+}
+
+// === Editor render ===
+function _revRenderEditor(c){
+  const r=S._revEdit;if(!r)return;
+  const sim=S.sims.find(s=>s.id===r.simId);
+  const simNome=r.simNome||sim?.nome||'(simulado)';
+  const cor=_REV_STATUS_COR[r.status]||'var(--t2)';
+  c.innerHTML=`<div style="margin-bottom:14px">
+    <button class="btn btn-g btn-sm" onclick="fecharRevisaoEditor()" style="margin-bottom:10px">← Voltar para a lista</button>
+    ${r.status==='exportada'?`<div style="background:rgba(47,129,247,.12);border:1px solid var(--accent);color:var(--accent);padding:10px 14px;border-radius:8px;margin-bottom:10px;font-size:13px;font-weight:600">📤 Esta revisão foi exportada para o checklist oficial. Edição bloqueada — somente leitura.</div>`:''}
+    <div class="card">
+      <div class="cb" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+        <div>
+          <div style="font-family:Fraunces,serif;font-size:18px;font-weight:700">${simNome}</div>
+          <div style="font-size:12px;color:var(--t2);margin-top:4px">
+            <span class="badge" style="background:transparent;border:1px solid ${cor};color:${cor};font-size:10px;letter-spacing:1px">${_REV_STATUS_LABEL[r.status]?.toUpperCase()}</span>
+            · Limite: ${r.prazoRevisao?fDT(r.prazoRevisao):'—'}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span id="rev-save-status" style="font-size:12px;color:var(--t2);font-family:JetBrains Mono,monospace">✓ salvo</span>
+          ${r.status==='rascunho'?'<button class="btn btn-p btn-sm" onclick="abrirRevisao()">🚀 Abrir para revisão</button>':''}
+          ${r.status==='aberta'?'<button class="btn btn-s btn-sm" onclick="fecharRevisao()">🔒 Fechar revisão</button>':''}
+          ${r.status==='fechada'?`<button class="btn btn-p btn-sm" onclick="abrirRevisao()" title="Liberar de novo para os professores comentarem">🔄 Reabrir para profs</button><button onclick="exportarRevisao()" style="background:var(--green);color:#000;font-weight:700;border:none;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px">📤 Exportar p/ checklist oficial</button>`:''}
+          ${r.status==='exportada'?`<button onclick="reabrirRevisaoExportada()" style="background:transparent;color:var(--yellow);border:1px solid var(--yellow);padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">🔓 Reabrir edição</button><button onclick="baixarPdfRev()" style="background:var(--accent);color:#fff;font-weight:700;border:none;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px">📄 Baixar relatório PDF</button>`:''}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="rev-casos-wrap"></div>`;
+  _revRenderCasos();
+}
+
+function _revRenderCasos(){
+  const wrap=document.getElementById('rev-casos-wrap');if(!wrap)return;
+  const r=S._revEdit;
+  const casosCriar=[],casosOral=[];
+  (r.casos||[]).forEach((co,ci)=>{(co.bloco==='oral'?casosOral:casosCriar).push({co,ci});});
+  const sec=(titulo,corVar,corRgba,icone,arr,bloco)=>`<div style="margin-bottom:22px;padding:16px;border:1.5px solid ${corRgba.replace('ALPHA','.35')};border-radius:14px;background:linear-gradient(180deg,${corRgba.replace('ALPHA','.06')},rgba(0,0,0,.08));box-shadow:0 0 0 1px ${corRgba.replace('ALPHA','.05')},0 8px 32px -12px ${corRgba.replace('ALPHA','.35')}">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed ${corRgba.replace('ALPHA','.25')}">
+      <div style="font-family:JetBrains Mono,monospace;font-size:12px;font-weight:700;letter-spacing:1.5px;color:${corVar};text-transform:uppercase">${icone} ${titulo} · ${arr.length} caso${arr.length!==1?'s':''}</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="openImportCasosRev('${bloco}')" title="Importar vários casos de uma vez (texto colado)" style="background:transparent;color:${corVar};font-weight:700;border:1.5px solid ${corVar};padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;letter-spacing:.3px;transition:background .15s" onmouseover="this.style.background='${corRgba.replace('ALPHA','.1')}'" onmouseout="this.style.background='transparent'">📥 Importar em bloco</button>
+        <button onclick="addCasoRev('${bloco}')" style="background:${corVar};color:#000;font-weight:700;border:none;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:12px;letter-spacing:.3px;box-shadow:0 4px 12px -2px ${corRgba.replace('ALPHA','.5')};transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 18px -2px ${corRgba.replace('ALPHA','.7')}'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 12px -2px ${corRgba.replace('ALPHA','.5')}'">+ Adicionar caso</button>
+      </div>
+    </div>
+    ${arr.length?arr.map(({co,ci})=>_revRenderCaso(co,ci)).join(''):'<p style="color:var(--t2);font-size:12px;padding:8px 4px">Nenhum caso ainda neste bloco.</p>'}
+  </div>`;
+  wrap.innerHTML=
+    sec('Criar / Simulação','var(--accent)','rgba(47,129,247,ALPHA)','🩺',casosCriar,'criar')+
+    sec('Oral Online','var(--orange)','rgba(251,143,68,ALPHA)','🎙️',casosOral,'oral');
+}
+
+function _revRenderCaso(co,ci){
+  const r=S._revEdit;
+  const exportada=r.status==='exportada';
+  const editavel=r.status==='rascunho'||r.status==='aberta';
+  const finalizado=co.casoFinalizado||exportada;
+  const blocoCor=co.bloco==='oral'?'var(--orange)':'var(--accent)';
+  return`<div class="card" style="margin-bottom:12px;border-left:4px solid ${blocoCor};${finalizado?'border-top:1px solid var(--green);border-right:1px solid var(--green);border-bottom:1px solid var(--green);box-shadow:0 0 0 1px rgba(63,185,80,.15),0 4px 16px -4px rgba(63,185,80,.25)':''}">
+    <div class="ch" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px" onclick="toggleCasoRev(${ci})">
+      <div style="display:flex;align-items:center;gap:10px;flex:1">
+        <span id="rev-chev-${ci}" style="font-size:12px;color:var(--accent);transition:transform .15s;display:inline-block;width:14px;${co._aberto?'transform:rotate(90deg)':''}">▶</span>
+        <div class="ct" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-family:Fraunces,serif">📋 ${co.nome||'(caso sem nome)'}</span>
+          ${finalizado?'<span style="background:var(--green);color:#000;font-family:\'Plus Jakarta Sans\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;padding:4px 10px;border-radius:6px;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px -2px rgba(63,185,80,.5)">✓ Finalizado</span>':''}
+        </div>
+      </div>
+      <div onclick="event.stopPropagation()" style="display:flex;gap:6px;align-items:center">
+        <select onchange="moverCasoRev(${ci},this.value)" title="Mover para outro bloco" ${finalizado?'disabled':''} style="background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;cursor:pointer">
+          <option value="criar" ${co.bloco==='criar'?'selected':''}>🩺 Criar</option>
+          <option value="oral" ${co.bloco==='oral'?'selected':''}>🎙️ Oral</option>
+        </select>
+        <button class="btn btn-d btn-sm" onclick="rmCasoRev(${ci})" title="Remover caso">🗑️</button>
+      </div>
+    </div>
+    <div id="rev-caso-body-${ci}" class="cb ${co._aberto?'':'hidden'}">
+      <div class="fg"><label class="fl">Nome do caso</label>
+        <input class="fc" value="${(co.nome||'').replace(/"/g,'&quot;')}" oninput="editCasoRev(${ci},'nome',this.value)" ${finalizado?'disabled':''}/>
+      </div>
+      <div class="fg"><label class="fl">Enunciado</label>
+        <textarea class="fc" rows="6" oninput="editCasoRev(${ci},'enunciado',this.value)" ${finalizado?'disabled':''} style="font-family:inherit;line-height:1.5;resize:vertical">${co.enunciado||''}</textarea>
+        ${_revRenderImagens(co.enunciadoImagens||[],ci,null,finalizado)}
+        ${!finalizado?`<button class="btn btn-s btn-sm" onclick="document.getElementById('rev-img-input-${ci}--enun').click()" style="margin-top:6px">📎 Imagem no enunciado</button>
+        <input id="rev-img-input-${ci}--enun" type="file" accept="image/*" style="display:none" onchange="uploadImgRev(event,${ci},null)"/>`:''}
+        ${_revEditRenderComments('enunciado',co.id)}
+      </div>
+      <div style="margin-top:10px"><div style="font-weight:700;font-size:13px;margin-bottom:8px;color:var(--t2);letter-spacing:.5px;text-transform:uppercase">Perguntas</div></div>
+      <div id="rev-perguntas-${ci}">${(co.perguntas||[]).map((p,pi)=>_revRenderPergunta(p,ci,pi,finalizado)).join('')}</div>
+      ${!finalizado?`<button class="btn btn-s btn-sm" onclick="addPerguntaRev(${ci})" style="margin-top:8px">+ Adicionar pergunta</button>`:''}
+      <div style="margin-top:14px;padding-top:14px;border-top:1px dashed var(--border);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap">
+        ${(r.status==='aberta'||r.status==='fechada')&&!finalizado?`<button onclick="finalizarCasoRev(${ci})" style="background:var(--yellow);color:#000;font-weight:700;border:none;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px">✓ Finalizar caso</button>`:''}
+        ${finalizado?`<button onclick="reabrirCasoRev(${ci})" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px">🔓 Reabrir caso</button>`:''}
+        <button class="btn btn-sm" onclick="salvarRevAgora(${ci})" style="background:var(--green);color:#000;font-weight:700;border:none">💾 Salvar alterações</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function _revRenderPergunta(p,ci,pi,casoFinalizado){
+  const cor='var(--accent)';
+  return`<div style="border:1.5px solid rgba(47,129,247,.45);border-radius:10px;padding:14px;margin-bottom:12px;background:linear-gradient(180deg,rgba(47,129,247,.05),var(--bg2));box-shadow:0 0 0 1px rgba(47,129,247,.08),0 4px 16px -4px rgba(47,129,247,.18)">
+    <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">
+      <strong style="font-size:13px;color:${cor};min-width:60px;font-family:JetBrains Mono,monospace;letter-spacing:.5px;padding-top:10px">P${pi+1}.</strong>
+      <textarea class="fc" rows="4" oninput="editPerguntaRev(${ci},${pi},'titulo',this.value)" placeholder="Texto da pergunta" ${casoFinalizado?'disabled':''} style="flex:1;font-family:inherit;line-height:1.5;resize:vertical;min-height:90px">${(p.titulo||'').replace(/</g,'&lt;')}</textarea>
+      ${!casoFinalizado?`<button class="btn btn-d btn-sm" onclick="rmPerguntaRev(${ci},${pi})" title="Remover" style="align-self:flex-start">🗑️</button>`:''}
+    </div>
+    ${_revRenderImagens(p.perguntaImagens||[],ci,pi,casoFinalizado)}
+    ${!casoFinalizado?`<button class="btn btn-s btn-sm" onclick="document.getElementById('rev-img-input-${ci}-${pi}').click()" style="margin:4px 0 10px">📎 Imagem na pergunta</button>
+    <input id="rev-img-input-${ci}-${pi}" type="file" accept="image/*" style="display:none" onchange="uploadImgRev(event,${ci},${pi})"/>`:''}
+    ${_revEditRenderComments('pergunta',p.id)}
+    <div style="font-size:11px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;margin:8px 0 6px">Itens do checklist</div>
+    ${(p.itens||[]).map((it,ii)=>`<div>
+      <div style="display:flex;gap:6px;margin-bottom:6px;align-items:flex-start">
+        <div style="flex:0 0 50px;font-size:13px;font-weight:700;color:${cor};font-family:JetBrains Mono,monospace;text-align:center;padding:8px 0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs)">${it.label||_revLabelSeq(ii)}</div>
+        <input class="fc" style="flex:1;font-size:12px" value="${(it.descricao||'').replace(/"/g,'&quot;')}" oninput="editItemRev(${ci},${pi},${ii},'descricao',this.value)" placeholder="Descrição do item" ${casoFinalizado?'disabled':''}/>
+        ${(()=>{const hasObs=!!(it.obs||(it.obsImagens||[]).length);return !casoFinalizado?`<button onclick="toggleObsRev(${ci},${pi},${ii})" title="${hasObs?'Editar observação':'Adicionar observação'}" style="background:${hasObs?'rgba(255,193,7,.15)':'transparent'};border:1px solid ${hasObs?'var(--yellow)':'var(--border)'};color:${hasObs?'var(--yellow)':'var(--t2)'};padding:4px 8px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">💡${(it.obsImagens||[]).length?'📷':''}</button>`:(hasObs?`<span title="${(it.obs||'').replace(/"/g,'&quot;')}" style="background:rgba(255,193,7,.15);border:1px solid var(--yellow);color:var(--yellow);padding:4px 8px;border-radius:6px;font-size:12px;cursor:help">💡${(it.obsImagens||[]).length?'📷':''}</span>`:'')})()}
+        ${!casoFinalizado?`<button class="btn btn-d btn-sm" onclick="rmItemRev(${ci},${pi},${ii})" style="font-size:11px">✕</button>`:''}
+      </div>
+      <div id="rev-obs-${ci}-${pi}-${ii}" class="hidden" style="margin:0 0 10px 56px;padding:10px;background:rgba(255,193,7,.06);border:1px dashed var(--yellow);border-radius:6px">
+        <div style="font-size:11px;font-weight:700;color:var(--yellow);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">💡 Observação para o avaliador</div>
+        <textarea class="fc" rows="3" oninput="editItemRev(${ci},${pi},${ii},'obs',this.value)" placeholder="Ex: Se o aluno falar X, ele não ganha nem perde ponto." ${casoFinalizado?'disabled':''} style="font-family:inherit;font-size:12px;line-height:1.5;resize:vertical">${(it.obs||'').replace(/</g,'&lt;')}</textarea>
+        ${(it.obsImagens||[]).length?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">${(it.obsImagens||[]).map((u,oi)=>`<div style="position:relative;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--bg3)">
+          <img src="${u}" onclick="openImgLightbox('${u}')" style="max-width:140px;max-height:100px;display:block;cursor:zoom-in"/>
+          ${!casoFinalizado?`<button onclick="removeImgObsRev(${ci},${pi},${ii},${oi})" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:11px">✕</button>`:''}
+        </div>`).join('')}</div>`:''}
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px;flex-wrap:wrap">
+          <div style="font-size:11px;color:var(--t2);flex:1;min-width:200px">Avaliadores veem texto + imagem ao clicar no 💡 durante o simulado.</div>
+          ${!casoFinalizado?`<div style="display:flex;gap:6px;flex-shrink:0">
+            <button onclick="document.getElementById('rev-img-obs-${ci}-${pi}-${ii}').click()" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px">📎 Imagem</button>
+            <button onclick="salvarObsRev(${ci},${pi},${ii})" style="background:var(--green);color:#000;font-weight:700;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;display:inline-flex;align-items:center;gap:5px">💾 Salvar</button>
+          </div>
+          <input id="rev-img-obs-${ci}-${pi}-${ii}" type="file" accept="image/*" style="display:none" onchange="uploadImgObsRev(event,${ci},${pi},${ii})"/>`:''}
+        </div>
+      </div>
+      ${_revEditRenderComments('item',it.id)}
+    </div>`).join('')}
+    ${!casoFinalizado?`<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+      <button class="btn btn-s btn-sm" onclick="addItemRev(${ci},${pi})" style="font-size:11px">+ Item</button>
+      <button class="btn btn-s btn-sm" onclick="toggleBulkRev(${ci},${pi})" style="font-size:11px">📋 Colar em massa</button>
+    </div>
+    <div id="rev-bulk-${ci}-${pi}" class="hidden" style="margin-top:8px;padding:10px;background:var(--bg3);border:1px dashed var(--border);border-radius:var(--rs)">
+      <div style="font-size:11px;color:var(--t2);margin-bottom:6px">Cole os itens (1 por linha). Labels A, B, C... gerados automaticamente.</div>
+      <textarea id="rev-bulk-ta-${ci}-${pi}" class="fc" rows="5" style="font-size:12px;font-family:inherit;line-height:1.5"></textarea>
+      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+        <button class="btn btn-p btn-sm" onclick="parseBulkRev(${ci},${pi},false)" style="font-size:11px">Adicionar</button>
+        <button class="btn btn-s btn-sm" onclick="parseBulkRev(${ci},${pi},true)" style="font-size:11px">Substituir todos</button>
+        <button class="btn btn-s btn-sm" onclick="toggleBulkRev(${ci},${pi})" style="font-size:11px">Cancelar</button>
+      </div>
+    </div>`:''}
+  </div>`;
+}
+
+// Mostra o popup da observação no checklist oficial (ao clicar no badge 💡)
+window.showObsCk=(btn)=>{
+  const txt=btn.dataset.obs||'';
+  let imgs=[];
+  try{imgs=JSON.parse(btn.dataset.obsImgs||'[]');}catch(e){imgs=[];}
+  if(!txt&&!imgs.length)return;
+  const old=document.getElementById('ck-obs-popup');if(old)old.remove();
+  const p=document.createElement('div');
+  p.id='ck-obs-popup';
+  p.innerHTML=`<div style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px" onclick="document.getElementById('ck-obs-popup').remove()">
+    <div onclick="event.stopPropagation()" style="max-width:640px;width:100%;max-height:90vh;overflow:auto;background:var(--bg2);border:1.5px solid var(--yellow);border-radius:12px;padding:20px;box-shadow:0 12px 48px rgba(0,0,0,.5)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">
+        <div style="font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--yellow);text-transform:uppercase">💡 Observação do item</div>
+        <button onclick="document.getElementById('ck-obs-popup').remove()" style="background:transparent;border:none;color:var(--t2);font-size:18px;cursor:pointer">✕</button>
+      </div>
+      ${txt?`<div style="font-size:14px;line-height:1.5;white-space:pre-wrap">${txt.replace(/</g,'&lt;').replace(/\n/g,'<br/>')}</div>`:''}
+      ${imgs.length?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:${txt?'14px':'0'}">${imgs.map(u=>`<img src="${u}" onclick="openImgLightbox('${u}')" style="max-width:260px;max-height:200px;border:1px solid var(--border);border-radius:8px;cursor:zoom-in"/>`).join('')}</div>`:''}
+    </div>
+  </div>`;
+  document.body.appendChild(p);
+};
+
+window.toggleObsRev=(ci,pi,ii)=>{
+  const el=document.getElementById(`rev-obs-${ci}-${pi}-${ii}`);if(!el)return;
+  el.classList.toggle('hidden');
+  if(!el.classList.contains('hidden')){
+    const ta=el.querySelector('textarea');if(ta)setTimeout(()=>ta.focus(),50);
+  }
+};
+
+window.salvarObsRev=async(ci,pi,ii)=>{
+  await _revFlushSave(true);
+  // Re-render pra refletir o estado novo (ícone amarelo se obs foi preenchido)
+  _revRenderCasos();
+  // Mantém o caso aberto (não fecha o card do caso)
+  if(S._revEdit?.casos?.[ci])S._revEdit.casos[ci]._aberto=true;
+  _revShowToast('✓ Observação salva','var(--green)');
+};
+
+window.toggleBulkRev=(ci,pi)=>{
+  const el=document.getElementById(`rev-bulk-${ci}-${pi}`);if(!el)return;
+  el.classList.toggle('hidden');
+  if(!el.classList.contains('hidden')){
+    const ta=document.getElementById(`rev-bulk-ta-${ci}-${pi}`);if(ta)setTimeout(()=>ta.focus(),50);
+  }
+};
+
+// Gera label sequencial: A, B, ..., Z, AA, AB, ...
+function _revLabelSeq(idx){
+  let n=idx,s='';
+  do{s=String.fromCharCode(65+(n%26))+s;n=Math.floor(n/26)-1;}while(n>=0);
+  return s;
+}
+
+window.parseBulkRev=(ci,pi,replace)=>{
+  const ta=document.getElementById(`rev-bulk-ta-${ci}-${pi}`);
+  if(!ta||!ta.value.trim()){alert('Cole os itens antes de importar.');return;}
+  const lines=ta.value.split(/\n+/).map(l=>l.trim()).filter(l=>l.length>0);
+  const parsed=[];
+  lines.forEach(line=>{
+    const m=line.match(/^([A-Za-z]?\d*)[.)\-:\s→–—]+(.+)$/);
+    const desc=(m&&m[2])?m[2].trim():line;
+    parsed.push({id:_revUid('item'),label:'',descricao:desc});
+  });
+  if(!parsed.length){alert('Nenhum item reconhecido.');return;}
+  const p=S._revEdit.casos[ci].perguntas[pi];
+  p.itens=replace?parsed:[...(p.itens||[]),...parsed];
+  _revRenumerarItens(p);
+  ta.value='';
+  document.getElementById(`rev-bulk-${ci}-${pi}`).classList.add('hidden');
+  _revRenderCasos();
+  _revFlushSave();
+};
+
+function _revRenderImagens(arr,ci,pi,casoFinalizado){
+  if(!arr.length)return'';
+  return`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">`+arr.map((url,idx)=>`<div style="position:relative;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;background:var(--bg3)">
+    <img src="${url}" style="max-width:160px;max-height:120px;display:block"/>
+    ${!casoFinalizado?`<button onclick="removeImgRev(${ci},${pi===null?'null':pi},${idx})" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:11px">✕</button>`:''}
+  </div>`).join('')+`</div>`;
+}
+
+window.toggleCasoRev=(ci)=>{
+  const co=S._revEdit.casos[ci];co._aberto=!co._aberto;
+  document.getElementById(`rev-caso-body-${ci}`).classList.toggle('hidden');
+  const ch=document.getElementById(`rev-chev-${ci}`);if(ch)ch.style.transform=co._aberto?'rotate(90deg)':'rotate(0deg)';
+};
+
+window.addCasoRev=(bloco)=>{
+  bloco=bloco==='oral'?'oral':'criar';
+  S._revEdit.casos=S._revEdit.casos||[];
+  const seq=(S._revEdit.casos||[]).filter(c=>c.bloco===bloco).length+1;
+  S._revEdit.casos.push({id:_revUid('caso'),bloco,nome:'Caso '+seq,enunciado:'',enunciadoImagens:[],perguntas:[],casoFinalizado:false,_aberto:true});
+  _revRenderCasos();_revScheduleSave();
+};
+window.moverCasoRev=(ci,bloco)=>{
+  bloco=bloco==='oral'?'oral':'criar';
+  S._revEdit.casos[ci].bloco=bloco;
+  _revRenderCasos();_revFlushSave();
+};
+window.rmCasoRev=async(ci)=>{
+  const co=S._revEdit.casos[ci];
+  if(!confirm(`Remover "${co.nome||'caso'}"?`))return;
+  // Remove imagens do storage
+  for(const u of (co.enunciadoImagens||[]))await _revRemoveStorage(u);
+  for(const p of (co.perguntas||[]))for(const u of (p.perguntaImagens||[]))await _revRemoveStorage(u);
+  S._revEdit.casos.splice(ci,1);
+  _revRenderCasos();_revFlushSave();
+};
+window.editCasoRev=(ci,field,val)=>{S._revEdit.casos[ci][field]=val;_revScheduleSave();};
+window.finalizarCasoRev=async(ci)=>{
+  if(!confirm('Finalizar este caso? Profs não conseguirão mais comentar nele.'))return;
+  const co=S._revEdit.casos[ci];if(!co)return;
+  co.casoFinalizado=true;
+  co._aberto=false;
+  _revRenderCasos();
+  await _revFlushSave(true);
+  _revShowToast(`✓ "${co.nome||'Caso'}" finalizado`,'var(--yellow)');
+};
+window.reabrirCasoRev=(ci)=>{
+  if(!confirm('Reabrir o caso? Profs voltam a poder comentar.'))return;
+  S._revEdit.casos[ci].casoFinalizado=false;
+  _revRenderCasos();_revFlushSave();
+};
+
+// Botão explícito de salvar (UX: tranquiliza mesmo com auto-save)
+// Quando passado ci, fecha o dropdown daquele caso e mostra um toast.
+window.salvarRevAgora=async(ci)=>{
+  await _revFlushSave(true);
+  const indicator=document.getElementById('rev-save-status');
+  if(indicator){indicator.textContent='✓ tudo salvo';indicator.style.color='var(--green)';}
+  if(typeof ci==='number'&&S._revEdit?.casos?.[ci]){
+    S._revEdit.casos[ci]._aberto=false;
+    _revRenderCasos();
+    _revShowToast(`✓ "${S._revEdit.casos[ci].nome||'Caso'}" salvo com sucesso`,'var(--green)');
+  } else {
+    _revShowToast('✓ Tudo salvo','var(--green)');
+  }
+};
+
+function _revShowToast(msg,cor){
+  const old=document.getElementById('rev-toast');if(old)old.remove();
+  const t=document.createElement('div');
+  t.id='rev-toast';
+  t.textContent=msg;
+  t.style.cssText=`position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:${cor||'var(--accent)'};color:#000;padding:12px 22px;border-radius:10px;font-weight:700;font-size:14px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.4);opacity:0;transition:all .25s`;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>{t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';});
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';setTimeout(()=>t.remove(),300);},2200);
+}
+window.addPerguntaRev=(ci)=>{
+  const co=S._revEdit.casos[ci];co.perguntas=co.perguntas||[];
+  co.perguntas.push({id:_revUid('perg'),titulo:'',perguntaImagens:[],itens:[]});
+  _revRenderCasos();_revScheduleSave();
+};
+
+// === IMPORT EM BLOCO (casos clínicos do Word/texto) ===
+let _icParsed=null,_icBloco='criar';
+
+window.openImportCasosRev=(bloco)=>{
+  if(!S._revEdit){alert('Abra uma revisão para editar antes de importar.');return;}
+  _icBloco=(bloco==='oral')?'oral':'criar';
+  _icParsed=null;
+  document.getElementById('mic-sub').textContent='Bloco de destino: '+(_icBloco==='oral'?'🎙️ Oral Online':'🩺 Criar / Simulação');
+  document.getElementById('mic-ta').value='';
+  document.getElementById('mic-preview').innerHTML='';
+  document.getElementById('mic-summary').textContent='';
+  document.getElementById('mic-err').classList.add('hidden');
+  document.getElementById('mic-confirm').textContent='📥 Importar';
+  document.getElementById('modal-import-casos').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('mic-ta').focus(),50);
+};
+
+function _icEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function _parseImportCasos(text){
+  const lines=text.split(/\r?\n/);
+  // Marcadores de bloco (exigem `:`, `-` ou número após a palavra-chave pra evitar falsos positivos)
+  const reCaso=/^\s*(?:#{1,3}\s*)?caso(?:\s+cl[ií]nico)?(?:\s+(\d+)|\s*[:\-]\s*)\s*[:\-\.\)]?\s*(.*)$/i;
+  const rePerg=/^\s*(?:#{1,3}\s*)?(?:pergunta|item)(?:\s+\d+\s*[:\-\.\)]?|\s*[:\-])\s*(.+)?$/i;
+  const rePergShort=/^\s*P\s*\d+\s*[:\-\.\)]\s*(.+)$/i;
+  const reEnun=/^\s*(?:#{1,3}\s*)?(?:enunciado|contexto)\s*[:\-]?\s*(.*)$/i;
+  const reTitulo=/^\s*(?:#{1,3}\s*)?(?:quest[aã]o|enunciado da pergunta)\s*[:\-]?\s*(.*)$/i;
+  const reResposta=/^\s*(?:#{1,3}\s*)?(?:resposta|respostas|gabarito|checklist|itens|items)\s*[:\-]?\s*(.*)$/i;
+  const reBullet=/^\s*[\-\*•▪◦–—·]\s+(.+)$/;
+  const reNumbered=/^\s*(?:\d+|[A-Za-z])\s*[\.\)]\s+(.+)$/;
+  const casos=[];let cur=null,curQ=null,mode='enunciado';
+  const flushQ=()=>{if(cur&&curQ){cur.perguntas.push(curQ);curQ=null;}};
+  const flushCase=()=>{flushQ();if(cur){casos.push(cur);cur=null;}};
+  const newQ=(titulo)=>{flushQ();curQ={titulo:(titulo||'').trim(),itens:[]};mode='titulo';};
+  const addToEnun=(t)=>{cur.enunciado+=(cur.enunciado?'\n':'')+t;};
+  const addToTit=(t)=>{curQ.titulo+=(curQ.titulo?'\n':'')+t;};
+  for(const raw of lines){
+    const stripped=raw.replace(/\*\*/g,'').replace(/^\s*>\s*/,'').trimEnd();
+    if(!stripped.trim())continue;
+    let m;
+    if((m=stripped.match(reCaso))){
+      flushCase();
+      const numStr=(m[1]||'').trim();
+      const nomeStr=(m[2]||'').trim();
+      const nome=nomeStr||(numStr?'Caso '+numStr:'Caso '+(casos.length+1));
+      cur={nome,enunciado:'',perguntas:[]};mode='enunciado';continue;
+    }
+    if(!cur)continue;
+    if((m=stripped.match(rePerg))||(m=stripped.match(rePergShort))){
+      newQ(m[1]||'');continue;
+    }
+    if((m=stripped.match(reEnun))&&!curQ){
+      mode='enunciado';
+      const inl=(m[1]||'').trim();if(inl)addToEnun(inl);
+      continue;
+    }
+    if(curQ&&(m=stripped.match(reTitulo))){
+      mode='titulo';
+      const inl=(m[1]||'').trim();if(inl)addToTit(inl);
+      continue;
+    }
+    if(curQ&&(m=stripped.match(reResposta))){
+      mode='itens';
+      const inl=(m[1]||'').trim();if(inl)curQ.itens.push({descricao:inl});
+      continue;
+    }
+    if(!curQ&&(m=stripped.match(reTitulo))){
+      newQ(m[1]||'');continue;
+    }
+    if(!curQ&&reResposta.test(stripped))continue;
+    if((m=stripped.match(reBullet))||(m=stripped.match(reNumbered))){
+      const desc=m[1].trim();
+      if(curQ){mode='itens';curQ.itens.push({descricao:desc});}
+      else addToEnun('• '+desc);
+      continue;
+    }
+    // Texto solto: depende do modo
+    if(curQ){
+      if(mode==='itens')curQ.itens.push({descricao:stripped.trim()});
+      else addToTit(stripped.trim());
+    } else {
+      addToEnun(stripped.trim());
+    }
+  }
+  flushCase();
+  return casos;
+}
+
+window.previewImportCasos=()=>{
+  const text=document.getElementById('mic-ta').value;
+  const err=document.getElementById('mic-err');
+  err.classList.add('hidden');
+  if(!text.trim()){
+    err.textContent='Cole o texto antes de pré-visualizar.';
+    err.classList.remove('hidden');return;
+  }
+  const parsed=_parseImportCasos(text);
+  if(!parsed.length){
+    err.textContent='Nenhum "Caso ..." encontrado no texto.';
+    err.classList.remove('hidden');_icParsed=null;return;
+  }
+  _icParsed=parsed;
+  const totalP=parsed.reduce((a,c)=>a+c.perguntas.length,0);
+  const totalI=parsed.reduce((a,c)=>a+c.perguntas.reduce((b,p)=>b+p.itens.length,0),0);
+  document.getElementById('mic-summary').textContent=`${parsed.length} caso(s) · ${totalP} pergunta(s) · ${totalI} item(s)`;
+  document.getElementById('mic-preview').innerHTML=parsed.map((c,i)=>`<div style="margin-bottom:8px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px">
+    <div style="font-weight:700;color:var(--accent);margin-bottom:4px;font-size:13px">${i+1}. ${_icEsc(c.nome)}</div>
+    ${c.enunciado?`<div style="font-size:12px;color:var(--t2);margin-bottom:6px;white-space:pre-wrap">${_icEsc(c.enunciado.slice(0,280))}${c.enunciado.length>280?'…':''}</div>`:'<div style="font-size:11px;color:var(--yellow);margin-bottom:6px">⚠️ Sem enunciado</div>'}
+    ${c.perguntas.length?c.perguntas.map((p,pi)=>`<div style="margin-left:10px;margin-top:4px">
+      <div style="font-size:12px;font-weight:600">P${pi+1}: ${_icEsc(p.titulo||'(sem título)')}</div>
+      ${p.itens.length?`<div style="font-size:11px;color:var(--t2);margin-left:12px">${p.itens.length} item(s): ${p.itens.slice(0,3).map(it=>_icEsc((it.descricao||'').slice(0,45))).join(' · ')}${p.itens.length>3?' …':''}</div>`:'<div style="font-size:11px;color:var(--red);margin-left:12px">⚠️ Sem itens</div>'}
+    </div>`).join(''):'<div style="font-size:11px;color:var(--red);margin-left:6px">⚠️ Sem perguntas</div>'}
+  </div>`).join('');
+  document.getElementById('mic-confirm').textContent=`📥 Importar ${parsed.length} caso${parsed.length>1?'s':''}`;
+};
+
+window.confirmImportCasos=async()=>{
+  if(!S._revEdit){alert('Nenhuma revisão aberta.');return;}
+  // Se não houve pré-visualização, faz parse agora a partir do textarea
+  if(!_icParsed||!_icParsed.length){
+    const text=document.getElementById('mic-ta').value;
+    const err=document.getElementById('mic-err');
+    err.classList.add('hidden');
+    if(!text.trim()){err.textContent='Cole o texto antes de importar.';err.classList.remove('hidden');return;}
+    _icParsed=_parseImportCasos(text);
+    if(!_icParsed.length){err.textContent='Nenhum "Caso ..." encontrado no texto.';err.classList.remove('hidden');return;}
+  }
+  S._revEdit.casos=S._revEdit.casos||[];
+  const seqBase=(S._revEdit.casos||[]).filter(c=>c.bloco===_icBloco).length;
+  _icParsed.forEach((c,idx)=>{
+    const caso={
+      id:_revUid('caso'),
+      bloco:_icBloco,
+      nome:c.nome||('Caso '+(seqBase+idx+1)),
+      enunciado:c.enunciado||'',
+      enunciadoImagens:[],
+      perguntas:(c.perguntas||[]).map(p=>{
+        const perg={
+          id:_revUid('perg'),
+          titulo:p.titulo||'',
+          perguntaImagens:[],
+          itens:(p.itens||[]).map(it=>({id:_revUid('item'),label:'',descricao:it.descricao||''}))
+        };
+        _revRenumerarItens(perg);
+        return perg;
+      }),
+      casoFinalizado:false,
+      _aberto:false
+    };
+    S._revEdit.casos.push(caso);
+  });
+  const n=_icParsed.length;
+  _icParsed=null;
+  CM('modal-import-casos');
+  _revRenderCasos();
+  await _revFlushSave(true);
+  _revShowToast(`✓ ${n} caso${n>1?'s':''} importado${n>1?'s':''}`,'var(--green)');
+};
+window.rmPerguntaRev=async(ci,pi)=>{
+  const p=S._revEdit.casos[ci].perguntas[pi];
+  if(!confirm('Remover esta pergunta e seus itens?'))return;
+  for(const u of (p.perguntaImagens||[]))await _revRemoveStorage(u);
+  S._revEdit.casos[ci].perguntas.splice(pi,1);
+  _revRenderCasos();_revFlushSave();
+};
+window.editPerguntaRev=(ci,pi,field,val)=>{S._revEdit.casos[ci].perguntas[pi][field]=val;_revScheduleSave();};
+function _revRenumerarItens(p){
+  if(!p||!Array.isArray(p.itens))return;
+  p.itens.forEach((it,i)=>{it.label=_revLabelSeq(i);});
+}
+window.addItemRev=(ci,pi)=>{
+  const p=S._revEdit.casos[ci].perguntas[pi];p.itens=p.itens||[];
+  p.itens.push({id:_revUid('item'),label:'',descricao:''});
+  _revRenumerarItens(p);
+  _revRenderCasos();_revScheduleSave();
+};
+window.rmItemRev=(ci,pi,ii)=>{
+  const p=S._revEdit.casos[ci].perguntas[pi];
+  p.itens.splice(ii,1);
+  _revRenumerarItens(p);
+  _revRenderCasos();_revFlushSave();
+};
+window.editItemRev=(ci,pi,ii,field,val)=>{
+  S._revEdit.casos[ci].perguntas[pi].itens[ii][field]=val;_revScheduleSave();
+};
+
+// === Storage helpers ===
+async function _revRemoveStorage(url){
+  if(!url||!url.startsWith('http'))return;
+  try{
+    // Extrai path do URL (https://firebasestorage.../o/<encoded-path>?alt=...)
+    const m=url.match(/\/o\/([^?]+)/);if(!m)return;
+    const path=decodeURIComponent(m[1]);
+    await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,path));
+  }catch(e){console.warn('storage delete falhou (pode ser órfão):',e.code||e.message);}
+}
+
+window.uploadImgRev=async(event,ci,pi)=>{
+  const f=event.target.files&&event.target.files[0];if(!f)return;
+  if(f.size>5*1024*1024){alert('Imagem maior que 5 MB. Reduza o tamanho.');event.target.value='';return;}
+  const r=S._revEdit;
+  const co=r.casos[ci];
+  const path=`revisaoCasos/${r.id}/${co.id}/${Date.now()}_${f.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+  const indicator=document.getElementById('rev-save-status');
+  if(indicator){indicator.textContent='⬆ enviando imagem...';indicator.style.color='var(--accent)';}
+  try{
+    const sref=window._fbStorage.ref(window._fbStorage.storage,path);
+    await window._fbStorage.uploadBytes(sref,f);
+    const url=await window._fbStorage.getDownloadURL(sref);
+    if(pi===null||pi==='null'){
+      co.enunciadoImagens=co.enunciadoImagens||[];
+      co.enunciadoImagens.push(url);
+    }else{
+      co.perguntas[pi].perguntaImagens=co.perguntas[pi].perguntaImagens||[];
+      co.perguntas[pi].perguntaImagens.push(url);
+    }
+    _revRenderCasos();
+    await _revFlushSave();
+  }catch(e){
+    console.error('upload:',e);
+    alert('Erro ao enviar imagem: '+(e.code||e.message));
+    if(indicator){indicator.textContent='⚠ erro';indicator.style.color='var(--red)';}
+  }
+  event.target.value='';
+};
+
+window.removeImgRev=async(ci,pi,idx)=>{
+  if(!confirm('Remover esta imagem?'))return;
+  const co=S._revEdit.casos[ci];
+  const arr=(pi===null||pi==='null')?co.enunciadoImagens:co.perguntas[pi].perguntaImagens;
+  const url=arr[idx];
+  arr.splice(idx,1);
+  _revRenderCasos();
+  await _revFlushSave();
+  await _revRemoveStorage(url);
+};
+
+window.uploadImgObsRev=async(event,ci,pi,ii)=>{
+  const f=event.target.files&&event.target.files[0];if(!f)return;
+  if(f.size>5*1024*1024){alert('Imagem maior que 5 MB. Reduza o tamanho.');event.target.value='';return;}
+  const r=S._revEdit;
+  const co=r.casos[ci];
+  const it=co.perguntas[pi].itens[ii];
+  const path=`revisaoCasos/${r.id}/${co.id}/obs_${it.id||(pi+'_'+ii)}/${Date.now()}_${f.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+  const indicator=document.getElementById('rev-save-status');
+  if(indicator){indicator.textContent='⬆ enviando imagem...';indicator.style.color='var(--accent)';}
+  // Feedback visual dentro do box
+  const obsBox=document.getElementById(`rev-obs-${ci}-${pi}-${ii}`);
+  const placeholder=document.createElement('div');
+  placeholder.style.cssText='display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 12px;background:var(--accent-dim);border:1px dashed var(--accent);border-radius:6px;font-size:12px;color:var(--accent);font-weight:600';
+  placeholder.innerHTML=`<div style="width:14px;height:14px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0"></div><span>Enviando imagem… <span style="color:var(--t2);font-weight:400">(${f.name})</span></span>`;
+  if(obsBox)obsBox.appendChild(placeholder);
+  try{
+    const sref=window._fbStorage.ref(window._fbStorage.storage,path);
+    await window._fbStorage.uploadBytes(sref,f);
+    const url=await window._fbStorage.getDownloadURL(sref);
+    it.obsImagens=it.obsImagens||[];
+    it.obsImagens.push(url);
+    co._aberto=true;
+    _revRenderCasos();
+    const el=document.getElementById(`rev-obs-${ci}-${pi}-${ii}`);if(el)el.classList.remove('hidden');
+    await _revFlushSave();
+  }catch(e){
+    console.error('upload obs:',e);
+    alert('Erro ao enviar imagem: '+(e.code||e.message));
+    if(indicator){indicator.textContent='⚠ erro';indicator.style.color='var(--red)';}
+    placeholder.remove();
+  }
+  event.target.value='';
+};
+
+window.removeImgObsRev=async(ci,pi,ii,idx)=>{
+  if(!confirm('Remover esta imagem?'))return;
+  const co=S._revEdit.casos[ci];
+  const it=co.perguntas[pi].itens[ii];
+  const arr=it.obsImagens||[];
+  const url=arr[idx];
+  arr.splice(idx,1);
+  co._aberto=true;
+  _revRenderCasos();
+  const el=document.getElementById(`rev-obs-${ci}-${pi}-${ii}`);if(el)el.classList.remove('hidden');
+  await _revFlushSave();
+  await _revRemoveStorage(url);
+};
+
+window.abrirRevisao=async()=>{
+  if(!S._revEdit)return;
+  if(!(S._revEdit.casos||[]).length){alert('Adicione ao menos 1 caso antes de abrir a revisão.');return;}
+  const isReabertura=S._revEdit.status==='fechada';
+  const msg=isReabertura
+    ?'Reabrir esta revisão para os professores?\n\nProfs voltam a poder votar e comentar. O snapshot original é preservado.'
+    :'Abrir esta revisão para os professores?\n\nOs profs começam a poder votar e comentar. O conteúdo atual será gravado como SNAPSHOT ORIGINAL — usado no PDF de comparação.';
+  if(!confirm(msg))return;
+  S._revEdit.status='aberta';
+  // Snapshot só é capturado na primeira abertura. Em reaberturas, preserva o baseline original.
+  if(!(S._revEdit.casosOriginais||[]).length){
+    S._revEdit.casosOriginais=JSON.parse(JSON.stringify(S._revEdit.casos));
+    S._revEdit.snapshotEm=new Date().toISOString();
+  }
+  await _revFlushSave(true);
+  renderRevisaoTab();
+};
+
+// Reabre a edição de uma revisão já exportada (volta pra status 'fechada').
+// Snapshot original é preservado quando existe; capturado silenciosamente se for legado/vazio.
+window.reabrirRevisaoExportada=async()=>{
+  if(!S._revEdit)return;
+  if(S._revEdit.status!=='exportada')return;
+  if(!confirm('Reabrir a edição desta revisão?\n\nVocê vai poder editar os casos novamente. Profs continuam sem poder comentar (a revisão volta ao status FECHADA).\n\nObs: se você editar e exportar de novo, o checklist oficial será sobrescrito.'))return;
+  S._revEdit.status='fechada';
+  // Se não há snapshot (revisão legada ou criada antes do mecanismo), capturar agora
+  // como baseline. Edições futuras aparecem no PDF como alteradas.
+  if(!(S._revEdit.casosOriginais||[]).length){
+    S._revEdit.casosOriginais=JSON.parse(JSON.stringify(S._revEdit.casos));
+    S._revEdit.snapshotEm=new Date().toISOString();
+  }
+  S._revEdit.reabertaEm=new Date().toISOString();
+  S._revEdit.reabertaPor=S.currentUser?.nome||S.currentUser?.username||'admin';
+  await _revFlushSave(true);
+  _revShowToast('🔓 Edição reaberta — status: FECHADA','var(--yellow)');
+  renderRevisaoTab();
+};
+
+window.fecharRevisao=async()=>{
+  if(!S._revEdit)return;
+  if(!confirm('Fechar a revisão? Profs param de poder comentar. Você ainda pode editar e exportar.'))return;
+  S._revEdit.status='fechada';
+  await _revFlushSave();
+  renderRevisaoTab();
+};
+
+// === Exportação para o checklist oficial ===
+window.exportarRevisao=async()=>{
+  const r=S._revEdit;if(!r)return;
+  const casosCriar=(r.casos||[]).filter(c=>c.bloco==='criar');
+  const casosOral=(r.casos||[]).filter(c=>c.bloco==='oral');
+  const naoFinalizados=(r.casos||[]).filter(c=>!c.casoFinalizado);
+  if(naoFinalizados.length){
+    if(!confirm(`Atenção: ${naoFinalizados.length} caso(s) ainda não foram finalizados. Exportar mesmo assim?`))return;
+  }
+  if(!confirm(`Exportar para o checklist oficial do simulado "${r.simNome}"?\n\n⚠️ ESTA AÇÃO É DESTRUTIVA: o template oficial existente será SOBRESCRITO.\n\nCriar/Simulação: ${casosCriar.length} caso(s)\nOral Online: ${casosOral.length} caso(s)`))return;
+  const conf=prompt('CONFIRMAÇÃO FINAL\n\nDigite EXPORTAR para sobrescrever o checklist oficial.');
+  if(conf!=='EXPORTAR')return;
+
+  const stripPrivate=co=>({
+    nome:co.nome||'',
+    enunciado:co.enunciado||'',
+    enunciadoImagens:Array.isArray(co.enunciadoImagens)?[...co.enunciadoImagens]:[],
+    perguntas:(co.perguntas||[]).map(p=>({
+      titulo:p.titulo||'',
+      perguntaImagens:Array.isArray(p.perguntaImagens)?[...p.perguntaImagens]:[],
+      itens:(p.itens||[]).map(it=>({
+        label:it.label||'',
+        descricao:it.descricao||'',
+        ...(it.obs?{obs:it.obs}:{}),
+        ...(Array.isArray(it.obsImagens)&&it.obsImagens.length?{obsImagens:[...it.obsImagens]}:{})
+      }))
+    }))
+  });
+
+  const tplCriar={casos:casosCriar.map(stripPrivate)};
+  const tplOral={casos:casosOral.map(stripPrivate)};
+
+  try{
+    await Promise.all([
+      setDoc(doc(db,`checklists/${r.simId}/meta/templateCriar`),tplCriar),
+      setDoc(doc(db,`checklists/${r.simId}/meta/templateOral`),tplOral)
+    ]);
+    S._revEdit.status='exportada';
+    S._revEdit.exportadoEm=new Date().toISOString();
+    S._revEdit.exportadoPor=S.currentUser?.nome||S.currentUser?.username||'admin';
+    await _revFlushSave(true);
+    _revShowToast('✓ Checklist exportado com sucesso','var(--green)');
+    renderRevisaoTab();
+  }catch(e){
+    console.error('exportarRevisao:',e);
+    alert('Erro ao exportar: '+(e.code||e.message||e));
+  }
+};
+
+// === Geração de PDF ===
+let _jsPDFLib=null;
+async function _loadJsPDF(){
+  if(_jsPDFLib)return _jsPDFLib;
+  if(window.jspdf?.jsPDF){_jsPDFLib=window.jspdf.jsPDF;return _jsPDFLib;}
+  await new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload=resolve;s.onerror=reject;
+    document.head.appendChild(s);
+  });
+  _jsPDFLib=window.jspdf.jsPDF;
+  return _jsPDFLib;
+}
+
+const _pdfMudou=(a,b)=>(a||'').trim()!==(b||'').trim();
+
+window.baixarPdfRev=async()=>{
+  const r=S._revEdit;if(!r)return;
+  _revShowToast('Gerando PDF...','var(--accent)');
+  try{
+    const jsPDF=await _loadJsPDF();
+    const doc=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+    const W=210,H=297,M=15,RIGHT=W-M;
+    let y=M;
+
+    // Limpa o texto pra fonte WinAnsi (helvetica padrão do jsPDF não suporta emoji nem unicode amplo)
+    const clean=s=>(s||'').toString()
+      .replace(/→/g,'->').replace(/←/g,'<-').replace(/↔/g,'<->')
+      .replace(/[–—]/g,'-').replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/…/g,'...').replace(/•/g,'-')
+      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2700}-\u{27BF}\u{1F000}-\u{1F2FF}]/gu,'')
+      .replace(/[^\x09\x0A\x0D\x20-\x7E -ÿ]/g,'').trim();
+
+    const ensureSpace=need=>{if(y+need>H-15){doc.addPage();y=M;}};
+    const writeText=(text,opts={})=>{
+      const{size=10,style='normal',color=[40,40,40],indent=0,gap=0}=opts;
+      doc.setFont('helvetica',style);doc.setFontSize(size);doc.setTextColor(...color);
+      const maxW=RIGHT-M-indent;
+      const lines=doc.splitTextToSize(clean(text),maxW);
+      const lineH=size*0.4;
+      ensureSpace(lines.length*lineH+gap);
+      lines.forEach(l=>{doc.text(l,M+indent,y);y+=lineH;});
+      y+=gap;
+    };
+    const muda=(a,b)=>clean(a).trim()!==clean(b).trim();
+
+    // === CAPA ===
+    doc.setFillColor(20,30,60);doc.rect(0,0,W,50,'F');
+    doc.setTextColor(255);
+    doc.setFont('helvetica','bold');doc.setFontSize(20);doc.text('AROS - Anest-Review',M,22);
+    doc.setFont('helvetica','normal');doc.setFontSize(11);doc.text('Relatorio de Revisao de Casos',M,30);
+    doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text(clean(r.simNome)||'Simulado',M,42);
+    y=60;
+    doc.setTextColor(60);
+    writeText('Coordenador: '+(r.exportadoPor||r.criadoPor||'-'),{gap:1});
+    writeText('Exportado em: '+new Date(r.exportadoEm||Date.now()).toLocaleString('pt-BR'),{gap:1});
+    writeText('Total de casos: '+(r.casos||[]).length,{gap:8});
+
+    // === BLOCOS ===
+    const blocos=[
+      {bloco:'criar',titulo:'CRIAR / SIMULACAO',cor:[47,129,247]},
+      {bloco:'oral',titulo:'ORAL ONLINE',cor:[251,143,68]}
+    ];
+
+    for(const{bloco,titulo,cor}of blocos){
+      const casos=(r.casos||[]).filter(c=>c.bloco===bloco);
+      if(!casos.length)continue;
+
+      ensureSpace(16);
+      doc.setFillColor(...cor);doc.rect(M,y,RIGHT-M,8,'F');
+      doc.setTextColor(255);doc.setFont('helvetica','bold');doc.setFontSize(11);
+      doc.text(titulo+' - '+casos.length+' caso(s)',M+3,y+5.5);
+      y+=14;
+
+      for(let cdx=0;cdx<casos.length;cdx++){
+        const co=casos[cdx];
+        const ori=(r.casosOriginais||[]).find(c=>c.id===co.id);
+
+        ensureSpace(14);
+        doc.setTextColor(20,20,20);doc.setFont('helvetica','bold');doc.setFontSize(13);
+        doc.text(clean('Caso '+(cdx+1)+' - '+(co.nome||'')),M,y);y+=7;
+
+        if(!ori){
+          writeText('CASO NOVO (criado durante a revisao - sem comparativo)',{style:'italic',size:9,color:[150,100,30],gap:6});
+          continue;
+        }
+
+        // Enunciado
+        const enuMudou=muda(co.enunciado,ori.enunciado);
+        writeText('Enunciado: '+(enuMudou?'ALTERADO':'NAO ALTERADO'),{style:'bold',size:10,color:enuMudou?[200,110,30]:[60,140,80],gap:1});
+        if(enuMudou){
+          writeText('Antes: '+(ori.enunciado||'(vazio)'),{size:9,color:[120,120,120],indent:4,gap:1});
+          writeText('Depois: '+(co.enunciado||'(vazio)'),{size:9,color:[40,40,40],indent:4,gap:3});
+        }
+
+        // Perguntas — match por id quando disponível, fallback por índice
+        const perguntasAtuais=co.perguntas||[];
+        const perguntasOriginais=ori.perguntas||[];
+        const matchedOrigPergIds=new Set();
+
+        for(let pi=0;pi<perguntasAtuais.length;pi++){
+          const p=perguntasAtuais[pi];
+          let op=p.id?perguntasOriginais.find(x=>x.id===p.id):null;
+          if(!op&&!p.id)op=perguntasOriginais[pi];
+          if(op&&op.id)matchedOrigPergIds.add(op.id);
+
+          if(!op){
+            ensureSpace(8);
+            writeText('P'+(pi+1)+': PERGUNTA NOVA',{style:'bold',size:10,color:[200,110,30],gap:1});
+            writeText('Texto: '+(p.titulo||'(vazio)'),{size:9,color:[40,40,40],indent:4,gap:2});
+            (p.itens||[]).forEach(it=>{
+              writeText((it.label||'')+': NOVO ITEM',{style:'bold',size:9,color:[200,110,30],indent:4,gap:0});
+              writeText(it.descricao||'(vazio)',{size:8,color:[40,40,40],indent:8,gap:1});
+            });
+            y+=2;
+            continue;
+          }
+
+          const tituloMudou=muda(p.titulo,op.titulo);
+          writeText('P'+(pi+1)+': '+(tituloMudou?'ALTERADO':'NAO ALTERADO'),{style:'bold',size:10,color:tituloMudou?[200,110,30]:[60,140,80],gap:1});
+          if(tituloMudou){
+            writeText('Antes: '+(op.titulo||'(vazio)'),{size:9,color:[120,120,120],indent:4,gap:1});
+            writeText('Depois: '+(p.titulo||'(vazio)'),{size:9,color:[40,40,40],indent:4,gap:2});
+          }
+
+          // Itens — match por id
+          const itensAtuais=p.itens||[];
+          const itensOriginais=op.itens||[];
+          const matchedOrigItemIds=new Set();
+
+          for(let ii=0;ii<itensAtuais.length;ii++){
+            const it=itensAtuais[ii];
+            let oi=it.id?itensOriginais.find(x=>x.id===it.id):null;
+            if(!oi&&!it.id)oi=itensOriginais[ii];
+            if(oi&&oi.id)matchedOrigItemIds.add(oi.id);
+            const lbl=it.label||'';
+
+            if(!oi){
+              writeText(lbl+': NOVO ITEM',{style:'bold',size:9,color:[200,110,30],indent:4,gap:0});
+              writeText(it.descricao||'(vazio)',{size:8,color:[40,40,40],indent:8,gap:1});
+              continue;
+            }
+            const descMudou=muda(it.descricao,oi.descricao);
+            const obsMudou=muda(it.obs||'',oi.obs||'');
+            const mudou=descMudou||obsMudou;
+            writeText(lbl+': '+(mudou?'ALTERADO':'NAO ALTERADO'),{style:'bold',size:9,color:mudou?[200,110,30]:[60,140,80],indent:4,gap:0});
+            if(descMudou){
+              writeText('Antes: '+(oi.descricao||'(vazio)'),{size:8,color:[120,120,120],indent:8,gap:0});
+              writeText('Depois: '+(it.descricao||'(vazio)'),{size:8,color:[40,40,40],indent:8,gap:1});
+            }
+            if(obsMudou){
+              writeText('Obs antes: '+(oi.obs||'(vazio)'),{size:8,color:[120,120,120],indent:8,gap:0});
+              writeText('Obs depois: '+(it.obs||'(vazio)'),{size:8,color:[40,40,40],indent:8,gap:1});
+            }
+          }
+          // Itens removidos
+          itensOriginais.forEach(oi=>{
+            if(oi.id&&!matchedOrigItemIds.has(oi.id)){
+              writeText('Item REMOVIDO ('+(oi.label||'')+'): '+(oi.descricao||'(vazio)'),{style:'italic',size:8,color:[180,60,60],indent:4,gap:1});
+            }
+          });
+          y+=1;
+        }
+        // Perguntas removidas
+        perguntasOriginais.forEach(op=>{
+          if(op.id&&!matchedOrigPergIds.has(op.id)){
+            writeText('PERGUNTA REMOVIDA: '+(op.titulo||'(vazio)'),{style:'italic',size:9,color:[180,60,60],gap:1});
+          }
+        });
+        y+=4;
+      }
+    }
+
+    // Rodapé
+    const totalPages=doc.internal.getNumberOfPages();
+    for(let i=1;i<=totalPages;i++){
+      doc.setPage(i);
+      doc.setFontSize(8);doc.setTextColor(160);
+      doc.text('AROS - '+clean(r.simNome)+' - pg '+i+'/'+totalPages,M,H-8);
+      doc.text(new Date().toLocaleDateString('pt-BR'),RIGHT,H-8,{align:'right'});
+    }
+
+    const safe=s=>(s||'').toString().normalize('NFKD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'_').replace(/^_|_$/g,'');
+    doc.save(`Revisao_${safe(r.simNome)}_${new Date().toISOString().slice(0,10)}.pdf`);
+    _revShowToast('PDF gerado','var(--green)');
+    return;
+  }catch(e){
+    console.error('pdf gen:',e);
+    alert('Erro ao gerar PDF: '+(e.message||e));
+    return;
+  }
+};
+
+window._baixarPdfRevLegacy=async()=>{
+  return; /* legacy desativado — código antigo substituído pela versão simplificada acima */
+  /*
+    // Helper pra adicionar texto com quebra automática + paginação
+    const ensureSpace=(needed)=>{if(y+needed>H-M){doc.addPage();y=M;}};
+    const addLines=(text,opts={})=>{
+      const{font='helvetica',style='normal',size=10,color=[40,40,40],indent=0,maxW=RIGHT-M-indent,gap=0}=opts;
+      doc.setFont(font,style);doc.setFontSize(size);doc.setTextColor(...color);
+      const lines=doc.splitTextToSize(text||'',maxW);
+      const lineH=size*0.4;
+      ensureSpace(lines.length*lineH+gap);
+      lines.forEach(ln=>{doc.text(ln,M+indent,y);y+=lineH;});
+      y+=gap;
+    };
+    const addTag=(txt,corBg,corFg=[255,255,255])=>{
+      doc.setFontSize(8);doc.setFont('helvetica','bold');
+      const wTxt=doc.getTextWidth(txt)+4;
+      ensureSpace(6);
+      doc.setFillColor(...corBg);doc.roundedRect(M,y-3.5,wTxt,5,1,1,'F');
+      doc.setTextColor(...corFg);doc.text(txt,M+2,y);
+      y+=6;
+    };
+    const addRule=()=>{ensureSpace(4);doc.setDrawColor(180);doc.setLineWidth(.2);doc.line(M,y,RIGHT,y);y+=4;};
+
+    // === CAPA ===
+    doc.setFillColor(20,30,60);doc.rect(0,0,W,55,'F');
+    doc.setTextColor(255);doc.setFont('helvetica','bold');doc.setFontSize(22);
+    doc.text('AROS',M,22);
+    doc.setFont('helvetica','normal');doc.setFontSize(11);
+    doc.text('Anest-Review · Relatório de Revisão de Casos',M,30);
+    doc.setFontSize(16);doc.setFont('helvetica','bold');
+    doc.text(r.simNome||'Simulado',M,45);
+    y=66;
+
+    doc.setTextColor(60);doc.setFontSize(10);doc.setFont('helvetica','normal');
+    doc.text(`Coordenador: ${r.exportadoPor||r.criadoPor||'—'}`,M,y);y+=5;
+    doc.text(`Exportado em: ${r.exportadoEm?new Date(r.exportadoEm).toLocaleString('pt-BR'):new Date().toLocaleString('pt-BR')}`,M,y);y+=5;
+    doc.text(`Total de casos: ${(r.casos||[]).length}`,M,y);y+=10;
+
+    // Sumário
+    doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(0);
+    doc.text('Resumo das alterações',M,y);y+=6;
+    let totSemAlt=0,totAlt=0,totNovo=0;
+    (r.casos||[]).forEach(co=>{
+      const ori=(r.casosOriginais||[]).find(c=>c.id===co.id);
+      if(!ori)totNovo++;
+      else{
+        let mudou=_pdfMudou(co.enunciado,ori.enunciado)||_pdfMudou(co.nome,ori.nome);
+        if(!mudou)mudou=(co.perguntas||[]).some((p,pi)=>{
+          const op=(ori.perguntas||[])[pi];if(!op)return true;
+          if(_pdfMudou(p.titulo,op.titulo))return true;
+          return (p.itens||[]).some((it,ii)=>{
+            const oi=(op.itens||[])[ii];if(!oi)return true;
+            return _pdfMudou(it.descricao,oi.descricao)||_pdfMudou(it.obs,oi.obs);
+          })||(op.itens||[]).length!==(p.itens||[]).length;
+        })||(ori.perguntas||[]).length!==(co.perguntas||[]).length;
+        if(mudou)totAlt++;else totSemAlt++;
+      }
+    });
+    doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(60);
+    doc.text(`• ${totSemAlt} caso(s) sem alterações`,M+4,y);y+=5;
+    doc.text(`• ${totAlt} caso(s) com alterações`,M+4,y);y+=5;
+    if(totNovo)doc.text(`• ${totNovo} caso(s) novo(s) (sem original)`,M+4,y),y+=5;
+    y+=4;
+
+    // === BLOCOS ===
+    const blocos=[
+      {bloco:'criar',titulo:'CRIAR / SIMULAÇÃO',cor:[47,129,247]},
+      {bloco:'oral',titulo:'ORAL ONLINE',cor:[251,143,68]}
+    ];
+    for(const{bloco,titulo,cor}of blocos){
+      const casos=(r.casos||[]).filter(c=>c.bloco===bloco);
+      if(!casos.length)continue;
+      ensureSpace(20);
+      doc.setFillColor(...cor);doc.rect(M,y,RIGHT-M,8,'F');
+      doc.setTextColor(255);doc.setFont('helvetica','bold');doc.setFontSize(12);
+      doc.text(`${titulo} · ${casos.length} caso(s)`,M+3,y+5.5);
+      y+=14;
+
+      for(const co of casos){
+        const ori=(r.casosOriginais||[]).find(c=>c.id===co.id);
+        ensureSpace(20);
+        doc.setTextColor(0);doc.setFont('helvetica','bold');doc.setFontSize(13);
+        doc.text(`📋 ${co.nome||'(sem nome)'}`,M,y);y+=6;
+        if(!ori){addTag('NOVO CASO (sem original)',[100,100,100]);y+=2;}
+
+        // Enunciado
+        const enuMudou=ori&&_pdfMudou(co.enunciado,ori.enunciado);
+        addLines('Enunciado',{style:'bold',size:10,color:[60,60,60],gap:1});
+        if(!ori||enuMudou)addTag(enuMudou?'ALTERADO':'NOVO',[230,140,40]);
+        else addTag('SEM ALTERACOES',[60,160,80]);
+        addLines(co.enunciado||'(sem enunciado)',{size:10,color:[20,20,20],gap:enuMudou&&ori?2:4});
+        if(enuMudou&&ori){
+          addLines('Original:',{style:'italic',size:8,color:[140,140,140],indent:4,gap:1});
+          addLines(ori.enunciado||'(vazio)',{size:8,color:[140,140,140],indent:4,gap:4});
+        }
+
+        // Perguntas
+        for(let pi=0;pi<(co.perguntas||[]).length;pi++){
+          const p=co.perguntas[pi];
+          const op=ori?(ori.perguntas||[])[pi]:null;
+          ensureSpace(15);
+          addLines(`P${pi+1}. ${p.titulo||'(sem texto)'}`,{style:'bold',size:11,color:[20,20,20],gap:1});
+          const tituloMudou=op&&_pdfMudou(p.titulo,op.titulo);
+          if(!op)addTag('NOVA PERGUNTA',[230,140,40]);
+          else if(tituloMudou)addTag('TITULO ALTERADO',[230,140,40]);
+          if(tituloMudou&&op){
+            addLines('Original: '+(op.titulo||'(vazio)'),{style:'italic',size:8,color:[140,140,140],indent:4,gap:2});
+          }
+
+          // Itens
+          if((p.itens||[]).length){
+            addLines('Itens do checklist:',{style:'bold',size:9,color:[80,80,80],indent:2,gap:1});
+            for(let ii=0;ii<p.itens.length;ii++){
+              const it=p.itens[ii];
+              const oi=op?(op.itens||[])[ii]:null;
+              ensureSpace(8);
+              const lbl=it.label||'';
+              const desc=it.descricao||'';
+              addLines(`${lbl}. ${desc}`,{size:9,color:[20,20,20],indent:6,gap:0});
+              if(it.obs)addLines(`💡 Obs: ${it.obs}`,{style:'italic',size:8,color:[180,140,30],indent:10,gap:0});
+              if(oi){
+                const itemMudou=_pdfMudou(it.descricao,oi.descricao)||_pdfMudou(it.obs||'',oi.obs||'');
+                if(itemMudou){
+                  addLines('  → Alterado. Original: '+(oi.descricao||'(vazio)')+(oi.obs?` [obs: ${oi.obs}]`:''),{style:'italic',size:7,color:[180,100,40],indent:8,gap:1});
+                }
+              } else if(op){
+                addLines('  → Item novo (não havia no original)',{style:'italic',size:7,color:[180,100,40],indent:8,gap:1});
+              }
+            }
+            // Itens removidos
+            const removidos=op?((op.itens||[]).slice(p.itens.length)):[];
+            removidos.forEach(oi=>{
+              addLines(`✗ REMOVIDO: ${oi.descricao||'(vazio)'}`,{style:'italic',size:8,color:[200,60,60],indent:8,gap:1});
+            });
+          }
+          y+=2;
+        }
+        // Perguntas removidas
+        if(ori){
+          const pergRemovidas=(ori.perguntas||[]).slice((co.perguntas||[]).length);
+          pergRemovidas.forEach((op,idx)=>{
+            addLines(`✗ PERGUNTA REMOVIDA: P${(co.perguntas||[]).length+idx+1}. ${op.titulo||'(vazio)'}`,{style:'italic',size:9,color:[200,60,60],indent:2,gap:1});
+          });
+        }
+        addRule();
+      }
+    }
+
+    // Rodapé com data nas páginas
+    const totalPages=doc.internal.getNumberOfPages();
+    for(let i=1;i<=totalPages;i++){
+      doc.setPage(i);
+      doc.setFontSize(8);doc.setTextColor(160);
+      doc.text(`AROS · ${r.simNome} · pg ${i}/${totalPages}`,M,H-8);
+      doc.text(new Date().toLocaleDateString('pt-BR'),RIGHT,H-8,{align:'right'});
+    }
+
+    const safe=s=>(s||'').toString().normalize('NFKD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'_').replace(/^_|_$/g,'');
+    doc.save(`Revisao_${safe(r.simNome)}_${new Date().toISOString().slice(0,10)}.pdf`);
+    _revShowToast('✓ PDF gerado','var(--green)');
+  }catch(e){
+    console.error('pdf gen:',e);
+    alert('Erro ao gerar PDF: '+(e.message||e));
+  }
+  */
+};
+
 S.financeiro={profsFin:{},tipos:[],meses:{}};
 const FIN_DEFAULT_TIPOS=[
   {id:'sys-rodada',nome:'Rodada de simulado oficial',valorPadrao:200,system:true},
@@ -4855,7 +6711,7 @@ window.deleteUser=async()=>{
 
 // co tabs
 window.switchCoTab=(tab,btn)=>{
-  ['simulados','trocas','professores','listas','desempenho','checklist','config','usuarios','extra','simExtras','financeiro','mentorias'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
+  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','mentorias'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
   document.querySelectorAll('.co-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   // Show "Novo Simulado" only on simulados tab
@@ -7579,6 +9435,7 @@ window.switchCoTab = (tab, btn) => {
   if(tab==='simExtras') renderSimuladosExtras();
   if(tab==='financeiro') renderFinanceiro();
   if(tab==='mentorias') renderMentorias();
+  if(tab==='revisao') renderRevisaoTab();
 };
 
 
@@ -8655,6 +10512,15 @@ function renderCkCasos(resp){
     // Body (collapsible)
     let body=`<div id="ck-body-${ci}" style="display:${isOpen?'block':'none'};padding:16px 20px;background:var(--bg2)">`;
 
+    // Enunciado + imagens (se a revisão tiver exportado esses campos)
+    if(caso.enunciado||(caso.enunciadoImagens||[]).length){
+      body+=`<div style="margin-bottom:14px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs)">
+        <div style="font-size:11px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">📝 Caso clínico</div>
+        ${caso.enunciado?`<div style="font-size:13px;line-height:1.5;white-space:pre-wrap;color:var(--text)">${(caso.enunciado||'').replace(/</g,'&lt;')}</div>`:''}
+        ${(caso.enunciadoImagens||[]).length?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">${caso.enunciadoImagens.map(u=>`<img src="${u}" onclick="openImgLightbox('${u}')" style="max-width:240px;max-height:180px;border:1px solid var(--border);border-radius:8px;cursor:zoom-in"/>`).join('')}</div>`:''}
+      </div>`;
+    }
+
     perguntas.forEach((perg,pi)=>{
       const itens=perg.itens||[];
       const pergId=`ck-perg-${ci}-${pi}`;
@@ -8677,7 +10543,8 @@ function renderCkCasos(resp){
         <div id="${pergId}" style="display:none">
           <div style="display:flex;justify-content:flex-end;padding:6px 14px 0">
             <button class="btn btn-d btn-sm" style="font-size:11px" onclick="resetCkPergunta(${ci},${pi})">🗑️ Resetar Pergunta ${pi+1}</button>
-          </div>`;
+          </div>
+          ${(perg.perguntaImagens||[]).length?`<div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 14px 4px">${perg.perguntaImagens.map(u=>`<img src="${u}" onclick="openImgLightbox('${u}')" style="max-width:200px;max-height:160px;border:1px solid var(--border);border-radius:8px;cursor:zoom-in"/>`).join('')}</div>`:''}`;
       itens.forEach((item,ii)=>{
         const key=`${pi}_${ii}`;
         const val=casoResp.itens[key]||'';
@@ -8689,6 +10556,7 @@ function renderCkCasos(resp){
           <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
             <span id="ck-item-lbl-${ci}-${pi}-${ii}" style="font-size:13px;font-weight:800;color:${valColor};min-width:20px">${lbl}</span>
             ${item.descricao?`<span style="font-size:13px;color:var(--text)">${item.descricao}</span>`:`<span style="font-size:12px;color:var(--t2)">(${pts.toFixed(2)} pts)</span>`}
+            ${(item.obs||(item.obsImagens||[]).length)?`<button onclick="event.stopPropagation();showObsCk(this)" data-obs="${(item.obs||'').replace(/"/g,'&quot;').replace(/</g,'&lt;')}" data-obs-imgs="${JSON.stringify(item.obsImagens||[]).replace(/"/g,'&quot;')}" title="${(item.obs||'').replace(/"/g,'&quot;')}" style="background:rgba(255,193,7,.18);border:1px solid var(--yellow);color:var(--yellow);padding:2px 7px;border-radius:6px;cursor:help;font-size:12px;flex-shrink:0">💡 Obs${(item.obsImagens||[]).length?' 📷':''}</button>`:''}
           </div>
           <div style="display:flex;gap:5px;flex-shrink:0">
             ${['certo','parcial','errado'].map(v=>`<button onclick="setCkItem(${ci},${pi},${ii},'${v}')"
@@ -9207,10 +11075,16 @@ window.switchBlocoEdit=(bloco,btn)=>{
   syncTplFromDOM();
   _ckBlocoEdit=bloco;
   _ckTemplateEdit=bloco==='criar'?_ckTemplateEditCriar:_ckTemplateEditOral;
-  document.getElementById('btn-bloco-criar')?.classList.toggle('btn-p',bloco==='criar');
-  document.getElementById('btn-bloco-criar')?.classList.toggle('btn-s',bloco!=='criar');
-  document.getElementById('btn-bloco-oral')?.classList.toggle('btn-p',bloco==='oral');
-  document.getElementById('btn-bloco-oral')?.classList.toggle('btn-s',bloco!=='oral');
+  const c=document.getElementById('btn-bloco-criar');
+  const o=document.getElementById('btn-bloco-oral');
+  if(c){
+    if(bloco==='criar'){c.style.cssText='flex:1;background:var(--accent);color:#fff;border:1px solid var(--accent);box-shadow:0 4px 14px -4px rgba(47,129,247,.55)';}
+    else{c.style.cssText='flex:1;background:transparent;color:var(--text);border:1px solid var(--border)';}
+  }
+  if(o){
+    if(bloco==='oral'){o.style.cssText='flex:1;background:var(--orange);color:#000;border:1px solid var(--orange);box-shadow:0 4px 14px -4px rgba(251,143,68,.55)';}
+    else{o.style.cssText='flex:1;background:transparent;color:var(--text);border:1px solid var(--border)';}
+  }
   _tplOpen.casos=new Set();_tplOpen.perguntas=new Set();
   renderTemplateEditor();
 };
@@ -9247,8 +11121,8 @@ function renderTemplateEditor(){
   const wrap=document.getElementById('ck-template-casos');if(!wrap)return;
   // Show block selector tabs
   wrap.innerHTML=`<div style="display:flex;gap:10px;margin-bottom:16px">
-    <button onclick="switchBlocoEdit('criar',this)" id="btn-bloco-criar" class="btn ${(_ckBlocoEdit||'criar')==='criar'?'btn-p':'btn-s'}" style="flex:1">📋 CRIAR / Simulação</button>
-    <button onclick="switchBlocoEdit('oral',this)" id="btn-bloco-oral" class="btn ${(_ckBlocoEdit||'criar')==='oral'?'btn-p':'btn-s'}" style="flex:1">🎙️ Oral Online</button>
+    <button onclick="switchBlocoEdit('criar',this)" id="btn-bloco-criar" class="btn" style="flex:1;${(_ckBlocoEdit||'criar')==='criar'?'background:var(--accent);color:#fff;border:1px solid var(--accent);box-shadow:0 4px 14px -4px rgba(47,129,247,.55)':'background:transparent;color:var(--text);border:1px solid var(--border)'}">🩺 Criar / Simulação</button>
+    <button onclick="switchBlocoEdit('oral',this)" id="btn-bloco-oral" class="btn" style="flex:1;${(_ckBlocoEdit||'criar')==='oral'?'background:var(--orange);color:#000;border:1px solid var(--orange);box-shadow:0 4px 14px -4px rgba(251,143,68,.55)':'background:transparent;color:var(--text);border:1px solid var(--border)'}">🎙️ Oral Online</button>
   </div><div id="ck-blocos-tpl-wrap"></div>`;
   const blocoWrap=document.getElementById('ck-blocos-tpl-wrap');
   const activeTpl=(_ckBlocoEdit||'criar')==='criar'?_ckTemplateEditCriar:_ckTemplateEditOral;
@@ -9283,16 +11157,17 @@ function renderTemplateEditor(){
       html+=`
       <div style="margin-bottom:10px;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden">
         <!-- Pergunta header with inline editable title -->
-        <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--bg3)">
-          <span onclick="tplTogglePerg('${pergKey}')" style="font-size:12px;cursor:pointer;padding:2px 5px;border-radius:4px" title="Expandir/recolher">${pergOpen?'▼':'▶'}</span>
-          <span style="font-size:12px;font-weight:700;color:var(--t2);white-space:nowrap">Pergunta ${pi+1} —</span>
-          <input id="tpl-hdr-perg-${pergKey}" value="${perg.titulo||''}" placeholder="Título da pergunta (opcional)"
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:9px 12px;background:var(--bg3)">
+          <span onclick="tplTogglePerg('${pergKey}')" style="font-size:12px;cursor:pointer;padding:6px 5px;border-radius:4px;flex-shrink:0" title="Expandir/recolher">${pergOpen?'▼':'▶'}</span>
+          <span style="font-size:12px;font-weight:700;color:var(--t2);white-space:nowrap;padding-top:8px">Pergunta ${pi+1} —</span>
+          <textarea id="tpl-hdr-perg-${pergKey}" placeholder="Título da pergunta (opcional)"
             oninput="_ckTemplateEdit.casos[${ci}].perguntas[${pi}].titulo=this.value"
             onblur="autoSaveCkTemplate()"
             onclick="event.stopPropagation()"
-            style="flex:1;border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;outline:none;color:var(--text);min-width:0"/>
-          <span style="font-size:11px;color:var(--t2);white-space:nowrap">${itens.length} iten${itens.length!==1?'s':''}</span>
-          <button class="btn btn-d btn-sm" onclick="rmCkPergunta(${ci},${pi})" style="font-size:10px">✕</button>
+            rows="2"
+            style="flex:1;border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;outline:none;color:var(--text);min-width:0;line-height:1.5;resize:vertical;padding:4px 0">${(perg.titulo||'').replace(/</g,'&lt;')}</textarea>
+          <span style="font-size:11px;color:var(--t2);white-space:nowrap;padding-top:8px">${itens.length} iten${itens.length!==1?'s':''}</span>
+          <button class="btn btn-d btn-sm" onclick="rmCkPergunta(${ci},${pi})" style="font-size:10px;align-self:flex-start;margin-top:4px">✕</button>
         </div>
         <!-- Pergunta body -->
         <div id="tpl-perg-${pergKey}" style="display:${pergOpen?'block':'none'};padding:12px 14px">
@@ -9309,12 +11184,33 @@ function renderTemplateEditor(){
           <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">`;
       itens.forEach((item,ii)=>{
         const lbl=String.fromCharCode(65+ii);
-        html+=`<div style="display:flex;gap:8px;align-items:center">
-          <span style="font-size:12px;font-weight:800;color:var(--accent);min-width:20px;text-align:center">${lbl}</span>
-          <input value="${(item.descricao||'').replace(/"/g,'&quot;')}" placeholder="Descrição do item"
-            oninput="_ckTemplateEdit.casos[${ci}].perguntas[${pi}].itens[${ii}].descricao=this.value"
-            style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:5px;background:var(--bg2);font-family:inherit;font-size:12px;outline:none;color:var(--text)"/>
-          <button class="btn btn-g btn-sm" onclick="rmCkItem(${ci},${pi},${ii})">✕</button>
+        const obsImgs=item.obsImagens||[];
+        const temObs=!!(item.obs||obsImgs.length);
+        html+=`<div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="font-size:12px;font-weight:800;color:var(--accent);min-width:20px;text-align:center">${lbl}</span>
+            <input value="${(item.descricao||'').replace(/"/g,'&quot;')}" placeholder="Descrição do item"
+              oninput="_ckTemplateEdit.casos[${ci}].perguntas[${pi}].itens[${ii}].descricao=this.value"
+              style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:5px;background:var(--bg2);font-family:inherit;font-size:12px;outline:none;color:var(--text)"/>
+            <button onclick="toggleCkObs(${ci},${pi},${ii})" title="${temObs?'Editar observação':'Adicionar observação'}" style="background:${temObs?'rgba(255,193,7,.18)':'transparent'};border:1px solid ${temObs?'var(--yellow)':'var(--border)'};color:${temObs?'var(--yellow)':'var(--t2)'};padding:4px 8px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:600">💡${obsImgs.length?'📷':''}</button>
+            <button class="btn btn-g btn-sm" onclick="rmCkItem(${ci},${pi},${ii})">✕</button>
+          </div>
+          <div id="ck-obs-${ci}-${pi}-${ii}" class="hidden" style="margin:4px 0 6px 28px;padding:10px;background:rgba(255,193,7,.06);border:1px dashed var(--yellow);border-radius:6px">
+            <div style="font-size:11px;font-weight:700;color:var(--yellow);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">💡 Observação para o avaliador</div>
+            <textarea oninput="_ckTemplateEdit.casos[${ci}].perguntas[${pi}].itens[${ii}].obs=this.value" placeholder="Ex: Se o aluno falar X, ele não ganha nem perde ponto." style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;background:var(--bg2);font-family:inherit;font-size:12px;line-height:1.5;outline:none;color:var(--text);resize:vertical;min-height:60px">${(item.obs||'').replace(/</g,'&lt;')}</textarea>
+            ${obsImgs.length?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">${obsImgs.map((u,oi)=>`<div style="position:relative;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--bg3)">
+              <img src="${u}" onclick="openImgLightbox('${u}')" style="max-width:140px;max-height:100px;display:block;cursor:zoom-in"/>
+              <button onclick="removeImgObsCk(${ci},${pi},${ii},${oi})" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:11px">✕</button>
+            </div>`).join('')}</div>`:''}
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px;flex-wrap:wrap">
+              <div style="font-size:11px;color:var(--t2);flex:1;min-width:200px">Avaliadores veem texto + imagem ao clicar no 💡.</div>
+              <div style="display:flex;gap:6px;flex-shrink:0">
+                <button onclick="document.getElementById('ck-img-obs-${ci}-${pi}-${ii}').click()" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:6px 10px;border-radius:5px;cursor:pointer;font-size:12px">📎 Imagem</button>
+                <button onclick="salvarCkObs(${ci},${pi},${ii})" style="background:var(--green);color:#000;font-weight:700;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:12px">💾 Salvar</button>
+              </div>
+              <input id="ck-img-obs-${ci}-${pi}-${ii}" type="file" accept="image/*" style="display:none" onchange="uploadImgObsCk(event,${ci},${pi},${ii})"/>
+            </div>
+          </div>
         </div>`;
       });
       html+=`</div>
@@ -9394,7 +11290,87 @@ window.addCkPergunta=ci=>{
 };
 window.rmCkPergunta=(ci,pi)=>{syncTplFromDOM();_ckTemplateEdit.casos[ci].perguntas.splice(pi,1);renderTemplateEditor();};
 window.addCkItem=(ci,pi)=>{syncTplFromDOM();_ckTemplateEdit.casos[ci].perguntas[pi].itens.push({label:'',descricao:''});renderTemplateEditor();};
+
+window.toggleCkObs=(ci,pi,ii)=>{
+  const el=document.getElementById(`ck-obs-${ci}-${pi}-${ii}`);if(!el)return;
+  el.classList.toggle('hidden');
+  if(!el.classList.contains('hidden')){
+    const ta=el.querySelector('textarea');if(ta)setTimeout(()=>ta.focus(),50);
+  }
+};
+
+window.salvarCkObs=async(ci,pi,ii)=>{
+  if(!_ckSimId){alert('Selecione um simulado.');return;}
+  syncTplFromDOM();
+  const blocoPath='checklists/'+_ckSimId+'/meta/template'+(_ckBlocoEdit==='oral'?'Oral':'Criar');
+  const template=JSON.parse(JSON.stringify(_ckTemplateEdit));
+  try{
+    await setDoc(doc(db,blocoPath),template);
+    if(_ckBlocoEdit==='oral')_ckTemplate.oral=template;else _ckTemplate.criar=template;
+    renderTemplateEditor();
+    // Toast simples
+    const old=document.getElementById('ck-obs-toast');if(old)old.remove();
+    const t=document.createElement('div');
+    t.id='ck-obs-toast';
+    t.textContent='✓ Observação salva';
+    t.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:10px 18px;border-radius:8px;font-weight:700;font-size:13px;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.4)';
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(),1800);
+  }catch(e){console.error('salvarCkObs',e);alert('Erro ao salvar: '+(e.code||e.message));}
+};
 window.rmCkItem=(ci,pi,ii)=>{syncTplFromDOM();_ckTemplateEdit.casos[ci].perguntas[pi].itens.splice(ii,1);renderTemplateEditor();};
+
+window.uploadImgObsCk=async(event,ci,pi,ii)=>{
+  const f=event.target.files&&event.target.files[0];if(!f)return;
+  if(!_ckSimId){alert('Selecione um simulado.');event.target.value='';return;}
+  if(f.size>5*1024*1024){alert('Imagem maior que 5 MB. Reduza o tamanho.');event.target.value='';return;}
+  syncTplFromDOM();
+  const path=`checklists/${_ckSimId}/obs_imgs/${_ckBlocoEdit||'criar'}/${Date.now()}_${f.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+  // Feedback visual dentro do box
+  const obsBox=document.getElementById(`ck-obs-${ci}-${pi}-${ii}`);
+  const placeholder=document.createElement('div');
+  placeholder.style.cssText='display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 12px;background:var(--accent-dim);border:1px dashed var(--accent);border-radius:6px;font-size:12px;color:var(--accent);font-weight:600';
+  placeholder.innerHTML=`<div style="width:14px;height:14px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0"></div><span>Enviando imagem… <span style="color:var(--t2);font-weight:400">(${f.name})</span></span>`;
+  if(obsBox)obsBox.appendChild(placeholder);
+  try{
+    const sref=window._fbStorage.ref(window._fbStorage.storage,path);
+    await window._fbStorage.uploadBytes(sref,f);
+    const url=await window._fbStorage.getDownloadURL(sref);
+    const it=_ckTemplateEdit.casos[ci].perguntas[pi].itens[ii];
+    it.obsImagens=it.obsImagens||[];
+    it.obsImagens.push(url);
+    const blocoPath='checklists/'+_ckSimId+'/meta/template'+(_ckBlocoEdit==='oral'?'Oral':'Criar');
+    const template=JSON.parse(JSON.stringify(_ckTemplateEdit));
+    await setDoc(doc(db,blocoPath),template);
+    if(_ckBlocoEdit==='oral')_ckTemplate.oral=template;else _ckTemplate.criar=template;
+    renderTemplateEditor();
+    const el=document.getElementById(`ck-obs-${ci}-${pi}-${ii}`);if(el)el.classList.remove('hidden');
+  }catch(e){
+    console.error('uploadImgObsCk',e);
+    alert('Erro ao enviar imagem: '+(e.code||e.message));
+    placeholder.remove();
+  }
+  event.target.value='';
+};
+
+window.removeImgObsCk=async(ci,pi,ii,idx)=>{
+  if(!confirm('Remover esta imagem?'))return;
+  if(!_ckSimId){alert('Selecione um simulado.');return;}
+  syncTplFromDOM();
+  const it=_ckTemplateEdit.casos[ci].perguntas[pi].itens[ii];
+  const arr=it.obsImagens||[];
+  const url=arr[idx];
+  arr.splice(idx,1);
+  const blocoPath='checklists/'+_ckSimId+'/meta/template'+(_ckBlocoEdit==='oral'?'Oral':'Criar');
+  const template=JSON.parse(JSON.stringify(_ckTemplateEdit));
+  try{
+    await setDoc(doc(db,blocoPath),template);
+    if(_ckBlocoEdit==='oral')_ckTemplate.oral=template;else _ckTemplate.criar=template;
+    renderTemplateEditor();
+    const el=document.getElementById(`ck-obs-${ci}-${pi}-${ii}`);if(el)el.classList.remove('hidden');
+    if(url)await _revRemoveStorage(url);
+  }catch(e){console.error('removeImgObsCk',e);alert('Erro ao remover: '+(e.code||e.message));}
+};
 
 // Parse pasted items like "A. Description" or "A) Description"
 window.parsePastedItens=(ci,pi)=>{
