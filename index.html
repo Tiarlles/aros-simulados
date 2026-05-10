@@ -365,7 +365,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
     </div>
     <div class="header-right">
       <div class="view-tabs">
-        <button class="nav-tab on" id="tab-al" onclick="switchView('aluno')">👨‍🎓 Alunos</button>
+        <button class="nav-tab on" id="tab-al" onclick="switchView('aluno')">👨‍🎓 Simulados TSA Oral</button>
         <button class="nav-tab" id="tab-co" onclick="switchView('coord')" style="display:none">🛠️ Coordenação</button>
         <button class="nav-tab" id="tab-mt" onclick="goMentoriaAluno()" title="Mentorias">🎓 Mentorias</button>
       </div>
@@ -10086,13 +10086,17 @@ window.saveCfg=async()=>{
   const np=document.getElementById('np').value;
   const cp=document.getElementById('cp2').value;
   const m=document.getElementById('cfg-msg');
+  const u=S.currentUser;
+  if(!u){m.className='al al-e';m.textContent='Sessão expirada. Faça login novamente.';m.classList.remove('hidden');return;}
   if(!op){m.className='al al-e';m.textContent='Digite a senha atual.';m.classList.remove('hidden');return;}
-  if(op!==S.cfg.password){m.className='al al-e';m.textContent='❌ Senha atual incorreta.';m.classList.remove('hidden');return;}
+  if(op!==u.senha){m.className='al al-e';m.textContent='❌ Senha atual incorreta.';m.classList.remove('hidden');return;}
   if(!np){m.className='al al-e';m.textContent='Digite a nova senha.';m.classList.remove('hidden');return;}
   if(np.length<4){m.className='al al-e';m.textContent='A nova senha deve ter ao menos 4 caracteres.';m.classList.remove('hidden');return;}
   if(np!==cp){m.className='al al-e';m.textContent='As senhas não coincidem.';m.classList.remove('hidden');return;}
-  S.cfg.password=np;
-  await setDoc(doc(db,'config','settings'),S.cfg);
+  const username=u.id||u.username;
+  const data={username,nome:u.nome||username,senha:np,role:u.role||'user',permissoes:u.permissoes||[]};
+  await setDoc(doc(db,'usuarios',username),data);
+  u.senha=np;
   m.className='al al-s';m.textContent='✅ Senha alterada com sucesso!';m.classList.remove('hidden');
   document.getElementById('op').value='';
   document.getElementById('np').value='';
