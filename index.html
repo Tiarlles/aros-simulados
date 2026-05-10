@@ -2202,6 +2202,7 @@ async function boot(){
   try{const s=await getDoc(doc(db,'config','settings'));if(s.exists())Object.assign(S.cfg,s.data());}catch(e){}
   await Promise.all([loadSims(),loadProfs(),loadListas(),loadUsuarios(),loadMenuLabels(),loadSimExtra(),loadFinanceiro(),loadMentorias(),loadBlocos(),loadClinicas(),loadRevisoes()]);
   renderSimCards();
+  if(typeof _restoreSession==='function')_restoreSession();
   if(typeof _initMentoriaHash==='function')_initMentoriaHash();
   // apply saved theme
   const t=localStorage.getItem('aros-theme')||'dark';
@@ -6733,6 +6734,7 @@ window.checkPass=async()=>{
   if(!u){errEl.textContent='Usuário ou senha incorretos.';errEl.classList.remove('hidden');return;}
   errEl.classList.add('hidden');
   S.currentUser=u;S.unlocked=true;S.profUnlocked=u.role==='avaliador';
+  try{localStorage.setItem('aros_session',u.username||u.id);}catch(e){}
   document.getElementById('co-login').classList.add('hidden');
   document.getElementById('co-panel').classList.remove('hidden');
   applyTabsByRole();
@@ -6741,11 +6743,27 @@ window.checkPass=async()=>{
 
 window.logout=()=>{
   S.currentUser=null;S.unlocked=false;S.profUnlocked=false;
+  try{localStorage.removeItem('aros_session');}catch(e){}
   document.getElementById('co-panel').classList.add('hidden');
   document.getElementById('co-login').classList.remove('hidden');
   const u=document.getElementById('co-user');if(u)u.value='';
   const p=document.getElementById('co-pass');if(p)p.value='';
 };
+
+// Restaura sessão do localStorage (chamado no boot, após loadUsuarios)
+function _restoreSession(){
+  try{
+    const savedUser=localStorage.getItem('aros_session');
+    if(!savedUser)return;
+    const u=S.usuarios.find(x=>(x.username||x.id||'').toLowerCase()===savedUser.toLowerCase());
+    if(!u){localStorage.removeItem('aros_session');return;}
+    S.currentUser=u;S.unlocked=true;S.profUnlocked=u.role==='avaliador';
+    document.getElementById('co-login').classList.add('hidden');
+    document.getElementById('co-panel').classList.remove('hidden');
+    applyTabsByRole();
+    popCoSel();renderProfGlobal();renderListasPanel();renderUsuarios();
+  }catch(e){console.warn('restoreSession:',e);}
+}
 
 // ── CRUD USUÁRIOS ────────────────────────────────────────────────────────────
 function renderUsuarios(){
