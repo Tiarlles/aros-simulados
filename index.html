@@ -4987,11 +4987,12 @@ function _revRenderComentario(cm,replies,targetType,targetId,readonly){
       <button onclick="votarComentarioRev('${cm.id}','concordo')" style="background:${meuV==='concordo'?'var(--green)':'transparent'};color:${meuV==='concordo'?'#000':'var(--t2)'};border:1px solid ${meuV==='concordo'?'var(--green)':'var(--border)'};padding:2px 8px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600">👍${cnt.concordo?' '+cnt.concordo:''}</button>
       <button onclick="votarComentarioRev('${cm.id}','discordo')" style="background:${meuV==='discordo'?'var(--red)':'transparent'};color:${meuV==='discordo'?'#fff':'var(--t2)'};border:1px solid ${meuV==='discordo'?'var(--red)':'var(--border)'};padding:2px 8px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600">👎${cnt.discordo?' '+cnt.discordo:''}</button>
       <button onclick="toggleResponderRev('${cm.id}')" style="background:transparent;color:var(--t2);border:1px solid var(--border);padding:2px 8px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600">↩️ Responder${replies.length?' · '+replies.length:''}</button>
+      ${meu?`<button onclick="apagarComentarioRev('${cm.id}',true)" style="background:transparent;color:var(--red);border:1px solid var(--border);padding:2px 8px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;margin-left:auto" title="Apagar meu comentário">🗑️ Apagar</button>`:''}
     </div>`}
     ${replies.length?`<div style="margin:8px 0 0 14px;border-left:2px dashed var(--border);padding-left:10px;display:flex;flex-direction:column;gap:6px">${replies.map(r=>{
       const rMeu=r.profNome===S._revProfNome;
       return`<div style="padding:6px 8px;background:rgba(0,0,0,.25);border-left:3px solid ${rMeu?'var(--green)':'var(--accent)'};border-radius:6px;font-size:12px">
-        <div style="font-size:10px;font-weight:700;color:var(--accent);margin-bottom:2px">${r.profNome}${rMeu?' (você)':''} · ${r.criadoEm?fDT(r.criadoEm):''}</div>
+        <div style="display:flex;align-items:flex-start;gap:6px"><div style="flex:1;font-size:10px;font-weight:700;color:var(--accent);margin-bottom:2px">${r.profNome}${rMeu?' (você)':''} · ${r.criadoEm?fDT(r.criadoEm):''}</div>${rMeu&&!readonly?`<button onclick="apagarComentarioRev('${r.id}',false)" style="background:transparent;color:var(--red);border:1px solid var(--border);padding:1px 6px;border-radius:4px;cursor:pointer;font-size:10px;line-height:1" title="Apagar minha resposta">🗑️</button>`:''}</div>
         <div style="white-space:pre-wrap">${(r.comentario||'').replace(/</g,'&lt;')}</div>
       </div>`;
     }).join('')}</div>`:''}
@@ -5099,6 +5100,28 @@ window.comentarRev=async(targetType,targetId)=>{
     profNome:S._revProfNome,comentario:txt,criadoEm:ts
   });
   if(inp)inp.value='';
+  await _revLoadComentarios(revId);
+  _revRenderProfEditor(document.getElementById('rev-content'));
+};
+
+window.apagarComentarioRev=async(comentId,isTopLevel)=>{
+  if(!S._revProfRevisao||!S._revProfNome)return;
+  const cm=S._revProfComentarios.find(c=>c.id===comentId);
+  if(!cm){alert('Comentário não encontrado.');return;}
+  if(cm.profNome!==S._revProfNome){alert('Você só pode apagar seus próprios comentários.');return;}
+  if(!_profCanInteract(cm.targetType,cm.targetId))return;
+  const replies=isTopLevel?S._revProfComentarios.filter(c=>c.kind==='comentario'&&c.parentId===comentId):[];
+  const msg=replies.length
+    ?`Apagar este comentário e suas ${replies.length} resposta${replies.length!==1?'s':''}?`
+    :'Apagar este comentário?';
+  if(!confirm(msg))return;
+  const revId=S._revProfRevisao.id;
+  try{
+    await deleteDoc(doc(db,`revisaoCasos/${revId}/comentarios/${comentId}`));
+    if(replies.length){
+      await Promise.allSettled(replies.map(r=>deleteDoc(doc(db,`revisaoCasos/${revId}/comentarios/${r.id}`))));
+    }
+  }catch(e){console.error('apagarComentarioRev:',e);alert('Erro ao apagar: '+(e.code||e.message));return;}
   await _revLoadComentarios(revId);
   _revRenderProfEditor(document.getElementById('rev-content'));
 };
