@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AROS · Confirmação de Simulados</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Permanent+Marker&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>(function(){try{var t=localStorage.getItem('aros-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
@@ -343,6 +343,18 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 @keyframes fi{from{opacity:0}to{opacity:1}}
 @keyframes su{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes spin{to{transform:rotate(360deg)}}
+.rt-wrap{display:flex;flex-direction:column;width:100%}
+.rt-tb{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-bottom:none;border-radius:5px 5px 0 0;padding:4px 6px;align-items:center}
+.rt-tb button{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:3px 8px;font-size:11px;cursor:pointer;border-radius:3px;font-weight:600;min-width:26px;line-height:1.2;font-family:inherit}
+.rt-tb button:hover{background:var(--bg)}
+.rt-tb button:active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.rt-ed{min-height:60px;max-height:240px;overflow:auto;padding:8px 10px;border:1px solid var(--border);border-radius:0 0 5px 5px;background:var(--bg2);color:var(--text);font-family:inherit;font-size:13px;line-height:1.5;outline:none;transition:border-color .15s}
+.rt-ed:focus{border-color:var(--accent)}
+.rt-ed b,.rt-ed strong{font-weight:700}
+.rt-ed i,.rt-ed em{font-style:italic}
+.rt-ed u{text-decoration:underline}
+.rt-wrap[data-empty="1"] .rt-ed{position:relative}
+.rt-wrap[data-empty="1"] .rt-ed:not(:focus):empty::before{content:attr(data-ph);color:var(--t2);opacity:.55;pointer-events:none}
 @keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 var(--accent-glow)}50%{box-shadow:0 0 0 6px transparent}}
 @keyframes instr-pulse{0%,100%{box-shadow:0 0 0 0 rgba(210,153,34,.55),0 1px 0 rgba(255,255,255,.08) inset}50%{box-shadow:0 0 0 8px rgba(210,153,34,0),0 1px 0 rgba(255,255,255,.08) inset}}
 
@@ -1154,6 +1166,29 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
           </div>
         </div>
 
+        <!-- 2.5. Cronômetro da Projeção (dropdown) -->
+        <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden">
+          <div onclick="cfgToggle('cfg-cron-body','cfg-cron-arr')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg2);cursor:pointer;user-select:none" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:18px">⏱️</span>
+              <div>
+                <p style="font-weight:700;font-size:15px">Cronômetro da Projeção</p>
+                <p style="font-size:12px;color:var(--t2)">Tempo limite após o qual o cronômetro fica vermelho</p>
+              </div>
+            </div>
+            <span id="cfg-cron-arr" style="font-size:14px;color:var(--t2);transition:transform .2s">▼</span>
+          </div>
+          <div id="cfg-cron-body" style="display:none;padding:16px 18px;border-top:1px solid var(--border)">
+            <div class="fg">
+              <label class="fl">Tempo limite (mm:ss)</label>
+              <input class="fc" id="cfg-cron-limit" type="text" placeholder="07:30" pattern="[0-9]{1,2}:[0-9]{2}" style="max-width:160px"/>
+              <p style="font-size:11px;color:var(--t2);margin-top:4px">A partir desse tempo o cronômetro fica vermelho (padrão 07:30).</p>
+            </div>
+            <div id="cfg-cron-msg" class="hidden"></div>
+            <button class="btn btn-p" onclick="saveCronLimit()">💾 Salvar tempo limite</button>
+          </div>
+        </div>
+
         <!-- 3. Configurar Acesso dos Professores (dropdown) -->
         <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden">
           <div onclick="cfgToggle('cfg-prof-body','cfg-prof-arr')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg2);cursor:pointer;user-select:none" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
@@ -1952,6 +1987,77 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
   </div>
 </div>
 
+<!-- ══ OVERLAY: Preview de slides ══ -->
+<div id="slides-preview" class="hidden" style="position:fixed;inset:0;z-index:9999;background:#fff;color:#000;display:flex;flex-direction:column;font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif">
+  <style>
+    #slides-preview .sp-header{height:44px;background:#000;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:1.5px}
+    #slides-preview .sp-stage{flex:1;display:flex;padding:40px 56px;background:#fff;overflow:hidden;box-sizing:border-box}
+    #slides-preview .slide-capa{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px;font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif}
+    #slides-preview .slide-capa .sim{font-family:inherit;font-size:clamp(36px,5vw,72px);font-weight:700;color:#000;line-height:1.1}
+    #slides-preview .slide-capa .caso{font-family:inherit;font-size:clamp(36px,5vw,72px);font-weight:700;color:#000;line-height:1.1}
+    #slides-preview .slide-perg{flex:1;display:flex;flex-direction:column;gap:10px;width:100%;min-height:0}
+    #slides-preview .slide-perg .pcaso{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(32px,3.8vw,60px);font-weight:700;color:#000;line-height:1;letter-spacing:-.5px}
+    #slides-preview .slide-perg .penun-label{font-size:clamp(18px,1.8vw,26px);font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
+    #slides-preview .slide-perg .penun{font-size:clamp(14px,1.3vw,22px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap}
+    #slides-preview .slide-perg .pperg{font-size:clamp(18px,1.8vw,26px);font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
+    #slides-preview .slide-perg .ptxt{font-size:clamp(14px,1.3vw,22px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap}
+    #slides-preview .slide-perg .pbody{display:flex;gap:28px;flex:1;min-height:0;align-items:flex-start;margin-top:6px}
+    #slides-preview .slide-perg .pbody.dir{flex-direction:row}
+    #slides-preview .slide-perg .pbody.baixo,#slides-preview .slide-perg .pbody.grande{flex-direction:column}
+    #slides-preview .slide-perg .ptext-col{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;overflow:hidden}
+    #slides-preview .slide-perg .pimg-col{display:flex;align-items:center;justify-content:center}
+    #slides-preview .slide-perg .pbody.dir .pimg-col{flex:0 0 45%;max-width:45%;align-self:stretch}
+    #slides-preview .slide-perg .pbody.baixo .pimg-col,#slides-preview .slide-perg .pbody.grande .pimg-col{width:100%;flex:1;min-height:0}
+    #slides-preview .slide-perg .pbody.grande .ptext-col{flex:0 0 auto}
+    #slides-preview .slide-perg .pimg-col img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
+    #slides-preview .slide-perg .pbody.grande .pimg-col img{max-height:60vh}
+    #slides-preview .sp-nav{height:52px;background:#f7f7f7;border-top:1px solid #e5e5e5;display:flex;align-items:center;justify-content:center;gap:10px}
+    #slides-preview .sp-nav button{background:#fff;border:1px solid #ccc;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;color:#333;font-family:inherit}
+    #slides-preview .sp-nav button:hover:not(:disabled){background:#eee}
+    #slides-preview .sp-nav button:disabled{opacity:.4;cursor:not-allowed}
+    #slides-preview .sp-pos{font-family:'JetBrains Mono',monospace;font-size:12px;color:#666;letter-spacing:2px;min-width:120px;text-align:center}
+  </style>
+  <div class="sp-header">
+    <span>👁 PREVIEW · COMO O ALUNO VAI VER</span>
+    <button onclick="closeSlidesPreview()" style="background:transparent;color:#fff;border:1px solid #444;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px">✕ Fechar</button>
+  </div>
+  <div class="sp-stage" id="sp-content"></div>
+  <div class="sp-nav">
+    <button onclick="navSlidesPreview(-Infinity)" id="sp-first">⏮ Primeiro</button>
+    <button onclick="navSlidesPreview(-1)" id="sp-prev">◀ Anterior</button>
+    <span class="sp-pos" id="sp-pos">—</span>
+    <button onclick="navSlidesPreview(1)" id="sp-next">Próximo ▶</button>
+    <button onclick="navSlidesPreview(Infinity)" id="sp-last">Último ⏭</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: Slides de projeção ══ -->
+<div class="mo hidden" id="modal-slides">
+  <div class="md" style="max-width:980px">
+    <div class="mh">
+      <div><div class="m-title">🎬 Slides de projeção</div><div class="m-sub" id="msl-sub">Sequência exibida ao aluno durante o simulado</div></div>
+      <button class="m-close" onclick="CM('modal-slides')">✕</button>
+    </div>
+    <div class="m-body">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+        <button class="btn btn-s btn-sm" onclick="slideAdd()">+ Adicionar slide</button>
+        <button class="btn btn-s btn-sm" onclick="slidesRegerarPadrao()" title="Recria os slides a partir do enunciado e perguntas do caso">🔄 Regenerar padrão</button>
+        <button class="btn btn-p btn-sm" onclick="previewSlides()" title="Veja como os slides serão exibidos ao aluno">👁 Pré-visualizar</button>
+        <span style="width:1px;height:20px;background:var(--border);margin:0 4px"></span>
+        <button class="btn btn-s btn-sm" onclick="expandAllSlides()" title="Abrir todos os slides" style="font-size:11px">⊞ Expandir todos</button>
+        <button class="btn btn-s btn-sm" onclick="collapseAllSlides()" title="Fechar todos os slides" style="font-size:11px">⊟ Recolher todos</button>
+        <span style="flex:1"></span>
+        <span id="msl-counter" style="font-size:12px;color:var(--t2)"></span>
+      </div>
+      <div id="msl-list" style="display:flex;flex-direction:column;gap:14px;max-height:62vh;overflow:auto;padding:4px 6px 4px 2px"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-slides')">Fechar</button>
+      <button class="btn btn-p" onclick="saveSlidesModal()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODAL: Instruções do simulado (presencial) ══ -->
 <div class="mo hidden" id="modal-sim-instr">
   <div class="md" style="max-width:560px">
@@ -2199,6 +2305,14 @@ const fHM=(h,m)=>`${String(h).padStart(2,'0')}h${String(m).padStart(2,'0')}`;
 
 // boot
 async function boot(){
+  const _bootParams=new URLSearchParams(window.location.search);
+  if(_bootParams.get('modo')==='projecao'){
+    try{const s=await getDoc(doc(db,'config','settings'));if(s.exists())Object.assign(S.cfg,s.data());}catch(e){}
+    return _initProjecao(_bootParams.get('sim'),_bootParams.get('caso'));
+  }
+  if(_bootParams.get('modo')==='preview'){
+    return _initPreview();
+  }
   try{const s=await getDoc(doc(db,'config','settings'));if(s.exists())Object.assign(S.cfg,s.data());}catch(e){}
   await Promise.all([loadSims(),loadProfs(),loadListas(),loadUsuarios(),loadMenuLabels(),loadSimExtra(),loadFinanceiro(),loadMentorias(),loadBlocos(),loadClinicas(),loadRevisoes()]);
   renderSimCards();
@@ -2221,6 +2335,254 @@ async function boot(){
     _loadDiv.remove();
   }
 }
+// ══════════════════════════════════════════════════════════════
+// MODO PROJEÇÃO — janela dedicada que exibe slides + cronômetro
+// ══════════════════════════════════════════════════════════════
+async function _initProjecao(simId,casoId){
+  if(!simId||!casoId){document.body.innerHTML='<div style="color:#fff;font-family:sans-serif;padding:40px">Parâmetros inválidos.</div>';return;}
+  document.title='Projeção · AROS';
+  let slides=[];
+  try{
+    const snap=await getDoc(doc(db,'checklists/'+simId+'/meta/templateCriar'));
+    if(snap.exists()){
+      const tpl=snap.data();
+      const caso=(tpl.casos||[]).find(c=>(c.id||'')===casoId)||(tpl.casos||[])[parseInt(casoId.replace('caso_',''),10)||0];
+      if(caso)slides=Array.isArray(caso.slides)&&caso.slides.length?caso.slides:gerarSlidesPadrao(caso,0);
+    }
+  }catch(e){console.error('loadSlidesProj',e);}
+  if(!slides.length){document.body.innerHTML='<div style="color:#fff;font-family:sans-serif;padding:40px;background:#111;min-height:100vh">Nenhum slide cadastrado para este caso.</div>';return;}
+
+  const limStr=S.cfg.cronometroLimite||'07:30';
+  const [lm,ls]=limStr.split(':').map(Number);
+  const limiteMs=((lm||0)*60+(ls||0))*1000;
+  const storageKey='aros_proj_'+simId+'_'+casoId;
+  let idx=0;
+  try{localStorage.removeItem(storageKey);}catch(e){}
+
+  document.body.innerHTML=`<style>
+    html,body{margin:0;padding:0;background:#fff;color:#000;font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;overflow:hidden;height:100vh}
+    #proj-timer{position:fixed;top:0;left:0;right:0;height:60px;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:700;letter-spacing:3px;z-index:10;transition:color .3s}
+    #proj-timer.over{color:#ff3b3b}
+    #proj-stage{position:fixed;top:60px;left:0;right:0;bottom:0;display:flex;padding:48px 64px;box-sizing:border-box;background:#fff;overflow:hidden}
+    /* Capa */
+    .slide-capa{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif}
+    .slide-capa .sim{font-family:inherit;font-size:clamp(42px,5.5vw,80px);font-weight:700;color:#000;line-height:1.1}
+    .slide-capa .caso{font-family:inherit;font-size:clamp(42px,5.5vw,80px);font-weight:700;color:#000;line-height:1.1}
+    /* Pergunta */
+    .slide-perg{flex:1;display:flex;flex-direction:column;gap:10px;width:100%;min-height:0}
+    .slide-perg .pcaso{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(40px,4.5vw,72px);font-weight:700;color:#000;line-height:1;letter-spacing:-.5px}
+    .slide-perg .penun-label{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(20px,2vw,28px);font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
+    .slide-perg .penun{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(16px,1.5vw,24px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap}
+    .slide-perg .pperg{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(20px,2vw,28px);font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
+    .slide-perg .ptxt{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(16px,1.5vw,24px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap}
+    .slide-perg .pbody{display:flex;gap:32px;flex:1;min-height:0;align-items:flex-start;margin-top:8px}
+    .slide-perg .pbody.dir{flex-direction:row}
+    .slide-perg .pbody.baixo{flex-direction:column}
+    .slide-perg .pbody.grande{flex-direction:column}
+    .slide-perg .ptext-col{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0;overflow:hidden}
+    .slide-perg .pimg-col{display:flex;align-items:center;justify-content:center}
+    .slide-perg .pbody.dir .pimg-col{flex:0 0 45%;max-width:45%;align-self:stretch}
+    .slide-perg .pbody.baixo .pimg-col{width:100%;flex:1;min-height:0}
+    .slide-perg .pbody.grande .pimg-col{width:100%;flex:1;min-height:0}
+    .slide-perg .pbody.grande .ptext-col{flex:0 0 auto}
+    .slide-perg .pimg-col img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
+    .slide-perg .pbody.grande .pimg-col img{max-height:65vh}
+    .slide-imgpura{flex:1;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+    .slide-imgpura img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
+  </style>
+  <div id="proj-timer">00:00</div>
+  <div id="proj-stage"></div>`;
+
+  let timerStart=0,timerElapsed=0,timerRunning=false,timerInt=null;
+  const timerEl=document.getElementById('proj-timer');
+  const fmt=(ms)=>{const t=Math.floor(ms/1000);const mm=String(Math.floor(t/60)).padStart(2,'0');const ss=String(t%60).padStart(2,'0');return mm+':'+ss;};
+  function renderTimer(){
+    const ms=timerRunning?(Date.now()-timerStart+timerElapsed):timerElapsed;
+    timerEl.textContent=fmt(ms);
+    if(limiteMs>0&&ms>limiteMs)timerEl.classList.add('over');else timerEl.classList.remove('over');
+  }
+  function timerPlay(){if(timerRunning)return;timerStart=Date.now();timerRunning=true;timerInt=setInterval(renderTimer,250);renderTimer();broadcastEstado();}
+  function timerPause(){if(!timerRunning)return;timerElapsed+=Date.now()-timerStart;timerRunning=false;clearInterval(timerInt);renderTimer();broadcastEstado();}
+  function timerReset(){timerElapsed=0;timerStart=Date.now();renderTimer();broadcastEstado();}
+  renderTimer();
+
+  function renderSlide(){
+    const raw=slides[idx]||{};
+    const s=_slideMigrar(raw);
+    const stage=document.getElementById('proj-stage');
+    stage.innerHTML=_renderSlideHTML(s);
+    try{localStorage.setItem(storageKey,JSON.stringify({idx}));}catch(e){}
+  }
+  function navigate(novo){
+    const prev=idx;
+    idx=Math.max(0,Math.min(novo,slides.length-1));
+    // Auto-iniciar cronômetro ao sair da capa
+    if(prev===0&&idx>=1&&!timerRunning&&timerElapsed===0)timerPlay();
+    renderSlide();
+    broadcastEstado();
+  }
+  renderSlide();
+
+  const channel=new BroadcastChannel('aros-slides-'+simId+'-'+casoId);
+  function broadcastEstado(){
+    const ms=timerRunning?(Date.now()-timerStart+timerElapsed):timerElapsed;
+    channel.postMessage({tipo:'sync',idx,total:slides.length,timerMs:ms,timerRunning,limiteMs});
+  }
+  channel.onmessage=(ev)=>{
+    const d=ev.data||{};
+    if(d.tipo==='navigate'){navigate(d.idx);}
+    else if(d.tipo==='next'){navigate(idx+1);}
+    else if(d.tipo==='prev'){navigate(idx-1);}
+    else if(d.tipo==='first'){navigate(0);}
+    else if(d.tipo==='last'){navigate(slides.length-1);}
+    else if(d.tipo==='timer'){
+      if(d.acao==='play')timerPlay();
+      else if(d.acao==='pause')timerPause();
+      else if(d.acao==='reset')timerReset();
+    }
+    else if(d.tipo==='estado')broadcastEstado();
+  };
+
+  document.addEventListener('keydown',(e)=>{
+    if(e.key==='ArrowRight'||e.key===' ')navigate(idx+1);
+    else if(e.key==='ArrowLeft')navigate(idx-1);
+    else if(e.key==='Home')navigate(0);
+    else if(e.key==='End')navigate(slides.length-1);
+    else if(e.key==='p'||e.key==='P'){if(timerRunning)timerPause();else timerPlay();}
+  });
+
+  broadcastEstado();
+}
+
+function _escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+async function _initPreview(){
+  document.title='Preview Slides · AROS';
+  let slides=[];
+  try{slides=JSON.parse(localStorage.getItem('aros_preview_slides')||'[]');}catch(e){}
+  if(!slides.length){document.body.innerHTML='<div style="color:#fff;font-family:sans-serif;padding:40px;background:#111;min-height:100vh">Nenhum slide pra pré-visualizar.</div>';return;}
+  slides=slides.map(_slideMigrar);
+  let idx=0;
+  document.body.innerHTML=`<style>
+    html,body{margin:0;padding:0;background:#fff;color:#000;font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;overflow:hidden;height:100vh}
+    #pv-header{position:fixed;top:0;left:0;right:0;height:44px;background:#000;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:1.5px;z-index:10}
+    #pv-stage{position:fixed;top:44px;left:0;right:0;bottom:52px;display:flex;padding:48px 64px;box-sizing:border-box;background:#fff;overflow:hidden}
+    #pv-nav{position:fixed;bottom:0;left:0;right:0;height:52px;background:#f7f7f7;border-top:1px solid #e5e5e5;display:flex;align-items:center;justify-content:center;gap:10px;z-index:10}
+    #pv-nav button{background:#fff;border:1px solid #ccc;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;color:#333;font-family:inherit}
+    #pv-nav button:hover:not(:disabled){background:#eee}
+    #pv-nav button:disabled{opacity:.4;cursor:not-allowed}
+    #pv-pos{font-family:'JetBrains Mono',monospace;font-size:12px;color:#666;letter-spacing:2px;min-width:120px;text-align:center}
+    .slide-capa{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif}
+    .slide-capa .sim{font-family:inherit;font-size:clamp(42px,5.5vw,80px);font-weight:700;color:#000;line-height:1.1}
+    .slide-capa .caso{font-family:inherit;font-size:clamp(42px,5.5vw,80px);font-weight:700;color:#000;line-height:1.1}
+    .slide-perg{flex:1;display:flex;flex-direction:column;gap:10px;width:100%;min-height:0}
+    .slide-perg .pcaso{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(40px,4.5vw,72px);font-weight:700;color:#000;line-height:1;letter-spacing:-.5px}
+    .slide-perg .penun-label{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(20px,2vw,28px);font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
+    .slide-perg .penun{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(16px,1.5vw,24px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap}
+    .slide-perg .pperg{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(20px,2vw,28px);font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
+    .slide-perg .ptxt{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(16px,1.5vw,24px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap}
+    .slide-perg .pbody{display:flex;gap:32px;flex:1;min-height:0;align-items:flex-start;margin-top:8px}
+    .slide-perg .pbody.dir{flex-direction:row}
+    .slide-perg .pbody.baixo,.slide-perg .pbody.grande{flex-direction:column}
+    .slide-perg .ptext-col{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0;overflow:hidden}
+    .slide-perg .pimg-col{display:flex;align-items:center;justify-content:center}
+    .slide-perg .pbody.dir .pimg-col{flex:0 0 45%;max-width:45%;align-self:stretch}
+    .slide-perg .pbody.baixo .pimg-col,.slide-perg .pbody.grande .pimg-col{width:100%;flex:1;min-height:0}
+    .slide-perg .pbody.grande .ptext-col{flex:0 0 auto}
+    .slide-perg .pimg-col img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
+    .slide-perg .pbody.grande .pimg-col img{max-height:65vh}
+    .slide-imgpura{flex:1;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+    .slide-imgpura img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
+  </style>
+  <div id="pv-header">
+    <span>👁 PREVIEW · COMO O ALUNO VAI VER</span>
+    <span style="opacity:.7">←/→ · Espaço · Home/End · Esc</span>
+  </div>
+  <div id="pv-stage"></div>
+  <div id="pv-nav">
+    <button id="pv-first">⏮ Primeiro</button>
+    <button id="pv-prev">◀ Anterior</button>
+    <span id="pv-pos">—</span>
+    <button id="pv-next">Próximo ▶</button>
+    <button id="pv-last">Último ⏭</button>
+  </div>`;
+  function render(){
+    document.getElementById('pv-stage').innerHTML=_renderSlideHTML(slides[idx]);
+    document.getElementById('pv-pos').textContent='SLIDE '+(idx+1)+' / '+slides.length;
+    document.getElementById('pv-first').disabled=idx===0;
+    document.getElementById('pv-prev').disabled=idx===0;
+    document.getElementById('pv-next').disabled=idx>=slides.length-1;
+    document.getElementById('pv-last').disabled=idx>=slides.length-1;
+  }
+  function go(d){if(d===Infinity)idx=slides.length-1;else if(d===-Infinity)idx=0;else idx=Math.max(0,Math.min(slides.length-1,idx+d));render();}
+  document.getElementById('pv-first').onclick=()=>go(-Infinity);
+  document.getElementById('pv-prev').onclick=()=>go(-1);
+  document.getElementById('pv-next').onclick=()=>go(1);
+  document.getElementById('pv-last').onclick=()=>go(Infinity);
+  document.addEventListener('keydown',(e)=>{
+    if(e.key==='ArrowRight'||e.key===' ')go(1);
+    else if(e.key==='ArrowLeft')go(-1);
+    else if(e.key==='Home')go(-Infinity);
+    else if(e.key==='End')go(Infinity);
+    else if(e.key==='Escape')window.close();
+  });
+  render();
+}
+
+function _renderSlideHTML(s){
+  if(!s)return '';
+  if(s.imagemPura){
+    return s.imagem?`<div class="slide-imgpura"><img src="${s.imagem}" alt=""/></div>`:'<div class="slide-imgpura" style="color:#aaa;display:flex;align-items:center;justify-content:center;flex:1">(slide imagem pronta sem imagem)</div>';
+  }
+  if(s.capa){
+    const sim=_ensureHTML(s.simNome||s.titulo||'');
+    const caso=_ensureHTML(s.casoLabel||s.texto||'');
+    return `<div class="slide-capa">
+      ${sim?`<div class="sim">${sim}</div>`:''}
+      ${caso?`<div class="caso">${caso}</div>`:''}
+    </div>`;
+  }
+  const pos=(s.imagemPos||'baixo');
+  const ct=_escHtml(s.casoTitulo||'');
+  const en=_ensureHTML(s.enunciado||'');
+  const pt=_escHtml(s.pergTitulo||'');
+  const px=_ensureHTML(s.pergTexto||'');
+  const img=s.imagem?`<div class="pimg-col"><img src="${s.imagem}" alt=""/></div>`:'';
+  const enunBlock=en?`<div class="penun-label">Enunciado</div><div class="penun">${en}</div>`:'';
+  // Em 'grande': imagem domina, texto fica compacto em cima
+  if(pos==='grande'&&s.imagem){
+    return `<div class="slide-perg">
+      ${ct?`<div class="pcaso">${ct}</div>`:''}
+      ${enunBlock}
+      ${pt?`<div class="pperg">${pt}</div>`:''}
+      ${px?`<div class="ptxt">${px}</div>`:''}
+      <div class="pbody grande">${img}</div>
+    </div>`;
+  }
+  // 'direita': texto à esquerda, imagem à direita
+  if(pos==='direita'&&s.imagem){
+    return `<div class="slide-perg">
+      ${ct?`<div class="pcaso">${ct}</div>`:''}
+      <div class="pbody dir">
+        <div class="ptext-col">
+          ${enunBlock}
+          ${pt?`<div class="pperg">${pt}</div>`:''}
+          ${px?`<div class="ptxt">${px}</div>`:''}
+        </div>
+        ${img}
+      </div>
+    </div>`;
+  }
+  // 'baixo' (default): texto em cima, imagem embaixo
+  return `<div class="slide-perg">
+    ${ct?`<div class="pcaso">${ct}</div>`:''}
+    ${enunBlock}
+    ${pt?`<div class="pperg">${pt}</div>`:''}
+    ${px?`<div class="ptxt">${px}</div>`:''}
+    ${s.imagem?`<div class="pbody baixo">${img}</div>`:''}
+  </div>`;
+}
+
 boot();
 
 async function loadSims(){
@@ -10229,6 +10591,18 @@ window.saveProfCfg=async()=>{
   setTimeout(()=>m.classList.add('hidden'),2000);
 };
 
+window.saveCronLimit=async()=>{
+  const raw=(document.getElementById('cfg-cron-limit')?.value||'').trim();
+  const m=document.getElementById('cfg-cron-msg');
+  if(!/^\d{1,2}:\d{2}$/.test(raw)){m.className='al al-e';m.textContent='Use o formato mm:ss (ex: 07:30).';m.classList.remove('hidden');return;}
+  const [mm,ss]=raw.split(':').map(Number);
+  if(ss>=60){m.className='al al-e';m.textContent='Segundos inválidos.';m.classList.remove('hidden');return;}
+  S.cfg.cronometroLimite=raw;
+  await setDoc(doc(db,'config','settings'),S.cfg);
+  m.className='al al-s';m.textContent='✅ Tempo limite salvo!';m.classList.remove('hidden');
+  setTimeout(()=>m.classList.add('hidden'),2000);
+};
+
 window.saveCfgUrl=async()=>{
   const url=(document.getElementById('cfg-url')?.value||'').trim().replace(/\/$/,'');
   const m=document.getElementById('cfg-url-msg');
@@ -10286,6 +10660,8 @@ window.switchCoTab=(tab,btn)=>{
     if(apiKeyEl&&S.cfg.aiKey)apiKeyEl.value=S.cfg.aiKey;
     const allowedTabs=S.cfg.profTabs||['simulados','trocas','professores','listas','desempenho','checklist'];
     document.querySelectorAll('.prof-tab-chk').forEach(chk=>{chk.checked=allowedTabs.includes(chk.value);});
+    const cronEl=document.getElementById('cfg-cron-limit');
+    if(cronEl)cronEl.value=S.cfg.cronometroLimite||'07:30';
   }
 };
 
@@ -10679,6 +11055,12 @@ function renderCkCasos(resp){
 
     // Body (collapsible)
     let body=`<div id="ck-body-${ci}" style="display:${isOpen?'block':'none'};padding:16px 20px;background:var(--bg2)">`;
+
+    // Projeção (apenas bloco Criar)
+    if(_ckBloco==='criar'){
+      const numSlides=(caso.slides||[]).length;
+      body+=`<div id="ck-proj-${ci}" style="margin-bottom:14px">${renderProjPanel(ci,numSlides)}</div>`;
+    }
 
     // Enunciado + imagens (se a revisão tiver exportado esses campos)
     if(caso.enunciado||(caso.enunciadoImagens||[]).length){
@@ -11233,6 +11615,464 @@ window.finalizarChecklist=async(silent=false)=>{
   }
 };
 
+// ══════════════════════════════════════════════════════════════
+// SLIDES DE PROJEÇÃO (bloco Criar)
+// ══════════════════════════════════════════════════════════════
+let _slidesEditCasoIdx=-1;
+let _slidesEditList=[];
+let _slidesOpen=new Set();
+const _slideUid=()=>'sl_'+Math.random().toString(36).slice(2,9);
+function _slideSnippet(s){
+  const raw=(s.simNome||s.casoLabel||s.pergTitulo||s.enunciado||s.pergTexto||'');
+  const tmp=document.createElement('div');tmp.innerHTML=raw;
+  const txt=(tmp.textContent||'').replace(/\s+/g,' ').trim();
+  return txt.length>70?txt.slice(0,70)+'…':txt;
+}
+window.toggleSlideOpen=(i)=>{
+  if(_slidesOpen.has(i))_slidesOpen.delete(i);else _slidesOpen.add(i);
+  _slidesRender();
+};
+window.expandAllSlides=()=>{_slidesEditList.forEach((_,i)=>_slidesOpen.add(i));_slidesRender();};
+window.collapseAllSlides=()=>{_slidesOpen.clear();_slidesRender();};
+
+function gerarSlidesPadrao(caso,casoIdx){
+  const slides=[];
+  const simNome=(S.sims?.find(s=>s.id===_ckSimId)?.nome||'').trim();
+  const casoNome=(caso.nome||'').trim();
+  const casoNum='CASO '+(casoIdx+1);
+  const casoLabel=casoNum+(casoNome?': '+casoNome:'');
+  // Slide 1 — Capa: nome do simulado + título do caso
+  slides.push({id:_slideUid(),capa:true,simNome,casoLabel,imagem:'',imagemPos:'baixo'});
+  // Slides N — CASO X / enunciado / Pergunta N / texto pergunta
+  const enun=(caso.enunciado||'').trim();
+  const enunImgs=Array.isArray(caso.enunciadoImagens)?caso.enunciadoImagens:[];
+  (caso.perguntas||[]).forEach((p,pi)=>{
+    const pergTitulo='Pergunta '+(pi+1);
+    const pergTexto=(p.titulo||'').trim();
+    const pImgs=Array.isArray(p.perguntaImagens)?p.perguntaImagens:[];
+    const img=enunImgs[0]||pImgs[0]||'';
+    slides.push({id:_slideUid(),casoTitulo:casoNum,enunciado:enun,pergTitulo,pergTexto,imagem:img,imagemPos:'baixo'});
+  });
+  return slides;
+}
+
+// Migração de slides legados (formato antigo titulo+texto)
+function _slideMigrar(s){
+  if(!s)return s;
+  if(s.casoTitulo!==undefined||s.simNome!==undefined)return s; // já novo formato
+  if(s.titulo===undefined&&s.texto===undefined)return s;
+  if(s.capa){return {...s,simNome:s.titulo||'',casoLabel:s.texto||'',imagemPos:s.imagemPos||'baixo'};}
+  // tenta separar enunciado de pergunta texto (split em \n\n)
+  const txt=(s.texto||'').trim();
+  const idx=txt.indexOf('\n\n');
+  const enun=idx>=0?txt.slice(0,idx):'';
+  const perg=idx>=0?txt.slice(idx+2):txt;
+  return {...s,casoTitulo:'',enunciado:enun,pergTitulo:s.titulo||'',pergTexto:perg,imagemPos:s.imagemPos||'baixo'};
+}
+
+window.openSlidesModal=(ci)=>{
+  const caso=_ckTemplateEdit.casos[ci];if(!caso)return;
+  _slidesEditCasoIdx=ci;
+  let slides=Array.isArray(caso.slides)?JSON.parse(JSON.stringify(caso.slides)):[];
+  if(!slides.length)slides=gerarSlidesPadrao(caso,ci);
+  slides=slides.map(_slideMigrar);
+  slides.forEach(s=>{if(!s.id)s.id=_slideUid();});
+  _slidesEditList=slides;
+  _slidesOpen=new Set();
+  document.getElementById('msl-sub').textContent='Caso '+(ci+1)+' — '+((caso.nome||'').trim()||'(sem nome)');
+  _slidesRender();
+  document.getElementById('modal-slides').classList.remove('hidden');
+};
+
+function _slidesRender(){
+  const list=document.getElementById('msl-list');
+  const counter=document.getElementById('msl-counter');
+  if(!list)return;
+  counter.textContent=_slidesEditList.length+' slide'+(_slidesEditList.length!==1?'s':'');
+  if(!_slidesEditList.length){
+    list.innerHTML='<div class="al al-i">Nenhum slide. Clique em "Adicionar slide" ou "Regenerar padrão".</div>';
+    return;
+  }
+  list.innerHTML=_slidesEditList.map((s,i)=>{
+    const tipoLabel=s.imagemPura?'🖼️ Imagem pronta':(s.capa?'🎯 Capa':'📝 Pergunta');
+    const tipoColor=s.imagemPura?'var(--orange)':(s.capa?'var(--accent)':'var(--green)');
+    const ec=(v)=>String(v||'').replace(/"/g,'&quot;');
+    const isOpen=_slidesOpen.has(i);
+    const snippet=_slideSnippet(s);
+    const hasImg=!!s.imagem;
+    let camposHtml='';
+    if(s.imagemPura){
+      camposHtml=`<div style="padding:18px;background:var(--bg);border:1px dashed var(--border);border-radius:var(--rs);font-size:12px;color:var(--t2);line-height:1.5">
+        Este slide vai exibir <strong>apenas a imagem ao lado</strong>, ocupando o slide inteiro. Use isso quando você já tem uma imagem pronta (PowerPoint exportado, Canva, etc) com tudo desenhado e não quer que o sistema monte o layout.
+      </div>`;
+    }else if(s.capa){
+      camposHtml=`
+        <label class="fl" style="margin-top:4px">Nome do simulado</label>
+        ${_rtEditor(s.simNome,i,'simNome','Ex: Simulado 3')}
+        <div style="height:8px"></div>
+        <label class="fl">Título do caso</label>
+        ${_rtEditor(s.casoLabel,i,'casoLabel','Ex: CASO 1: Meningioma')}`;
+    }else{
+      camposHtml=`
+        <label class="fl" style="margin-top:4px">Enunciado</label>
+        ${_rtEditor(s.enunciado,i,'enunciado','Paciente masculino, 56 anos...')}
+        <div style="height:8px"></div>
+        <label class="fl">Título da pergunta</label>
+        <input class="fc" value="${ec(s.pergTitulo)}" placeholder="Pergunta 1" oninput="_slidesEditList[${i}].pergTitulo=this.value" style="margin-bottom:8px;font-size:13px;font-weight:600"/>
+        <label class="fl">Texto da pergunta</label>
+        ${_rtEditor(s.pergTexto,i,'pergTexto','Desenhe o polígono de Willis...')}`;
+    }
+    const posSel=(s.capa||s.imagemPura)?'':`
+      <div style="margin-top:8px">
+        <label class="fl" style="font-size:11px">Posição da imagem</label>
+        <select onchange="_slidesEditList[${i}].imagemPos=this.value;_slidesRender()" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;background:var(--bg2);color:var(--text);font-family:inherit;font-size:12px">
+          <option value="baixo" ${(s.imagemPos||'baixo')==='baixo'?'selected':''}>⬇️ Embaixo (centralizada)</option>
+          <option value="direita" ${s.imagemPos==='direita'?'selected':''}>➡️ À direita do texto</option>
+          <option value="grande" ${s.imagemPos==='grande'?'selected':''}>🔍 Grande (ocupa o slide)</option>
+        </select>
+      </div>`;
+    return `<div style="border:1.5px solid ${isOpen?'var(--accent)':'var(--border)'};border-radius:var(--r);background:var(--bg2);overflow:hidden;box-shadow:${isOpen?'0 4px 14px -6px rgba(47,129,247,.35)':'0 1px 2px rgba(0,0,0,.04)'};transition:border-color .15s,box-shadow .15s">
+      <div onclick="toggleSlideOpen(${i})" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;flex-wrap:wrap;transition:background .15s">
+        <span style="font-size:13px;color:var(--t2);transition:transform .15s;display:inline-block;transform:rotate(${isOpen?'90':'0'}deg);width:14px;flex-shrink:0">▶</span>
+        <span style="font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-dim);padding:3px 8px;border-radius:4px;flex-shrink:0">SLIDE ${i+1}</span>
+        <span style="font-size:11px;font-weight:700;color:${tipoColor};padding:3px 7px;border:1px solid ${tipoColor};border-radius:4px;flex-shrink:0;background:rgba(0,0,0,.04)">${tipoLabel}</span>
+        ${hasImg?'<span style="font-size:13px" title="Este slide tem imagem">📎</span>':''}
+        <span style="flex:1;min-width:0;font-size:12px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${snippet||'<em style="opacity:.5">(vazio)</em>'}</span>
+        <div onclick="event.stopPropagation()" style="display:flex;gap:5px;flex-shrink:0">
+          <button class="btn ${s.imagemPura?'btn-p':'btn-s'} btn-sm" onclick="slideToggleImagemPura(${i})" title="${s.imagemPura?'Voltar pra slide com texto':'Substituir por uma imagem pronta'}" style="font-size:11px">${s.imagemPura?'↩️':'🖼️'}</button>
+          <button class="btn btn-s btn-sm" onclick="slideMove(${i},-1)" ${i===0?'disabled':''} title="Mover pra cima" style="font-size:11px">▲</button>
+          <button class="btn btn-s btn-sm" onclick="slideMove(${i},1)" ${i===_slidesEditList.length-1?'disabled':''} title="Mover pra baixo" style="font-size:11px">▼</button>
+          <button class="btn btn-d btn-sm" onclick="slideRemove(${i})" title="Remover" style="font-size:11px">✕</button>
+        </div>
+      </div>
+      ${isOpen?`<div style="padding:14px 16px;border-top:1px solid var(--border);background:var(--bg)">
+        <div style="display:grid;grid-template-columns:1fr 220px;gap:14px;align-items:start">
+          <div>${camposHtml}</div>
+          <div>
+            ${s.imagem?`<div style="position:relative;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#fff">
+              <img src="${s.imagem}" style="width:100%;max-height:140px;object-fit:contain;display:block"/>
+              <button onclick="slideRemoveImg(${i})" title="Remover imagem" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:11px">✕</button>
+            </div>`:`<label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1.5px dashed var(--border);border-radius:8px;padding:18px;cursor:pointer;background:var(--bg3);min-height:90px">
+              <span style="font-size:22px">🖼️</span>
+              <span style="font-size:11px;color:var(--t2);text-align:center">Anexar imagem/GIF<br><span style="color:var(--t2);opacity:.7">até 15MB</span></span>
+              <input type="file" accept="image/*" onchange="slideUploadImg(${i},this.files[0]);this.value=''" style="display:none"/>
+            </label>`}
+            ${posSel}
+          </div>
+        </div>
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── Mini editor de texto (B/I/U/A+/A-/limpar) ──
+function _sanitizeSlideHTML(html){
+  if(!html)return '';
+  const tmp=document.createElement('div');
+  tmp.innerHTML=String(html);
+  tmp.querySelectorAll('script,style,iframe,object,embed,link,meta').forEach(n=>n.remove());
+  tmp.querySelectorAll('*').forEach(el=>{
+    [...el.attributes].forEach(a=>{
+      const n=a.name.toLowerCase();
+      if(n.startsWith('on'))el.removeAttribute(a.name);
+      else if(n==='href'&&/^javascript:/i.test(a.value))el.removeAttribute(a.name);
+      else if(n==='style'){
+        // só permite font-size, font-weight, font-style, text-decoration
+        const safe=a.value.split(';').map(s=>s.trim()).filter(s=>/^(font-size|font-weight|font-style|text-decoration)\s*:/i.test(s)).join('; ');
+        if(safe)el.setAttribute('style',safe);else el.removeAttribute('style');
+      }
+    });
+  });
+  return tmp.innerHTML;
+}
+function _ensureHTML(s){
+  if(!s)return '';
+  if(/<[a-z][^>]*>/i.test(s))return _sanitizeSlideHTML(s);
+  return _escHtml(s).replace(/\n/g,'<br>');
+}
+function _rtEditor(value,i,field,placeholder){
+  const html=_ensureHTML(value);
+  const ph=(placeholder||'').replace(/"/g,'&quot;');
+  return `<div class="rt-wrap" data-empty="${html?'0':'1'}">
+    <div class="rt-tb">
+      <button type="button" onclick="rtCmd(this,'bold')" title="Negrito (Ctrl+B)"><b>B</b></button>
+      <button type="button" onclick="rtCmd(this,'italic')" title="Itálico (Ctrl+I)"><i>I</i></button>
+      <button type="button" onclick="rtCmd(this,'underline')" title="Sublinhado"><u>U</u></button>
+      <span style="width:1px;background:var(--border);align-self:stretch;margin:2px 4px"></span>
+      <button type="button" onclick="rtCmd(this,'fontSize','5')" title="Aumentar">A+</button>
+      <button type="button" onclick="rtCmd(this,'fontSize','2')" title="Diminuir" style="font-size:9px">A-</button>
+      <button type="button" onclick="rtCmd(this,'removeFormat')" title="Limpar formatação">⌫</button>
+    </div>
+    <div class="rt-ed" contenteditable="true" data-i="${i}" data-field="${field}" data-ph="${ph}"
+      oninput="rtChanged(this)" onblur="rtChanged(this)"
+      onkeyup="this.closest('.rt-wrap').dataset.empty=this.textContent.trim()?'0':'1'"
+    >${html}</div>
+  </div>`;
+}
+window.rtCmd=(btn,cmd,arg)=>{
+  const wrap=btn.closest('.rt-wrap');
+  const ed=wrap.querySelector('.rt-ed');
+  ed.focus();
+  try{document.execCommand('styleWithCSS',false,true);}catch(e){}
+  document.execCommand(cmd,false,arg||null);
+  rtChanged(ed);
+};
+window.rtChanged=(ed)=>{
+  const i=Number(ed.dataset.i);
+  const f=ed.dataset.field;
+  if(isNaN(i)||!f||!_slidesEditList[i])return;
+  _slidesEditList[i][f]=_sanitizeSlideHTML(ed.innerHTML);
+};
+
+window.slideAdd=()=>{const i=_slidesEditList.length;_slidesEditList.push({id:_slideUid(),casoTitulo:'',enunciado:'',pergTitulo:'',pergTexto:'',imagem:'',imagemPos:'baixo'});_slidesOpen.add(i);_slidesRender();};
+window.slideToggleImagemPura=(i)=>{
+  const s=_slidesEditList[i];if(!s)return;
+  s.imagemPura=!s.imagemPura;
+  _slidesRender();
+};
+window.slideMove=(idx,dir)=>{const t=idx+dir;if(t<0||t>=_slidesEditList.length)return;const a=_slidesEditList[idx];_slidesEditList[idx]=_slidesEditList[t];_slidesEditList[t]=a;_slidesRender();};
+window.slideRemove=(idx)=>{if(!confirm('Remover este slide?'))return;_slidesEditList.splice(idx,1);_slidesRender();};
+window.slideRemoveImg=(idx)=>{if(!confirm('Remover imagem deste slide?'))return;_slidesEditList[idx].imagem='';_slidesRender();};
+
+window.slideUploadImg=async(idx,f)=>{
+  if(!f)return;
+  if(f.size>15*1024*1024){alert('Imagem muito grande (máx 15MB).');return;}
+  if(!_ckSimId){alert('Simulado não identificado.');return;}
+  const caso=_ckTemplateEdit.casos[_slidesEditCasoIdx];
+  const casoId=caso.id||('caso_'+_slidesEditCasoIdx);
+  if(!caso.id)caso.id=casoId;
+  const safe=f.name.replace(/[^a-z0-9._-]/gi,'_');
+  const path='simulados/'+_ckSimId+'/slides/'+casoId+'/'+Date.now()+'_'+safe;
+  const slideEl=document.querySelectorAll('#msl-list > div')[idx];
+  const fileLbl=slideEl?.querySelector('label');
+  if(fileLbl)fileLbl.innerHTML='<div style="width:18px;height:18px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></div><span style="font-size:11px;color:var(--accent);margin-top:6px">Enviando…</span>';
+  try{
+    const sref=window._fbStorage.ref(window._fbStorage.storage,path);
+    await window._fbStorage.uploadBytes(sref,f);
+    const url=await window._fbStorage.getDownloadURL(sref);
+    _slidesEditList[idx].imagem=url;
+    _slidesRender();
+  }catch(e){
+    console.error('slideUploadImg',e);
+    alert('Erro ao enviar imagem: '+(e.code||e.message||e));
+    _slidesRender();
+  }
+};
+
+window.slidesRegerarPadrao=()=>{
+  if(_slidesEditList.length&&!confirm('Isso substitui os slides atuais pelo padrão gerado do enunciado e perguntas. Continuar?'))return;
+  const caso=_ckTemplateEdit.casos[_slidesEditCasoIdx];
+  _slidesEditList=gerarSlidesPadrao(caso,_slidesEditCasoIdx);
+  _slidesRender();
+};
+
+window.previewSlides=()=>{
+  if(!_slidesEditList.length){alert('Nenhum slide pra pré-visualizar. Adicione ou regenere primeiro.');return;}
+  try{localStorage.setItem('aros_preview_slides',JSON.stringify(_slidesEditList));}catch(e){alert('Erro ao preparar preview: '+e.message);return;}
+  const url=window.location.pathname+'?modo=preview';
+  const win=window.open(url,'aros_preview','width=1280,height=720');
+  if(!win){alert('A janela foi bloqueada pelo navegador. Permita pop-ups e clique novamente.');}
+};
+
+window.saveSlidesModal=async()=>{
+  if(_slidesEditCasoIdx<0)return;
+  const caso=_ckTemplateEdit.casos[_slidesEditCasoIdx];
+  if(!caso.id)caso.id='caso_'+_slidesEditCasoIdx;
+  caso.slides=JSON.parse(JSON.stringify(_slidesEditList));
+  const blocoPath='checklists/'+_ckSimId+'/meta/template'+(_ckBlocoEdit==='oral'?'Oral':'Criar');
+  try{
+    const template=JSON.parse(JSON.stringify(_ckTemplateEdit));
+    await setDoc(doc(db,blocoPath),template);
+    if(_ckBlocoEdit==='oral')_ckTemplate.oral=template;else _ckTemplate.criar=template;
+    CM('modal-slides');
+    renderTemplateEditor();
+  }catch(e){
+    console.error('saveSlidesModal',e);
+    alert('Erro ao salvar slides: '+(e.message||e));
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+// PROJEÇÃO — controle do lado do prof (BroadcastChannel + janela)
+// ══════════════════════════════════════════════════════════════
+const _projAtivo={}; // ci -> {channel, win, idx, total, timerMs, timerRunning, simId, casoId}
+
+function renderProjPanel(ci,numSlides){
+  const caso=window._ckTemplateCurrent?.casos?.[ci];
+  const casoId=caso?.id||('caso_'+ci);
+  const state=_projAtivo[ci];
+  if(!numSlides){
+    return `<div style="padding:10px 14px;background:var(--bg);border:1px dashed var(--border);border-radius:var(--rs);font-size:12px;color:var(--t2)">🎬 Nenhum slide cadastrado para este caso. Configure no editor de template.</div>`;
+  }
+  if(!state){
+    return `<button onclick="iniciarProjecao(${ci})" class="btn btn-p" style="width:100%;padding:14px;font-size:14px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--blue));color:#fff;border:none;border-radius:var(--rs);box-shadow:0 4px 14px -4px rgba(47,129,247,.55)">▶ Projetar caso (${numSlides} slide${numSlides!==1?'s':''})</button>`;
+  }
+  const idx=state.idx||0;
+  const total=state.total||numSlides;
+  const ms=state.timerRunning?(Date.now()-state.timerStartLocal+state.timerMsBase):(state.timerMs||0);
+  const limStr=S.cfg.cronometroLimite||'07:30';
+  const [lm,ls]=limStr.split(':').map(Number);
+  const limMs=((lm||0)*60+(ls||0))*1000;
+  const over=ms>limMs;
+  const tStr=_fmtTimer(ms);
+  return `<div style="border:2px solid var(--accent);border-radius:var(--r);overflow:hidden;background:var(--bg)">
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#000;color:#fff">
+      <span style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:#ccc">CRONÔMETRO</span>
+      <span id="proj-timer-${ci}" style="font-family:JetBrains Mono,monospace;font-size:22px;font-weight:700;letter-spacing:2px;color:${over?'#ff3b3b':'#fff'};margin-left:auto">${tStr}</span>
+      <button onclick="projecaoTimer(${ci},'${state.timerRunning?'pause':'play'}')" title="${state.timerRunning?'Pausar':'Iniciar'}" style="background:transparent;color:#fff;border:1px solid #444;border-radius:4px;width:32px;height:30px;cursor:pointer;font-size:13px">${state.timerRunning?'⏸':'▶'}</button>
+      <button onclick="projecaoTimer(${ci},'reset')" title="Zerar" style="background:transparent;color:#fff;border:1px solid #444;border-radius:4px;width:32px;height:30px;cursor:pointer;font-size:13px">⟲</button>
+    </div>
+    <div style="padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <button onclick="projecaoNav(${ci},'first')" ${idx===0?'disabled':''} class="btn btn-s btn-sm" title="Primeiro">⏮</button>
+      <button onclick="projecaoNav(${ci},'prev')" ${idx===0?'disabled':''} class="btn btn-s btn-sm">◀ Anterior</button>
+      <span style="flex:1;text-align:center;font-family:JetBrains Mono,monospace;font-size:13px;font-weight:700;color:var(--accent)">Slide ${idx+1} / ${total}</span>
+      <button onclick="projecaoNav(${ci},'next')" ${idx>=total-1?'disabled':''} class="btn btn-p btn-sm">Próximo ▶</button>
+      <button onclick="projecaoNav(${ci},'last')" ${idx>=total-1?'disabled':''} class="btn btn-s btn-sm" title="Último">⏭</button>
+    </div>
+    <div style="padding:0 14px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:10px">
+      <span style="font-size:11px;color:var(--t2)">Atalhos: ←/→/Espaço · Home/End · P (play/pause)</span>
+      <span style="flex:1"></span>
+      <button onclick="projecaoReabrirJanela(${ci})" class="btn btn-s btn-sm" title="Reabre a janela se foi fechada">🔄 Reabrir janela</button>
+      <button onclick="encerrarProjecao(${ci})" class="btn btn-d btn-sm">⛔ Encerrar</button>
+    </div>
+  </div>`;
+}
+
+function _fmtTimer(ms){const t=Math.floor(ms/1000);const mm=String(Math.floor(t/60)).padStart(2,'0');const ss=String(t%60).padStart(2,'0');return mm+':'+ss;}
+
+function _atualizaPainelProj(ci){
+  const el=document.getElementById('ck-proj-'+ci);
+  if(el){
+    const caso=window._ckTemplateCurrent?.casos?.[ci];
+    const numSlides=(caso?.slides||[]).length;
+    el.innerHTML=renderProjPanel(ci,numSlides);
+  }
+  _atualizaBarraFixa();
+}
+
+function _ensureBarraFixaStyle(){
+  if(document.getElementById('proj-fixed-bar-style'))return;
+  const st=document.createElement('style');
+  st.id='proj-fixed-bar-style';
+  st.textContent=`
+    #proj-fixed-bar{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:99999!important;background:#000!important;color:#fff!important;display:flex!important;align-items:center;gap:12px;padding:9px 16px;box-shadow:0 4px 16px rgba(0,0,0,.5);font-family:-apple-system,Segoe UI,Roboto,sans-serif;flex-wrap:wrap;box-sizing:border-box;width:100vw}
+    #proj-fixed-bar button{font-family:inherit}
+    body.has-proj-bar{padding-top:54px!important}
+  `;
+  document.head.appendChild(st);
+}
+
+function _atualizaBarraFixa(){
+  const cis=Object.keys(_projAtivo);
+  let bar=document.getElementById('proj-fixed-bar');
+  if(!cis.length){
+    if(bar)bar.remove();
+    document.body.classList.remove('has-proj-bar');
+    return;
+  }
+  _ensureBarraFixaStyle();
+  const ci=Number(cis[cis.length-1]);
+  const state=_projAtivo[ci];
+  const idx=state.idx||0;
+  const total=state.total||1;
+  const ms=state.timerRunning?(Date.now()-state.timerStartLocal+state.timerMsBase):(state.timerMs||0);
+  const limStr=S.cfg.cronometroLimite||'07:30';
+  const [lm,ls]=limStr.split(':').map(Number);
+  const limMs=((lm||0)*60+(ls||0))*1000;
+  const over=ms>limMs;
+  const tStr=_fmtTimer(ms);
+  if(!bar){
+    bar=document.createElement('div');
+    bar.id='proj-fixed-bar';
+    document.documentElement.appendChild(bar);
+  }
+  bar.innerHTML=`
+    <span style="font-size:10px;font-weight:700;letter-spacing:2px;color:#888;background:#222;padding:3px 8px;border-radius:4px">● PROJETANDO</span>
+    <span style="font-family:JetBrains Mono,monospace;font-size:22px;font-weight:700;letter-spacing:2px;color:${over?'#ff3b3b':'#fff'};min-width:80px">${tStr}</span>
+    <button onclick="projecaoTimer(${ci},'${state.timerRunning?'pause':'play'}')" title="${state.timerRunning?'Pausar':'Iniciar'}" style="background:transparent;color:#fff;border:1px solid #444;border-radius:4px;width:30px;height:28px;cursor:pointer;font-size:13px">${state.timerRunning?'⏸':'▶'}</button>
+    <button onclick="projecaoTimer(${ci},'reset')" title="Zerar cronômetro" style="background:transparent;color:#fff;border:1px solid #444;border-radius:4px;width:30px;height:28px;cursor:pointer;font-size:13px">⟲</button>
+    <span style="width:1px;height:24px;background:#333;margin:0 4px"></span>
+    <button onclick="projecaoNav(${ci},'prev')" ${idx===0?'disabled':''} style="background:#1a1a1a;color:#fff;border:1px solid #333;border-radius:4px;padding:5px 10px;cursor:${idx===0?'not-allowed':'pointer'};font-size:12px;opacity:${idx===0?'.4':'1'}">◀ Anterior</button>
+    <span style="font-family:JetBrains Mono,monospace;font-size:12px;color:#fff;letter-spacing:1px;font-weight:700;min-width:60px;text-align:center">${idx+1} / ${total}</span>
+    <button onclick="projecaoNav(${ci},'next')" ${idx>=total-1?'disabled':''} style="background:var(--accent);color:#fff;border:none;border-radius:4px;padding:6px 14px;cursor:${idx>=total-1?'not-allowed':'pointer'};font-size:12px;font-weight:700;opacity:${idx>=total-1?'.4':'1'}">Próximo ▶</button>
+    <span style="flex:1;min-width:10px"></span>
+    <button onclick="encerrarProjecao(${ci})" title="Encerrar projeção" style="background:transparent;color:#ff7b7b;border:1px solid #553;border-radius:4px;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:600">⛔ Encerrar</button>
+  `;
+  document.body.classList.add('has-proj-bar');
+}
+
+window.iniciarProjecao=(ci)=>{
+  if(_projAtivo[ci])return;
+  const caso=window._ckTemplateCurrent?.casos?.[ci];
+  if(!caso||!(caso.slides||[]).length){alert('Nenhum slide cadastrado para este caso.');return;}
+  const simId=_ckSimId;
+  const casoId=caso.id||('caso_'+ci);
+  const total=caso.slides.length;
+  const channel=new BroadcastChannel('aros-slides-'+simId+'-'+casoId);
+  const state={simId,casoId,channel,idx:0,total,timerMs:0,timerRunning:false,timerMsBase:0,timerStartLocal:0,win:null,tickInt:null};
+  _projAtivo[ci]=state;
+  channel.onmessage=(ev)=>{
+    const d=ev.data||{};
+    if(d.tipo==='sync'){
+      state.idx=d.idx;
+      state.total=d.total;
+      state.timerMs=d.timerMs;
+      state.timerRunning=d.timerRunning;
+      if(d.timerRunning){state.timerStartLocal=Date.now();state.timerMsBase=d.timerMs;}
+      _atualizaPainelProj(ci);
+    }
+  };
+  // Open window
+  const url=window.location.pathname+'?modo=projecao&sim='+encodeURIComponent(simId)+'&caso='+encodeURIComponent(casoId);
+  state.win=window.open(url,'aros_proj_'+simId+'_'+casoId,'width=1280,height=720');
+  if(!state.win){alert('A janela foi bloqueada pelo navegador. Permita pop-ups e clique novamente.');delete _projAtivo[ci];channel.close();return;}
+  // Pede estado depois que a janela carregar
+  setTimeout(()=>channel.postMessage({tipo:'estado'}),1500);
+  // Tick local pra atualizar visual do cronômetro
+  state.tickInt=setInterval(()=>{if(state.timerRunning)_atualizaPainelProj(ci);},500);
+  _atualizaPainelProj(ci);
+};
+
+window.projecaoNav=(ci,acao)=>{
+  const st=_projAtivo[ci];if(!st)return;
+  st.channel.postMessage({tipo:acao});
+};
+
+window.projecaoTimer=(ci,acao)=>{
+  const st=_projAtivo[ci];if(!st)return;
+  st.channel.postMessage({tipo:'timer',acao});
+};
+
+window.projecaoReabrirJanela=(ci)=>{
+  const st=_projAtivo[ci];if(!st)return;
+  const url=window.location.pathname+'?modo=projecao&sim='+encodeURIComponent(st.simId)+'&caso='+encodeURIComponent(st.casoId);
+  st.win=window.open(url,'aros_proj_'+st.simId+'_'+st.casoId,'width=1280,height=720');
+  setTimeout(()=>st.channel.postMessage({tipo:'estado'}),1500);
+};
+
+window.encerrarProjecao=(ci)=>{
+  const st=_projAtivo[ci];if(!st)return;
+  if(st.win&&!st.win.closed){try{st.win.close();}catch(e){}}
+  if(st.tickInt)clearInterval(st.tickInt);
+  st.channel.close();
+  delete _projAtivo[ci];
+  _atualizaPainelProj(ci);
+};
+
+// Atalhos de teclado quando há projeção ativa
+document.addEventListener('keydown',(e)=>{
+  const cis=Object.keys(_projAtivo);
+  if(!cis.length)return;
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(tag==='input'||tag==='textarea'||e.target.isContentEditable)return;
+  const ci=Number(cis[cis.length-1]);
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();projecaoNav(ci,'next');}
+  else if(e.key==='ArrowLeft'){e.preventDefault();projecaoNav(ci,'prev');}
+  else if(e.key==='Home'){e.preventDefault();projecaoNav(ci,'first');}
+  else if(e.key==='End'){e.preventDefault();projecaoNav(ci,'last');}
+  else if(e.key==='p'||e.key==='P'){e.preventDefault();const st=_projAtivo[ci];projecaoTimer(ci,st?.timerRunning?'pause':'play');}
+});
+
 // ── Template editor ───────────────────────────────────────────────────────────
 let _ckTemplateEdit={casos:[]};
 let _ckTemplateEditCriar={casos:[]};
@@ -11312,6 +12152,7 @@ function renderTemplateEditor(){
         onclick="event.stopPropagation()"
         style="flex:1;border:none;background:transparent;font-family:inherit;font-size:14px;font-weight:600;outline:none;color:var(--text);min-width:0"/>
       <span style="font-size:12px;color:var(--t2);white-space:nowrap">${perguntas.length} pergunta${perguntas.length!==1?'s':''}</span>
+      ${(_ckBlocoEdit||'criar')==='criar'?`<button class="btn btn-s btn-sm" onclick="openSlidesModal(${ci})" title="Editar slides de projeção deste caso" style="font-size:11px">🎬 Slides${(caso.slides||[]).length?' ('+caso.slides.length+')':''}</button>`:''}
       <button class="btn btn-d btn-sm" onclick="rmCkCaso(${ci})" style="font-size:11px">✕ Remover</button>
     </div>
 
