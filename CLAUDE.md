@@ -41,7 +41,7 @@ Não há build, lint, nem suíte de testes. Mudanças no `index.html` são valid
 
 ## Convenções e restrições (importantes)
 
-1. **Nunca rode `git push`.** O usuário sobe o `index.html` manualmente pelo GitHub web (Add file → Upload files → substituir) no repo público `Tiarlles/aros-simulados`. O diretório local não é um repo git.
+1. **Deploy pelo git (NOVO fluxo).** O diretório local é um repo git conectado a `https://github.com/Tiarlles/aros-simulados` (branch `main`). Quando o usuário autorizar explicitamente ("deploy", "sobe pra produção", etc.), faz `git add -A && git commit -m "..." && git push origin main`. GitHub Pages atualiza `aros.anestreview.com.br` em ~30s. **Não faça push preventivo após edits sem autorização explícita.** Token de autenticação salvo no macOS Keychain (gerado em 2026-05-15).
 2. **Não crie arquivos `.md`** sem o usuário pedir.
 3. **Cloud Function: só deploy quando o usuário autorizar explicitamente.** Não faça deploy preventivo após edits.
 4. **Migrações de dados** são feitas via scripts Node ad-hoc em `/tmp/xlsx-reader/` usando o **Firebase JS SDK como cliente público** (não Admin SDK — sem service account). Funciona porque as Rules permitem os writes necessários.
