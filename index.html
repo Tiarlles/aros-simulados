@@ -3215,6 +3215,25 @@ function _escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&l
 // MODO PROJEÇÃO REMOTA (Firestore live) — usado pelo prof (role=prof) e aluno (role=aluno)
 // Lê projecaoLive/{simId}__{alunoId} via onSnapshot, carrega slides do caso atual, renderiza.
 // ══════════════════════════════════════════════════════════════
+
+// Apaga TODOS os traços (subcoleção strokes) de uma sessão de projeção remota.
+// Firestore NÃO cascateia delete em subcoleções, então precisamos limpar explicitamente
+// sempre que encerrar/desabilitar a apresentação — senão os desenhos voltam quando a sala for reaberta.
+async function _limparStrokesProjLive(simId,alunoId){
+  if(!simId||!alunoId)return;
+  try{
+    const snap=await getDocs(collection(db,`projecaoLive/${simId}__${alunoId}/strokes`));
+    if(snap.empty)return;
+    const batches=[];let batch=writeBatch(db);let n=0;
+    snap.docs.forEach(d=>{
+      batch.delete(d.ref);n++;
+      if(n>=400){batches.push(batch);batch=writeBatch(db);n=0;}
+    });
+    if(n>0)batches.push(batch);
+    await Promise.all(batches.map(b=>b.commit()));
+  }catch(e){console.warn('limparStrokesProjLive:',e);}
+}
+
 async function _initProjecaoLive(simId,alunoId,role){
   if(!simId||!alunoId){document.body.innerHTML='<div style="color:#fff;font-family:sans-serif;padding:40px;background:#111;min-height:100vh">Parâmetros inválidos. Esta janela precisa de sim+aluno na URL.</div>';return;}
   const isProf=role==='prof';
@@ -3337,12 +3356,34 @@ async function _initProjecaoLive(simId,alunoId,role){
       document.getElementById('proj-stage').innerHTML='<div id="aguardando"><div class="ico">⏳</div><div class="msg">Nenhum slide cadastrado para este caso.</div></div>';
     }
   }
+  // Evita re-render desnecessário (innerHTML flicka imagens). Re-render só quando casoId+idx mudaram.
+  let _lastRenderKey='';
+  function _preloadVizinhos(){
+    for(const di of [-2,-1,1,2]){
+      const j=idx+di;
+      if(j<0||j>=slides.length)continue;
+      const sv=_slideMigrar(slides[j]||{});
+      if(sv.imagem){const im=new Image();im.src=sv.imagem;}
+      if(sv.enunciadoImagem){const im=new Image();im.src=sv.enunciadoImagem;}
+    }
+  }
   function renderSlide(){
     const stage=document.getElementById('proj-stage');
     if(!slides.length){
-      stage.innerHTML=`<div id="aguardando"><div class="ico">🎬</div><div class="msg">Aguardando o professor iniciar a projeção...</div><div class="sub">A sala está conectada. Os slides aparecerão aqui em instantes.</div></div>`;
+      if(_lastRenderKey!=='__empty__'){
+        stage.innerHTML=`<div id="aguardando"><div class="ico">🎬</div><div class="msg">Aguardando o professor iniciar a projeção...</div><div class="sub">A sala está conectada. Os slides aparecerão aqui em instantes.</div></div>`;
+        _lastRenderKey='__empty__';
+      }
       return;
     }
+    const key=`${casoIdAtual}__${idx}`;
+    if(key===_lastRenderKey){
+      // Mesma tela — só garante que controles estejam coerentes (idempotente, sem flash)
+      const pos=document.getElementById('proj-pos');
+      if(pos)pos.textContent=(idx+1)+' / '+slides.length;
+      return;
+    }
+    _lastRenderKey=key;
     const raw=slides[idx]||{};
     const s=_slideMigrar(raw);
     stage.innerHTML=_renderSlideHTML(s);
@@ -3353,6 +3394,8 @@ async function _initProjecaoLive(simId,alunoId,role){
     const nextBtn=document.getElementById('btn-next');
     if(prevBtn)prevBtn.disabled=idx<=0;
     if(nextBtn)nextBtn.disabled=idx>=slides.length-1;
+    // Pré-carrega imagens dos slides vizinhos pro próximo "next" ser instantâneo
+    _preloadVizinhos();
   }
   // Wire dos controles (só ativos pra prof)
   if(isProf){
@@ -3378,7 +3421,9 @@ async function _initProjecaoLive(simId,alunoId,role){
     document.getElementById('btn-prev').onclick=()=>navegarPara(idx-1);
     document.getElementById('btn-next').onclick=()=>navegarPara(idx+1);
     document.getElementById('btn-encerrar').onclick=async()=>{
-      if(!confirm('Interromper a projeção?\n\nO slide some pro aluno mas a sala fica aberta — ele continua conectado e você pode retomar a qualquer momento clicando em "Projetar caso" no painel.'))return;
+      if(!confirm('Interromper a projeção?\n\nO slide some pro aluno mas a sala fica aberta — ele continua conectado e você pode retomar a qualquer momento clicando em "Projetar caso" no painel.\n\nTodos os desenhos serão apagados.'))return;
+      // Apaga os traços do canvas pra eles não voltarem quando a sala for reaberta
+      await _limparStrokesProjLive(simId,alunoId);
       // Apenas para a projeção; mantém ativo:true pra sala continuar aberta (aluno não precisa abrir novo link).
       await setDoc(doc(db,'projecaoLive',`${simId}__${alunoId}`),{projecaoAberta:false,timerRunning:false,interrompidaEm:new Date().toISOString(),updatedAt:new Date().toISOString()},{merge:true}).catch(e=>console.warn(e));
       window.close();
@@ -16056,8 +16101,10 @@ window.copiarLinkSalaAluno=async(studentId,btnEl)=>{
 // Desabilitar (encerrar) a sessão deste aluno
 window.desabilitarSimuladoAluno=async(studentId)=>{
   if(!_ckSimId)return;
-  if(!confirm('Desabilitar a projeção remota deste aluno?\n\nO link "Entrar na sala" some pra ele. Você pode habilitar de novo quando quiser.'))return;
+  if(!confirm('Desabilitar a projeção remota deste aluno?\n\nO link "Entrar na sala" some pra ele. Você pode habilitar de novo quando quiser.\n\nTodos os desenhos serão apagados.'))return;
   const liveId=`${_ckSimId}__${studentId}`;
+  // Limpa traços ANTES de remover o doc pai — subcoleção não cascateia
+  await _limparStrokesProjLive(_ckSimId,studentId);
   try{
     await deleteDoc(doc(db,'projecaoLive',liveId));
   }catch(e){
@@ -17458,6 +17505,8 @@ window.iniciarProjecao=async(ci)=>{
   const casoId=caso.id||('caso_'+ci);
   const total=caso.slides.length;
   const liveId=`${simId}__${alunoId}`;
+  // Limpeza defensiva: apaga traços remanescentes de qualquer sessão anterior antes de começar
+  await _limparStrokesProjLive(simId,alunoId);
   const state={simId,alunoId,casoId,ci,idx:0,total,timerMs:0,timerRunning:false,timerMsBase:0,timerStartLocal:0,win:null,tickInt:null,unsub:null,liveId};
   _projAtivo[ci]=state;
   // Subscribe pro doc — recebe confirmações + atualizações de qualquer fonte
@@ -17583,6 +17632,8 @@ window.encerrarProjecao=async(ci)=>{
   if(st.win&&!st.win.closed){try{st.win.close();}catch(e){}}
   if(st.tickInt)clearInterval(st.tickInt);
   if(st.unsub)try{st.unsub();}catch(e){}
+  // Apaga os traços do canvas — não devem persistir entre apresentações
+  _limparStrokesProjLive(st.simId,st.alunoId);
   delete _projAtivo[ci];
   // Marca projecaoAberta:false no doc (mantém ativo:true até o prof clicar "desabilitar")
   try{
