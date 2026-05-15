@@ -1,0 +1,80 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ────────────────────────────────────────────────────────────────────────
+    // REVISÃO DE CASOS — imagens em enunciados, perguntas e obs do item
+    // Paths aceitos (profundidade variável):
+    //   revisaoCasos/{revId}/{casoId}/{filename}
+    //   revisaoCasos/{revId}/{casoId}/obs_{itemId}/{filename}
+    // Limite: 15MB por arquivo, apenas imagens (inclui GIFs animados).
+    // ────────────────────────────────────────────────────────────────────────
+    match /revisaoCasos/{revId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.resource.size < 15 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if true;
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // CHECKLIST TEMPLATE — imagens na observação do item (editor direto)
+    // Path: checklists/{simId}/obs_imgs/{bloco}/{filename}
+    // Mesmas regras da revisão.
+    // ────────────────────────────────────────────────────────────────────────
+    match /checklists/{simId}/obs_imgs/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.resource.size < 15 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if true;
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // CHECKLIST TEMPLATE — imagens no enunciado do caso e em perguntas (editor
+    // direto, usado especialmente em Simulado Extra que não passa por Revisão).
+    // Paths aceitos:
+    //   checklists/{simId}/tpl_imgs/{bloco}/enun_{ci}/{filename}
+    //   checklists/{simId}/tpl_imgs/{bloco}/perg_{ci}_{pi}/{filename}
+    // ────────────────────────────────────────────────────────────────────────
+    match /checklists/{simId}/tpl_imgs/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.resource.size < 15 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if true;
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // SLIDES DE PROJEÇÃO — imagens/GIFs dos slides aplicados no simulado oral.
+    // Path: simulados/{simId}/slides/{casoId}/{idx}_{filename}
+    // 15MB pra acomodar GIFs animados.
+    // ────────────────────────────────────────────────────────────────────────
+    match /simulados/{simId}/slides/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.resource.size < 15 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if true;
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // RECURSOS DE PROVA — imagens anexadas a questões (admin), contestações
+    // (aluno) e pareceres (prof).
+    // Paths aceitos:
+    //   provas/{provaId}/questoes/{qId}/{filename}                 — imagem da questão
+    //   provas/{provaId}/questoes/{qId}/contestacoes/{cId}/{file} — anexo do aluno
+    //   provas/{provaId}/questoes/{qId}/parecer/{filename}        — anexo do prof
+    // 15MB, apenas imagens.
+    // ────────────────────────────────────────────────────────────────────────
+    match /provas/{provaId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.resource.size < 15 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if true;
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // DEFAULT DENY
+    // ────────────────────────────────────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

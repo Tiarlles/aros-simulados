@@ -1,0 +1,277 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ────────────────────────────────────────────────────────────────────────
+    // SIMULADOS — leitura pública (alunos precisam ver o card e a escala).
+    // Escrita: validação básica de shape para evitar lixo.
+    // ────────────────────────────────────────────────────────────────────────
+    match /simulados/{simId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.nome is string
+                            && request.resource.data.nome.size() > 0
+                            && request.resource.data.nome.size() < 200;
+      // delete só do console (impede script malicioso varrer tudo)
+      allow delete: if false;
+
+      match /alunos/{alunoId} {
+        allow read: if true;
+        allow create, update: if request.resource.data.nome is string
+                              && request.resource.data.nome.size() > 0
+                              && request.resource.data.nome.size() < 200;
+        allow delete: if true; // remoção de aluno faz parte do fluxo
+      }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // USUÁRIOS DO PAINEL — read aberto (login lê pra validar credenciais).
+    // Write: validação de shape. Bloquear delete pra não apagarem o admin.
+    // ⚠️  Senhas em plaintext: refatorar pra Cloud Function de login depois.
+    // ────────────────────────────────────────────────────────────────────────
+    match /usuarios/{username} {
+      allow read: if true;
+      allow create, update: if request.resource.data.username is string
+                            && request.resource.data.senha is string
+                            && request.resource.data.senha.size() < 200;
+      allow delete: if false; // só pelo console
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // LISTAS DE ALUNOS — leitura pública, escrita validada.
+    // ────────────────────────────────────────────────────────────────────────
+    match /listas/{listaId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.nome is string
+                            && request.resource.data.nome.size() < 200;
+      allow delete: if true; // coord pode apagar listas antigas
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // SOLICITAÇÕES SIMULADO EXTRA — qualquer um pode CRIAR (fluxo do aluno).
+    // Update controlado (status muda via painel ou Cloud Function da Hotmart).
+    // Delete bloqueado via cliente (mantém histórico).
+    // ────────────────────────────────────────────────────────────────────────
+    match /solicitacoesExtra/{reqId} {
+      allow read: if true; // painel coord precisa listar
+      allow create: if request.resource.data.nome is string
+                    && request.resource.data.email is string
+                    && request.resource.data.email.matches('.+@.+')
+                    && request.resource.data.opcoes is list
+                    && request.resource.data.opcoes.size() > 0
+                    && request.resource.data.opcoes.size() <= 3;
+      allow update: if request.resource.data.nome == resource.data.nome
+                    && request.resource.data.email == resource.data.email;
+      allow delete: if false; // só pelo console (mantém auditoria)
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // TROCAS DIRETAS (entre alunos) — fluxo do app.
+    // ────────────────────────────────────────────────────────────────────────
+    match /trocasDiretas/{trocaId} {
+      allow read, create, update: if true;
+      allow delete: if true; // expira após resolução
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // CONFIG — leitura aberta (app precisa pra renderizar).
+    // Write: bloqueia delete pra ninguém zerar config crítico.
+    // ⚠️  Slack webhook em config/simExtra ainda é leitura pública.
+    //    Refatorar pra Cloud Function depois.
+    // ────────────────────────────────────────────────────────────────────────
+    match /config/{cfgId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if false;
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // NOTAS, CHECKLISTS, DISPONIBILIDADE, FEEDBACK GERAL — usados pelos painéis.
+    // Mantém abertos com proteção mínima.
+    // ────────────────────────────────────────────────────────────────────────
+    match /notas/{simId}/alunos/{matricula} {
+      allow read, create, update: if true;
+      allow delete: if false;
+    }
+
+    match /checklists/{simId}/meta/{docId} {
+      allow read, create, update: if true;
+      allow delete: if false;
+    }
+    match /checklists/{simId}/respostas/{studentId} {
+      allow read, create, update: if true;
+      allow delete: if false;
+    }
+
+    match /disponibilidade/{simId}/profs/{profKey} {
+      allow read, create, update: if true;
+      allow delete: if true;
+    }
+
+    match /feedbackGeral/{simId} {
+      allow read, create, update: if true;
+      allow delete: if false;
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // FEATURES / TAREFAS (roadmap kanban interno da coordenação)
+    // ────────────────────────────────────────────────────────────────────────
+    match /tarefas/{taskId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.titulo is string
+                            && request.resource.data.titulo.size() > 0
+                            && request.resource.data.status in ['ideia','fazendo','feito']
+                            && request.resource.data.prioridade in ['alta','media','baixa'];
+      allow delete: if true;
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // MENTORIAS (grupos com mentor + alunos vinculados, tipo TEA/TSA/ME1/ME2/ME3).
+    // ────────────────────────────────────────────────────────────────────────
+    match /mentorias/{mentoriaId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
+                            && request.resource.data.mentorNome is string
+                            && request.resource.data.mentorNome.size() > 0;
+      allow delete: if true;
+    }
+
+    // BLOCOS MENSAIS DE CLÍNICAS (agrupa as clínicas de um mês com tema único)
+    match /blocosClinica/{blocoId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
+                            && request.resource.data.titulo is string
+                            && request.resource.data.titulo.size() > 0
+                            && request.resource.data.tema is string;
+      allow delete: if true;
+    }
+
+    // CLÍNICAS DE QUESTÕES (sessões dentro de um bloco mensal)
+    match /clinicas/{clinicaId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
+                            && request.resource.data.mentorNome is string
+                            && request.resource.data.dataHora is string;
+      allow delete: if true;
+
+      match /alunos/{alunoId} {
+        allow read: if true;
+        allow create, update: if request.resource.data.nome is string
+                              && request.resource.data.nome.size() > 0;
+        allow delete: if true;
+      }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // REVISÃO DE CASOS — peer review dos casos clínicos antes de aplicar
+    // ────────────────────────────────────────────────────────────────────────
+    match /revisaoCasos/{revId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.simId is string
+                            && request.resource.data.status in ['rascunho','aberta','fechada','exportada'];
+      allow delete: if true;
+
+      // Comentários ancorados a um caso/pergunta/item específico
+      match /comentarios/{cmtId} {
+        allow read: if true;
+        allow create, update: if request.resource.data.profNome is string
+                              && request.resource.data.profNome.size() > 0
+                              && request.resource.data.targetType in ['enunciado','pergunta','item','caso'];
+        allow delete: if true;
+      }
+
+      // Histórico de edições do coord (antes/depois)
+      match /historico/{histId} {
+        allow read: if true;
+        allow create, update: if request.resource.data.editadoPor is string;
+        allow delete: if false;
+      }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // RECURSOS DE PROVA — sistema de contestação de gabarito de provas.
+    //
+    // Schema:
+    //   provas/{provaId}                              — metadata da prova
+    //     campos: nome, tipo, ano, dataLimite, mensagemInicial, status
+    //   provas/{provaId}/questoes/{qId}               — questão + parecer AnestReview
+    //     campos: numero, modo (estruturado|bloco|vf), enunciado, alternativas[],
+    //             blocoTexto, gabaritoOficial, imagemUrl, validada,
+    //             pareceresPorAlt (só em modo vf), parecerRascunho/parecerFinalizado,
+    //             validadaPor, validadaEm, parecer, parecerArgumento,
+    //             parecerImagemUrl, parecerPor, parecerEm
+    //   provas/{provaId}/questoes/{qId}/contestacoes/{cId} — contestação do aluno
+    //     campos: emailAluno, nomeAluno, motivo, fonte, fonteCustom,
+    //             pagina, imagemUrl, status (pendente|respondida),
+    //             criadoEm, respondidoEm, respostaSnapshot
+    //   fontesRecurso/{fId}                           — fontes pré-cadastradas
+    //   recursosConfig/{cfgId}                        — instruções, msg topo, etc.
+    //
+    // Reads abertos (alunos precisam ver provas/questões/pareceres).
+    // Creates/updates de contestação abertos (aluno público identifica por email).
+    // ────────────────────────────────────────────────────────────────────────
+    match /provas/{provaId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.nome is string
+                            && request.resource.data.nome.size() > 0
+                            && request.resource.data.tipo in ['TSA','TEA','ME1','ME2','ME3']
+                            && request.resource.data.status in ['ativa','encerrada'];
+      allow delete: if true;
+
+      match /questoes/{qId} {
+        allow read: if true;
+        allow create, update: if request.resource.data.numero is number
+                              && request.resource.data.modo in ['estruturado','bloco','vf'];
+        allow delete: if true;
+
+        match /contestacoes/{cId} {
+          allow read: if true;
+          allow create: if request.resource.data.emailAluno is string
+                        && request.resource.data.emailAluno.matches('.+@.+')
+                        && request.resource.data.motivo is string
+                        && request.resource.data.motivo.size() > 0;
+          allow update: if request.resource.data.emailAluno == resource.data.emailAluno
+                        && request.resource.data.motivo is string;
+          allow delete: if true;
+        }
+      }
+    }
+
+    match /fontesRecurso/{fId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.nome is string
+                            && request.resource.data.nome.size() > 0;
+      allow delete: if true;
+    }
+
+    match /recursosConfig/{cfgId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if false;
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // PROJEÇÃO AO VIVO — sincronia remota slide+cronômetro entre prof e aluno.
+    // liveId = `${simId}__${alunoId}`. Doc representa a sessão ativa.
+    // Subcoleção strokes/ usada pra desenhos do aluno (Fase 2).
+    // ────────────────────────────────────────────────────────────────────────
+    match /projecaoLive/{liveId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.simId is string
+                            && request.resource.data.alunoId is string;
+      allow delete: if true; // limpa após encerrar
+      match /strokes/{strokeId} {
+        allow read: if true;
+        allow create, update: if true;
+        allow delete: if true;
+      }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // DEFAULT DENY — qualquer coleção/path não listada acima é bloqueada.
+    // Atacante curioso bate em coleções aleatórias e recebe permission denied.
+    // ────────────────────────────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

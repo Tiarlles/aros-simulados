@@ -1,0 +1,20 @@
+# Secrets — NÃO subir pra o GitHub
+cloud-function-hotmart/.env
+cloud-function-hotmart/.env.*
+
+# Dependências
+cloud-function-hotmart/node_modules/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+firebase-debug.log
+firebase-debug.*.log
+
+# Backup local (opcional — remova se quiser versionar)
+Backup/
+
+# Claude Code settings locais
+.claude/settings.local.json
