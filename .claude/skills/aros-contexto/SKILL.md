@@ -27,7 +27,9 @@ SPA monolítico single-file (HTML+CSS+JS vanilla, ~7500+ linhas em `index.html`)
 | Webhook backend | Cloud Function Gen 2 — `cloud-function-hotmart/index.js` |
 | Deploy frontend | GitHub Pages (repo público [Tiarlles/aros-simulados](https://github.com/Tiarlles/aros-simulados), branch `main`, com CNAME pra `aros.anestreview.com.br`) |
 
-**Importante:** o diretório local NÃO é um repo git. O usuário faz upload manual do `index.html` no GitHub web (Add file → Upload files). **Nunca rodar `git push`.**
+**Deploy (atualizado 2026-05-15):** o diretório local **agora é um repo git** conectado ao remote `https://github.com/Tiarlles/aros-simulados` (branch `main`). Token salvo no macOS Keychain. Quando o usuário fala "deploy"/"sobe pra produção", rodar `git add -A && git commit -m "..." && git push origin main`. GitHub Pages atualiza `aros.anestreview.com.br` em ~30s. **Não fazer push preventivo sem autorização explícita.**
+
+**Testes locais:** `iniciar-servidor.command` (na raiz do projeto) — duplo-clique no Finder abre Terminal rodando `python3 -m http.server 8080` + abre Chrome em `http://localhost:8080/index.html#admin`. Live Server do VS Code NÃO recomendado (injeta script de auto-reload que quebra o `<script type="module">` em alguns casos).
 
 ## URLs e endpoints
 
@@ -145,6 +147,28 @@ fontesRecurso/{fId}                 — bibliografia pré-cadastrada (UI: "Bibli
 
 recursosConfig/{cfgId}              — config global do sistema de recursos
   └ doc 'settings': { instrucoes (HTML), mensagemTopo (HTML), ... }
+
+projecaoLive/{liveId}               — sessão de projeção remota AO VIVO (Fase 1+2, 2026-05-15)
+  └ liveId = `${simId}__${alunoId}` (uma sessão por aluno por simulado)
+  └ campos: simId, alunoId, alunoNome, simNome, ativo (bool),
+            projecaoAberta (bool), casoId, casoIdx, idx, total,
+            timerStartedAt (ISO|null), timerPausedMs (num), timerRunning (bool),
+            habilitadoEm, encerradaEm, interrompidaEm, updatedAt
+  └ Fluxo: prof clica "Habilitar" → cria doc com ativo:true. Aluno vê botão
+           "Entrar na sala" na escala-view. Prof clica "Projetar caso" → grava
+           casoId+idx+projecaoAberta:true. Aluno + preview do prof recebem
+           via onSnapshot (substitui o BroadcastChannel antigo, agora funciona
+           remoto entre máquinas/redes).
+  └ Encerrar projeção (botão na preview): grava projecaoAberta:false mas
+           mantém ativo:true → aluno vê "Caso finalizado pelo professor",
+           sala fica aberta pra prof retomar com outro caso.
+  └ Desabilitar (botão "✓ Habilitado" no checklist): deleta doc → aluno
+           vê "Sessão encerrada".
+  ├ strokes/{strokeId}                — traços do canvas de desenho (Fase 2)
+  │   campos: points:[{x:0-1,y:0-1}] (normalizado), color (hex),
+  │           thickness, slideIdx, casoId, by ('prof'|'aluno'), ts
+  │   Filtragem: cada slide mostra só seus traços (por casoId+slideIdx).
+  │   Botão "🗑 Limpar" deleta todos os strokes do casoId+slideIdx atuais.
 
 config/{cfgId}
   ├ settings                        — config legacy + cronometroLimite ('mm:ss', default '07:30')
@@ -295,41 +319,74 @@ Detalhes técnicos:
 - **Imagens em observações** uploadadas pra `revisaoCasos/{revId}/{casoId}/obs_{itemId}/{filename}` (Storage).
 - **Importação em massa** via textarea (parser `_parseImportCasos`).
 
-### Slides de Projeção (bloco Criar)
-Permite o prof aplicar o simulado oral de **um único dispositivo**: a janela do checklist controla, e uma janela separada exibe os slides pro aluno via tela compartilhada (Zoom). Disponível **apenas para casos do bloco Criar/Simulação**.
+### Slides de Projeção (bloco Criar) — refatorado em 2026-05-15 pra modo remoto
+Sistema agora sincroniza prof + aluno(s) via **Firestore** (substitui o BroadcastChannel antigo, que era local-only). Funciona com prof e alunos em máquinas/redes diferentes. Disponível **apenas para casos do bloco Criar/Simulação**.
 
 **Estrutura de slide** (em `caso.slides[]`):
 - **Capa** (`capa: true`): campos `simNome` + `casoLabel` (rich text).
-- **Pergunta**: `casoTitulo`, `enunciado` (HTML), `pergTitulo`, `pergTexto` (HTML), `imagem`, `imagemPos`.
+- **Pergunta**: `casoTitulo`, `enunciado` (HTML), `enunciadoImagem`, `pergTitulo`, `pergTexto` (HTML), `imagem`, `imagemPos`.
+  - `enunciadoImagem`: imagem do contexto (do `caso.enunciadoImagens[0]`), renderiza inline entre o texto do enunciado e o título da pergunta.
+  - `imagem`: imagem da própria pergunta (do `perg.perguntaImagens[0]`), renderiza no `imagemPos`.
+  - Ambas podem coexistir no mesmo slide.
 - **Imagem pronta** (`imagemPura: true`): só a imagem ocupando o slide inteiro.
 
-**Posicionamento da imagem** (`imagemPos`): `baixo` | `direita` | `grande`.
+**Posicionamento da imagem** (`imagemPos`): `baixo` | `direita` | `grande`. Container limitado a `max-height:50vh` com `overflow:hidden` pra evitar overlap com texto.
+
+**Auto-sincronia de slides com o caso (`_autoSyncAllSlidesCriar`)**:
+- Sempre que caso é criado, importado em bloco, recebe pergunta nova/removida ou imagem anexada, os slides são regenerados via `gerarSlidesPadrao(caso, ci)`.
+- Flag `caso.slidesManual = true` é setada quando o usuário **customiza** slides no modal (salva edições que diferem do padrão). Quando true, auto-sync pula esse caso.
+- Botão "🔄 Regenerar padrão" reseta slidesManual via `_slidesIguaisAoPadrao()`.
+- Upload/remove de imagem **força** `slidesManual = false` pra refletir imediato (anexar imagem é mudança de conteúdo).
 
 **Editor de slides** (modal "🎬 Slides"):
-- Cards colapsáveis (dropdown) com badge SLIDE N, tipo colorido, snippet, botões de ação.
-- Auto-geração na primeira abertura: capa + 1 slide por pergunta. `gerarSlidesPadrao(caso, casoIdx)`.
-- `🔄 Regenerar padrão` recria do zero.
-- `👁 Pré-visualizar` abre janela nova (`?modo=preview`).
-- Mini editor rich text (`_rtEditor`): B / I / U / A+ / A- / ⌫. HTML sanitizado por `_sanitizeSlideHTML`.
-- `_ensureHTML(s)` na renderização (compat texto puro).
-- `_slideMigrar` migra slides legados `{titulo, texto}` ao abrir.
+- Cards colapsáveis com badge SLIDE N, tipo colorido, snippet, botões de ação.
+- Mini editor rich text (`_rtEditor`): B / I / U / A+ / A- / ⌫. HTML sanitizado por `_sanitizeSlideHTML`. Sem `max-height` interno (deixa crescer e modal scrolla).
+- Modal `#msl-list` sem `max-height` próprio — modal `.md` (max-height:92vh) scrolla tudo.
+- Preview da `enunciadoImagem` aparece read-only no card do slide ("Gerencie na galeria do caso").
 
-**Janela de projeção**:
-- URL: `?modo=projecao&sim={simId}&caso={casoId}`. `_initProjecao(simId, casoId)` bypassa login.
-- Layout: cronômetro fixo no topo (preto), slide centralizado (branco). Sem rodapé.
-- Cronômetro progressivo, vermelho após `S.cfg.cronometroLimite` (default 07:30). Auto-start ao avançar da capa.
-- Sempre abre no slide 1.
-- Sincronia: `BroadcastChannel('aros-slides-{simId}-{casoId}')`. Mensagens `navigate/next/prev/first/last/timer/estado`.
-- Atalhos: ←/→/Espaço/Home/End/P.
+**Modo `?modo=projecao-live&sim={simId}&aluno={alunoId}&role=prof|aluno`** (NOVO, substitui modo `projecao` legado):
+- `_initProjecaoLive(simId, alunoId, role)` no boot.
+- Escuta `projecaoLive/{simId}__{alunoId}` via `onSnapshot`.
+- Carrega slides do caso atual via `checklists/{simId}/meta/templateCriar`.
+- Render unificado pra prof e aluno; prof tem controles na topbar (◀ ▶ ⛔ Encerrar) — sem cronômetro (esse fica no `proj-fixed-bar` do painel da coord).
+- Cronômetro renderizado localmente baseado em `timerStartedAt + timerPausedMs` (não floods de writes).
+- Auto-start do cronômetro ao sair do slide 0 (capa).
+- Atalhos: ←/→/Espaço (sem mais `P` — cronômetro só no proj-fixed-bar).
 
-**Painel de controle** (no checklist):
+**Estilo do slide**:
+- Texto justificado (`text-align: justify; hyphens: auto`).
+- Imagens (`.pimg-col img`, `.penun-img img`): `max-height: 100%` do container, container limitado a 50vh.
+- Fonte: Calibri preto/branco.
+- "CASO N" (`.pcaso`): clamp(20px, 2.25vw, 36px) — reduzido em 50% pra dar mais espaço ao texto.
+
+**Painel de controle** (no checklist do prof):
 - Botão `▶ Projetar caso (N slides)`.
-- Painel inline com cronômetro + nav.
-- **Barra fixa preta no topo** (`#proj-fixed-bar`) ancorada em `document.documentElement`, z-index 99999, !important pra contornar transform/filter ancestrais.
+- Botão `▶️ Habilitar`/`✓ Habilitado` por aluno (libera o link da sala).
+- Botão `📋 Link` (quando habilitado) — copia URL `?modo=projecao-live&sim=X&aluno=Y&role=aluno` pro clipboard. Triplo fallback: navigator.clipboard → execCommand → modal com URL pra cópia manual.
+- **Barra fixa preta no topo** (`#proj-fixed-bar`) — refatorada pra criar DOM uma vez e atualizar só atributos (corrige bug "precisa clicar 2x" que existia no innerHTML replace anterior). Tem timer + play/pause/reset + nav + encerrar.
 
-**Upload de imagens**: `simulados/{simId}/slides/{casoId}/{timestamp}_{filename}`. Limite 15MB.
+**Aluno entra na sala**:
+- Botão `🎬 Entrar na sala` aparece na linha do aluno na escala-view (`alunoRowHTML` e `presAlunoRow`) quando `projecaoLive.ativo:true`.
+- Cor: gradient accent azul com `animation: btn-pulse` pra chamar atenção.
+- Clique abre popup `?modo=projecao-live&...&role=aluno`.
+- Pra Simulado Extra (que não tem card na home): prof envia o link copiado por WhatsApp/email.
 
-**Fonte do slide**: Calibri preto/branco.
+**Canvas de desenho sincronizado** (Fase 2):
+- Sobreposto à projeção (`#proj-canvas`, position:fixed, z-index:5).
+- `pointer-events:none` por padrão; `pointer-events:auto` quando caneta ativa.
+- Toolbar no canto inferior direito com:
+  - Botão `✏️ Caneta` (toggle) — quando ativo, fica destacado com a cor selecionada e revela a paleta.
+  - Paleta de 6 cores: vermelho, azul, verde, amarelo, preto, branco. Cor selecionada com borda branca + halo. Lembra em `localStorage.aros_pen_cor`.
+  - Botão `🗑 Limpar` — apaga todos os traços do slide atual (com confirm).
+- Cor inicial por papel: aluno=vermelho, prof=azul.
+- Espessura fixa: 4px.
+- Eventos: `pointerdown`/`move`/`up`. Coordenadas normalizadas (0-1) pra funcionar em qualquer resolução.
+- Traço fica visível localmente em tempo real (zero latência); ao soltar, é gravado em `projecaoLive/{liveId}/strokes/{strokeId}` (1 write por traço completo).
+- Outros viewers recebem via `onSnapshot` na subcoleção `strokes` (~500ms latência).
+- Quando slide muda (idx ou casoId), `renderCanvas` filtra automaticamente.
+- Trocas de caso esvaziam visualmente o canvas (traços daquele caso só voltam se voltar pro caso).
+
+**Upload de imagens (slides)**: `simulados/{simId}/slides/{casoId}/{timestamp}_{filename}`. Limite 15MB.
 
 ### Mentorias
 - `mentorias/{id}`: grupos com mentor + alunos. Cadastro de alunos **opcional** (grupo pode ser salvo vazio).
@@ -472,6 +529,7 @@ Pragmáticas, não restritivas, porque o app **não usa Firebase Auth**:
 - `provas/{provaId}/questoes/{qId}/contestacoes/{cId}`: `emailAluno` matches `.+@.+` + `motivo` string não vazia. Aluno público pode criar (sem auth).
 - `fontesRecurso/{fId}`: `nome` string não vazia.
 - `recursosConfig/{cfgId}`: open create/update (single doc 'settings'), block delete.
+- `projecaoLive/{liveId}` (deploy 2026-05-15): `simId` + `alunoId` strings; delete livre (limpa após encerrar). Subcoleção `strokes/{strokeId}`: open create/update/delete.
 
 ## Storage Rules
 
@@ -479,6 +537,7 @@ Pragmáticas, não restritivas, porque o app **não usa Firebase Auth**:
 - `checklists/{simId}/obs_imgs/{allPaths=**}`: idem.
 - `simulados/{simId}/slides/{allPaths=**}`: idem (slides de projeção).
 - `provas/{provaId}/{allPaths=**}`: idem (imagens de questão, contestação, parecer).
+- `checklists/{simId}/tpl_imgs/{allPaths=**}` (2026-05-14): imagens do enunciado/pergunta/gabarito no template do checklist. Paths usados: `tpl_imgs/{bloco}/enun_{ci}/{file}`, `tpl_imgs/{bloco}/perg_{ci}_{pi}/{file}`, `tpl_imgs/{bloco}/gab_{ci}_{pi}/{file}`.
 - Default deny.
 
 Deploy: `npx -y firebase-tools deploy --only storage` (precisa autorização do usuário).
@@ -520,7 +579,7 @@ Não há build, lint, nem suíte de testes. Validação = abrir `index.html` no 
 
 ## Convenções e restrições (CRÍTICAS)
 
-1. **Nunca rodar `git push`**. O usuário sobe `index.html` manualmente no GitHub web.
+1. **Deploy via git push (atualizado 2026-05-15)**. Diretório local agora é repo git conectado ao GitHub. Quando user autorizar explicitamente ("deploy"/"sobe pra produção"), rodar `git add -A && git commit -m "..." && git push origin main`. GitHub Pages atualiza em ~30s. **NÃO fazer push preventivo após edits** — sempre esperar autorização.
 2. **Não criar arquivos `.md`** sem o usuário pedir explicitamente.
 3. **Cloud Function: deploy SÓ quando autorizado**. Não fazer deploy preventivo.
 4. **Migrações de dados / fixes pontuais** via scripts Node em `/tmp/xlsx-reader/` usando **Firebase JS SDK como cliente público** (não Admin SDK). Funciona porque as Rules permitem.
@@ -536,7 +595,6 @@ Não há build, lint, nem suíte de testes. Validação = abrir `index.html` no 
 - Slack webhook URL legível em `config/simExtra` (mover pra Cloud Function como proxy resolveria).
 - Sem Firebase Auth → Rules tem proteção limitada (só shape + block deletes).
 - Sem Firebase App Check → API key usável por qualquer um.
-- Usuário precisa subir o `index.html` atual no GitHub Pages manualmente.
 
 ## Estilo do usuário (Tiarlles)
 
@@ -545,6 +603,114 @@ Não há build, lint, nem suíte de testes. Validação = abrir `index.html` no 
 - "Foi" = funcionou/aprovado. "Pode" = autorizado a prosseguir.
 - Prefere ver o resultado funcionando localmente antes de subir.
 - Quando algo quebra, costuma colar a mensagem de erro direto.
+
+### Editor de Template do Checklist (refatorado 2026-05-14/15)
+
+**Layout empilhado estilo Revisão de Casos** (substituiu o switcher de aba antigo):
+- Dois cards coloridos um abaixo do outro: 🩺 Criar / Simulação (azul) e 🎙️ Oral Online (laranja).
+- Cada card tem header com contador de casos + dois botões: **+ Adicionar Manualmente** (cheio, cor do bloco) e **+ Adicionar em Bloco** (outline).
+- Casos de cada bloco ficam dentro do seu card, com `border-left` colorido.
+
+**Bloco-aware refactor**:
+- IDs prefixados por bloco: `tpl-criar-hdr-caso-0`, `ck-oral-obs-1-0-2`, etc. — sem colisões de índice.
+- `_tplOpen = {criar: {casos: Set, perguntas: Set}, oral: {...}}` — estado de abertura por bloco.
+- Funções mutadoras (`addCkCaso`, `rmCkCaso`, `addCkPergunta`, `rmCkPergunta`, `addCkItem`, `rmCkItem`, `parsePastedItens`, `toggleCkObs`, `salvarCkObs`, `uploadImgObsCk`, `removeImgObsCk`, `tplToggleCaso`, `tplTogglePerg`, `saveCkPergunta`) aceitam `bloco` como primeiro param.
+- Handlers `oninput` no DOM usam refs diretos (`_ckTemplateEditCriar` / `_ckTemplateEditOral`) em vez de `_ckTemplateEdit` (que ficou só pro slides modal e legacy).
+- `syncTplFromDOM` sincroniza **ambos** os blocos.
+- `_persistBlocoTemplate(bloco)` é helper único pra salvar um bloco específico.
+
+**Bug crítico de "items sumindo" corrigido** (2026-05-13):
+- `syncTplFromDOM` usava seletor `input` genérico que pegava também o `<input type="file">` do upload de obs imagem. Resultado: cada `setDoc` por blur clobberava `descricao` do próximo item (file input retorna vazio).
+- Fix: filtro `input:not([type="file"])`.
+
+**Importação em bloco no template** (2026-05-14):
+- Botão "+ Adicionar em Bloco" abre `modal-import-ck-tpl` com textarea + checkbox "Substituir todos os casos existentes do bloco".
+- Usa `_parseImportCasos` (reusa parser da Revisão de Casos).
+- Detecção anti-double-click: button disable + nullify de `_ickTplParsed` antes do await.
+- Preserva enunciado + perguntas + itens + gabarito.
+
+**Campo Gabarito comentado** (exclusivo Simulado Extra, 2026-05-15):
+- Cada pergunta tem campo `gabarito` (string) + `gabaritoImagens[]` (URLs).
+- Parser `_parseImportCasos` detecta marker `Comentário:`, `Comentario:`, `Anotação:`, `Comentário da pergunta N:`. Modo `mode='comentario'` acumula linhas seguintes.
+- UI no editor: textarea verde "💬 Gabarito comentado" + galeria de imagens, **só visível pra `_ckSimEhExtra()`**.
+- Gabarito NÃO vai pra slides (não aparece na projeção).
+- Aparece no feedback final do aluno (popup `gerarFeedbackAluno`) na seção "📚 Casos, checklist e gabarito" entre habilidades e rodapé.
+- PDF gerado (`montarHTMLRelatorio`) também inclui via helper `_montarHTMLExtraCasesPDF` quando `d.isExtra`.
+
+**Galeria de imagens em enunciado/pergunta/gabarito** (2026-05-14):
+- `_renderTplImagensCk(arr, bloco, ci, pi, alvo)` — alvo `enun`/`perg`/`gab`. Inputs file individuais com IDs únicos.
+- Upload com **feedback visual**: placeholder com spinner + nome do arquivo, substituído pela thumbnail quando completa.
+- Storage path: `checklists/{simId}/tpl_imgs/{bloco}/{enun_ci|perg_ci_pi|gab_ci_pi}/{ts}_{file}`.
+- Limite 15MB, image/* only.
+- Imagem da pergunta vence sobre imagem do enunciado quando o slide é gerado (precedência fixada).
+
+**Enunciado do caso editável** (2026-05-14):
+- Textarea `📝 Enunciado do caso (opcional)` no topo do body do caso (quando expandido).
+- `_renderTplCaso` inclui o textarea + galeria de imagens do enunciado.
+- Salvo em `caso.enunciado` (string) e `caso.enunciadoImagens[]`.
+- Render no checklist do prof (visualização do simulado) e nos slides como `enunciadoImagem` separado.
+
+**Botão "▶️ Habilitar / ✓ Habilitado" por aluno**:
+- Renderizado em `renderCkStudents` ao lado do badge de status.
+- Cria/deleta `projecaoLive/{simId}__{alunoId}` doc com `ativo:true/false`.
+- Quando habilitado, mostra também botão "📋 Link" (laranja) que copia URL pra clipboard.
+- `_ckSubscribeLiveStatus()` assina cada possível doc dos alunos do sim via onSnapshot, atualiza estado `_ckLiveStatus[alunoId]` e re-renderiza a lista.
+
+**Botão "🔄 Resetar" por aluno**:
+- Renderizado quando aluno está "em andamento" ou "finalizado".
+- Dupla confirmação (confirm + digitar "RESETAR").
+- Deleta `checklists/{simId}/respostas/{studentId}` (com fallback `setDoc merge:false` zerando se rule bloquear delete).
+- Zera notas em `notas/{simId}/alunos/{key}` (`criar:null, oral:null, notaFinal:null`).
+- Re-renderiza lista + chama `renderDesempenho`.
+
+**Cálculo automático de notaFinal**:
+- Em `lancarNotaBloco`, após gravar `criar` OU `oral`, lê o doc atual e checa se o OUTRO bloco já tem nota. Se sim, calcula `notaFinal = (criar + oral) / 2` e grava no mesmo setDoc.
+- Antes a nota final só era preenchida pelo "✏️ Editar" manual no Desempenho.
+
+**Slides auto-gerados na criação/import** (Criar):
+- `addCkCaso('criar')` → cria caso com `slides: gerarSlidesPadrao(...)` (só capa por enquanto, perguntas vazias).
+- `addCkPergunta('criar', ci)` → após push, chama `_autoSyncAllSlidesCriar()` pra atualizar slides incluindo a nova pergunta.
+- `rmCkPergunta` idem.
+- `confirmImportCkTpl` (bloco criar) → idem após push dos casos parseados.
+- `autoSaveCkTemplate` (on blur de qualquer input) → idem.
+- Persistência imediata em todos os triggers.
+
+**Voltar do editor de template = save automático**:
+- Botão `← Voltar` chama `voltarTemplateEditor()` que faz syncTplFromDOM + setDoc dos dois templates + toast verde "✓ Template salvo" + backToCkHome.
+- Antes era manual ("💾 Salvar Template" obrigatório).
+
+### Feedback do aluno + PDF Final (atualizado pra Simulado Extra)
+
+**Popup `gerarFeedbackAluno(studentId)`** (na aba Checklist, botão "🔖 Gerar Feedback"):
+- Carrega checklist do aluno, templates, histórico, médias, feedback geral.
+- Aplica IA (Gemini 2.5 Flash) em cada feedback de caso via `applyAIPrompt` (silent fallback se sem API key).
+- Abre view `ck-preview` populando dados via `abrirPreviewV2(data)`.
+
+**Seção Extra na preview (`prev-extra-cases`)**:
+- Aparece SÓ pra `data.isExtra === true`.
+- Render via `_renderExtraCasesPreview(data)`: por bloco (Criar azul, Oral laranja), mostra cada caso com enunciado + imagens + perguntas (título + imagens + checklist `A) B) C)` + box verde "💬 Gabarito comentado" com texto + imagens).
+
+**PDF final (`montarHTMLRelatorio`)**:
+- Ordem das seções: Histórico → Feedback por Caso → Feedback Geral → Avaliação de Habilidades → **📚 Casos, checklist e gabarito** (só Extra) → Rodapé.
+- Helper `_montarHTMLExtraCasesPDF(d)` renderiza a seção Extra com `page-break-inside:avoid` por caso pra não cortar no meio.
+
+### Sistema de Recursos — detecção de imagens em PDF (2026-05-14)
+
+**Extração de imagens durante import PDF** (`_extrairTextoPdf`):
+- Além de extrair texto, percorre `page.getOperatorList()` rastreando CTM (matriz de transformação) e detecta TODAS as paint ops de imagem.
+- Coleta dinâmica de ops via regex: `^paint(Image|Jpeg|Inline)` em `pdfjsLib.OPS` (cobre variantes de versão).
+- Filtros: mínimo 30pt em qualquer dimensão, banidas imagens que repetem em ≥5 páginas mesma posição (logos/headers).
+- Mapeamento imagem→questão: imagem é assignada à questão cujo Y é maior que `im.y` (o fundo da imagem) na mesma página, ordenado por proximidade.
+
+**Flag `imagemPendente`**:
+- Set em `S.recursos._pdfImagensSet` durante import, depois persistido em `questoes/{qId}.imagemPendente = true` se a questão tem imagem detectada e nenhum `imagemUrl` ainda.
+- Badge "📷 IMG PENDENTE" no card da questão (na aba 📚 Provas).
+- Filtro "📷 IMG PENDENTE (N)" na barra de filtros se houver alguma.
+- `saveQuestao` zera o flag quando `imagemUrl` é populada.
+
+**Modal de import limpo**:
+- Removido box de pré-visualização e box de "Dicas".
+- Só status do PDF + textarea editável + count de questões detectadas.
 
 ## Histórico recente (resumo cronológico)
 
