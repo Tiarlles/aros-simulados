@@ -3591,7 +3591,11 @@ async function _initProjecaoLive(simId,alunoId,role){
     // Projeção interrompida (prof fechou o preview mas mantém a sala aberta — pode retomar)
     if(d.projecaoAberta===false){
       if(!isProf){
-        document.getElementById('proj-stage').innerHTML='<div id="aguardando"><div class="ico">✅</div><div class="msg">Caso finalizado pelo professor.</div></div>';
+        // Distingue "nunca iniciou" (casoId vazio) de "encerrou caso" (casoId populado)
+        const nuncaIniciou=!d.casoId;
+        document.getElementById('proj-stage').innerHTML=nuncaIniciou
+          ?'<div id="aguardando"><div class="ico">🎬</div><div class="msg">Aguardando o professor iniciar a projeção...</div><div class="sub">A sala está conectada. Os slides aparecerão aqui em instantes.</div></div>'
+          :'<div id="aguardando"><div class="ico">✅</div><div class="msg">Caso finalizado pelo professor.</div></div>';
         timerRunning=false;renderTimer();
         return;
       }
