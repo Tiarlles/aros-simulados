@@ -16174,7 +16174,7 @@ function renderCkStudents(list){
     const liveAtivo=!!(_ckLiveStatus&&_ckLiveStatus[s.id]&&_ckLiveStatus[s.id].ativo);
     const btnHabilitar=liveAtivo
       ?`<button onclick="event.stopPropagation();desabilitarSimuladoAluno('${s.id}')" class="btn btn-s btn-sm" title="Desabilitar sessão remota deste aluno" style="font-size:11px;padding:3px 10px;background:rgba(63,185,80,.12);border-color:rgba(63,185,80,.45);color:#3fb950">✓ Habilitado</button>`
-      :`<button onclick="event.stopPropagation();habilitarSimuladoAluno('${s.id}')" class="btn btn-s btn-sm" title="Habilitar a sessão remota da projeção para este aluno (libera o botão 'Entrar na sala' na escala dele)" style="font-size:11px;padding:3px 10px;background:rgba(47,129,247,.1);border-color:rgba(47,129,247,.4);color:var(--accent)">▶️ Habilitar</button>`;
+      :`<button onclick="event.stopPropagation();habilitarSimuladoAluno('${s.id}')" class="btn btn-s btn-sm" title="Habilitar a sessão remota da projeção para este aluno (libera o botão 'Entrar na sala' na escala dele)" style="font-size:11px;padding:3px 10px;background:rgba(47,129,247,.1);border-color:rgba(47,129,247,.4);color:var(--accent)">▶️ Habilitar Simulado</button>`;
     // Botão "Copiar link" — quando habilitado, copia o link direto da sala do aluno
     const btnCopyLink=liveAtivo
       ?`<button onclick="event.stopPropagation();copiarLinkSalaAluno('${s.id}',this)" class="btn btn-s btn-sm" title="Copia o link direto da sala deste aluno — útil pra Simulado Extra (manda por WhatsApp/email)" style="font-size:11px;padding:3px 10px;background:rgba(251,143,68,.1);border-color:rgba(251,143,68,.4);color:#fb8f44">📋 Link</button>`
