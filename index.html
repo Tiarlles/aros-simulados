@@ -3260,25 +3260,33 @@ async function _initProjecaoLive(simId,alunoId,role){
     #proj-timer .ctrl-bar button.primary{background:var(--accent,#2f81f7);border-color:var(--accent,#2f81f7);color:#fff}
     #proj-timer .ctrl-bar button.danger{background:transparent;color:#ff7b7b;border-color:#553}
     #proj-timer .ctrl-bar .pos{font-family:'JetBrains Mono',monospace;font-size:13px;color:#fff;letter-spacing:1px;font-weight:700;min-width:64px;text-align:center}
-    #proj-stage{position:fixed;top:60px;left:0;right:0;bottom:0;display:flex;padding:48px 64px;box-sizing:border-box;background:#fff;overflow:hidden}
+    /* Palco letterboxed em 16:9. O frame tem largura/altura REAIS em px,
+       calculadas em JS pra caber dentro do wrap mantendo a proporção.
+       Conteúdo interno usa unidades em (relativas ao font-size do frame,
+       também setado em JS = fh/50) pra escalar proporcionalmente.
+       Canvas tem o tamanho FÍSICO do frame, então traços normalizados
+       (0-1) caem na mesma posição relativa do conteúdo em qualquer tela. */
+    #proj-wrap{position:fixed;top:60px;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden}
+    #proj-frame{position:relative;flex:0 0 auto;background:#fff;font-size:18px;overflow:hidden}
+    #proj-stage{position:absolute;inset:0;display:flex;padding:2.67em 3.56em;box-sizing:border-box;background:#fff;overflow:hidden}
     /* Capa */
-    .slide-capa{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif}
-    .slide-capa .sim{font-family:inherit;font-size:clamp(42px,5.5vw,80px);font-weight:700;color:#000;line-height:1.1}
-    .slide-capa .caso{font-family:inherit;font-size:clamp(42px,5.5vw,80px);font-weight:700;color:#000;line-height:1.1}
-    /* Pergunta — mesmas regras do _initProjecao */
-    .slide-perg{flex:1;display:flex;flex-direction:column;gap:10px;width:100%;min-height:0}
-    .slide-perg .pcaso{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(20px,2.25vw,36px);font-weight:700;color:#000;line-height:1;letter-spacing:-.5px}
-    .slide-perg .penun-label{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(20px,2vw,28px);font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
-    .slide-perg .penun{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(16px,1.5vw,24px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify}
-    .slide-perg .penun-img{display:flex;justify-content:center;align-items:center;margin:10px 0;max-height:50vh;flex:0 1 auto;overflow:hidden}
-    .slide-perg .penun-img img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;border-radius:4px}
-    .slide-perg .pbody.dir .ptext-col .penun-img{max-height:35vh}
-    .slide-perg .pperg{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(20px,2vw,28px);font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
-    .slide-perg .ptxt{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(16px,1.5vw,24px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify}
-    .slide-perg .pbody{display:flex;gap:32px;min-height:0;align-items:flex-start;margin-top:8px}
+    .slide-capa{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:1.11em;font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif}
+    .slide-capa .sim{font-family:inherit;font-size:4em;font-weight:700;color:#000;line-height:1.1}
+    .slide-capa .caso{font-family:inherit;font-size:4em;font-weight:700;color:#000;line-height:1.1}
+    /* Pergunta */
+    .slide-perg{flex:1;display:flex;flex-direction:column;gap:.56em;width:100%;min-height:0}
+    .slide-perg .pcaso{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:1.78em;font-weight:700;color:#000;line-height:1;letter-spacing:-.02em}
+    .slide-perg .penun-label{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:1.44em;font-weight:700;color:#000;line-height:1.15;margin-top:.22em;text-transform:uppercase}
+    .slide-perg .penun{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:1.22em;font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify}
+    .slide-perg .penun-img{display:flex;justify-content:center;align-items:center;margin:.56em 0;max-height:25em;flex:0 1 auto;overflow:hidden}
+    .slide-perg .penun-img img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;border-radius:.22em}
+    .slide-perg .pbody.dir .ptext-col .penun-img{max-height:17.5em}
+    .slide-perg .pperg{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:1.44em;font-weight:700;color:#000;line-height:1.15;margin-top:.22em;text-transform:uppercase}
+    .slide-perg .ptxt{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:1.22em;font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify}
+    .slide-perg .pbody{display:flex;gap:1.78em;min-height:0;align-items:flex-start;margin-top:.44em}
     .slide-perg .pbody.dir{flex-direction:row;flex:1 1 auto}
-    .slide-perg .pbody.baixo{flex-direction:column;flex:0 1 50vh;max-height:50vh;overflow:hidden;width:100%}
-    .slide-perg .pbody.grande{flex-direction:column;flex:0 1 50vh;max-height:50vh;overflow:hidden;width:100%}
+    .slide-perg .pbody.baixo{flex-direction:column;flex:0 1 25em;max-height:25em;overflow:hidden;width:100%}
+    .slide-perg .pbody.grande{flex-direction:column;flex:0 1 25em;max-height:25em;overflow:hidden;width:100%}
     .slide-perg .ptext-col{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0;overflow:hidden}
     .slide-perg .pimg-col{display:flex;align-items:center;justify-content:center;min-height:0}
     .slide-perg .pbody.dir .pimg-col{flex:0 0 45%;max-width:45%;align-self:stretch}
@@ -3292,14 +3300,18 @@ async function _initProjecaoLive(simId,alunoId,role){
     #aguardando .ico{font-size:64px;opacity:.6}
     #aguardando .msg{font-size:18px;font-weight:600;color:#444}
     #aguardando .sub{font-size:13px;color:#888}
-    /* Canvas de desenho sobreposto — pointer-events default OFF; só captura quando caneta ativa */
-    #proj-canvas{position:fixed;top:60px;left:0;right:0;bottom:0;width:100vw;height:calc(100vh - 60px);z-index:5;pointer-events:none;touch-action:none}
+    /* Canvas de desenho sobreposto — vive DENTRO do #proj-frame pra herdar
+       o aspect ratio 16:9. pointer-events default OFF; só captura quando caneta
+       ou borracha estão ativas. */
+    #proj-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none;touch-action:none}
     #proj-canvas.pen-ativa{pointer-events:auto;cursor:crosshair}
+    #proj-canvas.eraser-ativa{pointer-events:auto;cursor:cell}
     #draw-toolbar{position:fixed;bottom:18px;right:18px;z-index:20;display:flex;gap:8px;align-items:center;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);border:1px solid #333;border-radius:10px;padding:8px 10px;box-shadow:0 6px 24px rgba(0,0,0,.45);font-family:-apple-system,Segoe UI,Roboto,sans-serif}
     #draw-toolbar button{background:#1a1a1a;color:#fff;border:1px solid #333;border-radius:6px;padding:7px 13px;cursor:pointer;font-size:12.5px;font-weight:600;font-family:inherit;transition:background .15s,border-color .15s,box-shadow .15s}
     #draw-toolbar button:hover{background:#252525;border-color:#444}
     #draw-toolbar button.danger{color:#ff7b7b;border-color:#553}
     #draw-toolbar button#btn-pen-toggle.ativo{background:var(--accent,#2f81f7);border-color:var(--accent,#2f81f7);color:#fff;box-shadow:0 0 0 3px rgba(47,129,247,.3)}
+    #draw-toolbar button#btn-eraser.ativo{background:#fff;border-color:#fff;color:#000;box-shadow:0 0 0 3px rgba(255,255,255,.3)}
     #draw-toolbar #pen-colors{display:flex;gap:5px;align-items:center;padding:0 4px;border-left:1px solid #333;border-right:1px solid #333;margin:0 4px;height:30px}
     #draw-toolbar #pen-colors.hidden{display:none}
     #draw-toolbar .color-btn{width:22px;height:22px;padding:0;border-radius:50%;border:2px solid #555;cursor:pointer;transition:transform .12s,border-color .15s,box-shadow .15s}
@@ -3312,11 +3324,16 @@ async function _initProjecaoLive(simId,alunoId,role){
       <button id="btn-prev" title="Anterior">◀</button>
       <span class="pos" id="proj-pos">1 / 1</span>
       <button id="btn-next" class="primary" title="Próximo">▶</button>
+      <button id="btn-pip" title="Picture-in-Picture (janela flutuante)">📌 PIP</button>
       <button id="btn-encerrar" class="danger" title="Interromper projeção (sala fica aberta — pode retomar)">⛔ Encerrar</button>
     </span>
   </div>
-  <div id="proj-stage"></div>
-  <canvas id="proj-canvas"></canvas>
+  <div id="proj-wrap">
+    <div id="proj-frame">
+      <div id="proj-stage"></div>
+      <canvas id="proj-canvas"></canvas>
+    </div>
+  </div>
   <div id="draw-toolbar">
     <button id="btn-pen-toggle" title="Liga/desliga modo caneta">✏️ Caneta</button>
     <span id="pen-colors" class="hidden">
@@ -3327,15 +3344,30 @@ async function _initProjecaoLive(simId,alunoId,role){
       <button class="color-btn" data-color="#000000" title="Preto" style="background:#000000"></button>
       <button class="color-btn" data-color="#ffffff" title="Branco" style="background:#ffffff"></button>
     </span>
+    <button id="btn-eraser" title="Borracha — apaga o traço inteiro ao passar por cima">🧽 Borracha</button>
     <button id="btn-limpar" class="danger" title="Apaga todos os traços deste slide">🗑 Limpar</button>
   </div>`;
+  // Refs cacheadas — sobrevivem a um eventual transplante do DOM pra janela PIP.
+  // (document.getElementById passaria a apontar pro doc errado se chamado depois do move.)
+  const projTimerEl=document.getElementById('proj-timer');
+  const projStageEl=document.getElementById('proj-stage');
+  const projWrapEl=document.getElementById('proj-wrap');
+  const projFrameEl=document.getElementById('proj-frame');
+  const projPosEl=document.getElementById('proj-pos');
+  const drawToolbarEl=document.getElementById('draw-toolbar');
+  const btnPrev=document.getElementById('btn-prev');
+  const btnNext=document.getElementById('btn-next');
+  const btnEncerrar=document.getElementById('btn-encerrar');
+  const btnLimpar=document.getElementById('btn-limpar');
+  const btnEraser=document.getElementById('btn-eraser');
+  const btnPIP=document.getElementById('btn-pip');
   // Computa total a partir dos slides carregados
   const fmt=(ms)=>{const t=Math.floor(ms/1000);const mm=String(Math.floor(t/60)).padStart(2,'0');const ss=String(t%60).padStart(2,'0');return mm+':'+ss;};
   function renderTimer(){
     const ms=timerRunning&&timerStartedAt?(Date.now()-timerStartedAt+timerPausedMs):timerPausedMs;
-    const el=document.getElementById('proj-timer');
-    el.querySelector('.tval').textContent=fmt(ms);
-    if(limiteMs>0&&ms>limiteMs)el.classList.add('over');else el.classList.remove('over');
+    if(!projTimerEl)return;
+    projTimerEl.querySelector('.tval').textContent=fmt(ms);
+    if(limiteMs>0&&ms>limiteMs)projTimerEl.classList.add('over');else projTimerEl.classList.remove('over');
   }
   setInterval(renderTimer,250);renderTimer();
   // Carrega slides do caso atual (cache: só recarrega se casoId mudou)
@@ -3353,7 +3385,7 @@ async function _initProjecaoLive(simId,alunoId,role){
       }
     }catch(e){console.error('carregarSlides:',e);}
     if(!slides||!slides.length){
-      document.getElementById('proj-stage').innerHTML='<div id="aguardando"><div class="ico">⏳</div><div class="msg">Nenhum slide cadastrado para este caso.</div></div>';
+      if(projStageEl)projStageEl.innerHTML='<div id="aguardando"><div class="ico">⏳</div><div class="msg">Nenhum slide cadastrado para este caso.</div></div>';
     }
   }
   // Evita re-render desnecessário (innerHTML flicka imagens). Re-render só quando casoId+idx mudaram.
@@ -3368,7 +3400,8 @@ async function _initProjecaoLive(simId,alunoId,role){
     }
   }
   function renderSlide(){
-    const stage=document.getElementById('proj-stage');
+    const stage=projStageEl;
+    if(!stage)return;
     if(!slides.length){
       if(_lastRenderKey!=='__empty__'){
         stage.innerHTML=`<div id="aguardando"><div class="ico">🎬</div><div class="msg">Aguardando o professor iniciar a projeção...</div><div class="sub">A sala está conectada. Os slides aparecerão aqui em instantes.</div></div>`;
@@ -3379,8 +3412,7 @@ async function _initProjecaoLive(simId,alunoId,role){
     const key=`${casoIdAtual}__${idx}`;
     if(key===_lastRenderKey){
       // Mesma tela — só garante que controles estejam coerentes (idempotente, sem flash)
-      const pos=document.getElementById('proj-pos');
-      if(pos)pos.textContent=(idx+1)+' / '+slides.length;
+      if(projPosEl)projPosEl.textContent=(idx+1)+' / '+slides.length;
       return;
     }
     _lastRenderKey=key;
@@ -3388,12 +3420,9 @@ async function _initProjecaoLive(simId,alunoId,role){
     const s=_slideMigrar(raw);
     stage.innerHTML=_renderSlideHTML(s);
     // Atualiza posição no controle
-    const pos=document.getElementById('proj-pos');
-    if(pos)pos.textContent=(idx+1)+' / '+slides.length;
-    const prevBtn=document.getElementById('btn-prev');
-    const nextBtn=document.getElementById('btn-next');
-    if(prevBtn)prevBtn.disabled=idx<=0;
-    if(nextBtn)nextBtn.disabled=idx>=slides.length-1;
+    if(projPosEl)projPosEl.textContent=(idx+1)+' / '+slides.length;
+    if(btnPrev)btnPrev.disabled=idx<=0;
+    if(btnNext)btnNext.disabled=idx>=slides.length-1;
     // Pré-carrega imagens dos slides vizinhos pro próximo "next" ser instantâneo
     _preloadVizinhos();
   }
@@ -3418,22 +3447,71 @@ async function _initProjecaoLive(simId,alunoId,role){
       }
       await setDoc(doc(db,'projecaoLive',`${simId}__${alunoId}`),payload,{merge:true}).catch(e=>console.warn(e));
     };
-    document.getElementById('btn-prev').onclick=()=>navegarPara(idx-1);
-    document.getElementById('btn-next').onclick=()=>navegarPara(idx+1);
-    document.getElementById('btn-encerrar').onclick=async()=>{
+    if(btnPrev)btnPrev.onclick=()=>navegarPara(idx-1);
+    if(btnNext)btnNext.onclick=()=>navegarPara(idx+1);
+    if(btnEncerrar)btnEncerrar.onclick=async()=>{
       if(!confirm('Interromper a projeção?\n\nO slide some pro aluno mas a sala fica aberta — ele continua conectado e você pode retomar a qualquer momento clicando em "Projetar caso" no painel.\n\nTodos os desenhos serão apagados.'))return;
       // Apaga os traços do canvas pra eles não voltarem quando a sala for reaberta
       await _limparStrokesProjLive(simId,alunoId);
       // Apenas para a projeção; mantém ativo:true pra sala continuar aberta (aluno não precisa abrir novo link).
       await setDoc(doc(db,'projecaoLive',`${simId}__${alunoId}`),{projecaoAberta:false,timerRunning:false,interrompidaEm:new Date().toISOString(),updatedAt:new Date().toISOString()},{merge:true}).catch(e=>console.warn(e));
+      // Fecha PIP se estiver aberto, depois fecha a janela principal
+      try{if(window.documentPictureInPicture?.window)window.documentPictureInPicture.window.close();}catch(e){}
       window.close();
     };
     // Atalhos de teclado pro prof (navegação apenas; cronômetro fica no painel da coord)
-    document.addEventListener('keydown',(e)=>{
+    const _projKeyHandler=(e)=>{
       if(e.target&&['INPUT','TEXTAREA'].includes(e.target.tagName))return;
-      if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();document.getElementById('btn-next')?.click();}
-      else if(e.key==='ArrowLeft'){e.preventDefault();document.getElementById('btn-prev')?.click();}
-    });
+      if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();btnNext?.click();}
+      else if(e.key==='ArrowLeft'){e.preventDefault();btnPrev?.click();}
+    };
+    document.addEventListener('keydown',_projKeyHandler);
+    // Botão PIP — abre janela flutuante "always on top" com o preview inteiro
+    if(btnPIP){
+      btnPIP.onclick=async()=>{
+        if(!('documentPictureInPicture' in window)){
+          alert('Picture-in-Picture não é suportado neste navegador.\n\nFunciona no Chrome 116+ ou Edge.');
+          return;
+        }
+        // Se já tem PIP aberto, fecha (toggle)
+        if(window.documentPictureInPicture.window){
+          try{window.documentPictureInPicture.window.close();}catch(e){}
+          return;
+        }
+        try{
+          const pipWin=await window.documentPictureInPicture.requestWindow({width:640,height:380});
+          // Copia TODOS os <style> da página (head E body) — o modo projecao-live
+          // injeta um <style> dentro do body via innerHTML, então o head sozinho
+          // não tem o CSS de #proj-frame, .slide-perg, etc.
+          document.querySelectorAll('style').forEach(s=>{
+            const c=pipWin.document.createElement('style');
+            c.textContent=s.textContent;
+            pipWin.document.head.appendChild(c);
+          });
+          document.querySelectorAll('link[rel="stylesheet"]').forEach(l=>{
+            const c=pipWin.document.createElement('link');
+            c.rel='stylesheet';
+            if(l.href)c.href=l.href;
+            pipWin.document.head.appendChild(c);
+          });
+          pipWin.document.body.style.cssText='margin:0;padding:0;background:#000;overflow:hidden';
+          // Move toda a UI da projeção pra janela PIP
+          [projTimerEl,projWrapEl,drawToolbarEl].forEach(el=>{if(el)pipWin.document.body.appendChild(el);});
+          // Atalhos de teclado também precisam funcionar na janela PIP
+          pipWin.document.addEventListener('keydown',_projKeyHandler);
+          // Reajusta escala dentro da nova janela
+          setTimeout(()=>{fitFrame();renderCanvas();},80);
+          // Ao fechar PIP, traz tudo de volta pra janela principal
+          pipWin.addEventListener('pagehide',()=>{
+            [projTimerEl,projWrapEl,drawToolbarEl].forEach(el=>{if(el)document.body.appendChild(el);});
+            setTimeout(()=>{fitFrame();renderCanvas();},80);
+          });
+        }catch(e){
+          console.error('PIP:',e);
+          alert('Não consegui abrir Picture-in-Picture: '+(e.message||e));
+        }
+      };
+    }
   }
   // ═══════════ CANVAS DE DESENHO ═══════════
   // Caneta começa DESLIGADA. Usuário precisa clicar em "✏️ Caneta" pra ativar.
@@ -3466,7 +3544,31 @@ async function _initProjecaoLive(simId,alunoId,role){
       if(b.dataset.color===penCor)b.classList.add('selected');else b.classList.remove('selected');
     });
   }
-  btnPen.onclick=()=>{penAtiva=!penAtiva;atualizaUIPen();};
+  // Borracha — apaga traços inteiros ao passar por cima.
+  let borrachaAtiva=false;
+  let borrachaArrastando=false;
+  // Raio de "hit" da borracha em coords normalizadas (≈ 3% da diagonal do canvas).
+  const BORRACHA_RAIO=0.025;
+  function atualizaUIBorracha(){
+    if(borrachaAtiva){
+      canvas.classList.add('eraser-ativa');
+      btnEraser?.classList.add('ativo');
+    }else{
+      canvas.classList.remove('eraser-ativa');
+      btnEraser?.classList.remove('ativo');
+    }
+  }
+  btnPen.onclick=()=>{
+    penAtiva=!penAtiva;
+    // Mutual exclusion com a borracha
+    if(penAtiva&&borrachaAtiva){borrachaAtiva=false;atualizaUIBorracha();}
+    atualizaUIPen();
+  };
+  if(btnEraser)btnEraser.onclick=()=>{
+    borrachaAtiva=!borrachaAtiva;
+    if(borrachaAtiva&&penAtiva){penAtiva=false;atualizaUIPen();}
+    atualizaUIBorracha();
+  };
   document.querySelectorAll('#pen-colors .color-btn').forEach(b=>{
     b.onclick=()=>{
       penCor=b.dataset.color;
@@ -3475,20 +3577,47 @@ async function _initProjecaoLive(simId,alunoId,role){
     };
   });
   atualizaUIPen();
+  atualizaUIBorracha();
   // Traços recebidos do Firestore (todos os papéis). Cada um: {id, points:[{x,y}], color, thickness, slideIdx, casoId, by}
   // Coordenadas são NORMALIZADAS (0-1) pra funcionar em qualquer tamanho de tela.
   let strokes=[];
   // Traço em andamento (sendo desenhado agora pelo usuário local — render imediato antes do sync)
   let strokeAtual=null;
   let drawingStrokesUnsub=null;
+  // Encaixa o frame em 16:9 dentro do wrap (sem transform — usa width/height
+  // REAIS em px). Também ajusta o font-size do frame pra que unidades em
+  // dentro do conteúdo escalem proporcionalmente com a altura do frame.
+  function fitFrame(){
+    if(!projWrapEl||!projFrameEl)return;
+    const W=projWrapEl.clientWidth, H=projWrapEl.clientHeight;
+    if(W<=0||H<=0)return;
+    const target=16/9;
+    let fw,fh;
+    if(W/H>target){fh=H; fw=H*target;}
+    else{fw=W; fh=W/target;}
+    projFrameEl.style.width=fw+'px';
+    projFrameEl.style.height=fh+'px';
+    // Base de em: 1em = 1/50 da altura do frame (design assume fh=900 → em=18px)
+    projFrameEl.style.fontSize=(fh/50)+'px';
+    resizeCanvas();
+  }
   function resizeCanvas(){
     const dpr=window.devicePixelRatio||1;
-    canvas.width=canvas.clientWidth*dpr;
-    canvas.height=canvas.clientHeight*dpr;
+    const w=canvas.clientWidth||1, h=canvas.clientHeight||1;
+    canvas.width=Math.round(w*dpr);
+    canvas.height=Math.round(h*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
     renderCanvas();
   }
-  window.addEventListener('resize',resizeCanvas);
+  // ResizeObserver pega TUDO (resize de janela, zoom, mudança de DPR, F11, PIP).
+  const _projResizeObs=new ResizeObserver(()=>fitFrame());
+  if(projWrapEl)_projResizeObs.observe(projWrapEl);
+  window.addEventListener('resize',fitFrame);
+  // Retries pra cobrir layout assíncrono (popup abrindo, fonts carregando, etc.)
+  fitFrame();
+  requestAnimationFrame(fitFrame);
+  setTimeout(fitFrame,100);
+  setTimeout(fitFrame,500);
   function renderCanvas(){
     ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);
     const W=canvas.clientWidth,H=canvas.clientHeight;
@@ -3522,9 +3651,37 @@ async function _initProjecaoLive(simId,alunoId,role){
     const py=(e.clientY-r.top)/r.height;
     return{x:Math.max(0,Math.min(1,px)),y:Math.max(0,Math.min(1,py))};
   }
+  // Encontra traços visíveis cujo algum ponto cai dentro do raio da borracha
+  // e apaga eles (Firestore + local). Roda em cada pointerdown/move da borracha.
+  async function _apagarStrokesProximos(p){
+    const r2=BORRACHA_RAIO*BORRACHA_RAIO;
+    const aApagar=[];
+    for(const s of strokes){
+      if(s.casoId!==casoIdAtual||s.slideIdx!==idx||!s.points)continue;
+      for(const pt of s.points){
+        const dx=pt.x-p.x, dy=pt.y-p.y;
+        if(dx*dx+dy*dy<r2){aApagar.push(s);break;}
+      }
+    }
+    if(!aApagar.length)return;
+    // Remove local (re-render imediato — sem esperar Firestore)
+    const ids=new Set(aApagar.map(s=>s.id));
+    strokes=strokes.filter(s=>!ids.has(s.id));
+    renderCanvas();
+    // Apaga no Firestore (sincroniza pra todos os outros viewers)
+    try{
+      await Promise.all(aApagar.map(s=>deleteDoc(doc(db,`projecaoLive/${simId}__${alunoId}/strokes/${s.id}`))));
+    }catch(e){console.warn('borracha:',e);}
+  }
   canvas.addEventListener('pointerdown',e=>{
-    if(!penAtiva)return; // defesa em profundidade — CSS já bloqueia, mas garante
     if(e.button!==0&&e.pointerType==='mouse')return; // só botão esquerdo
+    if(borrachaAtiva){
+      canvas.setPointerCapture(e.pointerId);
+      borrachaArrastando=true;
+      _apagarStrokesProximos(pontoEvento(e));
+      return;
+    }
+    if(!penAtiva)return; // defesa em profundidade — CSS já bloqueia, mas garante
     canvas.setPointerCapture(e.pointerId);
     strokeAtual={
       points:[pontoEvento(e)],
@@ -3535,6 +3692,10 @@ async function _initProjecaoLive(simId,alunoId,role){
     renderCanvas();
   });
   canvas.addEventListener('pointermove',e=>{
+    if(borrachaAtiva&&borrachaArrastando){
+      _apagarStrokesProximos(pontoEvento(e));
+      return;
+    }
     if(!strokeAtual)return;
     strokeAtual.points.push(pontoEvento(e));
     renderCanvas();
@@ -3553,16 +3714,25 @@ async function _initProjecaoLive(simId,alunoId,role){
     }catch(e){console.warn('flushStroke:',e);}
     renderCanvas();
   }
-  canvas.addEventListener('pointerup',flushStroke);
-  canvas.addEventListener('pointercancel',()=>{strokeAtual=null;renderCanvas();});
-  canvas.addEventListener('pointerleave',e=>{if(strokeAtual)flushStroke();});
+  canvas.addEventListener('pointerup',e=>{
+    if(borrachaAtiva){borrachaArrastando=false;return;}
+    flushStroke();
+  });
+  canvas.addEventListener('pointercancel',()=>{
+    borrachaArrastando=false;
+    strokeAtual=null;renderCanvas();
+  });
+  canvas.addEventListener('pointerleave',e=>{
+    if(borrachaAtiva){borrachaArrastando=false;return;}
+    if(strokeAtual)flushStroke();
+  });
   // Subscribe na subcoleção de traços
   drawingStrokesUnsub=onSnapshot(collection(db,`projecaoLive/${simId}__${alunoId}/strokes`),snap=>{
     strokes=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderCanvas();
   });
   // Botão "Limpar" — apaga todos os traços do casoId + slideIdx atuais
-  document.getElementById('btn-limpar').onclick=async()=>{
+  if(btnLimpar)btnLimpar.onclick=async()=>{
     const visiveis=strokes.filter(s=>s.casoId===casoIdAtual&&s.slideIdx===idx);
     if(!visiveis.length){return;}
     if(!confirm(`Apagar todos os ${visiveis.length} traço${visiveis.length>1?'s':''} deste slide?`))return;
@@ -3571,20 +3741,20 @@ async function _initProjecaoLive(simId,alunoId,role){
     }catch(e){console.warn('limpar strokes:',e);}
   };
   // Inicializa tamanho do canvas
-  setTimeout(resizeCanvas,50);
+  setTimeout(()=>{fitFrame();resizeCanvas();},50);
   // ═══════════ FIM CANVAS ═══════════
 
   // Subscribe no doc live (canal principal de sync)
   onSnapshot(doc(db,'projecaoLive',`${simId}__${alunoId}`),async snap=>{
     if(!snap.exists()){
-      document.getElementById('proj-stage').innerHTML='<div id="aguardando"><div class="ico">⏳</div><div class="msg">Sala ainda não iniciada.</div><div class="sub">Aguarde o professor liberar.</div></div>';
+      if(projStageEl)projStageEl.innerHTML='<div id="aguardando"><div class="ico">⏳</div><div class="msg">Sala ainda não iniciada.</div><div class="sub">Aguarde o professor liberar.</div></div>';
       return;
     }
     const d=snap.data();
     liveDoc=d;
     // Sessão totalmente encerrada (prof desabilitou no painel)
     if(d.ativo===false){
-      document.getElementById('proj-stage').innerHTML='<div id="aguardando"><div class="ico">⛔</div><div class="msg">Sessão encerrada pelo professor.</div><div class="sub">Você pode fechar esta janela.</div></div>';
+      if(projStageEl)projStageEl.innerHTML='<div id="aguardando"><div class="ico">⛔</div><div class="msg">Sessão encerrada pelo professor.</div><div class="sub">Você pode fechar esta janela.</div></div>';
       timerRunning=false;timerPausedMs=0;timerStartedAt=null;renderTimer();
       return;
     }
@@ -3593,7 +3763,7 @@ async function _initProjecaoLive(simId,alunoId,role){
       if(!isProf){
         // Distingue "nunca iniciou" (casoId vazio) de "encerrou caso" (casoId populado)
         const nuncaIniciou=!d.casoId;
-        document.getElementById('proj-stage').innerHTML=nuncaIniciou
+        if(projStageEl)projStageEl.innerHTML=nuncaIniciou
           ?'<div id="aguardando"><div class="ico">🎬</div><div class="msg">Aguardando o professor iniciar a projeção...</div><div class="sub">A sala está conectada. Os slides aparecerão aqui em instantes.</div></div>'
           :'<div id="aguardando"><div class="ico">✅</div><div class="msg">Caso finalizado pelo professor.</div></div>';
         timerRunning=false;renderTimer();
@@ -16169,12 +16339,13 @@ window.habilitarSimuladoAluno=async(studentId)=>{
 // Triplo fallback: navigator.clipboard → document.execCommand('copy') → modal com URL visível.
 window.copiarLinkSalaAluno=async(studentId,btnEl)=>{
   if(!_ckSimId){alert('Selecione um simulado primeiro.');return;}
-  // Base URL: se estiver rodando local (file://), gera link local pra testar mesmo que
-  // systemUrl esteja configurado pra produção. Caso contrário, usa systemUrl ou origin+pathname.
+  // Base URL: se estiver rodando local (file:// OU localhost/127.0.0.1), gera link
+  // local pra testar mesmo que systemUrl esteja configurado pra produção.
+  // Caso contrário, usa systemUrl (compartilha link de produção) ou origin+pathname.
   let base;
-  const isLocal=window.location.protocol==='file:';
+  const host=window.location.hostname;
+  const isLocal=window.location.protocol==='file:'||host==='localhost'||host==='127.0.0.1'||host==='0.0.0.0';
   if(isLocal){
-    // file:///Users/.../index.html → ...index.html?modo=... (sem barra extra)
     base=window.location.origin+window.location.pathname;
   }else if(S.cfg?.systemUrl){
     base=S.cfg.systemUrl.replace(/\/+$/,'')+'/';
@@ -17706,10 +17877,8 @@ window.iniciarProjecao=async(ci)=>{
     delete _projAtivo[ci];
     return;
   }
-  // Abre janela preview do prof
-  const url=window.location.pathname+'?modo=projecao-live&sim='+encodeURIComponent(simId)+'&aluno='+encodeURIComponent(alunoId)+'&role=prof';
-  state.win=window.open(url,'aros_proj_'+simId+'_'+alunoId,'width=1280,height=800');
-  if(!state.win){alert('A janela foi bloqueada pelo navegador. Permita pop-ups e clique novamente.');}
+  // Abre PIP (preferido) ou popup tradicional como fallback
+  await _abrirProjecaoUI(state);
   // Tick local pra atualizar visual do cronômetro
   state.tickInt=setInterval(()=>{if(state.timerRunning)_atualizaPainelProj(ci);},500);
   _atualizaPainelProj(ci);
@@ -17774,15 +17943,56 @@ window.projecaoTimer=async(ci,acao)=>{
   }catch(e){console.warn('projecaoTimer:',e);}
 };
 
-window.projecaoReabrirJanela=(ci)=>{
+window.projecaoReabrirJanela=async(ci)=>{
   const st=_projAtivo[ci];if(!st)return;
-  const url=window.location.pathname+'?modo=projecao-live&sim='+encodeURIComponent(st.simId)+'&aluno='+encodeURIComponent(st.alunoId)+'&role=prof';
-  st.win=window.open(url,'aros_proj_'+st.simId+'_'+st.alunoId,'width=1280,height=800');
+  await _abrirProjecaoUI(st);
 };
+
+// Abre o "preview do prof" preferencialmente como Picture-in-Picture (janela
+// flutuante always-on-top), com um iframe carregando a view do ALUNO — assim
+// o prof vê espelhado exatamente o que o aluno está vendo no link remoto.
+// Controles (Anterior/Próximo/cronômetro/Encerrar) ficam no proj-fixed-bar do
+// painel da coord. Se o browser não suporta PIP, cai no popup tradicional.
+async function _abrirProjecaoUI(state){
+  const {simId,alunoId}=state;
+  // URL absoluta — o iframe vive dentro do document about:blank da janela PIP,
+  // então caminhos relativos não resolvem direito. Construímos contra location.href.
+  const urlAluno=new URL(window.location.pathname+'?modo=projecao-live&sim='+encodeURIComponent(simId)+'&aluno='+encodeURIComponent(alunoId)+'&role=aluno',window.location.href).toString();
+  // Fecha qualquer popup/PIP anterior pra evitar janelas duplicadas
+  if(state.pipWin){try{state.pipWin.close();}catch(e){}state.pipWin=null;}
+  if(state.win&&!state.win.closed){try{state.win.close();}catch(e){}state.win=null;}
+  // 1) PIP (Chrome 116+/Edge)
+  if('documentPictureInPicture' in window){
+    try{
+      if(window.documentPictureInPicture.window){
+        try{window.documentPictureInPicture.window.close();}catch(e){}
+      }
+      const pipWin=await window.documentPictureInPicture.requestWindow({width:640,height:380});
+      pipWin.document.title='Projetando · AROS';
+      pipWin.document.body.style.cssText='margin:0;padding:0;background:#000;overflow:hidden;width:100vw;height:100vh';
+      const iframe=pipWin.document.createElement('iframe');
+      iframe.src=urlAluno;
+      iframe.style.cssText='border:0;width:100vw;height:100vh;display:block;background:#000';
+      iframe.allow='autoplay';
+      pipWin.document.body.appendChild(iframe);
+      state.pipWin=pipWin;
+      // Se o usuário fechar o PIP manualmente, limpa a ref
+      pipWin.addEventListener('pagehide',()=>{state.pipWin=null;});
+      return;
+    }catch(e){
+      console.warn('PIP indisponível, abrindo popup tradicional:',e);
+    }
+  }
+  // 2) Fallback: popup tradicional com role=prof (tem timer/controles próprios)
+  const urlProf=window.location.pathname+'?modo=projecao-live&sim='+encodeURIComponent(simId)+'&aluno='+encodeURIComponent(alunoId)+'&role=prof';
+  state.win=window.open(urlProf,'aros_proj_'+simId+'_'+alunoId,'width=1280,height=800');
+  if(!state.win){alert('A janela foi bloqueada pelo navegador. Permita pop-ups e clique novamente.\n\n(Se estiver no Chrome ou Edge, atualize pra versão mais recente — o ideal é abrir como Picture-in-Picture.)');}
+}
 
 window.encerrarProjecao=async(ci)=>{
   const st=_projAtivo[ci];if(!st)return;
   if(st.win&&!st.win.closed){try{st.win.close();}catch(e){}}
+  if(st.pipWin){try{st.pipWin.close();}catch(e){}st.pipWin=null;}
   if(st.tickInt)clearInterval(st.tickInt);
   if(st.unsub)try{st.unsub();}catch(e){}
   // Apaga os traços do canvas — não devem persistir entre apresentações
