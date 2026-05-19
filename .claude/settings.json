@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -nc --rawfile ctx \".claude/skills/aros-contexto/SKILL.md\" '{hookSpecificOutput: {hookEventName: \"SessionStart\", additionalContext: (\"=== CONTEXTO AROS auto-carregado via SessionStart hook ===\\n\\nA skill /aros-contexto foi injetada automaticamente abaixo. NÃO invoque /aros-contexto — o conteúdo já está aqui:\\n\\n\" + $ctx)}}' 2>/dev/null || echo '{}'",
+            "timeout": 10,
+            "statusMessage": "Carregando contexto AROS..."
+          }
+        ]
+      }
+    ]
+  }
+}
