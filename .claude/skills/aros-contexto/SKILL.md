@@ -29,7 +29,13 @@ SPA monolítico single-file (HTML+CSS+JS vanilla, ~7500+ linhas em `index.html`)
 
 **Deploy (atualizado 2026-05-15):** o diretório local **agora é um repo git** conectado ao remote `https://github.com/Tiarlles/aros-simulados` (branch `main`). Token salvo no macOS Keychain. Quando o usuário fala "deploy"/"sobe pra produção", rodar `git add -A && git commit -m "..." && git push origin main`. GitHub Pages atualiza `aros.anestreview.com.br` em ~30s. **Não fazer push preventivo sem autorização explícita.**
 
-**Testes locais:** `iniciar-servidor.command` (na raiz do projeto) — duplo-clique no Finder abre Terminal rodando `python3 -m http.server 8080` + abre Chrome em `http://localhost:8080/index.html#admin`. Live Server do VS Code NÃO recomendado (injeta script de auto-reload que quebra o `<script type="module">` em alguns casos).
+**Testes locais (CRÍTICO — fluxo padrão do usuário):** o usuário **sempre testa localmente antes de autorizar deploy**, e usa o `iniciar-servidor-dev.command` (porta 8081). Esse script **auto-detecta a worktree com `index.html` de mtime mais recente** e serve dela; só cai pra raiz se nenhuma worktree tiver `index.html` mais novo que o main. Quando você editar o `index.html` numa worktree, o usuário relança o script (Cmd+W na janela velha + duplo-clique no .command) e o Terminal imprime `Servindo: worktree: <nome>` ou `Servindo: pasta principal (main)`. Existe também o `iniciar-servidor.command` (porta 8080) que sempre serve a raiz — usado pra comparar com produção. Live Server do VS Code NÃO recomendado (injeta script de auto-reload que quebra o `<script type="module">`).
+
+**REGRA CRÍTICA — nunca copiar `index.html` da worktree pra raiz manualmente.** Incidente 2026-05-18: copiei pra "facilitar visualização" e clobberei trabalho não-commitado de outra sessão paralela que estava sendo servida via dev script. Quando o user diz "não vejo as mudanças localmente":
+- **Primeiro**: `lsof -iTCP:8081 -sTCP:LISTEN` + `lsof -p <pid> | grep cwd` pra ver onde o servidor velho está apontando — geralmente é um processo antigo de antes das suas edits, servindo a raiz/worktree errada.
+- **Solução**: `kill <pid>` e pedir pro user relançar o `iniciar-servidor-dev.command`. Cmd+Shift+R no Chrome pra burlar cache.
+- **NUNCA** fazer `cp worktree/index.html raiz/` sem antes: (a) `cd raiz && git status` — se modificado, parar e checar com user, (b) listar outras worktrees (`ls .claude/worktrees/`) e checar mtimes/`git status` de cada uma.
+- Deploy oficial é `git push origin main` da própria worktree (com autorização explícita), nunca cópia manual.
 
 ## URLs e endpoints
 
@@ -514,6 +520,31 @@ Sistema de contestação de gabarito de provas TSA/TEA/ME1/ME2/ME3. Aluno públi
 - Card resumo do topo: 4 cards agora (Total geral, Salários fixos, **Mentoria**, Variáveis).
 - `FIN_DEFAULT_TIPOS` ainda tem `'mentoria'` como tipo de lançamento livre (legado), mas mentoria automática NÃO usa esse tipo — ela é gerada via cálculo de sobreposição direto, não fica gravada como lançamento.
 
+**Cadastros do Financeiro** (modal ⚙️ Cadastros, admin-only) com 3 abas:
+- **👨‍⚕️ Professores**: tabela com **busca por nome** (filtra em tempo real via `_finCadFilterProfs`) + 4 colunas: Professor / Email (somente leitura — fonte: `S.profsEmail[nome]`) / Salário fixo / Início / Fim. Início/Fim são `<input type="month">` (YYYY-MM) opcionais; se vazios o salário aplica em todos os meses; se preenchidos restringe ao intervalo.
+- **📌 Tipos de atividade**: editor de tipos personalizados (atividades extras).
+- **📧 Solicitar Nota**: config do envio automático de email. Campos: `emailCoord` (CC), `templateId`, `serviceId`. Salvo em `S.financeiro.notaFiscalCfg = {emailCoord, templateId, serviceId}`.
+
+**Painel de pagamentos do mês** (`renderFinanceiro`):
+- **🔍 Busca** por nome no topo (filtra a tabela em tempo real via `_finFilterProfs`).
+- **Ordem alfabética** (substituiu o sort por total desc).
+- Coluna **Rodadas Sim Oficial** (renomeada de "Rodadas"; mesma renomeação no detalhamento e seções).
+- Coluna **Solicitar Nota** (admin-only) antes de "Ações" com lógica `_finSolicitarNota(profNome, anoMes)`:
+  - 1ª solicitação: botão azul `📨 Solicitar Nota` → confirm → dispara email via `emailjs.send(serviceId, templateId, {to_email, cc_email, nome, mes, valor_total, detalhamento, assunto})` → registra timestamp em `S.financeiro.meses[anoMes].notasSolicitadas[profNome]` no Firestore.
+  - Já solicitado: mostra `✓ DD/MM HH:MM` em verde + botão `🔁 Reenviar` (confirm de reenvio).
+  - Se email do prof vazio → alerta direcionando pra Configurações → Professores.
+  - Se templateId vazio → alerta direcionando pra Cadastros → Solicitar Nota.
+
+**Detalhamento individual** (`openFinRelatorio`):
+- Resumo só lista categorias com valor > 0 (esconde zerados).
+- Seções (Rodadas Sim Oficial, Simulados extras, Mentoria, Atividades extras) só renderizam se houver registros.
+
+**Email do professor** vive em `config/professores.emails = {[nome]: email}` (fonte única). Carregado em `S.profsEmail`. Editado **apenas** na aba Professores (Configurações) via `saveProfEmail(nome, email)` no blur do input. O modal Cadastros do Financeiro mostra como **somente leitura**.
+
+**Salário fixo com período opcional**: `S.financeiro.profsFin[nome] = {salarioFixo, inicio, fim, ...}`. No cálculo, `fixo=0` se `anoMes < inicio` ou `anoMes > fim`. Comparação lexicográfica funciona pra YYYY-MM.
+
+**Filtro de profs com atividade**: `calcFinanceiroMes` retorna só profs com `fixo>0 || totalRodadas>0 || ...`. Profs zerados não aparecem (decisão UX — mantém tabela enxuta).
+
 ## Firestore Rules (resumo)
 
 Pragmáticas, não restritivas, porque o app **não usa Firebase Auth**:
@@ -579,15 +610,16 @@ Não há build, lint, nem suíte de testes. Validação = abrir `index.html` no 
 
 ## Convenções e restrições (CRÍTICAS)
 
-1. **Deploy via git push (atualizado 2026-05-15)**. Diretório local agora é repo git conectado ao GitHub. Quando user autorizar explicitamente ("deploy"/"sobe pra produção"), rodar `git add -A && git commit -m "..." && git push origin main`. GitHub Pages atualiza em ~30s. **NÃO fazer push preventivo após edits** — sempre esperar autorização.
-2. **Não criar arquivos `.md`** sem o usuário pedir explicitamente.
-3. **Cloud Function: deploy SÓ quando autorizado**. Não fazer deploy preventivo.
-4. **Migrações de dados / fixes pontuais** via scripts Node em `/tmp/xlsx-reader/` usando **Firebase JS SDK como cliente público** (não Admin SDK). Funciona porque as Rules permitem.
-5. **Nunca coloque `</script>` literal dentro de template literals JS** no `index.html`. Splitar como `` `<scr` + `ipt>` `` ou parser HTML quebra.
-6. **Backups em `Backup/index N.html`** — NÃO editar.
-7. **Distinguir oficial vs extra** sempre que mexer em listagem de simulados.
-8. **Sessão em localStorage** (`aros_session`). Não armazena senha, só username — re-resolvido em `S.usuarios` no boot.
-9. **Estrutura do menu lateral é DATA-DRIVEN**: ao mexer em sidebar, modal de permissões, ou qualquer renderização que dependa de grupos/abas, use `_menuEffectiveGroups()` em vez de iterar `TAB_GROUPS` direto. `TAB_GROUPS` é só fonte das tabs built-in; a layout final pode estar customizada em `config/menu.structure`.
+1. **Deploy via git push (atualizado 2026-05-15)**. Diretório local agora é repo git conectado ao GitHub. Quando user autorizar explicitamente ("deploy"/"sobe pra produção"), rodar `git add -A && git commit -m "..." && git push origin main`. GitHub Pages atualiza em ~30s. **NÃO fazer push preventivo após edits** — sempre esperar autorização. **Usuário SEMPRE testa localmente no `iniciar-servidor-dev.command` antes de autorizar o push** — nunca pular essa etapa.
+2. **NUNCA copiar `index.html` de worktree pra raiz** (incidente 2026-05-18). Múltiplas worktrees rodam em paralelo com trabalho não-commitado de sessões diferentes; o `iniciar-servidor-dev.command` auto-detecta a worktree de mtime mais recente. Cópia manual pra raiz clobbera trabalho de outras sessões E muda o mtime da raiz, desviando o auto-detect. Se o user diz "não vejo as mudanças": (a) checar processo do servidor com `lsof -iTCP:8081 -sTCP:LISTEN` + `lsof -p <pid> | grep cwd`, (b) se for processo antigo apontando pro lugar errado, matar (`kill <pid>`) e pedir pro user relançar o script, (c) Cmd+Shift+R no navegador pra burlar cache. Nunca `cp` pra raiz sem `git status` na raiz + listagem de worktrees + checagem de mtime/status de cada uma primeiro.
+3. **Não criar arquivos `.md`** sem o usuário pedir explicitamente.
+4. **Cloud Function: deploy SÓ quando autorizado**. Não fazer deploy preventivo.
+5. **Migrações de dados / fixes pontuais** via scripts Node em `/tmp/xlsx-reader/` usando **Firebase JS SDK como cliente público** (não Admin SDK). Funciona porque as Rules permitem.
+6. **Nunca coloque `</script>` literal dentro de template literals JS** no `index.html`. Splitar como `` `<scr` + `ipt>` `` ou parser HTML quebra.
+7. **Backups em `Backup/index N.html`** — NÃO editar.
+8. **Distinguir oficial vs extra** sempre que mexer em listagem de simulados.
+9. **Sessão em localStorage** (`aros_session`). Não armazena senha, só username — re-resolvido em `S.usuarios` no boot.
+10. **Estrutura do menu lateral é DATA-DRIVEN**: ao mexer em sidebar, modal de permissões, ou qualquer renderização que dependa de grupos/abas, use `_menuEffectiveGroups()` em vez de iterar `TAB_GROUPS` direto. `TAB_GROUPS` é só fonte das tabs built-in; a layout final pode estar customizada em `config/menu.structure`.
 
 ## Dívidas técnicas conhecidas (não corrigir sem pedirem)
 
@@ -711,6 +743,40 @@ Não há build, lint, nem suíte de testes. Validação = abrir `index.html` no 
 **Modal de import limpo**:
 - Removido box de pré-visualização e box de "Dicas".
 - Só status do PDF + textarea editável + count de questões detectadas.
+
+## Pendências em aberto (configuração externa)
+
+Funcionalidades que estão **prontas no código** mas dependem de uma config externa pra rodar de verdade. Quando o usuário pedir pra "configurar X" ou retomar uma dessas, verifique aqui primeiro.
+
+### 📧 Solicitação de Nota Fiscal via EmailJS (criada 2026-05-18)
+
+**Status do código**: ✅ pronto. Botão `📨 Solicitar Nota` no painel de pagamentos do mês dispara `emailjs.send(serviceId, templateId, {to_email, cc_email, nome, mes, valor_total, detalhamento, assunto})` em `_finSolicitarNota`.
+
+**Pendente do usuário (Tiarlles)**:
+- Já contratou plano **paid do EmailJS** pra poder ter `From Email` personalizado.
+- Quer que o email saia do remetente **`controladoria@grupomedreview.com.br`** (caixa do GrupoMedReview).
+- Precisa fazer no dashboard do EmailJS:
+  1. **Email Services → Add New Service**: conectar a caixa `controladoria@grupomedreview.com.br` (Gmail/Microsoft365/SMTP — depende do provider, ainda não confirmado). Gera um `service_id` (ex: `service_controladoria`).
+  2. **Account → Domains**: verificar o domínio `grupomedreview.com.br` (SPF + DKIM no DNS) — necessário pra "From Email" customizado funcionar no paid.
+  3. **Email Templates → Create New Template** com nome "Solicitar Nota Fiscal":
+     - **Settings**: vincular ao service novo, anotar template ID.
+     - **Email Configuration**: `To: {{to_email}}`, `Cc: {{cc_email}}`, `From Name: Controladoria · AnestReview`, `From Email: controladoria@grupomedreview.com.br`, `Reply To: controladoria@grupomedreview.com.br`, `Subject: {{assunto}}`.
+     - **Content** (HTML, modelo já pronto pra colar no walkthrough da conversa de 2026-05-18): usa `{{nome}}`, `{{mes}}`, `{{valor_total}}`, `{{detalhamento}}`.
+  4. Testar pelo botão "Test It" do EmailJS antes de salvar.
+- Depois colar no AROS: **Financeiro → ⚙️ Cadastros → 📧 Solicitar Nota**:
+  - `Email da coordenação (CC)`: `controladoria@grupomedreview.com.br` (ou outra caixa)
+  - `Template ID`: o gerado
+  - `Service ID`: o gerado
+
+**Quando retomar**: ofereça refazer o walkthrough completo (já existe no chat de 2026-05-18) ou apenas validar o passo específico que travou. Antes, pergunte se ele já fez algum dos passos.
+
+### 📧 Cloud Function de email diário pra Mentorias (08h BRT)
+
+**Status**: pendente desde antes. Aguarda usuário criar template dedicado no EmailJS pra disparar link da sessão automaticamente no dia da aula. Templates atuais (`template_r0vjejs`) são reciclados pra envio manual via botão "📧 Enviar link agora".
+
+### 📧 Template dedicado de parecer (Sistema de Recursos)
+
+**Status**: pendente. `sendParecerEmail` usa `template_r0vjejs` reciclado. Aguarda usuário criar template dedicado pra notificações de parecer finalizado.
 
 ## Histórico recente (resumo cronológico)
 
