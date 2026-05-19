@@ -520,30 +520,90 @@ Sistema de contestação de gabarito de provas TSA/TEA/ME1/ME2/ME3. Aluno públi
 - Card resumo do topo: 4 cards agora (Total geral, Salários fixos, **Mentoria**, Variáveis).
 - `FIN_DEFAULT_TIPOS` ainda tem `'mentoria'` como tipo de lançamento livre (legado), mas mentoria automática NÃO usa esse tipo — ela é gerada via cálculo de sobreposição direto, não fica gravada como lançamento.
 
-**Cadastros do Financeiro** (modal ⚙️ Cadastros, admin-only) com 3 abas:
+**Cadastros do Financeiro** (modal **⚙️ Cadastro / Configurações**, admin-de-financeiro-only — renomeado de "Cadastros" em 2026-05-19) com 3 abas:
 - **👨‍⚕️ Professores**: tabela com **busca por nome** (filtra em tempo real via `_finCadFilterProfs`) + 4 colunas: Professor / Email (somente leitura — fonte: `S.profsEmail[nome]`) / Salário fixo / Início / Fim. Início/Fim são `<input type="month">` (YYYY-MM) opcionais; se vazios o salário aplica em todos os meses; se preenchidos restringe ao intervalo.
 - **📌 Tipos de atividade**: editor de tipos personalizados (atividades extras).
-- **📧 Solicitar Nota**: config do envio automático de email. Campos: `emailCoord` (CC), `templateId`, `serviceId`. Salvo em `S.financeiro.notaFiscalCfg = {emailCoord, templateId, serviceId}`.
+- **📧 Configurar e-Mail** (renomeado de "Solicitar Nota" em 2026-05-19): config do envio automático de email. Campos: `emailCoord` (CC), `templateId`, `serviceId`. Salvo em `S.financeiro.notaFiscalCfg = {emailCoord, templateId, serviceId}`.
 
-**Painel de pagamentos do mês** (`renderFinanceiro`):
-- **🔍 Busca** por nome no topo (filtra a tabela em tempo real via `_finFilterProfs`).
-- **Ordem alfabética** (substituiu o sort por total desc).
-- Coluna **Rodadas Sim Oficial** (renomeada de "Rodadas"; mesma renomeação no detalhamento e seções).
-- Coluna **Solicitar Nota** (admin-only) antes de "Ações" com lógica `_finSolicitarNota(profNome, anoMes)`:
-  - 1ª solicitação: botão azul `📨 Solicitar Nota` → confirm → dispara email via `emailjs.send(serviceId, templateId, {to_email, cc_email, nome, mes, valor_total, detalhamento, assunto})` → registra timestamp em `S.financeiro.meses[anoMes].notasSolicitadas[profNome]` no Firestore.
-  - Já solicitado: mostra `✓ DD/MM HH:MM` em verde + botão `🔁 Reenviar` (confirm de reenvio).
-  - Se email do prof vazio → alerta direcionando pra Configurações → Professores.
-  - Se templateId vazio → alerta direcionando pra Cadastros → Solicitar Nota.
+**Setup atual do EmailJS (deploy 2026-05-19):**
+- Service: `service_aros_nf` (Gmail OAuth com conta de usuário real do Workspace; "From" é determinado por OAuth)
+- Strategy "send-as alias": OAuth com conta pessoal do user (ex: `tiarlles.miller@grupomedreview.com.br`) que tem alias configurado pra enviar como `controladoria@grupomedreview.com.br` (grupo distribuído pros 4 membros da controladoria). Template seta `From Email: controladoria@grupomedreview.com.br` + `Reply To: controladoria@grupomedreview.com.br` — assim o destinatário vê controladoria como remetente, respostas voltam pro grupo todo.
+- Template `tmpl_aros_nf` (renomear conforme configurado): aceita variáveis `{{nome}}`, `{{mes}}`, `{{valor_total}}`, `{{detalhamento}}`, `{{assunto}}`, `{{to_email}}`, `{{cc_email}}`. HTML do template em `/tmp/aros-nf-template.html` (versionado fora do repo). Texto menciona prazo de **3 dias úteis**.
+
+**Painel de pagamentos do mês** (`renderFinanceiro` — refatoração massiva em 2026-05-19):
+- **🔍 Busca** por nome no topo + **filtro de status na coluna Controle** (pills "Todos · Aguardando · Solicitada · Emitida · Não emitida") via `_finFilterProfs()` cruzando ambos os critérios. Estado do filtro em `window._finFilterCtrl`.
+- **Ordem alfabética**.
+- **Coluna Professor FIXA** (sticky horizontal) + `min-width:240px` + background sólido pra não vazar conteúdo das colunas que rolam por trás.
+- **Fontes dos números reduzidas 20%** em toda a tabela: 13px → 10.5px (células), 15px → 12px (total), 11px → 9px (subtexto). Coluna Professor mantém tamanho normal.
+- **Cards de resumo em 1 linha só** (`grid-template-columns:repeat(4,1fr)`, padding e fontes compactos).
+- Coluna **Rodadas Sim Oficial** (renomeada de "Rodadas").
+- Coluna **Solicitar Nota** (admin-de-financeiro-only) com `_finSolicitarNota(profNome, anoMes)`:
+  - 1ª solicitação: botão azul `📨 Solicitar Nota` → confirm → dispara email via `_finEnviarNotaInterno` (helper extraído pra reuso entre individual e bulk) → registra timestamp em `mes.notasSolicitadas[profNome]` + **auto-muda controleStatus pra 'nf-solicitada'** no mesmo save.
+  - Já solicitado: mostra `✓ DD/MM HH:MM` em verde + botão `🔁 Reenviar`.
+  - **Chip vermelho `⚠️ VENCIDO · N DIAS ÚTEIS`** quando passou >3 dias úteis sem o admin marcar 'nf-emitida' ou 'nf-nao-emitida' (helper `_diasUteisDesde`).
+- Coluna **Controle** (após Solicitar Nota): dropdown com 4 status — `aguardando-fechamento` (default) · `nf-solicitada` · `nf-emitida` · `nf-nao-emitida`. Cores: cinza · azul · verde · vermelho. Não-admin vê pill colorida read-only. Status salvo em `mes.controleStatus[profNome]`. Handler `_finSetControle`.
+- Coluna **Ações** redesenhada (2026-05-19): botão **📄 Detalhar** com texto visível + botão `🗑️` vermelho ao lado pra excluir o prof do mês.
+- **Exclusão de prof do mês** (`_finExcluirProf`) com **dupla confirmação**: `confirm()` + `prompt("digite EXCLUIR")`. Marca em `mes.profsExcluidos[]` (reversível, não destrutivo). Rodapé da tabela mostra "🗑️ N excluídos: [Nome ↩]" com botão de restaurar (`_finRestaurarProf`).
+- **Botão "📨 SOLICITAR TODAS AS NOTAS"** no header quando mês fechado: dispara em loop sequencial pra todos os profs com email cadastrado e total > 0. Confirma uma vez com lista (com email vs sem email). Status do badge mostra progresso `"📨 Enviando 3/12: Prof X…"`. Save único no final. Alert final com sumário. Função `_finSolicitarTodasNotas`.
+
+**Sistema de Pendências (rollover de NF não emitida — entregue 2026-05-19):**
+- **Trigger manual com confirmação**: admin muda dropdown Controle pra "NF não emitida" → popup `confirm` "Mover R$ X pro mês [M+1]? Sim/Cancelar".
+- **Modelo de dados**: `S.financeiro.meses[anoMes].pendencias[] = [{id, profNome, valor, origemMes, descricaoSnapshot, criadoEm, profSnapshot, controleStatus, notaSolicitadaEm}]`. `profSnapshot` é o objeto `p` completo (com `rodadasDet`, `simExtrasDet`, `mentoriasDet`, `manuaisDet`) congelado no momento do rollover — usado pra reconstruir o detalhamento exato no email da pendência. Flag `mes.rolloverPara[profNome] = 'YYYY-MM'` no mês ORIGEM marca o rollover pra render mostrar badge.
+- **Próximo mês = M+1 sempre** (helper `_proximoMes(anoMes)`). Cria mês destino se não existir.
+- **Render no mês origem**: linha do prof com rollover fica `opacity:.78` (suave), total **riscado** + badge laranja `🔄 [MES/ANO]`.
+- **Render no mês destino**: seção nova **"💸 Pendências de meses anteriores"** logo abaixo da tabela principal — borda laranja, header com total grande, tabela `Professor · Descrição · Origem · Valor · Solicitar Nota · Controle · 🗑️ Remover`. Cards do resumo do topo incluem pendências no Total Geral (com nota "inclui R$ X em pendências") e no card Variáveis (sublabel "+R$ X pendência(s)" em laranja).
+- **Email separado da pendência** (`_finSolicitarNotaPendencia`): assunto `Solicitação de NF — Pendência de [Mai/2026]`, corpo deixa explícito no topo "📌 Esta é uma PENDÊNCIA referente ao mês de X. Pagamento sendo regularizado em Y.", detalhamento line-by-line do mês original (reconstruído do `profSnapshot`). Auto-marca `pendencia.controleStatus = 'nf-solicitada'` ao enviar.
+- **Pendência tem própria coluna Controle** (`_finSetControlePendencia`) — independente do controle do mês de origem. NÃO faz rollover automático ao marcar 'nf-nao-emitida' (evita recursão infinita) — admin decide manualmente.
+- **Reversão automática**: se admin mudar Controle do mês origem de 'nf-nao-emitida' pra outro status, popup pergunta se quer remover a pendência do mês destino.
+- **Reversão manual**: botão 🗑️ na linha da pendência (`_finRemoverPendencia`) remove a pendência E limpa o flag `rolloverPara` no mês origem.
+- **Resultado pro prof**: recebe **email 1** com salário normal do mês corrente (R$ 6k de Jun) + **email 2** separado com a pendência (R$ 6k de Mai) → emite **2 NFs separadas** (1 pra cada origem).
+
+**Detalhamento do email** (`_finEnviarNotaInterno` — refatorado em 2026-05-19, reutilizado por individual + bulk):
+- Formato line-by-line: cada categoria tem linha de resumo + sub-bullets dos itens. Ex: Rodadas mostra cada `simNome · Sábado rodada 1 · 11/05/2026`; Sim Extras mostra cada aluno; Mentorias mostra cada grupo com período e dias; Atividades extras mostra cada item.
+- Indentação dos sub-bullets preservada via `white-space: pre-line` no HTML do template.
+
+**Suporte a múltiplos emails por prof** (deploy 2026-05-19):
+- `S.profsEmail[nome]` agora aceita 1 ou mais emails separados por `;` (ou `,` fallback). Persistido como string única em `config/professores.emails[nome]`.
+- Helper `_profEmails(nome)` retorna `string[]` (split + trim + dedupe). Helper `_normalizeEmailsStr(raw)` normaliza ao salvar (padroniza separador pra `; `).
+- `_finSolicitarNota` e `_finSolicitarNotaPendencia` fazem loop sequencial enviando 1 email por destinatário (não usa BCC/CC do mesmo template). Cada envio do prof = N emails separados.
+- Input na UI de Configurações → Lista de Professores: `type="text"` (não `email`) com placeholder `email1@dom.com; email2@dom.com (opcional · até 3 emails separados por ;)`. Display read-only no modal Cadastros do Financeiro mostra 1 email por linha quando há múltiplos.
 
 **Detalhamento individual** (`openFinRelatorio`):
 - Resumo só lista categorias com valor > 0 (esconde zerados).
 - Seções (Rodadas Sim Oficial, Simulados extras, Mentoria, Atividades extras) só renderizam se houver registros.
 
-**Email do professor** vive em `config/professores.emails = {[nome]: email}` (fonte única). Carregado em `S.profsEmail`. Editado **apenas** na aba Professores (Configurações) via `saveProfEmail(nome, email)` no blur do input. O modal Cadastros do Financeiro mostra como **somente leitura**.
+**Email do professor** vive em `config/professores.emails = {[nome]: 'email1; email2'}` (fonte única). Carregado em `S.profsEmail`. Editado **apenas** na aba Lista de Professores (Configurações) via `saveProfEmail(nome, email)` no blur do input. O modal Cadastros do Financeiro mostra como **somente leitura**.
 
 **Salário fixo com período opcional**: `S.financeiro.profsFin[nome] = {salarioFixo, inicio, fim, ...}`. No cálculo, `fixo=0` se `anoMes < inicio` ou `anoMes > fim`. Comparação lexicográfica funciona pra YYYY-MM.
 
 **Filtro de profs com atividade**: `calcFinanceiroMes` retorna só profs com `fixo>0 || totalRodadas>0 || ...`. Profs zerados não aparecem (decisão UX — mantém tabela enxuta).
+
+**Selector de mês** (2026-05-19): piso fixo em Maio/2026 (anterior não existia o sistema) + 12 meses futuros do mês atual (pra planejamento de pendências/rollovers). Ordem: mais recente primeiro.
+
+**Bug fix 2026-05-19**: `loadFinanceiro` agora carrega `notaFiscalCfg` no estado em memória (estava sendo dropado no reload — save ia pro Firestore mas no boot perdia).
+
+### Sistema de auth: permissões granulares e admin por aba (2026-05-19)
+
+**Modelo de dados** em `usuarios/{username}`:
+- `role`: `'admin'` (acesso total a tudo) | `'user'` (granular)
+- `permissoes[]`: lista de IDs de abas que o usuário VÊ (ex: `['financeiro']`)
+- `permissoesAdmin[]` (NOVO): lista de abas em que o usuário tem **poderes de admin** sem ser admin geral. Ex: `['financeiro']` faz o user agir como admin DENTRO do financeiro mas não ver outras abas
+- `inativo: bool` (NOVO): se `true`, usuário é filtrado do login + da listagem (usado pra "soft-delete" em renomeação, já que rules bloqueiam delete em `/usuarios`)
+- `renomeadoPara: 'novoUsername'` + `renomeadoEm: ISO` (NOVO): preenchidos quando admin renomeia um usuário
+
+**Helper `_isAdminEm(tab)`**: retorna `true` se `role==='admin'` OU se `permissoesAdmin.includes(tab)`. Substituiu **todos os 13 checks** de `S.currentUser?.role==='admin'` que existiam dentro do escopo do financeiro (linhas 12200-13400 do index.html). Pra outras features, novos checks devem usar esse helper se for feature-específica, ou continuar com `role==='admin'` se for admin global.
+
+**Renomear usuário** (UI nova em 2026-05-19): docs do Firestore têm ID imutável e rules bloqueiam delete em `/usuarios`. Estratégia: ao renomear, cria novo doc com novo ID + marca o velho com `inativo: true` + `renomeadoPara: novo`. Login (`tryLogin`) e restore session filtram inativos via `!x.inativo`. Listagem `renderUsuarios` também filtra.
+
+**Validador de username relaxado** (2026-05-19): de `/^[a-z0-9._-]+$/` pra `/^[a-z0-9._@+-]+$/` — aceita email como username (necessário pra `controladoria@grupomedreview.com.br`).
+
+**Modal de edição de usuário** (`openUserModal` / `saveUser`):
+- Campo "Nome de usuário" agora editável mesmo em edit mode (era `disabled`).
+- Novo grid **"Admin de abas específicas"** abaixo do grid de permissões. Sincronizado via `_muSyncAdminGrid()`: só habilita checkbox de admin pra abas onde o user já tem permissão de acesso.
+- Quando "Administrador geral" está marcado, ambos os grids (permissões + admin-por-aba) ficam desabilitados.
+- Badge na listagem mostra `admin: financeiro` em destaque pros users com `permissoesAdmin` setado.
+
+**Caso de uso típico (controladoria)**: usuário `controladoria@grupomedreview.com.br` com `permissoes: ['financeiro']` + `permissoesAdmin: ['financeiro']` → vê SÓ a aba Financeiro, mas com poderes totais lá dentro (pode fechar mês, solicitar NF, editar cadastros, excluir profs, etc).
 
 ## Firestore Rules (resumo)
 
