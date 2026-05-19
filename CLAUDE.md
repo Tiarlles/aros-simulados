@@ -4,7 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Onde está o contexto
 
-`PROJECT_STATE.md` é a fonte de verdade do estado do projeto (modelo de dados Firestore, URLs, endpoints, features, dívidas técnicas, histórico). **Leia primeiro ao iniciar uma sessão.** Mantenha esse arquivo atualizado quando mudanças relevantes acontecerem.
+**IMPORTANTE — invoque `/aros-contexto` ANTES da primeira ação técnica em qualquer sessão deste projeto.** A skill `.claude/skills/aros-contexto/SKILL.md` é a fonte de verdade do estado do projeto: arquitetura completa, modelo de dados Firestore, todas as features (Solicitar NF, Pendências, admin granular, Revisão de Casos, Mentorias, Recursos, etc), URLs, dívidas técnicas, decisões de design e convenções de fluxo.
+
+Esta CLAUDE.md tem só o **mínimo** pra você não fazer besteira antes de carregar o contexto completo. A skill atualiza automaticamente conforme features mudam — confie nela, não nesta CLAUDE.
+
+`PROJECT_STATE.md` legado foi esvaziado (vira só redirecionador). Não tente lê-lo.
 
 ## Arquitetura
 
@@ -50,7 +54,7 @@ Não há build, lint, nem suíte de testes. Mudanças no `index.html` são valid
 
 ## Modelo de dados resumido
 
-Ver `PROJECT_STATE.md` pro detalhe. Coleções principais:
+Ver SKILL.md de `/aros-contexto` pro detalhe completo. Coleções principais:
 - `simulados/{simId}` + subcoleção `alunos/{alunoId}` (oficial ou extra via flag `isExtra`)
 - `usuarios/{username}`, `listas/{listaId}`
 - `solicitacoesExtra/{reqId}` (status: `aguardando-pagamento` → `pago` → `efetivada` | `cancelada`)
