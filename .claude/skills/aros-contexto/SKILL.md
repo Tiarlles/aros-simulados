@@ -21,7 +21,7 @@ SPA monolítico single-file (HTML+CSS+JS vanilla, ~7500+ linhas em `index.html`)
 | Banco | Firebase Firestore (projeto `simulados-confirmacao`) |
 | Storage | Firebase Storage (imagens de revisão, checklists, slides) |
 | Auth | **Sistema próprio** em `usuarios/{username}` com senhas plaintext. Não usa Firebase Auth. **Dívida técnica conhecida.** |
-| Email | EmailJS (`service_exyoa4r` / `template_r0vjejs`) |
+| Email | EmailJS (`service_exyoa4r`). **Templates:** `template_r0vjejs` (simulados TSA Oral — trocas/confirmação/presença) e `template_hb89fxv` (Mentoria — todos os 5 tipos + envio de link da reunião). Mentoria usa var `{{tipo_mentoria}}` (TEA/TSA/ME1/ME2/ME3) em vez de `{{simulado}}`. |
 | Pagamentos | Hotmart (produto "+3 Simulados Extras Online AROS!") |
 | Notificações | Slack Incoming Webhook (canal `#notificacao-simulado-extra`) |
 | Webhook backend | Cloud Function Gen 2 — `cloud-function-hotmart/index.js` |
@@ -404,10 +404,27 @@ Sistema agora sincroniza prof + aluno(s) via **Firestore** (substitui o Broadcas
 - **Status visual do card:** badge mono "● MENTORIA ATIVA/INATIVA/AGENDADA/PERÍODO NÃO INFORMADO" + borda lateral colorida + gradient sutil. Calculado por `_mentStatus(g)` baseado em hoje vs período.
 - **Não exibe** valor mensal no card (decisão UX) — só aparece no Financeiro.
 
-### Sessão de clínica — envio manual do link
-- Botão **📧 Enviar link agora** no `_renderSessao` quando `c.link` não vazio.
-- `sendClinicaLinkNow(clinicaId, btnEl)` carrega alunos da subcoleção, filtra `status:'confirmed'` com email, dispara via EmailJS browser (`template_r0vjejs`), marca `c.emailLinkEnviadoEm` no doc.
+### Sessão de clínica — link da reunião + envio manual
+- **Botão "🔗 Link Reunião"** no card de cada clínica (entre Editar e Enviar link). Abre modal dedicado `modal-clinica-link` com URL field + botão "🗑️ Remover link" (só aparece se já tiver link salvo). Valida `http://` ou `https://`. Botão fica azul (`btn-p`) se há link, cinza (`btn-s`) se não.
+  - `openClinicaLink(id)` / `saveClinicaLink()` / `clearClinicaLink()` em ~9678–9710.
+  - **O modal de Editar Clínica não tem mais o campo de link** — `saveClinica` preserva `c.link` do doc existente via `cExist = S.clinicas.find(x => x.id === editId)`.
+- Botão **📧 Enviar link agora** aparece SÓ quando `c.link` está preenchido.
+- `sendClinicaLinkNow(clinicaId, btnEl)` carrega alunos da subcoleção, filtra `status:'confirmed'` com email, dispara via EmailJS browser (**`template_hb89fxv`**, var `tipo_mentoria`), marca `c.emailLinkEnviadoEm` no doc.
 - Botão muda pra "Enviar link novamente" + chip verde "✅ enviado em DD/MM HH:MM" depois do primeiro envio.
+
+### Sessão de clínica — emails de confirmação/troca (visão aluno)
+- `sendEmailMentoria(type, aluno, clinicaOrigem, clinicaDest)` em ~9736. **Template:** `template_hb89fxv`. 5 tipos: `confirmed`, `absent`, `swap`, `trocaConfirmada`, `match`.
+- **Vars enviadas:** `to_email`, `nome`, `assunto`, `mensagem`, `tipo_mentoria` (TEA/TSA/ME1/ME2/ME3 — da clínica destino quando é troca/match, da origem nos demais), `dia`, `horario`.
+- **Construção lazy das mensagens** (`msgBuilders[type]()`). Os msgs ficavam num objeto literal avaliado eagerly e quebravam com `Cannot read properties of undefined (reading 'mentorNome')` quando `clinicaDest` era undefined em `confirmed`/`absent`. **Não voltar pra `const msgs = {...}` em assignment direto** — usar funções por tipo.
+- **`fmt(c)` é tolerante a `undefined`** — retorna `''` se `c` for falsy; usa `c.mentorNome||'(sem mentor)'`.
+- **Order of operations crítica em `_mtaAplicarResp`:** updateDoc → render → (se absent: tentarPuxarSwapVaga → render) → sendEmailMentoria → alert. **Render acontece ANTES do envio de email** (que é assíncrono e demora 2-5s). Inverter essa ordem causa o bug "status só atualiza após F5".
+
+### Coordenação — visualização de alunos por clínica
+- `_renderClinicaAlunos(c, alunos)` em ~9447 renderiza a lista expandida ao clicar "👥 Ver alunos".
+- **Badge "Aluno de: [mentor]"** (amarelo, `var(--yellow)`) aparece ao lado do nome quando o aluno tem `originalClinicaId` setado. Indica que ele veio por troca/swap da clínica de outro mentor. Tooltip mostra o tema da clínica de origem. Lookup: `S.clinicas.find(x => x.id === a.originalClinicaId)`.
+- **`originalClinicaId` é setado em 5 fluxos:** `tentarPuxarSwapVaga` (4262), `mtaSubmitTroca` quando há vaga livre (4319), `tentarMatchTrocaMentoria` (9691, 9697), `forcarTrocaMentoria` da coord (9717).
+- **Data/hora de resposta foi removida da linha do aluno** (decisão UX 2026-05-20: poluía a UI).
+- **Stats da clínica reorganizadas** (canto direito do card do mentor): `14/20` em destaque, depois linha verde "✅ N confirmado(s)" + linha `🔄 N | ⏳ N | ❌ N` com separadores discretos.
 
 ### Features (kanban interno da coordenação)
 Aba `📌 Features` no grupo **Administração** (admin-only). Roadmap de ideias do produto que o user usa pra organizar o que mandar pro Claude implementar.
@@ -832,7 +849,7 @@ Funcionalidades que estão **prontas no código** mas dependem de uma config ext
 
 ### 📧 Cloud Function de email diário pra Mentorias (08h BRT)
 
-**Status**: pendente desde antes. Aguarda usuário criar template dedicado no EmailJS pra disparar link da sessão automaticamente no dia da aula. Templates atuais (`template_r0vjejs`) são reciclados pra envio manual via botão "📧 Enviar link agora".
+**Status**: pendente. Template dedicado **JÁ EXISTE** (`template_hb89fxv` — criado 2026-05-20). Falta só implementar a Cloud Function com Cloud Scheduler 08h BRT que lê clínicas do dia, dispara `sendClinicaLinkNow` equivalente backend, marca `emailLinkEnviadoEm`. Hoje o envio é manual via botão "📧 Enviar link agora" (também usando `template_hb89fxv`).
 
 ### 📧 Template dedicado de parecer (Sistema de Recursos)
 
@@ -926,4 +943,12 @@ Mentorias (2026-05-13):
 - **Cadastro de alunos opcional**: grupo pode ser salvo com lista vazia.
 - **Financeiro automático**: `_mentSobreposicaoMes(g, anoMes)` calcula dias trabalhados × dias do mês. Mês cheio = `valorMensal`; mês parcial = proporcional. Aparece como coluna "Mentoria" na tabela + card de resumo + aba "Mentoria" no Excel.
 - **Botão "📧 Enviar link agora"** em sessões com `c.link`: dispara EmailJS pra alunos `confirmed`, marca `emailLinkEnviadoEm`, vira "Enviar novamente" + chip de timestamp.
-- **Pendente**: Cloud Function `mentoriaEmailDiario` (Cloud Scheduler 08h BRT) — aguardando user assinar EmailJS pago + criar template novo pra disparar link automaticamente no dia da sessão.
+
+Mentorias — refinamentos (2026-05-20):
+- **Template EmailJS dedicado** (`template_hb89fxv`): saiu de cima do `template_r0vjejs` (compartilhado com TSA Oral). Var nova `{{tipo_mentoria}}` puxa TEA/TSA/ME1/ME2/ME3 da clínica destino (em trocas/match) ou origem (em confirmação/ausência/swap). Aplicado em `sendEmailMentoria` (5 tipos) + `sendClinicaLinkNow`.
+- **Bug fix — mensagens lazy**: `sendEmailMentoria` antes usava `const msgs = {...}` (literal eager), e as entries `trocaConfirmada`/`match` chamavam `fmt(clinicaDest)` mesmo quando `clinicaDest` era undefined (em `confirmed`/`absent`). Quebrava com TypeError no `c.mentorNome` ANTES do `emailjs.send`, sem nenhum email sair. Agora cada entry é `() => "..."` em `msgBuilders[type]` e só a do tipo correto roda. `fmt(c)` virou tolerante a undefined.
+- **Bug fix — render bloqueante**: `_mtaAplicarResp` chamava `await sendEmailMentoria(...)` ANTES de `mtaRenderClinicas()`. EmailJS demora 2-5s, então a UI parecia "travada" e status só atualizava após F5. Reordenado: write → render → (swap+render se absent) → sendEmail → alert.
+- **"Link Reunião" virou botão+modal próprio** no card de cada clínica (entre Editar e Enviar link). Campo de link saiu do modal de Editar Clínica. Modal `modal-clinica-link` com validação de URL + botão "🗑️ Remover link". Botão fica azul quando há link salvo, cinza quando vazio.
+- **Coord — badge "Aluno de: [mentor]"** ao lado do nome dos alunos que vieram via troca (qualquer um dos 5 fluxos que setam `originalClinicaId`). Tooltip = tema da clínica de origem.
+- **Coord — UI da lista de alunos limpa**: removida data/hora de `respondedAt` (poluía a linha). Manteve só status + ações.
+- **Coord — stats da clínica reorganizados**: `14/20` em destaque, depois "✅ N confirmados" em verde, depois `🔄 N | ⏳ N | ❌ N` com separador discreto.
