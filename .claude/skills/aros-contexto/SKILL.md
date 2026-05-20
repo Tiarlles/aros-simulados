@@ -332,6 +332,39 @@ Filtros aplicados em: `renderSimCards`, `popCoSel`, `simsAplicados` (Garantia), 
 - **`@media (pointer:coarse)`**: tilt 3D fica desligado em touch (`_arosBindTilt` checa).
 - Audiência majoritária do AROS é iPhone → custo de blur é zero perceptível (decisão 2026-05-20).
 
+### Padrão Mobile (estabelecido em 2026-05-20)
+**Breakpoints canônicos:**
+- `< 900px`: tablet (reduz padding, fonts ligeiros menores).
+- `< 720px`: phone (mudanças estruturais: hamburger menu, cards horizontais, hero compacto).
+- `< 380px`: phone pequeno tipo iPhone SE (aperta mais).
+
+**Header no mobile (< 720px):**
+- Pill de tabs + botões 🔐/🌙 escondidos via `display:none !important`.
+- Hambúrguer 42×42px (`.hamburger-btn`) aparece no header-right.
+- Slide-in panel `.mobile-menu` da direita com backdrop blur, animação `mmSlide .45s var(--ease-out-soft)`.
+- Items 48px+ touch-friendly. Item ativo com gradient laranja. Body trava overflow enquanto aberto.
+
+**Cards no mobile (< 720px): layout horizontal**
+- `flex-direction:row !important` no card.
+- Cover virou painel lateral fixo: `flex:0 0 132px; width:132px` (110px em <380px).
+- Body: `flex:1 1 auto; min-width:0` (importante pra texto poder truncar).
+- `transform:none !important` no card (desliga tilt residual).
+- Shine sweep e perspective desligados no mobile.
+- Title clamped em 2 linhas, sub em 2 linhas (1 em <380px).
+- **Use `!important` agressivamente** nos overrides — flex layout tem muitas batalhas de specificity com width:100%/aspect-ratio do desktop.
+
+**Hero no mobile:**
+- Padding reduzido: `padding: 20px 12px 24px` (era 48px 16px 56px).
+- H1: `clamp(28px, 8vw, 40px)` (era 38-72px).
+- **Importante**: o `::before` do hero tem `inset: -40px -10% -10%` (gradient mesh extending 10% pros lados). Pra evitar **horizontal overflow no mobile**, o `.home-hero` precisa de `overflow:hidden; border-radius:24px`. Bug 2026-05-20: usuário viu cards "perdidos" deslocados pra esquerda — era esse overflow horizontal criando scroll.
+
+**Teste local em iPhone real (recomendado pelo usuário):**
+1. No Mac terminal: `cd <path>` → `python3 -m http.server 8080` (8000 pode estar ocupada).
+2. Pegar IP: `ipconfig getifaddr en0`.
+3. iPhone no mesmo Wi-Fi: `http://<ip>:8080`.
+- Mudanças no `index.html` aparecem com pull-to-refresh — sem precisar reiniciar servidor.
+- Firebase funciona normal (conecta da internet independente da origem).
+
 ### Boas práticas de escopo (pra não vazar em admin)
 - **NÃO** mexer em estilos globais (`.btn`, `.fc`, `.card`) sem necessidade.
 - Override escopado: `#view-al .sim-card`, `#tab-comunicacao .com-row`, etc.
@@ -1082,3 +1115,11 @@ Home + Mural de Comunicação + estilo Apple-like (2026-05-20):
 - **Header refeito Apple-like**: pill glass + sliding indicator colorido por categoria. Botão **🔐 cadeado** ao lado do toggle de tema abre o painel da Coordenação (substitui o antigo botão "🛠️ Coordenação" que aparecia com `#admin` — tab-co fica permanentemente oculto).
 - **Simulados TSA Oral (aluno) refeito Apple-like**: cards com top accent gradient (laranja→amarelo→roxo→azul), tilt 3D, glow, title em Space Grotesk 19px, chips de data como pill glass com glow lateral, search input pill com focus ring colorido, day-tabs com sliding indicator.
 - **Estilo Apple-like estabelecido como padrão reutilizável** — ver seção "Estilo Apple-like (referência reutilizável)" nesta skill. Quando user pedir "estilo Apple" em outra área, aplicar o padrão direto sem re-perguntar especificações.
+
+Polimento mobile (2026-05-20, mesmo dia):
+- **Hambúrguer no mobile** (`< 720px`): pill de tabs + botões 🔐/🌙 escondem; aparece `.hamburger-btn` 42px à direita do header. Clica → slide-in panel da direita (86% width, max 360px) com backdrop blur. Items grandes touch-friendly, item ativo destacado conforme `S.view`. Funções: `openMobileMenu()` / `closeMobileMenu()`.
+- **Cards da Home horizontais no mobile**: thumbnail 132px fixo à esquerda, título+sub+CTA à direita (estilo lista iOS). Cabem 3 cards na tela inteira. Padrão guardado na seção "Padrão Mobile" desta skill.
+- **Bug fix — overflow horizontal**: `.home-hero::before` com `inset:-40px -10% -10%` (gradient mesh) criava scroll horizontal na página, fazendo cards aparecerem deslocados pra esquerda. Fix: `overflow:hidden; border-radius:24px` no `.home-hero`.
+- **Cards mobile com `!important`**: o `width:100%` original do `.home-card-cover` (desktop) ganhava do `flex-basis` no override mobile, fazendo cover ocupar 100% e body sumir. Solução: usar `!important` em todas as propriedades de flex do override mobile.
+- **Fonte dos card titles** trocada de Fraunces (serif) pra Space Grotesk (consistente com o hero).
+- **Servidor local pra testar mobile**: `python3 -m http.server 8080` + IP via `ipconfig getifaddr en0` + iPhone no mesmo Wi-Fi acessa `http://<ip>:8080`. Iteração ao vivo com pull-to-refresh.
