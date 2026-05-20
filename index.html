@@ -12446,6 +12446,9 @@ window.renderFinanceiro=async()=>{
       ${dados.slice().filter(p=>!(mesData.profsExcluidos||[]).includes(p.nome)).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(p=>{
         const safeNome=p.nome.replace(/'/g,"\\'");
         const dataAttr=p.nome.toLowerCase();
+        const regime=_regimeOf(p.nome);
+        const isRPA=regime==='rpa';
+        const regimeBadge=isRPA?` <span style="display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9.5px;background:rgba(228,109,10,.18);color:#e46d0a;padding:2px 6px;border-radius:4px;font-weight:700;letter-spacing:.5px;vertical-align:middle;margin-left:6px" title="Regime: RPA (Recibo de Pagamento Autônomo) — não emite NF">RPA</span>`:'';
         const solic=notasSolicitadas[p.nome]||'';
         // Alerta vencido: passou 3 dias úteis desde a solicitação e o controle ainda
         // não está 'nf-emitida' nem 'nf-nao-emitida' (decisões finais). Sinaliza que
@@ -12461,7 +12464,9 @@ window.renderFinanceiro=async()=>{
               ${vencidoChip}
               <button class="btn btn-s btn-sm" onclick="_finSolicitarNota('${safeNome}','${anoMes}')" title="Reenviar solicitação" style="font-size:10.5px;padding:3px 8px">🔁 Reenviar</button>
             </div>`
-          :`<button class="btn btn-p btn-sm" onclick="_finSolicitarNota('${safeNome}','${anoMes}')" style="font-size:11px;padding:5px 12px;font-weight:700">📨 Solicitar Nota</button>`;
+          :(isRPA
+            ?`<button class="btn btn-s btn-sm" onclick="_finSolicitarRPA('${safeNome}','${anoMes}')" style="font-size:11px;padding:5px 12px;font-weight:700;background:rgba(228,109,10,.15);color:#e46d0a;border-color:rgba(228,109,10,.4)" title="Prof em regime RPA — fluxo de email separado">📋 Solicitar RPA</button>`
+            :`<button class="btn btn-p btn-sm" onclick="_finSolicitarNota('${safeNome}','${anoMes}')" style="font-size:11px;padding:5px 12px;font-weight:700">📨 Solicitar Nota</button>`);
         // Se foi rolado pro próximo mês: total fica riscado + badge laranja
         const rolledTo=rolloverPara[p.nome];
         const totalDisplay=rolledTo
@@ -12470,8 +12475,8 @@ window.renderFinanceiro=async()=>{
               <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;background:rgba(228,109,10,.18);color:#e46d0a;padding:2px 6px;border-radius:4px;font-weight:700;letter-spacing:.3px">🔄 ${_mesNome(rolledTo).toUpperCase()}</span>
             </div>`
           :`<span style="font-weight:800;color:var(--accent);font-size:12px">${_BRL(p.total)}</span>`;
-        return `<tr data-prof-nome="${dataAttr}" data-ctrl-status="${ctrlAtual}"${rolledTo?' style="opacity:.78"':''}>
-          <td style="${tdProf}">${p.nome}</td>
+        return `<tr data-prof-nome="${dataAttr}" data-ctrl-status="${ctrlAtual}" data-regime="${regime}"${rolledTo?' style="opacity:.78"':''}>
+          <td style="${tdProf}">${p.nome}${regimeBadge}</td>
           <td style="${tdS};text-align:right;${tdNumStyle}">${p.fixo>0?_BRL(p.fixo):'—'}</td>
           <td style="${tdS};text-align:right;${tdNumStyle}">${p.rodadasQtd>0?`${p.rodadasQtd} × ${_BRL(p.valRod)}<br><span style="${subNumStyle}">${_BRL(p.totalRodadas)}</span>`:'—'}</td>
           <td style="${tdS};text-align:right;${tdNumStyle}">${p.simExtrasQtd>0?`${p.simExtrasQtd} × ${_BRL(p.valExt)}<br><span style="${subNumStyle}">${_BRL(p.totalSimExtras)}</span>`:'—'}</td>
@@ -12520,15 +12525,21 @@ window.renderFinanceiro=async()=>{
         const safeId=p.id.replace(/'/g,"\\'");
         const safeNome=p.profNome.replace(/'/g,"\\'");
         const dtCriado=p.criadoEm?new Date(p.criadoEm).toLocaleDateString('pt-BR'):'—';
-        // Botão Solicitar Nota da pendência: igual ao do mês corrente, com timestamp + reenviar
+        const regimePend=_regimeOf(p.profNome);
+        const isRPAPend=regimePend==='rpa';
+        const regimeBadgePend=isRPAPend?` <span style="display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9.5px;background:rgba(228,109,10,.18);color:#e46d0a;padding:2px 6px;border-radius:4px;font-weight:700;letter-spacing:.5px;vertical-align:middle;margin-left:6px" title="Regime: RPA (Recibo de Pagamento Autônomo)">RPA</span>`:'';
+        // Botão Solicitar Nota da pendência: igual ao do mês corrente, com timestamp + reenviar.
+        // Pra prof RPA, mostra botão "Solicitar RPA" que abre fluxo separado (placeholder por enquanto).
         const solicPend=p.notaSolicitadaEm
           ?`<div style="display:flex;flex-direction:column;align-items:center;gap:4px">
               <span style="font-size:10.5px;color:var(--green);font-weight:700">✓ ${fmtSolic(p.notaSolicitadaEm)}</span>
-              <button class="btn btn-s btn-sm" onclick="_finSolicitarNotaPendencia('${anoMes}','${safeId}')" title="Reenviar solicitação da pendência" style="font-size:10.5px;padding:3px 8px">🔁 Reenviar</button>
+              <button class="btn btn-s btn-sm" onclick="${isRPAPend?`_finSolicitarRPA('${safeNome}','${anoMes}')`:`_finSolicitarNotaPendencia('${anoMes}','${safeId}')`}" title="Reenviar solicitação da pendência" style="font-size:10.5px;padding:3px 8px">🔁 Reenviar</button>
             </div>`
-          :`<button class="btn btn-p btn-sm" onclick="_finSolicitarNotaPendencia('${anoMes}','${safeId}')" style="font-size:11px;padding:5px 12px;font-weight:700" title="Envia email separado pra cobrar a NF desta pendência">📨 Solicitar</button>`;
+          :(isRPAPend
+            ?`<button class="btn btn-s btn-sm" onclick="_finSolicitarRPA('${safeNome}','${anoMes}')" style="font-size:11px;padding:5px 12px;font-weight:700;background:rgba(228,109,10,.15);color:#e46d0a;border-color:rgba(228,109,10,.4)" title="Prof em regime RPA — fluxo de email separado">📋 Solicitar RPA</button>`
+            :`<button class="btn btn-p btn-sm" onclick="_finSolicitarNotaPendencia('${anoMes}','${safeId}')" style="font-size:11px;padding:5px 12px;font-weight:700" title="Envia email separado pra cobrar a NF desta pendência">📨 Solicitar</button>`);
         return `<tr>
-          <td style="${tdS};font-weight:700">${p.profNome}</td>
+          <td style="${tdS};font-weight:700">${p.profNome}${regimeBadgePend}</td>
           <td style="${tdS};font-size:12.5px">${(p.descricaoSnapshot||'').replace(/</g,'&lt;')}</td>
           <td style="${tdS};font-size:11.5px;color:var(--t2)">Originado em ${_mesNome(p.origemMes)} · marcado em ${dtCriado}</td>
           <td style="${tdS};text-align:right;font-weight:800;color:#e46d0a;font-size:15px">${_BRL(p.valor)}</td>
@@ -12848,6 +12859,20 @@ async function _finEnviarNotaInterno(profNome,anoMes,opts){
 // data/hora em config/financeiro.meses[anoMes].notasSolicitadas[profNome].
 // Config do envio fica em S.financeiro.notaFiscalCfg = {emailCoord, templateId, serviceId}.
 // Email do prof vem de S.profsEmail[profNome] (editado na aba Professores).
+// Regime de pagamento do prof: 'pj' (default) ou 'rpa'.
+// Profs sem flag explícita são tratados como PJ pra retrocompatibilidade.
+const _regimeOf=(profNome)=>{
+  const c=(S.financeiro?.profsFin||{})[profNome];
+  return c?.regime==='rpa'?'rpa':'pj';
+};
+
+// Placeholder do fluxo RPA — template de email ainda não foi criado.
+// Quando o user configurar o template no EmailJS, ligar aqui o envio (estrutura igual a _finSolicitarNota).
+window._finSolicitarRPA=async(profNome,anoMes)=>{
+  if(!_isAdminEm('financeiro')){alert('Apenas administradores podem solicitar RPA.');return;}
+  alert(`⏳ Fluxo de RPA ainda não foi configurado.\n\nO prof "${profNome}" está marcado como RPA, mas o template de email do RPA ainda não existe no EmailJS.\n\nCrie o template e me chame pra ligar o envio.`);
+};
+
 window._finSolicitarNota=async(profNome,anoMes)=>{
   if(!_isAdminEm('financeiro')){alert('Apenas administradores podem solicitar nota.');return;}
   // 1. Valida config e email(s) do prof
@@ -12986,28 +13011,35 @@ window._finSolicitarTodasNotas=async(anoMes)=>{
   const mesData=(S.financeiro.meses||{})[anoMes]||{};
   const dados=mesData.snapshot||await calcFinanceiroMes(anoMes);
   const excluidos=new Set(mesData.profsExcluidos||[]);
-  // Elegíveis: total > 0, não excluído, com email
-  const elegiveis=dados.filter(p=>p.total>0&&!excluidos.has(p.nome)).map(p=>({...p,emails:_profEmails(p.nome)}));
-  const comEmail=elegiveis.filter(x=>x.emails.length>0);
-  const semEmail=elegiveis.filter(x=>x.emails.length===0);
-  if(!comEmail.length){
+  // Elegíveis: total > 0, não excluído, com email. Separa por regime: PJ usa NF, RPA tem fluxo próprio.
+  const elegiveis=dados.filter(p=>p.total>0&&!excluidos.has(p.nome)).map(p=>({...p,emails:_profEmails(p.nome),regime:_regimeOf(p.nome)}));
+  const pjElegiveis=elegiveis.filter(x=>x.regime!=='rpa');
+  const rpaElegiveis=elegiveis.filter(x=>x.regime==='rpa');
+  const comEmail=pjElegiveis.filter(x=>x.emails.length>0);
+  const semEmail=pjElegiveis.filter(x=>x.emails.length===0);
+  if(!comEmail.length&&!rpaElegiveis.length){
     alert(`Nenhum professor elegível pra envio.\n\n${elegiveis.length} prof(s) no mês, mas nenhum tem email cadastrado.\n\nCadastre os emails em Configurações → Lista de Professores.`);
     return;
   }
   // Confirm com lista
   const linhasMsg=[
-    `Disparar SOLICITAÇÃO DE NF pra ${comEmail.length} professor${comEmail.length>1?'es':''} de ${_mesNome(anoMes)}?`,
+    `Disparar SOLICITAÇÃO DE NF pra ${comEmail.length} professor${comEmail.length===1?'':'es'} PJ de ${_mesNome(anoMes)}?`,
     '',
-    `📧 Pra cada prof, será enviado 1 email por destinatário cadastrado.`,
+    `📧 Pra cada prof PJ, será enviado 1 email por destinatário cadastrado.`,
     `📋 Cópia (CC): ${(cfg.emailCoord||'').trim()||'(nenhum)'}`,
     '',
-    `Profs a serem notificados:`,
+    `Profs PJ a serem notificados:`,
     ...comEmail.map(x=>`   • ${x.nome} — ${_BRL(x.total)} (${x.emails.length} email${x.emails.length>1?'s':''})`),
   ];
+  if(rpaElegiveis.length){
+    linhasMsg.push('',`⏳ Pulados — RPA (fluxo separado, template não configurado ainda):`,
+      ...rpaElegiveis.map(x=>`   • ${x.nome} — ${_BRL(x.total)}`),
+      '',`Pra disparar pros RPA, primeiro crie o template no EmailJS e me chame pra ligar.`);
+  }
   if(semEmail.length){
     linhasMsg.push('','⚠️ Pulados (sem email cadastrado):',...semEmail.map(x=>`   • ${x.nome} — ${_BRL(x.total)}`));
   }
-  linhasMsg.push('','Confirma o envio em lote?');
+  linhasMsg.push('',comEmail.length?'Confirma o envio em lote pros profs PJ?':'⚠️ Nenhum prof PJ elegível. Os RPA serão pulados — nada será enviado. Confirmar mesmo assim?');
   if(!confirm(linhasMsg.join('\n')))return;
   // Loop sequencial
   const statusBox=document.getElementById('fin-status-box');
@@ -13221,6 +13253,7 @@ function renderFinCadProfs(){
     <thead><tr style="background:var(--bg3)">
       <th style="padding:8px;text-align:left">Professor</th>
       <th style="padding:8px;text-align:left" title="Email cadastrado em Professores. Pra editar, vá em Configurações → Professores.">Email (somente leitura)</th>
+      <th style="padding:8px;text-align:center" title="Regime de pagamento: PJ (Pessoa Jurídica — emite NF) ou RPA (Recibo de Pagamento Autônomo).">Regime</th>
       <th style="padding:8px;text-align:right">Salário fixo mensal (R$)</th>
       <th style="padding:8px;text-align:center" title="Primeiro mês em que recebe o salário fixo (deixe vazio se indeterminado)">Início</th>
       <th style="padding:8px;text-align:center" title="Último mês em que recebe o salário fixo (deixe vazio se indeterminado)">Fim</th>
@@ -13230,6 +13263,7 @@ function renderFinCadProfs(){
       const safe=nome.replace(/"/g,'&quot;');
       const ini=(c.inicio||'').replace(/"/g,'&quot;');
       const fim=(c.fim||'').replace(/"/g,'&quot;');
+      const regime=c.regime==='rpa'?'rpa':'pj';
       const emailsArr=(typeof _profEmails==='function'?_profEmails(nome):[((S.profsEmail||{})[nome]||'').trim()].filter(Boolean));
       const emailDisplay=emailsArr.length
         ?emailsArr.map(em=>`<div style="font-size:12px;color:var(--text);line-height:1.4">${em.replace(/</g,'&lt;')}</div>`).join('')
@@ -13237,6 +13271,7 @@ function renderFinCadProfs(){
       return`<tr data-prof-nome="${safe.toLowerCase()}">
         <td style="padding:6px 8px;border-top:1px solid var(--border);font-weight:600">${nome}</td>
         <td style="padding:6px 8px;border-top:1px solid var(--border)">${emailDisplay}</td>
+        <td style="padding:6px 8px;border-top:1px solid var(--border);text-align:center"><select class="fc fc-prof-regime" data-prof="${safe}" style="width:90px;padding:4px 8px;font-weight:600"><option value="pj"${regime==='pj'?' selected':''}>PJ</option><option value="rpa"${regime==='rpa'?' selected':''}>RPA</option></select></td>
         <td style="padding:6px 8px;border-top:1px solid var(--border);text-align:right"><input type="number" step="0.01" min="0" class="fc fc-prof-fix" data-prof="${safe}" value="${Number(c.salarioFixo)||0}" style="width:140px;text-align:right;padding:4px 8px"/></td>
         <td style="padding:6px 8px;border-top:1px solid var(--border);text-align:center"><input type="month" class="fc fc-prof-ini" data-prof="${safe}" value="${ini}" style="width:140px;padding:4px 8px" title="Primeiro mês com salário fixo (formato YYYY-MM)"/></td>
         <td style="padding:6px 8px;border-top:1px solid var(--border);text-align:center"><input type="month" class="fc fc-prof-fim" data-prof="${safe}" value="${fim}" style="width:140px;padding:4px 8px" title="Último mês com salário fixo (formato YYYY-MM)"/></td>
@@ -13311,13 +13346,14 @@ window.saveFinCadastros=async(ev)=>{
   // Coleta inputs profs: salário fixo + período opcional (inicio/fim em YYYY-MM).
   // O email do prof NÃO é editado aqui — vive em config/professores.emails,
   // editado na aba Professores das Configurações (fonte única de verdade).
-  const iniMap=new Map(),fimMap=new Map();
+  const iniMap=new Map(),fimMap=new Map(),regMap=new Map();
   document.querySelectorAll('.fc-prof-ini').forEach(el=>iniMap.set(el.dataset.prof,(el.value||'').trim()));
   document.querySelectorAll('.fc-prof-fim').forEach(el=>fimMap.set(el.dataset.prof,(el.value||'').trim()));
+  document.querySelectorAll('.fc-prof-regime').forEach(el=>regMap.set(el.dataset.prof,el.value==='rpa'?'rpa':'pj'));
   const pf={};
   document.querySelectorAll('.fc-prof-fix').forEach(inp=>{
     const n=inp.dataset.prof;
-    pf[n]={salarioFixo:Number(inp.value)||0,inicio:iniMap.get(n)||'',fim:fimMap.get(n)||''};
+    pf[n]={salarioFixo:Number(inp.value)||0,inicio:iniMap.get(n)||'',fim:fimMap.get(n)||'',regime:regMap.get(n)||'pj'};
   });
   // Coleta tipos (mantém system mesmo que nome esteja vazio no DOM)
   const tipos=(S.financeiro.tipos||[]).map((t,i)=>{
