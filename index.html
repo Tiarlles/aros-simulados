@@ -2599,13 +2599,9 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
       <div class="fg"><label class="fl">Data e horário</label>
         <input class="fc" id="mcl-datahora" type="datetime-local"/>
       </div>
-      <div class="g2">
-        <div class="fg"><label class="fl">Link da reunião (Zoom/Meet)</label>
-          <input class="fc" id="mcl-link" placeholder="https://..."/>
-        </div>
-        <div class="fg"><label class="fl">Limite de alunos</label>
-          <input class="fc" id="mcl-limite" type="number" min="1" step="1" value="20"/>
-        </div>
+      <div class="fg"><label class="fl">Limite de alunos</label>
+        <input class="fc" id="mcl-limite" type="number" min="1" step="1" value="20"/>
+        <p style="font-size:11px;color:var(--t2);margin-top:4px">💡 Link da reunião: configure no botão "🔗 Link Reunião" na clínica.</p>
       </div>
       <div id="mcl-err" class="al al-e hidden"></div>
     </div>
@@ -2613,6 +2609,25 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
       <button class="btn btn-d btn-sm" id="mcl-del" onclick="deleteClinica()" style="margin-right:auto;display:none">🗑️ Apagar</button>
       <button class="btn btn-s" onclick="CM('modal-clinica')">Cancelar</button>
       <button class="btn btn-p" onclick="saveClinica()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Link da reunião da clínica ══ -->
+<div class="mo hidden" id="modal-clinica-link">
+  <div class="md" style="max-width:520px">
+    <div class="mh"><div><div class="m-title">🔗 Link da reunião</div><div class="m-sub" id="mcll-sub">Zoom, Google Meet, etc.</div></div><button class="m-close" onclick="CM('modal-clinica-link')">✕</button></div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">URL da reunião</label>
+        <input class="fc" id="mcll-link" placeholder="https://meet.google.com/... ou https://zoom.us/..."/>
+        <p style="font-size:11px;color:var(--t2);margin-top:4px">Cole aqui o link da sala. Os alunos confirmados verão o link ao acessar a aba Mentorias e podem receber por email no botão "📧 Enviar link".</p>
+      </div>
+      <div id="mcll-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-d btn-sm" id="mcll-del" onclick="clearClinicaLink()" style="margin-right:auto;display:none">🗑️ Remover link</button>
+      <button class="btn btn-s" onclick="CM('modal-clinica-link')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveClinicaLink()">💾 Salvar</button>
     </div>
   </div>
 </div>
@@ -4229,11 +4244,13 @@ async function _mtaAplicarResp(clinicaId,alunoId,type){
   await updateDoc(doc(db,`clinicas/${clinicaId}/alunos/${alunoId}`),update);
   _invalidateClinicaAlunos(clinicaId);
   const c=S.clinicas.find(x=>x.id===clinicaId);
+  // Renderiza ANTES do envio de email pra UI atualizar na hora (email pode demorar segundos).
+  await mtaRenderClinicas();
+  // Se for ausência, tenta puxar alguém da fila de swap e re-renderiza.
+  if(type==='absent'){await tentarPuxarSwapVaga(c);await mtaRenderClinicas();}
   let okMail=true;
   if(type==='confirmed')okMail=await sendEmailMentoria('confirmed',a,c);
   else if(type==='absent')okMail=await sendEmailMentoria('absent',a,c);
-  if(type==='absent')await tentarPuxarSwapVaga(c);
-  await mtaRenderClinicas();
   if(type==='confirmed')alert(okMail?`✅ Presença confirmada!\nUm e-mail de confirmação foi enviado para ${a.email}.`:`✅ Presença confirmada!\n⚠️ Falha ao enviar e-mail (verifique sua caixa, pode chegar atrasado).`);
   else if(type==='absent')alert(okMail?`Ausência registrada.\nUm e-mail foi enviado para ${a.email}.`:`Ausência registrada.\n⚠️ Falha ao enviar e-mail.`);
 }
@@ -9241,12 +9258,14 @@ function _renderSessao(c,isAvulsa){
       </div>
       <div style="text-align:right">
         <div style="font-size:16px;font-weight:800;color:${cor}">${ocup}/${lim}</div>
-        <div style="font-size:11px;color:var(--t2)">✅${cf} 🔄${sw} ⏳${pe} ❌${ab}</div>
+        <div style="font-size:12px;color:var(--green);font-weight:600;margin-top:2px">✅ ${cf} confirmado${cf===1?'':'s'}</div>
+        <div style="font-size:11px;color:var(--t2);margin-top:2px">🔄 ${sw} <span style="opacity:.4">|</span> ⏳ ${pe} <span style="opacity:.4">|</span> ❌ ${ab}</div>
       </div>
     </div>
     <div class="aluno-acts" style="width:100%;margin-top:6px">
       <button class="btn btn-s btn-sm" onclick="toggleClinicaAlunos('${c.id}')">👥 Ver alunos</button>
       <button class="btn btn-s btn-sm" onclick="openClinica('${c.id}')">✏️ Editar</button>
+      <button class="btn ${c.link?'btn-p':'btn-s'} btn-sm" onclick="openClinicaLink('${c.id}')" title="${c.link?'Editar link da reunião':'Adicionar link da reunião'}">🔗 ${c.link?'Link Reunião':'Link Reunião'}</button>
       ${c.link?`<button class="btn btn-p btn-sm" onclick="sendClinicaLinkNow('${c.id}',this)" title="Envia o link da reunião para todos os alunos confirmados">📧 Enviar link${c.emailLinkEnviadoEm?' novamente':' agora'}</button>`:''}
       ${c.emailLinkEnviadoEm?`<span style="font-size:11px;color:var(--green);align-self:center;margin-left:4px">✅ enviado em ${fDT(c.emailLinkEnviadoEm)}</span>`:''}
     </div>
@@ -9431,9 +9450,12 @@ function _renderClinicaAlunos(c,alunos){
   return alunos.slice().sort(ord).map(a=>{
     const cls=a.status==='confirmed'?'status-confirmed':a.status==='swap'?'status-swap':a.status==='absent'?'status-absent':'';
     const podeReset=a.status&&a.status!=='pending';
+    // Se veio de outra clínica via troca/swap, mostra o mentor de origem
+    const cOrig=a.originalClinicaId?S.clinicas.find(x=>x.id===a.originalClinicaId):null;
+    const origTag=cOrig?`<span style="display:inline-flex;align-items:center;font-size:11px;font-weight:600;color:var(--yellow);background:rgba(234,179,8,.12);border:1px solid rgba(234,179,8,.35);padding:2px 8px;border-radius:4px;margin-left:8px" title="${_temaDeClinica(cOrig)}">Aluno de: ${cOrig.mentorNome}</span>`:'';
     return`<div class="aluno-row ${cls}" style="margin-bottom:5px;padding:8px 12px">
-      <div class="aluno-name" style="font-size:13px">${a.nome}</div>
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${sbadge(a.status)}${a.respondedAt?`<span style="font-size:10px;color:var(--t2)">${fDT(a.respondedAt)}</span>`:''}
+      <div class="aluno-name" style="font-size:13px">${a.nome}${origTag}</div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${sbadge(a.status)}
         ${podeReset?`<button class="btn btn-s btn-sm" onclick="resetClinicaAluno('${c.id}','${a.id}')" style="font-size:10px;padding:2px 7px" title="Resetar resposta">↺ Resetar</button>`:''}
         <button class="btn btn-d btn-sm" onclick="rmClinicaAluno('${c.id}','${a.id}')" style="font-size:10px;padding:2px 7px" title="Remover">✕</button>
       </div>
@@ -9595,7 +9617,6 @@ window.openClinica=(id,blocoIdNew)=>{
   const opts=S.mentorias.filter(g=>!tipoFiltro||g.tipo===tipoFiltro).map(g=>`<option value="${g.id}" ${c?.mentoriaId===g.id?'selected':''}>${g.tipo} · ${g.mentorNome} (${(g.alunos||[]).length} alunos)</option>`).join('');
   sel.innerHTML='<option value="">— escolha um mentor —</option>'+opts;
   document.getElementById('mcl-datahora').value=c?.dataHora||'';
-  document.getElementById('mcl-link').value=c?.link||'';
   document.getElementById('mcl-limite').value=c?.limite||20;
   document.getElementById('mcl-err').classList.add('hidden');
   document.getElementById('mcl-mentor-info').textContent='';
@@ -9617,7 +9638,8 @@ window.saveClinica=async()=>{
   const id=editId||('cln_'+Date.now()+'_'+Math.random().toString(36).slice(2,5));
   const mentoriaId=document.getElementById('mcl-mentor').value;
   const dataHora=document.getElementById('mcl-datahora').value;
-  const link=document.getElementById('mcl-link').value.trim();
+  const cExist=editId?S.clinicas.find(x=>x.id===editId):null;
+  const link=cExist?.link||'';
   const limite=parseInt(document.getElementById('mcl-limite').value)||20;
   const err=document.getElementById('mcl-err');
   const g=S.mentorias.find(x=>x.id===mentoriaId);
@@ -9651,6 +9673,40 @@ window.saveClinica=async()=>{
   await loadClinicas();
   _invalidateClinicaAlunos();
   CM('modal-clinica');
+  renderMentorias();
+};
+
+window.openClinicaLink=(id)=>{
+  const c=S.clinicas.find(x=>x.id===id);if(!c){alert('Sessão não encontrada.');return;}
+  document.getElementById('mcll-sub').textContent=`${c.mentorNome} · ${_fmtClinDataHora(c.dataHora)}`;
+  document.getElementById('mcll-link').value=c.link||'';
+  document.getElementById('mcll-err').classList.add('hidden');
+  document.getElementById('mcll-del').style.display=c.link?'':'none';
+  document.getElementById('modal-clinica-link').dataset.editId=id;
+  document.getElementById('modal-clinica-link').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('mcll-link').focus(),50);
+};
+
+window.saveClinicaLink=async()=>{
+  const id=document.getElementById('modal-clinica-link').dataset.editId;
+  if(!id)return;
+  const link=document.getElementById('mcll-link').value.trim();
+  const err=document.getElementById('mcll-err');
+  if(link&&!/^https?:\/\//i.test(link)){err.textContent='O link precisa começar com http:// ou https://';err.classList.remove('hidden');return;}
+  err.classList.add('hidden');
+  await setDoc(doc(db,'clinicas',id),{link,updatedAt:new Date().toISOString()},{merge:true});
+  await loadClinicas();
+  CM('modal-clinica-link');
+  renderMentorias();
+};
+
+window.clearClinicaLink=async()=>{
+  const id=document.getElementById('modal-clinica-link').dataset.editId;
+  if(!id)return;
+  if(!confirm('Remover o link da reunião desta clínica?'))return;
+  await setDoc(doc(db,'clinicas',id),{link:'',updatedAt:new Date().toISOString()},{merge:true});
+  await loadClinicas();
+  CM('modal-clinica-link');
   renderMentorias();
 };
 
@@ -9740,22 +9796,26 @@ async function sendEmailMentoria(type,aluno,clinicaOrigem,clinicaDest){
     trocaConfirmada:'✅ Troca de Clínica Efetivada',
     match:'✅ Troca de Clínica Casada Automaticamente',
   };
-  const fmt=c=>`${_temaDeClinica(c)} · ${c.mentorNome} · ${_fmtClinDataHora(c.dataHora)}`;
-  const msgs={
-    confirmed:`Sua presença na Clínica de Questões foi CONFIRMADA! ✅\n\n${fmt(clinicaOrigem)}\n\n${clinicaOrigem.link?'Link: '+clinicaOrigem.link:''}`,
-    absent:`Registramos sua ausência na Clínica de Questões.\n\n${fmt(clinicaOrigem)}`,
-    swap:`Recebemos sua solicitação de troca para outra clínica.\n\n📌 Atual: ${fmt(clinicaOrigem)}\n📅 Desejada: ${clinicaDest?fmt(clinicaDest):''}\n\nSe houver vaga ou um match recíproco, a troca é efetivada automaticamente.`,
-    trocaConfirmada:`Sua troca foi efetivada! ✅\n\nDe: ${fmt(clinicaOrigem)}\nPara: ${fmt(clinicaDest)}\n\n${clinicaDest?.link?'Link: '+clinicaDest.link:''}`,
-    match:`Sua troca foi casada automaticamente com outro aluno! ✅\n\nVocê foi realocado para: ${fmt(clinicaDest)}\n\n${clinicaDest?.link?'Link: '+clinicaDest.link:''}`,
+  const fmt=c=>c?`${_temaDeClinica(c)} · ${c.mentorNome||'(sem mentor)'} · ${_fmtClinDataHora(c.dataHora)}`:'';
+  const msgBuilders={
+    confirmed:()=>`Sua presença na Clínica de Questões foi CONFIRMADA! ✅\n\n${fmt(clinicaOrigem)}\n\n${clinicaOrigem?.link?'Link: '+clinicaOrigem.link:''}`,
+    absent:()=>`Registramos sua ausência na Clínica de Questões.\n\n${fmt(clinicaOrigem)}`,
+    swap:()=>`Recebemos sua solicitação de troca para outra clínica.\n\n📌 Atual: ${fmt(clinicaOrigem)}\n📅 Desejada: ${fmt(clinicaDest)}\n\nSe houver vaga ou um match recíproco, a troca é efetivada automaticamente.`,
+    trocaConfirmada:()=>`Sua troca foi efetivada! ✅\n\nDe: ${fmt(clinicaOrigem)}\nPara: ${fmt(clinicaDest)}\n\n${clinicaDest?.link?'Link: '+clinicaDest.link:''}`,
+    match:()=>`Sua troca foi casada automaticamente com outro aluno! ✅\n\nVocê foi realocado para: ${fmt(clinicaDest)}\n\n${clinicaDest?.link?'Link: '+clinicaDest.link:''}`,
   };
+  const mensagem=(msgBuilders[type]||(()=>''))();
   console.log('[mentoria mail] enviando',{type,to:aluno.email});
+  // Pra trocas efetivadas/match, mostrar data/horário da clínica DESTINO (nova alocação).
+  // Pros demais (confirmed/absent/swap), mostrar da clínica de ORIGEM.
+  const cRef=(type==='trocaConfirmada'||type==='match')&&clinicaDest?clinicaDest:clinicaOrigem;
   try{
-    const res=await emailjs.send('service_exyoa4r','template_r0vjejs',{
+    const res=await emailjs.send('service_exyoa4r','template_hb89fxv',{
       to_email:aluno.email,nome:aluno.nome,
-      assunto:subjects[type],mensagem:msgs[type],
-      simulado:'Mentoria',
-      dia:clinicaOrigem?.dataHora?fD(clinicaOrigem.dataHora.split('T')[0]):'',
-      horario:clinicaOrigem?.dataHora?clinicaOrigem.dataHora.split('T')[1].slice(0,5):'',
+      assunto:subjects[type],mensagem,
+      tipo_mentoria:cRef?.tipo||clinicaOrigem?.tipo||'Mentoria',
+      dia:cRef?.dataHora?fD(cRef.dataHora.split('T')[0]):'',
+      horario:cRef?.dataHora?cRef.dataHora.split('T')[1].slice(0,5):'',
     });
     console.log('[mentoria mail] enviado OK',res?.status);
     return true;
@@ -9784,10 +9844,10 @@ window.sendClinicaLinkNow=async(clinicaId,btnEl)=>{
   const mensagem=`Olá! Hoje é o dia da sua Clínica de Questões.\n\n📅 ${tema} · ${c.mentorNome}\n🕒 ${dia} às ${horario}\n\n🔗 Link da reunião:\n${c.link}\n\nNos vemos lá!`;
   for(const a of confirmados){
     try{
-      await emailjs.send('service_exyoa4r','template_r0vjejs',{
+      await emailjs.send('service_exyoa4r','template_hb89fxv',{
         to_email:a.email,nome:a.nome,
         assunto:'🎓 Link da Clínica de Questões · '+tema,
-        mensagem,simulado:'Mentoria',dia,horario,
+        mensagem,tipo_mentoria:c?.tipo||'Mentoria',dia,horario,
       });
       ok++;
     }catch(e){console.error('[clinica link] falha',a.email,e);fail++;}
