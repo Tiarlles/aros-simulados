@@ -267,6 +267,27 @@ service cloud.firestore {
     }
 
     // ────────────────────────────────────────────────────────────────────────
+    // COMUNICAÇÃO (mural da Home por categoria: tsa / tea / mes)
+    // config/comunicacao guarda os cards (titulo/subtitulo/imagem) — usa rule de /config.
+    // comunicacao/{cat}/posts/{postId} → posts do mural.
+    // Read aberto (alunos não-logados precisam ver). Write com shape mínimo.
+    // ────────────────────────────────────────────────────────────────────────
+    match /comunicacao/{cat} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if false;
+
+      match /posts/{postId} {
+        allow read: if true;
+        allow create, update: if request.resource.data.titulo is string
+                              && request.resource.data.titulo.size() > 0
+                              && request.resource.data.titulo.size() < 300
+                              && request.resource.data.corpo is string;
+        allow delete: if true;
+      }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
     // DEFAULT DENY — qualquer coleção/path não listada acima é bloqueada.
     // Atacante curioso bate em coleções aleatórias e recebe permission denied.
     // ────────────────────────────────────────────────────────────────────────

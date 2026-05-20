@@ -238,8 +238,121 @@ Filtros aplicados em: `renderSimCards`, `popCoSel`, `simsAplicados` (Garantia), 
 
 **Padrão "ADM badge":**
 - Abas marcadas como admin-only ganham um pill mono "ADM" discreto à direita na sidebar.
-- Lista hardcoded em `ADMIN_ONLY_TABS = new Set(['usuarios','config','financeiro','features','recProvas','recFontes','recConfig','recMetricas'])`.
+- Lista hardcoded em `ADMIN_ONLY_TABS = new Set(['usuarios','config','financeiro','features','recProvas','recFontes','recConfig','recMetricas','comunicacao'])`.
 - `recGestao` é INTENCIONALMENTE não-admin-only — qualquer prof autenticado deve poder dar parecer em contestações.
+
+## Estilo "Apple-like" (referência reutilizável)
+
+**Quando o usuário pedir pra deixar algo "estilo Apple", "Apple-like", "imersivo e tecnológico", "premium", "estilo iOS/macOS" — aplicar este padrão.** Foi estabelecido nas telas Home, Mural, Header, Simulados TSA Oral (aluno) e aba de Comunicação (admin) em 2026-05-20. **NÃO re-perguntar especificações** — usar o padrão abaixo direto.
+
+### Tokens canônicos (já existem em `<style id="home-styles">` no `index.html`)
+```css
+:root{
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);     /* easing default — transitions de hover/state */
+  --ease-out-fast: cubic-bezier(0.22, 1, 0.36, 1);    /* easing pra sliding indicators / movimentação direta */
+  --ease-in-out:   cubic-bezier(0.65, 0, 0.35, 1);    /* easing pra animações infinitas (mesh, pulse) */
+}
+```
+
+### Liquid Glass (containers, pills, modais)
+- `backdrop-filter: blur(12-22px) saturate(140-180%)` + `-webkit-` prefix.
+- Background: `linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015))` (dark) / `rgba(15,23,42,.04→.01)` (light).
+- Border: `1px solid color-mix(in srgb, var(--border) 80%, transparent)`.
+- Sombras em camadas: `0 1px 0 rgba(255,255,255,.06) inset, 0 1px 2px rgba(0,0,0,.15), 0 8px 24px rgba(0,0,0,.22)`.
+- **Mobile**: media query `(max-width:820px)` reduz/desliga `backdrop-filter` pra economizar GPU.
+
+### Pill capsule (containers, botões, tabs)
+- `border-radius: 999px`.
+- Padding generoso: containers `5px`, botões `9px 18-22px`.
+- Tipografia: **Space Grotesk** 12.5-13px peso 600, letter-spacing `.2px`.
+
+### Sliding indicator (segmented controls estilo macOS Sequoia)
+- `<span class="*-indicator" aria-hidden="true">` dentro do container pill.
+- CSS: `position:absolute; top:5px; bottom:5px; transition: transform .55s var(--ease-out-fast), width .55s var(--ease-out-fast)`.
+- JS mede `getBoundingClientRect()` da `.tab.on` e seta `transform: translateX(Xpx); width: Wpx`.
+- Cor do indicador varia por categoria via `data-active-cat` attribute (laranja TSA, azul TEA, roxo MEs).
+- Exemplos no código: `_arosUpdateNavIndicator()` (header), `_arosUpdateDayTabsIndicator()` (genérico), `_comUpdateSubnavIndicator()` (aba Comunicação).
+
+### Tipografia tecnológica
+- **Títulos hero (h1)**: Space Grotesk 700, `clamp(38px, 6vw, 72px)`, `letter-spacing:-2.2px`, `line-height:1.02`.
+- **Títulos de seção (h2/h3)**: Space Grotesk 700, 22-28px, `letter-spacing:-.6px`.
+- **Acentos em itálico/destaque**: gradient text `linear-gradient(135deg, #fb923c 0%, #a855f7 55%, #3b82f6 100%)` com `-webkit-background-clip:text; color:transparent`.
+- **Labels mono uppercase**: JetBrains Mono 10.5px peso 700, letter-spacing `1.6-3px`, `text-transform:uppercase`. Cor `var(--t2)`.
+
+### Cards / botões de card
+- Border-radius: 18-24px.
+- Padding: 22-30px.
+- Hover lift: `transform: translateY(-3 a -6px)`.
+- **Tilt 3D** opcional: `data-tilt` no elemento, `_arosBindTilt()` aplica `rotateX/Y` até 6° seguindo mouse (desligado em touch e em reduced-motion).
+- **Glow follow-cursor**: `::after` com `background: radial-gradient(circle at var(--mx) var(--my), ...)`, `_arosBindTilt` atualiza `--mx/--my`.
+- **Shine sweep**: `::before` com gradient diagonal translúcido, transitions de transform no hover (passa da esquerda pra direita).
+- **Borda gradient sutil**: técnica `padding:1.5px; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor`.
+
+### Reveal-on-scroll
+- Adicionar `class="reveal"` em elementos. Por padrão: `opacity:0; transform:translateY(28px)`.
+- `_arosObserveReveal()` usa IntersectionObserver pra adicionar `.in` quando entram no viewport.
+- **Fail-safe de 1200ms** garante que tudo aparece mesmo se observer não disparar.
+- Stagger: `style="transition-delay: ${i*80}ms"` em listas.
+
+### Hero com mesh-gradient animado
+- `::before` com múltiplas `radial-gradient(...)` em posições/cores diferentes, `filter: blur(60px) saturate(120%)`.
+- `animation: heroMesh 18s var(--ease-in-out) infinite alternate` movendo `transform: translate3d` sutil.
+- Grade pontilhada sobreposta com máscara radial: `background-image: linear-gradient(grid 1px, transparent 1px), linear-gradient(90deg, grid 1px, transparent 1px); mask-image: radial-gradient(ellipse, #000 35%, transparent 80%)`.
+
+### Header sticky com fade-on-scroll
+- Default: `background: rgba(13,17,23,.58)` + blur 22px.
+- Estado `.scrolled` (window.scrollY>8): `background: rgba(8,10,14,.82)` + sombra sutil.
+- Listener: `window.addEventListener('scroll', ...)` passive.
+
+### Modais Apple-like
+- Backdrop com blur via `.mo` (já existe).
+- Container `.md` com `border-radius:18-20px`, padding 0, overflow hidden.
+- Botão close circular flutuante (`width:36px; border-radius:999px; background:rgba(0,0,0,.4)` + blur) que **gira 90° no hover**.
+
+### Cores temáticas por contexto
+- TSA: laranja `#fb923c` / `#fbbf24`
+- TEA: azul `#3b82f6` / `#60a5fa`
+- MEs: roxo `#a855f7` / `#c084fc`
+- Aplicar via `--c: cor` em escopo `[data-cat="X"]` no container, e `var(--c)` em filhos.
+
+### Drag-and-drop (HTML5 nativo, sem libs)
+- Padrão visual: handle `⋮⋮` à esquerda da row, `cursor:grab/grabbing`.
+- Drop indicator: classe `.drop-target-before` / `.drop-target-after` adiciona `box-shadow: 0 ±3px 0 0 var(--accent)` + border accent.
+- Persistência: array `order` em config doc (não posição numérica em cada item — array de IDs é atômico e simples).
+- Exemplo de referência: `_comBindDragDrop()` na aba Comunicação.
+
+### Sanitização HTML em editores rich-text
+- Função `_comSanitizePostHTML(html)` em `index.html` — remove `script/style/iframe/object/embed/link/meta`, atributos `on*`, `href:javascript:`, e filtra `style` permitindo só `color | background-color | font-size | font-weight | font-style | text-decoration | text-align`.
+- Adiciona `target="_blank" rel="noopener"` automático em `<a>` externos.
+- Padrão de toolbar: prefix `cp/mpr/mft + Exec/Color/InsertCode/InsertLink/InsertImage`. Reuso da classe `.ftb` (botão) e `.ftb-sep` (separador) e `.ftb-c` (swatch de cor).
+
+### Performance / acessibilidade
+- **`@media (prefers-reduced-motion: reduce)`**: desliga animações infinitas, tilt, reveal, transições longas.
+- **`@media (max-width: 820px)`**: reduz/desliga `backdrop-filter` pra Android antigo. Grids passam pra coluna única.
+- **`@media (pointer:coarse)`**: tilt 3D fica desligado em touch (`_arosBindTilt` checa).
+- Audiência majoritária do AROS é iPhone → custo de blur é zero perceptível (decisão 2026-05-20).
+
+### Boas práticas de escopo (pra não vazar em admin)
+- **NÃO** mexer em estilos globais (`.btn`, `.fc`, `.card`) sem necessidade.
+- Override escopado: `#view-al .sim-card`, `#tab-comunicacao .com-row`, etc.
+- Específico vence específico — não usar `!important` exceto em casos cirúrgicos pra override de inline styles.
+
+### Componentes reutilizáveis (já existem)
+- `_arosBindTilt()` — aplica tilt 3D + glow em `[data-tilt]`.
+- `_arosObserveReveal()` — IntersectionObserver pra `.reveal`.
+- `_arosUpdateNavIndicator()` — sliding indicator do header.
+- `_arosUpdateDayTabsIndicator(wrapId, indId)` — sliding indicator genérico.
+- `_comUpdateSubnavIndicator()` — sliding indicator da aba Comunicação.
+- Função `_comAdminToggleCard(id, ev)` — toggle de collapsible com chevron rotacionando.
+
+**Quando aplicar em uma área nova:** seguir a ordem:
+1. CSS escopado por `#id-da-area` (cuidado pra não vazar).
+2. Pill containers + Space Grotesk + tokens.
+3. Liquid glass nos cards/containers.
+4. Hover states (lift + glow + shine).
+5. Reveal-on-scroll nos itens.
+6. Media queries pra mobile e reduced-motion.
+7. Sliding indicators se houver tabs/segmented controls.
 
 ## Features principais
 
@@ -952,3 +1065,20 @@ Mentorias — refinamentos (2026-05-20):
 - **Coord — badge "Aluno de: [mentor]"** ao lado do nome dos alunos que vieram via troca (qualquer um dos 5 fluxos que setam `originalClinicaId`). Tooltip = tema da clínica de origem.
 - **Coord — UI da lista de alunos limpa**: removida data/hora de `respondedAt` (poluía a linha). Manteve só status + ações.
 - **Coord — stats da clínica reorganizados**: `14/20` em destaque, depois "✅ N confirmados" em verde, depois `🔄 N | ⏳ N | ❌ N` com separador discreto.
+
+Home + Mural de Comunicação + estilo Apple-like (2026-05-20):
+- **Home institucional virou landing default** (`view-home`). Hero "Seu parceiro na jornada pela Anestesiologia." com gradient text na palavra Anestesiologia + 3 cards de categoria (🟠 TSA · 🔵 TEA · 🟣 MEs) em grid responsivo (3 col desktop, 1 col mobile). Cards têm tilt 3D, glow follow-cursor, shine sweep, capa 16:10 editável.
+- **Mural por categoria** (`view-mural`): feed em **grid de cards compactos** (3 col desktop / 2 tablet / 1 mobile). Cada card: capa 16:9 + badge "📌 Fixado" se aplicável + título + snippet (3 linhas) + CTA "Ler aviso →". Clica abre **modal full content** com imagem proporcional, título, corpo HTML rico e botão de link.
+- **Coleções novas no Firestore**:
+  - `config/comunicacao` → `{cards:{tsa,tea,mes:{titulo,subtitulo,imagem}}, order:{tsa:[ids],tea:[ids],mes:[ids]}}`. Read aberto, write/delete protegido (rule de `/config/`).
+  - `comunicacao/{cat}/posts/{postId}` → `{titulo, corpo (HTML), imagem, linkUrl, linkLabel, pinned, published, createdAt, updatedAt}`. Rule deployada em 2026-05-20.
+- **Sort de posts** (`_comSortPosts`): pinned ASC primeiro, depois pelo índice em `config/comunicacao.order[cat]` (manual via drag), fallback createdAt DESC.
+- **Aba admin "📢 Comunicação"** (grupo Administração, admin-only): subnav TSA/TEA/MEs com sliding indicator colorido + 3 dropdowns collapsíveis:
+  1. **🖼️ Capa do card na Home** (começa fechado) — título/subtítulo/imagem da categoria. Hint dimensão 1600×1000 (16:10).
+  2. **📝 Avisos publicados** (começa aberto) — rows arrastáveis pelo handle `⋮⋮`. Botão "+ Novo aviso" no header.
+  3. **🚫 Avisos despublicados** (começa fechado) — avisos com `published:false`.
+- **Ações inline na row**: 🚫 Despublicar / ✅ Publicar (toggle, move entre boxes) → ✏️ (editar) → 🗑️ (excluir com confirm). Sync do array `order` em criar/deletar/despublicar.
+- **Editor de aviso**: contenteditable com toolbar completa (B/I/U/S, listas, código, link, **📷 imagem inline** com upload pro Storage `comunicacao/posts/{cat}/inline/`, alinhamento, 7 cores texto + 5 fundo). Hint de dimensão da imagem de capa: 1600×900 (16:9). Compat com posts antigos (markdown leve preservado).
+- **Header refeito Apple-like**: pill glass + sliding indicator colorido por categoria. Botão **🔐 cadeado** ao lado do toggle de tema abre o painel da Coordenação (substitui o antigo botão "🛠️ Coordenação" que aparecia com `#admin` — tab-co fica permanentemente oculto).
+- **Simulados TSA Oral (aluno) refeito Apple-like**: cards com top accent gradient (laranja→amarelo→roxo→azul), tilt 3D, glow, title em Space Grotesk 19px, chips de data como pill glass com glow lateral, search input pill com focus ring colorido, day-tabs com sliding indicator.
+- **Estilo Apple-like estabelecido como padrão reutilizável** — ver seção "Estilo Apple-like (referência reutilizável)" nesta skill. Quando user pedir "estilo Apple" em outra área, aplicar o padrão direto sem re-perguntar especificações.
