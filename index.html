@@ -1167,6 +1167,32 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-comunicacao .cl-admin-row.cl-admin-empty{color:var(--t2);text-align:center;display:block;padding:24px}
 @media (max-width: 820px){#tab-comunicacao .cl-admin-row{grid-template-columns:1fr auto;gap:6px}#tab-comunicacao .cl-admin-row .cl-r-meta,#tab-comunicacao .cl-admin-row .cl-r-data{font-size:11.5px}}
 
+/* ═════════════ AUDITORIA ═════════════ */
+#tab-auditoria .aud-row{display:grid;grid-template-columns:160px 1.4fr 1.6fr 2fr auto;gap:10px;align-items:center;padding:11px 14px;border-bottom:1px solid color-mix(in srgb, var(--border) 60%, transparent);font-size:13px;transition:background .15s}
+#tab-auditoria .aud-row:hover{background:color-mix(in srgb, var(--accent) 5%, transparent)}
+#tab-auditoria .aud-row:last-child{border-bottom:none}
+#tab-auditoria .aud-head{display:grid;grid-template-columns:160px 1.4fr 1.6fr 2fr auto;gap:10px;align-items:center;padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--border);font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--t2);position:sticky;top:0;z-index:1}
+#tab-auditoria .aud-ts{font-family:'JetBrains Mono','SF Mono',monospace;font-size:12px;color:var(--t2);line-height:1.35}
+#tab-auditoria .aud-user{font-weight:600;line-height:1.35}
+#tab-auditoria .aud-user-email{font-size:11px;color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace}
+#tab-auditoria .aud-target{font-size:12px;color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;word-break:break-word}
+#tab-auditoria .aud-action{display:inline-flex;align-items:center;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:1.2px;padding:4px 10px;border-radius:999px;background:color-mix(in srgb, var(--t2) 14%, transparent);color:var(--t2);border:1px solid color-mix(in srgb, var(--t2) 30%, transparent);backdrop-filter:blur(14px) saturate(140%);white-space:nowrap}
+#tab-auditoria .aud-action.aud-create{background:color-mix(in srgb, #22c55e 14%, transparent);color:#22c55e;border-color:color-mix(in srgb, #22c55e 40%, transparent)}
+#tab-auditoria .aud-action.aud-destroy{background:color-mix(in srgb, #ef4444 14%, transparent);color:#ef4444;border-color:color-mix(in srgb, #ef4444 40%, transparent)}
+#tab-auditoria .aud-action.aud-auth{background:color-mix(in srgb, #3b82f6 14%, transparent);color:#3b82f6;border-color:color-mix(in srgb, #3b82f6 40%, transparent)}
+#tab-auditoria .aud-empty{padding:40px 24px;text-align:center;color:var(--t2)}
+#tab-auditoria .aud-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+#tab-auditoria .aud-detail-grid pre,#modal-audit-detail pre{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11.5px;line-height:1.5;color:var(--text);max-height:320px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+#modal-audit-detail .ad-row{margin-bottom:14px}
+#modal-audit-detail .ad-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--t2);margin-bottom:6px}
+#modal-audit-detail .ad-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width: 820px){
+  #tab-auditoria .aud-head{display:none}
+  #tab-auditoria .aud-row{grid-template-columns:1fr;gap:6px;padding:14px;border-bottom:1px solid var(--border)}
+  #tab-auditoria .aud-row > *{min-width:0}
+  #modal-audit-detail .ad-grid{grid-template-columns:1fr}
+}
+
 /* ═════════════ SENHAS E ACESSOS ═════════════ */
 .sa-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
 .sa-search-wrap{position:relative;flex:1;min-width:240px}
@@ -1947,9 +1973,18 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
   <div id="co-login" style="max-width:340px;margin:72px auto;text-align:center">
     <div style="font-size:48px;margin-bottom:14px">🔐</div>
     <h2 style="font-family:Fraunces,serif;font-size:21px;margin-bottom:6px">Área da Coordenação</h2>
-    <p style="color:var(--t2);margin-bottom:20px;font-size:14px">Digite a senha para acessar.</p>
+    <p style="color:var(--t2);margin-bottom:20px;font-size:14px">Acesse com sua conta Google ou suas credenciais.</p>
+    <button type="button" id="btn-google-login" onclick="loginGoogle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px 14px;background:var(--bg);color:var(--text);border:1.5px solid var(--border);border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s var(--ease-out-soft);margin-bottom:14px" onmouseover="this.style.background='var(--bg3)';this.style.borderColor='var(--accent)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)'">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48" style="flex-shrink:0"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+      Continuar com Google
+    </button>
+    <div style="display:flex;align-items:center;gap:10px;margin:14px 0 14px;color:var(--t2);font-size:11px;font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;letter-spacing:1.5px;text-transform:uppercase">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <span>ou</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
     <div style="margin-bottom:8px">
-      <input class="fc" id="co-user" type="text" placeholder="Usuário" autocomplete="username" style="text-align:center" onkeydown="if(event.key==='Enter')checkPass()"/>
+      <input class="fc" id="co-user" type="text" placeholder="Email ou usuário" autocomplete="username" style="text-align:center" onkeydown="if(event.key==='Enter')checkPass()"/>
     </div>
     <div style="position:relative;margin-bottom:8px">
       <input class="fc" id="co-pass" type="password" placeholder="Senha" autocomplete="current-password" style="text-align:center;padding-right:40px" onkeydown="if(event.key==='Enter')checkPass()"/>
@@ -2727,6 +2762,67 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
       </div>
     </div>
 
+    <!-- TAB: Auditoria (admin only) -->
+    <div id="tab-auditoria" class="hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-spacing:-.3px;line-height:1.15">Auditoria</h3>
+          <p style="font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;color:var(--accent);font-size:10.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:4px">Log de ações · quem fez o quê</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="cb" style="padding:14px">
+          <div class="aud-filters" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
+            <div class="fg" style="flex:1;min-width:180px;margin:0">
+              <label class="fl">Buscar usuário</label>
+              <input type="text" class="fc" id="aud-f-user" placeholder="nome ou email" oninput="applyAuditFilters()"/>
+            </div>
+            <div class="fg" style="flex:1;min-width:180px;margin:0">
+              <label class="fl">Ação</label>
+              <select class="fc" id="aud-f-action" onchange="applyAuditFilters()">
+                <option value="">Todas</option>
+              </select>
+            </div>
+            <div class="fg" style="margin:0">
+              <label class="fl">De</label>
+              <input type="date" class="fc" id="aud-f-from" onchange="applyAuditFilters()"/>
+            </div>
+            <div class="fg" style="margin:0">
+              <label class="fl">Até</label>
+              <input type="date" class="fc" id="aud-f-to" onchange="applyAuditFilters()"/>
+            </div>
+            <button class="btn btn-s btn-sm" onclick="clearAuditFilters()">Limpar</button>
+            <button class="btn btn-p btn-sm" onclick="exportAuditCsv()">⬇ CSV</button>
+            <button class="btn btn-s btn-sm" onclick="renderAuditoria(true)" title="Recarregar do Firestore">↻ Atualizar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cb" style="padding:0">
+          <div id="aud-table-wrap">
+            <div class="ld" style="padding:24px"><div class="sp"></div> Carregando log...</div>
+          </div>
+          <div id="aud-load-more-wrap" style="padding:14px;text-align:center;display:none">
+            <button class="btn btn-s btn-sm" id="aud-load-more" onclick="loadMoreAudit()">Carregar mais 50</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: detalhes de uma entrada de auditoria -->
+    <div id="modal-audit-detail" class="mo hidden" data-no-backdrop-close>
+      <div class="mc" style="max-width:780px">
+        <div class="m-head"><h3 id="ad-title">Detalhes do registro</h3><button class="mx" onclick="CM('modal-audit-detail')">×</button></div>
+        <div class="m-body" id="ad-body"></div>
+        <div class="m-foot">
+          <button class="btn btn-s btn-sm" onclick="copyAuditDetail()">📋 Copiar JSON</button>
+          <button class="btn btn-p" onclick="CM('modal-audit-detail')">Fechar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- TAB: Comunicação (mural por categoria — TSA / TEA / MEs) -->
     <div id="tab-comunicacao" class="hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
@@ -2848,6 +2944,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
     <div class="m-body">
       <div class="fg"><label class="fl">Nome de usuário (login)</label><input class="fc" id="mu-username" placeholder="ex: maria.silva" autocomplete="off"/></div>
       <div class="fg"><label class="fl">Nome completo</label><input class="fc" id="mu-nome" placeholder="ex: Maria Silva"/></div>
+      <div class="fg"><label class="fl">Email (login via Google ou Firebase)</label><input class="fc" id="mu-email" type="email" placeholder="ex: maria@exemplo.com" autocomplete="off"/><p style="font-size:11px;color:var(--t2);margin-top:4px">Opcional. Necessário pra login via Google ou link de redefinição de senha. Precisa ser igual ao email cadastrado no Firebase Auth.</p></div>
       <div class="fg"><label class="fl">Senha</label><input class="fc" id="mu-senha" type="text" placeholder="Senha de acesso" autocomplete="new-password"/></div>
       <div class="fg">
         <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg3);border-radius:var(--rs);cursor:pointer;border:1.5px solid var(--border)" id="mu-admin-wrap">
@@ -4551,18 +4648,63 @@ Equipe AnestReview · AROS</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore,collection,doc,getDoc,getDocs,setDoc,updateDoc,onSnapshot,deleteDoc,writeBatch,addDoc,query,orderBy,serverTimestamp }
+import { getFirestore,collection,doc,getDoc,getDocs,setDoc,updateDoc,onSnapshot,deleteDoc,writeBatch,addDoc,query,orderBy,serverTimestamp,limit as fbLimit,startAfter }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage,ref as storageRef,uploadBytes,getDownloadURL,deleteObject }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { getAuth,GoogleAuthProvider,signInWithPopup,signInWithEmailAndPassword,sendPasswordResetEmail,signOut,onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const _fbApp=initializeApp({apiKey:"AIzaSyDEljxGEKhl6taJEcbQHoAb8QsjWT7fx08",authDomain:"simulados-confirmacao.firebaseapp.com",projectId:"simulados-confirmacao",storageBucket:"simulados-confirmacao.firebasestorage.app",messagingSenderId:"399694193508",appId:"1:399694193508:web:70d7a65d51798045ef1071"});
 const db=getFirestore(_fbApp);
 const _storage=getStorage(_fbApp);
+const auth=getAuth(_fbApp);
 window._fbStorage={ref:storageRef,uploadBytes,getDownloadURL,deleteObject,storage:_storage};
+window._fbAuth={auth,signInWithEmailAndPassword,signInWithPopup,sendPasswordResetEmail,signOut,onAuthStateChanged,GoogleAuthProvider};
 
 const S={view:'home',unlocked:false,profUnlocked:false,currentUser:null,usuarios:[],sims:[],curSim:null,students:[],coDay:'sabado',alDay:'sabado',step:1,cfg:{password:'aros2025',profPassword:'Anestreview1531',profTabs:['simulados','trocas','professores','listas','desempenho','checklist']},pendSwap:null,profs:[],listas:[],simExtraCfg:{linkPagoAluno:'',linkPagoExterno:'',linkGratuito:'',slackWebhook:'',listaVigenteId:'',alunosGratuitos:[]},solicitacoesExtra:[],simStats:{},_id:null,_rSab:[],_rDom:[]};
 window.S=S;
+
+// ── AUDIT LOG ────────────────────────────────────────────────────────────────
+// Fire-and-forget. Nunca bloqueia ou quebra o fluxo principal — falha silenciosa.
+// Alunos não logam (operações anônimas NÃO são auditadas — sem actor).
+async function audit(action,target,payload){
+  payload=payload||{};
+  try{
+    const cu=S.currentUser;
+    const actor=cu?{
+      uid:cu.id||cu.username||null,
+      nome:cu.nome||cu.username||'?',
+      email:cu.email||null,
+      role:cu.role||null
+    }:null;
+    await addDoc(collection(db,'auditLog'),{
+      ts:serverTimestamp(),
+      action,
+      target:target||null,
+      actor,
+      before:payload.before==null?null:payload.before,
+      after:payload.after==null?null:payload.after,
+      meta:payload.meta==null?null:payload.meta,
+      userAgent:(navigator.userAgent||'').slice(0,200)
+    });
+  }catch(e){console.warn('audit() failed:',action,e);}
+}
+window._audit=audit;
+// Lista canônica de ações — também usada como popular do filtro na aba Auditoria.
+const AUDIT_ACTIONS=[
+  'LOGIN_CUSTOM','LOGIN_FIREBASE','LOGIN_GOOGLE','LOGOUT',
+  'SIMULADO_CRIADO','SIMULADO_EDITADO',
+  'NOTA_LANCADA','NOTA_RESETADA',
+  'ALUNO_ADICIONADO','ALUNO_REMOVIDO','ALUNO_STATUS_ALTERADO','ALUNO_MOVIDO','ALUNO_SWAP',
+  'PRESENCA_TOGGLE',
+  'MENTORIA_CRIADA','MENTORIA_EDITADA','MENTORIA_REMOVIDA',
+  'SOLICITACAO_EXTRA_EFETIVADA','SOLICITACAO_EXTRA_EDITADA',
+  'USUARIO_CRIADO','USUARIO_EDITADO','USUARIO_DESATIVADO',
+  'COMUNICACAO_POST_CRIADO','COMUNICACAO_POST_EDITADO','COMUNICACAO_POST_DELETADO',
+  'CONFIG_ALTERADA'
+];
+window.AUDIT_ACTIONS=AUDIT_ACTIONS;
 
 // helpers
 const uid=()=>Math.random().toString(36).slice(2,10);
@@ -6694,10 +6836,15 @@ window.comAdminSavePost=async()=>{
   try{
     const cat=S.comAdmin.cat;
     if(S.comAdmin.editingId){
-      await updateDoc(doc(db,'comunicacao/'+cat+'/posts/'+S.comAdmin.editingId),data);
+      const postId=S.comAdmin.editingId;
+      let _postBefore=null;
+      try{const sn=await getDoc(doc(db,'comunicacao/'+cat+'/posts/'+postId));if(sn.exists())_postBefore=sn.data();}catch(e){}
+      await updateDoc(doc(db,'comunicacao/'+cat+'/posts/'+postId),data);
+      audit('COMUNICACAO_POST_EDITADO',{collection:'comunicacao/posts',cat,postId},{before:_postBefore,after:data});
     }else{
       data.createdAt=now;
       const ref=await addDoc(collection(db,'comunicacao/'+cat+'/posts'),data);
+      audit('COMUNICACAO_POST_CRIADO',{collection:'comunicacao/posts',cat,postId:ref.id},{after:data});
       // Insere o novo aviso no topo da ordem (defaul: publicado vai pro topo)
       const ord=S.comunicacao.order[cat]||[];
       if(!ord.includes(ref.id)){
@@ -6738,6 +6885,7 @@ window.comAdminDeleteRow=async(id)=>{
   if(!confirm(`Apagar o aviso "${p.titulo||'(sem título)'}"?\nEsta ação não pode ser desfeita.`))return;
   try{
     await deleteDoc(doc(db,'comunicacao/'+cat+'/posts/'+id));
+    audit('COMUNICACAO_POST_DELETADO',{collection:'comunicacao/posts',cat,postId:id},{before:p});
     const ord=S.comunicacao.order[cat]||[];
     const idx=ord.indexOf(id);
     if(idx>=0){ord.splice(idx,1);S.comunicacao.order[cat]=ord;_comSaveOrder(cat);}
@@ -6751,7 +6899,9 @@ window.comAdminDeletePost=async()=>{
   if(!confirm('Apagar este aviso? Esta ação não pode ser desfeita.'))return;
   try{
     const cat=S.comAdmin.cat;
+    const _post=(S.comunicacao.posts[cat]||[]).find(x=>x.id===id)||null;
     await deleteDoc(doc(db,'comunicacao/'+cat+'/posts/'+id));
+    audit('COMUNICACAO_POST_DELETADO',{collection:'comunicacao/posts',cat,postId:id},{before:_post});
     // Remove da ordem persistida
     const ord=S.comunicacao.order[cat]||[];
     const idx=ord.indexOf(id);
@@ -7262,27 +7412,34 @@ async function _mtaAplicarTroca(destClinicaId,vagaLivre){
 
 window.esqueceuSenha=async()=>{
   const msgEl=document.getElementById('forgot-msg');
-  msgEl.className='al al-i';
-  msgEl.textContent='⏳ Enviando senha por e-mail...';
-  msgEl.classList.remove('hidden');
-  try{
-    await emailjs.send('service_exyoa4r','template_r0vjejs',{
-      to_email:'tiarllesmiller@gmail.com',
-      nome:'Coordenação AROS',
-      assunto:'🔑 Senha de acesso ao painel AROS',
-      mensagem:`Sua senha de acesso ao painel de coordenação AROS é:\n\n${S.cfg.password}\n\nSe não solicitou esta recuperação, ignore este e-mail.`,
-      simulado:'AROS · Sistema de Simulados',
-      dia:'',
-      horario:''
-    });
-    msgEl.className='al al-s';
-    msgEl.textContent='✅ Senha enviada para tiarllesmiller@gmail.com';
-  }catch(e){
-    msgEl.className='al al-e';
-    msgEl.textContent='❌ Erro ao enviar e-mail. Tente novamente.';
-    console.error('EmailJS esqueceu senha:',e);
+  const inputEl=document.getElementById('co-user');
+  const raw=(inputEl?.value||'').trim();
+  // Se digitou email → reset via Firebase Auth
+  if(raw.includes('@')){
+    msgEl.className='al al-i';
+    msgEl.textContent='⏳ Enviando link de redefinição...';
+    msgEl.classList.remove('hidden');
+    try{
+      await resetSenhaFirebase(raw);
+      msgEl.className='al al-s';
+      msgEl.textContent='✅ Email enviado. Confira sua caixa de entrada (e o spam).';
+    }catch(e){
+      console.error('resetSenha:',e);
+      const code=e?.code||'';
+      let txt='❌ Erro ao enviar. Tente novamente.';
+      if(code==='auth/invalid-email')txt='❌ Email inválido.';
+      else if(code==='auth/user-not-found')txt='❌ Email não cadastrado no Firebase.';
+      msgEl.className='al al-e';
+      msgEl.textContent=txt;
+    }
+    setTimeout(()=>msgEl.classList.add('hidden'),6000);
+    return;
   }
-  setTimeout(()=>msgEl.classList.add('hidden'),5000);
+  // Fallback: usuário clássico (sem email) → orienta contato com coord
+  msgEl.className='al al-i';
+  msgEl.textContent='ℹ️ Para recuperar a senha do seu usuário, contate a coordenação. Se você tem email cadastrado, digite o email no campo acima e clique novamente.';
+  msgEl.classList.remove('hidden');
+  setTimeout(()=>msgEl.classList.add('hidden'),8000);
 };
 
 // ── USUÁRIOS, PERMISSÕES E GRUPOS DE ABAS ────────────────────────────────────
@@ -7320,12 +7477,15 @@ const TAB_GROUPS=[
     {id:'comunicacao',label:'📢 Comunicação'},
     {id:'senhasAcessos',label:'🔐 Senhas e Acessos'},
     {id:'usuarios',label:'👤 Usuários'},
+    {id:'auditoria',label:'🔍 Auditoria'},
     {id:'config',label:'⚙️ Configurações'}
   ]}
 ];
 const ALL_TABS=TAB_GROUPS.flatMap(g=>g.tabs.map(t=>t.id));
 // Abas reservadas a administradores (badge "ADM" no menu lateral)
-const ADMIN_ONLY_TABS=new Set(['usuarios','config','financeiro','features','recProvas','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos']);
+const ADMIN_ONLY_TABS=new Set(['usuarios','config','financeiro','features','recProvas','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos','auditoria']);
+// Abas STRICT-admin: SÓ aparecem pra role==='admin'. Não dá pra granular como permissão.
+const STRICT_ADMIN_TABS=new Set(['auditoria']);
 
 // Labels customizáveis pelo admin (sobrescrevem os defaults de TAB_GROUPS)
 // Clock do status bar da sidebar de Coordenação
@@ -7474,6 +7634,9 @@ function userRoleLabel(u){
 function renderSidebar(){
   const container=document.getElementById('co-tabs-list');if(!container)return;
   const allowed=new Set(userTabs(S.currentUser));
+  const isAdmin=S.currentUser?.role==='admin';
+  // Strict-admin tabs (ex: auditoria) só aparecem se role==='admin'
+  if(!isAdmin){STRICT_ADMIN_TABS.forEach(t=>allowed.delete(t));}
   const collapsed=new Set(JSON.parse(localStorage.getItem('aros-sidebar-collapsed')||'[]'));
   container.innerHTML=_menuEffectiveGroups().map(g=>{
     // Filtra items pela permissão do usuário
@@ -8123,7 +8286,10 @@ window.renderSolicitacoesExtra=()=>{
 window.setSolicitacaoStatus=async(id,status)=>{
   const update={status,updatedAt:new Date().toISOString()};
   if(status==='pago'){update.paidAt=new Date().toISOString();update.paidVia='manual';}
+  const _before=S.solicitacoesExtra.find(x=>x.id===id);
   await updateDoc(doc(db,'solicitacoesExtra',id),update);
+  const action=status==='efetivada'?'SOLICITACAO_EXTRA_EFETIVADA':'SOLICITACAO_EXTRA_EDITADA';
+  audit(action,{collection:'solicitacoesExtra',reqId:id},{before:_before?{status:_before.status}:null,after:update});
   const s=S.solicitacoesExtra.find(x=>x.id===id);if(s)Object.assign(s,update);
   // Notifica Slack quando pagamento for marcado manualmente
   if(status==='pago'&&s)notifySlackPaymentReceived(s);
@@ -8161,6 +8327,7 @@ window.saveSimExtraCfg=async()=>{
     slackWebhook:document.getElementById('se-slack').value.trim()
   };
   await setDoc(doc(db,'config','simExtra'),S.simExtraCfg);
+  audit('CONFIG_ALTERADA',{collection:'config',path:'simExtra'},{after:{...S.simExtraCfg,slackWebhook:S.simExtraCfg.slackWebhook?'***':''},meta:{kind:'simExtra-cfg'}});
   const msg=document.getElementById('se-cfg-msg');
   msg.className='al al-s';msg.textContent='✅ Salvo';msg.classList.remove('hidden');
   setTimeout(()=>msg.classList.add('hidden'),2000);
@@ -8435,9 +8602,11 @@ window.saveAddAlunoSimExtra=async()=>{
       dataAgendada,horario,professor,
       updatedAt:new Date().toISOString(),
     },{merge:true});
+    audit('ALUNO_STATUS_ALTERADO',{collection:'simulados/alunos',simId,studentId:editId},{before:cur,after:{dataAgendada,horario,professor},meta:{kind:'simExtra-edit'}});
     if(cur.solicitacaoId){
       try{
         await updateDoc(doc(db,'solicitacoesExtra',cur.solicitacaoId),{dataAgendada,horario,professor,updatedAt:new Date().toISOString()});
+        audit('SOLICITACAO_EXTRA_EDITADA',{collection:'solicitacoesExtra',reqId:cur.solicitacaoId},{after:{dataAgendada,horario,professor}});
         const s=S.solicitacoesExtra.find(x=>x.id===cur.solicitacaoId);if(s){s.dataAgendada=dataAgendada;s.horario=horario;s.professor=professor;}
       }catch(e){console.warn('update solicitacao falhou',e);}
     }
@@ -8474,16 +8643,19 @@ window.saveAddAlunoSimExtra=async()=>{
   const professor=document.getElementById('maae-prof').value||'';
   if(!dataAgendada||!horario){err.textContent='Informe data e horário.';err.classList.remove('hidden');return;}
   const docId=matricula||('aluno_'+Date.now()+'_'+Math.random().toString(36).slice(2,6));
-  await setDoc(doc(db,`simulados/${simId}/alunos/${docId}`),{
+  const _newAlunoData={
     nome,email,matricula,
     dataAgendada,horario,professor,
     status:'confirmed',presenca:'presente',
     isExtra:true,solicitacaoId,
     criadoEm:new Date().toISOString(),
-  },{merge:true});
+  };
+  await setDoc(doc(db,`simulados/${simId}/alunos/${docId}`),_newAlunoData,{merge:true});
+  audit('ALUNO_ADICIONADO',{collection:'simulados/alunos',simId,studentId:docId},{after:_newAlunoData,meta:{kind:'simExtra-add'}});
   // Se vinculou solicitação, marca ela como efetivada e grava agendamento
   if(solicitacaoId){
     await updateDoc(doc(db,'solicitacoesExtra',solicitacaoId),{status:'efetivada',updatedAt:new Date().toISOString(),simExtraId:simId,dataAgendada,horario,professor});
+    audit('SOLICITACAO_EXTRA_EFETIVADA',{collection:'solicitacoesExtra',reqId:solicitacaoId,simExtraId:simId},{after:{status:'efetivada',simExtraId:simId,dataAgendada,horario,professor}});
     const s=S.solicitacoesExtra.find(x=>x.id===solicitacaoId);if(s){s.status='efetivada';s.simExtraId=simId;s.dataAgendada=dataAgendada;s.horario=horario;s.professor=professor;}
   }
   // Se veio de cota gratuita, incrementa quotaUsada
@@ -12489,8 +12661,15 @@ window.saveMentorGrupo=async()=>{
   });
   if(dup){err.innerHTML=`E-mail <strong>${dup.email}</strong> já está em outra mentoria. Aluno só pode estar em uma.`;err.classList.remove('hidden');return;}
   err.classList.add('hidden');
+  const _isNewMentoria=!document.getElementById('modal-ment-grupo').dataset.editId;
+  let _mentoriaBefore=null;
+  if(!_isNewMentoria){
+    try{const sn=await getDoc(doc(db,'mentorias',id));if(sn.exists())_mentoriaBefore=sn.data();}catch(e){}
+  }
   try{
-    await setDoc(doc(db,'mentorias',id),{tipo,mentorNome,inicio,fim,valorMensal,alunos,updatedAt:new Date().toISOString(),...(document.getElementById('modal-ment-grupo').dataset.editId?{}:{criadoEm:new Date().toISOString()})},{merge:true});
+    const _newMentoriaData={tipo,mentorNome,inicio,fim,valorMensal,alunos,updatedAt:new Date().toISOString(),...(_isNewMentoria?{criadoEm:new Date().toISOString()}:{})};
+    await setDoc(doc(db,'mentorias',id),_newMentoriaData,{merge:true});
+    audit(_isNewMentoria?'MENTORIA_CRIADA':'MENTORIA_EDITADA',{collection:'mentorias',grupoId:id},{before:_mentoriaBefore,after:_newMentoriaData});
   }catch(e){
     console.error('saveMentorGrupo:',e);
     err.innerHTML=`❌ Erro ao salvar: <strong>${(e&&e.code)||e.message||e}</strong><br><span style="font-size:11px">Provavelmente as Firestore Rules ainda não foram atualizadas em produção (precisa fazer deploy das rules).</span>`;
@@ -12508,7 +12687,10 @@ window.deleteMentorGrupo=async()=>{
   const id=document.getElementById('modal-ment-grupo').dataset.editId;
   if(!id)return;
   if(!confirm('Apagar este grupo? Os alunos vinculados perdem o vínculo. Não desfaz clínicas já criadas.'))return;
+  let _mentoriaBefore=null;
+  try{const sn=await getDoc(doc(db,'mentorias',id));if(sn.exists())_mentoriaBefore=sn.data();}catch(e){}
   await deleteDoc(doc(db,'mentorias',id));
+  audit('MENTORIA_REMOVIDA',{collection:'mentorias',grupoId:id},{before:_mentoriaBefore});
   await loadMentorias();
   CM('modal-ment-grupo');
   renderMentorias();
@@ -16607,27 +16789,91 @@ function applyTabsByRole(){
   }
 }
 
-window.checkPass=async()=>{
-  const usernameEl=document.getElementById('co-user');
-  const passEl=document.getElementById('co-pass');
-  const errEl=document.getElementById('pass-err');
-  const username=(usernameEl?.value||'').trim().toLowerCase();
-  const senha=passEl?.value||'';
-  if(!username||!senha){errEl.textContent='Preencha usuário e senha.';errEl.classList.remove('hidden');return;}
-  // Recarrega usuários antes de validar (pega criações recentes em outras abas)
-  try{await loadUsuarios();}catch(e){console.error(e);}
-  const u=S.usuarios.find(x=>!x.inativo&&(x.username||x.id||'').toLowerCase()===username&&x.senha===senha);
-  if(!u){errEl.textContent='Usuário ou senha incorretos.';errEl.classList.remove('hidden');return;}
-  errEl.classList.add('hidden');
+// Aplica sessão local pro user autenticado (custom OU Firebase Auth via onAuthStateChanged)
+function _applyLocalSession(u){
   S.currentUser=u;S.unlocked=true;S.profUnlocked=u.role==='avaliador';
   try{localStorage.setItem('aros_session',u.username||u.id);}catch(e){}
   document.getElementById('co-login').classList.add('hidden');
   document.getElementById('co-panel').classList.remove('hidden');
   applyTabsByRole();
   popCoSel();renderProfGlobal();renderListasPanel();renderUsuarios();if(typeof renderSenhasAcessos==='function')renderSenhasAcessos();if(typeof renderSenhasPublicas==='function')renderSenhasPublicas();
+}
+
+window.loginGoogle=async()=>{
+  const errEl=document.getElementById('pass-err');
+  try{
+    const provider=new GoogleAuthProvider();
+    window._freshFirebaseLogin=true; // sinaliza pro onAuthStateChanged auditar como LOGIN
+    await signInWithPopup(auth,provider);
+    // onAuthStateChanged listener faz o resto (busca user local, popula S.currentUser)
+  }catch(e){
+    window._freshFirebaseLogin=false;
+    console.error('loginGoogle:',e);
+    errEl.textContent=e.code==='auth/popup-closed-by-user'
+      ? 'Login cancelado.'
+      : 'Erro no login com Google: '+(e.message||e.code);
+    errEl.classList.remove('hidden');
+  }
 };
 
-window.logout=()=>{
+async function loginEmailFirebase(email,senha){
+  window._freshFirebaseLogin=true; // sinaliza pro onAuthStateChanged auditar como LOGIN
+  try{
+    return await signInWithEmailAndPassword(auth,email,senha);
+  }catch(e){
+    window._freshFirebaseLogin=false;
+    throw e;
+  }
+}
+
+async function resetSenhaFirebase(email){
+  await sendPasswordResetEmail(auth,email);
+}
+
+window.checkPass=async()=>{
+  const usernameEl=document.getElementById('co-user');
+  const passEl=document.getElementById('co-pass');
+  const errEl=document.getElementById('pass-err');
+  const raw=(usernameEl?.value||'').trim();
+  const username=raw.toLowerCase();
+  const senha=passEl?.value||'';
+  if(!username||!senha){errEl.textContent='Preencha usuário e senha.';errEl.classList.remove('hidden');return;}
+  // Se contém @, tenta Firebase Auth primeiro; se credencial não existir lá, cai pro custom
+  // (cobre coords cadastrados com email como username no sistema antigo).
+  if(username.includes('@')){
+    try{
+      await loginEmailFirebase(raw,senha);
+      errEl.classList.add('hidden');
+      // onAuthStateChanged popula S.currentUser e abre o painel
+      return;
+    }catch(e){
+      console.error('loginEmail:',e);
+      const code=e?.code||'';
+      const fallbackCodes=['auth/invalid-credential','auth/user-not-found','auth/wrong-password'];
+      if(!fallbackCodes.includes(code)){
+        let msg='Email ou senha incorretos.';
+        if(code==='auth/invalid-email')msg='Email inválido.';
+        else if(code==='auth/user-disabled')msg='Usuário desativado.';
+        else if(code==='auth/too-many-requests')msg='Muitas tentativas. Tente mais tarde.';
+        else if(code==='auth/network-request-failed')msg='Sem conexão. Verifique a internet.';
+        errEl.textContent=msg;errEl.classList.remove('hidden');
+        return;
+      }
+      // credencial não bate no Firebase — tenta fluxo custom abaixo
+    }
+  }
+  // Fallback: login custom clássico (username + senha plaintext)
+  try{await loadUsuarios();}catch(e){console.error(e);}
+  const u=S.usuarios.find(x=>!x.inativo&&(x.username||x.id||'').toLowerCase()===username&&x.senha===senha);
+  if(!u){errEl.textContent='Usuário ou senha incorretos.';errEl.classList.remove('hidden');return;}
+  errEl.classList.add('hidden');
+  _applyLocalSession(u);
+  audit('LOGIN_CUSTOM',{username:u.username||u.id});
+};
+
+window.logout=async()=>{
+  audit('LOGOUT',{});
+  try{await signOut(auth);}catch(e){/* sem sessão Firebase, ok */}
   S.currentUser=null;S.unlocked=false;S.profUnlocked=false;
   try{localStorage.removeItem('aros_session');}catch(e){}
   document.getElementById('co-panel').classList.add('hidden');
@@ -16636,6 +16882,37 @@ window.logout=()=>{
   const p=document.getElementById('co-pass');if(p)p.value='';
 };
 
+// Listener Firebase Auth: ativa quando login Google/Email Firebase resolve.
+// Custom login (username+senha) não dispara isso — segue caminho próprio em _applyLocalSession.
+onAuthStateChanged(auth,async(user)=>{
+  // Modo projeção/preview destrói o DOM da coord — listener não faz nada
+  const _modo=new URLSearchParams(location.search).get('modo');
+  if(_modo==='projecao'||_modo==='projecao-live'||_modo==='preview')return;
+  if(!user)return;
+  if(S.currentUser)return; // já logado via custom, evita override
+  try{await loadUsuarios();}catch(e){console.error(e);}
+  const email=(user.email||'').toLowerCase();
+  const localUser=S.usuarios.find(u=>!u.inativo&&u.email&&u.email.toLowerCase()===email);
+  if(!localUser){
+    const errEl=document.getElementById('pass-err');
+    if(errEl){
+      errEl.textContent=`Email ${user.email} autenticado, mas não tem cadastro no AROS. Contate a coordenação.`;
+      errEl.classList.remove('hidden');
+    }
+    try{await signOut(auth);}catch(e){}
+    return;
+  }
+  _applyLocalSession(localUser);
+  // Só audita LOGIN se for fresh sign-in (flag setada em loginGoogle/loginEmailFirebase).
+  // Restore de sessão cacheada NÃO gera entrada — evita poluir log a cada page reload.
+  if(window._freshFirebaseLogin){
+    const provider=user.providerData?.[0]?.providerId||'';
+    const action=provider==='google.com'?'LOGIN_GOOGLE':'LOGIN_FIREBASE';
+    audit(action,{email:user.email||null,provider});
+    window._freshFirebaseLogin=false;
+  }
+});
+
 // Restaura sessão do localStorage (chamado no boot, após loadUsuarios)
 function _restoreSession(){
   try{
@@ -16643,11 +16920,7 @@ function _restoreSession(){
     if(!savedUser)return;
     const u=S.usuarios.find(x=>!x.inativo&&(x.username||x.id||'').toLowerCase()===savedUser.toLowerCase());
     if(!u){localStorage.removeItem('aros_session');return;}
-    S.currentUser=u;S.unlocked=true;S.profUnlocked=u.role==='avaliador';
-    document.getElementById('co-login').classList.add('hidden');
-    document.getElementById('co-panel').classList.remove('hidden');
-    applyTabsByRole();
-    popCoSel();renderProfGlobal();renderListasPanel();renderUsuarios();if(typeof renderSenhasAcessos==='function')renderSenhasAcessos();if(typeof renderSenhasPublicas==='function')renderSenhasPublicas();
+    _applyLocalSession(u);
   }catch(e){console.warn('restoreSession:',e);}
 }
 
@@ -16693,6 +16966,7 @@ window.openUserModal=(id)=>{
   // Edição liberada: admin pode renomear. Renomeio cria novo doc + marca o velho inativo.
   document.getElementById('mu-username').disabled=false;
   document.getElementById('mu-nome').value=u?.nome||'';
+  document.getElementById('mu-email').value=u?.email||'';
   document.getElementById('mu-senha').value=u?.senha||'';
   const isAdmin=u?.role==='admin';
   document.getElementById('mu-admin').checked=isAdmin;
@@ -16701,11 +16975,12 @@ window.openUserModal=(id)=>{
   const userPermsAdmin=new Set(Array.isArray(u?.permissoesAdmin)?u.permissoesAdmin:[]);
   const grid=document.getElementById('mu-perms-grid');
   const gridAdmin=document.getElementById('mu-perms-admin-grid');
-  const _tabCheckbox=(t,extraStyle)=>`<label style="display:flex;align-items:center;gap:8px;padding:5px 8px;cursor:pointer;border-radius:6px;${extraStyle||''}" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background=''">
+  // STRICT_ADMIN_TABS (auditoria) não pode ser concedida como permissão granular — só role==='admin'.
+  const _tabCheckbox=(t,extraStyle)=>STRICT_ADMIN_TABS.has(t.id)?'':`<label style="display:flex;align-items:center;gap:8px;padding:5px 8px;cursor:pointer;border-radius:6px;${extraStyle||''}" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background=''">
         <input type="checkbox" class="mu-perm" value="${t.id}" ${isAdmin||userPerms.has(t.id)?'checked':''} onchange="_muSyncAdminGrid()" style="width:14px;height:14px;cursor:pointer"/>
         <span style="font-size:13px">${tabLabel(t)}</span>
       </label>`;
-  const _tabAdminCheckbox=(t,extraStyle)=>`<label style="display:flex;align-items:center;gap:8px;padding:5px 8px;cursor:pointer;border-radius:6px;${extraStyle||''}" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background=''">
+  const _tabAdminCheckbox=(t,extraStyle)=>STRICT_ADMIN_TABS.has(t.id)?'':`<label style="display:flex;align-items:center;gap:8px;padding:5px 8px;cursor:pointer;border-radius:6px;${extraStyle||''}" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background=''">
         <input type="checkbox" class="mu-perm-admin" value="${t.id}" ${userPermsAdmin.has(t.id)?'checked':''} style="width:14px;height:14px;cursor:pointer"/>
         <span style="font-size:13px">${tabLabel(t)}</span>
       </label>`;
@@ -16782,6 +17057,7 @@ window.saveUser=async()=>{
   const editId=document.getElementById('modal-user').dataset.editId||'';
   const username=document.getElementById('mu-username').value.trim().toLowerCase();
   const nome=document.getElementById('mu-nome').value.trim();
+  const email=(document.getElementById('mu-email')?.value||'').trim().toLowerCase();
   const senha=document.getElementById('mu-senha').value;
   const isAdmin=document.getElementById('mu-admin').checked;
   const permissoes=isAdmin?[]:Array.from(document.querySelectorAll('.mu-perm:checked')).map(c=>c.value);
@@ -16790,11 +17066,21 @@ window.saveUser=async()=>{
   if(!username||!senha){errEl.textContent='Preencha usuário e senha.';errEl.classList.remove('hidden');return;}
   // Validator relaxado: aceita email (incl. @ e mais de um .) além de username tradicional.
   if(!/^[a-z0-9._@+-]+$/.test(username)){errEl.textContent='Usuário pode ter letras minúsculas, números, ponto, arroba, traço, sublinha ou +.';errEl.classList.remove('hidden');return;}
+  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent='Email inválido.';errEl.classList.remove('hidden');return;}
   // Conflito: username diferente do editId E já existe outro
   const conflito=S.usuarios.some(u=>(u.username||u.id)===username && u.id!==editId);
   if(conflito){errEl.textContent='Já existe um usuário com esse nome.';errEl.classList.remove('hidden');return;}
+  // Conflito de email: dois usuários ativos não podem compartilhar o mesmo email
+  if(email){
+    const emailConflito=S.usuarios.some(u=>!u.inativo&&u.email&&u.email.toLowerCase()===email&&u.id!==editId&&(u.username||u.id)!==username);
+    if(emailConflito){errEl.textContent='Já existe um usuário ativo com esse email.';errEl.classList.remove('hidden');return;}
+  }
   if(!isAdmin&&!permissoes.length){errEl.textContent='Marque ao menos uma permissão (ou ative Administrador).';errEl.classList.remove('hidden');return;}
-  const data={username,nome:nome||username,senha,role:isAdmin?'admin':'user',permissoes,permissoesAdmin,inativo:false};
+  const data={username,nome:nome||username,email,senha,role:isAdmin?'admin':'user',permissoes,permissoesAdmin,inativo:false};
+  // Sanitiza senha pro audit log (não vazar credencial)
+  const _dataForAudit={...data,senha:'***'};
+  const _userBefore=editId?S.usuarios.find(u=>u.id===editId):null;
+  const _userBeforeSan=_userBefore?{..._userBefore,senha:'***'}:null;
   // === Renomeio: editId existe E username mudou ===
   // Doc IDs no Firestore são imutáveis. Estratégia: cria novo doc com novo ID,
   // marca o velho como inativo (rules bloqueiam delete em /usuarios). Login filtra inativos.
@@ -16814,6 +17100,8 @@ window.saveUser=async()=>{
         renomeadoPara:username,
         renomeadoEm:new Date().toISOString(),
       });
+      audit('USUARIO_EDITADO',{collection:'usuarios',username},{before:_userBeforeSan,after:_dataForAudit,meta:{renomeio:{from:editId,to:username}}});
+      audit('USUARIO_DESATIVADO',{collection:'usuarios',username:editId},{meta:{renomeadoPara:username}});
     }catch(e){
       console.error('saveUser rename:',e);
       errEl.textContent='Erro ao renomear: '+(e?.code||e?.message||e);errEl.classList.remove('hidden');
@@ -16821,6 +17109,7 @@ window.saveUser=async()=>{
     }
   }else{
     await setDoc(doc(db,'usuarios',username),data);
+    audit(editId?'USUARIO_EDITADO':'USUARIO_CRIADO',{collection:'usuarios',username},{before:_userBeforeSan,after:_dataForAudit});
   }
   await loadUsuarios();
   // Se editou o próprio usuário logado, atualiza S.currentUser + sessão pra refletir
@@ -16842,19 +17131,21 @@ window.deleteUser=async()=>{
   const admins=S.usuarios.filter(x=>x.role==='admin');
   if(u.role==='admin'&&admins.length<=1){alert('Não é possível apagar o único administrador.');return;}
   await deleteDoc(doc(db,'usuarios',id));
+  audit('USUARIO_DESATIVADO',{collection:'usuarios',username:id},{before:{...u,senha:'***'},meta:{kind:'delete'}});
   await loadUsuarios();
   CM('modal-user');renderUsuarios();
 };
 
 // co tabs
 window.switchCoTab=(tab,btn)=>{
-  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','mentorias','features','recProvas','recGestao','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos','senhasPublicas'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
+  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','mentorias','features','recProvas','recGestao','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos','senhasPublicas','auditoria'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
   document.querySelectorAll('.co-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   // Show "Novo Simulado" only on simulados tab
   const btnNovo=document.getElementById('btn-novo-sim');
   if(btnNovo)btnNovo.style.display=tab==='simulados'?'':'none';
   if(tab==='usuarios')renderUsuarios();
+  if(tab==='auditoria'&&typeof renderAuditoria==='function')renderAuditoria();
 };
 
 // sim cards (aluno view)
@@ -18128,7 +18419,14 @@ window.dDropPos=async(e,dia,rn,p)=>{
 };
 
 window.resetSt=async id=>updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${id}`),{status:'pending',email:null,respondedAt:null,swapSlots:[],obs:''});
-window.rmSt=async id=>{if(!confirm('Remover este aluno?'))return;await deleteDoc(doc(db,`simulados/${S.curSim.id}/alunos/${id}`));};
+window.rmSt=async id=>{
+  if(!confirm('Remover este aluno?'))return;
+  const simId=S.curSim.id;
+  let _alunoBefore=null;
+  try{const sn=await getDoc(doc(db,`simulados/${simId}/alunos/${id}`));if(sn.exists())_alunoBefore=sn.data();}catch(e){}
+  await deleteDoc(doc(db,`simulados/${simId}/alunos/${id}`));
+  audit('ALUNO_REMOVIDO',{collection:'simulados/alunos',simId,studentId:id},{before:_alunoBefore});
+};
 
 function updateStats(){
   document.getElementById('s-t').textContent=S.students.length;
@@ -18346,6 +18644,11 @@ window.confirmarTrocaPres=async()=>{
     updatedAt:ts,
   };
   await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),update);
+  audit('ALUNO_SWAP',{collection:'simulados/alunos',simId:S.curSim.id,studentId:sid},{
+    before:{dia:s.dia,nome:s.nome},
+    after:{dia:targetDia},
+    meta:{kind:'presencial'}
+  });
   Object.assign(s,update);
   // E-mail
   if(s.email){
@@ -18556,6 +18859,11 @@ window.doMatchedSwap=async(id1,id2)=>{
   batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${id1}`),{dia:d2,rodada:r2,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,originalDia:d1||null,originalRodada:r1||null});
   batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${id2}`),{dia:d1,rodada:r1,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,originalDia:d2||null,originalRodada:r2||null});
   await batch.commit();
+  audit('ALUNO_SWAP',{collection:'simulados/alunos',simId:S.curSim.id,studentIds:[id1,id2]},{
+    before:{[id1]:{dia:d1,rodada:r1,nome:s1.nome},[id2]:{dia:d2,rodada:r2,nome:s2.nome}},
+    after:{[id1]:{dia:d2,rodada:r2},[id2]:{dia:d1,rodada:r1}},
+    meta:{kind:'matched'}
+  });
   const novoH1=getH(d2,r2);const novoD1=d2==='sabado'?'Sábado':'Domingo';
   const novoH2=getH(d1,r1);const novoD2=d1==='sabado'?'Sábado':'Domingo';
   if(s1.email)await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:s1.email,nome:s1.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD1} · ${novoH1}`,simulado:S.curSim.nome,dia:novoD1,horario:novoH1}).catch(e=>console.error(e));
@@ -18591,6 +18899,11 @@ window.doSwap=async()=>{
   if(inSlot>=lim){msgEl.className='al al-e';msgEl.textContent=`Rodada cheia (${lim}).`;msgEl.classList.remove('hidden');return;}
   const novoH=getH(dia,rodada);const novoD=dia==='sabado'?'Sábado':'Domingo';
   await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${s.id}`),{dia,rodada,posicao:null,status:'confirmed',respondedAt:new Date().toISOString(),swapResolved:true,originalDia:s.dia||null,originalRodada:s.rodada||null});
+  audit('ALUNO_SWAP',{collection:'simulados/alunos',simId:S.curSim.id,studentId:s.id},{
+    before:{dia:s.dia,rodada:s.rodada,nome:s.nome},
+    after:{dia,rodada},
+    meta:{kind:'manual'}
+  });
   if(s.email){const msg=`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD} · ${novoH}`;await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:s.email,nome:s.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:msg,simulado:S.curSim.nome,dia:novoD,horario:novoH}).catch(()=>{});}
   msgEl.className='al al-s';msgEl.textContent='✅ Troca realizada e e-mail enviado!';msgEl.classList.remove('hidden');
   setTimeout(()=>CM('modal-swap'),1400);
@@ -19055,8 +19368,14 @@ async function saveSim(mode){
     updatedAt:new Date().toISOString()
   };
 
+  // Antes de salvar: snapshot pro audit em caso de edição
+  let _simBefore=null;
+  if(mode!=='create'){
+    try{const sn=await getDoc(doc(db,'simulados',id));if(sn.exists())_simBefore=sn.data();}catch(e){}
+  }
   // Always save all sim data
   await setDoc(doc(db,'simulados',id),data,{merge:true});
+  audit(mode==='create'?'SIMULADO_CRIADO':'SIMULADO_EDITADO',{collection:'simulados',simId:id},{before:_simBefore,after:data});
 
   // Presencial: salva listas de alunos por dia (cole separado)
   if(isPres){
@@ -19248,6 +19567,7 @@ window.addProfGlobal=async()=>{
   if(!S.profs.includes(v)){
     S.profs.push(v);S.profs.sort((a,b)=>a.localeCompare(b,'pt-BR'));
     await setDoc(doc(db,'config','professores'),{lista:S.profs,emails:S.profsEmail||{}});
+    audit('CONFIG_ALTERADA',{collection:'config',path:'professores'},{after:{added:v,total:S.profs.length},meta:{kind:'prof-add'}});
     renderProfGlobal();
   }
   document.getElementById('prof-input').value='';
@@ -19258,6 +19578,7 @@ window.rmProfG=async i=>{
   // Limpa o email pareado também
   if(S.profsEmail&&nome)delete S.profsEmail[nome];
   await setDoc(doc(db,'config','professores'),{lista:S.profs,emails:S.profsEmail||{}});
+  audit('CONFIG_ALTERADA',{collection:'config',path:'professores'},{after:{removed:nome,total:S.profs.length},meta:{kind:'prof-remove'}});
   renderProfGlobal();
 };
 // Retorna lista de emails do prof (string[]). Aceita 1 ou mais emails
@@ -19711,6 +20032,7 @@ window.switchCoTab = (tab, btn) => {
   if(tab==='comunicacao') renderComunicacaoAdmin();
   if(tab==='senhasAcessos') renderSenhasAcessos();
   if(tab==='senhasPublicas') renderSenhasPublicas();
+  if(tab==='auditoria') renderAuditoria();
 };
 
 
@@ -19729,18 +20051,24 @@ async function loadNotas(simId){
 }
 
 async function saveNota(simId,matricula,data){
+  let _notaBefore=null;
+  try{const sn=await getDoc(doc(db,`notas/${simId}/alunos/${matricula}`));if(sn.exists())_notaBefore=sn.data();}catch(e){}
   await setDoc(doc(db,`notas/${simId}/alunos/${matricula}`),data,{merge:true});
+  // fire-and-forget — não atrasa UI
+  audit('NOTA_LANCADA',{collection:'notas',simId,matricula},{before:_notaBefore,after:data});
 }
 
 // Presence: saved on student record in simulado
 window.togglePresenca=async(simId,studentId,val)=>{
   await updateDoc(doc(db,`simulados/${simId}/alunos/${studentId}`),{presenca:val});
+  audit('PRESENCA_TOGGLE',{collection:'simulados/alunos',simId,studentId},{after:{presenca:val},meta:{presente:val==='presente'}});
 };
 
 window.togglePresBtn=async(simId,studentId,val)=>{
   if(!simId||!studentId)return;
   const presenca=val||null;
   await updateDoc(doc(db,`simulados/${simId}/alunos/${studentId}`),{presenca});
+  audit('PRESENCA_TOGGLE',{collection:'simulados/alunos',simId,studentId},{after:{presenca},meta:{presente:presenca==='presente'}});
 };
 
 // ── Populate desempenho lista selector ────────────────────────────────────────
@@ -19768,10 +20096,13 @@ window.toggleDesempSort = (col) => {
 // Zera a nota de um aluno (volta ao estado "não lançada")
 window.resetNota = async (simId, mat, nomeAluno) => {
   if (!confirm(`Zerar a nota de ${nomeAluno}?\n\nOs campos voltarão como se a nota nunca tivesse sido lançada.`)) return;
+  let _notaBefore=null;
+  try{const sn=await getDoc(doc(db,`notas/${simId}/alunos/${mat}`));if(sn.exists())_notaBefore=sn.data();}catch(e){}
   await setDoc(doc(db, `notas/${simId}/alunos/${mat}`), {
     criar: null, oral: null, notaFinal: null,
     updatedAt: new Date().toISOString(),
   }, { merge: true });
+  audit('NOTA_RESETADA',{collection:'notas',simId,matricula:mat},{before:_notaBefore,meta:{nomeAluno}});
   renderDesempenho();
 };
 
@@ -20336,6 +20667,7 @@ window.saveProfCfg=async()=>{
   S.cfg.profPassword=pass;
   S.cfg.profTabs=tabs;
   await setDoc(doc(db,'config','settings'),S.cfg);
+  audit('CONFIG_ALTERADA',{collection:'config',path:'settings'},{after:{profPassword:'***',profTabs:tabs},meta:{kind:'prof'}});
   m.className='al al-s';m.textContent='✅ Configuração salva!';m.classList.remove('hidden');
   setTimeout(()=>m.classList.add('hidden'),2000);
 };
@@ -20348,6 +20680,7 @@ window.saveCronLimit=async()=>{
   if(ss>=60){m.className='al al-e';m.textContent='Segundos inválidos.';m.classList.remove('hidden');return;}
   S.cfg.cronometroLimite=raw;
   await setDoc(doc(db,'config','settings'),S.cfg);
+  audit('CONFIG_ALTERADA',{collection:'config',path:'settings'},{after:{cronometroLimite:raw},meta:{kind:'cronometro'}});
   m.className='al al-s';m.textContent='✅ Tempo limite salvo!';m.classList.remove('hidden');
   setTimeout(()=>m.classList.add('hidden'),2000);
 };
@@ -20387,6 +20720,7 @@ window.saveCfgUrl=async()=>{
   if(!url){m.className='al al-e';m.textContent='Digite uma URL válida.';m.classList.remove('hidden');return;}
   S.cfg.systemUrl=url;
   await setDoc(doc(db,'config','settings'),S.cfg);
+  audit('CONFIG_ALTERADA',{collection:'config',path:'settings'},{after:{systemUrl:url},meta:{kind:'systemUrl'}});
   m.className='al al-s';m.textContent='✅ URL salva!';m.classList.remove('hidden');
   setTimeout(()=>m.classList.add('hidden'),2000);
 };
@@ -20441,6 +20775,206 @@ window.switchCoTab=(tab,btn)=>{
     const cronEl=document.getElementById('cfg-cron-limit');
     if(cronEl)cronEl.value=S.cfg.cronometroLimite||'07:30';
   }
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// AUDITORIA — log de ações, paginado, com filtros client-side
+// ════════════════════════════════════════════════════════════════════════════
+const AUDIT_PAGE_SIZE=50;
+const _auditState={loaded:[],lastDoc:null,reachedEnd:false,loading:false,detail:null};
+window._auditState=_auditState;
+
+const _AUDIT_CREATE=new Set(['SIMULADO_CRIADO','NOTA_LANCADA','ALUNO_ADICIONADO','MENTORIA_CRIADA','USUARIO_CRIADO','COMUNICACAO_POST_CRIADO','SOLICITACAO_EXTRA_EFETIVADA','PRESENCA_TOGGLE']);
+const _AUDIT_DESTROY=new Set(['ALUNO_REMOVIDO','MENTORIA_REMOVIDA','USUARIO_DESATIVADO','COMUNICACAO_POST_DELETADO','NOTA_RESETADA']);
+const _AUDIT_AUTH=new Set(['LOGIN_CUSTOM','LOGIN_FIREBASE','LOGIN_GOOGLE','LOGOUT']);
+function _auditActionClass(action){
+  if(_AUDIT_DESTROY.has(action))return'aud-destroy';
+  if(_AUDIT_CREATE.has(action))return'aud-create';
+  if(_AUDIT_AUTH.has(action))return'aud-auth';
+  return'';
+}
+function _auditFmtTs(ts){
+  if(!ts)return'—';
+  try{
+    const d=ts.toDate?ts.toDate():(ts.seconds?new Date(ts.seconds*1000):new Date(ts));
+    if(isNaN(d.getTime()))return'—';
+    return d.toLocaleDateString('pt-BR')+'<br>'+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }catch(e){return'—';}
+}
+function _auditTsToDate(ts){
+  if(!ts)return null;
+  try{return ts.toDate?ts.toDate():(ts.seconds?new Date(ts.seconds*1000):new Date(ts));}catch(e){return null;}
+}
+function _auditTargetStr(target){
+  if(!target)return'—';
+  if(typeof target==='string')return target;
+  try{return JSON.stringify(target);}catch(e){return String(target);}
+}
+function _auditEscape(s){return(s==null?'':String(s)).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+async function renderAuditoria(forceReload){
+  if(S.currentUser?.role!=='admin'){
+    const wrap=document.getElementById('aud-table-wrap');
+    if(wrap)wrap.innerHTML='<div class="aud-empty">Acesso restrito a administradores.</div>';
+    return;
+  }
+  // Popula select de ações (uma vez)
+  const sel=document.getElementById('aud-f-action');
+  if(sel&&sel.options.length<=1){
+    AUDIT_ACTIONS.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;sel.appendChild(o);});
+  }
+  if(forceReload||!_auditState.loaded.length){
+    _auditState.loaded=[];_auditState.lastDoc=null;_auditState.reachedEnd=false;
+    await loadAuditLogPage();
+  }else{
+    _renderAuditTable();
+  }
+}
+window.renderAuditoria=renderAuditoria;
+
+async function loadAuditLogPage(){
+  if(_auditState.loading||_auditState.reachedEnd)return;
+  _auditState.loading=true;
+  const wrap=document.getElementById('aud-table-wrap');
+  if(wrap&&!_auditState.loaded.length){
+    wrap.innerHTML='<div class="ld" style="padding:24px"><div class="sp"></div> Carregando log...</div>';
+  }
+  try{
+    const constraints=[orderBy('ts','desc'),fbLimit(AUDIT_PAGE_SIZE)];
+    if(_auditState.lastDoc)constraints.push(startAfter(_auditState.lastDoc));
+    const q=query(collection(db,'auditLog'),...constraints);
+    const snap=await getDocs(q);
+    if(snap.docs.length<AUDIT_PAGE_SIZE)_auditState.reachedEnd=true;
+    if(snap.docs.length)_auditState.lastDoc=snap.docs[snap.docs.length-1];
+    snap.docs.forEach(d=>_auditState.loaded.push({id:d.id,...d.data()}));
+    _renderAuditTable();
+  }catch(e){
+    console.error('loadAuditLogPage:',e);
+    if(wrap)wrap.innerHTML='<div class="aud-empty">Erro ao carregar log: '+_auditEscape(e.message||e.code||e)+'</div>';
+  }finally{
+    _auditState.loading=false;
+  }
+}
+window.loadMoreAudit=loadAuditLogPage;
+
+function _auditCurrentFilters(){
+  const user=(document.getElementById('aud-f-user')?.value||'').trim().toLowerCase();
+  const action=document.getElementById('aud-f-action')?.value||'';
+  const from=document.getElementById('aud-f-from')?.value||'';
+  const to=document.getElementById('aud-f-to')?.value||'';
+  return{user,action,from,to};
+}
+function _auditApply(rows){
+  const{user,action,from,to}=_auditCurrentFilters();
+  const fromT=from?new Date(from+'T00:00:00').getTime():null;
+  const toT=to?new Date(to+'T23:59:59.999').getTime():null;
+  return rows.filter(r=>{
+    if(action&&r.action!==action)return false;
+    if(user){
+      const a=r.actor||{};
+      const blob=((a.nome||'')+' '+(a.email||'')+' '+(a.uid||'')).toLowerCase();
+      if(!blob.includes(user))return false;
+    }
+    if(fromT||toT){
+      const d=_auditTsToDate(r.ts);
+      if(!d)return false;
+      const t=d.getTime();
+      if(fromT&&t<fromT)return false;
+      if(toT&&t>toT)return false;
+    }
+    return true;
+  });
+}
+
+function _renderAuditTable(){
+  const wrap=document.getElementById('aud-table-wrap');if(!wrap)return;
+  const filtered=_auditApply(_auditState.loaded);
+  if(!filtered.length){
+    wrap.innerHTML='<div class="aud-empty">Nenhum registro encontrado.</div>';
+  }else{
+    const head=`<div class="aud-head">
+      <div>Data/hora</div><div>Usuário</div><div>Ação</div><div>Alvo</div><div></div>
+    </div>`;
+    const rows=filtered.map(r=>{
+      const a=r.actor||{};
+      const cls=_auditActionClass(r.action);
+      const actor=a.nome?_auditEscape(a.nome):'<em style="color:var(--t3)">sistema</em>';
+      const email=a.email?`<div class="aud-user-email">${_auditEscape(a.email)}</div>`:'';
+      return `<div class="aud-row">
+        <div class="aud-ts">${_auditFmtTs(r.ts)}</div>
+        <div><div class="aud-user">${actor}</div>${email}</div>
+        <div><span class="aud-action ${cls}">${_auditEscape(r.action||'?')}</span></div>
+        <div class="aud-target">${_auditEscape(_auditTargetStr(r.target))}</div>
+        <div><button class="btn btn-s btn-sm" onclick="openAuditDetail('${_auditEscape(r.id)}')" title="Ver detalhes">👁</button></div>
+      </div>`;
+    }).join('');
+    wrap.innerHTML=head+rows;
+  }
+  const moreWrap=document.getElementById('aud-load-more-wrap');
+  if(moreWrap)moreWrap.style.display=_auditState.reachedEnd?'none':'block';
+}
+
+window.applyAuditFilters=()=>{_renderAuditTable();};
+window.clearAuditFilters=()=>{
+  ['aud-f-user','aud-f-from','aud-f-to'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  const sel=document.getElementById('aud-f-action');if(sel)sel.value='';
+  _renderAuditTable();
+};
+
+window.openAuditDetail=(id)=>{
+  const r=_auditState.loaded.find(x=>x.id===id);if(!r)return;
+  _auditState.detail=r;
+  const dts=_auditTsToDate(r.ts);
+  const tsStr=dts?dts.toLocaleString('pt-BR'):'—';
+  const actor=r.actor||{};
+  const actorLine=actor.nome
+    ?`${_auditEscape(actor.nome)} (${_auditEscape(actor.email||actor.uid||'?')}) · role: ${_auditEscape(actor.role||'?')}`
+    :'sistema (sem actor)';
+  const fmt=(v)=>{try{return _auditEscape(JSON.stringify(v,null,2));}catch(e){return _auditEscape(String(v));}};
+  const body=document.getElementById('ad-body');
+  body.innerHTML=`
+    <div class="ad-row"><div class="ad-label">Ação</div><div><span class="aud-action ${_auditActionClass(r.action)}">${_auditEscape(r.action||'?')}</span></div></div>
+    <div class="ad-row"><div class="ad-label">Quando</div><div style="font-family:'JetBrains Mono','SF Mono',monospace;font-size:12.5px">${_auditEscape(tsStr)}</div></div>
+    <div class="ad-row"><div class="ad-label">Quem</div><div>${actorLine}</div></div>
+    <div class="ad-row"><div class="ad-label">Alvo</div><pre>${fmt(r.target)}</pre></div>
+    <div class="ad-grid">
+      <div class="ad-row"><div class="ad-label">Before</div><pre>${fmt(r.before)}</pre></div>
+      <div class="ad-row"><div class="ad-label">After</div><pre>${fmt(r.after)}</pre></div>
+    </div>
+    <div class="ad-row"><div class="ad-label">Meta</div><pre>${fmt(r.meta)}</pre></div>
+    <div class="ad-row"><div class="ad-label">User agent</div><div style="font-family:'JetBrains Mono','SF Mono',monospace;font-size:11.5px;color:var(--t2);word-break:break-all">${_auditEscape(r.userAgent||'—')}</div></div>
+    <div class="ad-row"><div class="ad-label">Doc ID</div><div style="font-family:'JetBrains Mono','SF Mono',monospace;font-size:11.5px;color:var(--t2)">${_auditEscape(r.id)}</div></div>
+  `;
+  document.getElementById('modal-audit-detail').classList.remove('hidden');
+};
+
+window.copyAuditDetail=async()=>{
+  const r=_auditState.detail;if(!r)return;
+  const obj={...r,ts:_auditTsToDate(r.ts)?.toISOString()||null};
+  try{await navigator.clipboard.writeText(JSON.stringify(obj,null,2));alert('JSON copiado.');}
+  catch(e){alert('Não foi possível copiar: '+e.message);}
+};
+
+window.exportAuditCsv=()=>{
+  const rows=_auditApply(_auditState.loaded);
+  const esc=(v)=>{if(v==null)return'';let s=typeof v==='string'?v:JSON.stringify(v);s=s.replace(/"/g,'""');return'"'+s+'"';};
+  const header=['ts','action','actor_nome','actor_email','actor_role','target','before','after','meta'].join(',');
+  const lines=rows.map(r=>{
+    const dts=_auditTsToDate(r.ts);
+    return[
+      dts?dts.toISOString():'',
+      r.action||'',
+      r.actor?.nome||'',r.actor?.email||'',r.actor?.role||'',
+      r.target,r.before,r.after,r.meta
+    ].map(esc).join(',');
+  });
+  const csv=[header,...lines].join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='auditLog-'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };
 
 

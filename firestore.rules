@@ -288,6 +288,19 @@ service cloud.firestore {
     }
 
     // ────────────────────────────────────────────────────────────────────────
+    // AUDIT LOG — registros append-only de ações da coord/prof.
+    // Read aberto (admin lê na aba Auditoria). Create aberto com shape mínimo.
+    // Update/delete bloqueados — log é imutável.
+    // ────────────────────────────────────────────────────────────────────────
+    match /auditLog/{logId} {
+      allow read: if true;
+      allow create: if request.resource.data.action is string
+                    && request.resource.data.action.size() > 0
+                    && request.resource.data.action.size() < 80;
+      allow update, delete: if false;
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
     // DEFAULT DENY — qualquer coleção/path não listada acima é bloqueada.
     // Atacante curioso bate em coleções aleatórias e recebe permission denied.
     // ────────────────────────────────────────────────────────────────────────
