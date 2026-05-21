@@ -2714,7 +2714,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 </div>
 
 <!-- ══ MODAL: Aviso/Post de Comunicação (criar/editar) ══ -->
-<div class="mo hidden" id="modal-com-post">
+<div class="mo hidden" id="modal-com-post" data-no-backdrop-close>
   <div class="md" style="max-width:640px;max-height:92vh;display:flex;flex-direction:column">
     <div class="mh">
       <div><div class="m-title" id="cp-title">Novo aviso</div><div class="m-sub" id="cp-sub">Categoria: TSA</div></div>
@@ -2722,6 +2722,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
     </div>
     <div class="m-body" style="overflow-y:auto">
       <div class="fg"><label class="fl">Título</label><input class="fc" id="cp-titulo" placeholder="Ex: Inscrições abertas para o módulo XX" maxlength="180"/></div>
+      <div class="fg"><label class="fl">Subtítulo</label><input class="fc" id="cp-subtitulo" placeholder="Breve descrição que aparece no card (opcional)" maxlength="220"/></div>
       <div class="fg">
         <label class="fl">Corpo do aviso</label>
         <div id="cp-toolbar" style="display:flex;flex-wrap:wrap;gap:4px;padding:6px;background:var(--bg3);border:1px solid var(--border);border-bottom:none;border-radius:var(--rs) var(--rs) 0 0">
@@ -5438,7 +5439,7 @@ function _comCardCfg(cat){
   const saved=S.comunicacao.cards[cat]||{};
   return{
     titulo:saved.titulo||def.titulo,
-    subtitulo:saved.subtitulo||def.subtitulo,
+    subtitulo:saved.subtitulo!==undefined ? saved.subtitulo : def.subtitulo,
     imagem:saved.imagem||''
   };
 }
@@ -5575,7 +5576,7 @@ window.renderHomeCards=()=>{
       </div>
       <div class="home-card-body">
         <h3 class="home-card-title">${_comEsc(cfg.titulo)}</h3>
-        <p class="home-card-sub">${_comEsc(cfg.subtitulo)}</p>
+        ${cfg.subtitulo?`<p class="home-card-sub">${_comEsc(cfg.subtitulo)}</p>`:''}
         <span class="home-card-cta">Ver mural <span class="home-card-cta-arrow">→</span></span>
       </div>
     </button>`;
@@ -5609,6 +5610,11 @@ window.openMuralPost=(cat,postId)=>{
   modal.classList.remove('hidden');
   // scroll do body do modal pro topo
   setTimeout(()=>{const b=document.getElementById('mmp-body');if(b)b.scrollTop=0;},20);
+  // Imagens no corpo do aviso abrem no lightbox ao clicar
+  document.querySelectorAll('#mmp-body .mmp-text img').forEach(im=>{
+    im.style.cursor='zoom-in';
+    im.addEventListener('click',(e)=>{e.preventDefault();e.stopPropagation();openImgLightbox(im.src);});
+  });
 };
 
 // ── COMUNICAÇÃO · ADMIN ────────────────────────────────────────
@@ -5824,6 +5830,7 @@ function _comAdminResetForm(){
   S.comAdmin.editingId=null;
   S.comAdmin.pendingImg='';
   document.getElementById('cp-titulo').value='';
+  document.getElementById('cp-subtitulo').value='';
   document.getElementById('cp-corpo').innerHTML='';
   document.getElementById('cp-link-url').value='';
   document.getElementById('cp-link-label').value='';
@@ -5884,6 +5891,7 @@ window.comAdminEditPost=(id)=>{
   document.getElementById('cp-title').textContent='Editar aviso';
   document.getElementById('cp-sub').textContent='Categoria: '+S.comAdmin.cat.toUpperCase();
   document.getElementById('cp-titulo').value=p.titulo||'';
+  document.getElementById('cp-subtitulo').value=p.subtitulo||'';
   // Compat: posts antigos foram salvos como texto cru (markdown leve).
   // Se vier texto sem tags, converte quebras em <br> ao carregar no editor.
   const corpo=p.corpo||'';
@@ -5898,6 +5906,7 @@ window.comAdminEditPost=(id)=>{
 };
 window.comAdminSavePost=async()=>{
   const titulo=(document.getElementById('cp-titulo').value||'').trim();
+  const subtitulo=(document.getElementById('cp-subtitulo').value||'').trim();
   // Lê o HTML do editor rich-text e sanitiza antes de salvar
   const corpoRaw=document.getElementById('cp-corpo').innerHTML||'';
   const corpo=_comSanitizePostHTML(corpoRaw);
@@ -5912,7 +5921,7 @@ window.comAdminSavePost=async()=>{
   if(!corpoText){err.textContent='O corpo do aviso é obrigatório.';err.classList.remove('hidden');return;}
   const now=Date.now();
   const data={
-    titulo,corpo,linkUrl,linkLabel,pinned,published,
+    titulo,subtitulo,corpo,linkUrl,linkLabel,pinned,published,
     imagem:S.comAdmin.pendingImg||'',
     updatedAt:now
   };
@@ -5994,7 +6003,9 @@ window.renderMural=async(cat)=>{
   const cfg=_comCardCfg(cat);
   document.getElementById('mural-tag').textContent=`${def.emoji} ${def.label}`;
   document.getElementById('mural-h1').textContent=cfg.titulo;
-  document.getElementById('mural-sub').textContent=cfg.subtitulo;
+  const _murSub=document.getElementById('mural-sub');
+  _murSub.textContent=cfg.subtitulo||'';
+  _murSub.style.display=cfg.subtitulo?'':'none';
   const list=document.getElementById('mural-list');
   list.innerHTML='<div class="mural-empty"><div class="mural-empty-icon">⏳</div>Carregando avisos…</div>';
   const posts=await loadComunicacaoPosts(cat);
@@ -6004,16 +6015,14 @@ window.renderMural=async(cat)=>{
     return;
   }
   list.innerHTML=pubs.map((p,i)=>{
-    // Snippet: texto puro do corpo (sem HTML) pra preview de 3 linhas
-    const _t=document.createElement('div');_t.innerHTML=p.corpo||'';
-    const snippet=(_t.textContent||'').replace(/\s+/g,' ').trim();
+    const subtitulo=(p.subtitulo||'').trim();
     const cover=p.imagem?`<div class="mural-card-cover"><img src="${_comEsc(p.imagem)}" alt="" loading="lazy"/>${p.pinned?'<span class="mural-card-pin">📌 Fixado</span>':''}</div>`
       :(p.pinned?'<div class="mural-card-cover" style="aspect-ratio:auto;background:linear-gradient(135deg, color-mix(in srgb, var(--c) 25%, var(--bg2)) 0%, var(--bg) 100%);min-height:6px"><span class="mural-card-pin">📌 Fixado</span></div>':'');
     return `<button class="mural-card reveal ${p.pinned?'pinned':''}" style="transition-delay:${Math.min(i,6)*70}ms" onclick="openMuralPost('${cat}','${p.id}')">
       ${cover}
       <div class="mural-card-body">
         <h3 class="mural-card-title">${_comEsc(p.titulo||'(sem título)')}</h3>
-        ${snippet?`<p class="mural-card-snippet">${_comEsc(snippet)}</p>`:''}
+        ${subtitulo?`<p class="mural-card-snippet">${_comEsc(subtitulo)}</p>`:''}
         <span class="mural-card-cta">Ler aviso <span class="mural-card-cta-arrow">→</span></span>
       </div>
     </button>`;
