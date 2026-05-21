@@ -2,159 +2,205 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ════════════════════════════════════════════════════════════════════════
+    // POLÍTICA GERAL
     // ────────────────────────────────────────────────────────────────────────
-    // SIMULADOS — leitura pública (alunos precisam ver o card e a escala).
-    // Escrita: validação básica de shape para evitar lixo.
+    // • READS continuam abertos (alunos navegam sem login).
+    // • WRITES de coleções coord/prof agora exigem `request.auth.uid != null`
+    //   (Firebase Auth — Google ou Email/Password).
+    // • WRITES anônimos de aluno são permitidos APENAS nos fluxos públicos:
+    //   solicitacoesExtra (create), trocasDiretas, checklists/respostas,
+    //   clinicas/alunos (swap), provas/.../contestacoes.
+    // • DELETES sensíveis continuam bloqueados (do console).
+    // ════════════════════════════════════════════════════════════════════════
+    function isAuth() { return request.auth != null && request.auth.uid != null; }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // SIMULADOS — leitura pública. Escrita exige auth (coord/prof).
     // ────────────────────────────────────────────────────────────────────────
     match /simulados/{simId} {
       allow read: if true;
-      allow create, update: if request.resource.data.nome is string
+      allow create, update: if isAuth()
+                            && request.resource.data.nome is string
                             && request.resource.data.nome.size() > 0
                             && request.resource.data.nome.size() < 200;
-      // delete só do console (impede script malicioso varrer tudo)
       allow delete: if false;
 
       match /alunos/{alunoId} {
         allow read: if true;
-        allow create, update: if request.resource.data.nome is string
-                              && request.resource.data.nome.size() > 0
-                              && request.resource.data.nome.size() < 200;
-        allow delete: if true; // remoção de aluno faz parte do fluxo
+        // Create: exige auth (coord adiciona aluno ao simulado).
+        allow create: if isAuth()
+                      && request.resource.data.nome is string
+                      && request.resource.data.nome.size() > 0
+                      && request.resource.data.nome.size() < 200;
+        // Update: coord logado OU aluno anônimo via link de email (responder presença,
+        // aceitar troca direta, swap). Anônimo NÃO pode mudar nome ou matricula.
+        allow update: if (isAuth()
+                         && request.resource.data.nome is string
+                         && request.resource.data.nome.size() > 0)
+                      || (request.resource.data.nome == resource.data.nome
+                          && request.resource.data.matricula == resource.data.matricula);
+        allow delete: if isAuth();
       }
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // USUÁRIOS DO PAINEL — read aberto (login lê pra validar credenciais).
-    // Write: validação de shape. Bloquear delete pra não apagarem o admin.
-    // ⚠️  Senhas em plaintext: refatorar pra Cloud Function de login depois.
+    // USUÁRIOS DO PAINEL — read aberto (custom login lê pra validar senha).
+    // Write exige auth (admin/coord criando outros usuários).
+    // ⚠️  Senhas em plaintext: dívida técnica conhecida. Refatorar pra Cloud
+    //    Function quando aposentar o custom login.
     // ────────────────────────────────────────────────────────────────────────
     match /usuarios/{username} {
       allow read: if true;
-      allow create, update: if request.resource.data.username is string
+      allow create, update: if isAuth()
+                            && request.resource.data.username is string
                             && request.resource.data.senha is string
                             && request.resource.data.senha.size() < 200;
-      allow delete: if false; // só pelo console
+      allow delete: if false;
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // LISTAS DE ALUNOS — leitura pública, escrita validada.
+    // LISTAS DE ALUNOS — leitura pública, escrita exige auth.
     // ────────────────────────────────────────────────────────────────────────
     match /listas/{listaId} {
       allow read: if true;
-      allow create, update: if request.resource.data.nome is string
+      allow create, update: if isAuth()
+                            && request.resource.data.nome is string
                             && request.resource.data.nome.size() < 200;
-      allow delete: if true; // coord pode apagar listas antigas
+      allow delete: if isAuth();
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // SOLICITAÇÕES SIMULADO EXTRA — qualquer um pode CRIAR (fluxo do aluno).
-    // Update controlado (status muda via painel ou Cloud Function da Hotmart).
-    // Delete bloqueado via cliente (mantém histórico).
+    // SOLICITAÇÕES SIMULADO EXTRA — fluxo do aluno (create anônimo).
+    // Update exige auth (coord altera status). Delete bloqueado.
     // ────────────────────────────────────────────────────────────────────────
     match /solicitacoesExtra/{reqId} {
-      allow read: if true; // painel coord precisa listar
+      allow read: if true;
       allow create: if request.resource.data.nome is string
                     && request.resource.data.email is string
                     && request.resource.data.email.matches('.+@.+')
                     && request.resource.data.opcoes is list
                     && request.resource.data.opcoes.size() > 0
                     && request.resource.data.opcoes.size() <= 3;
-      allow update: if request.resource.data.nome == resource.data.nome
+      allow update: if isAuth()
+                    && request.resource.data.nome == resource.data.nome
                     && request.resource.data.email == resource.data.email;
-      allow delete: if false; // só pelo console (mantém auditoria)
+      allow delete: if false;
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // TROCAS DIRETAS (entre alunos) — fluxo do app.
+    // TROCAS DIRETAS (entre alunos) — fluxo anônimo. Mantém aberto.
     // ────────────────────────────────────────────────────────────────────────
     match /trocasDiretas/{trocaId} {
       allow read, create, update: if true;
-      allow delete: if true; // expira após resolução
+      allow delete: if true;
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // CONFIG — leitura aberta (app precisa pra renderizar).
-    // Write: bloqueia delete pra ninguém zerar config crítico.
+    // CONFIG — leitura aberta. Escrita exige auth.
     // ⚠️  Slack webhook em config/simExtra ainda é leitura pública.
-    //    Refatorar pra Cloud Function depois.
     // ────────────────────────────────────────────────────────────────────────
     match /config/{cfgId} {
       allow read: if true;
-      allow create, update: if true;
+      // Write geral: exige auth (coord/admin editando configurações).
+      // Exceção: config/simExtra pode receber update anônimo SE alterar somente
+      // o campo `alunosGratuitos` (incremento de quotaUsada pelo aluno gratuito
+      // ao criar uma solicitação extra).
+      allow create: if isAuth();
+      allow update: if isAuth()
+                   || (cfgId == 'simExtra'
+                       && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['alunosGratuitos']));
       allow delete: if false;
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // NOTAS, CHECKLISTS, DISPONIBILIDADE, FEEDBACK GERAL — usados pelos painéis.
-    // Mantém abertos com proteção mínima.
+    // NOTAS — coord/prof lançam. Escrita exige auth.
     // ────────────────────────────────────────────────────────────────────────
     match /notas/{simId}/alunos/{matricula} {
-      allow read, create, update: if true;
+      allow read: if true;
+      allow create, update: if isAuth();
       allow delete: if false;
     }
 
+    // ────────────────────────────────────────────────────────────────────────
+    // CHECKLISTS — template (meta) editado por coord; respostas salvas por aluno.
+    // ────────────────────────────────────────────────────────────────────────
     match /checklists/{simId}/meta/{docId} {
-      allow read, create, update: if true;
+      allow read: if true;
+      allow create, update: if isAuth();
       allow delete: if false;
     }
     match /checklists/{simId}/respostas/{studentId} {
-      allow read, create, update: if true;
-      allow delete: if false;
-    }
-
-    match /disponibilidade/{simId}/profs/{profKey} {
-      allow read, create, update: if true;
-      allow delete: if true;
-    }
-
-    match /feedbackGeral/{simId} {
-      allow read, create, update: if true;
+      allow read, create, update: if true;  // aluno salva próprio
       allow delete: if false;
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // FEATURES / TAREFAS (roadmap kanban interno da coordenação)
+    // DISPONIBILIDADE — prof/coord registra disponibilidade. Exige auth.
+    // ────────────────────────────────────────────────────────────────────────
+    match /disponibilidade/{simId}/profs/{profKey} {
+      allow read: if true;
+      allow create, update: if isAuth();
+      allow delete: if isAuth();
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // FEEDBACK GERAL — coord/prof escreve. Exige auth.
+    // ────────────────────────────────────────────────────────────────────────
+    match /feedbackGeral/{simId} {
+      allow read: if true;
+      allow create, update: if isAuth();
+      allow delete: if false;
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // FEATURES / TAREFAS (kanban interno). Exige auth.
     // ────────────────────────────────────────────────────────────────────────
     match /tarefas/{taskId} {
       allow read: if true;
-      allow create, update: if request.resource.data.titulo is string
+      allow create, update: if isAuth()
+                            && request.resource.data.titulo is string
                             && request.resource.data.titulo.size() > 0
                             && request.resource.data.status in ['ideia','fazendo','feito']
                             && request.resource.data.prioridade in ['alta','media','baixa'];
-      allow delete: if true;
+      allow delete: if isAuth();
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // MENTORIAS (grupos com mentor + alunos vinculados, tipo TEA/TSA/ME1/ME2/ME3).
+    // MENTORIAS — coord cria/edita. Exige auth.
     // ────────────────────────────────────────────────────────────────────────
     match /mentorias/{mentoriaId} {
       allow read: if true;
-      allow create, update: if request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
+      allow create, update: if isAuth()
+                            && request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
                             && request.resource.data.mentorNome is string
                             && request.resource.data.mentorNome.size() > 0;
-      allow delete: if true;
+      allow delete: if isAuth();
     }
 
-    // BLOCOS MENSAIS DE CLÍNICAS (agrupa as clínicas de um mês com tema único)
+    // BLOCOS MENSAIS DE CLÍNICAS — coord cria. Exige auth.
     match /blocosClinica/{blocoId} {
       allow read: if true;
-      allow create, update: if request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
+      allow create, update: if isAuth()
+                            && request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
                             && request.resource.data.titulo is string
                             && request.resource.data.titulo.size() > 0
                             && request.resource.data.tema is string;
-      allow delete: if true;
+      allow delete: if isAuth();
     }
 
-    // CLÍNICAS DE QUESTÕES (sessões dentro de um bloco mensal)
+    // CLÍNICAS DE QUESTÕES — coord cria (parent). Subcoleção alunos: aluno responde swap (anônimo).
     match /clinicas/{clinicaId} {
       allow read: if true;
-      allow create, update: if request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
+      allow create, update: if isAuth()
+                            && request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
                             && request.resource.data.mentorNome is string
                             && request.resource.data.dataHora is string;
-      allow delete: if true;
+      allow delete: if isAuth();
 
       match /alunos/{alunoId} {
         allow read: if true;
+        // Aluno anônimo responde swap. Coord também escreve aqui mas via fluxo logado — OK.
         allow create, update: if request.resource.data.nome is string
                               && request.resource.data.nome.size() > 0;
         allow delete: if true;
@@ -162,103 +208,92 @@ service cloud.firestore {
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // REVISÃO DE CASOS — peer review dos casos clínicos antes de aplicar
+    // REVISÃO DE CASOS — coord/prof. Exige auth.
     // ────────────────────────────────────────────────────────────────────────
     match /revisaoCasos/{revId} {
       allow read: if true;
-      allow create, update: if request.resource.data.simId is string
+      allow create, update: if isAuth()
+                            && request.resource.data.simId is string
                             && request.resource.data.status in ['rascunho','aberta','fechada','exportada'];
-      allow delete: if true;
+      allow delete: if isAuth();
 
-      // Comentários ancorados a um caso/pergunta/item específico
       match /comentarios/{cmtId} {
         allow read: if true;
-        allow create, update: if request.resource.data.profNome is string
+        allow create, update: if isAuth()
+                              && request.resource.data.profNome is string
                               && request.resource.data.profNome.size() > 0
                               && request.resource.data.targetType in ['enunciado','pergunta','item','caso'];
-        allow delete: if true;
+        allow delete: if isAuth();
       }
 
-      // Histórico de edições do coord (antes/depois)
       match /historico/{histId} {
         allow read: if true;
-        allow create, update: if request.resource.data.editadoPor is string;
+        allow create, update: if isAuth()
+                              && request.resource.data.editadoPor is string;
         allow delete: if false;
       }
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // RECURSOS DE PROVA — sistema de contestação de gabarito de provas.
-    //
-    // Schema:
-    //   provas/{provaId}                              — metadata da prova
-    //     campos: nome, tipo, ano, dataLimite, mensagemInicial, status
-    //   provas/{provaId}/questoes/{qId}               — questão + parecer AnestReview
-    //     campos: numero, modo (estruturado|bloco|vf), enunciado, alternativas[],
-    //             blocoTexto, gabaritoOficial, imagemUrl, validada,
-    //             pareceresPorAlt (só em modo vf), parecerRascunho/parecerFinalizado,
-    //             validadaPor, validadaEm, parecer, parecerArgumento,
-    //             parecerImagemUrl, parecerPor, parecerEm
-    //   provas/{provaId}/questoes/{qId}/contestacoes/{cId} — contestação do aluno
-    //     campos: emailAluno, nomeAluno, motivo, fonte, fonteCustom,
-    //             pagina, imagemUrl, status (pendente|respondida),
-    //             criadoEm, respondidoEm, respostaSnapshot
-    //   fontesRecurso/{fId}                           — fontes pré-cadastradas
-    //   recursosConfig/{cfgId}                        — instruções, msg topo, etc.
-    //
-    // Reads abertos (alunos precisam ver provas/questões/pareceres).
-    // Creates/updates de contestação abertos (aluno público identifica por email).
+    // RECURSOS DE PROVA — provas/questões editadas por coord (auth).
+    // Contestações criadas por aluno anônimo (mantém aberto).
     // ────────────────────────────────────────────────────────────────────────
     match /provas/{provaId} {
       allow read: if true;
-      allow create, update: if request.resource.data.nome is string
+      allow create, update: if isAuth()
+                            && request.resource.data.nome is string
                             && request.resource.data.nome.size() > 0
                             && request.resource.data.tipo in ['TSA','TEA','ME1','ME2','ME3']
                             && request.resource.data.status in ['ativa','encerrada'];
-      allow delete: if true;
+      allow delete: if isAuth();
 
       match /questoes/{qId} {
         allow read: if true;
-        allow create, update: if request.resource.data.numero is number
+        allow create, update: if isAuth()
+                              && request.resource.data.numero is number
                               && request.resource.data.modo in ['estruturado','bloco','vf'];
-        allow delete: if true;
+        allow delete: if isAuth();
 
         match /contestacoes/{cId} {
           allow read: if true;
+          // Aluno anônimo cria contestação
           allow create: if request.resource.data.emailAluno is string
                         && request.resource.data.emailAluno.matches('.+@.+')
                         && request.resource.data.motivo is string
                         && request.resource.data.motivo.size() > 0;
-          allow update: if request.resource.data.emailAluno == resource.data.emailAluno
-                        && request.resource.data.motivo is string;
-          allow delete: if true;
+          // Update: aluno corrige a própria contestação OU coord responde (auth)
+          allow update: if (request.resource.data.emailAluno == resource.data.emailAluno
+                            && request.resource.data.motivo is string)
+                           || isAuth();
+          allow delete: if isAuth();
         }
       }
     }
 
     match /fontesRecurso/{fId} {
       allow read: if true;
-      allow create, update: if request.resource.data.nome is string
+      allow create, update: if isAuth()
+                            && request.resource.data.nome is string
                             && request.resource.data.nome.size() > 0;
-      allow delete: if true;
+      allow delete: if isAuth();
     }
 
     match /recursosConfig/{cfgId} {
       allow read: if true;
-      allow create, update: if true;
+      allow create, update: if isAuth();
       allow delete: if false;
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // PROJEÇÃO AO VIVO — sincronia remota slide+cronômetro entre prof e aluno.
-    // liveId = `${simId}__${alunoId}`. Doc representa a sessão ativa.
-    // Subcoleção strokes/ usada pra desenhos do aluno (Fase 2).
+    // PROJEÇÃO AO VIVO — prof e aluno interagem (modo prof/aluno via URL).
+    // Mantém escrita aberta porque aluno desenha strokes em modo remoto.
+    // Refatorar quando virar feature mais formal.
     // ────────────────────────────────────────────────────────────────────────
     match /projecaoLive/{liveId} {
       allow read: if true;
       allow create, update: if request.resource.data.simId is string
                             && request.resource.data.alunoId is string;
-      allow delete: if true; // limpa após encerrar
+      allow delete: if true;
       match /strokes/{strokeId} {
         allow read: if true;
         allow create, update: if true;
@@ -267,30 +302,29 @@ service cloud.firestore {
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // COMUNICAÇÃO (mural da Home por categoria: tsa / tea / mes)
-    // config/comunicacao guarda os cards (titulo/subtitulo/imagem) — usa rule de /config.
-    // comunicacao/{cat}/posts/{postId} → posts do mural.
-    // Read aberto (alunos não-logados precisam ver). Write com shape mínimo.
+    // COMUNICAÇÃO — mural editado por coord. Exige auth.
     // ────────────────────────────────────────────────────────────────────────
     match /comunicacao/{cat} {
       allow read: if true;
-      allow create, update: if true;
+      allow create, update: if isAuth();
       allow delete: if false;
 
       match /posts/{postId} {
         allow read: if true;
-        allow create, update: if request.resource.data.titulo is string
+        allow create, update: if isAuth()
+                              && request.resource.data.titulo is string
                               && request.resource.data.titulo.size() > 0
                               && request.resource.data.titulo.size() < 300
                               && request.resource.data.corpo is string;
-        allow delete: if true;
+        allow delete: if isAuth();
       }
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // AUDIT LOG — registros append-only de ações da coord/prof.
-    // Read aberto (admin lê na aba Auditoria). Create aberto com shape mínimo.
+    // AUDIT LOG — append-only. Read aberto pra admin ler. Create aberto pra
+    // capturar ações de quem ainda usa login custom (sem Firebase Auth).
     // Update/delete bloqueados — log é imutável.
+    // ⚠️  Reads abertos: refatorar pra exigir auth quando aposentar custom login.
     // ────────────────────────────────────────────────────────────────────────
     match /auditLog/{logId} {
       allow read: if true;
@@ -302,7 +336,6 @@ service cloud.firestore {
 
     // ────────────────────────────────────────────────────────────────────────
     // DEFAULT DENY — qualquer coleção/path não listada acima é bloqueada.
-    // Atacante curioso bate em coleções aleatórias e recebe permission denied.
     // ────────────────────────────────────────────────────────────────────────
     match /{document=**} {
       allow read, write: if false;

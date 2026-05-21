@@ -318,6 +318,8 @@ main{max-width:1300px;margin:0 auto;padding:24px}
 .b-abs{background:var(--rl);color:var(--red);border-color:rgba(248,81,73,.25)}
 .b-swap{background:var(--bl);color:var(--blue);border-color:rgba(47,129,247,.25)}
 .b-match{background:var(--ol);color:var(--orange);border-color:rgba(251,143,68,.25)}
+.prof-logado-badge{display:flex;align-items:center;gap:8px;padding:10px 12px;background:linear-gradient(180deg,var(--bg3),var(--bg2));border:1px solid var(--border);border-radius:10px;margin-bottom:6px}
+.prof-logado-badge .badge.b-conf{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;letter-spacing:.5px}
 
 /* ═══ FORM · TECH UI ═══ */
 .fg{margin-bottom:14px}
@@ -581,6 +583,27 @@ body:has(.mo:not(.hidden)){overflow:hidden}
 .aluno-name{font-weight:700;font-size:14px;flex:1;min-width:140px;letter-spacing:-.1px}
 .aluno-meta{font-size:12px;color:var(--t2);white-space:nowrap}
 .aluno-acts{display:flex;gap:5px;flex-wrap:wrap}
+
+/* USER ROW · gerenciamento de usuários (lista enxuta, Apple-like) */
+.user-row{display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all .18s var(--ease-out-soft,ease-out);outline:none}
+.user-row:hover{background:color-mix(in srgb, var(--accent) 6%, var(--bg2));border-color:color-mix(in srgb, var(--accent) 40%, var(--border));transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.user-row:focus-visible{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent)}
+.user-row:active{transform:translateY(0);transition:transform .08s}
+.user-row-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.user-row-name{font-weight:600;font-size:14.5px;color:var(--text);letter-spacing:-.1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-row-me{display:inline-block;margin-left:6px;padding:1px 7px;font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;font-size:9px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--accent);background:color-mix(in srgb, var(--accent) 14%, transparent);border-radius:999px;vertical-align:middle}
+.user-row-email{font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;font-size:11px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-row-tipo{display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:999px;flex-shrink:0}
+.user-row-tipo-icon{font-size:13px;line-height:1}
+.user-row-tipo-label{font-size:11.5px;font-weight:600;color:var(--text);letter-spacing:-.05px;white-space:nowrap}
+.user-row-chev{font-size:18px;color:var(--t3);font-weight:300;flex-shrink:0;transition:transform .18s var(--ease-out-soft,ease-out);line-height:1}
+.user-row:hover .user-row-chev{transform:translateX(3px);color:var(--accent)}
+@media(max-width:600px){
+  .user-row{gap:10px;padding:11px 12px}
+  .user-row-name{font-size:14px}
+  .user-row-tipo{padding:4px 8px}
+  .user-row-tipo-label{font-size:11px}
+}
 
 /* RESPONSE BUTTONS · TECH */
 .rb{padding:7px 14px;border-radius:8px;border:1.5px solid transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.2px;box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 1px 2px rgba(0,0,0,.06)}
@@ -2540,6 +2563,27 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
           </div>
         </div>
 
+        <!-- Presets por Tipo de Usuário (dropdown) -->
+        <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden">
+          <div onclick="cfgToggle('cfg-tipos-presets-body','cfg-tipos-presets-arr');if(document.getElementById('cfg-tipos-presets-body').style.display==='block')renderTiposPresets()" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg2);cursor:pointer;user-select:none" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:18px">⚙️</span>
+              <div>
+                <p style="font-weight:700;font-size:15px">Presets de Tipo de Usuário</p>
+                <p style="font-size:12px;color:var(--t2)">Conjunto de abas pré-marcadas ao escolher cada tipo no cadastro de usuário</p>
+              </div>
+            </div>
+            <span id="cfg-tipos-presets-arr" style="font-size:14px;color:var(--t2);transition:transform .2s">▼</span>
+          </div>
+          <div id="cfg-tipos-presets-body" style="display:none;padding:16px 18px;border-top:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+              <button class="btn btn-s btn-sm" onclick="novoTipoUsuario()">+ Novo tipo</button>
+              <button class="btn btn-p btn-sm" onclick="salvarTiposPresets()">💾 Salvar todos</button>
+            </div>
+            <div id="tipos-presets-wrap" style="display:flex;flex-direction:column;gap:10px"></div>
+          </div>
+        </div>
+
         <!-- 1. Cadastro de Professores (dropdown) -->
         <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden">
           <div onclick="cfgToggle('cfg-profs-body','cfg-profs-arr')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg2);cursor:pointer;user-select:none" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
@@ -2756,8 +2800,12 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
           <button class="btn btn-p btn-sm" onclick="openUserModal()">+ Novo usuário</button>
         </div>
         <div class="cb">
-          <p style="color:var(--t2);font-size:13px;margin-bottom:14px">Crie e gerencie quem acessa o painel da coordenação. Papéis: <strong>admin</strong> (acesso total), <strong>coordenador</strong> (simulados, trocas, professores, listas, desempenho), <strong>avaliador</strong> (apenas checklist).</p>
-          <div id="users-list"></div>
+          <div style="position:relative;margin-bottom:14px">
+            <input class="fc" id="users-search" type="search" placeholder="Buscar por nome…" autocomplete="off" oninput="renderUsuarios()" style="padding-left:36px"/>
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t2);pointer-events:none;font-size:14px">🔎</span>
+          </div>
+          <div id="users-count" style="font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--t2);margin-bottom:10px"></div>
+          <div id="users-list" style="display:flex;flex-direction:column;gap:6px"></div>
         </div>
       </div>
     </div>
@@ -2942,25 +2990,24 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
   <div class="md" style="max-width:460px">
     <div class="mh"><div><div class="m-title" id="mu-title">Novo usuário</div><div class="m-sub">Defina credenciais e papel</div></div><button class="m-close" onclick="CM('modal-user')">✕</button></div>
     <div class="m-body">
-      <div class="fg"><label class="fl">Nome de usuário (login)</label><input class="fc" id="mu-username" placeholder="ex: maria.silva" autocomplete="off"/></div>
-      <div class="fg"><label class="fl">Nome completo</label><input class="fc" id="mu-nome" placeholder="ex: Maria Silva"/></div>
+      <div class="fg"><label class="fl">Nome de usuário (login + display)</label><input class="fc" id="mu-username" placeholder="ex: Maria Silva" autocomplete="off"/></div>
       <div class="fg"><label class="fl">Email (login via Google ou Firebase)</label><input class="fc" id="mu-email" type="email" placeholder="ex: maria@exemplo.com" autocomplete="off"/><p style="font-size:11px;color:var(--t2);margin-top:4px">Opcional. Necessário pra login via Google ou link de redefinição de senha. Precisa ser igual ao email cadastrado no Firebase Auth.</p></div>
       <div class="fg"><label class="fl">Senha</label><input class="fc" id="mu-senha" type="text" placeholder="Senha de acesso" autocomplete="new-password"/></div>
       <div class="fg">
-        <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg3);border-radius:var(--rs);cursor:pointer;border:1.5px solid var(--border)" id="mu-admin-wrap">
-          <input type="checkbox" id="mu-admin" onchange="toggleAdminMode()" style="width:16px;height:16px;cursor:pointer"/>
-          <div><div style="font-weight:700;font-size:13px">Administrador</div><div style="font-size:11px;color:var(--t2)">Acesso total + gerencia usuários · vê automaticamente novas abas</div></div>
-        </label>
+        <label class="fl">Tipo de usuário</label>
+        <select class="fc" id="mu-tipo" onchange="onTipoChange()">
+          <option value="prof">👨‍🏫 Professor</option>
+          <option value="coord">🎯 Coordenador</option>
+          <option value="suporte">🤝 Suporte</option>
+          <option value="financeiro">💰 Financeiro</option>
+          <option value="adm">🛡️ Administrador (acesso total)</option>
+        </select>
+        <p style="font-size:11px;color:var(--t2);margin-top:4px">Define o conjunto de abas padrão. Pode customizar abaixo.</p>
       </div>
-      <div class="fg" id="mu-perms-wrap">
+      <div class="fg" id="mu-perms-section">
         <label class="fl">Permissões (abas que o usuário vê)</label>
         <div id="mu-perms-grid" style="display:flex;flex-direction:column;gap:4px;border:1px solid var(--border);border-radius:var(--rs);padding:10px;background:var(--bg3)"></div>
-        <p style="font-size:11px;color:var(--t2);margin-top:6px">Apenas as abas marcadas serão visíveis. Novas abas criadas no futuro NÃO ficam visíveis automaticamente — só o admin precisa ajustar manualmente.</p>
-      </div>
-      <div class="fg" id="mu-perms-admin-wrap">
-        <label class="fl">Admin de abas específicas (poderes de administrador limitados)</label>
-        <div id="mu-perms-admin-grid" style="display:flex;flex-direction:column;gap:4px;border:1px solid var(--border);border-radius:var(--rs);padding:10px;background:var(--bg3)"></div>
-        <p style="font-size:11px;color:var(--t2);margin-top:6px">Marque as abas em que este usuário deve ter poderes de admin (editar/excluir/configurar). Só aparece pra abas onde o usuário já tem permissão de acesso. Ignorado se "Administrador" geral estiver marcado.</p>
+        <p style="font-size:11px;color:var(--t2);margin-top:6px">Apenas as abas marcadas serão visíveis. Acesso à aba = controle total dentro dela. Novas abas criadas no futuro NÃO ficam visíveis automaticamente.</p>
       </div>
       <div id="mu-err" class="al al-e hidden"></div>
     </div>
@@ -4665,6 +4712,72 @@ window._fbAuth={auth,signInWithEmailAndPassword,signInWithPopup,sendPasswordRese
 const S={view:'home',unlocked:false,profUnlocked:false,currentUser:null,usuarios:[],sims:[],curSim:null,students:[],coDay:'sabado',alDay:'sabado',step:1,cfg:{password:'aros2025',profPassword:'Anestreview1531',profTabs:['simulados','trocas','professores','listas','desempenho','checklist']},pendSwap:null,profs:[],listas:[],simExtraCfg:{linkPagoAluno:'',linkPagoExterno:'',linkGratuito:'',slackWebhook:'',listaVigenteId:'',alunosGratuitos:[]},solicitacoesExtra:[],simStats:{},_id:null,_rSab:[],_rDom:[]};
 window.S=S;
 
+// ── IDENTIDADE: prof logado (Fase 2 da migração Firebase Auth) ───────────────
+// Retorna o nome do prof correspondente a S.currentUser.nome (match em S.profs,
+// case-insensitive). Retorna null se admin/coord/não-logado ou se o usuário
+// avaliador não tem match em S.profs (fallback gracioso: dropdown continua aparecendo).
+function getProfLogadoNome(){
+  const u=S.currentUser;
+  if(!u)return null;
+  // Só tipo 'prof' tem identidade implícita. Admin/coord/suporte/financeiro vêem dropdown editável.
+  if(typeof getTipo==='function'){
+    if(getTipo(u)!=='prof')return null;
+  }else{
+    // Fallback se helper não tiver carregado ainda
+    if(u.role==='admin')return null;
+  }
+  const nome=(u.nome||u.username||'').trim();
+  if(!nome)return null;
+  const match=(S.profs||[]).find(p=>(typeof p==='string'?p:(p?.nome||'')).trim().toLowerCase()===nome.toLowerCase());
+  return match?(typeof match==='string'?match:match.nome):null;
+}
+window.getProfLogadoNome=getProfLogadoNome;
+
+// Aplica padrão "abolir dropdown se prof logado" num <select>.
+// - Se prof logado: esconde select, seta value=profNome, insere badge "Você: X" antes.
+// - Caso contrário: mostra select editável (populado com opts) e remove badge se existir.
+// opts: { placeholder?, profs? (default S.profs) }
+window.aplicarProfLogadoEmSelect=(selOrId,opts)=>{
+  const sel=typeof selOrId==='string'?document.getElementById(selOrId):selOrId;
+  if(!sel)return;
+  opts=opts||{};
+  const placeholder=opts.placeholder||'Selecione seu nome...';
+  const profs=opts.profs||S.profs||[];
+  const wrapper=sel.parentElement;
+  const profNome=getProfLogadoNome();
+  // Sempre repopula opts (mesmo se for esconder), pra leituras de .value funcionarem
+  const optsHtml=`<option value="">${placeholder}</option>`+profs.map(p=>{
+    const nome=typeof p==='string'?p:(p?.nome||'');
+    const safe=nome.replace(/"/g,'&quot;');
+    return `<option value="${safe}">${nome.replace(/</g,'&lt;')}</option>`;
+  }).join('');
+  sel.innerHTML=optsHtml;
+  let badge=wrapper?wrapper.querySelector('.prof-logado-badge'):null;
+  if(profNome){
+    // Garante que a option do prof logado existe (cobre race condition no boot:
+    // se S.profs ainda não carregou, injeta a option pro sel.value ter onde ancorar).
+    const safeVal=profNome.replace(/"/g,'&quot;');
+    if(![...sel.options].some(o=>o.value===profNome)){
+      sel.insertAdjacentHTML('beforeend',`<option value="${safeVal}">${profNome.replace(/</g,'&lt;')}</option>`);
+    }
+    sel.value=profNome;
+    sel.style.display='none';
+    if(wrapper&&!badge){
+      badge=document.createElement('div');
+      badge.className='prof-logado-badge';
+      const safe=profNome.replace(/</g,'&lt;');
+      badge.innerHTML=`<span class="badge b-conf" style="padding:6px 12px;font-size:13px"><strong>${safe}</strong> · você</span>`;
+      wrapper.insertBefore(badge,sel);
+    }else if(badge){
+      const safe=profNome.replace(/</g,'&lt;');
+      badge.innerHTML=`<span class="badge b-conf" style="padding:6px 12px;font-size:13px"><strong>${safe}</strong> · você</span>`;
+    }
+  }else{
+    sel.style.display='';
+    if(badge)badge.remove();
+  }
+};
+
 // ── AUDIT LOG ────────────────────────────────────────────────────────────────
 // Fire-and-forget. Nunca bloqueia ou quebra o fluxo principal — falha silenciosa.
 // Alunos não logam (operações anônimas NÃO são auditadas — sem actor).
@@ -4739,6 +4852,10 @@ async function boot(){
     return _initPreview();
   }
   try{const s=await getDoc(doc(db,'config','settings'));if(s.exists())Object.assign(S.cfg,s.data());}catch(e){}
+  // Migração: campo antigo professorPreset → tiposPresets.prof (só se tiposPresets ainda não existir)
+  if(S.cfg&&Array.isArray(S.cfg.professorPreset)&&!S.cfg.tiposPresets){
+    S.cfg.tiposPresets={prof:S.cfg.professorPreset};
+  }
   await Promise.all([loadSims(),loadProfs(),loadListas(),loadUsuarios(),loadMenuLabels(),loadSimExtra(),loadFinanceiro(),loadMentorias(),loadBlocos(),loadClinicas(),loadRevisoes(),loadRecProvas(),loadComunicacaoCards(),loadConteudosLiberados(),loadSenhasAcessos()]);
   // Pre-carrega contagens de posts pra mostrar o badge "X avisos" nos cards da home
   try{await Promise.all(['tsa','tea','mes'].map(c=>loadComunicacaoPosts(c)));}catch(e){}
@@ -7482,8 +7599,22 @@ const TAB_GROUPS=[
   ]}
 ];
 const ALL_TABS=TAB_GROUPS.flatMap(g=>g.tabs.map(t=>t.id));
-// Abas reservadas a administradores (badge "ADM" no menu lateral)
+// Abas historicamente reservadas a administradores. Hoje serve só como fallback —
+// o badge "ADM" no menu é decidido dinamicamente por isAdmExclusiveTab (ver abaixo).
 const ADMIN_ONLY_TABS=new Set(['usuarios','config','financeiro','features','recProvas','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos','auditoria']);
+// Retorna true se a aba é EXCLUSIVA do tipo 'adm' — ou seja, nenhum outro tipo (prof/coord/suporte/financeiro/custom)
+// tem essa aba no seu preset. STRICT_ADMIN_TABS (ex: auditoria) sempre conta como exclusiva.
+function isAdmExclusiveTab(tabId){
+  if(STRICT_ADMIN_TABS.has(tabId))return true;
+  const presets=(typeof _tiposPresets==='function')?_tiposPresets():null;
+  if(!presets)return ADMIN_ONLY_TABS.has(tabId);
+  for(const tipo of Object.keys(presets)){
+    if(tipo==='adm')continue;
+    if(Array.isArray(presets[tipo])&&presets[tipo].includes(tabId))return false;
+  }
+  return true;
+}
+window.isAdmExclusiveTab=isAdmExclusiveTab;
 // Abas STRICT-admin: SÓ aparecem pra role==='admin'. Não dá pra granular como permissão.
 const STRICT_ADMIN_TABS=new Set(['auditoria']);
 
@@ -7597,45 +7728,61 @@ async function loadUsuarios(){
   S.usuarios=snap.docs.map(d=>({id:d.id,...d.data()}));
   if(!S.usuarios.length){
     // Bootstrap: cria admin/aros2025 na primeira execução
-    await setDoc(doc(db,'usuarios','admin'),{username:'admin',senha:'aros2025',nome:'Administrador',role:'admin',permissoes:[]});
-    S.usuarios=[{id:'admin',username:'admin',senha:'aros2025',nome:'Administrador',role:'admin',permissoes:[]}];
+    await setDoc(doc(db,'usuarios','admin'),{username:'admin',senha:'aros2025',nome:'Administrador',tipo:'adm',role:'admin',permissoes:[]});
+    S.usuarios=[{id:'admin',username:'admin',senha:'aros2025',nome:'Administrador',tipo:'adm',role:'admin',permissoes:[]}];
   }
 }
 
-// Lista de abas que o usuário vê. Admin sempre vê tudo. Usuários comuns: apenas o que está em permissoes[].
+// Retorna o "tipo" do usuário, com fallback pro modelo antigo (role).
+// Tipos: adm | prof | coord | suporte | financeiro
+function getTipo(u){
+  if(!u)return null;
+  if(u.tipo)return u.tipo;
+  if(u.role==='admin')return 'adm';
+  if(u.role==='avaliador')return 'prof';
+  // Default pros legados não-admin: coord (mantém acesso ao que tinha em permissoes[])
+  return 'coord';
+}
+window.getTipo=getTipo;
+
+// Lista de abas que o usuário vê. Admin (tipo 'adm') sempre vê tudo.
+// Demais: apenas o que está em permissoes[].
 function userTabs(u){
   if(!u)return[];
-  if(u.role==='admin')return ALL_TABS;
+  if(getTipo(u)==='adm')return ALL_TABS;
   if(Array.isArray(u.permissoes))return u.permissoes;
-  // Compat com cadastros antigos baseados em role 'coordenador'/'avaliador'
+  // Compat com cadastros antigos sem permissoes
   const legacy={coordenador:['simulados','trocas','professores','listas','desempenho'],avaliador:['checklist']};
   return legacy[u.role]||[];
 }
 
-// "Admin DE uma aba específica" — true se role==='admin' (admin global) OU se a aba
-// está em permissoesAdmin[]. Permite criar usuários com poderes de admin restritos a
-// abas específicas (ex: controladoria com admin do Financeiro mas sem ver o resto).
+// "Admin DE uma aba específica" — true se tipo==='adm' (admin global)
+// OU se a aba está em permissoes[] (acesso à aba = controle total dentro dela).
 function _isAdminEm(tab){
   const u=S.currentUser;
   if(!u)return false;
-  if(u.role==='admin')return true;
-  if(Array.isArray(u.permissoesAdmin)&&u.permissoesAdmin.includes(tab))return true;
+  if(getTipo(u)==='adm')return true;
+  if(Array.isArray(u.permissoes)&&u.permissoes.includes(tab))return true;
   return false;
 }
 window._isAdminEm=_isAdminEm;
 
 function userRoleLabel(u){
-  if(u.role==='admin')return'Administrador';
-  if(Array.isArray(u.permissoes))return`${u.permissoes.length} permiss${u.permissoes.length===1?'ão':'ões'}`;
-  return u.role||'Usuário';
+  if(!u)return'Usuário';
+  const t=getTipo(u);
+  if(typeof _tiposMeta==='function'){
+    const meta=_tiposMeta();
+    if(meta[t]?.label)return meta[t].label;
+  }
+  return ({adm:'Administrador',prof:'Professor',coord:'Coordenador',suporte:'Suporte',financeiro:'Financeiro'})[t]||t||'Usuário';
 }
 
 // Renderiza a sidebar agrupada (lê permissões do usuário logado para esconder abas/grupos vazios)
 function renderSidebar(){
   const container=document.getElementById('co-tabs-list');if(!container)return;
   const allowed=new Set(userTabs(S.currentUser));
-  const isAdmin=S.currentUser?.role==='admin';
-  // Strict-admin tabs (ex: auditoria) só aparecem se role==='admin'
+  const isAdmin=getTipo(S.currentUser)==='adm';
+  // Strict-admin tabs (ex: auditoria) só aparecem para o tipo 'adm'
   if(!isAdmin){STRICT_ADMIN_TABS.forEach(t=>allowed.delete(t));}
   const collapsed=new Set(JSON.parse(localStorage.getItem('aros-sidebar-collapsed')||'[]'));
   container.innerHTML=_menuEffectiveGroups().map(g=>{
@@ -7655,7 +7802,7 @@ function renderSidebar(){
         ${filtered.map(it=>{
           if(it.kind==='tab'){
             const t=it.tab;
-            const adm=ADMIN_ONLY_TABS.has(t.id)?'<span class="co-tab-adm">ADM</span>':'';
+            const adm=isAdmExclusiveTab(t.id)?'<span class="co-tab-adm">ADM</span>':'';
             return `<button class="co-tab" data-tab="${t.id}" onclick="switchCoTab('${t.id}',this)"><span class="co-tab-label">${tabLabel(t)}</span>${adm}</button>`;
           }
           const sgCol=collapsed.has(it.id);
@@ -7665,7 +7812,7 @@ function renderSidebar(){
             </button>
             <div class="co-subgroup-body">
               ${it.tabs.map(t=>{
-                const adm=ADMIN_ONLY_TABS.has(t.id)?'<span class="co-tab-adm">ADM</span>':'';
+                const adm=isAdmExclusiveTab(t.id)?'<span class="co-tab-adm">ADM</span>':'';
                 return `<button class="co-tab" data-tab="${t.id}" onclick="switchCoTab('${t.id}',this)"><span class="co-tab-label">${tabLabel(t)}</span>${adm}</button>`;
               }).join('')}
             </div>
@@ -10930,15 +11077,18 @@ window.pedirIdentidadeProf=(opts)=>{
   document.getElementById('masm-explicacao').textContent=opts.explicacao||'Como o login da coordenação é único, identifique o professor responsável.';
   document.getElementById('masm-ok-btn').innerHTML=opts.btnLabel||'🛡️ Confirmar';
   S._masmCallback=opts.onConfirm||null;
-  // Popula select com profs
+  // Popula select com profs (abole dropdown se prof logado)
   const sel=document.getElementById('masm-prof');
-  sel.innerHTML='<option value="">— escolha —</option>'+(S.profs||[]).map(p=>`<option value="${(p||'').replace(/"/g,'&quot;')}">${(p||'').replace(/</g,'&lt;')}</option>`).join('');
-  // Pré-seleciona último prof usado (localStorage)
-  const ult=localStorage.getItem('aros_rec_ult_prof');
-  if(ult&&[...sel.options].some(o=>o.value===ult))sel.value=ult;
+  aplicarProfLogadoEmSelect(sel,{placeholder:'— escolha —'});
+  const profLogado=getProfLogadoNome();
+  if(!profLogado){
+    // Pré-seleciona último prof usado (localStorage) — só faz sentido pro admin
+    const ult=localStorage.getItem('aros_rec_ult_prof');
+    if(ult&&[...sel.options].some(o=>o.value===ult))sel.value=ult;
+  }
   document.getElementById('masm-err').classList.add('hidden');
   document.getElementById('modal-assumir').classList.remove('hidden');
-  setTimeout(()=>sel.focus(),50);
+  if(!profLogado)setTimeout(()=>sel.focus(),50);
 };
 
 // Handler genérico do botão OK do modal de identidade — dispara o callback configurado.
@@ -16791,7 +16941,7 @@ function applyTabsByRole(){
 
 // Aplica sessão local pro user autenticado (custom OU Firebase Auth via onAuthStateChanged)
 function _applyLocalSession(u){
-  S.currentUser=u;S.unlocked=true;S.profUnlocked=u.role==='avaliador';
+  S.currentUser=u;S.unlocked=true;S.profUnlocked=getTipo(u)==='prof';
   try{localStorage.setItem('aros_session',u.username||u.id);}catch(e){}
   document.getElementById('co-login').classList.add('hidden');
   document.getElementById('co-panel').classList.remove('hidden');
@@ -16862,9 +17012,15 @@ window.checkPass=async()=>{
       // credencial não bate no Firebase — tenta fluxo custom abaixo
     }
   }
-  // Fallback: login custom clássico (username + senha plaintext)
+  // Fallback: login custom clássico. Aceita digitar tanto o slug (username/id)
+  // quanto o display name (campo nome), case-insensitive — ambos viáveis após o refactor de tipos.
   try{await loadUsuarios();}catch(e){console.error(e);}
-  const u=S.usuarios.find(x=>!x.inativo&&(x.username||x.id||'').toLowerCase()===username&&x.senha===senha);
+  const u=S.usuarios.find(x=>{
+    if(x.inativo||x.senha!==senha)return false;
+    const slug=(x.username||x.id||'').toLowerCase();
+    const display=(x.nome||'').toLowerCase();
+    return slug===username||display===username;
+  });
   if(!u){errEl.textContent='Usuário ou senha incorretos.';errEl.classList.remove('hidden');return;}
   errEl.classList.add('hidden');
   _applyLocalSession(u);
@@ -16927,61 +17083,68 @@ function _restoreSession(){
 // ── CRUD USUÁRIOS ────────────────────────────────────────────────────────────
 function renderUsuarios(){
   const el=document.getElementById('users-list');if(!el)return;
+  const countEl=document.getElementById('users-count');
   // Filtra inativos (renomeados ou desativados) — não aparecem na lista.
   const ativos=S.usuarios.filter(u=>!u.inativo);
-  if(!ativos.length){el.innerHTML='<p style="color:var(--t2);font-size:13px">Nenhum usuário cadastrado.</p>';return;}
-  const sorted=[...ativos].sort((a,b)=>{
-    // Admins primeiro, depois alfabético
-    const ad=(a.role==='admin'?0:1)-(b.role==='admin'?0:1);
-    return ad!==0?ad:(a.username||'').localeCompare(b.username||'','pt-BR');
-  });
+  // Aplica filtro de busca (nome OR email, case-insensitive, sem acentos)
+  const searchEl=document.getElementById('users-search');
+  const raw=(searchEl?.value||'').trim().toLowerCase();
+  const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const q=norm(raw);
+  const filtered=q?ativos.filter(u=>norm(u.nome||u.username||'').includes(q)||norm(u.email||'').includes(q)):ativos;
+  // Ordem alfabética simples por nome de exibição (pt-BR, case-insensitive)
+  const sorted=[...filtered].sort((a,b)=>(a.nome||a.username||'').localeCompare(b.nome||b.username||'','pt-BR',{sensitivity:'base'}));
+  // Contador
+  if(countEl){
+    countEl.textContent=q
+      ? `${sorted.length} de ${ativos.length} ${ativos.length===1?'usuário':'usuários'}`
+      : `${ativos.length} ${ativos.length===1?'usuário':'usuários'}`;
+  }
+  if(!sorted.length){
+    el.innerHTML=`<div style="padding:32px 16px;text-align:center;color:var(--t2);font-size:13px;border:1px dashed var(--border);border-radius:var(--rs);background:var(--bg3)">${q?'Nenhum usuário encontrado para "<strong>'+_escHtml(raw)+'</strong>".':'Nenhum usuário cadastrado.'}</div>`;
+    return;
+  }
+  const meta=typeof _tiposMeta==='function'?_tiposMeta():{};
   el.innerHTML=sorted.map(u=>{
     const isMe=S.currentUser&&u.id===S.currentUser.id;
-    const isAdmin=u.role==='admin';
-    const tabs=userTabs(u);
-    const adminEm=Array.isArray(u.permissoesAdmin)?u.permissoesAdmin:[];
-    const badge=isAdmin?'<span class="badge b-swap">admin · acesso total</span>'
-      :`<span class="badge b-conf">${tabs.length} ${tabs.length===1?'aba':'abas'}</span>${adminEm.length?` <span class="badge b-swap" title="Admin de ${adminEm.length} aba${adminEm.length===1?'':'s'} específica${adminEm.length===1?'':'s'}">admin: ${adminEm.join(', ')}</span>`:''}`;
-    const tabsList=isAdmin?'todas as abas (inclusive futuras)':tabs.map(t=>{
-      const tabDef=TAB_GROUPS.flatMap(g=>g.tabs).find(x=>x.id===t);return tabDef?tabLabel(tabDef):t;
-    }).join(', ')||'<em style="color:var(--t3)">nenhuma</em>';
-    return`<div class="aluno-row">
-      <div style="flex:1;min-width:200px">
-        <div style="font-weight:700;font-size:14px">${u.nome||u.username} ${isMe?'<span style="color:var(--accent);font-size:11px;font-weight:600">(você)</span>':''}</div>
-        <div style="color:var(--t2);font-size:12px;margin-top:2px">@${u.username||u.id} · ${badge}</div>
-        <div style="color:var(--t2);font-size:11px;margin-top:4px">${tabsList}</div>
+    const tipo=getTipo(u);
+    const tipoMeta=meta[tipo]||{label:userRoleLabel(u),icon:'👤'};
+    const tipoIcon=tipoMeta.icon||'👤';
+    const tipoLbl=tipoMeta.label||userRoleLabel(u);
+    const displayName=u.nome||u.username||'';
+    return `<div class="user-row" onclick="openUserModal('${u.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openUserModal('${u.id}')}">
+      <div class="user-row-main">
+        <div class="user-row-name">${_escHtml(displayName)}${isMe?' <span class="user-row-me">você</span>':''}</div>
+        ${u.email?`<div class="user-row-email">${_escHtml(u.email)}</div>`:''}
       </div>
-      <div class="aluno-acts">
-        <button class="btn btn-s btn-sm" onclick="openUserModal('${u.id}')">✏️ Editar</button>
+      <div class="user-row-tipo">
+        <span class="user-row-tipo-icon">${tipoIcon}</span>
+        <span class="user-row-tipo-label">${_escHtml(tipoLbl)}</span>
       </div>
+      <div class="user-row-chev">›</div>
     </div>`;
   }).join('');
 }
+window.renderUsuarios=renderUsuarios;
 
 window.openUserModal=(id)=>{
   const isEdit=!!id;
   const u=isEdit?S.usuarios.find(x=>x.id===id):null;
   document.getElementById('mu-title').textContent=isEdit?'Editar usuário':'Novo usuário';
-  document.getElementById('mu-username').value=u?.username||'';
+  // Display name primeiro (preservar acentos/espaços); username é fallback pra docs antigos
+  document.getElementById('mu-username').value=u?.nome||u?.username||'';
   // Edição liberada: admin pode renomear. Renomeio cria novo doc + marca o velho inativo.
   document.getElementById('mu-username').disabled=false;
-  document.getElementById('mu-nome').value=u?.nome||'';
   document.getElementById('mu-email').value=u?.email||'';
   document.getElementById('mu-senha').value=u?.senha||'';
-  const isAdmin=u?.role==='admin';
-  document.getElementById('mu-admin').checked=isAdmin;
+  const tipo=isEdit?getTipo(u):'prof';
+  popMuTipoSelect(tipo);
   // Monta grid de checkboxes seguindo a estrutura efetiva (grupos + subgrupos + ordem custom)
   const userPerms=new Set(userTabs(u));
-  const userPermsAdmin=new Set(Array.isArray(u?.permissoesAdmin)?u.permissoesAdmin:[]);
   const grid=document.getElementById('mu-perms-grid');
-  const gridAdmin=document.getElementById('mu-perms-admin-grid');
-  // STRICT_ADMIN_TABS (auditoria) não pode ser concedida como permissão granular — só role==='admin'.
+  // STRICT_ADMIN_TABS (auditoria) não pode ser concedida como permissão granular — só tipo 'adm'.
   const _tabCheckbox=(t,extraStyle)=>STRICT_ADMIN_TABS.has(t.id)?'':`<label style="display:flex;align-items:center;gap:8px;padding:5px 8px;cursor:pointer;border-radius:6px;${extraStyle||''}" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background=''">
-        <input type="checkbox" class="mu-perm" value="${t.id}" ${isAdmin||userPerms.has(t.id)?'checked':''} onchange="_muSyncAdminGrid()" style="width:14px;height:14px;cursor:pointer"/>
-        <span style="font-size:13px">${tabLabel(t)}</span>
-      </label>`;
-  const _tabAdminCheckbox=(t,extraStyle)=>STRICT_ADMIN_TABS.has(t.id)?'':`<label style="display:flex;align-items:center;gap:8px;padding:5px 8px;cursor:pointer;border-radius:6px;${extraStyle||''}" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background=''">
-        <input type="checkbox" class="mu-perm-admin" value="${t.id}" ${userPermsAdmin.has(t.id)?'checked':''} style="width:14px;height:14px;cursor:pointer"/>
+        <input type="checkbox" class="mu-perm" value="${t.id}" ${tipo==='adm'||userPerms.has(t.id)?'checked':''} style="width:14px;height:14px;cursor:pointer"/>
         <span style="font-size:13px">${tabLabel(t)}</span>
       </label>`;
   const groupsHtml=_menuEffectiveGroups().map(g=>`
@@ -16998,23 +17161,15 @@ window.openUserModal=(id)=>{
     </div>
   `).join('');
   grid.innerHTML=groupsHtml;
-  // Grid "Admin de" — mesma estrutura mas com class diferente nos checkboxes
-  const groupsAdminHtml=_menuEffectiveGroups().map(g=>`
-    <div style="margin-bottom:10px">
-      <div style="font-size:10px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">${(g.label||'').replace(/</g,'&lt;')}</div>
-      ${g.items.map(it=>{
-        if(it.kind==='tab')return _tabAdminCheckbox(it.tab);
-        const sg=it;
-        return `<div style="margin:4px 0 4px 8px;padding-left:8px;border-left:1px dashed var(--border)">
-          <div style="font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.5px;text-transform:uppercase;margin:4px 0 2px">${(sg.label||'').replace(/</g,'&lt;')}</div>
-          ${sg.tabs.map(t=>_tabAdminCheckbox(t,'margin-left:4px')).join('')}
-        </div>`;
-      }).join('')}
-    </div>
-  `).join('');
-  gridAdmin.innerHTML=groupsAdminHtml;
-  toggleAdminMode();
-  _muSyncAdminGrid();
+  // Ajusta visibilidade da seção de permissões e (se for novo usuário) aplica preset
+  if(isEdit){
+    // Edit: respeita as permissoes salvas (já marcadas acima) — só ajusta visibilidade
+    const section=document.getElementById('mu-perms-section');
+    if(section)section.style.display=tipo==='adm'?'none':'';
+  }else{
+    // Novo: aplica preset do tipo default
+    onTipoChange();
+  }
   document.getElementById('mu-err').classList.add('hidden');
   const delBtn=document.getElementById('mu-del');
   // Não deixa apagar o próprio usuário logado
@@ -17024,48 +17179,262 @@ window.openUserModal=(id)=>{
   document.getElementById('modal-user').classList.remove('hidden');
 };
 
-// Sincroniza o grid "Admin de" com as permissões marcadas: só admin de aba a que
-// o usuário tem permissão de acesso. Checkbox fica desabilitado pra abas não permitidas.
-window._muSyncAdminGrid=()=>{
-  const permitidas=new Set(Array.from(document.querySelectorAll('.mu-perm:checked')).map(c=>c.value));
-  document.querySelectorAll('.mu-perm-admin').forEach(c=>{
-    const allowed=permitidas.has(c.value);
-    c.disabled=!allowed;
-    const lbl=c.closest('label');
-    if(lbl){lbl.style.opacity=allowed?'1':'.4';lbl.style.cursor=allowed?'pointer':'not-allowed';}
-    if(!allowed)c.checked=false;
-  });
+// ── Presets por Tipo de Usuário ──────────────────────────────────────────────
+const TIPOS_PRESETS_DEFAULT={
+  adm:[],
+  prof:['simulados','trocas','desempenho','checklist','revisao','professores'],
+  coord:['simulados','trocas','extra','simExtras','desempenho','checklist','revisao','professores','listas','mentorias','comunicacao','senhasAcessos','senhasPublicas'],
+  suporte:['listas','comunicacao','senhasAcessos','senhasPublicas','extra'],
+  financeiro:['financeiro','simulados']
 };
-
-// Quando "Administrador" está marcado, ambos os grids (permissões + admin-por-aba) ficam
-// desabilitados (admin geral tem tudo automaticamente).
-window.toggleAdminMode=()=>{
-  const isAdmin=document.getElementById('mu-admin').checked;
-  const wrap=document.getElementById('mu-perms-wrap');
-  const wrapAdmin=document.getElementById('mu-perms-admin-wrap');
-  wrap.style.opacity=isAdmin?'.45':'1';
-  wrap.style.pointerEvents=isAdmin?'none':'auto';
-  if(wrapAdmin){
-    wrapAdmin.style.opacity=isAdmin?'.45':'1';
-    wrapAdmin.style.pointerEvents=isAdmin?'none':'auto';
+const TIPO_META={
+  prof:{icon:'👨‍🏫',label:'Professor'},
+  coord:{icon:'🎯',label:'Coordenador'},
+  suporte:{icon:'🤝',label:'Suporte'},
+  financeiro:{icon:'💰',label:'Financeiro'},
+  adm:{icon:'🛡️',label:'Administrador'}
+};
+function _tiposPresets(){
+  const cfg=S.cfg&&S.cfg.tiposPresets;
+  const merged={...TIPOS_PRESETS_DEFAULT};
+  if(cfg&&typeof cfg==='object'){
+    // Inclui defaults + qualquer tipo custom presente no cfg
+    for(const k of Object.keys(cfg)){
+      if(Array.isArray(cfg[k]))merged[k]=cfg[k];
+    }
   }
-  if(isAdmin)document.querySelectorAll('.mu-perm').forEach(c=>c.checked=true);
-  if(typeof _muSyncAdminGrid==='function')_muSyncAdminGrid();
-};
+  // Garante que adm sempre existe (mesmo que vazio)
+  if(!Array.isArray(merged.adm))merged.adm=[];
+  return merged;
+}
+// Merge dos metadados: defaults hardcoded + custom em S.cfg.tiposMeta
+function _tiposMeta(){
+  const cfg=S.cfg&&S.cfg.tiposMeta;
+  const merged={...TIPO_META};
+  if(cfg&&typeof cfg==='object'){
+    for(const k of Object.keys(cfg)){
+      const m=cfg[k];
+      if(m&&typeof m==='object'){
+        merged[k]={
+          label:(typeof m.label==='string'&&m.label.trim())?m.label.trim():(merged[k]?.label||k),
+          icon:(typeof m.icon==='string'&&m.icon.trim())?m.icon.trim():(merged[k]?.icon||'👤'),
+        };
+      }
+    }
+  }
+  return merged;
+}
+window._tiposMeta=_tiposMeta;
+function onTipoChange(){
+  const tipo=document.getElementById('mu-tipo').value;
+  const permsSection=document.getElementById('mu-perms-section');
+  if(tipo==='adm'){
+    if(permsSection)permsSection.style.display='none';
+    document.querySelectorAll('#mu-perms-grid input[type=checkbox]').forEach(cb=>cb.checked=true);
+  }else{
+    if(permsSection)permsSection.style.display='';
+    const preset=new Set((_tiposPresets()[tipo])||[]);
+    document.querySelectorAll('#mu-perms-grid input[type=checkbox]').forEach(cb=>{
+      cb.checked=preset.has(cb.value);
+    });
+  }
+}
+window.onTipoChange=onTipoChange;
+
+// Ordem canonical: defaults primeiro, customs em ordem alfabética, adm sempre por último
+function _tiposOrdenados(){
+  const presets=_tiposPresets();
+  const defaults=['prof','coord','suporte','financeiro'];
+  const customs=Object.keys(presets).filter(t=>!defaults.includes(t)&&t!=='adm').sort();
+  return [...defaults.filter(t=>t in presets),...customs,'adm'];
+}
+window._tiposOrdenados=_tiposOrdenados;
+
+// _escHtml já existe em escopo de módulo (linha ~4980). Só adicionamos _escAttr (variante pra atributos com aspas).
+function _escAttr(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function renderTiposPresets(){
+  const wrap=document.getElementById('tipos-presets-wrap');if(!wrap)return;
+  const current=_tiposPresets();
+  const meta=_tiposMeta();
+  const tipos=_tiposOrdenados();
+  const DEFAULT_TIPOS=new Set(['prof','coord','suporte','financeiro','adm']);
+  wrap.innerHTML=tipos.map(tipo=>{
+    const m=meta[tipo]||{label:tipo,icon:'👤'};
+    const label=_escHtml(m.label);
+    const icon=_escHtml(m.icon||'👤');
+    const tipoAttr=_escAttr(tipo);
+    const isDefault=DEFAULT_TIPOS.has(tipo);
+    const isAdm=tipo==='adm';
+    const count=isAdm?'∞':((current[tipo]||[]).length);
+    const countLabel=isAdm?'acesso total':`${count} abas`;
+    let body;
+    if(isAdm){
+      body=`<p style="font-size:12px;color:var(--t2);margin:0">Administrador sempre tem acesso total. Configuração não aplicável.</p>`;
+    }else{
+      const set=new Set(current[tipo]||[]);
+      const gridHtml=TAB_GROUPS.map(g=>{
+        const tabs=g.tabs.filter(t=>!STRICT_ADMIN_TABS.has(t.id));
+        if(!tabs.length)return'';
+        return `<div style="font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--t2);margin:8px 0 4px">// ${_escHtml(g.label)}</div>`+
+          tabs.map(t=>`<label style="display:flex;align-items:center;gap:8px;padding:5px 8px;cursor:pointer;border-radius:6px" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><input type="checkbox" data-tipo="${tipoAttr}" data-tab="${_escAttr(t.id)}" ${set.has(t.id)?'checked':''} style="width:14px;height:14px;cursor:pointer"/> <span style="font-size:13px">${_escHtml(t.label)}</span></label>`).join('');
+      }).join('');
+      body=`<div data-tipo-grid="${tipoAttr}" style="display:flex;flex-direction:column;gap:2px">${gridHtml}</div>`;
+    }
+    // Botões de editar/excluir só pra não-adm. Defaults podem ser editados (renomear/ícone) mas não excluídos.
+    const btnEdit=!isAdm?`<button class="btn btn-s btn-sm" onclick="event.stopPropagation();editarTipoMeta('${tipoAttr}')" title="Renomear/mudar ícone" style="padding:4px 8px;font-size:12px">✏️</button>`:'';
+    const btnDel=(!isAdm&&!isDefault)?`<button class="btn btn-d btn-sm" onclick="event.stopPropagation();excluirTipo('${tipoAttr}')" title="Excluir tipo" style="padding:4px 8px;font-size:12px">🗑</button>`:'';
+    return `<div style="border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;transition:all .2s var(--ease-out-soft,ease-out)">
+      <div onclick="toggleTipoAccordion('${tipoAttr}')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg3);cursor:pointer;user-select:none" onmouseover="this.style.background='var(--bg4,var(--bg2))'" onmouseout="this.style.background='var(--bg3)'">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">
+          <span style="font-size:18px">${icon}</span>
+          <span style="font-weight:700;font-size:14px">${label}</span>
+          <span style="font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;color:var(--t2);letter-spacing:.8px;text-transform:uppercase">${countLabel}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          ${btnEdit}${btnDel}
+          <span id="tipo-arr-${tipoAttr}" style="transition:transform .2s;font-size:12px;color:var(--t2);margin-left:4px">▼</span>
+        </div>
+      </div>
+      <div id="tipo-body-${tipoAttr}" style="display:none;padding:14px;border-top:1px solid var(--border);background:var(--bg2)">
+        ${body}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleTipoAccordion(tipo){
+  const body=document.getElementById(`tipo-body-${tipo}`);
+  const arr=document.getElementById(`tipo-arr-${tipo}`);
+  if(!body)return;
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'';
+  if(arr)arr.style.transform=open?'rotate(0deg)':'rotate(180deg)';
+}
+window.toggleTipoAccordion=toggleTipoAccordion;
+
+// Slug validator: lowercase, [a-z][a-z0-9_]*
+function _validaSlugTipo(s){
+  if(!s||typeof s!=='string')return'Slug não pode ser vazio.';
+  if(!/^[a-z][a-z0-9_]*$/.test(s))return'Slug inválido. Use apenas letras minúsculas, números e _ (começa com letra).';
+  if(s==='adm')return'Slug "adm" é reservado.';
+  if(s in _tiposPresets())return'Já existe um tipo com esse slug.';
+  return null;
+}
+
+async function novoTipoUsuario(){
+  const slug=(prompt('ID/slug do novo tipo (lowercase, sem espaços. Ex: monitor, estagiario):')||'').trim().toLowerCase();
+  if(!slug)return;
+  const err=_validaSlugTipo(slug);
+  if(err){alert(err);return;}
+  const label=(prompt('Nome de exibição (Ex: Monitor, Estagiário):',slug)||'').trim();
+  if(!label){alert('Nome não pode ser vazio.');return;}
+  const icon=(prompt('Ícone (emoji ou caractere curto). Deixe vazio pra usar 👤:','👤')||'').trim()||'👤';
+  // Persiste imediato
+  if(!S.cfg)S.cfg={};
+  S.cfg.tiposPresets={...(S.cfg.tiposPresets||{}),[slug]:[]};
+  S.cfg.tiposMeta={...(S.cfg.tiposMeta||{}),[slug]:{label,icon}};
+  try{
+    await setDoc(doc(db,'config','settings'),{tiposPresets:S.cfg.tiposPresets,tiposMeta:S.cfg.tiposMeta},{merge:true});
+    if(typeof audit==='function')audit('CONFIG_ALTERADA',{collection:'config',path:'settings'},{meta:{kind:'tipoUsuario',action:'criar',tipo:slug,label,icon}});
+    renderTiposPresets();
+    // Abre o novo accordion
+    setTimeout(()=>toggleTipoAccordion(slug),50);
+  }catch(e){console.error(e);alert('Erro ao criar tipo: '+(e.message||e));}
+}
+window.novoTipoUsuario=novoTipoUsuario;
+
+async function editarTipoMeta(tipo){
+  const meta=_tiposMeta()[tipo]||{label:tipo,icon:'👤'};
+  const novoLabel=(prompt('Novo nome de exibição:',meta.label)||'').trim();
+  if(!novoLabel){alert('Nome não pode ser vazio.');return;}
+  const novoIcon=(prompt('Novo ícone (emoji ou caractere curto):',meta.icon||'👤')||'').trim()||'👤';
+  if(!S.cfg)S.cfg={};
+  S.cfg.tiposMeta={...(S.cfg.tiposMeta||{}),[tipo]:{label:novoLabel,icon:novoIcon}};
+  try{
+    await setDoc(doc(db,'config','settings'),{tiposMeta:S.cfg.tiposMeta},{merge:true});
+    if(typeof audit==='function')audit('CONFIG_ALTERADA',{collection:'config',path:'settings'},{before:{label:meta.label,icon:meta.icon},after:{label:novoLabel,icon:novoIcon},meta:{kind:'tipoUsuario',action:'editar',tipo}});
+    renderTiposPresets();
+  }catch(e){console.error(e);alert('Erro ao salvar: '+(e.message||e));}
+}
+window.editarTipoMeta=editarTipoMeta;
+
+async function excluirTipo(tipo){
+  const meta=_tiposMeta()[tipo]||{label:tipo};
+  // Conta usuários ativos com esse tipo
+  const emUso=(S.usuarios||[]).filter(u=>!u.inativo&&getTipo(u)===tipo);
+  if(emUso.length){
+    alert(`${emUso.length} usuário(s) usa(m) o tipo "${meta.label}". Migre esses usuários para outro tipo antes de excluir.`);
+    return;
+  }
+  if(!confirm(`Excluir o tipo "${meta.label}"? Isso não pode ser desfeito.`))return;
+  if(!S.cfg)S.cfg={};
+  const presets={...(S.cfg.tiposPresets||{})};delete presets[tipo];
+  const metaAll={...(S.cfg.tiposMeta||{})};delete metaAll[tipo];
+  S.cfg.tiposPresets=presets;
+  S.cfg.tiposMeta=metaAll;
+  try{
+    // setDoc com merge não remove campos — usa updateDoc com deleteField
+    await setDoc(doc(db,'config','settings'),{tiposPresets:presets,tiposMeta:metaAll},{merge:true});
+    if(typeof audit==='function')audit('CONFIG_ALTERADA',{collection:'config',path:'settings'},{before:{tipo,label:meta.label},meta:{kind:'tipoUsuario',action:'excluir',tipo}});
+    renderTiposPresets();
+  }catch(e){console.error(e);alert('Erro ao excluir: '+(e.message||e));}
+}
+window.excluirTipo=excluirTipo;
+
+async function salvarTiposPresets(){
+  const wrap=document.getElementById('tipos-presets-wrap');if(!wrap)return;
+  const novo={adm:[]};
+  // Itera todos os tipos atuais (defaults + custom), exceto adm
+  const tiposAtuais=_tiposOrdenados().filter(t=>t!=='adm');
+  for(const tipo of tiposAtuais){
+    const grid=wrap.querySelector(`[data-tipo-grid="${tipo.replace(/"/g,'\\"')}"]`);
+    if(!grid){novo[tipo]=(_tiposPresets()[tipo])||[];continue;}
+    novo[tipo]=[...grid.querySelectorAll('input[type=checkbox]:checked')].map(i=>i.dataset.tab);
+  }
+  S.cfg.tiposPresets=novo;
+  const metaAll=S.cfg.tiposMeta||{};
+  try{
+    await setDoc(doc(db,'config','settings'),{tiposPresets:novo,tiposMeta:metaAll},{merge:true});
+    if(typeof audit==='function')audit('CONFIG_ALTERADA',{collection:'config',path:'settings'},{after:{tiposPresets:novo},meta:{kind:'tiposPresets'}});
+    alert('Presets salvos!');
+  }catch(e){console.error(e);alert('Erro ao salvar presets: '+(e.message||e));}
+}
+window.renderTiposPresets=renderTiposPresets;
+window.salvarTiposPresets=salvarTiposPresets;
+
+// Popula o <select id="mu-tipo"> dinamicamente com defaults + customs
+function popMuTipoSelect(currentTipo){
+  const sel=document.getElementById('mu-tipo');if(!sel)return;
+  const meta=_tiposMeta();
+  const tipos=_tiposOrdenados();
+  sel.innerHTML=tipos.map(t=>{
+    const m=meta[t]||{label:t,icon:'👤'};
+    const tag=t==='adm'?' (acesso total)':'';
+    const icon=_escHtml(m.icon||'👤');
+    const label=_escHtml(m.label);
+    const val=_escAttr(t);
+    return `<option value="${val}" ${t===currentTipo?'selected':''}>${icon} ${label}${tag}</option>`;
+  }).join('');
+}
+window.popMuTipoSelect=popMuTipoSelect;
 
 window.saveUser=async()=>{
   const editId=document.getElementById('modal-user').dataset.editId||'';
-  const username=document.getElementById('mu-username').value.trim().toLowerCase();
-  const nome=document.getElementById('mu-nome').value.trim();
+  // Username = display name (aceita espaços, acentos, etc). ID do doc = versão normalizada.
+  const usernameDisplay=document.getElementById('mu-username').value.trim();
   const email=(document.getElementById('mu-email')?.value||'').trim().toLowerCase();
   const senha=document.getElementById('mu-senha').value;
-  const isAdmin=document.getElementById('mu-admin').checked;
+  const tipo=document.getElementById('mu-tipo').value;
+  const isAdmin=tipo==='adm';
   const permissoes=isAdmin?[]:Array.from(document.querySelectorAll('.mu-perm:checked')).map(c=>c.value);
-  const permissoesAdmin=isAdmin?[]:Array.from(document.querySelectorAll('.mu-perm-admin:checked')).map(c=>c.value);
   const errEl=document.getElementById('mu-err');
-  if(!username||!senha){errEl.textContent='Preencha usuário e senha.';errEl.classList.remove('hidden');return;}
-  // Validator relaxado: aceita email (incl. @ e mais de um .) além de username tradicional.
-  if(!/^[a-z0-9._@+-]+$/.test(username)){errEl.textContent='Usuário pode ter letras minúsculas, números, ponto, arroba, traço, sublinha ou +.';errEl.classList.remove('hidden');return;}
+  if(!usernameDisplay||!senha){errEl.textContent='Preencha usuário e senha.';errEl.classList.remove('hidden');return;}
+  // ID do doc: normaliza o username pra slug (lowercase, sem acentos/espaços) — usado como chave Firestore.
+  const username=usernameDisplay.toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/\s+/g,'.').replace(/[^a-z0-9._@+-]/g,'');
+  if(!username){errEl.textContent='Nome de usuário inválido.';errEl.classList.remove('hidden');return;}
   if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent='Email inválido.';errEl.classList.remove('hidden');return;}
   // Conflito: username diferente do editId E já existe outro
   const conflito=S.usuarios.some(u=>(u.username||u.id)===username && u.id!==editId);
@@ -17075,8 +17444,9 @@ window.saveUser=async()=>{
     const emailConflito=S.usuarios.some(u=>!u.inativo&&u.email&&u.email.toLowerCase()===email&&u.id!==editId&&(u.username||u.id)!==username);
     if(emailConflito){errEl.textContent='Já existe um usuário ativo com esse email.';errEl.classList.remove('hidden');return;}
   }
-  if(!isAdmin&&!permissoes.length){errEl.textContent='Marque ao menos uma permissão (ou ative Administrador).';errEl.classList.remove('hidden');return;}
-  const data={username,nome:nome||username,email,senha,role:isAdmin?'admin':'user',permissoes,permissoesAdmin,inativo:false};
+  if(!isAdmin&&!permissoes.length){errEl.textContent='Marque ao menos uma permissão (ou escolha Administrador).';errEl.classList.remove('hidden');return;}
+  // role mantido por compat backward: 'admin' pra tipo adm, 'user' caso contrário.
+  const data={username,nome:usernameDisplay,email,senha,tipo,role:isAdmin?'admin':'user',permissoes,inativo:false};
   // Sanitiza senha pro audit log (não vazar credencial)
   const _dataForAudit={...data,senha:'***'};
   const _userBefore=editId?S.usuarios.find(u=>u.id===editId):null;
@@ -17128,8 +17498,8 @@ window.deleteUser=async()=>{
   const u=S.usuarios.find(x=>x.id===id);if(!u)return;
   if(!confirm(`Apagar usuário "${u.nome||u.username}"? Esta ação não pode ser desfeita.`))return;
   // Não permite apagar o último admin
-  const admins=S.usuarios.filter(x=>x.role==='admin');
-  if(u.role==='admin'&&admins.length<=1){alert('Não é possível apagar o único administrador.');return;}
+  const admins=S.usuarios.filter(x=>!x.inativo&&getTipo(x)==='adm');
+  if(getTipo(u)==='adm'&&admins.length<=1){alert('Não é possível apagar o único administrador.');return;}
   await deleteDoc(doc(db,'usuarios',id));
   audit('USUARIO_DESATIVADO',{collection:'usuarios',username:id},{before:{...u,senha:'***'},meta:{kind:'delete'}});
   await loadUsuarios();
@@ -19535,9 +19905,13 @@ function renderProfGlobal(){
       </div>`;
     }).join('')
     :'<p style="color:var(--t2);font-size:13px;margin-bottom:10px">Nenhum professor cadastrado.</p>';
-  // Populate prof selector for disponibilidade
+  // Populate prof selector for disponibilidade (abole dropdown se prof logado)
   const ps=document.getElementById('disp-prof-sel');
-  if(ps){ps.innerHTML='<option value="">Selecione seu nome...</option>'+S.profs.map(p=>`<option value="${p}">${p}</option>`).join('');}
+  if(ps){
+    aplicarProfLogadoEmSelect(ps,{placeholder:'Selecione seu nome...'});
+    // Se prof logado, dispara o load da disponibilidade do simulado atual
+    if(getProfLogadoNome())loadDispSim();
+  }
   // Populate single sim selector shared between disponibilidade and cobertura
   const ss=document.getElementById('prof-sim-sel');
   if(ss){const prev=ss.value;ss.innerHTML='<option value="">Selecione um simulado...</option>'+S.sims.map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');if(prev)ss.value=prev;}
@@ -20738,8 +21112,9 @@ window.saveCfg=async()=>{
   if(np.length<4){m.className='al al-e';m.textContent='A nova senha deve ter ao menos 4 caracteres.';m.classList.remove('hidden');return;}
   if(np!==cp){m.className='al al-e';m.textContent='As senhas não coincidem.';m.classList.remove('hidden');return;}
   const username=u.id||u.username;
-  const data={username,nome:u.nome||username,senha:np,role:u.role||'user',permissoes:u.permissoes||[]};
-  await setDoc(doc(db,'usuarios',username),data);
+  const data={username,nome:u.nome||username,senha:np,tipo:getTipo(u),role:u.role||(getTipo(u)==='adm'?'admin':'user'),permissoes:u.permissoes||[]};
+  if(u.email)data.email=u.email;
+  await setDoc(doc(db,'usuarios',username),data,{merge:true});
   u.senha=np;
   m.className='al al-s';m.textContent='✅ Senha alterada com sucesso!';m.classList.remove('hidden');
   document.getElementById('op').value='';
@@ -21827,7 +22202,13 @@ function requireProfForCaso(ci, callback){
   document.getElementById('prof-caso-aviso').classList.add('hidden');
   document.getElementById('prof-caso-hint').textContent='Para registrar sua avaliação, selecione seu nome:';
   const sel=document.getElementById('prof-caso-sel');
-  sel.innerHTML='<option value="">Selecione seu nome...</option>'+S.profs.map(p=>`<option value="${p}">${p}</option>`).join('');
+  aplicarProfLogadoEmSelect(sel,{placeholder:'Selecione seu nome...'});
+  // Se prof logado: identidade implícita, confirma direto sem mostrar modal
+  if(getProfLogadoNome()){
+    confirmarProfCaso();
+    return;
+  }
+  // Admin/coord: zera seleção e mostra modal pra escolher
   sel.value='';
   document.getElementById('modal-prof-caso').classList.remove('hidden');
 }
@@ -24749,7 +25130,7 @@ window.openFeedbackGeralModal=()=>{
   const s=_ckStudents.find(x=>x.id===_ckStudentId);
   document.getElementById('fg-modal-sub').textContent=s?.nome||'';
   const sel=document.getElementById('fg-prof-sel');
-  sel.innerHTML='<option value="">Selecione seu nome...</option>'+S.profs.map(p=>`<option value="${p}">${p}</option>`).join('');
+  aplicarProfLogadoEmSelect(sel,{placeholder:'Selecione seu nome...'});
   document.getElementById('fg-texto').value='';
   document.getElementById('fg-err').classList.add('hidden');
   document.getElementById('modal-feedback-geral').classList.remove('hidden');
