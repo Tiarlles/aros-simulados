@@ -78,8 +78,8 @@ simulados/{simId}
             isExtra?, presencial?, historico?
 
 usuarios/{slug}                     — painel da coord (slug = ID do doc, lowercase, sem espaço)
-  └ campos: username (slug), nome (display name), email, senha (plaintext — legacy),
-            tipo, role, permissoes[], inativo,
+  └ campos: username (slug), nome (display name), email (OBRIGATÓRIO desde 2026-05-21),
+            senha (plaintext — legacy), tipo, role, permissoes[], inativo,
             onboardingCriadoEm?, onboardingEnviadoEm?,
             renomeadoPara?, renomeadoEm?
   └ tipo (NOVO modelo, 2026-05-21):
@@ -821,6 +821,7 @@ Sistema de contestação de gabarito de provas TSA/TEA/ME1/ME2/ME3. Aluno públi
 - **Adicionado** select "Tipo de usuário" com 5 defaults + customs. `onTipoChange` aplica preset automaticamente (só em criação; em edição preserva permissões salvas).
 - Campo "Nome de usuário" editável mesmo em edit mode.
 - Validador relaxado (`/^[a-z0-9._@+-]+$/`): aceita email como username.
+- **Email é OBRIGATÓRIO** (decisão de 2026-05-21 — todo usuário precisa ter email pra eventualmente migrar pro Firebase Auth + receber convite/reset por email). Validador em `saveUser` bloqueia salvar sem email.
 
 **Renomear usuário**: docs do Firestore têm ID imutável e rules bloqueiam delete em `/usuarios`. Estratégia: cria novo doc com novo ID + marca o velho com `inativo:true` + `renomeadoPara: novo`. Login (`tryLogin`) e restore session filtram inativos via `!x.inativo`.
 
@@ -952,7 +953,8 @@ Não há build, lint, nem suíte de testes. Validação = abrir `index.html` no 
 ## Dívidas técnicas conhecidas (não corrigir sem pedirem)
 
 - **Senha plaintext em `usuarios.senha`** — refatorar quando aposentar custom login. Senha admin atual mudou (perguntar ao Tiarlles; `aros2025` é DESATUALIZADA).
-- **Login custom legado** ainda existe — planejado: feature flag `legacyLoginEnabled` em config + apagar após 60 dias de coexistência (~julho/2026).
+- **Login custom legado** continua disponível como fallback (aceita slug/nome/email + senha plaintext). **Decisão de 2026-05-21**: NÃO criar interruptor de desligamento — em vez disso, **email é obrigatório no cadastro de usuário** (forçando todos a terem email pra eventualmente migrar pro Firebase Auth). Custom login morre naturalmente quando o último user puder usar só Firebase Auth.
+- **Admin antigo (`usuarios/admin`)** apagado em prod em 2026-05-21 (estava sem email). O bootstrap em `loadUsuarios()` linha 7821 só recria o admin se a coleção estiver totalmente vazia — em prod nunca dispara mais (já há outros admins).
 - **Email reset usa template Firebase default** (não dá pra customizar HTML — restrição do Firebase). Nível 2 futuro: gerar link Firebase via Cloud Function + enviar email customizado via EmailJS.
 - **`auditLog` read aberto** (qualquer com projectId lê todo log) — refatorar quando aposentar custom login (vai ganhar `isAuth()` no read).
 - **`permissoesAdmin[]` órfão** em docs antigos — campo não é mais lido pelo código, dá pra limpar via migração.
@@ -1142,6 +1144,11 @@ Auth, audit log e onboarding (2026-05-21 — sessão longa, deploy completo):
 - **Badge "ADM" dinâmico**: `isAdmExclusiveTab(tabId)` substituiu `ADMIN_ONLY_TABS.has(tabId)` hardcoded — reflete decisões de preset em tempo real.
 - **Firebase Console**: idioma PT-BR, nome público "AROS · Anest-Review", `aros.anestreview.com.br` em Domínios Autorizados, support email Workspace.
 - **Deploy**: 3 commits + push `claude/recursing-mestorf-5f88f8 → main` + `firestore:rules` deployadas com nova regra `auditLog`.
+- **Refinos finais (mesma sessão)**:
+  - **Email obrigatório no cadastro de usuário**: `saveUser` rejeita salvar sem email. Hint no formulário diz "Obrigatório". Forçar email = caminho pra todos eventualmente logarem via Firebase Auth.
+  - **Admin antigo (`usuarios/admin` sem email) apagado em prod**. Bootstrap em `loadUsuarios()` só recria admin se a coleção estiver vazia — não dispara mais.
+  - **Decidido NÃO criar interruptor `legacyLoginEnabled`**. Em vez de UI pra desligar o login custom, email obrigatório no cadastro já força a migração natural. Custom login continua disponível como fallback indefinidamente.
+  - **Linguagem simples**: usuário (Tiarlles) pediu que evite jargão técnico — usar termos do dia-a-dia (ver `feedback_linguagem_simples.md` no memory).
 
 
 Camada de produto:
