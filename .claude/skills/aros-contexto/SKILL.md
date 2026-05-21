@@ -20,7 +20,7 @@ SPA monolítico single-file (HTML+CSS+JS vanilla, ~7500+ linhas em `index.html`)
 | CDN externos | EmailJS (envio de email), SheetJS (export/import xlsx), Firebase JS SDK |
 | Banco | Firebase Firestore (projeto `simulados-confirmacao`) |
 | Storage | Firebase Storage (imagens de revisão, checklists, slides) |
-| Auth | **Sistema próprio** em `usuarios/{username}` com senhas plaintext. Não usa Firebase Auth. **Dívida técnica conhecida.** |
+| Auth | **Firebase Auth** (Email/Password + Google) coexistindo com **login custom legado** em `usuarios/{username}` (senhas plaintext). Custom login virou read-only após apertarem as Rules (2026-05-21) — sobrevive como fallback até migração completa. **Senha admin atual mudou** (perguntar ao Tiarlles; `aros2025` é DESATUALIZADA). |
 | Email | EmailJS (`service_exyoa4r`). **Templates:** `template_r0vjejs` (simulados TSA Oral — trocas/confirmação/presença) e `template_hb89fxv` (Mentoria — todos os 5 tipos + envio de link da reunião). Mentoria usa var `{{tipo_mentoria}}` (TEA/TSA/ME1/ME2/ME3) em vez de `{{simulado}}`. |
 | Pagamentos | Hotmart (produto "+3 Simulados Extras Online AROS!") |
 | Notificações | Slack Incoming Webhook (canal `#notificacao-simulado-extra`) |
@@ -77,10 +77,23 @@ simulados/{simId}
             rodadasSab[], rodadasDom[], posProfs{},
             isExtra?, presencial?, historico?
 
-usuarios/{username}                 — painel da coord
-  └ campos: username, senha (plaintext), nome, role, permissoes[]
-  └ roles: 'admin' (acesso total) | 'user' (com permissoes[] granulares) | 'avaliador' (prof revisor)
-  └ default admin: admin / aros2025
+usuarios/{slug}                     — painel da coord (slug = ID do doc, lowercase, sem espaço)
+  └ campos: username (slug), nome (display name), email, senha (plaintext — legacy),
+            tipo, role, permissoes[], inativo,
+            onboardingCriadoEm?, onboardingEnviadoEm?,
+            renomeadoPara?, renomeadoEm?
+  └ tipo (NOVO modelo, 2026-05-21):
+      'adm'        — acesso total (ignora permissoes[])
+      'prof'       — preset default em config/settings.tiposPresets.prof
+      'coord'      — preset default
+      'suporte'    — preset default
+      'financeiro' — preset default
+      <custom>     — tipos custom criados pelo admin
+  └ role (BACKWARD COMPAT): 'admin' (= tipo:'adm') | 'user' (demais). Auto-derivado de tipo.
+  └ permissoes[]: IDs de abas que o user vê (ex: ['simulados','checklist']). adm ignora.
+  └ inativo: bool. Soft delete (Rules bloqueiam deleteDoc).
+  └ ELIMINADO em 2026-05-21: permissoesAdmin[] (admin granular por aba). Acesso à aba = controle total dentro.
+  └ Senha admin atual: PERGUNTAR ao Tiarlles (mudou; `aros2025` é DESATUALIZADA).
 
 listas/{listaId}                    — listas de alunos (cadastros)
   └ campos: nome, alunos[{nome, email, matricula}]
@@ -176,8 +189,18 @@ projecaoLive/{liveId}               — sessão de projeção remota AO VIVO (Fa
   │   Filtragem: cada slide mostra só seus traços (por casoId+slideIdx).
   │   Botão "🗑 Limpar" deleta todos os strokes do casoId+slideIdx atuais.
 
+auditLog/{auto}                     — trilha de auditoria (NOVO, 2026-05-21)
+  └ campos: ts (serverTimestamp), action (string canonical de AUDIT_ACTIONS),
+            target {collection, ...refs}, actor {uid, nome, email, role}|null,
+            before {...}|null, after {...}|null, meta {...}|null, userAgent
+  └ Helper window: window._audit(action, target, payload) fire-and-forget.
+  └ Read aberto (qualquer com projectId vê tudo) — refatorar quando aposentar custom login.
+
 config/{cfgId}
   ├ settings                        — config legacy + cronometroLimite ('mm:ss', default '07:30')
+  │                                   + tiposPresets {adm,prof,coord,suporte,financeiro,<custom>}
+  │                                   + tiposMeta {<tipo>: {label, icon}}  (override de TIPO_META)
+  │                                   Migração: professorPreset → tiposPresets.prof no boot.
   ├ professores                     — { lista: ['Nome 1', ...] }
   ├ menu                            — NEW schema: estrutura completa do menu lateral
   │   {
@@ -236,9 +259,10 @@ Filtros aplicados em: `renderSimCards`, `popCoSel`, `simsAplicados` (Garantia), 
 - Título com **barra accent vertical glow** à esquerda.
 - Chips de data: gradient bg + indicador accent vertical + label JetBrains Mono uppercase + valor `font-variant-numeric: tabular-nums`.
 
-**Padrão "ADM badge":**
-- Abas marcadas como admin-only ganham um pill mono "ADM" discreto à direita na sidebar.
-- Lista hardcoded em `ADMIN_ONLY_TABS = new Set(['usuarios','config','financeiro','features','recProvas','recFontes','recConfig','recMetricas','comunicacao'])`.
+**Padrão "ADM badge"** (dinâmico desde 2026-05-21):
+- Abas que SÓ tipo `adm` acessa ganham pill mono "ADM" à direita na sidebar.
+- Helper `isAdmExclusiveTab(tabId)`: `true` se a aba é STRICT_ADMIN OU se nenhum tipo não-adm tem essa aba no preset.
+- `STRICT_ADMIN_TABS` (hardcoded, núcleo absoluto): inclui aba `auditoria` (Audit Log).
 - `recGestao` é INTENCIONALMENTE não-admin-only — qualquer prof autenticado deve poder dar parecer em contestações.
 
 ## Estilo "Apple-like" (referência reutilizável)
@@ -401,7 +425,7 @@ Grupos default (em `TAB_GROUPS`):
 - **Cadastros:** Professores, Listas de Alunos
 - **Mentorias:** Mentorias
 - **Recursos:** 📚 Provas, 🛡️ Gestão de Recursos, 📖 Bibliografia, ⚙️ Instruções & Config, 📊 Métricas
-- **Administração:** 📌 Features, Financeiro, Usuários, Configurações
+- **Administração:** 📌 Features, Financeiro, Usuários, 📢 Comunicação, 🔍 Auditoria, Configurações
 
 **Reconciliação inteligente em `_menuEffectiveGroups()`:** quando um grupo NOVO é adicionado em `TAB_GROUPS` (e o usuário já tem `config/menu.structure` customizado), o grupo é automaticamente criado no final da estrutura salva (não fica órfão jogando as abas no último grupo existente).
 
@@ -423,10 +447,46 @@ Renderização da sidebar usa `_menuEffectiveGroups()` que:
 
 A aba Coordenação fica **oculta na visão inicial** (`tab-co` com `display:none`). Acesso via hash `#admin` ou `#coord` na URL.
 
-### Sistema de auth
-- Login usuário/senha custom (não usa Firebase Auth).
-- Roles: `admin`, `user` (permissões granulares), `avaliador` (prof que faz revisão de casos).
-- **Sessão persistida em localStorage** (`aros_session` = username). Refresh mantém login. Logout limpa.
+### Sistema de auth (refeito em 2026-05-21)
+**Coexistência de 2 sistemas** na tela `co-login`:
+1. **Firebase Auth** (novo): Google sign-in (`loginGoogle`) + Email/Password (`loginEmailFirebase`). Email/senha pode usar `sendPasswordResetEmail`.
+2. **Login custom legado** (`checkPass`): fallback para users sem email no Firebase. Aceita slug, display name ou email — case-insensitive.
+
+**Fluxo do `checkPass`**: se input contém `@` → tenta Firebase Auth primeiro, com fallback pro custom em `auth/invalid-credential` / `auth/user-not-found` / `auth/wrong-password`. Senão, vai direto pro custom.
+
+**Listener `onAuthStateChanged`** popula `S.currentUser` após sign-in Firebase: busca user doc por `email` em `S.usuarios`. Se não acha → erro + `signOut()`. Guard pra `?modo=projecao|projecao-live|preview` (não manipula DOM destruído). Flag `window._freshFirebaseLogin` evita auditar `LOGIN_*` em cada reload.
+
+**`esqueceuSenha`**: se input tem `@` → `sendPasswordResetEmail`; senão → mensagem orientando contatar coord.
+
+**Tipo + permissões** (modelo novo):
+- Helper `getTipo(u)`: retorna `u.tipo` com fallback pro `role` legado (`role:'admin'` → `'adm'`, demais → `'coord'`).
+- Helper `userTabs(u)`: tipo `adm` → `ALL_TABS`; senão → `u.permissoes`.
+- Helper `_isAdminEm(tabId)`: `tipo==='adm'` OU `permissoes.includes(tabId)`. **Acesso à aba = controle total dentro dela** (eliminou admin granular).
+- Campo `permissoesAdmin[]` **eliminado** em 2026-05-21 (órfão em docs antigos, ignorado pelo código).
+
+**Tipos de usuário configuráveis** (em `config/settings.tiposPresets`):
+- Defaults: `adm` (acesso total, preset ignorado), `prof`, `coord`, `suporte`, `financeiro`.
+- Custom: admin pode criar/editar/excluir em **Configurações → "⚙️ Presets de Tipo de Usuário"** (accordion com sub-accordion por tipo + checkboxes de tabs).
+- `TIPO_META` hardcoded define label+icon default por tipo; `config/settings.tiposMeta` permite override (incl. tipos custom).
+- Migração: campo antigo `professorPreset` é auto-migrado pra `tiposPresets.prof` no boot.
+
+**Identidade implícita de prof** (Fase 2, 2026-05-21):
+- Helper `getProfLogadoNome()` retorna nome do prof logado se aplicável (não-admin com `nome` que casa com `S.profs`), senão `null`.
+- Helper `aplicarProfLogadoEmSelect(sel, opts)` esconde o select e mostra badge "Você: {nome}".
+- **5 selects abolidos** quando prof logado: Disponibilidade (`disp-prof-sel`), Checklist Casos (`prof-caso-sel` — pula direto pro modal), Feedback Geral (`fg-prof-sel`), Parecer/Recurso (`masm-prof`).
+- **3 selects mantidos editáveis** (decisão UX): Mentorias grupo (`mmg-mentor`), Mentorias classe (`mcl-mentor`), Financeiro lançamento (`fl-prof`) — coord faz no nome de outros profs.
+
+**Audit Log** (NOVO, 2026-05-21):
+- Helper `audit(action, target, payload)` fire-and-forget. Window-exposed como `window._audit`.
+- Lista canônica em `AUDIT_ACTIONS` (linha ~4833): `LOGIN_CUSTOM`, `LOGIN_FIREBASE`, `LOGIN_GOOGLE`, `LOGOUT`, `SIMULADO_CRIADO`, `SIMULADO_EDITADO`, `NOTA_LANCADA`, `NOTA_RESETADA`, `ALUNO_ADICIONADO`, `ALUNO_REMOVIDO`, `ALUNO_STATUS_ALTERADO`, `ALUNO_MOVIDO`, `ALUNO_SWAP`, `PRESENCA_TOGGLE`, `MENTORIA_CRIADA`, `MENTORIA_EDITADA`, `MENTORIA_REMOVIDA`, `SOLICITACAO_EXTRA_EFETIVADA`, `SOLICITACAO_EXTRA_EDITADA`, `USUARIO_CRIADO`, `USUARIO_EDITADO`, `USUARIO_DESATIVADO`, `COMUNICACAO_POST_CRIADO`, `COMUNICACAO_POST_EDITADO`, `COMUNICACAO_POST_DELETADO`, `CONFIG_ALTERADA`.
+- ~30 pontos instrumentados no `index.html`.
+- **Aba "🔍 Auditoria"** em Admin (STRICT_ADMIN_TABS — só tipo `adm`): filtros (usuário, ação, data), paginação 50 por vez, modal com diff `before`/`after`, exportar CSV.
+
+**Badge "ADM" dinâmico** (2026-05-21):
+- Helper `isAdmExclusiveTab(tabId)`: `true` se a aba é STRICT_ADMIN OU se nenhum tipo não-adm tem essa aba no preset. Substituiu `ADMIN_ONLY_TABS.has(tabId)` hardcoded.
+- Badge no menu lateral reflete dinamicamente as decisões de preset.
+
+**Sessão persistida em localStorage** (`aros_session` = username). Refresh mantém login. Logout limpa. Em Firebase Auth, `onAuthStateChanged` restaura `S.currentUser` independente do localStorage.
 
 ### Auto-seleção de simulado por aba
 Várias abas que dependem de "qual sim?" usam helpers comuns:
@@ -745,36 +805,81 @@ Sistema de contestação de gabarito de provas TSA/TEA/ME1/ME2/ME3. Aluno públi
 
 **Bug fix 2026-05-19**: `loadFinanceiro` agora carrega `notaFiscalCfg` no estado em memória (estava sendo dropado no reload — save ia pro Firestore mas no boot perdia).
 
-### Sistema de auth: permissões granulares e admin por aba (2026-05-19)
+### Tela de Usuários reformulada (2026-05-21)
 
-**Modelo de dados** em `usuarios/{username}`:
-- `role`: `'admin'` (acesso total a tudo) | `'user'` (granular)
-- `permissoes[]`: lista de IDs de abas que o usuário VÊ (ex: `['financeiro']`)
-- `permissoesAdmin[]` (NOVO): lista de abas em que o usuário tem **poderes de admin** sem ser admin geral. Ex: `['financeiro']` faz o user agir como admin DENTRO do financeiro mas não ver outras abas
-- `inativo: bool` (NOVO): se `true`, usuário é filtrado do login + da listagem (usado pra "soft-delete" em renomeação, já que rules bloqueiam delete em `/usuarios`)
-- `renomeadoPara: 'novoUsername'` + `renomeadoEm: ISO` (NOVO): preenchidos quando admin renomeia um usuário
+**Aba Admin → Usuários** (`tab-usuarios`, STRICT_ADMIN):
+- Barra de busca por nome OU email (case-insensitive, sem acentos).
+- Select dinâmico de filtro por tipo (populado com tipos em uso + contagem cada).
+- Lista alfabética, linhas enxutas: nome + pill do tipo + chevron `›`. Linha inteira clicável.
+- Empty state contextualizado por filtro.
+- Removidas badges de "X abas" / "admin de Y" (admin granular foi eliminado).
+- `deleteUser` faz **soft delete** (`inativo:true`) — Rules bloqueiam `deleteDoc` em `usuarios/`.
 
-**Helper `_isAdminEm(tab)`**: retorna `true` se `role==='admin'` OU se `permissoesAdmin.includes(tab)`. Substituiu **todos os 13 checks** de `S.currentUser?.role==='admin'` que existiam dentro do escopo do financeiro (linhas 12200-13400 do index.html). Pra outras features, novos checks devem usar esse helper se for feature-específica, ou continuar com `role==='admin'` se for admin global.
+**Modal de criar/editar usuário** (mudou em 2026-05-21):
+- **Removido** campo "Nome completo" (display = username/slug).
+- **Removido** checkbox "Administrador geral" + grid de admin granular por aba.
+- **Adicionado** select "Tipo de usuário" com 5 defaults + customs. `onTipoChange` aplica preset automaticamente (só em criação; em edição preserva permissões salvas).
+- Campo "Nome de usuário" editável mesmo em edit mode.
+- Validador relaxado (`/^[a-z0-9._@+-]+$/`): aceita email como username.
 
-**Renomear usuário** (UI nova em 2026-05-19): docs do Firestore têm ID imutável e rules bloqueiam delete em `/usuarios`. Estratégia: ao renomear, cria novo doc com novo ID + marca o velho com `inativo: true` + `renomeadoPara: novo`. Login (`tryLogin`) e restore session filtram inativos via `!x.inativo`. Listagem `renderUsuarios` também filtra.
+**Renomear usuário**: docs do Firestore têm ID imutável e rules bloqueiam delete em `/usuarios`. Estratégia: cria novo doc com novo ID + marca o velho com `inativo:true` + `renomeadoPara: novo`. Login (`tryLogin`) e restore session filtram inativos via `!x.inativo`.
 
-**Validador de username relaxado** (2026-05-19): de `/^[a-z0-9._-]+$/` pra `/^[a-z0-9._@+-]+$/` — aceita email como username (necessário pra `controladoria@grupomedreview.com.br`).
+### Onboarding de Professores — fundido com Cadastro de Professores (2026-05-21)
 
-**Modal de edição de usuário** (`openUserModal` / `saveUser`):
-- Campo "Nome de usuário" agora editável mesmo em edit mode (era `disabled`).
-- Novo grid **"Admin de abas específicas"** abaixo do grid de permissões. Sincronizado via `_muSyncAdminGrid()`: só habilita checkbox de admin pra abas onde o user já tem permissão de acesso.
-- Quando "Administrador geral" está marcado, ambos os grids (permissões + admin-por-aba) ficam desabilitados.
-- Badge na listagem mostra `admin: financeiro` em destaque pros users com `permissoesAdmin` setado.
+**Local único**: Admin → Configurações → 👨‍🏫 Cadastro de Professores (não há mais accordion separado de "Onboarding"). Header do accordion mostra contagem por status: `42 profs · 🟢 12 convidados · 🟡 8 a convidar · 🔴 22 sem email`. Botão bulk "📧 Convidar todos" no header.
 
-**Caso de uso típico (controladoria)**: usuário `controladoria@grupomedreview.com.br` com `permissoes: ['financeiro']` + `permissoesAdmin: ['financeiro']` → vê SÓ a aba Financeiro, mas com poderes totais lá dentro (pode fechar mês, solicitar NF, editar cadastros, excluir profs, etc).
+**Cada linha de prof** mostra:
+- Nome (ellipsis).
+- Input de email principal (edição rápida).
+- Indicador `+N` se múltiplos emails (clicável → modal multi-email).
+- Botão `✏️` (modal multi-email).
+- Badge de status: 🔴 sem email / 🟡 a convidar / 🟢 convidado · DD/MM.
+- Botão "📧 Convidar" (cria user doc + envia email) ou "↻ Reenviar".
+- Botão ✕ remover.
 
-## Firestore Rules (resumo)
+**Modal de envio do convite** (`modal-convite-edit`): permite editar email destino antes de enviar (default: 1º email do prof). Chips clicáveis pros outros emails do prof.
 
-Pragmáticas, não restritivas, porque o app **não usa Firebase Auth**:
+**Modal multi-email** (`modal-prof-emails`): gerencia múltiplos emails por prof — 1 marcado como ⭐ principal (recebe convite + NF). Add/remove rows. Salvar valida formato + dedupe + junta com `;`.
+
+**Modal de dupla checagem de exclusão de prof** (`modal-rm-prof`): exige digitar o nome do prof. Mostra aviso se houver usuário linkado.
+
+**EmailJS template `template_rruper4`** (dedicado pra convite):
+- Variáveis: `to_email`, `prof_nome`, `prof_email`.
+- Conteúdo HTML: "Olá {nome}, Cadastre seu acesso no sistema..." + link `aros.anestreview.com.br` + sugestão Google login + esqueci a senha.
+- Footer "At.te / Equipe AnestReview".
+
+### Firebase Console / Project Settings (configurado 2026-05-21)
+
+- **Idioma do template**: Português (Brasil).
+- **Nome público do projeto**: "AROS · Anest-Review" (Configurações do projeto → Geral → Configurações públicas).
+- **E-mail de suporte**: Workspace email (`contato@anestreview.com.br` ou similar) — adicionado como Owner do projeto antes.
+- **Authorized domains**: `aros.anestreview.com.br` adicionado.
+- **Auth providers habilitados**: Email/Password + Google.
+- **Template editing locked**: Firebase bloqueia edição manual do template (medida anti-phishing); usuário aceita o template default em PT-BR.
+
+## Firestore Rules (resumo — APERTADAS em 2026-05-21)
+
+**Mudança crítica**: writes em coleções coord/prof agora exigem `request.auth.uid != null` (Firebase Auth). Login custom (sem Firebase Auth) virou **read-only** — toda escrita dá `permission-denied`. Comportamento desejado pra forçar migração.
+
+- Helper `isAuth()` em rules: `return request.auth != null && request.auth.uid != null`.
 - Default deny pra coleções desconhecidas.
 - Validação de **shape** em creates (tipos, tamanho de strings, enums).
 - **Block delete** em `simulados/{simId}`, `config/{cfgId}`, `usuarios/{u}`, `solicitacoesExtra/{r}`, `notas/...`, `checklists/...meta`, `feedbackGeral/{simId}`, `revisaoCasos/.../historico/...`.
-- **Read aberto** em quase tudo.
+- **Read aberto** em quase tudo (incl. `auditLog`).
+
+**Coleções que exigem auth pra escrever** (`isAuth()`):
+simulados, simulados/alunos (create), usuarios, listas, config (com 1 exceção), notas, checklists/meta, disponibilidade, feedbackGeral, tarefas, mentorias, blocosClinica, clinicas (parent), revisaoCasos, provas, fontesRecurso, recursosConfig, comunicacao, comunicacao/posts.
+
+**Exceções de aluno anônimo preservadas** (sem auth):
+- `solicitacoesExtra` create
+- `trocasDiretas` (todas)
+- `checklists/{sim}/respostas/{studentId}` (aluno salva próprio)
+- `clinicas/{c}/alunos/{a}` (aluno responde swap)
+- `provas/{p}/questoes/{q}/contestacoes` (aluno contesta)
+- `projecaoLive` + `strokes` (aluno desenha em modo remoto)
+- `simulados/{sim}/alunos/{a}` **update** anônimo preservando `nome+matricula` (aluno responde presença/troca via link)
+- `config/simExtra` **update** anônimo só pra alterar `alunosGratuitos` (incremento de quota)
+- `auditLog` create (custom login ainda precisa auditar)
 - `revisaoCasos/.../comentarios/{cmtId}`: `targetType` deve ser `'enunciado' | 'pergunta' | 'item' | 'caso'`; `delete: true` (necessário pro prof apagar próprio comentário).
 - `mentorias`, `blocosClinica`, `clinicas`: `tipo in ['TEA','TSA','ME1','ME2','ME3']` (atualizado em 2026-05-13).
 - `tarefas/{taskId}`: `titulo` string não vazia + `status in ['ideia','fazendo','feito']` + `prioridade in ['alta','media','baixa']`.
@@ -846,9 +951,12 @@ Não há build, lint, nem suíte de testes. Validação = abrir `index.html` no 
 
 ## Dívidas técnicas conhecidas (não corrigir sem pedirem)
 
-- Senhas plaintext em `usuarios/{username}` (refactor pra Cloud Function de login resolveria).
+- **Senha plaintext em `usuarios.senha`** — refatorar quando aposentar custom login. Senha admin atual mudou (perguntar ao Tiarlles; `aros2025` é DESATUALIZADA).
+- **Login custom legado** ainda existe — planejado: feature flag `legacyLoginEnabled` em config + apagar após 60 dias de coexistência (~julho/2026).
+- **Email reset usa template Firebase default** (não dá pra customizar HTML — restrição do Firebase). Nível 2 futuro: gerar link Firebase via Cloud Function + enviar email customizado via EmailJS.
+- **`auditLog` read aberto** (qualquer com projectId lê todo log) — refatorar quando aposentar custom login (vai ganhar `isAuth()` no read).
+- **`permissoesAdmin[]` órfão** em docs antigos — campo não é mais lido pelo código, dá pra limpar via migração.
 - Slack webhook URL legível em `config/simExtra` (mover pra Cloud Function como proxy resolveria).
-- Sem Firebase Auth → Rules tem proteção limitada (só shape + block deletes).
 - Sem Firebase App Check → API key usável por qualquer um.
 
 ## Agentes especialistas disponíveis (use proativamente)
@@ -1021,6 +1129,20 @@ Funcionalidades que estão **prontas no código** mas dependem de uma config ext
 **Status**: pendente. `sendParecerEmail` usa `template_r0vjejs` reciclado. Aguarda usuário criar template dedicado pra notificações de parecer finalizado.
 
 ## Histórico recente (resumo cronológico)
+
+Auth, audit log e onboarding (2026-05-21 — sessão longa, deploy completo):
+- **Firebase Auth integrado** (Email/Password + Google) coexistindo com login custom legado como fallback. Listener `onAuthStateChanged` popula `S.currentUser`. `esqueceuSenha` envia reset via Firebase quando input tem `@`.
+- **Modelo de usuário reescrito**: campo `tipo` (`adm`/`prof`/`coord`/`suporte`/`financeiro`/custom) substitui o par `role+permissoesAdmin`. `role` mantido como backward compat. `permissoesAdmin[]` **eliminado**. Helpers `getTipo`, `userTabs`, `_isAdminEm`.
+- **Tipos configuráveis** em `config/settings.tiposPresets` + `tiposMeta`. UI em Configurações → "⚙️ Presets de Tipo de Usuário" (accordion). Migração automática de `professorPreset` → `tiposPresets.prof`.
+- **Identidade implícita** (Fase 2): 5 selects "selecione quem é você" abolidos pra profs logados (Disponibilidade, Checklist Casos, Feedback Geral, Parecer/Recurso). 3 selects mantidos editáveis (Mentorias × 2, Financeiro).
+- **Audit Log** (`auditLog/{auto}`): helper `audit(action, target, payload)` + `AUDIT_ACTIONS` canônicas (~30 pontos instrumentados). Nova aba "🔍 Auditoria" (STRICT_ADMIN) com filtros, paginação, modal de diff, export CSV.
+- **Tela de Usuários reformulada**: busca por nome/email, filtro dinâmico por tipo, linhas enxutas, sem badges granulares. Modal: select de tipo + preset auto, sem mais "Administrador geral" e admin granular. Soft delete (`inativo:true`).
+- **Onboarding de Professores fundido com Cadastro de Professores**: contagem por status no header, linha com badge 🔴/🟡/🟢, botão "📧 Convidar" / "↻ Reenviar", bulk "Convidar todos". Modal de envio editável (`modal-convite-edit`). Modal multi-email por prof (`modal-prof-emails`). Modal de exclusão com dupla checagem (`modal-rm-prof`). EmailJS `template_rruper4` dedicado.
+- **Firestore Rules apertadas**: writes em coleções coord/prof exigem `isAuth()`. Login custom → read-only. Exceções preservadas pra fluxos anônimos de aluno.
+- **Badge "ADM" dinâmico**: `isAdmExclusiveTab(tabId)` substituiu `ADMIN_ONLY_TABS.has(tabId)` hardcoded — reflete decisões de preset em tempo real.
+- **Firebase Console**: idioma PT-BR, nome público "AROS · Anest-Review", `aros.anestreview.com.br` em Domínios Autorizados, support email Workspace.
+- **Deploy**: 3 commits + push `claude/recursing-mestorf-5f88f8 → main` + `firestore:rules` deployadas com nova regra `auditLog`.
+
 
 Camada de produto:
 - Solicitação de Simulado Extra com integração Hotmart (Cloud Function ativa).
