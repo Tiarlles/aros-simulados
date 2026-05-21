@@ -851,6 +851,25 @@ Não há build, lint, nem suíte de testes. Validação = abrir `index.html` no 
 - Sem Firebase Auth → Rules tem proteção limitada (só shape + block deletes).
 - Sem Firebase App Check → API key usável por qualquer um.
 
+## Agentes especialistas disponíveis (use proativamente)
+
+Quatro agentes project-level vivem em `.claude/agents/` e são auto-disponíveis em qualquer sessão do AROS. **Use-os em conjunto** ao planejar e executar intervenções, especialmente em features novas ou refactors de risco:
+
+- **`aros-coder`** (opus) — especialista em coding. Conhece a fundo o single-file index.html, padrões Apple-like, estado `S.*`, gotchas (switchCoTab hardcoded, query collisions em views espelhadas, `</script>` literals). **Invoque ao implementar** nova feature ou refatorar trechos.
+- **`aros-reviewer`** (sonnet) — revisor de regressão. Roda checklist específico do AROS (TAB_GROUPS, ADMIN_ONLY_TABS, switchCoTab list, hooks de render, DOM collisions, shape compat). **Invoque ANTES de aplicar mudança em código existente E DEPOIS de cada edit significativo.**
+- **`aros-ux`** (sonnet) — UX. Conhece linguagem visual estabelecida (glassmorphism Apple-like, cores por categoria, tipografia), pesa mobile-first (alunos no celular), tom da copy. **Invoque ao desenhar feature/fluxo/modal** novo.
+- **`aros-devil`** (opus) — advogado do diabo. Falsifica premissas, aponta riscos (senhas plaintext, read aberto, single-file inflando, mantenedor único). **Invoque APÓS decisões importantes** de design/arquitetura. Termina sempre com riscos prioritários ou "pode seguir".
+
+**Fluxo recomendado pra feature nova**:
+1. Discutir requisitos com o usuário.
+2. Chamar `aros-ux` pra desenhar fluxo + copy + estados.
+3. Chamar `aros-devil` pra contestar a proposta.
+4. Iterar com o usuário até alinhar.
+5. Chamar `aros-coder` pra implementar.
+6. Chamar `aros-reviewer` pra checar regressão antes de declarar pronto.
+
+Em pedidos simples (ajuste de texto, cor, micro-fix) você pode pular agentes — use bom-senso.
+
 ## Estilo do usuário (Tiarlles)
 
 - Pragmático, anestesiologista (não dev profissional). Quer ação direta, sem explicação técnica longa.

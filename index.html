@@ -1167,6 +1167,50 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-comunicacao .cl-admin-row.cl-admin-empty{color:var(--t2);text-align:center;display:block;padding:24px}
 @media (max-width: 820px){#tab-comunicacao .cl-admin-row{grid-template-columns:1fr auto;gap:6px}#tab-comunicacao .cl-admin-row .cl-r-meta,#tab-comunicacao .cl-admin-row .cl-r-data{font-size:11.5px}}
 
+/* ═════════════ SENHAS E ACESSOS ═════════════ */
+.sa-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.sa-search-wrap{position:relative;flex:1;min-width:240px}
+.sa-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--t2);pointer-events:none}
+.sa-search{padding-left:38px !important}
+.sa-grid{display:grid;grid-template-columns:1fr;gap:14px;max-width:760px}
+.sa-publica-badge{display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:9px;font-weight:800;letter-spacing:1.4px;color:#22c55e;background:color-mix(in srgb, #22c55e 14%, transparent);border:1px solid color-mix(in srgb, #22c55e 40%, transparent);padding:2px 8px;border-radius:999px;vertical-align:middle;margin-left:8px}
+.sa-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;transition:border-color .25s var(--ease-out-soft),transform .25s var(--ease-out-soft),box-shadow .25s var(--ease-out-soft);position:relative}
+.sa-card:hover{border-color:color-mix(in srgb, var(--accent) 60%, var(--border));transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.18)}
+.sa-card-head{display:flex;align-items:flex-start;gap:12px;cursor:pointer;user-select:none;padding:4px;margin:-4px;border-radius:10px;transition:background .2s}
+.sa-card-head:hover{background:color-mix(in srgb, var(--accent) 6%, transparent)}
+.sa-card-head:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sa-card-head .sa-card-endereco{cursor:pointer}
+.sa-toggle-creds{background:transparent;border:1px solid var(--border);color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;padding:6px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;transition:color .2s,border-color .2s,background .2s;white-space:nowrap;flex-shrink:0;align-self:center;pointer-events:none}
+.sa-card-head:hover .sa-toggle-creds{color:var(--accent);border-color:color-mix(in srgb, var(--accent) 50%, var(--border))}
+.sa-toggle-creds .sa-toggle-caret{transition:transform .25s var(--ease-out-soft)}
+.sa-toggle-creds.on{color:var(--accent);border-color:color-mix(in srgb, var(--accent) 50%, var(--border));background:color-mix(in srgb, var(--accent) 8%, transparent)}
+.sa-toggle-creds.on .sa-toggle-caret{transform:rotate(180deg)}
+.sa-creds{display:flex;flex-direction:column;gap:8px}
+@media (max-width: 560px){
+  .sa-toggle-creds .sa-toggle-label{display:none}
+  .sa-toggle-creds{padding:6px 10px}
+}
+.sa-logo{width:48px;height:48px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;flex:0 0 48px;overflow:hidden}
+.sa-logo img{width:100%;height:100%;object-fit:contain;display:block}
+.sa-logo-preview-modal{width:64px;height:64px;border-radius:12px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:30px;flex:0 0 64px;overflow:hidden}
+.sa-logo-preview-modal img{width:100%;height:100%;object-fit:contain;display:block}
+.sa-card-info{flex:1;min-width:0}
+.sa-card-nome{font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin:0 0 4px;letter-spacing:-.2px;line-height:1.25;word-break:break-word}
+.sa-card-endereco{font-size:12px;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:4px;word-break:break-all}
+.sa-card-endereco:hover{text-decoration:underline}
+.sa-card-row{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px 10px}
+.sa-card-row-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--t2);font-weight:700}
+.sa-card-row input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:13px;padding:0;letter-spacing:.5px;min-width:0}
+.sa-icon-btn{background:transparent;border:none;cursor:pointer;font-size:14px;padding:4px 6px;border-radius:6px;color:var(--t2);transition:color .2s,background .2s}
+.sa-icon-btn:hover{background:color-mix(in srgb, var(--accent) 12%, transparent);color:var(--accent)}
+.sa-2fa-tag{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#f59e0b;background:color-mix(in srgb, #f59e0b 12%, transparent);border:1px solid color-mix(in srgb, #f59e0b 40%, transparent);padding:4px 8px;border-radius:999px;cursor:pointer;align-self:flex-start;user-select:none}
+.sa-2fa-tag:hover{background:color-mix(in srgb, #f59e0b 22%, transparent)}
+.sa-2fa-instr{font-size:12.5px;line-height:1.5;color:var(--t2);background:color-mix(in srgb, #f59e0b 6%, transparent);border-left:3px solid #f59e0b;padding:10px 12px;border-radius:6px;white-space:pre-wrap}
+.sa-card-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:auto;padding-top:8px;border-top:1px dashed var(--border)}
+.sa-empty{grid-column:1/-1;padding:60px 24px;text-align:center;color:var(--t2);border:1px dashed var(--border);border-radius:14px;font-size:14px}
+.sa-empty-icon{font-size:42px;opacity:.45;margin-bottom:10px}
+.sa-copy-feedback{position:absolute;top:8px;right:8px;background:var(--accent);color:#fff;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.5px;animation:fi .25s ease-out}
+
 /* ═══════════════════════════════════════════════════════════════════
    APLE-LIKE · SIMULADOS TSA ORAL (aluno-view) — ESCOPADO em #view-al
    ═══════════════════════════════════════════════════════════════════ */
@@ -2061,6 +2105,30 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
       <div id="listas-list"></div>
     </div>
 
+    <!-- TAB: Senhas e Acessos (admin) -->
+    <div id="tab-senhasAcessos" class="hidden">
+      <div class="sa-toolbar">
+        <div class="sa-search-wrap">
+          <span class="sa-search-icon">🔍</span>
+          <input type="text" class="fc sa-search" id="sa-search" placeholder="Pesquisar por nome ou endereço..." oninput="renderSenhasAcessos()"/>
+        </div>
+        <button class="btn btn-p btn-sm" id="sa-new-btn" onclick="openSenhaModal()">+ Novo Acesso</button>
+      </div>
+      <p class="com-img-hint" style="margin:-4px 0 14px;font-size:12px;color:var(--t2)">⚠️ As senhas ficam salvas em texto no banco — só compartilhe com pessoas autorizadas. Marque o flag <strong>"Exibir em Senhas Públicas"</strong> para liberar o acesso aos professores.</p>
+      <div id="senhas-list" class="sa-grid"></div>
+    </div>
+
+    <!-- TAB: Senhas Públicas (espelho read-only, filtra só as marcadas como públicas) -->
+    <div id="tab-senhasPublicas" class="hidden">
+      <div class="sa-toolbar">
+        <div class="sa-search-wrap">
+          <span class="sa-search-icon">🔍</span>
+          <input type="text" class="fc sa-search" id="sp-search" placeholder="Pesquisar por nome ou endereço..." oninput="renderSenhasPublicas()"/>
+        </div>
+      </div>
+      <div id="senhas-publicas-list" class="sa-grid"></div>
+    </div>
+
     <!-- TAB: Simulados Extras -->
     <div id="tab-simExtras" class="hidden">
       <div class="card" style="margin-bottom:16px">
@@ -2803,6 +2871,54 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
       <button class="btn btn-d btn-sm" id="mu-del" onclick="deleteUser()" style="margin-right:auto;display:none">🗑️ Apagar</button>
       <button class="btn btn-s" onclick="CM('modal-user')">Cancelar</button>
       <button class="btn btn-p" onclick="saveUser()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Senha / Acesso (admin) ══ -->
+<div class="mo hidden" id="modal-senha" data-no-backdrop-close>
+  <div class="md" style="max-width:520px;max-height:92vh;display:flex;flex-direction:column">
+    <div class="mh">
+      <div><div class="m-title" id="sa-title">Novo Acesso</div><div class="m-sub">Cadastrar site, login e senha</div></div>
+      <button class="m-close" onclick="CM('modal-senha')">✕</button>
+    </div>
+    <div class="m-body" style="overflow-y:auto">
+      <div class="fg">
+        <label class="fl">Logo do site</label>
+        <p class="com-img-hint" style="font-size:11.5px;margin-bottom:8px">Anexe uma imagem (favicon ou logo). Será redimensionada para ~96px.</p>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div id="sa-logo-preview" class="sa-logo-preview-modal">🌐</div>
+          <input type="file" id="sa-logo-file" accept="image/*" style="display:none" onchange="saUploadLogo(event)"/>
+          <button class="btn btn-s btn-sm" onclick="document.getElementById('sa-logo-file').click()">📤 Anexar</button>
+          <button class="btn btn-g btn-sm" id="sa-logo-clear" onclick="saClearLogo()" style="display:none">🗑️ Remover</button>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Nome (do que é a senha) *</label><input class="fc" id="sa-nome" placeholder="Ex: Acesso ao painel da Hotmart" maxlength="120"/></div>
+      <div class="fg"><label class="fl">Endereço (URL)</label><input class="fc" id="sa-endereco" placeholder="https://..."/></div>
+      <div class="fg"><label class="fl">Login</label><input class="fc" id="sa-login" placeholder="usuário, email ou matrícula"/></div>
+      <div class="fg"><label class="fl">Senha *</label><input class="fc" id="sa-senha" placeholder="senha de acesso"/></div>
+      <div class="fg">
+        <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg3);border-radius:var(--rs);cursor:pointer;border:1.5px solid var(--border)">
+          <input type="checkbox" id="sa-publica" style="width:16px;height:16px;cursor:pointer"/>
+          <div><div style="font-weight:700;font-size:13px">🔓 Exibir em Senhas Públicas</div><div style="font-size:11px;color:var(--t2)">Marque para que professores com acesso à aba "Senhas Públicas" possam ver este registro</div></div>
+        </label>
+      </div>
+      <div class="fg">
+        <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg3);border-radius:var(--rs);cursor:pointer;border:1.5px solid var(--border)">
+          <input type="checkbox" id="sa-2fa" style="width:16px;height:16px;cursor:pointer" onchange="document.getElementById('sa-2fa-box').style.display=this.checked?'':'none'"/>
+          <div><div style="font-weight:700;font-size:13px">🔒 Possui validação em 2 etapas (2FA)</div><div style="font-size:11px;color:var(--t2)">Marque se for necessário código adicional pra logar</div></div>
+        </label>
+      </div>
+      <div class="fg" id="sa-2fa-box" style="display:none">
+        <label class="fl">Instruções para 2FA / Quem procurar</label>
+        <textarea class="fc" id="sa-2fa-instr" rows="3" placeholder="Ex: O código chega no celular da coord. Solicite a Tiarlles via WhatsApp."></textarea>
+      </div>
+      <div id="sa-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-d btn-sm" id="sa-del" onclick="deleteSenha()" style="margin-right:auto;display:none">🗑️ Apagar</button>
+      <button class="btn btn-s" onclick="CM('modal-senha')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveSenha()">💾 Salvar</button>
     </div>
   </div>
 </div>
@@ -4481,7 +4597,7 @@ async function boot(){
     return _initPreview();
   }
   try{const s=await getDoc(doc(db,'config','settings'));if(s.exists())Object.assign(S.cfg,s.data());}catch(e){}
-  await Promise.all([loadSims(),loadProfs(),loadListas(),loadUsuarios(),loadMenuLabels(),loadSimExtra(),loadFinanceiro(),loadMentorias(),loadBlocos(),loadClinicas(),loadRevisoes(),loadRecProvas(),loadComunicacaoCards(),loadConteudosLiberados()]);
+  await Promise.all([loadSims(),loadProfs(),loadListas(),loadUsuarios(),loadMenuLabels(),loadSimExtra(),loadFinanceiro(),loadMentorias(),loadBlocos(),loadClinicas(),loadRevisoes(),loadRecProvas(),loadComunicacaoCards(),loadConteudosLiberados(),loadSenhasAcessos()]);
   // Pre-carrega contagens de posts pra mostrar o badge "X avisos" nos cards da home
   try{await Promise.all(['tsa','tea','mes'].map(c=>loadComunicacaoPosts(c)));}catch(e){}
   renderSimCards();
@@ -5630,6 +5746,281 @@ async function _clSave(){
     },{merge:true});
   }catch(e){console.error('_clSave:',e);alert('Erro ao salvar: '+e.message);}
 }
+
+// ── SENHAS E ACESSOS ────────────────────────────────────────────
+S.senhas={entries:[]};
+S.saEditing={id:null,pendingLogo:''};
+
+function _saUid(){return 'sa_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);}
+
+async function loadSenhasAcessos(){
+  try{
+    const s=await getDoc(doc(db,'config','senhasAcessos'));
+    if(s.exists()){
+      const d=s.data();
+      S.senhas.entries=Array.isArray(d.entries)?d.entries:[];
+    }else{
+      S.senhas.entries=[];
+    }
+  }catch(e){console.error('loadSenhasAcessos:',e);S.senhas.entries=[];}
+}
+async function _saSave(){
+  try{
+    await setDoc(doc(db,'config','senhasAcessos'),{
+      entries:S.senhas.entries,updatedAt:Date.now()
+    },{merge:true});
+  }catch(e){console.error('_saSave:',e);alert('Erro ao salvar: '+e.message);}
+}
+
+// Redimensiona imagem client-side pra ~96px (canvas) e retorna data URL base64
+function _saResizeImage(file,maxSize=96){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=(e)=>{
+      const img=new Image();
+      img.onload=()=>{
+        const ratio=Math.min(maxSize/img.width,maxSize/img.height,1);
+        const w=Math.round(img.width*ratio);
+        const h=Math.round(img.height*ratio);
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        const ctx=c.getContext('2d');
+        ctx.drawImage(img,0,0,w,h);
+        // tenta WebP, fallback PNG
+        try{resolve(c.toDataURL('image/webp',.85));}
+        catch(_){resolve(c.toDataURL('image/png'));}
+      };
+      img.onerror=reject;
+      img.src=e.target.result;
+    };
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+window.saUploadLogo=async(ev)=>{
+  const f=ev.target.files&&ev.target.files[0];if(!f)return;
+  if(!f.type.startsWith('image/')){alert('Arquivo precisa ser uma imagem.');return;}
+  try{
+    const dataUrl=await _saResizeImage(f,128);
+    S.saEditing.pendingLogo=dataUrl;
+    _saRenderModalPreview();
+  }catch(e){console.error('saUploadLogo:',e);alert('Erro ao processar imagem: '+e.message);}
+  ev.target.value='';
+};
+window.saClearLogo=()=>{
+  S.saEditing.pendingLogo='';
+  _saRenderModalPreview();
+};
+function _saRenderModalPreview(){
+  const prev=document.getElementById('sa-logo-preview');
+  const clear=document.getElementById('sa-logo-clear');
+  if(!prev)return;
+  if(S.saEditing.pendingLogo){
+    prev.innerHTML=`<img src="${S.saEditing.pendingLogo}" alt=""/>`;
+    if(clear)clear.style.display='';
+  }else{
+    prev.innerHTML='🌐';
+    if(clear)clear.style.display='none';
+  }
+}
+
+window.openSenhaModal=(id)=>{
+  if(!_isAdminEm('senhasAcessos')&&S.currentUser?.role!=='admin'){alert('Apenas administradores podem cadastrar.');return;}
+  S.saEditing={id:id||null,pendingLogo:''};
+  document.getElementById('sa-err').classList.add('hidden');
+  if(id){
+    const e=(S.senhas.entries||[]).find(x=>x.id===id);
+    if(!e){alert('Acesso não encontrado.');return;}
+    document.getElementById('sa-title').textContent='Editar Acesso';
+    document.getElementById('sa-nome').value=e.nome||'';
+    document.getElementById('sa-endereco').value=e.endereco||'';
+    document.getElementById('sa-login').value=e.login||'';
+    document.getElementById('sa-senha').value=e.senha||'';
+    document.getElementById('sa-publica').checked=!!e.publica;
+    document.getElementById('sa-2fa').checked=!!e.twoFA;
+    document.getElementById('sa-2fa-instr').value=e.twoFAInstrucoes||'';
+    document.getElementById('sa-2fa-box').style.display=e.twoFA?'':'none';
+    document.getElementById('sa-del').style.display='';
+    S.saEditing.pendingLogo=e.logo||'';
+  }else{
+    document.getElementById('sa-title').textContent='Novo Acesso';
+    document.getElementById('sa-nome').value='';
+    document.getElementById('sa-endereco').value='';
+    document.getElementById('sa-login').value='';
+    document.getElementById('sa-senha').value='';
+    document.getElementById('sa-publica').checked=false;
+    document.getElementById('sa-2fa').checked=false;
+    document.getElementById('sa-2fa-instr').value='';
+    document.getElementById('sa-2fa-box').style.display='none';
+    document.getElementById('sa-del').style.display='none';
+  }
+  _saRenderModalPreview();
+  document.getElementById('modal-senha').classList.remove('hidden');
+};
+
+window.saveSenha=async()=>{
+  const nome=(document.getElementById('sa-nome').value||'').trim();
+  const endereco=(document.getElementById('sa-endereco').value||'').trim();
+  const login=(document.getElementById('sa-login').value||'').trim();
+  const senha=(document.getElementById('sa-senha').value||'').trim();
+  const twoFA=document.getElementById('sa-2fa').checked;
+  const twoFAInstrucoes=(document.getElementById('sa-2fa-instr').value||'').trim();
+  const logo=S.saEditing.pendingLogo||'';
+  const err=document.getElementById('sa-err');
+  if(!nome){err.textContent='Nome é obrigatório.';err.classList.remove('hidden');return;}
+  if(!senha){err.textContent='Senha é obrigatória.';err.classList.remove('hidden');return;}
+  const publica=document.getElementById('sa-publica').checked;
+  const entry={
+    id:S.saEditing.id||_saUid(),
+    nome,endereco,login,senha,logo,publica,twoFA,
+    twoFAInstrucoes:twoFA?twoFAInstrucoes:'',
+    updatedAt:Date.now()
+  };
+  if(S.saEditing.id){
+    const idx=S.senhas.entries.findIndex(x=>x.id===S.saEditing.id);
+    if(idx>=0)S.senhas.entries[idx]=entry;
+  }else{
+    entry.createdAt=Date.now();
+    S.senhas.entries.unshift(entry);
+  }
+  await _saSave();
+  CM('modal-senha');
+  renderSenhasAcessos();
+};
+
+window.deleteSenha=async()=>{
+  if(!S.saEditing.id)return;
+  if(!confirm('Apagar este acesso? Esta ação não pode ser desfeita.'))return;
+  S.senhas.entries=(S.senhas.entries||[]).filter(x=>x.id!==S.saEditing.id);
+  await _saSave();
+  CM('modal-senha');
+  renderSenhasAcessos();
+};
+
+window.saTogglePassword=(btnEl)=>{
+  const card=btnEl.closest('.sa-card');if(!card)return;
+  const inp=card.querySelector('[data-sa-pwd]');if(!inp)return;
+  inp.type=inp.type==='password'?'text':'password';
+};
+window.saCopyField=async(btnEl,field)=>{
+  const card=btnEl.closest('.sa-card');if(!card)return;
+  const id=card.getAttribute('data-sa-card');
+  const e=(S.senhas.entries||[]).find(x=>x.id===id);if(!e)return;
+  try{
+    await navigator.clipboard.writeText(e[field]||'');
+    const fb=document.createElement('span');
+    fb.className='sa-copy-feedback';
+    fb.textContent=field==='senha'?'✓ Senha copiada':'✓ Login copiado';
+    card.appendChild(fb);
+    setTimeout(()=>fb.remove(),1400);
+  }catch(err){alert('Erro ao copiar: '+err.message);}
+};
+window.saToggle2FA=(elOrId)=>{
+  // Aceita: o botão (this) OU um id de entrada (compat)
+  let card;
+  if(elOrId&&typeof elOrId==='object'&&elOrId.closest)card=elOrId.closest('.sa-card');
+  else card=document.querySelector(`[data-sa-card="${elOrId}"]`);
+  if(!card)return;
+  const box=card.querySelector('[data-sa-2fa-box]');if(!box)return;
+  box.style.display=box.style.display==='none'?'block':'none';
+};
+window.saToggle2FA=(id)=>{
+  const box=document.querySelector(`[data-sa-2fa-box="${id}"]`);if(!box)return;
+  box.style.display=box.style.display==='none'?'':'none';
+};
+
+function _saEscAttr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function _saMatch(e,q){
+  if(!q)return true;
+  q=q.toLowerCase();
+  return (e.nome||'').toLowerCase().includes(q)
+    ||(e.endereco||'').toLowerCase().includes(q)
+    ||(e.login||'').toLowerCase().includes(q);
+}
+function _saSortAlfa(arr){
+  return arr.slice().sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR',{sensitivity:'base'}));
+}
+function _saRenderCardHTML(e,opts){
+  const showEdit=!!opts.showEdit;
+  const showPublicaBadge=!!opts.showPublicaBadge;
+  const logo=e.logo?`<img src="${_saEscAttr(e.logo)}" alt=""/>`:'🌐';
+  const url=(e.endereco||'').trim();
+  const enderecoHtml=url?`<a class="sa-card-endereco" href="${_saEscAttr(url)}" target="_blank" rel="noopener">${_comEsc(url)} ↗</a>`:'';
+  const publicaBadge=(showPublicaBadge&&e.publica)?`<span class="sa-publica-badge" title="Visível em Senhas Públicas">🔓 PÚBLICA</span>`:'';
+  const twoFA=e.twoFA?`<button class="sa-2fa-tag" onclick="saToggle2FA('${e.id}')" title="Ver instruções de 2FA">🔒 2FA ▾</button>`:'';
+  const twoFABox=e.twoFA&&(e.twoFAInstrucoes||'').trim()?`<div class="sa-2fa-instr" data-sa-2fa-box="${e.id}" style="display:none">${_comEsc(e.twoFAInstrucoes)}</div>`:'';
+  const acoes=showEdit?`
+    <div class="sa-card-actions">
+      <button class="btn btn-s btn-sm" onclick="openSenhaModal('${e.id}')">✏️ Editar</button>
+    </div>`:'';
+  const enderecoHtmlClickable=url?`<a class="sa-card-endereco" href="${_saEscAttr(url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${_comEsc(url)} ↗</a>`:'';
+  const twoFAClick=e.twoFA?`<button class="sa-2fa-tag" onclick="saToggle2FA(this)" title="Ver instruções de 2FA">🔒 2FA ▾</button>`:'';
+  const twoFABoxClick=e.twoFA&&(e.twoFAInstrucoes||'').trim()?`<div class="sa-2fa-instr" data-sa-2fa-box style="display:none">${_comEsc(e.twoFAInstrucoes)}</div>`:'';
+  return `<div class="sa-card" data-sa-card="${e.id}">
+    <div class="sa-card-head" onclick="saToggleCreds(this)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();saToggleCreds(this)}">
+      <div class="sa-logo">${logo}</div>
+      <div class="sa-card-info">
+        <h3 class="sa-card-nome">${_comEsc(e.nome||'(sem nome)')} ${publicaBadge}</h3>
+        ${enderecoHtmlClickable}
+      </div>
+      <span class="sa-toggle-creds" data-sa-toggle title="Mostrar/ocultar credenciais" aria-expanded="false"><span class="sa-toggle-label">Mostrar credenciais</span> <span class="sa-toggle-caret">▾</span></span>
+    </div>
+    <div class="sa-creds" data-sa-creds style="display:none">
+      ${(e.login||'').trim()?`
+      <div class="sa-card-row">
+        <span class="sa-card-row-label">Login</span>
+        <input type="text" value="${_saEscAttr(e.login||'')}" readonly/>
+        <button class="sa-icon-btn" onclick="saCopyField(this,'login')" title="Copiar login">📋</button>
+      </div>`:''}
+      <div class="sa-card-row">
+        <span class="sa-card-row-label">Senha</span>
+        <input data-sa-pwd type="password" value="${_saEscAttr(e.senha||'')}" readonly/>
+        <button class="sa-icon-btn" onclick="saTogglePassword(this)" title="Mostrar/ocultar">👁️</button>
+        <button class="sa-icon-btn" onclick="saCopyField(this,'senha')" title="Copiar senha">📋</button>
+      </div>
+    </div>
+    ${twoFAClick}
+    ${twoFABoxClick}
+    ${acoes}
+  </div>`;
+}
+window.saToggleCreds=(headEl)=>{
+  const card=headEl.closest('.sa-card');if(!card)return;
+  const box=card.querySelector('[data-sa-creds]');
+  const btn=card.querySelector('[data-sa-toggle]');
+  if(!box||!btn)return;
+  const isOpen=btn.classList.contains('on');
+  const next=!isOpen;
+  box.style.display=next?'flex':'none';
+  btn.setAttribute('aria-expanded',next?'true':'false');
+  btn.classList.toggle('on',next);
+  const lbl=btn.querySelector('.sa-toggle-label');
+  if(lbl)lbl.textContent=next?'Ocultar credenciais':'Mostrar credenciais';
+};
+
+window.renderSenhasAcessos=()=>{
+  const list=document.getElementById('senhas-list');if(!list)return;
+  const isAdmin=_isAdminEm('senhasAcessos')||S.currentUser?.role==='admin';
+  const newBtn=document.getElementById('sa-new-btn');if(newBtn)newBtn.style.display=isAdmin?'':'none';
+  const q=(document.getElementById('sa-search')?.value||'').trim();
+  const entries=_saSortAlfa((S.senhas.entries||[]).filter(e=>_saMatch(e,q)));
+  if(!entries.length){
+    list.innerHTML=`<div class="sa-empty"><div class="sa-empty-icon">🔐</div>${q?'Nenhum acesso encontrado para "'+_comEsc(q)+'".':'Nenhum acesso cadastrado ainda.'}</div>`;
+    return;
+  }
+  list.innerHTML=entries.map(e=>_saRenderCardHTML(e,{showEdit:isAdmin,showPublicaBadge:true})).join('');
+};
+
+window.renderSenhasPublicas=()=>{
+  const list=document.getElementById('senhas-publicas-list');if(!list)return;
+  const q=(document.getElementById('sp-search')?.value||'').trim();
+  const entries=_saSortAlfa((S.senhas.entries||[]).filter(e=>e.publica&&_saMatch(e,q)));
+  if(!entries.length){
+    list.innerHTML=`<div class="sa-empty"><div class="sa-empty-icon">🔓</div>${q?'Nenhuma senha pública encontrada para "'+_comEsc(q)+'".':'Nenhuma senha pública disponível ainda.'}</div>`;
+    return;
+  }
+  list.innerHTML=entries.map(e=>_saRenderCardHTML(e,{showEdit:false,showPublicaBadge:false})).join('');
+};
 
 // Salva o array de ordem dos publicados pra essa categoria
 async function _comSaveOrder(cat){
@@ -6910,7 +7301,8 @@ const TAB_GROUPS=[
   ]},
   {id:'cadastros',label:'Cadastros',tabs:[
     {id:'professores',label:'👨‍🏫 Professores'},
-    {id:'listas',label:'👥 Listas de Alunos'}
+    {id:'listas',label:'👥 Listas de Alunos'},
+    {id:'senhasPublicas',label:'🔓 Senhas Públicas'}
   ]},
   {id:'mentorias',label:'Mentorias',tabs:[
     {id:'mentorias',label:'🎓 Mentorias'}
@@ -6926,13 +7318,14 @@ const TAB_GROUPS=[
     {id:'features',label:'📌 Features'},
     {id:'financeiro',label:'💰 Financeiro'},
     {id:'comunicacao',label:'📢 Comunicação'},
+    {id:'senhasAcessos',label:'🔐 Senhas e Acessos'},
     {id:'usuarios',label:'👤 Usuários'},
     {id:'config',label:'⚙️ Configurações'}
   ]}
 ];
 const ALL_TABS=TAB_GROUPS.flatMap(g=>g.tabs.map(t=>t.id));
 // Abas reservadas a administradores (badge "ADM" no menu lateral)
-const ADMIN_ONLY_TABS=new Set(['usuarios','config','financeiro','features','recProvas','recFontes','recConfig','recMetricas','comunicacao']);
+const ADMIN_ONLY_TABS=new Set(['usuarios','config','financeiro','features','recProvas','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos']);
 
 // Labels customizáveis pelo admin (sobrescrevem os defaults de TAB_GROUPS)
 // Clock do status bar da sidebar de Coordenação
@@ -16231,7 +16624,7 @@ window.checkPass=async()=>{
   document.getElementById('co-login').classList.add('hidden');
   document.getElementById('co-panel').classList.remove('hidden');
   applyTabsByRole();
-  popCoSel();renderProfGlobal();renderListasPanel();renderUsuarios();
+  popCoSel();renderProfGlobal();renderListasPanel();renderUsuarios();if(typeof renderSenhasAcessos==='function')renderSenhasAcessos();if(typeof renderSenhasPublicas==='function')renderSenhasPublicas();
 };
 
 window.logout=()=>{
@@ -16254,7 +16647,7 @@ function _restoreSession(){
     document.getElementById('co-login').classList.add('hidden');
     document.getElementById('co-panel').classList.remove('hidden');
     applyTabsByRole();
-    popCoSel();renderProfGlobal();renderListasPanel();renderUsuarios();
+    popCoSel();renderProfGlobal();renderListasPanel();renderUsuarios();if(typeof renderSenhasAcessos==='function')renderSenhasAcessos();if(typeof renderSenhasPublicas==='function')renderSenhasPublicas();
   }catch(e){console.warn('restoreSession:',e);}
 }
 
@@ -16455,7 +16848,7 @@ window.deleteUser=async()=>{
 
 // co tabs
 window.switchCoTab=(tab,btn)=>{
-  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','mentorias','features','recProvas','recGestao','recFontes','recConfig','recMetricas','comunicacao'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
+  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','mentorias','features','recProvas','recGestao','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos','senhasPublicas'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
   document.querySelectorAll('.co-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   // Show "Novo Simulado" only on simulados tab
@@ -19316,6 +19709,8 @@ window.switchCoTab = (tab, btn) => {
   if(tab==='recConfig') renderRecConfig();
   if(tab==='recMetricas') renderRecMetricas();
   if(tab==='comunicacao') renderComunicacaoAdmin();
+  if(tab==='senhasAcessos') renderSenhasAcessos();
+  if(tab==='senhasPublicas') renderSenhasPublicas();
 };
 
 
