@@ -2597,6 +2597,9 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
             <span id="cfg-profs-arr" style="font-size:14px;color:var(--t2);transition:transform .2s">▼</span>
           </div>
           <div id="cfg-profs-body" style="display:none;padding:16px 18px;border-top:1px solid var(--border)">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+              <button class="btn btn-p btn-sm" onclick="onboardingConvidarTodos()" title="Cadastra (se preciso) e envia convite pra todos os profs ainda não convidados">📧 Convidar todos</button>
+            </div>
             <div id="prof-global-list" style="margin-bottom:12px"></div>
             <div style="display:flex;gap:8px">
               <input class="fc" id="prof-input" placeholder="Nome do professor" style="flex:1" onkeydown="if(event.key==='Enter')addProfGlobal()"/>
@@ -2800,9 +2803,14 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
           <button class="btn btn-p btn-sm" onclick="openUserModal()">+ Novo usuário</button>
         </div>
         <div class="cb">
-          <div style="position:relative;margin-bottom:14px">
-            <input class="fc" id="users-search" type="search" placeholder="Buscar por nome…" autocomplete="off" oninput="renderUsuarios()" style="padding-left:36px"/>
-            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t2);pointer-events:none;font-size:14px">🔎</span>
+          <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+            <div style="position:relative;flex:1;min-width:220px">
+              <input class="fc" id="users-search" type="search" placeholder="Buscar por nome ou email…" autocomplete="off" oninput="renderUsuarios()" style="padding-left:36px;width:100%"/>
+              <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t2);pointer-events:none;font-size:14px">🔎</span>
+            </div>
+            <select class="fc" id="users-tipo-filter" onchange="renderUsuarios()" style="flex:0 0 auto;min-width:180px;cursor:pointer">
+              <option value="">Todos os tipos</option>
+            </select>
           </div>
           <div id="users-count" style="font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--t2);margin-bottom:10px"></div>
           <div id="users-list" style="display:flex;flex-direction:column;gap:6px"></div>
@@ -3015,6 +3023,73 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
       <button class="btn btn-d btn-sm" id="mu-del" onclick="deleteUser()" style="margin-right:auto;display:none">🗑️ Apagar</button>
       <button class="btn btn-s" onclick="CM('modal-user')">Cancelar</button>
       <button class="btn btn-p" onclick="saveUser()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Confirmar remoção de professor ══ -->
+<div class="mo hidden" id="modal-rm-prof">
+  <div class="md" style="max-width:460px">
+    <div class="mh">
+      <div><div class="m-title">🗑 Remover professor</div><div class="m-sub">Esta ação não pode ser desfeita.</div></div>
+      <button class="m-close" onclick="CM('modal-rm-prof')">✕</button>
+    </div>
+    <div class="m-body">
+      <p style="font-size:14px;margin:0 0 14px">Tem certeza que deseja remover <strong id="rmp-nome" style="color:var(--text)">—</strong> do cadastro?</p>
+      <div id="rmp-warnings" style="display:none;background:color-mix(in srgb, #f59e0b 12%, transparent);border:1px solid color-mix(in srgb, #f59e0b 40%, transparent);border-radius:var(--rs);padding:10px 12px;margin:0 0 14px;font-size:13px;color:var(--text)"></div>
+      <p style="font-size:12px;color:var(--t2);margin:0 0 6px">Digite o nome do professor pra confirmar:</p>
+      <input type="text" class="fc" id="rmp-confirma" placeholder="Nome do professor" autocomplete="off" oninput="rmpUpdateBtn()" onkeydown="if(event.key==='Enter')document.getElementById('rmp-ok').click()"/>
+      <div id="rmp-err" class="al al-e hidden" style="margin-top:10px"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-rm-prof')">Cancelar</button>
+      <button class="btn btn-d" id="rmp-ok" onclick="confirmarRemoveProf()" disabled style="opacity:.5">🗑 Excluir definitivamente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Gerenciar emails do professor (multi-email) ══ -->
+<div class="mo hidden" id="modal-prof-emails">
+  <div class="md" style="max-width:520px">
+    <div class="mh">
+      <div><div class="m-title">📧 Emails do professor</div><div class="m-sub" id="pem-nome">—</div></div>
+      <button class="m-close" onclick="CM('modal-prof-emails')">✕</button>
+    </div>
+    <div class="m-body">
+      <p style="color:var(--t2);font-size:12.5px;margin:0 0 12px">O <strong>email principal</strong> recebe convites e solicitação de NF. Os outros ficam cadastrados pra referência.</p>
+      <div id="pem-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <button type="button" class="btn btn-s btn-sm" onclick="pemAddRow()" style="margin-top:10px">+ Adicionar email</button>
+      <div id="pem-err" class="al al-e hidden" style="margin-top:10px"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-prof-emails')">Cancelar</button>
+      <button class="btn btn-p" onclick="salvarEmailsModal()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Convite de prof (editar email antes de enviar) ══ -->
+<div class="mo hidden" id="modal-convite-edit">
+  <div class="md" style="max-width:480px">
+    <div class="mh">
+      <div><div class="m-title">📧 Enviar convite</div><div class="m-sub" id="mce-prof-nome">—</div></div>
+      <button class="m-close" onclick="CM('modal-convite-edit')">✕</button>
+    </div>
+    <div class="m-body">
+      <div class="fg">
+        <label class="fl">Email para envio</label>
+        <input class="fc" id="mce-email" type="email" placeholder="email@exemplo.com" autocomplete="off"/>
+        <p style="font-size:11px;color:var(--t2);margin-top:4px">Será enviado para <strong>apenas este email</strong>. Pode editar antes de enviar.</p>
+      </div>
+      <div class="fg" id="mce-suggestions-wrap" style="display:none">
+        <label class="fl">Outros emails cadastrados deste prof</label>
+        <div id="mce-suggestions" style="display:flex;flex-direction:column;gap:4px;margin-top:6px"></div>
+      </div>
+      <div id="mce-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-convite-edit')">Cancelar</button>
+      <button class="btn btn-p" onclick="conviteEnviar()">📧 Enviar</button>
     </div>
   </div>
 </div>
@@ -17012,14 +17087,16 @@ window.checkPass=async()=>{
       // credencial não bate no Firebase — tenta fluxo custom abaixo
     }
   }
-  // Fallback: login custom clássico. Aceita digitar tanto o slug (username/id)
-  // quanto o display name (campo nome), case-insensitive — ambos viáveis após o refactor de tipos.
+  // Fallback: login custom clássico. Aceita digitar tanto o slug (username/id),
+  // quanto o display name (campo nome), QUANTO o email cadastrado — case-insensitive.
+  // O match por email cobre users criados via onboarding mas sem conta no Firebase Auth.
   try{await loadUsuarios();}catch(e){console.error(e);}
   const u=S.usuarios.find(x=>{
     if(x.inativo||x.senha!==senha)return false;
     const slug=(x.username||x.id||'').toLowerCase();
     const display=(x.nome||'').toLowerCase();
-    return slug===username||display===username;
+    const mail=(x.email||'').toLowerCase();
+    return slug===username||display===username||(mail&&mail===username);
   });
   if(!u){errEl.textContent='Usuário ou senha incorretos.';errEl.classList.remove('hidden');return;}
   errEl.classList.add('hidden');
@@ -17086,25 +17163,60 @@ function renderUsuarios(){
   const countEl=document.getElementById('users-count');
   // Filtra inativos (renomeados ou desativados) — não aparecem na lista.
   const ativos=S.usuarios.filter(u=>!u.inativo);
-  // Aplica filtro de busca (nome OR email, case-insensitive, sem acentos)
+  const meta=typeof _tiposMeta==='function'?_tiposMeta():{};
+  // Popula o select de tipo dinamicamente (só com tipos que têm pelo menos 1 usuário ativo)
+  const tipoFilterEl=document.getElementById('users-tipo-filter');
+  if(tipoFilterEl){
+    const tiposEmUso=new Map();
+    for(const u of ativos){
+      const t=getTipo(u);
+      tiposEmUso.set(t,(tiposEmUso.get(t)||0)+1);
+    }
+    const ordemPref=['adm','prof','coord','suporte','financeiro'];
+    const tiposOrdenados=[
+      ...ordemPref.filter(t=>tiposEmUso.has(t)),
+      ...[...tiposEmUso.keys()].filter(t=>!ordemPref.includes(t)).sort()
+    ];
+    const valAtual=tipoFilterEl.value;
+    const optsHtml=`<option value="">Todos os tipos (${ativos.length})</option>`+tiposOrdenados.map(t=>{
+      const m=meta[t]||{label:t,icon:'👤'};
+      return `<option value="${t}">${m.icon} ${m.label} (${tiposEmUso.get(t)})</option>`;
+    }).join('');
+    if(tipoFilterEl.innerHTML!==optsHtml){
+      tipoFilterEl.innerHTML=optsHtml;
+      tipoFilterEl.value=tiposEmUso.has(valAtual)?valAtual:'';
+    }
+  }
+  const tipoFiltro=tipoFilterEl?.value||'';
+  // Aplica filtro de busca (nome OR email, case-insensitive, sem acentos) + filtro de tipo
   const searchEl=document.getElementById('users-search');
   const raw=(searchEl?.value||'').trim().toLowerCase();
   const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
   const q=norm(raw);
-  const filtered=q?ativos.filter(u=>norm(u.nome||u.username||'').includes(q)||norm(u.email||'').includes(q)):ativos;
+  const filtered=ativos.filter(u=>{
+    if(tipoFiltro&&getTipo(u)!==tipoFiltro)return false;
+    if(!q)return true;
+    return norm(u.nome||u.username||'').includes(q)||norm(u.email||'').includes(q);
+  });
   // Ordem alfabética simples por nome de exibição (pt-BR, case-insensitive)
   const sorted=[...filtered].sort((a,b)=>(a.nome||a.username||'').localeCompare(b.nome||b.username||'','pt-BR',{sensitivity:'base'}));
   // Contador
   if(countEl){
-    countEl.textContent=q
+    const hasFilter=q||tipoFiltro;
+    countEl.textContent=hasFilter
       ? `${sorted.length} de ${ativos.length} ${ativos.length===1?'usuário':'usuários'}`
       : `${ativos.length} ${ativos.length===1?'usuário':'usuários'}`;
   }
   if(!sorted.length){
-    el.innerHTML=`<div style="padding:32px 16px;text-align:center;color:var(--t2);font-size:13px;border:1px dashed var(--border);border-radius:var(--rs);background:var(--bg3)">${q?'Nenhum usuário encontrado para "<strong>'+_escHtml(raw)+'</strong>".':'Nenhum usuário cadastrado.'}</div>`;
+    const tipoLbl=tipoFiltro?(meta[tipoFiltro]?.label||tipoFiltro):'';
+    let emptyMsg;
+    if(q&&tipoFiltro)emptyMsg=`Nenhum ${_escHtml(tipoLbl)} encontrado para "<strong>${_escHtml(raw)}</strong>".`;
+    else if(q)emptyMsg=`Nenhum usuário encontrado para "<strong>${_escHtml(raw)}</strong>".`;
+    else if(tipoFiltro)emptyMsg=`Nenhum usuário do tipo <strong>${_escHtml(tipoLbl)}</strong>.`;
+    else emptyMsg='Nenhum usuário cadastrado.';
+    el.innerHTML=`<div style="padding:32px 16px;text-align:center;color:var(--t2);font-size:13px;border:1px dashed var(--border);border-radius:var(--rs);background:var(--bg3)">${emptyMsg}</div>`;
     return;
   }
-  const meta=typeof _tiposMeta==='function'?_tiposMeta():{};
   el.innerHTML=sorted.map(u=>{
     const isMe=S.currentUser&&u.id===S.currentUser.id;
     const tipo=getTipo(u);
@@ -17126,6 +17238,283 @@ function renderUsuarios(){
   }).join('');
 }
 window.renderUsuarios=renderUsuarios;
+
+// ─── Onboarding de Professores (Fase 4 Firebase Auth) ──────────────────────
+function _onbStatus(profNome){
+  const emails=(typeof _profEmails==='function')?_profEmails(profNome):[];
+  if(!emails.length)return{code:'no-email',label:'Sem email',emoji:'🔴'};
+  const primeiro=emails[0].toLowerCase();
+  const user=(S.usuarios||[]).find(u=>!u.inativo&&(u.email||'').toLowerCase()===primeiro);
+  if(!user)return{code:'no-user',label:'Cadastrar',emoji:'🟡',email:emails[0]};
+  if(!user.onboardingEnviadoEm)return{code:'no-invite',label:'Convidar',emoji:'🟡',email:emails[0],user};
+  return{code:'done',label:'Convidado',emoji:'🟢',email:emails[0],user,enviadoEm:user.onboardingEnviadoEm};
+}
+// Alias: o onboarding foi fundido com o Cadastro de Professores em Admin → Configurações.
+// renderProfGlobal() faz tudo agora (lista de profs + status + botão Convidar inline).
+function renderOnboardingProfs(_force){
+  if(typeof renderProfGlobal==='function')renderProfGlobal();
+}
+window.renderOnboardingProfs=renderOnboardingProfs;
+
+// ─── Modal de gerenciamento de múltiplos emails do prof ───────────────────────
+function _pemRenderList(emails){
+  const list=document.getElementById('pem-list');if(!list)return;
+  list.innerHTML=emails.map((em,i)=>{
+    const isPrimary=i===0;
+    const safe=String(em||'').replace(/"/g,'&quot;');
+    return `<div class="pem-row" data-idx="${i}" style="display:flex;gap:8px;align-items:center">
+      <button type="button" onclick="pemSetPrimary(${i})" title="${isPrimary?'Email principal (recebe convite e NF)':'Tornar principal'}" style="background:none;border:none;cursor:pointer;font-size:18px;line-height:1;padding:4px;flex-shrink:0">${isPrimary?'⭐':'☆'}</button>
+      <input type="email" class="fc pem-input" value="${safe}" placeholder="email@dominio.com" style="flex:1;padding:7px 10px;font-size:13px"/>
+      <button type="button" onclick="pemRemoveRow(${i})" title="Remover" class="btn btn-g btn-sm" style="padding:4px 10px;flex-shrink:0">✕</button>
+    </div>`;
+  }).join('');
+}
+function _pemCollect(){
+  return [...document.querySelectorAll('#pem-list .pem-input')].map(i=>i.value.trim()).filter(Boolean);
+}
+window.abrirEmailsModal=(nome)=>{
+  if(!nome)return;
+  const modal=document.getElementById('modal-prof-emails');
+  if(!modal)return;
+  modal.dataset.profNome=nome;
+  const sub=document.getElementById('pem-nome');
+  if(sub)sub.textContent=nome;
+  const emails=(typeof _profEmails==='function')?_profEmails(nome):[];
+  _pemRenderList(emails.length?emails:['']);
+  const errEl=document.getElementById('pem-err');
+  if(errEl)errEl.classList.add('hidden');
+  modal.classList.remove('hidden');
+  setTimeout(()=>document.querySelector('#pem-list .pem-input')?.focus(),50);
+};
+window.pemAddRow=()=>{
+  const atuais=_pemCollect();
+  _pemRenderList([...atuais,'']);
+  // Foca o input que acabou de aparecer
+  setTimeout(()=>{
+    const inputs=document.querySelectorAll('#pem-list .pem-input');
+    inputs[inputs.length-1]?.focus();
+  },20);
+};
+window.pemRemoveRow=(idx)=>{
+  const atuais=_pemCollect();
+  if(atuais.length<=1){
+    // Mantém pelo menos 1 linha vazia
+    _pemRenderList(['']);
+    return;
+  }
+  atuais.splice(idx,1);
+  _pemRenderList(atuais);
+};
+window.pemSetPrimary=(idx)=>{
+  const atuais=_pemCollect();
+  if(idx<=0||idx>=atuais.length)return;
+  // Move o email da posição idx pra posição 0
+  const [primary]=atuais.splice(idx,1);
+  atuais.unshift(primary);
+  _pemRenderList(atuais);
+};
+window.salvarEmailsModal=async()=>{
+  const modal=document.getElementById('modal-prof-emails');
+  if(!modal)return;
+  const nome=modal.dataset.profNome||'';
+  const errEl=document.getElementById('pem-err');
+  const emails=_pemCollect();
+  // Valida formato de cada email
+  const reEmail=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const invalidos=emails.filter(e=>!reEmail.test(e));
+  if(invalidos.length){
+    if(errEl){errEl.textContent='Email(s) inválido(s): '+invalidos.join(', ');errEl.classList.remove('hidden');}
+    return;
+  }
+  // Dedupe (case-insensitive) preservando ordem
+  const seen=new Set();
+  const unicos=[];
+  for(const e of emails){
+    const key=e.toLowerCase();
+    if(!seen.has(key)){seen.add(key);unicos.push(e);}
+  }
+  const joined=unicos.join('; ');
+  try{
+    await saveProfEmail(nome,joined);
+    CM('modal-prof-emails');
+    renderProfGlobal();
+  }catch(e){
+    console.error(e);
+    if(errEl){errEl.textContent='Erro ao salvar: '+(e.message||e);errEl.classList.remove('hidden');}
+  }
+};
+
+function _onbSlug(nome){
+  return String(nome||'').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/\s+/g,'.').replace(/[^a-z0-9._@+-]/g,'');
+}
+
+async function onboardingCadastrar(nome){
+  const emails=(typeof _profEmails==='function')?_profEmails(nome):[];
+  if(!emails.length){alert('Cadastre o email do prof primeiro.');return;}
+  const email=emails[0].toLowerCase();
+  const conflito=(S.usuarios||[]).find(u=>!u.inativo&&(u.email||'').toLowerCase()===email);
+  if(conflito){alert(`Já existe usuário com email ${email}: ${conflito.nome||conflito.username}`);return;}
+  const slug=_onbSlug(nome);
+  if(!slug){alert('Nome de prof inválido pra gerar slug.');return;}
+  const conflitoUser=(S.usuarios||[]).find(u=>(u.username||u.id)===slug&&!u.inativo);
+  if(conflitoUser){alert(`Já existe usuário com login "${slug}".`);return;}
+  const senhaTemp=Math.random().toString(36).slice(2,12);
+  const presets=(typeof _tiposPresets==='function')?_tiposPresets():null;
+  const permsProf=(presets&&Array.isArray(presets.prof))?presets.prof:['simulados','trocas','desempenho','checklist','revisao','professores'];
+  const data={
+    username:slug,
+    nome,
+    email,
+    senha:senhaTemp,
+    tipo:'prof',
+    role:'user',
+    permissoes:permsProf,
+    inativo:false,
+    onboardingCriadoEm:new Date().toISOString()
+  };
+  try{
+    await setDoc(doc(db,'usuarios',slug),data);
+    S.usuarios.push({id:slug,...data});
+    audit('USUARIO_CRIADO',{collection:'usuarios',username:slug},{after:{...data,senha:'***'},meta:{kind:'onboarding'}});
+    renderOnboardingProfs();
+    if(typeof renderUsuarios==='function')renderUsuarios();
+  }catch(e){
+    console.error('onboardingCadastrar:',e);
+    alert('Erro ao cadastrar: '+(e.message||e));
+    throw e;
+  }
+}
+window.onboardingCadastrar=onboardingCadastrar;
+
+// Envio do convite — núcleo. Recebe o user doc + email direto.
+// Usa template dedicado (template_rruper4) com variáveis prof_nome + prof_email.
+// Audit usa USUARIO_EDITADO (mais coerente: estamos editando o doc do user).
+async function _onbSendInvite(user,email){
+  if(typeof emailjs==='undefined')throw new Error('EmailJS não carregado.');
+  const nome=user.nome||user.username||'Professor(a)';
+  await emailjs.send('service_exyoa4r','template_rruper4',{
+    to_email:email,
+    prof_nome:nome,
+    prof_email:email
+  });
+  const _before={onboardingEnviadoEm:user.onboardingEnviadoEm||null};
+  user.onboardingEnviadoEm=new Date().toISOString();
+  await updateDoc(doc(db,'usuarios',user.id),{onboardingEnviadoEm:user.onboardingEnviadoEm});
+  audit('USUARIO_EDITADO',{collection:'usuarios',username:user.id},{before:_before,after:{onboardingEnviadoEm:user.onboardingEnviadoEm},meta:{kind:'onboarding-invite-sent',email}});
+}
+
+// Ação unificada do botão "Convidar":
+//   1. Se prof não tem user doc ainda → cria automaticamente (tipo='prof', permissões do preset)
+//   2. Abre modal pra admin editar/confirmar o email
+//   3. Envia o convite no submit do modal
+async function onboardingConvidar(nome){
+  const emails=(typeof _profEmails==='function')?_profEmails(nome):[];
+  if(!emails.length){alert('Sem email cadastrado pra esse prof. Cadastre em Cadastros → Professores.');return;}
+  let user=(S.usuarios||[]).find(u=>!u.inativo&&(u.email||'').toLowerCase()===emails[0].toLowerCase());
+  if(!user){
+    // Cadastra silenciosamente antes de abrir o modal
+    try{await onboardingCadastrar(nome);}
+    catch(e){return;} // onboardingCadastrar já mostra alert em erro
+    user=(S.usuarios||[]).find(u=>!u.inativo&&(u.email||'').toLowerCase()===emails[0].toLowerCase());
+    if(!user)return;
+  }
+  return onboardingEnviarConvite(nome);
+}
+window.onboardingConvidar=onboardingConvidar;
+
+// Wrapper individual: abre modal pra admin escolher/editar o email antes de enviar.
+// O modal mostra o 1º email pré-selecionado + chips dos demais como sugestões clicáveis.
+async function onboardingEnviarConvite(nome){
+  const emails=(typeof _profEmails==='function')?_profEmails(nome):[];
+  if(!emails.length){alert('Sem email cadastrado.');return;}
+  const user=(S.usuarios||[]).find(u=>!u.inativo&&(u.email||'').toLowerCase()===emails[0].toLowerCase());
+  if(!user){alert('Prof não cadastrado como usuário. Clique "Cadastrar" primeiro.');return;}
+  // Popula modal
+  const subEl=document.getElementById('mce-prof-nome');
+  if(subEl)subEl.textContent=nome;
+  const emEl=document.getElementById('mce-email');
+  if(emEl)emEl.value=emails[0];
+  const errEl=document.getElementById('mce-err');
+  if(errEl)errEl.classList.add('hidden');
+  // Guarda referência ao user pra conviteEnviar() saber qual doc atualizar
+  document.getElementById('modal-convite-edit').dataset.userId=user.id;
+  document.getElementById('modal-convite-edit').dataset.profNome=nome;
+  // Sugestões: outros emails do prof
+  const sugWrap=document.getElementById('mce-suggestions-wrap');
+  const sugList=document.getElementById('mce-suggestions');
+  if(emails.length>1&&sugWrap&&sugList){
+    sugWrap.style.display='';
+    const escA=(typeof _escAttr==='function')?_escAttr:(s=>String(s||'').replace(/"/g,'&quot;'));
+    sugList.innerHTML=emails.slice(1).map(em=>`<button type="button" class="btn btn-s btn-sm" style="text-align:left;justify-content:flex-start;font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;font-size:12px" onclick="document.getElementById('mce-email').value='${escA(em)}'">📩 ${_escHtml(em)}</button>`).join('');
+  }else if(sugWrap){
+    sugWrap.style.display='none';
+  }
+  // Abre modal
+  document.getElementById('modal-convite-edit').classList.remove('hidden');
+  setTimeout(()=>emEl?.focus(),50);
+}
+window.onboardingEnviarConvite=onboardingEnviarConvite;
+
+// Confirma envio do modal: valida email + dispara _onbSendInvite
+async function conviteEnviar(){
+  const modal=document.getElementById('modal-convite-edit');
+  const userId=modal?.dataset.userId||'';
+  const errEl=document.getElementById('mce-err');
+  const email=(document.getElementById('mce-email')?.value||'').trim();
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    if(errEl){errEl.textContent='Email inválido.';errEl.classList.remove('hidden');}
+    return;
+  }
+  const user=(S.usuarios||[]).find(u=>u.id===userId);
+  if(!user){if(errEl){errEl.textContent='Usuário não encontrado.';errEl.classList.remove('hidden');}return;}
+  try{
+    await _onbSendInvite(user,email);
+    CM('modal-convite-edit');
+    renderOnboardingProfs();
+    if(typeof _revShowToast==='function')_revShowToast(`✓ Convite enviado pra ${email}`,'var(--green)');
+  }catch(e){
+    console.error('conviteEnviar:',e);
+    if(errEl){errEl.textContent='Erro ao enviar: '+(e.text||e.message||e);errEl.classList.remove('hidden');}
+  }
+}
+window.conviteEnviar=conviteEnviar;
+
+// Bulk unificado: pra cada prof com email + ainda não convidado, cadastra (se preciso) + envia email.
+// Usa o primeiro email cadastrado de cada prof (sem abrir modal — seria inviável pra dezenas).
+async function onboardingConvidarTodos(){
+  if(typeof emailjs==='undefined'){alert('EmailJS não carregado.');return;}
+  const candidatos=[];
+  for(const nome of (S.profs||[])){
+    const emails=(typeof _profEmails==='function')?_profEmails(nome):[];
+    if(!emails.length)continue;
+    const email=emails[0];
+    const user=(S.usuarios||[]).find(u=>!u.inativo&&(u.email||'').toLowerCase()===email.toLowerCase());
+    if(user&&user.onboardingEnviadoEm)continue; // já convidado
+    candidatos.push({nome,email,user});
+  }
+  if(!candidatos.length){alert('Todos os profs com email já foram convidados.');return;}
+  if(!confirm(`Convidar ${candidatos.length} prof(s)? Cada um receberá email no 1º endereço cadastrado.`))return;
+  let ok=0,fail=0;
+  for(const c of candidatos){
+    try{
+      let user=c.user;
+      if(!user){
+        await onboardingCadastrar(c.nome);
+        user=(S.usuarios||[]).find(u=>!u.inativo&&(u.email||'').toLowerCase()===c.email.toLowerCase());
+        if(!user)throw new Error('falha ao cadastrar');
+      }
+      await _onbSendInvite(user,c.email);
+      ok++;
+    }catch(e){console.error('convidar',c.nome,e);fail++;}
+  }
+  renderOnboardingProfs();
+  renderUsuarios();
+  alert(`✓ ${ok} convidado(s).${fail?' '+fail+' falha(s).':''}`);
+}
+window.onboardingConvidarTodos=onboardingConvidarTodos;
+// ─── Fim Onboarding ────────────────────────────────────────────────────────
 
 window.openUserModal=(id)=>{
   const isEdit=!!id;
@@ -17496,14 +17885,20 @@ window.deleteUser=async()=>{
   if(!id)return;
   if(S.currentUser?.id===id){alert('Você não pode apagar o próprio usuário enquanto está logado.');return;}
   const u=S.usuarios.find(x=>x.id===id);if(!u)return;
-  if(!confirm(`Apagar usuário "${u.nome||u.username}"? Esta ação não pode ser desfeita.`))return;
+  if(!confirm(`Apagar usuário "${u.nome||u.username}"? Ele não poderá mais logar.`))return;
   // Não permite apagar o último admin
   const admins=S.usuarios.filter(x=>!x.inativo&&getTipo(x)==='adm');
   if(getTipo(u)==='adm'&&admins.length<=1){alert('Não é possível apagar o único administrador.');return;}
-  await deleteDoc(doc(db,'usuarios',id));
-  audit('USUARIO_DESATIVADO',{collection:'usuarios',username:id},{before:{...u,senha:'***'},meta:{kind:'delete'}});
-  await loadUsuarios();
-  CM('modal-user');renderUsuarios();
+  // Soft delete: rules bloqueiam deleteDoc em /usuarios. Marca inativo (já filtrado em renderUsuarios + checkPass).
+  try{
+    await updateDoc(doc(db,'usuarios',id),{inativo:true});
+    audit('USUARIO_DESATIVADO',{collection:'usuarios',username:id},{before:{...u,senha:'***'},meta:{kind:'soft-delete'}});
+    await loadUsuarios();
+    CM('modal-user');renderUsuarios();
+  }catch(e){
+    console.error('deleteUser:',e);
+    alert('Erro ao apagar: '+(e.message||e));
+  }
 };
 
 // co tabs
@@ -17514,7 +17909,7 @@ window.switchCoTab=(tab,btn)=>{
   // Show "Novo Simulado" only on simulados tab
   const btnNovo=document.getElementById('btn-novo-sim');
   if(btnNovo)btnNovo.style.display=tab==='simulados'?'':'none';
-  if(tab==='usuarios')renderUsuarios();
+  if(tab==='usuarios'){renderUsuarios();if(typeof renderOnboardingProfs==='function')renderOnboardingProfs();}
   if(tab==='auditoria'&&typeof renderAuditoria==='function')renderAuditoria();
 };
 
@@ -19886,22 +20281,64 @@ window.doAddAluno=async()=>{
   CM('modal-add');
 };
 
-// PROFESSORES GLOBAL
+// PROFESSORES GLOBAL — inclui status de onboarding e botão Convidar inline
 function renderProfGlobal(){
   const list=document.getElementById('prof-global-list');
   const badge=document.getElementById('prof-count-badge');
-  if(badge)badge.innerHTML=S.profs.length
-    ?`<span style="font-weight:700;color:var(--text)">${S.profs.length} professor${S.profs.length!==1?'es':''} cadastrado${S.profs.length!==1?'s':''}</span>`
-    :'<span style="color:var(--t2)">Nenhum professor cadastrado ainda.</span>';
+  // Contagem com resumo de convites
+  if(badge){
+    const total=S.profs.length;
+    if(!total){
+      badge.innerHTML='<span style="color:var(--t2)">Nenhum professor cadastrado ainda.</span>';
+    }else{
+      const convidados=(S.profs||[]).filter(n=>_onbStatus(n).code==='done').length;
+      const aConvidar=(S.profs||[]).filter(n=>{const c=_onbStatus(n).code;return c==='no-user'||c==='no-invite';}).length;
+      const semEmail=(S.profs||[]).filter(n=>_onbStatus(n).code==='no-email').length;
+      const partes=[];
+      if(convidados)partes.push(`🟢 ${convidados} convidado${convidados===1?'':'s'}`);
+      if(aConvidar)partes.push(`🟡 ${aConvidar} a convidar`);
+      if(semEmail)partes.push(`🔴 ${semEmail} sem email`);
+      badge.innerHTML=`<span style="font-weight:700;color:var(--text)">${total} professor${total!==1?'es':''}</span>${partes.length?' <span style="color:var(--t2)">· '+partes.join(' · ')+'</span>':''}`;
+    }
+  }
   const emails=S.profsEmail||{};
+  const escA=(typeof _escAttr==='function')?_escAttr:(s=>String(s||'').replace(/"/g,'&quot;'));
   if(list)list.innerHTML=S.profs.length
     ?S.profs.map((p,i)=>{
       const safe=p.replace(/"/g,'&quot;');
       const email=(emails[p]||'').replace(/"/g,'&quot;');
-      return `<div class="prof-item" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <span style="flex:1;min-width:180px;font-weight:600">${p}</span>
-        <input type="text" class="fc" data-prof-email="${safe}" value="${email}" placeholder="email1@dom.com; email2@dom.com (opcional · até 3 emails separados por ;)" onblur="saveProfEmail('${p.replace(/'/g,"\\'")}',this.value)" style="flex:0 1 360px;min-width:240px;padding:5px 9px;font-size:12.5px" title="Email(s) do professor — separe por ; pra cadastrar mais de um. Todos receberão a solicitação de nota fiscal."/>
-        <button class="btn btn-g btn-sm" onclick="rmProfG(${i})" title="Remover professor">✕</button>
+      // Status de onboarding — badge compacto (apenas emoji + 1 palavra), data via tooltip
+      const s=_onbStatus(p);
+      const pillBase='font-family:\'JetBrains Mono\',\'SF Mono\',Menlo,Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:999px;white-space:nowrap;flex-shrink:0';
+      let onbBtn='';
+      let statusBadge='';
+      if(s.code==='no-email'){
+        statusBadge=`<span style="${pillBase};color:#ef4444;background:color-mix(in srgb,#ef4444 14%,transparent)" title="Cadastre um email pra poder convidar">🔴 sem email</span>`;
+      }else if(s.code==='done'){
+        const dt=s.enviadoEm?new Date(s.enviadoEm).toLocaleDateString('pt-BR'):'';
+        statusBadge=`<span style="${pillBase};color:#22c55e;background:color-mix(in srgb,#22c55e 14%,transparent)" title="Convite enviado${dt?' em '+dt:''}">🟢 convidado</span>`;
+        onbBtn=`<button class="btn btn-s btn-sm" onclick="onboardingConvidar('${p.replace(/'/g,"\\'")}')" title="Reenviar convite${dt?' (último: '+dt+')':''}" style="font-size:11px;padding:4px 10px;flex-shrink:0">↻</button>`;
+      }else{
+        statusBadge=`<span style="${pillBase};color:#f59e0b;background:color-mix(in srgb,#f59e0b 14%,transparent)" title="Tem email mas ainda não foi convidado">🟡 a convidar</span>`;
+        onbBtn=`<button class="btn btn-p btn-sm" onclick="onboardingConvidar('${p.replace(/'/g,"\\'")}')" title="Cadastra como usuário (se ainda não estiver) e envia convite por email" style="font-size:11px;padding:4px 10px;flex-shrink:0">📧 Convidar</button>`;
+      }
+      // Indicador de emails múltiplos (clicável pra abrir modal de edição)
+      const emailsArr=(typeof _profEmails==='function')?_profEmails(p):[];
+      const multiBadge=emailsArr.length>1
+        ?`<button type="button" onclick="abrirEmailsModal('${p.replace(/'/g,"\\'")}')" title="${emailsArr.length} emails cadastrados — clique pra editar" style="background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);border:none;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;padding:3px 7px;border-radius:999px;cursor:pointer;flex-shrink:0;white-space:nowrap">+${emailsArr.length-1}</button>`
+        :'';
+      // Botão ✏️ pra abrir modal multi-email
+      const editBtn=`<button type="button" onclick="abrirEmailsModal('${p.replace(/'/g,"\\'")}')" title="Gerenciar emails do professor" style="background:none;border:none;cursor:pointer;color:var(--t2);padding:4px 6px;font-size:13px;flex-shrink:0" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--t2)'">✏️</button>`;
+      // Mostra apenas o 1º email no input (compacto). Editar muitos emails => modal.
+      const primaryEmail=(emailsArr[0]||'').replace(/"/g,'&quot;');
+      return `<div class="prof-item" style="display:flex;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid color-mix(in srgb,var(--border) 50%,transparent);flex-wrap:nowrap;overflow:hidden">
+        <span style="flex:0 0 160px;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${safe}">${p}</span>
+        <input type="text" class="fc" data-prof-email="${safe}" value="${primaryEmail}" placeholder="email@dom.com" onblur="saveProfEmail('${p.replace(/'/g,"\\'")}',this.value);renderProfGlobal()" style="flex:1 1 0;min-width:0;padding:5px 9px;font-size:12.5px" title="Email principal — convites vão pra cá. Clique no ✏️ pra cadastrar mais."/>
+        ${multiBadge}
+        ${editBtn}
+        ${statusBadge}
+        ${onbBtn}
+        <button class="btn btn-g btn-sm" onclick="rmProfG(${i})" title="Remover professor" style="padding:4px 8px;flex-shrink:0">✕</button>
       </div>`;
     }).join('')
     :'<p style="color:var(--t2);font-size:13px;margin-bottom:10px">Nenhum professor cadastrado.</p>';
@@ -19946,15 +20383,89 @@ window.addProfGlobal=async()=>{
   }
   document.getElementById('prof-input').value='';
 };
-window.rmProfG=async i=>{
+// rmProfG agora apenas abre o modal de confirmação (dupla checagem).
+// A exclusão real acontece em confirmarRemoveProf() após o admin digitar o nome.
+window.rmProfG=i=>{
   const nome=S.profs[i];
+  if(!nome)return;
+  const modal=document.getElementById('modal-rm-prof');
+  if(!modal){
+    // Fallback se o modal não existir por algum motivo
+    if(!confirm(`Remover ${nome}? Esta ação não pode ser desfeita.`))return;
+    return _rmProfGExecute(i);
+  }
+  modal.dataset.profIdx=String(i);
+  modal.dataset.profNome=nome;
+  document.getElementById('rmp-nome').textContent=nome;
+  // Aviso se há usuário linkado, mentorias, disponibilidade, etc
+  const emails=(typeof _profEmails==='function')?_profEmails(nome):[];
+  const userLinkado=emails.length?(S.usuarios||[]).find(u=>!u.inativo&&(u.email||'').toLowerCase()===emails[0].toLowerCase()):null;
+  const warnings=[];
+  if(userLinkado){
+    warnings.push(`Existe um usuário linkado a este prof (<code>${userLinkado.username||userLinkado.id}</code>). Ele <strong>não será excluído automaticamente</strong> — gerencie em <em>Admin → Usuários</em> se quiser remover também.`);
+  }
+  const wrap=document.getElementById('rmp-warnings');
+  if(wrap){
+    if(warnings.length){
+      wrap.style.display='';
+      wrap.innerHTML='⚠️ '+warnings.join('<br><br>⚠️ ');
+    }else{
+      wrap.style.display='none';
+      wrap.innerHTML='';
+    }
+  }
+  const inp=document.getElementById('rmp-confirma');
+  if(inp)inp.value='';
+  const errEl=document.getElementById('rmp-err');
+  if(errEl)errEl.classList.add('hidden');
+  rmpUpdateBtn();
+  modal.classList.remove('hidden');
+  setTimeout(()=>inp?.focus(),50);
+};
+
+// Habilita o botão "Excluir" só quando o nome digitado bate
+window.rmpUpdateBtn=()=>{
+  const modal=document.getElementById('modal-rm-prof');
+  const inp=document.getElementById('rmp-confirma');
+  const btn=document.getElementById('rmp-ok');
+  if(!modal||!inp||!btn)return;
+  const alvo=(modal.dataset.profNome||'').trim().toLowerCase();
+  const dig=(inp.value||'').trim().toLowerCase();
+  const ok=alvo&&dig===alvo;
+  btn.disabled=!ok;
+  btn.style.opacity=ok?'1':'.5';
+};
+
+window.confirmarRemoveProf=async()=>{
+  const modal=document.getElementById('modal-rm-prof');
+  if(!modal)return;
+  const idx=parseInt(modal.dataset.profIdx||'-1',10);
+  const alvo=(modal.dataset.profNome||'').trim();
+  if(idx<0||S.profs[idx]!==alvo){
+    const errEl=document.getElementById('rmp-err');
+    if(errEl){errEl.textContent='Estado inconsistente. Cancele e tente novamente.';errEl.classList.remove('hidden');}
+    return;
+  }
+  try{
+    await _rmProfGExecute(idx);
+    CM('modal-rm-prof');
+  }catch(e){
+    console.error(e);
+    const errEl=document.getElementById('rmp-err');
+    if(errEl){errEl.textContent='Erro ao remover: '+(e.message||e);errEl.classList.remove('hidden');}
+  }
+};
+
+// Execução real do remove (separada pra ficar fácil de reusar)
+async function _rmProfGExecute(i){
+  const nome=S.profs[i];
+  if(!nome)return;
   S.profs.splice(i,1);
-  // Limpa o email pareado também
   if(S.profsEmail&&nome)delete S.profsEmail[nome];
   await setDoc(doc(db,'config','professores'),{lista:S.profs,emails:S.profsEmail||{}});
   audit('CONFIG_ALTERADA',{collection:'config',path:'professores'},{after:{removed:nome,total:S.profs.length},meta:{kind:'prof-remove'}});
   renderProfGlobal();
-};
+}
 // Retorna lista de emails do prof (string[]). Aceita 1 ou mais emails
 // separados por ';' (ou ',' como fallback). Filtra vazios e duplicados.
 window._profEmails=(nome)=>{
