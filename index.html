@@ -2608,8 +2608,6 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
           </div>
         </div>
 
-
-
       </div>
     </div>
 
@@ -2999,7 +2997,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
     <div class="mh"><div><div class="m-title" id="mu-title">Novo usuário</div><div class="m-sub">Defina credenciais e papel</div></div><button class="m-close" onclick="CM('modal-user')">✕</button></div>
     <div class="m-body">
       <div class="fg"><label class="fl">Nome de usuário (login + display)</label><input class="fc" id="mu-username" placeholder="ex: Maria Silva" autocomplete="off"/></div>
-      <div class="fg"><label class="fl">Email (login via Google ou Firebase)</label><input class="fc" id="mu-email" type="email" placeholder="ex: maria@exemplo.com" autocomplete="off"/><p style="font-size:11px;color:var(--t2);margin-top:4px">Opcional. Necessário pra login via Google ou link de redefinição de senha. Precisa ser igual ao email cadastrado no Firebase Auth.</p></div>
+      <div class="fg"><label class="fl">Email (login via Google ou Firebase)</label><input class="fc" id="mu-email" type="email" placeholder="ex: maria@exemplo.com" autocomplete="off"/><p style="font-size:11px;color:var(--t2);margin-top:4px">Obrigatório. Necessário pra login via Google ou redefinição de senha.</p></div>
       <div class="fg"><label class="fl">Senha</label><input class="fc" id="mu-senha" type="text" placeholder="Senha de acesso" autocomplete="new-password"/></div>
       <div class="fg">
         <label class="fl">Tipo de usuário</label>
@@ -17824,7 +17822,8 @@ window.saveUser=async()=>{
     .normalize('NFD').replace(/[̀-ͯ]/g,'')
     .replace(/\s+/g,'.').replace(/[^a-z0-9._@+-]/g,'');
   if(!username){errEl.textContent='Nome de usuário inválido.';errEl.classList.remove('hidden');return;}
-  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent='Email inválido.';errEl.classList.remove('hidden');return;}
+  if(!email){errEl.textContent='Email é obrigatório. Necessário pra login via Google ou redefinição de senha.';errEl.classList.remove('hidden');return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent='Email inválido.';errEl.classList.remove('hidden');return;}
   // Conflito: username diferente do editId E já existe outro
   const conflito=S.usuarios.some(u=>(u.username||u.id)===username && u.id!==editId);
   if(conflito){errEl.textContent='Já existe um usuário com esse nome.';errEl.classList.remove('hidden');return;}
