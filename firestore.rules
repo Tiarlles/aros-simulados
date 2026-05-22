@@ -35,11 +35,12 @@ service cloud.firestore {
                       && request.resource.data.nome.size() < 200;
         // Update: coord logado OU aluno anônimo via link de email (responder presença,
         // aceitar troca direta, swap). Anônimo NÃO pode mudar nome ou matricula.
+        // Usa .get(field, null) pra tolerar docs antigos sem o campo `matricula`.
         allow update: if (isAuth()
                          && request.resource.data.nome is string
                          && request.resource.data.nome.size() > 0)
                       || (request.resource.data.nome == resource.data.nome
-                          && request.resource.data.matricula == resource.data.matricula);
+                          && request.resource.data.get('matricula', null) == resource.data.get('matricula', null));
         allow delete: if isAuth();
       }
     }

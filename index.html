@@ -18258,6 +18258,13 @@ function getStudentRegisteredEmail(s){
   return null;
 }
 
+// Normalize email for safe comparison: strip zero-width / NBSP / hidden chars
+// from spreadsheet imports or mobile keyboards before case-insensitive compare.
+function normalizeEmailForCompare(e){
+  if(!e)return '';
+  return String(e).replace(/[​-‍﻿ \s]/g,'').toLowerCase();
+}
+
 // === Resposta · presencial (sem horário, troca = mudar de dia) ===
 window.openRespPres=(sid,type)=>{
   const s=S.students.find(x=>x.id===sid);if(!s)return;
@@ -18324,10 +18331,12 @@ window.subRespPres=async()=>{
   if(!email||!email.includes('@')){errEl.textContent='Digite um e-mail válido.';errEl.classList.remove('hidden');return;}
   const s=S.students.find(x=>x.id===sid);
   const regEmail=getStudentRegisteredEmail(s);
-  if(regEmail&&email.toLowerCase()!==regEmail.toLowerCase()){
+  if(regEmail&&normalizeEmailForCompare(email)!==normalizeEmailForCompare(regEmail)){
     const masked=maskEmail(regEmail);
     errEl.innerHTML=`❌ E-mail não reconhecido.<br>O e-mail cadastrado para <strong>${s.nome}</strong> é: <strong>${masked}</strong>`;
-    errEl.classList.remove('hidden');return;
+    errEl.classList.remove('hidden');
+    try{errEl.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}
+    return;
   }
   errEl.classList.add('hidden');
 
@@ -18341,7 +18350,15 @@ window.subRespPres=async()=>{
     if(s.dia){update.originalDia=s.dia;}
     update.dia=null;
   }
-  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),update);
+  try{
+    await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),update);
+  }catch(err){
+    console.error('[subRespPres] updateDoc falhou:',err);
+    errEl.innerHTML=`❌ Não foi possível salvar agora.<br><span style="font-size:12px">${(err&&err.code)||''} ${(err&&err.message)||'erro desconhecido'}</span><br>Tente novamente em alguns segundos. Se persistir, envie este aviso para a coordenação.`;
+    errEl.classList.remove('hidden');
+    try{errEl.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}
+    return;
+  }
   Object.assign(s,update);
 
   // Auto-match FIFO: troca casada com alguém que quer ir pro dia desse aluno
@@ -18525,10 +18542,12 @@ window.subResp=async()=>{
   // Email validation against registered list
   const s=S.students.find(x=>x.id===sid);
   const regEmail=getStudentRegisteredEmail(s);
-  if(regEmail&&email.toLowerCase()!==regEmail.toLowerCase()){
+  if(regEmail&&normalizeEmailForCompare(email)!==normalizeEmailForCompare(regEmail)){
     const masked=maskEmail(regEmail);
     errEl.innerHTML=`❌ E-mail não reconhecido.<br>O e-mail cadastrado para <strong>${s.nome}</strong> é: <strong>${masked}</strong><br>Verifique e tente novamente.`;
-    errEl.classList.remove('hidden');return;
+    errEl.classList.remove('hidden');
+    try{errEl.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}
+    return;
   }
 
   let swapSlots=[],obs='';
@@ -18549,7 +18568,15 @@ window.subResp=async()=>{
     if(s.dia&&s.rodada){updateData.originalDia=s.dia;updateData.originalRodada=s.rodada;}
     updateData.dia=null;updateData.rodada=null;updateData.posicao=null;
   }
-  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),updateData);
+  try{
+    await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),updateData);
+  }catch(err){
+    console.error('[subResp] updateDoc falhou:',err);
+    errEl.innerHTML=`❌ Não foi possível salvar agora.<br><span style="font-size:12px">${(err&&err.code)||''} ${(err&&err.message)||'erro desconhecido'}</span><br>Tente novamente em alguns segundos. Se persistir, envie este aviso para a coordenação.`;
+    errEl.classList.remove('hidden');
+    try{errEl.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}
+    return;
+  }
 
   // ── Gatilhos de troca automática ───────────────────────────────────────────
   let autoSwap=null;
