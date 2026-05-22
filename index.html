@@ -4613,14 +4613,19 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
           <p style="font-size:11px;color:var(--t2);margin-top:4px">Email que recebe cópia de toda solicitação enviada aos professores. Configure como CC no template do EmailJS.</p>
         </div>
         <div class="fg">
-          <label class="fl">🆔 Template ID do EmailJS</label>
+          <label class="fl">🆔 Template ID do EmailJS — Nota Fiscal (PJ)</label>
           <input type="text" class="fc" id="fc-nf-template" placeholder="template_solicitar_nota"/>
-          <p style="font-size:11px;color:var(--t2);margin-top:4px">ID do template criado no <a href="https://dashboard.emailjs.com/admin/templates" target="_blank" style="color:var(--accent)">dashboard do EmailJS</a>. Variáveis que o template precisa usar: <code>{{to_email}}</code>, <code>{{cc_email}}</code>, <code>{{nome}}</code>, <code>{{mes}}</code>, <code>{{valor_total}}</code>, <code>{{detalhamento}}</code>, <code>{{assunto}}</code>.</p>
+          <p style="font-size:11px;color:var(--t2);margin-top:4px">Template usado pra profs em regime <strong>PJ</strong>. ID do template criado no <a href="https://dashboard.emailjs.com/admin/templates" target="_blank" style="color:var(--accent)">dashboard do EmailJS</a>. Variáveis: <code>{{to_email}}</code>, <code>{{cc_email}}</code>, <code>{{nome}}</code>, <code>{{mes}}</code>, <code>{{valor_total}}</code>, <code>{{detalhamento}}</code>, <code>{{assunto}}</code>.</p>
+        </div>
+        <div class="fg">
+          <label class="fl">🆔 Template ID do EmailJS — RPA</label>
+          <input type="text" class="fc" id="fc-nf-template-rpa" placeholder="template_solicitar_rpa"/>
+          <p style="font-size:11px;color:var(--t2);margin-top:4px">Template usado pra profs em regime <strong>RPA</strong> (Recibo de Pagamento Autônomo). Mesmas variáveis do template PJ. Se em branco, profs RPA não recebem email (botão "📋 Solicitar RPA" avisa).</p>
         </div>
         <div class="fg">
           <label class="fl">🔧 Service ID do EmailJS <span style="color:var(--t2);font-weight:400">(opcional)</span></label>
           <input type="text" class="fc" id="fc-nf-service" placeholder="service_exyoa4r"/>
-          <p style="font-size:11px;color:var(--t2);margin-top:4px">Em branco usa o service padrão do sistema (<code>service_exyoa4r</code>).</p>
+          <p style="font-size:11px;color:var(--t2);margin-top:4px">Em branco usa o service padrão do sistema (<code>service_exyoa4r</code>). O mesmo service é usado pros dois templates (PJ e RPA).</p>
         </div>
         <details style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;margin-top:14px">
           <summary style="cursor:pointer;font-size:12.5px;font-weight:700;color:var(--accent)">📋 Exemplo de conteúdo do template (clique pra ver)</summary>
@@ -12004,7 +12009,7 @@ window.featCkPastePreview=()=>{
   const items=_featCkParse(document.getElementById('mft-ck-paste-area').value);
   const done=items.filter(x=>x.done).length;
   document.getElementById('mft-ck-paste-info').textContent=
-    items.length?`${items.length} item${items.length>1?'ns':''} detectado${items.length>1?'s':''}${done?` · ${done} já marcado${done>1?'s':''}`:''}`:'0 itens detectados';
+    items.length?`${items.length} ${items.length>1?'itens':'item'} detectado${items.length>1?'s':''}${done?` · ${done} já marcado${done>1?'s':''}`:''}`:'0 itens detectados';
 };
 
 window.featCkApplyPaste=()=>{
@@ -15642,7 +15647,7 @@ window.renderFinanceiro=async()=>{
   const acts=[];
   if(isAdmin){
     if(fechado){
-      acts.push(`<button class="btn btn-p btn-sm" onclick="_finSolicitarTodasNotas('${anoMes}')" title="Dispara o email de solicitação de NF pra TODOS os professores do mês (com email cadastrado e total > 0)" style="background:linear-gradient(135deg,#1f6feb,#2f81f7);color:#fff;font-weight:700">📨 SOLICITAR TODAS AS NOTAS</button>`);
+      acts.push(`<button class="btn btn-p btn-sm" onclick="_finSolicitarTodasNotas('${anoMes}')" title="Dispara email de solicitação pra TODOS os professores do mês (com email cadastrado e total > 0). Cada regime usa seu template: PJ recebe pedido de NF, RPA recebe pedido de RPA." style="background:linear-gradient(135deg,#1f6feb,#2f81f7);color:#fff;font-weight:700">📨 SOLICITAR TODAS (NF + RPA)</button>`);
       acts.push(`<button class="btn btn-s btn-sm" onclick="reabrirMesFin('${anoMes}')">🔓 Reabrir mês</button>`);
     }else{
       acts.push(`<button class="btn btn-p btn-sm" onclick="fecharMesFin('${anoMes}')">🔒 Fechar mês</button>`);
@@ -15697,12 +15702,20 @@ window.renderFinanceiro=async()=>{
   // 11px → 9px (subtexto numérico abaixo do valor principal nas células multi-linha).
   const tdNumStyle='font-size:10.5px';
   const subNumStyle='color:var(--t2);font-size:9px';
-  // notasSolicitadas: { [profNome]: ISO } — registro de quando a nota foi pedida pra cada prof neste mês.
+  // notasSolicitadas: { [profNome]: ISO } — registro de quando a nota/RPA foi pedida pra cada prof neste mês.
+  // notasSolicitadasRegime: { [profNome]: 'pj'|'rpa' } — qual fluxo foi disparado naquela solicitação.
+  // Docs antigos sem esse campo são tratados como 'pj' (padrão histórico).
   const notasSolicitadas=mesData.notasSolicitadas||{};
+  const notasSolicitadasRegime=mesData.notasSolicitadasRegime||{};
   const fmtSolic=(iso)=>{const d=new Date(iso);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});};
-  // controleStatus: { [profNome]: 'aguardando-fechamento'|'nf-solicitada'|'nf-emitida'|'nf-nao-emitida' }
-  // Default = 'aguardando-fechamento'. Mudado automaticamente pra 'nf-solicitada' ao clicar
-  // 📨 Solicitar Nota, OU manualmente pelo admin via dropdown na coluna Controle.
+  // Badge "NF" ou "RPA" pra mostrar o regime de uma solicitação anterior. Cor coerente com
+  // o badge "RPA" da coluna Professor (laranja) e o tom de acento azul pra NF.
+  const _regimeBadgeSolic=(reg)=>reg==='rpa'
+    ?`<span style="display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9px;background:rgba(228,109,10,.18);color:#e46d0a;padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:.5px;margin-left:4px;vertical-align:middle">RPA</span>`
+    :`<span style="display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9px;background:rgba(47,129,247,.18);color:var(--accent);padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:.5px;margin-left:4px;vertical-align:middle">NF</span>`;
+  // controleStatus: { [profNome]: 'aguardando-fechamento'|'nf-solicitada'|'rpa-solicitada'|'nf-emitida'|'nf-nao-emitida' }
+  // Default = 'aguardando-fechamento'. Mudado automaticamente pra 'nf-solicitada' (PJ) ou
+  // 'rpa-solicitada' (RPA) ao disparar email, OU manualmente pelo admin via dropdown.
   const controleStatus=mesData.controleStatus||{};
   // rolloverPara: { [profNome]: 'YYYY-MM' } — set quando admin marca nf-nao-emitida E
   // confirma mover o valor pro próximo mês. Render mostra valor riscado + badge.
@@ -15713,6 +15726,7 @@ window.renderFinanceiro=async()=>{
     const opts=[
       {v:'aguardando-fechamento',l:'Aguardando fechamento',bg:'var(--bg3)',fg:'var(--t2)'},
       {v:'nf-solicitada',         l:'NF solicitada',         bg:'rgba(47,129,247,.18)', fg:'var(--accent)'},
+      {v:'rpa-solicitada',        l:'RPA solicitada',        bg:'rgba(228,109,10,.18)', fg:'#e46d0a'},
       {v:'nf-emitida',            l:'NF emitida',            bg:'rgba(46,160,67,.18)',  fg:'var(--green)'},
       {v:'nf-nao-emitida',        l:'NF não emitida',        bg:'rgba(248,81,73,.18)',  fg:'var(--red)'},
     ];
@@ -15729,7 +15743,8 @@ window.renderFinanceiro=async()=>{
   const _ctrlFilterOpts=[
     {v:'todos',l:'Todos',c:'var(--t2)'},
     {v:'aguardando-fechamento',l:'Aguardando',c:'var(--t2)'},
-    {v:'nf-solicitada',l:'Solicitada',c:'var(--accent)'},
+    {v:'nf-solicitada',l:'NF solic.',c:'var(--accent)'},
+    {v:'rpa-solicitada',l:'RPA solic.',c:'#e46d0a'},
     {v:'nf-emitida',l:'Emitida',c:'var(--green)'},
     {v:'nf-nao-emitida',l:'Não emitida',c:'var(--red)'},
   ];
@@ -15774,11 +15789,22 @@ window.renderFinanceiro=async()=>{
         const diasUteis=solic?_diasUteisDesde(solic):0;
         const vencido=solic&&!ehDecisao&&diasUteis>3;
         const vencidoChip=vencido?`<span style="display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9.5px;background:rgba(248,81,73,.18);color:var(--red);padding:2px 6px;border-radius:4px;font-weight:700;letter-spacing:.3px;margin-top:2px" title="Passou de 3 dias úteis sem NF emitida. Considere cobrar o prof ou marcar 'NF não emitida' pra rolar o valor.">⚠️ VENCIDO · ${diasUteis} DIAS ÚTEIS</span>`:'';
+        // Regime que foi efetivamente enviado anteriormente. Default 'pj' pra docs legados.
+        const regimeEnviado=notasSolicitadasRegime[p.nome]||'pj';
+        const regimeAtual=isRPA?'rpa':'pj';
+        const regimeMudou=solic&&regimeEnviado!==regimeAtual;
+        const reenviarTitle=regimeMudou
+          ?`Última solicitação foi como ${regimeEnviado==='rpa'?'RPA':'NF'}. Clique pra reenviar agora como ${regimeAtual==='rpa'?'RPA':'NF'} (regime atual).`
+          :'Reenviar solicitação';
+        const reenviarStyle=regimeMudou
+          ?'font-size:10.5px;padding:3px 8px;background:rgba(228,109,10,.18);color:#e46d0a;border-color:rgba(228,109,10,.4);font-weight:700'
+          :'font-size:10.5px;padding:3px 8px';
+        const reenviarLabel=regimeMudou?'⚠️ Reenviar como '+(regimeAtual==='rpa'?'RPA':'NF'):'🔁 Reenviar';
         const solicCell=solic
           ?`<div style="display:flex;flex-direction:column;align-items:center;gap:4px">
-              <span style="font-size:10.5px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:4px">✓ ${fmtSolic(solic)}</span>
+              <span style="font-size:10.5px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:center">✓ ${fmtSolic(solic)} ${_regimeBadgeSolic(regimeEnviado)}</span>
               ${vencidoChip}
-              <button class="btn btn-s btn-sm" onclick="_finSolicitarNota('${safeNome}','${anoMes}')" title="Reenviar solicitação" style="font-size:10.5px;padding:3px 8px">🔁 Reenviar</button>
+              <button class="btn btn-s btn-sm" onclick="_finSolicitarNota('${safeNome}','${anoMes}','${regimeAtual}')" title="${reenviarTitle}" style="${reenviarStyle}">${reenviarLabel}</button>
             </div>`
           :(isRPA
             ?`<button class="btn btn-s btn-sm" onclick="_finSolicitarRPA('${safeNome}','${anoMes}')" style="font-size:11px;padding:5px 12px;font-weight:700;background:rgba(228,109,10,.15);color:#e46d0a;border-color:rgba(228,109,10,.4)" title="Prof em regime RPA — fluxo de email separado">📋 Solicitar RPA</button>`
@@ -15797,11 +15823,11 @@ window.renderFinanceiro=async()=>{
           <td style="${tdS};text-align:right;${tdNumStyle}">${p.rodadasQtd>0?`${p.rodadasQtd} × ${_BRL(p.valRod)}<br><span style="${subNumStyle}">${_BRL(p.totalRodadas)}</span>`:'—'}</td>
           <td style="${tdS};text-align:right;${tdNumStyle}">${p.simExtrasQtd>0?`${p.simExtrasQtd} × ${_BRL(p.valExt)}<br><span style="${subNumStyle}">${_BRL(p.totalSimExtras)}</span>`:'—'}</td>
           <td style="${tdS};text-align:right;${tdNumStyle}">${(p.mentoriasQtd||0)>0?`${p.mentoriasQtd} grupo${p.mentoriasQtd>1?'s':''}${(p.mentoriasDet||[]).some(m=>m.parcial)?' <span style="font-family:\'JetBrains Mono\',monospace;font-size:8.5px;background:var(--yl);color:var(--yellow);padding:1px 5px;border-radius:4px;font-weight:700">PARCIAL</span>':''}<br><span style="${subNumStyle}">${_BRL(p.totalMentorias||0)}</span>`:'—'}</td>
-          <td style="${tdS};text-align:right;${tdNumStyle}">${p.manuaisQtd>0?`${p.manuaisQtd} item${p.manuaisQtd>1?'ns':''}<br><span style="${subNumStyle}">${_BRL(p.totalManuais)}</span>`:'—'}</td>
+          <td style="${tdS};text-align:right;${tdNumStyle}">${p.manuaisQtd>0?`${p.manuaisQtd} ${p.manuaisQtd>1?'itens':'item'}<br><span style="${subNumStyle}">${_BRL(p.totalManuais)}</span>`:'—'}</td>
           <td style="${tdS};text-align:right">${totalDisplay}</td>
           <td style="${tdS};text-align:center">${solicCell}</td>
           <td style="${tdS};text-align:center">${_ctrlCell(p.nome)}</td>
-          <td style="${tdS};text-align:center"><div style="display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:nowrap"><button class="btn btn-s btn-sm" onclick="openFinRelatorio('${safeNome}','${anoMes}')" title="Ver detalhamento" style="font-size:11.5px;padding:5px 12px;font-weight:600;white-space:nowrap">📄 Detalhar</button>${isAdmin?`<button class="btn btn-d btn-sm" onclick="_finExcluirProf('${safeNome}','${anoMes}')" title="Excluir este professor do mês (dupla confirmação)" style="font-size:13px;padding:5px 9px;line-height:1">🗑️</button>`:''}</div></td>
+          <td style="${tdS};text-align:center"><div style="display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:nowrap">${isAdmin&&!fechado?`<button class="btn btn-p btn-sm" onclick="openFinLancamento('${anoMes}',null,'${safeNome}')" title="Lançar atividade extra para ${p.nome}" style="font-size:13px;padding:5px 9px;line-height:1;font-weight:700">+</button>`:''}<button class="btn btn-s btn-sm" onclick="openFinRelatorio('${safeNome}','${anoMes}')" title="Ver detalhamento" style="font-size:11.5px;padding:5px 12px;font-weight:600;white-space:nowrap">📄 Detalhar</button>${isAdmin?`<button class="btn btn-d btn-sm" onclick="_finExcluirProf('${safeNome}','${anoMes}')" title="Excluir este professor do mês (dupla confirmação)" style="font-size:13px;padding:5px 9px;line-height:1">🗑️</button>`:''}</div></td>
         </tr>`;
       }).join('')}
       </tbody>
@@ -15827,6 +15853,7 @@ window.renderFinanceiro=async()=>{
         const opts=[
           {v:'aguardando-fechamento',l:'Aguardando fechamento',bg:'var(--bg3)',fg:'var(--t2)'},
           {v:'nf-solicitada',         l:'NF solicitada',         bg:'rgba(47,129,247,.18)', fg:'var(--accent)'},
+          {v:'rpa-solicitada',        l:'RPA solicitada',        bg:'rgba(228,109,10,.18)', fg:'#e46d0a'},
           {v:'nf-emitida',            l:'NF emitida',            bg:'rgba(46,160,67,.18)',  fg:'var(--green)'},
           {v:'nf-nao-emitida',        l:'NF não emitida',        bg:'rgba(248,81,73,.18)',  fg:'var(--red)'},
         ];
@@ -15896,7 +15923,7 @@ window.renderFinanceiro=async()=>{
 // manualmente se quer criar nova pendência ou tratar offline (evita recursão).
 window._finSetControlePendencia=async(destMes,pendId,status)=>{
   if(!_isAdminEm('financeiro')){alert('Apenas administradores podem alterar o status de controle.');return;}
-  const valid=['aguardando-fechamento','nf-solicitada','nf-emitida','nf-nao-emitida'];
+  const valid=['aguardando-fechamento','nf-solicitada','rpa-solicitada','nf-emitida','nf-nao-emitida'];
   if(!valid.includes(status))return;
   const mes=(S.financeiro.meses||{})[destMes];if(!mes)return;
   const pend=(mes.pendencias||[]).find(x=>x.id===pendId);if(!pend)return;
@@ -15905,7 +15932,7 @@ window._finSetControlePendencia=async(destMes,pendId,status)=>{
   try{
     await saveFinanceiroDoc();
     if(typeof _revShowToast==='function'){
-      const labels={'aguardando-fechamento':'Aguardando fechamento','nf-solicitada':'NF solicitada','nf-emitida':'NF emitida','nf-nao-emitida':'NF não emitida'};
+      const labels={'aguardando-fechamento':'Aguardando fechamento','nf-solicitada':'NF solicitada','rpa-solicitada':'RPA solicitada','nf-emitida':'NF emitida','nf-nao-emitida':'NF não emitida'};
       _revShowToast(`✓ Pendência ${pend.profNome}: ${labels[status]}`,'var(--green)');
     }
     renderFinanceiro();
@@ -15988,7 +16015,7 @@ window._finSetCtrlFilter=(v)=>{
 // disparado por _finSolicitarNota com source='auto'). Persiste em config/financeiro.
 window._finSetControle=async(profNome,anoMes,status,source)=>{
   if(!_isAdminEm('financeiro')){alert('Apenas administradores podem alterar o status de controle.');return;}
-  const valid=['aguardando-fechamento','nf-solicitada','nf-emitida','nf-nao-emitida'];
+  const valid=['aguardando-fechamento','nf-solicitada','rpa-solicitada','nf-emitida','nf-nao-emitida'];
   if(!valid.includes(status))return;
   if(!S.financeiro.meses)S.financeiro.meses={};
   if(!S.financeiro.meses[anoMes])S.financeiro.meses[anoMes]={};
@@ -16080,16 +16107,18 @@ window._finFilterProfs=()=>{
   if(c)c.textContent=term?`${vis} de ${total} mostrad${vis===1?'o':'os'}`:`${total} professor${total!==1?'es':''}`;
 };
 
-// Helper INTERNO (sem popups) que dispara o email da NF de UM prof e atualiza
+// Helper INTERNO (sem popups) que dispara o email de cobrança de UM prof e atualiza
 // timestamp + controleStatus. Reutilizado pelo botão individual e pelo bulk.
+// opts.regime: 'pj' (default) usa templateId; 'rpa' usa templateIdRpa.
 // Retorna {ok:bool, sent:number, total:number, falhas:[{email,erro}], skipReason?}
 async function _finEnviarNotaInterno(profNome,anoMes,opts){
   opts=opts||{};
+  const regime=opts.regime==='rpa'?'rpa':'pj';
   const cfg=S.financeiro.notaFiscalCfg||{};
-  const templateId=(cfg.templateId||'').trim();
+  const templateId=(regime==='rpa'?(cfg.templateIdRpa||''):(cfg.templateId||'')).trim();
   const emailCoord=(cfg.emailCoord||'').trim();
   const serviceId=(cfg.serviceId||'').trim()||'service_exyoa4r';
-  if(!templateId)return{ok:false,sent:0,total:0,falhas:[],skipReason:'sem-template'};
+  if(!templateId)return{ok:false,sent:0,total:0,falhas:[],skipReason:regime==='rpa'?'sem-template-rpa':'sem-template'};
   const emailsProf=(typeof _profEmails==='function'?_profEmails(profNome):[((S.profsEmail||{})[profNome]||'').trim()].filter(Boolean));
   if(!emailsProf.length)return{ok:false,sent:0,total:0,falhas:[],skipReason:'sem-email'};
   // Dados do prof
@@ -16129,7 +16158,7 @@ async function _finEnviarNotaInterno(profNome,anoMes,opts){
     });
   }
   if(p.totalManuais>0){
-    linhas.push(`• Atividades extras — ${p.manuaisQtd} item${p.manuaisQtd===1?'':'ns'} = ${_BRL(p.totalManuais)}`);
+    linhas.push(`• Atividades extras — ${p.manuaisQtd} ${p.manuaisQtd===1?'item':'itens'} = ${_BRL(p.totalManuais)}`);
     (p.manuaisDet||[]).forEach(l=>{
       const t=tipos.find(x=>x.id===l.tipoId);
       const nomeT=t?t.nome:'Livre';
@@ -16141,7 +16170,9 @@ async function _finEnviarNotaInterno(profNome,anoMes,opts){
   const detalhamento=linhas.length?linhas.join('\n'):'(sem detalhamento — total zerado)';
   const mesNomeStr=_mesNome(anoMes);
   const fmtTotal=_BRL(p.total);
-  const assunto=`Solicitação de Nota Fiscal — ${mesNomeStr}`;
+  const assunto=regime==='rpa'
+    ?`Solicitação de RPA — ${mesNomeStr}`
+    :`Solicitação de Nota Fiscal — ${mesNomeStr}`;
   // Loop sequencial
   let sent=0;const falhas=[];
   for(const email of emailsProf){
@@ -16149,6 +16180,7 @@ async function _finEnviarNotaInterno(profNome,anoMes,opts){
       await emailjs.send(serviceId,templateId,{
         to_email:email,cc_email:emailCoord||'',
         nome:profNome,mes:mesNomeStr,valor_total:fmtTotal,detalhamento,assunto,
+        regime,
       });
       sent++;
     }catch(e){
@@ -16157,14 +16189,16 @@ async function _finEnviarNotaInterno(profNome,anoMes,opts){
     }
   }
   if(!sent)return{ok:false,sent:0,total:emailsProf.length,falhas,skipReason:'todos-falharam'};
-  // Registra timestamp + auto-muda controle (no save acumulado se opts.skipSave=true)
+  // Registra timestamp + regime usado + auto-muda controle (no save acumulado se opts.skipSave=true)
   if(!S.financeiro.meses)S.financeiro.meses={};
   if(!S.financeiro.meses[anoMes])S.financeiro.meses[anoMes]={};
   const mes=S.financeiro.meses[anoMes];
   if(!mes.notasSolicitadas)mes.notasSolicitadas={};
+  if(!mes.notasSolicitadasRegime)mes.notasSolicitadasRegime={};
   mes.notasSolicitadas[profNome]=new Date().toISOString();
+  mes.notasSolicitadasRegime[profNome]=regime;
   if(!mes.controleStatus)mes.controleStatus={};
-  mes.controleStatus[profNome]='nf-solicitada';
+  mes.controleStatus[profNome]=regime==='rpa'?'rpa-solicitada':'nf-solicitada';
   if(!opts.skipSave){
     try{await saveFinanceiroDoc();}catch(e){console.error('_finEnviarNotaInterno save:',e);}
   }
@@ -16182,27 +16216,32 @@ const _regimeOf=(profNome)=>{
   return c?.regime==='rpa'?'rpa':'pj';
 };
 
-// Placeholder do fluxo RPA — template de email ainda não foi criado.
-// Quando o user configurar o template no EmailJS, ligar aqui o envio (estrutura igual a _finSolicitarNota).
+// Fluxo RPA — delega pro _finSolicitarNota passando regime='rpa', que escolhe
+// o template templateIdRpa, ajusta o assunto e mensagens. Botão "📋 Solicitar RPA"
+// só aparece pra profs com regime='rpa' (config em Cadastros → Professores).
 window._finSolicitarRPA=async(profNome,anoMes)=>{
-  if(!_isAdminEm('financeiro')){alert('Apenas administradores podem solicitar RPA.');return;}
-  alert(`⏳ Fluxo de RPA ainda não foi configurado.\n\nO prof "${profNome}" está marcado como RPA, mas o template de email do RPA ainda não existe no EmailJS.\n\nCrie o template e me chame pra ligar o envio.`);
+  return _finSolicitarNota(profNome,anoMes,'rpa');
 };
 
-window._finSolicitarNota=async(profNome,anoMes)=>{
-  if(!_isAdminEm('financeiro')){alert('Apenas administradores podem solicitar nota.');return;}
+// regime: 'pj' (default — emite NF) ou 'rpa' (Recibo de Pagamento Autônomo).
+// Cada regime usa um Template ID diferente configurado em Cadastros → 📧 Configurar e-Mail.
+window._finSolicitarNota=async(profNome,anoMes,regimeArg)=>{
+  if(!_isAdminEm('financeiro')){alert('Apenas administradores podem solicitar.');return;}
+  const regime=regimeArg==='rpa'?'rpa':'pj';
+  const tipoDocLabel=regime==='rpa'?'RPA':'nota fiscal';
   // 1. Valida config e email(s) do prof
   const cfg=S.financeiro.notaFiscalCfg||{};
-  const templateId=(cfg.templateId||'').trim();
+  const templateId=(regime==='rpa'?(cfg.templateIdRpa||''):(cfg.templateId||'')).trim();
   const emailCoord=(cfg.emailCoord||'').trim();
   const serviceId=(cfg.serviceId||'').trim()||'service_exyoa4r';
   const emailsProf=(typeof _profEmails==='function'?_profEmails(profNome):[((S.profsEmail||{})[profNome]||'').trim()].filter(Boolean));
   if(!emailsProf.length){
-    alert(`O professor "${profNome}" não tem email cadastrado.\n\nVá em Configurações → Professores e cadastre pelo menos um email antes de solicitar nota.`);
+    alert(`O professor "${profNome}" não tem email cadastrado.\n\nVá em Configurações → Professores e cadastre pelo menos um email antes de solicitar ${tipoDocLabel}.`);
     return;
   }
   if(!templateId){
-    alert('O envio automático de email ainda não foi configurado.\n\nVá em Financeiro → ⚙️ Cadastro / Configurações → 📧 Configurar e-Mail e configure o Template ID do EmailJS.');
+    const campo=regime==='rpa'?'Template ID — RPA':'Template ID do EmailJS — Nota Fiscal (PJ)';
+    alert(`O envio automático de email pra ${tipoDocLabel} ainda não foi configurado.\n\nVá em Financeiro → ⚙️ Cadastro / Configurações → 📧 Configurar e-Mail e configure o "${campo}".`);
     return;
   }
   // 2. Carrega/calcula os dados do prof pra este mês (resumo + detalhamento)
@@ -16220,9 +16259,16 @@ window._finSolicitarNota=async(profNome,anoMes)=>{
   if(ja){
     const dt=new Date(ja);
     const txt=dt.toLocaleDateString('pt-BR')+' às '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    if(!confirm(`Já foi solicitada uma nota pra ${profNome} em ${txt}.\n\nReenviar pra ${emailsLabel}?\n${emailsLista}\nValor: ${fmtTotal}\n\nA data registrada será atualizada.`))return;
+    const regimeAnterior=((mesData.notasSolicitadasRegime||{})[profNome])||'pj';
+    const labelAnterior=regimeAnterior==='rpa'?'RPA':'NF (PJ)';
+    const labelAtual=regime==='rpa'?'RPA':'NF (PJ)';
+    if(regimeAnterior!==regime){
+      if(!confirm(`⚠️ Mudança de regime detectada.\n\nA última solicitação pra ${profNome} foi enviada como ${labelAnterior} em ${txt}.\nMas o regime atual do prof é ${labelAtual}.\n\nReenviar agora como ${labelAtual}?\n📧 Para: ${emailsLabel}\n${emailsLista}\n💰 Valor: ${fmtTotal}\n\nA data e o regime registrados serão substituídos.`))return;
+    }else{
+      if(!confirm(`Já foi solicitada uma ${tipoDocLabel} pra ${profNome} em ${txt}.\n\nReenviar pra ${emailsLabel}?\n${emailsLista}\nValor: ${fmtTotal}\n\nA data registrada será atualizada.`))return;
+    }
   }else{
-    if(!confirm(`Enviar solicitação de nota fiscal pra ${profNome}?\n\n📧 Para (${emailsLabel}):\n${emailsLista}\n${emailCoord?'📋 Cópia: '+emailCoord+'\n':''}💰 Valor: ${fmtTotal}\n🗓️ Mês de referência: ${mesNomeStr}\n\n${emailsProf.length>1?'Será disparado UM email por destinatário.':'O email será disparado agora.'}`))return;
+    if(!confirm(`Enviar solicitação de ${tipoDocLabel} pra ${profNome}?\n\n📧 Para (${emailsLabel}):\n${emailsLista}\n${emailCoord?'📋 Cópia: '+emailCoord+'\n':''}💰 Valor: ${fmtTotal}\n🗓️ Mês de referência: ${mesNomeStr}\n\n${emailsProf.length>1?'Será disparado UM email por destinatário.':'O email será disparado agora.'}`))return;
   }
   // 4. Monta detalhamento linha-a-linha (resumo da categoria + cada item).
   // Categorias com valor zero são omitidas. Cada item vira uma linha indentada.
@@ -16256,7 +16302,7 @@ window._finSolicitarNota=async(profNome,anoMes)=>{
     });
   }
   if(p.totalManuais>0){
-    linhas.push(`• Atividades extras — ${p.manuaisQtd} item${p.manuaisQtd===1?'':'ns'} = ${_BRL(p.totalManuais)}`);
+    linhas.push(`• Atividades extras — ${p.manuaisQtd} ${p.manuaisQtd===1?'item':'itens'} = ${_BRL(p.totalManuais)}`);
     (p.manuaisDet||[]).forEach(l=>{
       const t=tipos.find(x=>x.id===l.tipoId);
       const nomeT=t?t.nome:'Livre';
@@ -16266,7 +16312,9 @@ window._finSolicitarNota=async(profNome,anoMes)=>{
     });
   }
   const detalhamento=linhas.length?linhas.join('\n'):'(sem detalhamento — total zerado)';
-  const assunto=`Solicitação de Nota Fiscal — ${mesNomeStr}`;
+  const assunto=regime==='rpa'
+    ?`Solicitação de RPA — ${mesNomeStr}`
+    :`Solicitação de Nota Fiscal — ${mesNomeStr}`;
   // 5. Dispara um email por destinatário (loop sequencial)
   let ok=0;const falhas=[];
   for(const email of emailsProf){
@@ -16279,6 +16327,7 @@ window._finSolicitarNota=async(profNome,anoMes)=>{
         valor_total:fmtTotal,
         detalhamento,
         assunto,
+        regime,
       });
       ok++;
     }catch(e){
@@ -16291,15 +16340,17 @@ window._finSolicitarNota=async(profNome,anoMes)=>{
     alert('Nenhum email pôde ser enviado.\n\n'+falhas.map(f=>'• '+f.email+': '+f.erro).join('\n')+'\n\nVerifique o Template ID e Service ID em Cadastro / Configurações → Configurar e-Mail.');
     return;
   }
-  // 6. Registra a data/hora SÓ se ao menos 1 envio deu certo
+  // 6. Registra a data/hora + regime SÓ se ao menos 1 envio deu certo
   if(!S.financeiro.meses)S.financeiro.meses={};
   if(!S.financeiro.meses[anoMes])S.financeiro.meses[anoMes]={};
   const mes=S.financeiro.meses[anoMes];
   if(!mes.notasSolicitadas)mes.notasSolicitadas={};
+  if(!mes.notasSolicitadasRegime)mes.notasSolicitadasRegime={};
   mes.notasSolicitadas[profNome]=new Date().toISOString();
-  // Auto-muda o status de controle pra 'nf-solicitada' (no mesmo save)
+  mes.notasSolicitadasRegime[profNome]=regime;
+  // Auto-muda o status de controle: 'rpa-solicitada' pra RPA, 'nf-solicitada' pra PJ
   if(!mes.controleStatus)mes.controleStatus={};
-  mes.controleStatus[profNome]='nf-solicitada';
+  mes.controleStatus[profNome]=regime==='rpa'?'rpa-solicitada':'nf-solicitada';
   try{
     await saveFinanceiroDoc();
     const msg=falhas.length
@@ -16314,83 +16365,107 @@ window._finSolicitarNota=async(profNome,anoMes)=>{
   }
 };
 
-// Dispara solicitação de NF pra TODOS os profs do mês (com email e total > 0).
-// Botão visível só quando o mês está FECHADO. Confirma uma vez e roda em loop sequencial,
-// mostrando progresso no badge de status. Profs já excluídos do mês são pulados.
+// Dispara solicitação de NF (PJ) E RPA pra TODOS os profs do mês com email e total > 0.
+// Botão visível só quando o mês está FECHADO. Confirma uma vez e roda em loop sequencial.
+// Profs excluídos do mês são pulados. Cada regime usa seu próprio template (config em
+// Cadastros → Configurar e-Mail). Se um template não estiver configurado, os profs
+// daquele regime são pulados com aviso explícito.
 window._finSolicitarTodasNotas=async(anoMes)=>{
-  if(!_isAdminEm('financeiro')){alert('Apenas administradores podem solicitar nota.');return;}
+  if(!_isAdminEm('financeiro')){alert('Apenas administradores podem solicitar.');return;}
   const cfg=S.financeiro.notaFiscalCfg||{};
-  if(!(cfg.templateId||'').trim()){
-    alert('O envio automático de email ainda não foi configurado.\n\nVá em Financeiro → ⚙️ Cadastro / Configurações → 📧 Configurar e-Mail e configure o Template ID do EmailJS.');
+  const tplPj=(cfg.templateId||'').trim();
+  const tplRpa=(cfg.templateIdRpa||'').trim();
+  if(!tplPj&&!tplRpa){
+    alert('Nenhum template de email configurado.\n\nVá em Financeiro → ⚙️ Cadastro / Configurações → 📧 Configurar e-Mail e configure pelo menos um Template ID (PJ ou RPA).');
     return;
   }
   const mesData=(S.financeiro.meses||{})[anoMes]||{};
   const dados=mesData.snapshot||await calcFinanceiroMes(anoMes);
   const excluidos=new Set(mesData.profsExcluidos||[]);
-  // Elegíveis: total > 0, não excluído, com email. Separa por regime: PJ usa NF, RPA tem fluxo próprio.
+  // Elegíveis: total > 0, não excluído. Separa por regime.
   const elegiveis=dados.filter(p=>p.total>0&&!excluidos.has(p.nome)).map(p=>({...p,emails:_profEmails(p.nome),regime:_regimeOf(p.nome)}));
-  const pjElegiveis=elegiveis.filter(x=>x.regime!=='rpa');
-  const rpaElegiveis=elegiveis.filter(x=>x.regime==='rpa');
-  const comEmail=pjElegiveis.filter(x=>x.emails.length>0);
-  const semEmail=pjElegiveis.filter(x=>x.emails.length===0);
-  if(!comEmail.length&&!rpaElegiveis.length){
-    alert(`Nenhum professor elegível pra envio.\n\n${elegiveis.length} prof(s) no mês, mas nenhum tem email cadastrado.\n\nCadastre os emails em Configurações → Lista de Professores.`);
+  const pjAll=elegiveis.filter(x=>x.regime!=='rpa');
+  const rpaAll=elegiveis.filter(x=>x.regime==='rpa');
+  const pjComEmail=pjAll.filter(x=>x.emails.length>0);
+  const pjSemEmail=pjAll.filter(x=>x.emails.length===0);
+  const rpaComEmail=rpaAll.filter(x=>x.emails.length>0);
+  const rpaSemEmail=rpaAll.filter(x=>x.emails.length===0);
+  // Aplica gate de template: só envia se o template do regime estiver configurado.
+  const pjEnviar=tplPj?pjComEmail:[];
+  const rpaEnviar=tplRpa?rpaComEmail:[];
+  if(!pjEnviar.length&&!rpaEnviar.length){
+    let motivo='Nenhum professor elegível pra envio.';
+    if(elegiveis.length){
+      const detalhes=[];
+      if(pjAll.length&&!tplPj)detalhes.push(`• ${pjAll.length} prof(s) PJ pulados — Template PJ não configurado.`);
+      if(rpaAll.length&&!tplRpa)detalhes.push(`• ${rpaAll.length} prof(s) RPA pulados — Template RPA não configurado.`);
+      if(pjSemEmail.length+rpaSemEmail.length>0)detalhes.push(`• ${pjSemEmail.length+rpaSemEmail.length} prof(s) sem email cadastrado.`);
+      if(detalhes.length)motivo+='\n\n'+detalhes.join('\n');
+    }
+    alert(motivo);
     return;
   }
   // Confirm com lista
-  const linhasMsg=[
-    `Disparar SOLICITAÇÃO DE NF pra ${comEmail.length} professor${comEmail.length===1?'':'es'} PJ de ${_mesNome(anoMes)}?`,
-    '',
-    `📧 Pra cada prof PJ, será enviado 1 email por destinatário cadastrado.`,
-    `📋 Cópia (CC): ${(cfg.emailCoord||'').trim()||'(nenhum)'}`,
-    '',
-    `Profs PJ a serem notificados:`,
-    ...comEmail.map(x=>`   • ${x.nome} — ${_BRL(x.total)} (${x.emails.length} email${x.emails.length>1?'s':''})`),
-  ];
-  if(rpaElegiveis.length){
-    linhasMsg.push('',`⏳ Pulados — RPA (fluxo separado, template não configurado ainda):`,
-      ...rpaElegiveis.map(x=>`   • ${x.nome} — ${_BRL(x.total)}`),
-      '',`Pra disparar pros RPA, primeiro crie o template no EmailJS e me chame pra ligar.`);
+  const linhasMsg=[`Disparar solicitações de ${_mesNome(anoMes)}?`,''];
+  if(pjEnviar.length){
+    linhasMsg.push(`📨 NOTA FISCAL (PJ) — ${pjEnviar.length} prof${pjEnviar.length===1?'':'s'}:`);
+    pjEnviar.forEach(x=>linhasMsg.push(`   • ${x.nome} — ${_BRL(x.total)} (${x.emails.length} email${x.emails.length>1?'s':''})`));
+    linhasMsg.push('');
   }
-  if(semEmail.length){
-    linhasMsg.push('','⚠️ Pulados (sem email cadastrado):',...semEmail.map(x=>`   • ${x.nome} — ${_BRL(x.total)}`));
+  if(rpaEnviar.length){
+    linhasMsg.push(`📋 RPA — ${rpaEnviar.length} prof${rpaEnviar.length===1?'':'s'}:`);
+    rpaEnviar.forEach(x=>linhasMsg.push(`   • ${x.nome} — ${_BRL(x.total)} (${x.emails.length} email${x.emails.length>1?'s':''})`));
+    linhasMsg.push('');
   }
-  linhasMsg.push('',comEmail.length?'Confirma o envio em lote pros profs PJ?':'⚠️ Nenhum prof PJ elegível. Os RPA serão pulados — nada será enviado. Confirmar mesmo assim?');
+  linhasMsg.push(`📋 Cópia (CC): ${(cfg.emailCoord||'').trim()||'(nenhum)'}`);
+  // Avisos sobre pulados
+  if(!tplPj&&pjComEmail.length)linhasMsg.push('',`⚠️ ${pjComEmail.length} prof(s) PJ pulados — Template PJ não configurado.`);
+  if(!tplRpa&&rpaComEmail.length)linhasMsg.push('',`⚠️ ${rpaComEmail.length} prof(s) RPA pulados — Template RPA não configurado.`);
+  const semEmailTodos=[...pjSemEmail,...rpaSemEmail];
+  if(semEmailTodos.length){
+    linhasMsg.push('','⚠️ Pulados (sem email cadastrado):',...semEmailTodos.map(x=>`   • ${x.nome} (${x.regime==='rpa'?'RPA':'PJ'}) — ${_BRL(x.total)}`));
+  }
+  linhasMsg.push('','Confirmar envio em lote?');
   if(!confirm(linhasMsg.join('\n')))return;
-  // Loop sequencial
+  // Loop sequencial — combina PJ e RPA em uma única fila
+  const fila=[
+    ...pjEnviar.map(x=>({...x,regimeSend:'pj'})),
+    ...rpaEnviar.map(x=>({...x,regimeSend:'rpa'})),
+  ];
   const statusBox=document.getElementById('fin-status-box');
   const statusBoxOrig=statusBox?statusBox.innerHTML:'';
   let okCount=0,emailsOk=0,emailsFalha=0;
   const falhasGerais=[];
-  for(let i=0;i<comEmail.length;i++){
-    const x=comEmail[i];
-    if(statusBox)statusBox.innerHTML=`<span style="color:var(--accent);font-weight:700">📨 Enviando ${i+1}/${comEmail.length}: ${x.nome}…</span>`;
+  for(let i=0;i<fila.length;i++){
+    const x=fila[i];
+    const lbl=x.regimeSend==='rpa'?'RPA':'NF';
+    if(statusBox)statusBox.innerHTML=`<span style="color:var(--accent);font-weight:700">📨 Enviando ${i+1}/${fila.length} (${lbl}): ${x.nome}…</span>`;
     try{
-      const r=await _finEnviarNotaInterno(x.nome,anoMes,{skipSave:true});
+      const r=await _finEnviarNotaInterno(x.nome,anoMes,{skipSave:true,regime:x.regimeSend});
       if(r.ok){
         okCount++;emailsOk+=r.sent;emailsFalha+=r.falhas.length;
-        if(r.falhas.length)falhasGerais.push(`${x.nome}: ${r.falhas.length}/${r.total} falharam`);
+        if(r.falhas.length)falhasGerais.push(`${x.nome} (${lbl}): ${r.falhas.length}/${r.total} falharam`);
       }else{
-        falhasGerais.push(`${x.nome}: ${r.skipReason||'erro'}`);
+        falhasGerais.push(`${x.nome} (${lbl}): ${r.skipReason||'erro'}`);
         emailsFalha+=(r.total||0);
       }
     }catch(e){
       console.error('_finSolicitarTodasNotas loop:',x.nome,e);
-      falhasGerais.push(`${x.nome}: ${e?.message||e}`);
+      falhasGerais.push(`${x.nome} (${lbl}): ${e?.message||e}`);
     }
   }
   // Salva tudo de uma vez no final
   try{await saveFinanceiroDoc();}catch(e){console.error('_finSolicitarTodasNotas save:',e);}
   if(statusBox)statusBox.innerHTML=statusBoxOrig;
   // Toast + alert final
-  const msgToast=okCount===comEmail.length
+  const msgToast=okCount===fila.length
     ?`✓ ${okCount} solicitação(ões) enviada(s) (${emailsOk} email${emailsOk!==1?'s':''})`
-    :`⚠ ${okCount}/${comEmail.length} solicitação(ões) — ${emailsFalha} email(s) falharam`;
-  if(typeof _revShowToast==='function')_revShowToast(msgToast,okCount===comEmail.length?'var(--green)':'var(--yellow)');
-  let alertMsg=`📨 Envio em lote concluído.\n\n✓ ${okCount} de ${comEmail.length} prof(s) notificados\n✓ ${emailsOk} email(s) enviados com sucesso`;
+    :`⚠ ${okCount}/${fila.length} solicitação(ões) — ${emailsFalha} email(s) falharam`;
+  if(typeof _revShowToast==='function')_revShowToast(msgToast,okCount===fila.length?'var(--green)':'var(--yellow)');
+  let alertMsg=`📨 Envio em lote concluído.\n\n✓ ${okCount} de ${fila.length} prof(s) notificados\n✓ ${emailsOk} email(s) enviados com sucesso`;
   if(emailsFalha>0)alertMsg+=`\n❌ ${emailsFalha} email(s) falharam`;
   if(falhasGerais.length)alertMsg+=`\n\nDetalhes:\n`+falhasGerais.join('\n');
-  if(semEmail.length)alertMsg+=`\n\n⚠️ ${semEmail.length} prof(s) pulados (sem email):\n`+semEmail.map(x=>'   • '+x.nome).join('\n');
+  if(semEmailTodos.length)alertMsg+=`\n\n⚠️ ${semEmailTodos.length} prof(s) pulados (sem email):\n`+semEmailTodos.map(x=>'   • '+x.nome+(x.regime==='rpa'?' (RPA)':'')).join('\n');
   alert(alertMsg);
   renderFinanceiro();
 };
@@ -16467,7 +16542,7 @@ window._finSolicitarNotaPendencia=async(destMes,pendId)=>{
       });
     }
     if(p.totalManuais>0){
-      linhas.push(`• Atividades extras — ${p.manuaisQtd} item${p.manuaisQtd===1?'':'ns'} = ${_BRL(p.totalManuais)}`);
+      linhas.push(`• Atividades extras — ${p.manuaisQtd} ${p.manuaisQtd===1?'item':'itens'} = ${_BRL(p.totalManuais)}`);
       (p.manuaisDet||[]).forEach(l=>{
         const t=tipos.find(x=>x.id===l.tipoId);
         const nomeT=t?t.nome:'Livre';
@@ -16532,9 +16607,11 @@ window.openFinCadastros=()=>{
   const nfCfg=S.financeiro.notaFiscalCfg||{};
   const eCoord=document.getElementById('fc-nf-email-coord');
   const eTpl=document.getElementById('fc-nf-template');
+  const eTplRpa=document.getElementById('fc-nf-template-rpa');
   const eSvc=document.getElementById('fc-nf-service');
   if(eCoord)eCoord.value=nfCfg.emailCoord||'';
   if(eTpl)eTpl.value=nfCfg.templateId||'';
+  if(eTplRpa)eTplRpa.value=nfCfg.templateIdRpa||'';
   if(eSvc)eSvc.value=nfCfg.serviceId||'';
   document.getElementById('fc-msg').classList.add('hidden');
   document.getElementById('modal-fin-cadastros').classList.remove('hidden');
@@ -16684,8 +16761,9 @@ window.saveFinCadastros=async(ev)=>{
   // Coleta config da aba "📧 Solicitar Nota"
   const nfEmailCoord=(document.getElementById('fc-nf-email-coord')?.value||'').trim();
   const nfTemplate=(document.getElementById('fc-nf-template')?.value||'').trim();
+  const nfTemplateRpa=(document.getElementById('fc-nf-template-rpa')?.value||'').trim();
   const nfService=(document.getElementById('fc-nf-service')?.value||'').trim();
-  S.financeiro.notaFiscalCfg={emailCoord:nfEmailCoord,templateId:nfTemplate,serviceId:nfService};
+  S.financeiro.notaFiscalCfg={emailCoord:nfEmailCoord,templateId:nfTemplate,templateIdRpa:nfTemplateRpa,serviceId:nfService};
   try{
     await saveFinanceiroDoc();
     const msg=document.getElementById('fc-msg');
@@ -16709,7 +16787,7 @@ window.saveFinCadastros=async(ev)=>{
 
 // === Lançamento manual ===
 window._curFinMes=null;window._curFinLancId=null;
-window.openFinLancamento=(anoMes,lancId)=>{
+window.openFinLancamento=(anoMes,lancId,prefilledProf)=>{
   if(!_isAdminEm('financeiro')){alert('Apenas administradores podem lançar.');return;}
   window._curFinMes=anoMes;window._curFinLancId=lancId||null;
   const isEdit=!!lancId;
@@ -16734,6 +16812,7 @@ window.openFinLancamento=(anoMes,lancId)=>{
     }
     document.getElementById('fl-del').style.display='';
   }else{
+    sp.value=prefilledProf||'';
     document.getElementById('fl-desc').value='';
     document.getElementById('fl-valor').value='';
     document.getElementById('fl-qtd').value=1;
@@ -16780,6 +16859,11 @@ window.saveFinLancamento=async()=>{
   }else{
     m.lancamentos.push({id:'lanc_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),profNome,tipoId,descricao,valor,qtd,criadoEm:new Date().toISOString()});
   }
+  // Se o prof estava na lista de excluídos do mês, restaura automaticamente —
+  // lançar atividade pra ele significa que ele volta a fazer parte do mês.
+  if((m.profsExcluidos||[]).includes(profNome)){
+    m.profsExcluidos=m.profsExcluidos.filter(n=>n!==profNome);
+  }
   await saveFinanceiroDoc();
   CM('modal-fin-lanc');
   renderFinanceiro();
@@ -16793,6 +16877,20 @@ window.deleteFinLancamento=async()=>{
   await saveFinanceiroDoc();
   CM('modal-fin-lanc');
   renderFinanceiro();
+};
+
+// Remove uma atividade extra direto pelo modal de relatório (sem precisar abrir
+// o modal de lançamento). Após apagar, recarrega o relatório e re-renderiza o
+// financeiro pra refletir o novo total.
+window._finDeleteAtividade=async(anoMes,lancId,profNome)=>{
+  if(!_isAdminEm('financeiro')){alert('Apenas administradores podem remover.');return;}
+  if(!confirm('Remover esta atividade do pagamento?'))return;
+  const m=(S.financeiro.meses||{})[anoMes];if(!m)return;
+  m.lancamentos=(m.lancamentos||[]).filter(x=>x.id!==lancId);
+  await saveFinanceiroDoc();
+  renderFinanceiro();
+  // Reabre o relatório atualizado se ainda tiver atividade do prof; senão fecha.
+  openFinRelatorio(profNome,anoMes);
 };
 
 // === Fechar / reabrir mês ===
@@ -16841,7 +16939,17 @@ window.openFinRelatorio=async(profNome,anoMes)=>{
   const rodRows=p.rodadasDet.map(r=>[r.simNome,`${r.dia} · rodada ${r.rodada}`,r.data||'—',_BRL(p.valRod)]);
   const extRows=p.simExtrasDet.map(s=>[s.simNome,s.aluno,`${s.data}${s.horario?' '+s.horario:''}`,_BRL(p.valExt)]);
   const tipos=S.financeiro.tipos||[];
-  const manRows=p.manuaisDet.map(l=>{const t=tipos.find(x=>x.id===l.tipoId);return[t?t.nome:'Livre',l.descricao||'—',l.qtd,_BRL(l.valor),_BRL(l.valor*l.qtd)];});
+  const _relAtivAcoes=_isAdminEm('financeiro')&&mesData.status!=='fechado';
+  const _safeNome=profNome.replace(/'/g,"\\'");
+  const manRows=p.manuaisDet.map(l=>{
+    const t=tipos.find(x=>x.id===l.tipoId);
+    const base=[t?t.nome:'Livre',l.descricao||'—',l.qtd,_BRL(l.valor),_BRL(l.valor*l.qtd)];
+    if(_relAtivAcoes){
+      const acoes=`<div style="display:flex;gap:4px;justify-content:center;white-space:nowrap"><button class="btn btn-s btn-sm" onclick="openFinLancamento('${anoMes}','${l.id}')" title="Editar" style="font-size:12px;padding:3px 8px">✏️</button><button class="btn btn-d btn-sm" onclick="_finDeleteAtividade('${anoMes}','${l.id}','${_safeNome}')" title="Remover" style="font-size:12px;padding:3px 8px">🗑️</button></div>`;
+      base.push(acoes);
+    }
+    return base;
+  });
   const menRows=(p.mentoriasDet||[]).map(m=>{
     const iniFmt=m.inicio?fD(_mentNormData(m.inicio,'ini')):'—';
     const fimFmt=m.fim?fD(_mentNormData(m.fim,'fim')):'—';
@@ -16861,7 +16969,7 @@ window.openFinRelatorio=async(profNome,anoMes)=>{
   if(rodRows.length)secoesDet.push(sec('Rodadas Sim Oficial',detTab(rodRows,['Simulado','Rodada','Data','Valor'])));
   if(extRows.length)secoesDet.push(sec('Simulados extras',detTab(extRows,['Simulado','Aluno','Data/Hora','Valor'])));
   if(menRows.length)secoesDet.push(sec('Mentoria',detTab(menRows,['Tipo','Período','Alunos','Dias trabalhados no mês','Valor'])));
-  if(manRows.length)secoesDet.push(sec('Atividades extras',detTab(manRows,['Tipo','Descrição','Qtd','Unitário','Total'])));
+  if(manRows.length)secoesDet.push(sec('Atividades extras',detTab(manRows,_relAtivAcoes?['Tipo','Descrição','Qtd','Unitário','Total','Ações']:['Tipo','Descrição','Qtd','Unitário','Total'])));
   document.getElementById('fr-body').innerHTML=`
     <div style="background:var(--bg3);padding:14px;border-radius:var(--rs);margin-bottom:14px">
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:13px">

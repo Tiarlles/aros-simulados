@@ -746,7 +746,7 @@ Sistema de contestação de gabarito de provas TSA/TEA/ME1/ME2/ME3. Aluno públi
 **Cadastros do Financeiro** (modal **⚙️ Cadastro / Configurações**, admin-de-financeiro-only — renomeado de "Cadastros" em 2026-05-19) com 3 abas:
 - **👨‍⚕️ Professores**: tabela com **busca por nome** (filtra em tempo real via `_finCadFilterProfs`) + 4 colunas: Professor / Email (somente leitura — fonte: `S.profsEmail[nome]`) / Salário fixo / Início / Fim. Início/Fim são `<input type="month">` (YYYY-MM) opcionais; se vazios o salário aplica em todos os meses; se preenchidos restringe ao intervalo.
 - **📌 Tipos de atividade**: editor de tipos personalizados (atividades extras).
-- **📧 Configurar e-Mail** (renomeado de "Solicitar Nota" em 2026-05-19): config do envio automático de email. Campos: `emailCoord` (CC), `templateId`, `serviceId`. Salvo em `S.financeiro.notaFiscalCfg = {emailCoord, templateId, serviceId}`.
+- **📧 Configurar e-Mail** (renomeado de "Solicitar Nota" em 2026-05-19, ampliado pra RPA em 2026-05-22): config do envio automático de email. Campos: `emailCoord` (CC), `templateId` (PJ/NF), `templateIdRpa` (RPA), `serviceId`. Salvo em `S.financeiro.notaFiscalCfg = {emailCoord, templateId, templateIdRpa, serviceId}`. Cada regime do prof usa seu template próprio.
 
 **Setup atual do EmailJS (deploy 2026-05-19):**
 - Service: `service_aros_nf` (Gmail OAuth com conta de usuário real do Workspace; "From" é determinado por OAuth)
@@ -754,20 +754,22 @@ Sistema de contestação de gabarito de provas TSA/TEA/ME1/ME2/ME3. Aluno públi
 - Template `tmpl_aros_nf` (renomear conforme configurado): aceita variáveis `{{nome}}`, `{{mes}}`, `{{valor_total}}`, `{{detalhamento}}`, `{{assunto}}`, `{{to_email}}`, `{{cc_email}}`. HTML do template em `/tmp/aros-nf-template.html` (versionado fora do repo). Texto menciona prazo de **3 dias úteis**.
 
 **Painel de pagamentos do mês** (`renderFinanceiro` — refatoração massiva em 2026-05-19):
-- **🔍 Busca** por nome no topo + **filtro de status na coluna Controle** (pills "Todos · Aguardando · Solicitada · Emitida · Não emitida") via `_finFilterProfs()` cruzando ambos os critérios. Estado do filtro em `window._finFilterCtrl`.
+- **🔍 Busca** por nome no topo + **filtro de status na coluna Controle** (pills "Todos · Aguardando · NF solic. · RPA solic. · Emitida · Não emitida") via `_finFilterProfs()` cruzando ambos os critérios. Estado do filtro em `window._finFilterCtrl`. RPA solic. adicionado em 2026-05-22.
 - **Ordem alfabética**.
 - **Coluna Professor FIXA** (sticky horizontal) + `min-width:240px` + background sólido pra não vazar conteúdo das colunas que rolam por trás.
 - **Fontes dos números reduzidas 20%** em toda a tabela: 13px → 10.5px (células), 15px → 12px (total), 11px → 9px (subtexto). Coluna Professor mantém tamanho normal.
 - **Cards de resumo em 1 linha só** (`grid-template-columns:repeat(4,1fr)`, padding e fontes compactos).
 - Coluna **Rodadas Sim Oficial** (renomeada de "Rodadas").
-- Coluna **Solicitar Nota** (admin-de-financeiro-only) com `_finSolicitarNota(profNome, anoMes)`:
-  - 1ª solicitação: botão azul `📨 Solicitar Nota` → confirm → dispara email via `_finEnviarNotaInterno` (helper extraído pra reuso entre individual e bulk) → registra timestamp em `mes.notasSolicitadas[profNome]` + **auto-muda controleStatus pra 'nf-solicitada'** no mesmo save.
-  - Já solicitado: mostra `✓ DD/MM HH:MM` em verde + botão `🔁 Reenviar`.
+- Coluna **Solicitar Nota** (admin-de-financeiro-only) com `_finSolicitarNota(profNome, anoMes, regime?)`:
+  - 1ª solicitação PJ: botão azul `📨 Solicitar Nota` → confirm → dispara email via `_finEnviarNotaInterno` (helper extraído pra reuso entre individual e bulk) → registra timestamp em `mes.notasSolicitadas[profNome]` + regime em `mes.notasSolicitadasRegime[profNome]` + **auto-muda controleStatus pra 'nf-solicitada'** no mesmo save.
+  - 1ª solicitação RPA: botão laranja `📋 Solicitar RPA` → chama `_finSolicitarRPA` que delega pra `_finSolicitarNota(..., 'rpa')` → usa `templateIdRpa` → assunto vira "Solicitação de RPA — [mês]" → seta `controleStatus='rpa-solicitada'`.
+  - Já solicitado: mostra `✓ DD/MM HH:MM` em verde + **badge [NF] ou [RPA]** indicando o regime do último envio + botão `🔁 Reenviar`.
+  - **Reenviar respeita regime atual** (passa `regimeAtual` como 3º arg). Se regime mudou desde o último envio (ex: prof era PJ → virou RPA), botão fica laranja com label `⚠️ Reenviar como RPA` e dispara aviso explícito antes de enviar.
   - **Chip vermelho `⚠️ VENCIDO · N DIAS ÚTEIS`** quando passou >3 dias úteis sem o admin marcar 'nf-emitida' ou 'nf-nao-emitida' (helper `_diasUteisDesde`).
-- Coluna **Controle** (após Solicitar Nota): dropdown com 4 status — `aguardando-fechamento` (default) · `nf-solicitada` · `nf-emitida` · `nf-nao-emitida`. Cores: cinza · azul · verde · vermelho. Não-admin vê pill colorida read-only. Status salvo em `mes.controleStatus[profNome]`. Handler `_finSetControle`.
+- Coluna **Controle** (após Solicitar Nota): dropdown com 5 status — `aguardando-fechamento` (default) · `nf-solicitada` · `rpa-solicitada` (2026-05-22) · `nf-emitida` · `nf-nao-emitida`. Cores: cinza · azul · laranja · verde · vermelho. Não-admin vê pill colorida read-only. Status salvo em `mes.controleStatus[profNome]`. Handler `_finSetControle`. Não há `rpa-emitida`/`rpa-nao-emitida` separadas — admin usa NF emitida/não emitida semanticamente pra fechar o ciclo RPA (decisão de 2026-05-22, pode evoluir).
 - Coluna **Ações** redesenhada (2026-05-19): botão **📄 Detalhar** com texto visível + botão `🗑️` vermelho ao lado pra excluir o prof do mês.
 - **Exclusão de prof do mês** (`_finExcluirProf`) com **dupla confirmação**: `confirm()` + `prompt("digite EXCLUIR")`. Marca em `mes.profsExcluidos[]` (reversível, não destrutivo). Rodapé da tabela mostra "🗑️ N excluídos: [Nome ↩]" com botão de restaurar (`_finRestaurarProf`).
-- **Botão "📨 SOLICITAR TODAS AS NOTAS"** no header quando mês fechado: dispara em loop sequencial pra todos os profs com email cadastrado e total > 0. Confirma uma vez com lista (com email vs sem email). Status do badge mostra progresso `"📨 Enviando 3/12: Prof X…"`. Save único no final. Alert final com sumário. Função `_finSolicitarTodasNotas`.
+- **Botão "📨 SOLICITAR TODAS (NF + RPA)"** no header quando mês fechado: dispara em loop sequencial pra todos os profs com email cadastrado e total > 0. **Combina PJ e RPA numa fila única** (`_finSolicitarTodasNotas`, atualizado 2026-05-22) — cada prof recebe o template do seu regime. Se um dos templates não estiver configurado, profs daquele regime são pulados com aviso. Confirma uma vez com lista separada (NF · RPA · pulados sem email). Status do badge mostra progresso `"📨 Enviando 3/12 (RPA): Prof X…"`. Save único no final. Alert final com sumário.
 
 **Sistema de Pendências (rollover de NF não emitida — entregue 2026-05-19):**
 - **Trigger manual com confirmação**: admin muda dropdown Controle pra "NF não emitida" → popup `confirm` "Mover R$ X pro mês [M+1]? Sim/Cancelar".
@@ -1131,6 +1133,30 @@ Funcionalidades que estão **prontas no código** mas dependem de uma config ext
 **Status**: pendente. `sendParecerEmail` usa `template_r0vjejs` reciclado. Aguarda usuário criar template dedicado pra notificações de parecer finalizado.
 
 ## Histórico recente (resumo cronológico)
+
+Financeiro RPA + bug fix troca de simulado (2026-05-22 — sessão longa, deploys completos):
+- **Bug crítico do TSA Oral resolvido**: alunos antigos sem campo `matricula` no doc ficavam travados ao solicitar troca após apertamento das rules de 2026-05-21. A regra `request.resource.data.matricula == resource.data.matricula` falhava silenciosamente quando o campo não existia. **Fix**: trocou pra `request.resource.data.get('matricula', null) == resource.data.get('matricula', null)`. Deploy de rules separado. Lição salva em memory `feedback_firestore_rules_legacy_docs.md`.
+- **Blindagem do fluxo "Confirmar troca"** em `subResp()` e `subRespPres()`: novo helper `normalizeEmailForCompare()` (strip zero-width/NBSP/BOM antes de comparar), try/catch no `updateDoc` com mensagem visível pro aluno, `scrollIntoView` em mensagens de erro pra não ficarem fora da viewport no celular.
+- **Fluxo RPA completo** (era placeholder antes):
+  - Novo campo `templateIdRpa` em `S.financeiro.notaFiscalCfg` (UI no modal de Cadastros, label "Template ID — RPA").
+  - `_finSolicitarRPA` deixa de ser placeholder → delega pra `_finSolicitarNota(prof, mes, 'rpa')`.
+  - `_finSolicitarNota` ganhou 3º arg `regimeArg` que escolhe template, ajusta assunto ("Solicitação de RPA — [mês]" vs "Solicitação de Nota Fiscal — [mês]") e mensagens de erro/confirm.
+  - `_finEnviarNotaInterno` (helper bulk) idem — aceita `opts.regime`, escolhe template, ajusta assunto, manda `regime` no payload do EmailJS.
+  - `_finSolicitarTodasNotas` agora processa fila unificada PJ + RPA. Se um dos templates não estiver setado, profs daquele regime são pulados com aviso.
+  - Botão e label: "📨 SOLICITAR TODAS (NF + RPA)" (era "TODAS AS NOTAS").
+  - Template HTML do RPA já criado por Tiarlles no EmailJS dashboard (`template_lsfm3xc`), inspirado visualmente no template de NF (mesmo header gradiente + mesmas caixas), removendo o bloco de "Dados pra faturamento" e o aviso "O que fazer agora", trocando por um bloco azul "Sobre o pagamento" com a mensagem de RPA (contabilidade emite, envia cópia pro prof).
+- **Tracking do regime usado em cada envio**:
+  - Novo `mes.notasSolicitadasRegime[profNome]` = 'pj' ou 'rpa' (paralelo a `notasSolicitadas[profNome]`).
+  - Docs antigos sem o campo são tratados como 'pj' (backward compat).
+  - **Badge visual** `[NF]` (azul) ou `[RPA]` (laranja) ao lado da data `✓ DD/MM HH:MM` na coluna Solicitar Nota.
+  - **Reenviar respeita regime atual**: passa `regimeAtual` explicitamente. Se diferente do registrado anteriormente, botão fica laranja com `⚠️ Reenviar como RPA/NF` e o `_finSolicitarNota` mostra confirm específico ("Última como NF... regime agora é RPA. Reenviar como RPA?"). Decisão de design: NÃO resetar estado automaticamente ao trocar regime — preserva histórico, deixa decisão na hora do clique.
+- **Novo status `rpa-solicitada`** no dropdown Controle (5 status total) + filtro "RPA solic." na barra de filtros + validações dos `_finSetControle*`. Cor laranja matching o badge RPA. Auto-setado pelos dois fluxos de envio quando regime='rpa'. Não há `rpa-emitida`/`rpa-nao-emitida` por enquanto — admin usa NF emitida/não emitida pra fechar (pode evoluir).
+- **Painel financeiro — outros refinos**:
+  - **Typo `itemns` → `itens`** corrigido em 5 lugares (plural correto de "item" em português). Era `item${qtd>1?'ns':''}` produzindo "itemns".
+  - **Botão "+" inline na linha do prof** (admin + mês aberto) que abre o modal de lançamento já com prof pré-selecionado. `openFinLancamento` ganhou 3º arg `prefilledProf`.
+  - **Remover atividade pelo detalhamento**: seção "Atividades extras" do `openFinRelatorio` agora tem coluna "Ações" com ✏️ (editar) e 🗑️ (remover). Helper novo `_finDeleteAtividade(anoMes, lancId, profNome)` que apaga, salva, re-renderiza e reabre o relatório.
+  - **Restauração automática de prof excluído ao lançar atividade**: `saveFinLancamento` agora verifica se `profNome` está em `mes.profsExcluidos[]` e remove dali. Lógica: lançar atividade pra prof excluído implica que ele voltou a fazer parte do mês.
+- **Deploy completo**: 2 commits separados — primeiro o fix urgente da regra Firestore (`firestore:rules` + index.html com blindagem), depois o pacote financeiro (RPA + status + refinos). GitHub Pages atualizado em `aros.anestreview.com.br`.
 
 Auth, audit log e onboarding (2026-05-21 — sessão longa, deploy completo):
 - **Firebase Auth integrado** (Email/Password + Google) coexistindo com login custom legado como fallback. Listener `onAuthStateChanged` popula `S.currentUser`. `esqueceuSenha` envia reset via Firebase quando input tem `@`.
