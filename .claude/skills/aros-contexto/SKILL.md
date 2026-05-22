@@ -220,8 +220,31 @@ config/{cfgId}
   │   }
   │   Legado: se `structure` ausente, lê `g.tabs[]` por compat. Reconciliação automática
   │   coloca tabs novas (TAB_GROUPS adicionadas no código) no grupo original ou no último.
-  └ simExtra                        — { linkPagoAluno, linkPagoExterno, linkGratuito,
-                                         slackWebhook, listaVigenteId, alunosGratuitos[] }
+  ├ simExtra                        — { linkPagoAluno, linkPagoExterno, linkGratuito,
+  │                                      slackWebhook, listaVigenteId, alunosGratuitos[] }
+  └ catalogoConfig                  — listas mestre do Catálogo de Produtos (multi-select)
+                                       { publicosAlvo:[str], provasAlvo:[str] }
+                                       Seed automático na primeira abertura da aba (presets).
+
+produtos/{produtoId}                — Catálogo Interno de Produtos (descritivo p/ marketing/vendas/suporte)
+  {
+    nome, breveDescricao,           // sem limite de chars (legado: pitchCurto)
+    capa,                           // URL Storage (1:1, só thumb na listagem; NÃO no detalhe)
+    publicoAlvo:[str],              // multi-select de config/catalogoConfig.publicosAlvo
+    provasAlvo:[str],               // multi-select de config/catalogoConfig.provasAlvo
+    responsaveis:[str],             // tags livres multi (texto livre)
+    status:'rascunho'|'ativo'|'em-breve'|'descontinuado',
+    features:[                      // modelo único (sem tipos)
+      { id, icone, titulo, disponivel, numeroChave, descricao, updatedAt }
+    ],
+    temMentoria:bool,
+    mentoriaFeatures:[Feature],     // mesma shape de features, só se temMentoria=true
+    argumentosVenda:[str],          // bullets
+    objecoes:[{id, pergunta, resposta}],
+    links:[{id, label, url}],
+    anexos:[{id, label, path, url, sizeBytes, mime}],
+    ordem, createdAt, createdBy, updatedAt, updatedBy
+  }
 ```
 
 ## Distinção crítica: simulados oficiais vs extras
@@ -890,6 +913,65 @@ Aba `tab-orcamento` em Admin → Orçamento (ADMIN_ONLY_TABS). Controle de despe
 - Conteúdo HTML: "Olá {nome}, Cadastre seu acesso no sistema..." + link `aros.anestreview.com.br` + sugestão Google login + esqueci a senha.
 - Footer "At.te / Equipe AnestReview".
 
+### Catálogo Interno de Produtos (2026-05-22)
+
+**Aba "Produtos"** no painel coord — catálogo descritivo dos produtos da AnestReview pra equipes internas (marketing/vendas/suporte) consultarem. NÃO é catálogo de vendas pra alunos; é base de conhecimento interna.
+
+**Acesso:**
+- **Ver**: qualquer usuário com login interno (todos os tipos). Rascunhos só aparecem pra quem pode editar.
+- **Editar**: permissão granular `gerenciarCatalogo` (registry `EXTRA_PERMS`) — admin tem implicitamente. Liga via checkbox "Permissões extras" no modal de usuário.
+
+**Coleções:**
+- `produtos/{produtoId}` — produtos cadastrados (shape acima em Modelo de Dados).
+- `config/catalogoConfig` — listas mestre compartilhadas (`publicosAlvo`, `provasAlvo`). Seed automático na primeira abertura por quem tem `gerenciarCatalogo`/adm.
+
+**Presets seed `publicosAlvo`** (9 opções iniciais):
+"Residentes e Anestesiologistas em geral", "ME1/ME2/ME3", "Anestesiologistas que farão TEA 1ª/2ª Fase", "Anestesiologistas que farão TSA 1ª/2ª Fase", "Anestesiologistas que buscam atualização".
+
+**Presets seed `provasAlvo`** (7 opções iniciais):
+"TEA 1ª Fase", "TEA 2ª Fase", "TSA 1ª Fase", "TSA 2ª Fase", "Quadrimestrais / Anuais SBA", "Concurso", "Atualização".
+
+**Views (estado `S.produtosView`):**
+- `list` — listagem compacta com mini-capa 1:1, busca por texto livre, filtro por prova-alvo (chips multi-select). Botão "Novo produto" só pra quem edita.
+- `detail` — página dedicada (substitui a lista, com botão "← Voltar"). Sem capa grande. Header: nome + breve descrição + chips de status/público/provas/responsáveis. Seções: "// Sobre", "// O que está incluído" (features), "// Mentoria" (se temMentoria=true, com separador roxo), "// Argumentos de venda", "// Objeções frequentes", "// Links úteis", "// Anexos".
+- `edit` / `new` — accordion: Básico (nome, breve descrição sem limite, capa, público-alvo multi, provas-alvo multi, status, responsáveis tag livre) + Features + Mentoria (toggle + features) + Argumentos + Objeções + Links + Anexos.
+
+**Features (modelo único — sem tipos pré-definidos):**
+```
+{ id, icone, titulo, disponivel (S/N), numeroChave, descricao, updatedAt }
+```
+- Ícone: catálogo curado de 25 emojis + opção de emoji custom (clamp via grapheme cluster, max 2).
+- `disponivel=false` renderiza card atenuado (opacity reduzida) + flag "✗ Não incluído".
+- `updatedAt` por feature: atualizado automaticamente ao salvar quando algum campo dela mudou (compara antes/depois via `_proFeatEqual`). Mostrado no detalhe como smallprint "Atualizado em DD/MM/AAAA".
+- Drag-to-reorder via handle `⠿`.
+- "Adicionar feature" anexa direto um cartão em branco (sem picker de tipo) com autofocus no título. Mesmo handler `_proFeatAdd(source)` pra features principais e features da mentoria.
+
+**Multi-select com presets + cadastrar/remover:**
+- Picker `#pro-picker-pop` (genérico) lista opções do `config/catalogoConfig` + botão "+ Cadastrar novo" no rodapé.
+- Cada item tem botão `×` (só pra quem edita) que remove do catálogo global via `arrayRemove`. Se a opção está em uso em N produtos, confirm avisa "Está em uso em N produto(s)" — os produtos mantêm a tag órfã.
+- Audit: `CATALOGO_OPCAO_ADICIONADA` / `CATALOGO_OPCAO_REMOVIDA`.
+
+**Anexos:**
+- Storage path `produtos/{produtoId}/capa.{ext}` (capa) + `produtos/{produtoId}/anexos/{anexoId}.{ext}`.
+- Limite 5MB, image/* OR application/pdf. Rules exigem auth (alunos não acessam).
+
+**Audit log:** `PRODUTO_CRIADO`, `PRODUTO_EDITADO`, `PRODUTO_EXCLUIDO`, `PRODUTO_STATUS_ALTERADO`, `CATALOGO_OPCAO_ADICIONADA`, `CATALOGO_OPCAO_REMOVIDA`.
+
+**Compat retroativa (read tolerante):**
+- `pitchCurto` → lido como `breveDescricao` via `_proGetBreveDescricao`.
+- `publicoAlvo:string` → `[string]` via `_proGetPublicoAlvo`.
+- `responsavel:string` → `[string]` via `_proGetResponsaveis`.
+- Features com `tipo` (v2) → ignora o campo, lê os demais. `quantidade` antigo herda como `numeroChave`. `temVideoComentario` / `bonusProdutoId` ignorados silenciosamente.
+- Ao salvar, normaliza: grava `breveDescricao` + `deleteField(pitchCurto)`, `responsaveis` array + `deleteField(responsavel)`. Campos antigos de features não são removidos com `deleteField` (apenas ignorados na UI).
+
+**Polimento UX (Apple-like) aplicado em 2026-05-22:**
+- Emoji de feature reduzido (32→20px no detalhe, 26→20px na edição) + número-chave (28→22px).
+- Popover de ícone fecha com clique fora **e** Esc — handler global único em capture phase (`_proEnsureGlobalDismiss`, flag `window._proGlobalDismissBound`).
+- Accordion animado via `max-height` + `opacity` transition (0.2s).
+- Toolbar da listagem sem background/border (mais leve).
+- Listagem em viewport 900-1200px: `pro-row-tags` max-width 160px + badge `flex-shrink:0`. Mobile <480px: tags somem.
+- Mentoria no detalhe: `border-top` + título roxo `#a855f7` pra separar de "O que está incluído".
+
 ### Firebase Console / Project Settings (configurado 2026-05-21)
 
 - **Idioma do template**: Português (Brasil).
@@ -1172,6 +1254,20 @@ Funcionalidades que estão **prontas no código** mas dependem de uma config ext
 **Status**: pendente. `sendParecerEmail` usa `template_r0vjejs` reciclado. Aguarda usuário criar template dedicado pra notificações de parecer finalizado.
 
 ## Histórico recente (resumo cronológico)
+
+Catálogo Interno de Produtos (2026-05-22, em paralelo ao Financeiro RPA — branch separada que foi mergeada em 2026-05-23):
+- **Nova aba "Produtos"** no painel coord — catálogo descritivo dos produtos da AnestReview pra equipes internas (marketing/vendas/suporte). Não é catálogo de venda pra alunos.
+- **Coleção `produtos`** + **`config/catalogoConfig`** (listas mestre de público-alvo e provas-alvo). Storage path `produtos/{id}/`. Rules deployadas em 2026-05-22 (Firestore + Storage).
+- **Permissão granular `gerenciarCatalogo`** (registry `EXTRA_PERMS`) — admin tem implicitamente. Checkbox "Permissões extras" no modal de usuário.
+- **3 views** (`S.produtosView`): list (compacta com busca/filtros), detail (página dedicada, sem capa grande, com seções // Sobre, // O que está incluído, // Mentoria etc), edit/new (accordion).
+- **Features modelo único**: ícone (catálogo curado + emoji custom) + título + Sim/Não + número-chave + descrição + updatedAt por feature. Drag-to-reorder. Sem tipos pré-definidos (tentado em v2 e revertido por feedback do user).
+- **Mentoria** como toggle Sim/Não no produto + lista própria de features.
+- **Multi-select com presets** pra público-alvo e provas-alvo: lista mestre em `config/catalogoConfig`, "+ Cadastrar novo" e `×` pra remover (avisa se em uso em N produtos).
+- **Responsáveis** como tags livres multi (texto livre, sem lista mestre).
+- **Audit log**: PRODUTO_CRIADO/EDITADO/EXCLUIDO/STATUS_ALTERADO + CATALOGO_OPCAO_ADICIONADA/REMOVIDA.
+- **Polimento Apple-like**: emojis reduzidos (32→20px), número-chave (28→22px), popover fecha com Esc/clique-fora via handler global único, accordion animado, toolbar sem caixa pesada, mentoria com separador roxo.
+- **Iterações**: v1 (estrutura completa) → v2 (tipos de feature pré-definidos + bônus) → v3 (revertido pra feature única, removido bônus) → polimento UX.
+- **Importante (2026-05-23)**: a feature foi originalmente desenvolvida na branch `claude/great-brahmagupta-032554` e os 2 commits (`168aa7e` + `f1f5d18`) ficaram sem chegar em main por um tempo. Mergeada via cherry-pick em 2026-05-23 junto com toda a leva de Financeiro RPA + Orçamento.
 
 Financeiro RPA + bug fix troca de simulado (2026-05-22 — sessão longa, deploys completos):
 - **Bug crítico do TSA Oral resolvido**: alunos antigos sem campo `matricula` no doc ficavam travados ao solicitar troca após apertamento das rules de 2026-05-21. A regra `request.resource.data.matricula == resource.data.matricula` falhava silenciosamente quando o campo não existia. **Fix**: trocou pra `request.resource.data.get('matricula', null) == resource.data.get('matricula', null)`. Deploy de rules separado. Lição salva em memory `feedback_firestore_rules_legacy_docs.md`.
