@@ -767,6 +767,10 @@ Aba `tab-orcamento` em Admin → Orçamento (ADMIN_ONLY_TABS). Controle de despe
 
 **Permissão:** tipo='adm' via `_isAdminEm('orcamento')`. Firestore rule: read aberto (sem dados sensíveis), write exige isAuth. Delete bloqueado (só soft via status='arquivado').
 
+**Ajustes pós-lançamento (2026-05-22):**
+- `valorPrevisto` aceita 0 (só bloqueia negativo) — útil pra registrar gastos com valor a definir ou zerados por contexto. A regra "pago parcial < previsto" só aplica quando previsto > 0.
+- Datas vazias na tabela exibem `-` simples (cinza claro) em vez do bug anterior que mostrava "undefined/undefined/—" causado por `_orcDataFmt('—')`. Label "prevista"/"pago" só aparece quando há data preenchida.
+
 ### Financeiro
 - Salário fixo + atividades (revisão, mentoria, clínica) + fechamento mensal por prof.
 - **Mentoria como lançamento automático:** `calcFinanceiroMes(anoMes)` percorre `S.mentorias`, calcula sobreposição com o mês via `_mentSobreposicaoMes(g, anoMes)` e soma `valorProporcional` ao `mentorNome`.
