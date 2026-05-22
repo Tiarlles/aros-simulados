@@ -17344,15 +17344,16 @@ function _orcRenderDetalhe(eventoId){
         const valPrev=Number(g.valorPrevisto)||0;
         const valPago=Number(g.valorPago)||0;
         const nAnexos=(g.anexos||[]).length;
-        const dataExibir=g.status==='pago-total'||g.status==='pago-parcial'?(g.dataPagamento||g.dataPrevista||'—'):(g.dataPrevista||'—');
+        const dataExibir=g.status==='pago-total'||g.status==='pago-parcial'?(g.dataPagamento||g.dataPrevista||''):(g.dataPrevista||'');
         const dataLbl=g.status==='previsto'?'prevista':'pago';
+        const dataFmt=_orcDataFmt(dataExibir);
         return `<tr>
           <td style="${tdS}"><div style="font-weight:600;color:var(--text)">${(g.descricao||'').replace(/</g,'&lt;')}</div>${g.fornecedor?`<div style="font-size:11px;color:var(--t2);margin-top:2px">${g.fornecedor.replace(/</g,'&lt;')}</div>`:''}${g.observacoes?`<div style="font-size:11px;color:var(--t2);margin-top:4px;font-style:italic">"${g.observacoes.replace(/</g,'&lt;').slice(0,80)}${g.observacoes.length>80?'…':''}"</div>`:''}</td>
           <td style="${tdS}">${g.categoria?`<span style="display:inline-block;padding:2px 8px;background:var(--bg3);font-size:10.5px;border-radius:8px;color:var(--t2);font-family:JetBrains Mono,monospace">${g.categoria.replace(/</g,'&lt;')}</span>`:'<span style="color:var(--t3);font-size:11px">—</span>'}</td>
           <td style="${tdS};text-align:right;font-weight:600">${_orcBRL(valPrev)}</td>
           <td style="${tdS};text-align:right;font-weight:600;color:${g.status==='pago-total'?'var(--green)':g.status==='pago-parcial'?'var(--accent)':'var(--t3)'}">${g.status==='previsto'?'—':_orcBRL(valPago)}${g.status==='pago-parcial'&&valPrev>valPago?`<div style="font-size:10px;color:var(--t2);font-weight:500;margin-top:2px">falta ${_orcBRL(valPrev-valPago)}</div>`:''}</td>
           <td style="${tdS};text-align:center"><span style="display:inline-block;padding:4px 10px;background:${_orcStatusBg(g.status)};color:${_orcStatusFg(g.status)};font-size:11px;font-weight:700;border-radius:99px;white-space:nowrap">${_orcStatusLabel(g.status)}</span></td>
-          <td style="${tdS};text-align:center;font-size:11.5px"><div style="color:var(--text)">${_orcDataFmt(dataExibir)||'—'}</div><div style="color:var(--t3);font-size:10px;text-transform:uppercase;letter-spacing:.5px">${dataExibir!=='—'?dataLbl:''}</div></td>
+          <td style="${tdS};text-align:center;font-size:11.5px">${dataFmt?`<div style="color:var(--text)">${dataFmt}</div><div style="color:var(--t3);font-size:10px;text-transform:uppercase;letter-spacing:.5px">${dataLbl}</div>`:'<span style="color:var(--t3)">-</span>'}</td>
           <td style="${tdS};text-align:center">${nAnexos?`<button class="btn btn-s btn-sm" onclick="_orcAbrirAnexosLista('${safeId}')" title="Ver ${nAnexos} anexo${nAnexos>1?'s':''}" style="font-size:11px;padding:4px 9px">📎 ${nAnexos}</button>`:'<span style="color:var(--t3);font-size:11px">—</span>'}</td>
           ${!isArquivado?`<td style="${tdS};text-align:center;white-space:nowrap"><button class="btn btn-s btn-sm" onclick="openOrcamentoGasto('${safeId}')" title="Editar gasto" style="font-size:12px;padding:4px 8px">✏️</button></td>`:''}
         </tr>`;
@@ -17599,10 +17600,10 @@ window.saveOrcamentoGasto=async()=>{
   const anexos=window._curOrcAnexosPend||[];
   const err=document.getElementById('orc-ga-err');
   if(!descricao){err.textContent='Informe a descrição do gasto.';err.classList.remove('hidden');return;}
-  if(valorPrevisto<=0){err.textContent='Informe um valor previsto maior que zero.';err.classList.remove('hidden');return;}
+  if(valorPrevisto<0){err.textContent='Valor previsto não pode ser negativo.';err.classList.remove('hidden');return;}
   if(status==='pago-parcial'&&valorPago<=0){err.textContent='Pra "pago parcial", informe quanto já foi pago.';err.classList.remove('hidden');return;}
-  if(status==='pago-parcial'&&valorPago>=valorPrevisto){err.textContent='Pra pago parcial, o valor pago deve ser menor que o previsto. Use "pago total" se já foi pago tudo.';err.classList.remove('hidden');return;}
-  if(status==='pago-total'&&valorPago<=0){err.textContent='Informe o valor pago.';err.classList.remove('hidden');return;}
+  if(status==='pago-parcial'&&valorPrevisto>0&&valorPago>=valorPrevisto){err.textContent='Pra pago parcial, o valor pago deve ser menor que o previsto. Use "pago total" se já foi pago tudo.';err.classList.remove('hidden');return;}
+  if(status==='pago-total'&&valorPago<0){err.textContent='Valor pago não pode ser negativo.';err.classList.remove('hidden');return;}
   err.classList.add('hidden');
   const now=new Date().toISOString();
   const gastoData={
