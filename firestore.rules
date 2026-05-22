@@ -337,6 +337,22 @@ service cloud.firestore {
     }
 
     // ────────────────────────────────────────────────────────────────────────
+    // PRODUTOS — Catálogo Interno (marketing/vendas/suporte).
+    // Read exige auth (catálogo interno, alunos NÃO acessam).
+    // Write exige auth. Permissão granular `gerenciarCatalogo` é gateada na UI
+    // (segue o padrão atual do AROS — rules não distinguem permissões dentro de coord/prof).
+    // ────────────────────────────────────────────────────────────────────────
+    match /produtos/{produtoId} {
+      allow read: if isAuth();
+      allow create, update: if isAuth()
+                            && request.resource.data.nome is string
+                            && request.resource.data.nome.size() > 0
+                            && request.resource.data.nome.size() < 300
+                            && request.resource.data.status in ['rascunho','ativo','em-breve','descontinuado'];
+      allow delete: if isAuth();
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
     // AUDIT LOG — append-only. Read aberto pra admin ler. Create aberto pra
     // capturar ações de quem ainda usa login custom (sem Firebase Auth).
     // Update/delete bloqueados — log é imutável.
