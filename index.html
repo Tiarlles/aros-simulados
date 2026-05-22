@@ -2584,29 +2584,9 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
           </div>
         </div>
 
-        <!-- 1. Cadastro de Professores (dropdown) -->
-        <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden">
-          <div onclick="cfgToggle('cfg-profs-body','cfg-profs-arr')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg2);cursor:pointer;user-select:none" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
-            <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:18px">👨‍🏫</span>
-              <div>
-                <p style="font-weight:700;font-size:15px">Cadastro de Professores</p>
-                <p style="font-size:12px;color:var(--t2)" id="prof-count-badge">Carregando...</p>
-              </div>
-            </div>
-            <span id="cfg-profs-arr" style="font-size:14px;color:var(--t2);transition:transform .2s">▼</span>
-          </div>
-          <div id="cfg-profs-body" style="display:none;padding:16px 18px;border-top:1px solid var(--border)">
-            <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-              <button class="btn btn-p btn-sm" onclick="onboardingConvidarTodos()" title="Cadastra (se preciso) e envia convite pra todos os profs ainda não convidados">📧 Convidar todos</button>
-            </div>
-            <div id="prof-global-list" style="margin-bottom:12px"></div>
-            <div style="display:flex;gap:8px">
-              <input class="fc" id="prof-input" placeholder="Nome do professor" style="flex:1" onkeydown="if(event.key==='Enter')addProfGlobal()"/>
-              <button class="btn btn-p btn-sm" onclick="addProfGlobal()">+ Adicionar</button>
-            </div>
-          </div>
-        </div>
+        <!-- Cadastro de Professores: seção removida em 2026-05-22.
+             Toda gestão de professores agora acontece em Admin → Usuários
+             (criação com tipo=prof popula automaticamente lista + multi-email + convite). -->
 
       </div>
     </div>
@@ -2997,7 +2977,9 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
     <div class="mh"><div><div class="m-title" id="mu-title">Novo usuário</div><div class="m-sub">Defina credenciais e papel</div></div><button class="m-close" onclick="CM('modal-user')">✕</button></div>
     <div class="m-body">
       <div class="fg"><label class="fl">Nome de usuário (login + display)</label><input class="fc" id="mu-username" placeholder="ex: Maria Silva" autocomplete="off"/></div>
-      <div class="fg"><label class="fl">Email (login via Google ou Firebase)</label><input class="fc" id="mu-email" type="email" placeholder="ex: maria@exemplo.com" autocomplete="off"/><p style="font-size:11px;color:var(--t2);margin-top:4px">Obrigatório. Necessário pra login via Google ou redefinição de senha.</p></div>
+      <div class="fg"><label class="fl">Email principal (login)</label><input class="fc" id="mu-email" type="email" placeholder="email@dom.com" autocomplete="off"/><p style="font-size:11px;color:var(--t2);margin-top:4px">Obrigatório. Usado pra login via Google ou Firebase.</p></div>
+      <!-- Emails secundários — só visível pra tipo=prof. Toggla via onTipoChange. -->
+      <div class="fg hidden" id="mu-email-sec-row"><label class="fl">Emails secundários <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional)</span></label><input class="fc" id="mu-email-sec" type="text" placeholder="email2@dom.com; email3@outro.com" autocomplete="off"/><p style="font-size:11px;color:var(--t2);margin-top:4px">Até 2 emails extras pra comunicação (NF, RPA, avisos da coord). Separe por <code>;</code>.</p></div>
       <div class="fg"><label class="fl">Senha</label><input class="fc" id="mu-senha" type="text" placeholder="Senha de acesso" autocomplete="new-password"/></div>
       <div class="fg">
         <label class="fl">Tipo de usuário</label>
@@ -3009,6 +2991,20 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
           <option value="adm">🛡️ Administrador (acesso total)</option>
         </select>
         <p style="font-size:11px;color:var(--t2);margin-top:4px">Define o conjunto de abas padrão. Pode customizar abaixo.</p>
+      </div>
+      <!-- Visível só quando tipo=prof. Informa o admin que o prof entra automaticamente nas listagens
+           e oferece convite por email no mesmo salvamento (sem precisar ir em Cadastros → Professores). -->
+      <div id="mu-prof-extra" class="hidden">
+        <div style="background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;font-size:12px;line-height:1.5;color:var(--t1)">
+          📌 Este professor entrará automaticamente nas listagens (Financeiro, Mentorias, Disponibilidade, dropdowns) ao salvar.
+        </div>
+        <div class="fg" style="margin-bottom:6px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px">
+            <input type="checkbox" id="mu-prof-invite" checked style="width:16px;height:16px;cursor:pointer"/>
+            <span>📧 Enviar convite de acesso por email ao salvar</span>
+          </label>
+          <p style="font-size:11px;color:var(--t2);margin-top:4px;padding-left:24px">Manda email pro endereço cadastrado acima com link e senha provisória. Pode reenviar depois em <em>Cadastros → Professores</em>.</p>
+        </div>
       </div>
       <div class="fg" id="mu-perms-section">
         <label class="fl">Permissões (abas que o usuário vê)</label>
@@ -4791,19 +4787,34 @@ const S={view:'home',unlocked:false,profUnlocked:false,currentUser:null,usuarios
 window.S=S;
 
 // ── IDENTIDADE: prof logado (Fase 2 da migração Firebase Auth) ───────────────
-// Retorna o nome do prof correspondente a S.currentUser.nome (match em S.profs,
-// case-insensitive). Retorna null se admin/coord/não-logado ou se o usuário
-// avaliador não tem match em S.profs (fallback gracioso: dropdown continua aparecendo).
+// Retorna o nome do prof correspondente ao usuário logado, pra abolir os dropdowns
+// "selecione quem é você" em Disponibilidade, Checklist Casos, Feedback Geral e
+// modal de Parecer/Recurso. Estratégia em 2 etapas (mais robusta que só nome):
+//   1) match por EMAIL — bate o email do usuário logado contra S.profsEmail
+//      (config/professores.emails). Email é único e usado pra login Firebase Auth,
+//      então é o caminho mais confiável.
+//   2) match por NOME — fallback case-insensitive entre u.nome/username e S.profs.
+// Retorna null se usuário não logado, ou se nenhum dos matches encontrar
+// (fallback gracioso: dropdown continua aparecendo, sem travar nada).
+// Não há mais gate de tipo='prof' — se você for admin/coord mas o seu email
+// também estiver cadastrado como prof, você é tratado como esse prof (você
+// está agindo como você mesmo). Mentorias x2 e Financeiro mantêm dropdown
+// editável (não usam este helper) — admin lança em nome de outro prof por lá.
 function getProfLogadoNome(){
   const u=S.currentUser;
   if(!u)return null;
-  // Só tipo 'prof' tem identidade implícita. Admin/coord/suporte/financeiro vêem dropdown editável.
-  if(typeof getTipo==='function'){
-    if(getTipo(u)!=='prof')return null;
-  }else{
-    // Fallback se helper não tiver carregado ainda
-    if(u.role==='admin')return null;
+  // 1. Match por email (mais confiável — emails únicos, usados pra login)
+  const email=(u.email||'').trim().toLowerCase();
+  if(email&&S.profsEmail){
+    for(const profNome of Object.keys(S.profsEmail)){
+      const raw=S.profsEmail[profNome];
+      if(!raw)continue;
+      const emails=String(raw).split(/[;,]/).map(e=>e.trim().toLowerCase()).filter(Boolean);
+      if(emails.includes(email))return profNome;
+    }
   }
+  // 2. Fallback: match por nome em S.profs (compat pros casos onde ainda
+  // não há email cadastrado pro prof)
   const nome=(u.nome||u.username||'').trim();
   if(!nome)return null;
   const match=(S.profs||[]).find(p=>(typeof p==='string'?p:(p?.nome||'')).trim().toLowerCase()===nome.toLowerCase());
@@ -6252,18 +6263,25 @@ window.saCopyField=async(btnEl,field)=>{
     setTimeout(()=>fb.remove(),1400);
   }catch(err){alert('Erro ao copiar: '+err.message);}
 };
+// Aceita o botão (this) — usado na aba Senhas Públicas — OU um id de entrada
+// (usado na aba Senhas Acessos do admin). Procura a box `[data-sa-2fa-box]` correspondente
+// dentro do mesmo .sa-card e alterna display.
 window.saToggle2FA=(elOrId)=>{
-  // Aceita: o botão (this) OU um id de entrada (compat)
-  let card;
-  if(elOrId&&typeof elOrId==='object'&&elOrId.closest)card=elOrId.closest('.sa-card');
-  else card=document.querySelector(`[data-sa-card="${elOrId}"]`);
+  let card=null;
+  if(elOrId&&typeof elOrId==='object'&&typeof elOrId.closest==='function'){
+    card=elOrId.closest('.sa-card');
+  }else if(elOrId){
+    // Tenta achar pelo data-sa-2fa-box="id" (admin tab) ou pelo data-sa-card="id"
+    const direct=document.querySelector(`[data-sa-2fa-box="${elOrId}"]`);
+    if(direct){
+      direct.style.display=direct.style.display==='none'?'block':'none';
+      return;
+    }
+    card=document.querySelector(`[data-sa-card="${elOrId}"]`);
+  }
   if(!card)return;
   const box=card.querySelector('[data-sa-2fa-box]');if(!box)return;
   box.style.display=box.style.display==='none'?'block':'none';
-};
-window.saToggle2FA=(id)=>{
-  const box=document.querySelector(`[data-sa-2fa-box="${id}"]`);if(!box)return;
-  box.style.display=box.style.display==='none'?'':'none';
 };
 
 function _saEscAttr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
@@ -6284,14 +6302,14 @@ function _saRenderCardHTML(e,opts){
   const url=(e.endereco||'').trim();
   const enderecoHtml=url?`<a class="sa-card-endereco" href="${_saEscAttr(url)}" target="_blank" rel="noopener">${_comEsc(url)} ↗</a>`:'';
   const publicaBadge=(showPublicaBadge&&e.publica)?`<span class="sa-publica-badge" title="Visível em Senhas Públicas">🔓 PÚBLICA</span>`:'';
-  const twoFA=e.twoFA?`<button class="sa-2fa-tag" onclick="saToggle2FA('${e.id}')" title="Ver instruções de 2FA">🔒 2FA ▾</button>`:'';
+  const twoFA=e.twoFA?`<button class="sa-2fa-tag" onclick="saToggle2FA('${e.id}')" title="Ver instruções de autenticação">🔒 Precisa Autenticar ▾</button>`:'';
   const twoFABox=e.twoFA&&(e.twoFAInstrucoes||'').trim()?`<div class="sa-2fa-instr" data-sa-2fa-box="${e.id}" style="display:none">${_comEsc(e.twoFAInstrucoes)}</div>`:'';
   const acoes=showEdit?`
     <div class="sa-card-actions">
       <button class="btn btn-s btn-sm" onclick="openSenhaModal('${e.id}')">✏️ Editar</button>
     </div>`:'';
   const enderecoHtmlClickable=url?`<a class="sa-card-endereco" href="${_saEscAttr(url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${_comEsc(url)} ↗</a>`:'';
-  const twoFAClick=e.twoFA?`<button class="sa-2fa-tag" onclick="saToggle2FA(this)" title="Ver instruções de 2FA">🔒 2FA ▾</button>`:'';
+  const twoFAClick=e.twoFA?`<button class="sa-2fa-tag" onclick="saToggle2FA(this)" title="Ver instruções de autenticação">🔒 Precisa Autenticar ▾</button>`:'';
   const twoFABoxClick=e.twoFA&&(e.twoFAInstrucoes||'').trim()?`<div class="sa-2fa-instr" data-sa-2fa-box style="display:none">${_comEsc(e.twoFAInstrucoes)}</div>`:'';
   return `<div class="sa-card" data-sa-card="${e.id}">
     <div class="sa-card-head" onclick="saToggleCreds(this)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();saToggleCreds(this)}">
@@ -13279,7 +13297,15 @@ const _profSlug=(s)=>(s||'').toString().normalize('NFKD').replace(/[̀-ͯ]/g,'')
 const _revKey=(t,id)=>`${t}::${id}`;
 
 async function _revRenderProfView(c){
-  // Step 1: identificar professor
+  // Step 1: identificar professor — prefere identidade implícita do login.
+  // Se o usuário logado bate com algum prof cadastrado (por email ou nome),
+  // ignora o cache de localStorage e usa o nome do prof logado. Cobre o caso
+  // de troca de conta sem precisar limpar o localStorage manualmente.
+  const implicito=typeof getProfLogadoNome==='function'?getProfLogadoNome():null;
+  if(implicito&&S._revProfNome!==implicito){
+    S._revProfNome=implicito;
+    try{localStorage.setItem('aros_revProfNome',implicito);}catch(_){}
+  }
   if(!S._revProfNome){
     return _revRenderProfPicker(c);
   }
@@ -17630,10 +17656,62 @@ window.openUserModal=(id)=>{
   document.getElementById('mu-username').value=u?.nome||u?.username||'';
   // Edição liberada: admin pode renomear. Renomeio cria novo doc + marca o velho inativo.
   document.getElementById('mu-username').disabled=false;
-  document.getElementById('mu-email').value=u?.email||'';
   document.getElementById('mu-senha').value=u?.senha||'';
   const tipo=isEdit?getTipo(u):'prof';
   popMuTipoSelect(tipo);
+  // Email: pra prof cadastrado com múltiplos emails em config/professores, separa
+  // o 1º (principal — usado pro login) dos demais (secundários — comunicação).
+  // Busca em 3 estratégias em cascata pra cobrir diferenças entre o doc usuarios
+  // e a lista de profs:
+  //   1) match exato do u.nome contra chaves de S.profsEmail
+  //   2) match case-insensitive do u.nome
+  //   3) match pelo u.email contra qualquer email cadastrado pra um prof
+  let primaryEmail=u?.email||'';
+  let secondaryEmails='';
+  if(isEdit&&tipo==='prof'&&S.profsEmail){
+    let multi=u?.nome?S.profsEmail[u.nome]:null;
+    if(!multi&&u?.nome){
+      const target=u.nome.trim().toLowerCase();
+      const found=Object.keys(S.profsEmail).find(k=>k.trim().toLowerCase()===target);
+      if(found)multi=S.profsEmail[found];
+    }
+    if(!multi&&u?.email){
+      const target=u.email.trim().toLowerCase();
+      const found=Object.keys(S.profsEmail).find(k=>{
+        const raw=String(S.profsEmail[k]||'').toLowerCase();
+        return raw.split(/[;,]/).map(e=>e.trim()).includes(target);
+      });
+      if(found)multi=S.profsEmail[found];
+    }
+    if(multi){
+      const arr=String(multi).split(/[;,]/).map(e=>e.trim()).filter(Boolean);
+      // Garante que o primário seja o u.email (se houver). Caso não esteja na lista,
+      // usa o 1º da lista como primário.
+      if(u?.email){
+        const idx=arr.findIndex(e=>e.toLowerCase()===u.email.toLowerCase());
+        if(idx>=0){primaryEmail=arr[idx];arr.splice(idx,1);}
+        else if(arr.length){primaryEmail=arr.shift();}
+      }else if(arr.length){
+        primaryEmail=arr.shift();
+      }
+      secondaryEmails=arr.join('; ');
+    }
+  }
+  document.getElementById('mu-email').value=primaryEmail;
+  const secEl=document.getElementById('mu-email-sec');
+  if(secEl)secEl.value=secondaryEmails;
+  // Mostra/esconde bloco prof-extra (aviso de listagens + checkbox de convite)
+  // E linha de emails secundários. Explícito aqui pra cobrir edit mode
+  // (onTipoChange só é chamado em create e ao trocar o tipo no select).
+  const profExtra=document.getElementById('mu-prof-extra');
+  if(profExtra)profExtra.classList.toggle('hidden',tipo!=='prof');
+  const emailSecRow=document.getElementById('mu-email-sec-row');
+  if(emailSecRow)emailSecRow.classList.toggle('hidden',tipo!=='prof');
+  // Checkbox de convite começa marcado em create mode; em edit mode, desmarcado
+  // (editar prof não envia convite automaticamente — admin usa o checkbox se
+  // quiser reenviar, ou usa o botão dedicado em Cadastros → Professores).
+  const inviteCb=document.getElementById('mu-prof-invite');
+  if(inviteCb)inviteCb.checked=!isEdit;
   // Monta grid de checkboxes seguindo a estrutura efetiva (grupos + subgrupos + ordem custom)
   const userPerms=new Set(userTabs(u));
   const grid=document.getElementById('mu-perms-grid');
@@ -17733,6 +17811,12 @@ function onTipoChange(){
       cb.checked=preset.has(cb.value);
     });
   }
+  // Mostra/esconde bloco prof-extra (aviso de listagens + checkbox de convite)
+  // E linha de emails secundários (visível só pra prof).
+  const profExtra=document.getElementById('mu-prof-extra');
+  if(profExtra)profExtra.classList.toggle('hidden',tipo!=='prof');
+  const emailSecRow=document.getElementById('mu-email-sec-row');
+  if(emailSecRow)emailSecRow.classList.toggle('hidden',tipo!=='prof');
 }
 window.onTipoChange=onTipoChange;
 
@@ -17898,7 +17982,7 @@ async function salvarTiposPresets(){
 window.renderTiposPresets=renderTiposPresets;
 window.salvarTiposPresets=salvarTiposPresets;
 
-// Popula o <select id="mu-tipo"> dinamicamente com defaults + customs
+// Popula o <select id="mu-tipo"> dinamicamente com defaults + customs.
 function popMuTipoSelect(currentTipo){
   const sel=document.getElementById('mu-tipo');if(!sel)return;
   const meta=_tiposMeta();
@@ -17918,7 +18002,14 @@ window.saveUser=async()=>{
   const editId=document.getElementById('modal-user').dataset.editId||'';
   // Username = display name (aceita espaços, acentos, etc). ID do doc = versão normalizada.
   const usernameDisplay=document.getElementById('mu-username').value.trim();
-  const email=(document.getElementById('mu-email')?.value||'').trim().toLowerCase();
+  // Email principal (login) + emails secundários (só relevante pra prof, ignora pros demais).
+  // A combinação primário + secundários forma o multi-email gravado em S.profsEmail
+  // quando tipo=prof. usuarios/{slug}.email = só o primário.
+  const rawPrimary=(document.getElementById('mu-email')?.value||'').trim().toLowerCase();
+  const rawSecondary=(document.getElementById('mu-email-sec')?.value||'').trim();
+  const secondaryArr=rawSecondary.split(/[;,]/).map(e=>e.trim().toLowerCase()).filter(Boolean);
+  const emailsArr=Array.from(new Set([rawPrimary,...secondaryArr].filter(Boolean)));
+  const email=rawPrimary;
   const senha=document.getElementById('mu-senha').value;
   const tipo=document.getElementById('mu-tipo').value;
   const isAdmin=tipo==='adm';
@@ -17931,7 +18022,10 @@ window.saveUser=async()=>{
     .replace(/\s+/g,'.').replace(/[^a-z0-9._@+-]/g,'');
   if(!username){errEl.textContent='Nome de usuário inválido.';errEl.classList.remove('hidden');return;}
   if(!email){errEl.textContent='Email é obrigatório. Necessário pra login via Google ou redefinição de senha.';errEl.classList.remove('hidden');return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent='Email inválido.';errEl.classList.remove('hidden');return;}
+  const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const invalido=emailsArr.find(e=>!emailRegex.test(e));
+  if(invalido){errEl.textContent='Email inválido: '+invalido;errEl.classList.remove('hidden');return;}
+  if(emailsArr.length>3){errEl.textContent='Máximo 3 emails. Você informou '+emailsArr.length+'.';errEl.classList.remove('hidden');return;}
   // Conflito: username diferente do editId E já existe outro
   const conflito=S.usuarios.some(u=>(u.username||u.id)===username && u.id!==editId);
   if(conflito){errEl.textContent='Já existe um usuário com esse nome.';errEl.classList.remove('hidden');return;}
@@ -17984,7 +18078,58 @@ window.saveUser=async()=>{
     if(renomeando)try{localStorage.setItem('aros_session',username);}catch(_){}
     applyTabsByRole();
   }
+  // === Sync com lista de profs + envio de convite (quando tipo=prof) ===
+  // Garante que prof criado por aqui aparece nas listagens (Financeiro, Mentorias,
+  // Disponibilidade, dropdowns). Fluxo equivalente ao Cadastros → Professores.
+  // Em rename, remove o nome antigo e adiciona o novo na lista/emails (preserva tudo).
+  let _inviteFlash='';
+  if(tipo==='prof'){
+    try{
+      S.profs=S.profs||[];
+      S.profsEmail=S.profsEmail||{};
+      // Rename: remove o nome anterior (se diferente) e transfere o email.
+      if(editId&&_userBefore&&_userBefore.nome&&_userBefore.nome!==usernameDisplay){
+        const oldName=_userBefore.nome;
+        const oldEmail=S.profsEmail[oldName];
+        S.profs=S.profs.filter(p=>p!==oldName);
+        if(oldEmail!==undefined){delete S.profsEmail[oldName];}
+      }
+      if(!S.profs.includes(usernameDisplay))S.profs.push(usernameDisplay);
+      S.profs.sort((a,b)=>a.localeCompare(b,'pt-BR'));
+      // Salva multi-email normalizado ("email1; email2; email3"). Reusa o formato
+      // de Cadastros → Professores → fonte única em config/professores.emails.
+      const emailsStr=emailsArr.join('; ');
+      if(emailsStr)S.profsEmail[usernameDisplay]=emailsStr;
+      await setDoc(doc(db,'config','professores'),{lista:S.profs,emails:S.profsEmail});
+      audit('CONFIG_ALTERADA',{collection:'config',path:'professores'},{after:{synced:usernameDisplay,total:S.profs.length},meta:{kind:'prof-sync-from-users-tab'}});
+    }catch(e){
+      console.error('saveUser sync prof:',e);
+      // Não bloqueia — usuário foi criado/editado com sucesso. Só avisa.
+      if(typeof _revShowToast==='function')_revShowToast('⚠️ Usuário salvo, mas falha ao sincronizar lista de profs','var(--yellow)');
+    }
+    // Envio de convite por email se o checkbox estiver marcado
+    const inviteCb=document.getElementById('mu-prof-invite');
+    if(inviteCb&&inviteCb.checked&&email){
+      try{
+        const userDoc=S.usuarios.find(u=>u.id===username);
+        if(userDoc&&typeof _onbSendInvite==='function'){
+          await _onbSendInvite(userDoc,email);
+          _inviteFlash='✓ Usuário salvo e convite enviado pra '+email;
+        }
+      }catch(e){
+        console.error('saveUser invite:',e);
+        _inviteFlash='⚠️ Usuário salvo, mas falha ao enviar convite: '+(e?.text||e?.message||e);
+      }
+    }
+  }
   CM('modal-user');renderUsuarios();
+  // Se sincronizou com lista de profs, re-renderiza Cadastros → Professores
+  // pra atualizar badge "+1, +2" de multi-email + status de convite.
+  if(tipo==='prof'&&typeof renderProfGlobal==='function')renderProfGlobal();
+  // Toast final (se houve envio de convite, mostra resultado; caso contrário, padrão silencioso)
+  if(_inviteFlash&&typeof _revShowToast==='function'){
+    _revShowToast(_inviteFlash,_inviteFlash.startsWith('✓')?'var(--green)':'var(--yellow)');
+  }
 };
 
 window.deleteUser=async()=>{
@@ -17992,7 +18137,31 @@ window.deleteUser=async()=>{
   if(!id)return;
   if(S.currentUser?.id===id){alert('Você não pode apagar o próprio usuário enquanto está logado.');return;}
   const u=S.usuarios.find(x=>x.id===id);if(!u)return;
-  if(!confirm(`Apagar usuário "${u.nome||u.username}"? Ele não poderá mais logar.`))return;
+  const isProf=getTipo(u)==='prof';
+  // Pra prof: também remove de S.profs e S.profsEmail. Confirma com aviso explícito
+  // sobre dependências (mentorias, financeiro). Histórico antigo (notas, lançamentos
+  // passados) fica preservado mesmo sem o prof na lista.
+  const profNome=u.nome||u.username||'';
+  let msg=`Apagar usuário "${u.nome||u.username}"? Ele não poderá mais logar.`;
+  if(isProf){
+    const partes=[];
+    // Conta mentorias (ativas + arquivadas) onde esse prof aparece
+    const numMent=((S.mentorias||[]).filter(g=>(g.profs||[]).some(p=>p&&p.nome===profNome))||[]).length;
+    if(numMent)partes.push(`${numMent} grupo${numMent>1?'s':''} de mentoria`);
+    // Conta lançamentos financeiros do prof
+    let numLanc=0;
+    const meses=(S.financeiro?.meses)||{};
+    for(const mk of Object.keys(meses)){
+      const ls=meses[mk]?.lancamentos||[];
+      numLanc+=ls.filter(l=>l.profNome===profNome).length;
+    }
+    if(numLanc)partes.push(`${numLanc} lançamento${numLanc>1?'s':''} financeiro${numLanc>1?'s':''}`);
+    msg=`Apagar professor "${profNome}"?\n\nO que vai acontecer:\n• Login desativado (não pode mais entrar no sistema)\n• Removido das listagens (Financeiro, Mentorias, Disponibilidade, dropdowns)\n• Emails cadastrados serão apagados\n\nO QUE FICA PRESERVADO (histórico):\n• Notas dadas no passado\n• Lançamentos financeiros já registrados\n• Mentorias e checklists anteriores`;
+    if(partes.length){
+      msg+=`\n\n⚠️ Atenção — este prof tem vínculos ativos:\n   • ${partes.join('\n   • ')}\nNão impede a exclusão, mas confira se faz sentido.`;
+    }
+  }
+  if(!confirm(msg))return;
   // Não permite apagar o último admin
   const admins=S.usuarios.filter(x=>!x.inativo&&getTipo(x)==='adm');
   if(getTipo(u)==='adm'&&admins.length<=1){alert('Não é possível apagar o único administrador.');return;}
@@ -18000,8 +18169,22 @@ window.deleteUser=async()=>{
   try{
     await updateDoc(doc(db,'usuarios',id),{inativo:true});
     audit('USUARIO_DESATIVADO',{collection:'usuarios',username:id},{before:{...u,senha:'***'},meta:{kind:'soft-delete'}});
+    // Pra prof: remove da lista + emails. Mantém o doc inativo no usuarios pra
+    // auditoria + caso o admin queira reativar/renomear no futuro.
+    if(isProf&&profNome){
+      try{
+        S.profs=(S.profs||[]).filter(n=>n!==profNome);
+        if(S.profsEmail&&S.profsEmail[profNome])delete S.profsEmail[profNome];
+        await setDoc(doc(db,'config','professores'),{lista:S.profs,emails:S.profsEmail||{}});
+        audit('CONFIG_ALTERADA',{collection:'config',path:'professores'},{after:{removed:profNome,total:S.profs.length},meta:{kind:'prof-remove-via-delete-user'}});
+      }catch(e){
+        console.error('deleteUser remove prof from list:',e);
+        if(typeof _revShowToast==='function')_revShowToast('⚠️ Usuário desativado, mas falha ao remover das listagens','var(--yellow)');
+      }
+    }
     await loadUsuarios();
     CM('modal-user');renderUsuarios();
+    if(isProf&&typeof renderProfGlobal==='function')renderProfGlobal();
   }catch(e){
     console.error('deleteUser:',e);
     alert('Erro ao apagar: '+(e.message||e));
