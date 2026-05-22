@@ -98,6 +98,21 @@ service cloud.firestore {
     }
 
     // ────────────────────────────────────────────────────────────────────────
+    // ORÇAMENTO — controle de despesas por evento (admin only via UI, mas
+    // tecnicamente qualquer auth pode escrever; o ADMIN_ONLY_TABS bloqueia o
+    // acesso à aba no front. Read aberto pra simplicidade — sem dados sensíveis
+    // de aluno aqui).
+    // ────────────────────────────────────────────────────────────────────────
+    match /orcamentos/{eventoId} {
+      allow read: if true;
+      allow create, update: if isAuth()
+                            && request.resource.data.nome is string
+                            && request.resource.data.nome.size() > 0
+                            && request.resource.data.nome.size() < 200;
+      allow delete: if false; // soft delete via status='arquivado'
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
     // CONFIG — leitura aberta. Escrita exige auth.
     // ⚠️  Slack webhook em config/simExtra ainda é leitura pública.
     // ────────────────────────────────────────────────────────────────────────

@@ -85,6 +85,19 @@ service firebase.storage {
     }
 
     // ────────────────────────────────────────────────────────────────────────
+    // ORÇAMENTO — anexos dos gastos (notas fiscais, recibos, comprovantes).
+    // Path: orcamentos/{eventoId}/gastos/{gastoId}/{filename}
+    // Aceita PDF + imagens. 20MB pra acomodar PDFs maiores.
+    // ────────────────────────────────────────────────────────────────────────
+    match /orcamentos/{eventoId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.resource.size < 20 * 1024 * 1024
+                   && (request.resource.contentType.matches('image/.*')
+                       || request.resource.contentType == 'application/pdf');
+      allow delete: if true;
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
     // DEFAULT DENY
     // ────────────────────────────────────────────────────────────────────────
     match /{allPaths=**} {

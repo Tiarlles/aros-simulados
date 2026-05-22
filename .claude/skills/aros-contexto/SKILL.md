@@ -732,6 +732,41 @@ Sistema de contestação de gabarito de provas TSA/TEA/ME1/ME2/ME3. Aluno públi
 - Email: `sendParecerEmail` usa `template_r0vjejs` reciclado por enquanto. **Pendente**: template dedicado no EmailJS quando user criar.
 - Modal genérico tem handler que fecha ao clicar no overlay; opt-out via atributo `data-no-backdrop-close` no `.mo`. Modais com input crítico que não devem fechar acidentalmente: `modal-parecer`, `modal-import-pdf`, `modal-import-bloco`, `modal-questao`. Esse opt-out preserva conteúdo digitado contra cliques fora.
 
+### Orçamento (2026-05-22)
+
+Aba `tab-orcamento` em Admin → Orçamento (ADMIN_ONLY_TABS). Controle de despesas por evento.
+
+**Modelo de dados:** `orcamentos/{eventoId}` no Firestore:
+```
+{nome, descricao, valorTotal, dataInicio, dataFim,
+ status: 'ativo'|'arquivado',
+ gastos: [
+   {id, descricao, fornecedor, categoria,
+    valorPrevisto, valorPago,
+    status: 'previsto'|'pago-parcial'|'pago-total',
+    dataPrevista, dataPagamento,
+    anexos: [{url, nome, tipo, tamanho, path}],
+    observacoes, criadoEm, atualizadoEm}
+ ],
+ criadoEm, atualizadoEm}
+```
+
+**Anexos no Firebase Storage:** `orcamentos/{eventoId}/gastos/{gastoId}/{timestamp}_{filename}`. PDFs e imagens, limite 20MB. Storage rule específica adicionada.
+
+**Funções principais:**
+- `renderOrcamento()` — dispatcher (dashboard ou detalhe baseado em `window._curOrcEventoId`)
+- `_orcRenderDashboard()` — grid de cards de eventos com barra de progresso semáforo (verde<80%, amarelo 80-100%, vermelho >100%)
+- `_orcRenderDetalhe(eventoId)` — header com 4 stats grandes (Orçamento, Compromisso, Pago efetivo, Restante) + tabela de gastos
+- `openOrcamentoEvento(id?)` / `saveOrcamentoEvento()` / `deleteOrcamentoEvento()` (soft, status='arquivado')
+- `openOrcamentoGasto(id?)` / `saveOrcamentoGasto()` / `deleteOrcamentoGasto()`
+- `_orcUploadAnexos(event)` — multi-upload pro Storage, popula `window._curOrcAnexosPend`
+- `_orcRemoverAnexo(idx)` — delete do Storage + remove do array pendente
+- Helpers: `_orcBRL`, `_orcDataFmt`, `_orcTotalGasto` (compromisso), `_orcTotalPagoEfetivo` (saiu do caixa), `_orcProgColor`, `_orcStatusLabel/Bg/Fg`
+
+**UX Apple-like:** cards com hover transform/border, barra de progresso 8-10px com transição, stats em Space Grotesk, mono captions, cores semáforo, empty states com ícone grande, datalist autocompletado pra categorias.
+
+**Permissão:** tipo='adm' via `_isAdminEm('orcamento')`. Firestore rule: read aberto (sem dados sensíveis), write exige isAuth. Delete bloqueado (só soft via status='arquivado').
+
 ### Financeiro
 - Salário fixo + atividades (revisão, mentoria, clínica) + fechamento mensal por prof.
 - **Mentoria como lançamento automático:** `calcFinanceiroMes(anoMes)` percorre `S.mentorias`, calcula sobreposição com o mês via `_mentSobreposicaoMes(g, anoMes)` e soma `valorProporcional` ao `mentorNome`.

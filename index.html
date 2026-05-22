@@ -2857,6 +2857,18 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
       </div>
     </div>
 
+    <!-- TAB: Orçamento (controle de despesas por evento) -->
+    <div id="tab-orcamento" class="hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-spacing:-.3px;line-height:1.15">Orçamento</h3>
+          <p style="font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;color:var(--accent);font-size:10.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:4px">Controle orçamentário por evento</p>
+        </div>
+        <div id="orc-actions" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+      <div id="orc-content"><p style="color:var(--t2);font-size:13px;padding:14px">Carregando...</p></div>
+    </div>
+
     <!-- TAB: Comunicação (mural por categoria — TSA / TEA / MEs) -->
     <div id="tab-comunicacao" class="hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
@@ -3084,6 +3096,80 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
     <div class="m-foot">
       <button class="btn btn-s" onclick="CM('modal-convite-edit')">Cancelar</button>
       <button class="btn btn-p" onclick="conviteEnviar()">📧 Enviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Orçamento — Evento (criar/editar) ══ -->
+<div class="mo hidden" id="modal-orc-evento" data-no-backdrop-close>
+  <div class="md" style="max-width:540px">
+    <div class="mh">
+      <div><div class="m-title" id="orc-ev-title">Novo evento</div><div class="m-sub">Defina nome, orçamento e período</div></div>
+      <button class="m-close" onclick="CM('modal-orc-evento')">✕</button>
+    </div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">Nome do evento</label><input class="fc" id="orc-ev-nome" placeholder="Ex: Workshop TSA Junho 2026" autocomplete="off"/></div>
+      <div class="fg"><label class="fl">Descrição <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional)</span></label><textarea class="fc" id="orc-ev-desc" style="min-height:60px" placeholder="Contexto do evento, observações gerais..."></textarea></div>
+      <div class="fg"><label class="fl">Orçamento total (R$)</label><input class="fc" id="orc-ev-valor" type="number" step="0.01" min="0" placeholder="0,00" autocomplete="off"/></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="fg" style="flex:1;min-width:140px"><label class="fl">Data início <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional)</span></label><input class="fc" id="orc-ev-inicio" type="date"/></div>
+        <div class="fg" style="flex:1;min-width:140px"><label class="fl">Data fim <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional)</span></label><input class="fc" id="orc-ev-fim" type="date"/></div>
+      </div>
+      <div id="orc-ev-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-d btn-sm" id="orc-ev-del" onclick="deleteOrcamentoEvento()" style="margin-right:auto;display:none">🗑️ Arquivar</button>
+      <button class="btn btn-s" onclick="CM('modal-orc-evento')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveOrcamentoEvento()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Orçamento — Gasto (criar/editar) ══ -->
+<div class="mo hidden" id="modal-orc-gasto" data-no-backdrop-close>
+  <div class="md" style="max-width:620px;max-height:92vh;display:flex;flex-direction:column">
+    <div class="mh">
+      <div><div class="m-title" id="orc-ga-title">Novo gasto</div><div class="m-sub" id="orc-ga-sub"></div></div>
+      <button class="m-close" onclick="CM('modal-orc-gasto')">✕</button>
+    </div>
+    <div class="m-body" style="overflow-y:auto;flex:1">
+      <div class="fg"><label class="fl">Descrição</label><input class="fc" id="orc-ga-desc" placeholder="Ex: Coffee break, sala de aula, brindes..." autocomplete="off"/></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="fg" style="flex:1;min-width:200px"><label class="fl">Fornecedor <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional)</span></label><input class="fc" id="orc-ga-forn" placeholder="Quem vai receber" autocomplete="off"/></div>
+        <div class="fg" style="flex:1;min-width:160px"><label class="fl">Categoria <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional)</span></label><input class="fc" id="orc-ga-cat" placeholder="Ex: Alimentação, Material..." autocomplete="off" list="orc-cat-list"/><datalist id="orc-cat-list"></datalist></div>
+      </div>
+      <div class="fg"><label class="fl">Status</label>
+        <select class="fc" id="orc-ga-status" onchange="_orcGastoStatusChange()">
+          <option value="previsto">📋 Previsto (ainda não pago)</option>
+          <option value="pago-parcial">💸 Pago parcial</option>
+          <option value="pago-total">✅ Pago total</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="fg" style="flex:1;min-width:140px"><label class="fl">Valor previsto (R$)</label><input class="fc" id="orc-ga-valprev" type="number" step="0.01" min="0" placeholder="0,00" autocomplete="off"/></div>
+        <div class="fg" style="flex:1;min-width:140px" id="orc-ga-valpago-row"><label class="fl">Valor já pago (R$)</label><input class="fc" id="orc-ga-valpago" type="number" step="0.01" min="0" placeholder="0,00" autocomplete="off"/></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="fg" style="flex:1;min-width:140px"><label class="fl">Data prevista <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional)</span></label><input class="fc" id="orc-ga-dataprev" type="date"/></div>
+        <div class="fg" style="flex:1;min-width:140px" id="orc-ga-datapago-row"><label class="fl">Data do pagamento <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional)</span></label><input class="fc" id="orc-ga-datapago" type="date"/></div>
+      </div>
+      <div class="fg"><label class="fl">Observações <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional)</span></label><textarea class="fc" id="orc-ga-obs" style="min-height:50px" placeholder="Notas adicionais sobre o gasto..."></textarea></div>
+      <!-- Anexos -->
+      <div class="fg">
+        <label class="fl">Anexos <span style="color:var(--t2);font-weight:400;font-size:11px">(notas fiscais, recibos, comprovantes)</span></label>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
+          <input type="file" id="orc-ga-file-input" multiple accept=".pdf,image/*" style="display:none" onchange="_orcUploadAnexos(event)"/>
+          <button class="btn btn-s btn-sm" onclick="document.getElementById('orc-ga-file-input').click()" type="button">📎 Anexar arquivo(s)</button>
+          <span id="orc-ga-upload-status" style="font-size:11.5px;color:var(--t2)"></span>
+        </div>
+        <div id="orc-ga-anexos-list" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+      <div id="orc-ga-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-d btn-sm" id="orc-ga-del" onclick="deleteOrcamentoGasto()" style="margin-right:auto;display:none">🗑️ Apagar</button>
+      <button class="btn btn-s" onclick="CM('modal-orc-gasto')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveOrcamentoGasto()">💾 Salvar</button>
     </div>
   </div>
 </div>
@@ -7687,6 +7773,7 @@ const TAB_GROUPS=[
   {id:'admin',label:'Administração',tabs:[
     {id:'features',label:'📌 Features'},
     {id:'financeiro',label:'💰 Financeiro'},
+    {id:'orcamento',label:'📊 Orçamento'},
     {id:'comunicacao',label:'📢 Comunicação'},
     {id:'senhasAcessos',label:'🔐 Senhas e Acessos'},
     {id:'usuarios',label:'👤 Usuários'},
@@ -7697,7 +7784,7 @@ const TAB_GROUPS=[
 const ALL_TABS=TAB_GROUPS.flatMap(g=>g.tabs.map(t=>t.id));
 // Abas historicamente reservadas a administradores. Hoje serve só como fallback —
 // o badge "ADM" no menu é decidido dinamicamente por isAdmExclusiveTab (ver abaixo).
-const ADMIN_ONLY_TABS=new Set(['usuarios','config','financeiro','features','recProvas','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos','auditoria']);
+const ADMIN_ONLY_TABS=new Set(['usuarios','config','financeiro','orcamento','features','recProvas','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos','auditoria']);
 // Retorna true se a aba é EXCLUSIVA do tipo 'adm' — ou seja, nenhum outro tipo (prof/coord/suporte/financeiro/custom)
 // tem essa aba no seu preset. STRICT_ADMIN_TABS (ex: auditoria) sempre conta como exclusiva.
 function isAdmExclusiveTab(tabId){
@@ -17064,6 +17151,517 @@ window.exportFinRelatorioProf=()=>{
   _xlsxDownload(`financeiro_${profNome.replace(/\s+/g,'_')}_${anoMes}.xlsx`,sheets);
 };
 
+// ════════════════════════════════════════════════════════════════════════════
+// ORÇAMENTO — controle de despesas por evento
+// ════════════════════════════════════════════════════════════════════════════
+// Modelo: orcamentos/{eventoId} = {nome, descricao, valorTotal, dataInicio,
+// dataFim, status:'ativo'|'arquivado', gastos:[{...}], criadoEm, atualizadoEm}.
+// Acesso: tipo='adm' (ADMIN_ONLY_TABS). Anexos em Firebase Storage:
+// orcamentos/{eventoId}/gastos/{gastoId}/{timestamp}_{filename}.
+S.orcamentos=[];
+window._curOrcEventoId=null;       // null = dashboard; id = detalhe do evento
+window._curOrcGastoId=null;        // gasto sendo editado
+window._curOrcAnexosPend=[];       // anexos pendentes de upload (no modal de gasto)
+window._orcMostrarArquivados=false;
+
+async function loadOrcamentos(){
+  try{
+    const snap=await getDocs(collection(db,'orcamentos'));
+    S.orcamentos=snap.docs.map(d=>({id:d.id,...d.data()}));
+    S.orcamentos.sort((a,b)=>{
+      // Ativos primeiro; dentro do grupo, mais recente primeiro
+      if((a.status||'ativo')!==(b.status||'ativo'))return (a.status||'ativo')==='ativo'?-1:1;
+      return (b.criadoEm||'').localeCompare(a.criadoEm||'');
+    });
+  }catch(e){console.warn('loadOrcamentos:',e);S.orcamentos=[];}
+}
+
+const _orcBRL=(v)=>{const n=Number(v)||0;return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});};
+const _orcDataFmt=(iso)=>{if(!iso)return'';try{const[y,m,d]=iso.split('-');return `${d}/${m}/${y}`;}catch(e){return iso;}};
+const _orcStatusLabel=(s)=>({'previsto':'📋 Previsto','pago-parcial':'💸 Pago parcial','pago-total':'✅ Pago total'})[s]||'📋 Previsto';
+const _orcStatusBg=(s)=>({'previsto':'rgba(228,109,10,.15)','pago-parcial':'rgba(47,129,247,.18)','pago-total':'rgba(46,160,67,.18)'})[s]||'var(--bg3)';
+const _orcStatusFg=(s)=>({'previsto':'#e46d0a','pago-parcial':'var(--accent)','pago-total':'var(--green)'})[s]||'var(--t2)';
+
+// Soma o "compromisso" total de um evento (valor previsto se não pago + valor pago se houver)
+function _orcTotalGasto(ev){
+  const gastos=ev.gastos||[];
+  return gastos.reduce((sum,g)=>{
+    if(g.status==='pago-total')return sum+(Number(g.valorPago)||Number(g.valorPrevisto)||0);
+    if(g.status==='pago-parcial'){
+      // Conta o valor previsto inteiro como compromisso (o que falta pagar ainda é dívida)
+      return sum+(Math.max(Number(g.valorPrevisto)||0,Number(g.valorPago)||0));
+    }
+    return sum+(Number(g.valorPrevisto)||0);
+  },0);
+}
+function _orcTotalPagoEfetivo(ev){
+  return (ev.gastos||[]).reduce((sum,g)=>{
+    if(g.status==='pago-total')return sum+(Number(g.valorPago)||Number(g.valorPrevisto)||0);
+    if(g.status==='pago-parcial')return sum+(Number(g.valorPago)||0);
+    return sum;
+  },0);
+}
+
+// Cor da barra de progresso baseada na porcentagem usada
+function _orcProgColor(pct){
+  if(pct>=100)return'var(--red)';
+  if(pct>=80)return'var(--yellow)';
+  return'var(--green)';
+}
+
+window.renderOrcamento=async()=>{
+  if(!_isAdminEm('orcamento')&&getTipo(S.currentUser)!=='adm'){
+    document.getElementById('orc-content').innerHTML='<p style="padding:14px;color:var(--t2)">Acesso restrito.</p>';
+    return;
+  }
+  await loadOrcamentos();
+  if(window._curOrcEventoId){
+    _orcRenderDetalhe(window._curOrcEventoId);
+  }else{
+    _orcRenderDashboard();
+  }
+};
+
+function _orcRenderDashboard(){
+  const acts=document.getElementById('orc-actions');
+  const content=document.getElementById('orc-content');
+  const ativos=S.orcamentos.filter(e=>(e.status||'ativo')==='ativo');
+  const arquivados=S.orcamentos.filter(e=>e.status==='arquivado');
+  acts.innerHTML=`
+    <button class="btn btn-s btn-sm" onclick="_orcToggleArquivados()" title="Ver eventos arquivados">${window._orcMostrarArquivados?'← Voltar aos ativos':`📦 Arquivados (${arquivados.length})`}</button>
+    <button class="btn btn-p btn-sm" onclick="openOrcamentoEvento()">+ Novo evento</button>
+  `;
+  const lista=window._orcMostrarArquivados?arquivados:ativos;
+  if(!lista.length){
+    content.innerHTML=`<div style="padding:48px 24px;text-align:center;color:var(--t2);background:var(--bg2);border:1px dashed var(--border);border-radius:14px">
+      <div style="font-size:42px;margin-bottom:10px">${window._orcMostrarArquivados?'📦':'📊'}</div>
+      <p style="font-size:14px;font-weight:600;margin-bottom:6px">${window._orcMostrarArquivados?'Nenhum evento arquivado':'Nenhum evento de orçamento ainda'}</p>
+      <p style="font-size:12.5px">${window._orcMostrarArquivados?'Eventos arquivados aparecem aqui.':'Clique em "+ Novo evento" pra começar.'}</p>
+    </div>`;
+    return;
+  }
+  // Resumo macro (só pra ativos)
+  let macro='';
+  if(!window._orcMostrarArquivados){
+    const totalOrcado=ativos.reduce((s,e)=>s+(Number(e.valorTotal)||0),0);
+    const totalGasto=ativos.reduce((s,e)=>s+_orcTotalGasto(e),0);
+    const totalPago=ativos.reduce((s,e)=>s+_orcTotalPagoEfetivo(e),0);
+    const restante=totalOrcado-totalGasto;
+    const cardStat=(label,val,color)=>`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;flex:1;min-width:160px"><div style="font-size:10.5px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px">${label}</div><div style="font-size:20px;font-weight:800;color:${color||'var(--text)'};font-family:'Space Grotesk',sans-serif;letter-spacing:-.5px">${val}</div></div>`;
+    macro=`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">
+      ${cardStat('Orçamento total',_orcBRL(totalOrcado))}
+      ${cardStat('Compromisso',_orcBRL(totalGasto),'var(--accent)')}
+      ${cardStat('Pago efetivo',_orcBRL(totalPago),'var(--green)')}
+      ${cardStat('Restante',_orcBRL(restante),restante<0?'var(--red)':'var(--text)')}
+    </div>`;
+  }
+  // Grid de cards
+  const cards=lista.map(ev=>{
+    const total=Number(ev.valorTotal)||0;
+    const gasto=_orcTotalGasto(ev);
+    const restante=total-gasto;
+    const pct=total>0?Math.min(150,(gasto/total)*100):0;
+    const cor=_orcProgColor(pct);
+    const periodo=(ev.dataInicio||ev.dataFim)?`${_orcDataFmt(ev.dataInicio||'')}${ev.dataFim?(ev.dataInicio?' → ':'até ')+_orcDataFmt(ev.dataFim):''}`:'';
+    const arqBadge=ev.status==='arquivado'?'<span style="display:inline-block;padding:2px 8px;background:var(--bg3);color:var(--t2);font-size:10px;font-weight:700;border-radius:10px;font-family:JetBrains Mono,monospace;letter-spacing:.5px;text-transform:uppercase;margin-left:8px">ARQUIVADO</span>':'';
+    return `<div onclick="abrirOrcamentoEvento('${ev.id}')" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px 20px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:12px" onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-1px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+      <div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <h4 style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.25;color:var(--text)">${(ev.nome||'(sem nome)').replace(/</g,'&lt;')}${arqBadge}</h4>
+        </div>
+        ${periodo?`<p style="font-family:JetBrains Mono,monospace;font-size:10.5px;color:var(--t2);margin-top:4px;letter-spacing:.5px">${periodo}</p>`:''}
+        ${ev.descricao?`<p style="font-size:12.5px;color:var(--t2);margin-top:6px;line-height:1.5">${ev.descricao.replace(/</g,'&lt;').slice(0,120)}${ev.descricao.length>120?'…':''}</p>`:''}
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t2);font-weight:600;margin-bottom:6px"><span>${_orcBRL(gasto)} de ${_orcBRL(total)}</span><span style="color:${cor}">${pct.toFixed(0)}%</span></div>
+        <div style="height:8px;background:var(--bg3);border-radius:99px;overflow:hidden"><div style="height:100%;width:${Math.min(100,pct)}%;background:${cor};transition:width .3s;border-radius:99px"></div></div>
+        ${pct>100?`<p style="font-size:10.5px;color:var(--red);font-weight:700;margin-top:6px">⚠️ Passou ${_orcBRL(gasto-total)} do orçamento</p>`:`<p style="font-size:11.5px;color:var(--t2);margin-top:6px">Restam <strong style="color:${restante>0?'var(--green)':'var(--red)'}">${_orcBRL(restante)}</strong> · ${(ev.gastos||[]).length} gasto${(ev.gastos||[]).length!==1?'s':''}</p>`}
+      </div>
+    </div>`;
+  }).join('');
+  content.innerHTML=`${macro}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px">${cards}</div>`;
+}
+
+window._orcToggleArquivados=()=>{
+  window._orcMostrarArquivados=!window._orcMostrarArquivados;
+  _orcRenderDashboard();
+};
+
+window.abrirOrcamentoEvento=(eventoId)=>{
+  window._curOrcEventoId=eventoId;
+  _orcRenderDetalhe(eventoId);
+};
+
+window.voltarOrcamentoDashboard=()=>{
+  window._curOrcEventoId=null;
+  _orcRenderDashboard();
+};
+
+function _orcRenderDetalhe(eventoId){
+  const ev=S.orcamentos.find(e=>e.id===eventoId);
+  if(!ev){window._curOrcEventoId=null;_orcRenderDashboard();return;}
+  const acts=document.getElementById('orc-actions');
+  const content=document.getElementById('orc-content');
+  const total=Number(ev.valorTotal)||0;
+  const gasto=_orcTotalGasto(ev);
+  const pago=_orcTotalPagoEfetivo(ev);
+  const restante=total-gasto;
+  const pct=total>0?(gasto/total)*100:0;
+  const cor=_orcProgColor(pct);
+  const isArquivado=ev.status==='arquivado';
+  acts.innerHTML=`
+    <button class="btn btn-s btn-sm" onclick="voltarOrcamentoDashboard()">← Voltar</button>
+    ${!isArquivado?`<button class="btn btn-s btn-sm" onclick="openOrcamentoEvento('${ev.id}')">✏️ Editar evento</button>`:''}
+    ${isArquivado?`<button class="btn btn-s btn-sm" onclick="_orcRestaurarEvento('${ev.id}')">↩ Restaurar</button>`:`<button class="btn btn-p btn-sm" onclick="openOrcamentoGasto()">+ Novo gasto</button>`}
+  `;
+  const periodo=(ev.dataInicio||ev.dataFim)?`${_orcDataFmt(ev.dataInicio||'')}${ev.dataFim?(ev.dataInicio?' → ':'até ')+_orcDataFmt(ev.dataFim):''}`:'';
+  // Header com stats
+  const statCard=(label,val,color,sub)=>`<div style="flex:1;min-width:140px"><div style="font-size:10.5px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px">${label}</div><div style="font-size:22px;font-weight:800;color:${color||'var(--text)'};font-family:'Space Grotesk',sans-serif;letter-spacing:-.5px;line-height:1.1">${val}</div>${sub?`<div style="font-size:11px;color:var(--t2);margin-top:2px">${sub}</div>`:''}</div>`;
+  // Tabela de gastos
+  const gastos=(ev.gastos||[]).slice().sort((a,b)=>{
+    // Ordem: previsto > pago-parcial > pago-total, depois por data prevista
+    const ord={'previsto':0,'pago-parcial':1,'pago-total':2};
+    if((ord[a.status]||0)!==(ord[b.status]||0))return (ord[a.status]||0)-(ord[b.status]||0);
+    return (a.dataPrevista||'').localeCompare(b.dataPrevista||'');
+  });
+  const tdS='padding:11px 12px;border-bottom:1px solid var(--border);font-size:12.5px;vertical-align:top';
+  const thS='padding:10px 12px;background:var(--bg3);font-size:10.5px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;text-align:left;border-bottom:1px solid var(--border)';
+  const tabelaGastos=gastos.length
+    ?`<div style="overflow-x:auto;background:var(--bg2);border:1px solid var(--border);border-radius:12px"><table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="${thS}">Descrição</th>
+        <th style="${thS}">Categoria</th>
+        <th style="${thS};text-align:right">Previsto</th>
+        <th style="${thS};text-align:right">Pago</th>
+        <th style="${thS};text-align:center">Status</th>
+        <th style="${thS};text-align:center">Data</th>
+        <th style="${thS};text-align:center">Anexos</th>
+        ${!isArquivado?`<th style="${thS};text-align:center">Ações</th>`:''}
+      </tr></thead>
+      <tbody>
+      ${gastos.map(g=>{
+        const safeId=(g.id||'').replace(/'/g,"\\'");
+        const valPrev=Number(g.valorPrevisto)||0;
+        const valPago=Number(g.valorPago)||0;
+        const nAnexos=(g.anexos||[]).length;
+        const dataExibir=g.status==='pago-total'||g.status==='pago-parcial'?(g.dataPagamento||g.dataPrevista||'—'):(g.dataPrevista||'—');
+        const dataLbl=g.status==='previsto'?'prevista':'pago';
+        return `<tr>
+          <td style="${tdS}"><div style="font-weight:600;color:var(--text)">${(g.descricao||'').replace(/</g,'&lt;')}</div>${g.fornecedor?`<div style="font-size:11px;color:var(--t2);margin-top:2px">${g.fornecedor.replace(/</g,'&lt;')}</div>`:''}${g.observacoes?`<div style="font-size:11px;color:var(--t2);margin-top:4px;font-style:italic">"${g.observacoes.replace(/</g,'&lt;').slice(0,80)}${g.observacoes.length>80?'…':''}"</div>`:''}</td>
+          <td style="${tdS}">${g.categoria?`<span style="display:inline-block;padding:2px 8px;background:var(--bg3);font-size:10.5px;border-radius:8px;color:var(--t2);font-family:JetBrains Mono,monospace">${g.categoria.replace(/</g,'&lt;')}</span>`:'<span style="color:var(--t3);font-size:11px">—</span>'}</td>
+          <td style="${tdS};text-align:right;font-weight:600">${_orcBRL(valPrev)}</td>
+          <td style="${tdS};text-align:right;font-weight:600;color:${g.status==='pago-total'?'var(--green)':g.status==='pago-parcial'?'var(--accent)':'var(--t3)'}">${g.status==='previsto'?'—':_orcBRL(valPago)}${g.status==='pago-parcial'&&valPrev>valPago?`<div style="font-size:10px;color:var(--t2);font-weight:500;margin-top:2px">falta ${_orcBRL(valPrev-valPago)}</div>`:''}</td>
+          <td style="${tdS};text-align:center"><span style="display:inline-block;padding:4px 10px;background:${_orcStatusBg(g.status)};color:${_orcStatusFg(g.status)};font-size:11px;font-weight:700;border-radius:99px;white-space:nowrap">${_orcStatusLabel(g.status)}</span></td>
+          <td style="${tdS};text-align:center;font-size:11.5px"><div style="color:var(--text)">${_orcDataFmt(dataExibir)||'—'}</div><div style="color:var(--t3);font-size:10px;text-transform:uppercase;letter-spacing:.5px">${dataExibir!=='—'?dataLbl:''}</div></td>
+          <td style="${tdS};text-align:center">${nAnexos?`<button class="btn btn-s btn-sm" onclick="_orcAbrirAnexosLista('${safeId}')" title="Ver ${nAnexos} anexo${nAnexos>1?'s':''}" style="font-size:11px;padding:4px 9px">📎 ${nAnexos}</button>`:'<span style="color:var(--t3);font-size:11px">—</span>'}</td>
+          ${!isArquivado?`<td style="${tdS};text-align:center;white-space:nowrap"><button class="btn btn-s btn-sm" onclick="openOrcamentoGasto('${safeId}')" title="Editar gasto" style="font-size:12px;padding:4px 8px">✏️</button></td>`:''}
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table></div>`
+    :`<div style="padding:42px 24px;text-align:center;color:var(--t2);background:var(--bg2);border:1px dashed var(--border);border-radius:12px"><div style="font-size:36px;margin-bottom:10px">💰</div><p style="font-size:13px;font-weight:600">Nenhum gasto registrado ainda</p>${!isArquivado?'<p style="font-size:12px;margin-top:4px">Clique em "+ Novo gasto" pra começar.</p>':''}</div>`;
+  // Aviso visual se passou do orçamento
+  const aviso=pct>100?`<div style="background:rgba(248,81,73,.10);border:1px solid color-mix(in srgb,var(--red) 35%,transparent);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:var(--red);font-weight:600">⚠️ Este evento passou em ${_orcBRL(gasto-total)} do orçamento previsto.</div>`:'';
+  content.innerHTML=`
+    <div style="background:linear-gradient(180deg,var(--bg2),var(--bg));border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+        <div style="flex:1;min-width:240px">
+          <h2 style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;letter-spacing:-.5px;line-height:1.2">${(ev.nome||'(sem nome)').replace(/</g,'&lt;')}${isArquivado?' <span style="font-size:11px;color:var(--t2);font-weight:600;letter-spacing:.5px;text-transform:uppercase;font-family:JetBrains Mono,monospace;background:var(--bg3);padding:3px 9px;border-radius:8px;vertical-align:middle;margin-left:8px">arquivado</span>':''}</h2>
+          ${periodo?`<p style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--accent);margin-top:4px;letter-spacing:1px;text-transform:uppercase;font-weight:600">${periodo}</p>`:''}
+          ${ev.descricao?`<p style="font-size:13px;color:var(--t2);margin-top:10px;line-height:1.5;max-width:640px">${ev.descricao.replace(/</g,'&lt;')}</p>`:''}
+        </div>
+      </div>
+      ${aviso}
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px">
+        ${statCard('Orçamento total',_orcBRL(total))}
+        ${statCard('Compromisso',_orcBRL(gasto),'var(--accent)','previsto + pago')}
+        ${statCard('Pago efetivo',_orcBRL(pago),'var(--green)','já saiu do caixa')}
+        ${statCard('Restante',_orcBRL(restante),restante<0?'var(--red)':'var(--text)',`${pct.toFixed(0)}% usado`)}
+      </div>
+      <div style="height:10px;background:var(--bg3);border-radius:99px;overflow:hidden"><div style="height:100%;width:${Math.min(100,pct)}%;background:${cor};transition:width .3s;border-radius:99px"></div></div>
+    </div>
+    ${tabelaGastos}
+  `;
+  // Datalist de categorias (alimenta autocomplete no modal de gasto)
+  const cats=new Set();
+  (ev.gastos||[]).forEach(g=>{if(g.categoria)cats.add(g.categoria);});
+  const dl=document.getElementById('orc-cat-list');
+  if(dl)dl.innerHTML=[...cats].sort().map(c=>`<option value="${c.replace(/"/g,'&quot;')}">`).join('');
+}
+
+window._orcAbrirAnexosLista=(gastoId)=>{
+  const ev=S.orcamentos.find(e=>e.id===window._curOrcEventoId);if(!ev)return;
+  const g=(ev.gastos||[]).find(x=>x.id===gastoId);if(!g)return;
+  // Abre o modal de gasto em modo leitura — usuário vê os anexos lá
+  openOrcamentoGasto(gastoId);
+};
+
+// ── Modal de Evento ──────────────────────────────────────────────────────────
+window.openOrcamentoEvento=(eventoId)=>{
+  const isEdit=!!eventoId;
+  const ev=isEdit?S.orcamentos.find(e=>e.id===eventoId):null;
+  document.getElementById('modal-orc-evento').dataset.editId=eventoId||'';
+  document.getElementById('orc-ev-title').textContent=isEdit?'Editar evento':'Novo evento';
+  document.getElementById('orc-ev-nome').value=ev?.nome||'';
+  document.getElementById('orc-ev-desc').value=ev?.descricao||'';
+  document.getElementById('orc-ev-valor').value=ev?.valorTotal||'';
+  document.getElementById('orc-ev-inicio').value=ev?.dataInicio||'';
+  document.getElementById('orc-ev-fim').value=ev?.dataFim||'';
+  document.getElementById('orc-ev-err').classList.add('hidden');
+  document.getElementById('orc-ev-del').style.display=isEdit?'':'none';
+  document.getElementById('modal-orc-evento').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('orc-ev-nome').focus(),60);
+};
+
+window.saveOrcamentoEvento=async()=>{
+  const modal=document.getElementById('modal-orc-evento');
+  const editId=modal.dataset.editId||'';
+  const nome=document.getElementById('orc-ev-nome').value.trim();
+  const descricao=document.getElementById('orc-ev-desc').value.trim();
+  const valorTotal=Number(document.getElementById('orc-ev-valor').value)||0;
+  const dataInicio=document.getElementById('orc-ev-inicio').value||'';
+  const dataFim=document.getElementById('orc-ev-fim').value||'';
+  const err=document.getElementById('orc-ev-err');
+  if(!nome){err.textContent='Informe o nome do evento.';err.classList.remove('hidden');return;}
+  if(valorTotal<=0){err.textContent='Informe um valor de orçamento maior que zero.';err.classList.remove('hidden');return;}
+  if(dataInicio&&dataFim&&dataInicio>dataFim){err.textContent='Data de início deve ser anterior à data de fim.';err.classList.remove('hidden');return;}
+  err.classList.add('hidden');
+  const now=new Date().toISOString();
+  try{
+    if(editId){
+      const ev=S.orcamentos.find(e=>e.id===editId);if(!ev)throw new Error('Evento não encontrado.');
+      await setDoc(doc(db,'orcamentos',editId),{...ev,nome,descricao,valorTotal,dataInicio,dataFim,atualizadoEm:now},{merge:true});
+      audit('CONFIG_ALTERADA',{collection:'orcamentos',id:editId},{after:{nome,valorTotal},meta:{kind:'orcamento-evento-edit'}});
+    }else{
+      const id='ev_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+      await setDoc(doc(db,'orcamentos',id),{nome,descricao,valorTotal,dataInicio,dataFim,status:'ativo',gastos:[],criadoEm:now,atualizadoEm:now});
+      audit('CONFIG_ALTERADA',{collection:'orcamentos',id},{after:{nome,valorTotal},meta:{kind:'orcamento-evento-create'}});
+    }
+    CM('modal-orc-evento');
+    await loadOrcamentos();
+    if(editId&&window._curOrcEventoId===editId)_orcRenderDetalhe(editId);
+    else _orcRenderDashboard();
+    if(typeof _revShowToast==='function')_revShowToast(editId?'✓ Evento atualizado':'✓ Evento criado','var(--green)');
+  }catch(e){
+    console.error('saveOrcamentoEvento:',e);
+    err.textContent='Erro ao salvar: '+(e.message||e);err.classList.remove('hidden');
+  }
+};
+
+window.deleteOrcamentoEvento=async()=>{
+  const editId=document.getElementById('modal-orc-evento').dataset.editId||'';
+  if(!editId)return;
+  const ev=S.orcamentos.find(e=>e.id===editId);if(!ev)return;
+  const nGastos=(ev.gastos||[]).length;
+  const msg=`Arquivar o evento "${ev.nome}"?\n\n${nGastos?`Tem ${nGastos} gasto${nGastos>1?'s':''} registrado${nGastos>1?'s':''} — `:''}o evento sai do dashboard principal mas continua acessível em "📦 Arquivados". Pode ser restaurado depois.`;
+  if(!confirm(msg))return;
+  try{
+    await setDoc(doc(db,'orcamentos',editId),{...ev,status:'arquivado',atualizadoEm:new Date().toISOString()},{merge:true});
+    audit('CONFIG_ALTERADA',{collection:'orcamentos',id:editId},{meta:{kind:'orcamento-evento-archive'}});
+    CM('modal-orc-evento');
+    window._curOrcEventoId=null;
+    await loadOrcamentos();
+    _orcRenderDashboard();
+    if(typeof _revShowToast==='function')_revShowToast('✓ Evento arquivado','var(--accent)');
+  }catch(e){console.error('deleteOrcamentoEvento:',e);alert('Erro: '+(e.message||e));}
+};
+
+window._orcRestaurarEvento=async(eventoId)=>{
+  const ev=S.orcamentos.find(e=>e.id===eventoId);if(!ev)return;
+  if(!confirm(`Restaurar "${ev.nome}" pros eventos ativos?`))return;
+  try{
+    await setDoc(doc(db,'orcamentos',eventoId),{...ev,status:'ativo',atualizadoEm:new Date().toISOString()},{merge:true});
+    audit('CONFIG_ALTERADA',{collection:'orcamentos',id:eventoId},{meta:{kind:'orcamento-evento-restore'}});
+    await loadOrcamentos();
+    _orcRenderDetalhe(eventoId);
+    if(typeof _revShowToast==='function')_revShowToast('✓ Evento restaurado','var(--green)');
+  }catch(e){console.error(e);alert('Erro: '+(e.message||e));}
+};
+
+// ── Modal de Gasto ───────────────────────────────────────────────────────────
+window.openOrcamentoGasto=(gastoId)=>{
+  if(!window._curOrcEventoId){alert('Abra um evento antes.');return;}
+  const ev=S.orcamentos.find(e=>e.id===window._curOrcEventoId);if(!ev){alert('Evento não encontrado.');return;}
+  const isEdit=!!gastoId;
+  const g=isEdit?(ev.gastos||[]).find(x=>x.id===gastoId):null;
+  window._curOrcGastoId=gastoId||null;
+  window._curOrcAnexosPend=g?[...(g.anexos||[])]:[];
+  document.getElementById('modal-orc-gasto').dataset.editId=gastoId||'';
+  document.getElementById('orc-ga-title').textContent=isEdit?'Editar gasto':'Novo gasto';
+  document.getElementById('orc-ga-sub').textContent=ev.nome||'';
+  document.getElementById('orc-ga-desc').value=g?.descricao||'';
+  document.getElementById('orc-ga-forn').value=g?.fornecedor||'';
+  document.getElementById('orc-ga-cat').value=g?.categoria||'';
+  document.getElementById('orc-ga-status').value=g?.status||'previsto';
+  document.getElementById('orc-ga-valprev').value=g?.valorPrevisto||'';
+  document.getElementById('orc-ga-valpago').value=g?.valorPago||'';
+  document.getElementById('orc-ga-dataprev').value=g?.dataPrevista||'';
+  document.getElementById('orc-ga-datapago').value=g?.dataPagamento||'';
+  document.getElementById('orc-ga-obs').value=g?.observacoes||'';
+  document.getElementById('orc-ga-err').classList.add('hidden');
+  document.getElementById('orc-ga-del').style.display=isEdit?'':'none';
+  document.getElementById('orc-ga-upload-status').textContent='';
+  _orcRenderAnexosList();
+  _orcGastoStatusChange();
+  document.getElementById('modal-orc-gasto').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('orc-ga-desc').focus(),60);
+};
+
+window._orcGastoStatusChange=()=>{
+  const status=document.getElementById('orc-ga-status').value;
+  const valpagoRow=document.getElementById('orc-ga-valpago-row');
+  const datapagoRow=document.getElementById('orc-ga-datapago-row');
+  if(status==='previsto'){
+    valpagoRow.style.display='none';
+    datapagoRow.style.display='none';
+  }else{
+    valpagoRow.style.display='';
+    datapagoRow.style.display='';
+    // Auto-preenche valor pago = valor previsto pra pago-total (se ainda vazio)
+    if(status==='pago-total'){
+      const valpago=document.getElementById('orc-ga-valpago');
+      const valprev=document.getElementById('orc-ga-valprev');
+      if(!valpago.value&&valprev.value)valpago.value=valprev.value;
+    }
+  }
+};
+
+function _orcRenderAnexosList(){
+  const wrap=document.getElementById('orc-ga-anexos-list');if(!wrap)return;
+  const anexos=window._curOrcAnexosPend||[];
+  if(!anexos.length){wrap.innerHTML='<p style="font-size:11.5px;color:var(--t3);font-style:italic;padding:4px 0">Nenhum anexo. Clique em "Anexar arquivo(s)" pra adicionar.</p>';return;}
+  wrap.innerHTML=anexos.map((a,i)=>{
+    const tipo=a.tipo||'';
+    const isImg=tipo.startsWith('image/');
+    const icon=isImg?'🖼️':(tipo.includes('pdf')?'📄':'📎');
+    const tamKb=a.tamanho?(a.tamanho/1024).toFixed(0)+' KB':'';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px">
+      <span style="font-size:18px">${icon}</span>
+      <a href="${a.url}" target="_blank" rel="noopener" style="flex:1;min-width:0;color:var(--text);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px"><span style="font-weight:600">${(a.nome||'arquivo').replace(/</g,'&lt;')}</span>${tamKb?`<span style="color:var(--t2);font-size:11px;margin-left:6px">${tamKb}</span>`:''} <span style="color:var(--accent);font-size:11px">↗</span></a>
+      <button type="button" class="btn btn-d btn-sm" onclick="_orcRemoverAnexo(${i})" title="Remover anexo" style="font-size:12px;padding:3px 8px">🗑️</button>
+    </div>`;
+  }).join('');
+}
+
+window._orcUploadAnexos=async(event)=>{
+  const files=Array.from(event.target.files||[]);
+  if(!files.length)return;
+  const eventoId=window._curOrcEventoId;if(!eventoId)return;
+  const gastoId=window._curOrcGastoId||'tmp_'+Date.now();
+  const status=document.getElementById('orc-ga-upload-status');
+  status.textContent=`📤 Enviando ${files.length} arquivo${files.length>1?'s':''}...`;
+  let okCount=0;
+  for(const file of files){
+    try{
+      const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      const path=`orcamentos/${eventoId}/gastos/${gastoId}/${Date.now()}_${safe}`;
+      const ref=storageRef(_storage,path);
+      await uploadBytes(ref,file);
+      const url=await getDownloadURL(ref);
+      window._curOrcAnexosPend.push({url,nome:file.name,tipo:file.type||'',tamanho:file.size||0,path});
+      okCount++;
+    }catch(e){
+      console.error('_orcUploadAnexos:',file.name,e);
+      status.innerHTML=`<span style="color:var(--red)">❌ Falha no arquivo "${file.name}": ${e.message||e}</span>`;
+    }
+  }
+  event.target.value=''; // reset input pra permitir re-anexar mesmo arquivo
+  status.innerHTML=`<span style="color:var(--green)">✓ ${okCount}/${files.length} arquivo${files.length>1?'s':''} anexado${okCount>1?'s':''}</span>`;
+  setTimeout(()=>{status.textContent='';},3500);
+  _orcRenderAnexosList();
+};
+
+window._orcRemoverAnexo=async(idx)=>{
+  const a=window._curOrcAnexosPend[idx];if(!a)return;
+  if(!confirm(`Remover anexo "${a.nome}"?`))return;
+  // Tenta apagar do Storage também (se tiver path). Falha silenciosa se já não existe.
+  if(a.path){
+    try{await deleteObject(storageRef(_storage,a.path));}
+    catch(e){console.warn('deleteObject anexo:',e);}
+  }
+  window._curOrcAnexosPend.splice(idx,1);
+  _orcRenderAnexosList();
+};
+
+window.saveOrcamentoGasto=async()=>{
+  const eventoId=window._curOrcEventoId;if(!eventoId)return;
+  const ev=S.orcamentos.find(e=>e.id===eventoId);if(!ev)return;
+  const editId=document.getElementById('modal-orc-gasto').dataset.editId||'';
+  const descricao=document.getElementById('orc-ga-desc').value.trim();
+  const fornecedor=document.getElementById('orc-ga-forn').value.trim();
+  const categoria=document.getElementById('orc-ga-cat').value.trim();
+  const status=document.getElementById('orc-ga-status').value;
+  const valorPrevisto=Number(document.getElementById('orc-ga-valprev').value)||0;
+  const valorPago=status==='previsto'?0:(Number(document.getElementById('orc-ga-valpago').value)||0);
+  const dataPrevista=document.getElementById('orc-ga-dataprev').value||'';
+  const dataPagamento=status==='previsto'?'':(document.getElementById('orc-ga-datapago').value||'');
+  const observacoes=document.getElementById('orc-ga-obs').value.trim();
+  const anexos=window._curOrcAnexosPend||[];
+  const err=document.getElementById('orc-ga-err');
+  if(!descricao){err.textContent='Informe a descrição do gasto.';err.classList.remove('hidden');return;}
+  if(valorPrevisto<=0){err.textContent='Informe um valor previsto maior que zero.';err.classList.remove('hidden');return;}
+  if(status==='pago-parcial'&&valorPago<=0){err.textContent='Pra "pago parcial", informe quanto já foi pago.';err.classList.remove('hidden');return;}
+  if(status==='pago-parcial'&&valorPago>=valorPrevisto){err.textContent='Pra pago parcial, o valor pago deve ser menor que o previsto. Use "pago total" se já foi pago tudo.';err.classList.remove('hidden');return;}
+  if(status==='pago-total'&&valorPago<=0){err.textContent='Informe o valor pago.';err.classList.remove('hidden');return;}
+  err.classList.add('hidden');
+  const now=new Date().toISOString();
+  const gastoData={
+    id:editId||('g_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)),
+    descricao,fornecedor,categoria,status,
+    valorPrevisto,valorPago,
+    dataPrevista,dataPagamento,
+    observacoes,anexos,
+    criadoEm:editId?((ev.gastos||[]).find(g=>g.id===editId)?.criadoEm||now):now,
+    atualizadoEm:now,
+  };
+  const gastos=(ev.gastos||[]).slice();
+  if(editId){
+    const idx=gastos.findIndex(g=>g.id===editId);
+    if(idx>=0)gastos[idx]=gastoData;
+    else gastos.push(gastoData);
+  }else{
+    gastos.push(gastoData);
+  }
+  try{
+    await setDoc(doc(db,'orcamentos',eventoId),{...ev,gastos,atualizadoEm:now},{merge:true});
+    audit('CONFIG_ALTERADA',{collection:'orcamentos',id:eventoId},{meta:{kind:editId?'orcamento-gasto-edit':'orcamento-gasto-create',gastoId:gastoData.id}});
+    CM('modal-orc-gasto');
+    await loadOrcamentos();
+    _orcRenderDetalhe(eventoId);
+    if(typeof _revShowToast==='function')_revShowToast(editId?'✓ Gasto atualizado':'✓ Gasto registrado','var(--green)');
+  }catch(e){
+    console.error('saveOrcamentoGasto:',e);
+    err.textContent='Erro ao salvar: '+(e.message||e);err.classList.remove('hidden');
+  }
+};
+
+window.deleteOrcamentoGasto=async()=>{
+  const eventoId=window._curOrcEventoId;if(!eventoId)return;
+  const ev=S.orcamentos.find(e=>e.id===eventoId);if(!ev)return;
+  const editId=document.getElementById('modal-orc-gasto').dataset.editId||'';
+  if(!editId)return;
+  const g=(ev.gastos||[]).find(x=>x.id===editId);
+  if(!g)return;
+  const nAnexos=(g.anexos||[]).length;
+  if(!confirm(`Apagar o gasto "${g.descricao}"?\n\n${nAnexos?`${nAnexos} anexo${nAnexos>1?'s':''} também ${nAnexos>1?'serão removidos':'será removido'} do Storage.\n\n`:''}Esta ação não pode ser desfeita.`))return;
+  // Apaga anexos do Storage
+  for(const a of (g.anexos||[])){
+    if(a.path){
+      try{await deleteObject(storageRef(_storage,a.path));}
+      catch(e){console.warn('deleteObject:',e);}
+    }
+  }
+  const gastos=(ev.gastos||[]).filter(x=>x.id!==editId);
+  try{
+    await setDoc(doc(db,'orcamentos',eventoId),{...ev,gastos,atualizadoEm:new Date().toISOString()},{merge:true});
+    audit('CONFIG_ALTERADA',{collection:'orcamentos',id:eventoId},{meta:{kind:'orcamento-gasto-delete',gastoId:editId}});
+    CM('modal-orc-gasto');
+    await loadOrcamentos();
+    _orcRenderDetalhe(eventoId);
+    if(typeof _revShowToast==='function')_revShowToast('✓ Gasto removido','var(--accent)');
+  }catch(e){console.error('deleteOrcamentoGasto:',e);alert('Erro: '+(e.message||e));}
+};
+
 // Invalida cache de alunos sim extras quando há mudança
 function _invalidateSimExtraCache(){S._simExtraAlunosCache=null;}
 
@@ -18193,7 +18791,7 @@ window.deleteUser=async()=>{
 
 // co tabs
 window.switchCoTab=(tab,btn)=>{
-  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','mentorias','features','recProvas','recGestao','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos','senhasPublicas','auditoria'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
+  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','orcamento','mentorias','features','recProvas','recGestao','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos','senhasPublicas','auditoria'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
   document.querySelectorAll('.co-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   // Show "Novo Simulado" only on simulados tab
@@ -18201,6 +18799,7 @@ window.switchCoTab=(tab,btn)=>{
   if(btnNovo)btnNovo.style.display=tab==='simulados'?'':'none';
   if(tab==='usuarios'){renderUsuarios();if(typeof renderOnboardingProfs==='function')renderOnboardingProfs();}
   if(tab==='auditoria'&&typeof renderAuditoria==='function')renderAuditoria();
+  if(tab==='orcamento'&&typeof renderOrcamento==='function')renderOrcamento();
 };
 
 // sim cards (aluno view)
