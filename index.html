@@ -1827,17 +1827,93 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-section-mentoria{border-top:1px solid var(--border);padding-top:28px;margin-top:32px}
 #tab-produtos .pro-section-title-mentoria{color:#a855f7}
 #tab-produtos .pro-section-title-mentoria::before{color:#a855f7;opacity:.5}
+#tab-produtos .pro-ment-tag{display:inline-flex;align-items:center;margin-left:8px;padding:2px 9px;border-radius:999px;background:color-mix(in srgb,#f59e0b 14%,transparent);border:1px solid color-mix(in srgb,#f59e0b 40%,var(--border));color:#f59e0b;font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+/* Descrição da mentoria: aparece logo abaixo do título, sempre visível por inteiro */
+#tab-produtos .pro-ment-desc{font-size:14px;line-height:1.55;color:var(--text);margin:0 0 14px;max-width:820px;white-space:pre-wrap;border-left:3px solid color-mix(in srgb,#a855f7 50%,transparent);padding:2px 0 2px 12px}
+
+/* Seção Bônus (detalhe) — amarelo dourado pra distinguir das outras */
+#tab-produtos .pro-section-bonus{border-top:1px solid var(--border);padding-top:28px;margin-top:32px}
+#tab-produtos .pro-section-title-bonus{color:#fbbf24}
+#tab-produtos .pro-section-title-bonus::before{color:#fbbf24;opacity:.5}
+#tab-produtos .pro-bonus-cards{display:flex;flex-direction:column;gap:8px}
+#tab-produtos .pro-bonus-card{display:flex;align-items:center;gap:12px;padding:10px 14px;background:color-mix(in srgb,#fbbf24 4%,var(--bg2));border:1px solid color-mix(in srgb,#fbbf24 22%,var(--border));border-radius:12px;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+#tab-produtos .pro-bonus-card:hover{border-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,var(--bg2));transform:translateY(-1px)}
+#tab-produtos .pro-bonus-card.orphan{border-style:dashed;color:var(--t2);cursor:default;background:var(--bg3)}
+#tab-produtos .pro-bonus-card.orphan:hover{transform:none;border-color:var(--border)}
+#tab-produtos .pro-bonus-card-capa{width:40px;height:40px;border-radius:9px;background:var(--bg3);border:1px solid var(--border);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--t2);font-size:20px}
+#tab-produtos .pro-bonus-card-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+#tab-produtos .pro-bonus-card-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;line-height:1.2;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tab-produtos .pro-bonus-card-pitch{font-size:12px;color:var(--t2);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tab-produtos .pro-bonus-card-meta{display:flex;gap:4px;margin-top:2px;flex-wrap:wrap}
+#tab-produtos .pro-bonus-card-arrow{color:var(--t2);font-size:18px;font-weight:300;line-height:1;flex-shrink:0;transition:color .15s,transform .15s}
+#tab-produtos .pro-bonus-card:hover .pro-bonus-card-arrow{color:#fbbf24;transform:translateX(3px)}
 #tab-produtos .pro-text-block{font-size:14px;line-height:1.6;color:var(--text);max-width:820px;white-space:pre-wrap}
 
-#tab-produtos .pro-feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-@media (max-width:820px){#tab-produtos .pro-feat-grid{grid-template-columns:1fr}}
-#tab-produtos .pro-feat-card{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:flex-start;padding:16px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 1px 2px rgba(0,0,0,.06);transition:border-color .2s,box-shadow .2s}
-#tab-produtos .pro-feat-card:hover{border-color:var(--border2);box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 4px 12px rgba(0,0,0,.12)}
-#tab-produtos .pro-feat-icon{font-size:20px;line-height:1;width:48px;height:48px;border-radius:12px;background:color-mix(in srgb, var(--accent) 10%, var(--bg3));border:1px solid color-mix(in srgb, var(--border) 180%, transparent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-#tab-produtos .pro-feat-body{min-width:0}
-#tab-produtos .pro-feat-titulo{font-weight:700;font-size:15px;line-height:1.25;margin-bottom:4px;font-family:'Space Grotesk',sans-serif}
-#tab-produtos .pro-feat-numero{font-family:'JetBrains Mono','SF Mono',monospace;font-size:22px;font-weight:700;letter-spacing:-.5px;color:var(--accent);line-height:1.05;margin:6px 0 6px;display:block}
+/* Features renderizam uma por linha (não mais 2 colunas) — facilita scanning
+   vertical, especialmente quando descrições/diferenciais ficam longos. */
+#tab-produtos .pro-feat-grid{display:flex;flex-direction:column;gap:8px}
+#tab-produtos .pro-feat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+#tab-produtos .pro-feat-card:hover{border-color:color-mix(in srgb, var(--accent) 22%, var(--border))}
+#tab-produtos .pro-feat-card.open{border-color:color-mix(in srgb, var(--accent) 36%, var(--border));box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 4px 14px rgba(0,0,0,.08)}
+#tab-produtos .pro-feat-head{display:flex;align-items:center;gap:9px;padding:7px 12px;width:100%;background:transparent;border:none;color:inherit;text-align:left;font:inherit;cursor:default;transition:background .15s}
+#tab-produtos .pro-feat-card.has-detail .pro-feat-head{cursor:pointer}
+#tab-produtos .pro-feat-card.has-detail .pro-feat-head:hover{background:color-mix(in srgb, var(--accent) 4%, transparent)}
+#tab-produtos .pro-feat-icon{font-size:12px;line-height:1;width:26px;height:26px;border-radius:7px;background:color-mix(in srgb, var(--accent) 10%, var(--bg3));border:1px solid color-mix(in srgb, var(--accent) 18%, var(--border));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#tab-produtos .pro-feat-headline{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;min-width:0;flex:1}
+#tab-produtos .pro-feat-titulo{font-weight:600;font-size:13.5px;line-height:1.2;font-family:'Space Grotesk',sans-serif;color:var(--text);margin:0}
+#tab-produtos .pro-feat-numero{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.4px;color:var(--accent);line-height:1;background:color-mix(in srgb, var(--accent) 10%, transparent);border:1px solid color-mix(in srgb, var(--accent) 26%, var(--border));padding:2px 6px;border-radius:999px;white-space:nowrap}
+#tab-produtos .pro-feat-status{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#22c55e;flex-shrink:0}
+#tab-produtos .pro-feat-status.no{color:#ef4444}
+#tab-produtos .pro-feat-status.wip{color:#f59e0b}
+#tab-produtos .pro-feat-status .pro-feat-dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor;opacity:.85}
+#tab-produtos .pro-feat-chev{background:transparent;border:1px solid transparent;font-family:'JetBrains Mono','SF Mono',monospace;color:var(--t2);font-size:12px;line-height:1;padding:6px 8px;border-radius:6px;cursor:pointer;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),color .15s,background .15s,border-color .15s;flex-shrink:0}
+#tab-produtos .pro-feat-chev:hover{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 30%,var(--border))}
+#tab-produtos .pro-feat-card.open .pro-feat-chev{transform:rotate(180deg);color:var(--accent)}
+#tab-produtos .pro-feat-card.open .pro-feat-chev:hover{transform:rotate(180deg)}
+#tab-produtos .pro-feat-detail{max-height:0;opacity:0;overflow:hidden;transition:max-height .3s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,padding .2s,border-top-color .2s;border-top:1px solid transparent;padding:0 14px}
+#tab-produtos .pro-feat-card.open .pro-feat-detail{max-height:1000px;opacity:1;padding:12px 14px 14px;border-top-color:var(--border)}
 #tab-produtos .pro-feat-desc{font-size:13px;color:var(--t2);line-height:1.5}
+#tab-produtos .pro-feat-dif{margin-top:10px;padding:10px 12px;background:color-mix(in srgb,#fbbf24 8%,var(--bg3));border:1px solid color-mix(in srgb,#fbbf24 32%,var(--border));border-radius:10px}
+#tab-produtos .pro-feat-dif-label{display:inline-block;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#f59e0b;margin-bottom:4px}
+#tab-produtos .pro-feat-dif-body{font-size:13px;color:var(--text);line-height:1.5}
+#tab-produtos .pro-feat-dif-body p{margin:0 0 6px}
+#tab-produtos .pro-feat-dif-body p:last-child{margin-bottom:0}
+#tab-produtos .pro-feat-dif-body ul,#tab-produtos .pro-feat-dif-body ol{margin:6px 0;padding-left:22px}
+#tab-produtos .pro-feat-dif-body li{margin-bottom:3px}
+#tab-produtos .pro-feat-dif-body code{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:12px}
+#tab-produtos .pro-feat-dif-body a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+#tab-produtos .pro-feat-link{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:9px 16px;background:linear-gradient(135deg,var(--accent) 0%,color-mix(in srgb,var(--accent) 80%,#a855f7) 100%);border:1px solid color-mix(in srgb,var(--accent) 60%,#a855f7);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;letter-spacing:.2px;text-decoration:none;max-width:100%;box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 8px color-mix(in srgb,var(--accent) 28%,transparent);transition:transform .15s,box-shadow .15s,filter .15s}
+#tab-produtos .pro-feat-link:hover{transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.22) inset,0 4px 14px color-mix(in srgb,var(--accent) 40%,transparent);filter:brightness(1.06)}
+#tab-produtos .pro-feat-link:active{transform:translateY(0)}
+#tab-produtos .pro-feat-link-ico{font-size:14px;line-height:1;flex-shrink:0}
+#tab-produtos .pro-feat-link span:not(.pro-feat-link-ico){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+#tab-produtos .pro-feat-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+#tab-produtos .pro-feat-actions .pro-feat-link{margin-top:0}
+/* Botão PDF: gradient âmbar/vermelho pra diferenciar visualmente do botão de link */
+#tab-produtos .pro-feat-pdf-btn{background:linear-gradient(135deg,#dc2626 0%,#f59e0b 100%);border-color:color-mix(in srgb,#f59e0b 60%,#dc2626);box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 8px color-mix(in srgb,#dc2626 28%,transparent)}
+#tab-produtos .pro-feat-pdf-btn:hover{box-shadow:0 1px 0 rgba(255,255,255,.22) inset,0 4px 14px color-mix(in srgb,#dc2626 40%,transparent)}
+#tab-produtos .pro-feat-pdf-size{opacity:.75;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:500;margin-left:4px}
+/* Editor: bloco mostrando PDF atual com link, botão remover e trocar */
+#tab-produtos .pro-feat-pdf-current{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px;background:color-mix(in srgb,#f59e0b 8%,var(--bg));border:1px solid color-mix(in srgb,#f59e0b 28%,var(--border));border-radius:8px}
+#tab-produtos .pro-feat-pdf-link{color:#f59e0b;font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;font-weight:600;text-decoration:none;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tab-produtos .pro-feat-pdf-link:hover{text-decoration:underline}
+
+/* ─── Mini editor rich-text reutilizável dentro da aba Produtos ────────── */
+#tab-produtos .pro-rt{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--bg)}
+#tab-produtos .pro-rt:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+#tab-produtos .pro-rt-tb{display:flex;flex-wrap:wrap;gap:2px;align-items:center;padding:6px 8px;background:color-mix(in srgb,var(--bg2) 92%,transparent);border-bottom:1px solid var(--border)}
+#tab-produtos .pro-rt-tb .ftb{font-size:12px;padding:4px 8px}
+#tab-produtos .pro-rt-tb .ftb-sep{background:var(--border);margin:0 3px}
+#tab-produtos .pro-rt-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--t2);margin-right:6px;flex-shrink:0}
+#tab-produtos .pro-rt-body{min-height:80px;max-height:340px;overflow-y:auto;padding:10px 14px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;line-height:1.55;outline:none}
+#tab-produtos .pro-rt-body[data-empty="1"]::before{content:attr(data-placeholder);color:var(--t2);opacity:.55;pointer-events:none;font-style:italic}
+#tab-produtos .pro-rt-body p{margin:0 0 8px}
+#tab-produtos .pro-rt-body p:last-child{margin-bottom:0}
+#tab-produtos .pro-rt-body ul,#tab-produtos .pro-rt-body ol{margin:6px 0;padding-left:22px}
+#tab-produtos .pro-rt-body li{margin-bottom:3px}
+#tab-produtos .pro-rt-body code{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:12px}
+#tab-produtos .pro-rt-body a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+#tab-produtos .pro-rt-colors{display:inline-flex;gap:3px;align-items:center;padding-left:4px}
 
 #tab-produtos .pro-bullets{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
 #tab-produtos .pro-bullet{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.5}
@@ -1882,14 +1958,39 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-edit-tag-input{flex:1;min-width:120px;background:transparent;border:none;color:var(--text);font-size:13px;outline:none;padding:4px}
 #tab-produtos .pro-capa-uploader{display:flex;gap:14px;align-items:flex-start}
 #tab-produtos .pro-capa-preview{width:160px;aspect-ratio:21/9;border-radius:10px;background:var(--bg3);border:1px dashed var(--border);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:11px;text-align:center;flex-shrink:0;font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.6px}
-#tab-produtos .pro-feat-edit{padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--bg3);margin-bottom:10px}
-#tab-produtos .pro-feat-edit-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+#tab-produtos .pro-feat-edit{border:1px solid var(--border);border-radius:12px;background:var(--bg3);margin-bottom:10px;overflow:hidden;transition:border-color .15s,box-shadow .2s}
+#tab-produtos .pro-feat-edit:hover{border-color:color-mix(in srgb, var(--accent) 22%, var(--border))}
+#tab-produtos .pro-feat-edit.open{border-color:color-mix(in srgb, var(--accent) 36%, var(--border));box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 4px 14px rgba(0,0,0,.08)}
+#tab-produtos .pro-feat-edit-head{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}
+#tab-produtos .pro-feat-edit-head input,
+#tab-produtos .pro-feat-edit-head button,
+#tab-produtos .pro-feat-edit-head .pro-feat-edit-icon,
+#tab-produtos .pro-feat-edit-head .pro-feat-handle{cursor:auto}
+#tab-produtos .pro-feat-edit-head .pro-feat-edit-icon{cursor:pointer}
+#tab-produtos .pro-feat-edit-head button{cursor:pointer}
+#tab-produtos .pro-feat-edit-toggle{background:transparent;border:none;color:var(--t2);cursor:pointer;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;line-height:1;padding:6px;border-radius:6px;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),color .15s,background .15s;flex-shrink:0}
+#tab-produtos .pro-feat-edit-toggle:hover{background:color-mix(in srgb, var(--accent) 8%, transparent);color:var(--text)}
+#tab-produtos .pro-feat-edit.open .pro-feat-edit-toggle{transform:rotate(180deg);color:var(--accent)}
+#tab-produtos .pro-feat-edit-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .3s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,padding .2s,border-top-color .2s;border-top:1px solid transparent}
+#tab-produtos .pro-feat-edit.open .pro-feat-edit-body{max-height:1200px;opacity:1;padding:14px;border-top-color:var(--border)}
+#tab-produtos .pro-feat-edit-head-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-width:0}
+#tab-produtos .pro-feat-edit-head-pill{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid;white-space:nowrap}
+#tab-produtos .pro-feat-edit-head-pill.ok{background:color-mix(in srgb,#22c55e 12%,transparent);border-color:color-mix(in srgb,#22c55e 36%,var(--border));color:#22c55e}
+#tab-produtos .pro-feat-edit-head-pill.no{background:color-mix(in srgb,#ef4444 12%,transparent);border-color:color-mix(in srgb,#ef4444 36%,var(--border));color:#ef4444}
+#tab-produtos .pro-feat-edit-head-pill.wip{background:color-mix(in srgb,#f59e0b 14%,transparent);border-color:color-mix(in srgb,#f59e0b 40%,var(--border));color:#f59e0b}
+#tab-produtos .pro-feat-edit-head-pill.qty{background:color-mix(in srgb,var(--accent) 10%,transparent);border-color:color-mix(in srgb,var(--accent) 30%,var(--border));color:var(--accent)}
 #tab-produtos .pro-feat-edit-icon{width:48px;height:48px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;transition:all .15s;flex-shrink:0}
 #tab-produtos .pro-feat-edit-icon:hover{border-color:var(--accent)}
 #tab-produtos .pro-feat-edit-grid{display:grid;grid-template-columns:1fr 140px;gap:10px;margin-bottom:8px}
 @media (max-width:600px){#tab-produtos .pro-feat-edit-grid{grid-template-columns:1fr}}
-#tab-produtos .pro-feat-handle{cursor:grab;color:var(--t2);font-size:18px;padding:8px 4px;user-select:none}
+#tab-produtos .pro-feat-handle{cursor:grab;color:var(--t2);font-size:18px;padding:8px 4px;user-select:none;transition:color .15s}
+#tab-produtos .pro-feat-handle:hover{color:var(--accent)}
 #tab-produtos .pro-feat-handle:active{cursor:grabbing}
+/* Card durante drag */
+#tab-produtos .pro-feat-edit.pro-feat-dragging{opacity:.4}
+/* Indicadores de posição de drop */
+#tab-produtos .pro-feat-edit.drop-before{box-shadow:0 -3px 0 0 var(--accent),0 0 0 1px color-mix(in srgb,var(--accent) 30%,transparent);border-color:color-mix(in srgb,var(--accent) 40%,var(--border))}
+#tab-produtos .pro-feat-edit.drop-after{box-shadow:0 3px 0 0 var(--accent),0 0 0 1px color-mix(in srgb,var(--accent) 30%,transparent);border-color:color-mix(in srgb,var(--accent) 40%,var(--border))}
 #tab-produtos .pro-item-actions{display:flex;gap:6px;margin-left:auto}
 #tab-produtos .pro-icon-btn{background:transparent;border:1px solid var(--border);width:30px;height:30px;border-radius:8px;color:var(--t2);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
 #tab-produtos .pro-icon-btn:hover{border-color:var(--red);color:var(--red)}
@@ -1904,6 +2005,9 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 .pro-icon-pop-foot input:focus{border-color:var(--accent)}
 
 #tab-produtos .pro-edit-footer{position:sticky;bottom:0;left:0;right:0;background:linear-gradient(180deg,transparent,var(--bg) 25%);padding:14px 0;margin-top:18px;display:flex;gap:10px;justify-content:flex-end;align-items:center;z-index:5}
+#tab-produtos .pro-save-feedback{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:5px 11px;border-radius:999px;border:1px solid;animation:dexSlideIn .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
+#tab-produtos .pro-save-feedback.ok{background:color-mix(in srgb,#22c55e 12%,transparent);border-color:color-mix(in srgb,#22c55e 40%,var(--border));color:#22c55e}
+#tab-produtos .pro-save-feedback.err{background:color-mix(in srgb,#ef4444 12%,transparent);border-color:color-mix(in srgb,#ef4444 40%,var(--border));color:#ef4444}
 #tab-produtos .pro-dirty-pill{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#f59e0b;background:color-mix(in srgb, #f59e0b 12%, transparent);border:1px solid color-mix(in srgb, #f59e0b 40%, var(--border));padding:5px 9px;border-radius:6px;margin-right:auto}
 
 #tab-produtos .pro-dropzone{border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;color:var(--t2);font-size:13px;transition:all .15s;cursor:pointer}
@@ -1923,6 +2027,21 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 /* Picker popover (genérico — público/provas/tipo de feature) */
 .pro-picker-pop{position:fixed;z-index:9999;background:var(--bg2);border:1px solid var(--border);border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,.4),0 0 0 1px var(--accent-dim);padding:14px;width:340px;max-width:calc(100vw - 24px);max-height:70vh;overflow-y:auto}
 .pro-picker-pop.hidden{display:none}
+.pro-picker-head{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--t2);margin:0 0 10px}
+.pro-picker-body{display:flex;flex-direction:column;gap:4px}
+.pro-picker-opt{display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:1px solid transparent;color:var(--text);padding:8px 10px;border-radius:9px;cursor:pointer;text-align:left;font:inherit;font-size:13px;transition:background .12s,border-color .12s}
+.pro-picker-opt:hover{background:color-mix(in srgb,var(--accent) 8%,transparent);border-color:color-mix(in srgb,var(--accent) 22%,var(--border))}
+.pro-picker-empty{padding:18px 8px;text-align:center;color:var(--t2);font-size:12.5px;font-style:italic}
+
+/* Chips de produto vinculado no editor do Bônus */
+#tab-produtos .pro-bonus-block{}
+#tab-produtos .pro-bonus-prod-chip{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;transition:border-color .15s}
+#tab-produtos .pro-bonus-prod-chip:hover{border-color:color-mix(in srgb,#fbbf24 30%,var(--border))}
+#tab-produtos .pro-bonus-prod-chip.orphan{border-style:dashed;color:var(--t2)}
+#tab-produtos .pro-bonus-prod-capa{width:36px;height:36px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--t2);font-size:18px}
+#tab-produtos .pro-bonus-prod-info{flex:1;min-width:0}
+#tab-produtos .pro-bonus-prod-name{font-weight:600;font-size:13.5px;line-height:1.2;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tab-produtos .pro-bonus-prod-meta{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
 .pro-picker-list{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
 .pro-picker-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;font-size:13px;color:var(--text);transition:all .12s;background:transparent;text-align:left;width:100%}
 .pro-picker-item:hover{background:color-mix(in srgb, var(--accent) 6%, var(--bg3));border-color:var(--accent-dim)}
@@ -1944,6 +2063,8 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-toggle{display:inline-flex;border:1px solid var(--border);border-radius:999px;overflow:hidden;background:var(--bg3);font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
 #tab-produtos .pro-toggle button{background:transparent;border:none;color:var(--t2);padding:6px 14px;cursor:pointer;transition:all .15s}
 #tab-produtos .pro-toggle button.on{background:var(--accent);color:#fff}
+#tab-produtos .pro-toggle button.on.wip{background:#f59e0b;color:#fff}
+#tab-produtos .pro-toggle-3 button{padding:6px 11px;font-size:10.5px;letter-spacing:.6px}
 #tab-produtos .pro-toggle-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 
 /* Feature edit cards — variantes por tipo */
@@ -1966,10 +2087,35 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-feat-updated{display:block;margin-top:8px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;color:var(--t2);letter-spacing:.4px;opacity:.7}
 
 /* Header do detalhe sem capa hero */
-#tab-produtos .pro-detail-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-#tab-produtos .pro-detail-chip{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;background:var(--bg3);border:1px solid var(--border);padding:4px 9px;border-radius:6px;color:var(--t2);white-space:nowrap}
-#tab-produtos .pro-detail-chip.publico{background:color-mix(in srgb, var(--accent) 8%, var(--bg2));border-color:color-mix(in srgb, var(--accent) 40%, var(--border));color:var(--accent)}
-#tab-produtos .pro-detail-chip.responsavel{background:color-mix(in srgb, #b08bff 10%, var(--bg2));border-color:color-mix(in srgb, #b08bff 40%, var(--border));color:#b08bff}
+#tab-produtos .pro-detail-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}
+#tab-produtos .pro-detail-chip{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;background:var(--bg3);border:1px solid var(--border);padding:4px 11px;border-radius:999px;color:var(--t2);white-space:nowrap}
+#tab-produtos .pro-detail-chip.publico{background:color-mix(in srgb, var(--accent) 8%, var(--bg2));border-color:color-mix(in srgb, var(--accent) 32%, var(--border));color:var(--accent)}
+#tab-produtos .pro-detail-chip.responsavel{display:inline-flex;align-items:center;gap:5px;background:color-mix(in srgb, #b08bff 10%, var(--bg2));border-color:color-mix(in srgb, #b08bff 32%, var(--border));color:#b08bff;text-transform:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;letter-spacing:0;font-weight:600;padding:3px 10px 3px 8px}
+#tab-produtos .pro-detail-chip.responsavel::before{content:"👤";font-size:11px;opacity:.85}
+
+/* ─── Disclosure groups (público-alvo, provas-alvo) — Apple-like ─────── */
+#tab-produtos .pro-disc-row{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+#tab-produtos .pro-disc{background:color-mix(in srgb, var(--bg2) 92%, transparent);border:1px solid var(--border);border-radius:14px;overflow:hidden;backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);transition:border-color .2s,box-shadow .2s}
+#tab-produtos .pro-disc:hover{border-color:color-mix(in srgb, var(--accent) 28%, var(--border))}
+#tab-produtos .pro-disc.open{border-color:color-mix(in srgb, var(--accent) 36%, var(--border));box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 4px 14px rgba(0,0,0,.10)}
+#tab-produtos .pro-disc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:11px 16px;background:transparent;border:none;color:inherit;cursor:pointer;text-align:left;font:inherit;transition:background .15s}
+#tab-produtos .pro-disc-head:hover{background:color-mix(in srgb, var(--accent) 4%, transparent)}
+#tab-produtos .pro-disc-head:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+#tab-produtos .pro-disc-label{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--t2)}
+#tab-produtos .pro-disc-label .pro-disc-ico{font-size:13px;opacity:.85}
+#tab-produtos .pro-disc-count{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);background:color-mix(in srgb, var(--accent) 12%, transparent);border:1px solid color-mix(in srgb, var(--accent) 28%, transparent);padding:1px 8px;border-radius:999px;letter-spacing:.6px;font-variant-numeric:tabular-nums}
+#tab-produtos .pro-disc.provas .pro-disc-count{color:#fb923c;background:color-mix(in srgb, #fb923c 12%, transparent);border-color:color-mix(in srgb, #fb923c 30%, transparent)}
+#tab-produtos .pro-disc-chevron{font-family:'JetBrains Mono','SF Mono',monospace;color:var(--t2);font-size:11px;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));margin-left:auto;line-height:1}
+#tab-produtos .pro-disc.open .pro-disc-chevron{transform:rotate(180deg);color:var(--accent)}
+#tab-produtos .pro-disc-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .3s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,padding .2s}
+#tab-produtos .pro-disc.open .pro-disc-body{max-height:720px;opacity:1;padding:4px 16px 14px;overflow-y:auto}
+#tab-produtos .pro-disc-body .pro-detail-chips{margin-top:0;flex-direction:column;align-items:stretch;gap:4px}
+#tab-produtos .pro-disc-body .pro-detail-chip{display:flex;align-items:center;gap:8px;width:100%;white-space:normal;text-transform:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;font-weight:500;letter-spacing:0;padding:8px 12px;line-height:1.35;border-radius:10px;background:transparent;border:1px solid transparent;color:var(--text);transition:background .15s,border-color .15s}
+#tab-produtos .pro-disc-body .pro-detail-chip::before{content:"";flex-shrink:0;width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:.7}
+#tab-produtos .pro-disc.provas .pro-disc-body .pro-detail-chip::before{background:#fb923c}
+#tab-produtos .pro-disc-body .pro-detail-chip:hover{background:color-mix(in srgb, var(--accent) 6%, transparent);border-color:color-mix(in srgb, var(--accent) 20%, var(--border))}
+#tab-produtos .pro-disc.provas .pro-disc-body .pro-detail-chip:hover{background:color-mix(in srgb, #fb923c 6%, transparent);border-color:color-mix(in srgb, #fb923c 20%, var(--border))}
+#tab-produtos .pro-disc-empty{padding:0 16px 14px;font-size:12px;color:var(--t2);font-style:italic}
 
 /* Capa thumb dentro do Básico */
 #tab-produtos .pro-capa-mini-wrap{display:flex;gap:14px;align-items:flex-start;margin-top:6px}
@@ -1987,6 +2133,52 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 }
 @media (max-width:480px){
   #tab-produtos .pro-row-tags{display:none}
+}
+
+/* ─── Pergunte ao Dex (assistente IA do catálogo) ─────────────────────── */
+#tab-produtos .pro-dex-btn{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#3b82f6 0%,#a855f7 60%,#fb923c 100%);border:none;color:#fff;padding:9px 16px;border-radius:999px;font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.2px;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 4px 14px rgba(168,85,247,.32);transition:transform .2s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),box-shadow .2s;flex-shrink:0}
+#tab-produtos .pro-dex-btn:hover{transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 6px 20px rgba(168,85,247,.44)}
+#tab-produtos .pro-dex-btn.on{background:linear-gradient(135deg,#0ea5e9 0%,#6366f1 100%)}
+#tab-produtos .pro-dex-btn-ico{font-size:14px;line-height:1}
+
+#tab-produtos .pro-dex-panel{position:relative;margin:0 0 16px;padding:18px;background:linear-gradient(180deg,color-mix(in srgb,#a855f7 6%,var(--bg2)),color-mix(in srgb,#3b82f6 4%,var(--bg2)));border:1px solid color-mix(in srgb,#a855f7 36%,var(--border));border-radius:16px;box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 6px 22px rgba(168,85,247,.10);overflow:hidden;animation:dexSlideIn .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
+#tab-produtos .pro-dex-panel::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#3b82f6,#a855f7,#fb923c);opacity:.8}
+@keyframes dexSlideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+#tab-produtos .pro-dex-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+#tab-produtos .pro-dex-title{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--text);opacity:.9}
+#tab-produtos .pro-dex-title-ico{font-size:13px;background:linear-gradient(135deg,#3b82f6,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+#tab-produtos .pro-dex-close{background:transparent;border:none;color:var(--t2);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:6px;line-height:1;transition:color .15s,background .15s}
+#tab-produtos .pro-dex-close:hover{color:var(--text);background:color-mix(in srgb,var(--accent) 8%,transparent)}
+#tab-produtos .pro-dex-form{display:flex;gap:8px;align-items:flex-end}
+#tab-produtos .pro-dex-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;resize:vertical;min-height:44px;max-height:140px;line-height:1.4;transition:border-color .15s,box-shadow .15s}
+#tab-produtos .pro-dex-input:focus{outline:none;border-color:#a855f7;box-shadow:0 0 0 3px color-mix(in srgb,#a855f7 22%,transparent)}
+#tab-produtos .pro-dex-input::placeholder{color:var(--t2);opacity:.7}
+#tab-produtos .pro-dex-ask{background:linear-gradient(135deg,#3b82f6,#a855f7);border:none;color:#fff;padding:0 18px;height:44px;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;flex-shrink:0;transition:transform .15s,box-shadow .15s;box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 8px rgba(168,85,247,.32)}
+#tab-produtos .pro-dex-ask:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 4px 14px rgba(168,85,247,.44)}
+#tab-produtos .pro-dex-ask:disabled{opacity:.5;cursor:not-allowed}
+#tab-produtos .pro-dex-hint{margin-top:8px;font-size:11px;color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.4px}
+#tab-produtos .pro-dex-loading{display:flex;align-items:center;gap:10px;margin-top:14px;padding:14px;background:color-mix(in srgb,#a855f7 6%,var(--bg));border:1px dashed color-mix(in srgb,#a855f7 36%,var(--border));border-radius:12px;color:var(--t2);font-size:13px}
+#tab-produtos .pro-dex-loading .sp{width:14px;height:14px;border:2px solid color-mix(in srgb,#a855f7 30%,transparent);border-top-color:#a855f7;border-radius:50%;animation:dexSpin .8s linear infinite}
+@keyframes dexSpin{to{transform:rotate(360deg)}}
+#tab-produtos .pro-dex-error{margin-top:14px;padding:12px 14px;background:color-mix(in srgb,#ef4444 8%,var(--bg));border:1px solid color-mix(in srgb,#ef4444 36%,var(--border));border-radius:10px;color:#ef4444;font-size:13px;line-height:1.5}
+#tab-produtos .pro-dex-answer{margin-top:14px;padding:16px 18px;background:var(--bg);border:1px solid var(--border);border-radius:12px;font-size:14px;line-height:1.6;color:var(--text);white-space:normal}
+#tab-produtos .pro-dex-answer p{margin:0 0 10px}
+#tab-produtos .pro-dex-answer p:last-child{margin-bottom:0}
+#tab-produtos .pro-dex-answer ul{margin:6px 0 12px;padding-left:22px}
+#tab-produtos .pro-dex-answer li{margin-bottom:4px}
+#tab-produtos .pro-dex-answer strong{color:var(--text);font-weight:700}
+#tab-produtos .pro-dex-answer em{font-style:italic;color:var(--t2)}
+#tab-produtos .pro-dex-answer code{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:12.5px;font-family:'JetBrains Mono','SF Mono',monospace}
+#tab-produtos .pro-dex-prod-link{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,color-mix(in srgb,#3b82f6 14%,transparent),color-mix(in srgb,#a855f7 14%,transparent));border:1px solid color-mix(in srgb,#a855f7 42%,var(--border));color:var(--text);padding:1px 8px;border-radius:6px;font-weight:600;text-decoration:none;cursor:pointer;transition:all .15s;font-family:inherit}
+#tab-produtos .pro-dex-prod-link::before{content:"📦";font-size:11px;margin-right:2px}
+#tab-produtos .pro-dex-prod-link:hover{border-color:#a855f7;background:linear-gradient(135deg,color-mix(in srgb,#3b82f6 24%,transparent),color-mix(in srgb,#a855f7 24%,transparent));transform:translateY(-1px)}
+#tab-produtos .pro-dex-ext-link{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+#tab-produtos .pro-dex-meta{margin-top:10px;font-size:10.5px;color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.6px;text-transform:uppercase;opacity:.7}
+#tab-produtos .pro-dex-auth-cta{margin-top:8px}
+#tab-produtos .pro-dex-auth-cta .btn-sm{font-size:11.5px;padding:5px 12px}
+@media (max-width:720px){
+  #tab-produtos .pro-dex-form{flex-direction:column;align-items:stretch}
+  #tab-produtos .pro-dex-ask{width:100%;height:42px}
 }
 </style>
 
@@ -27395,33 +27587,87 @@ const PRO_CATALOGO_SEED={
 
 // ── Helpers de leitura tolerante (compat com docs antigos) ──────────────
 function _proGetBreveDescricao(p){return (p&&(p.breveDescricao??p.pitchCurto))||'';}
+// Normaliza URL: aceita só http/https. Adiciona https:// se for tipo "site.com/path"
+// sem scheme. Retorna '' pra valores inválidos.
+function _proNormalizeUrl(raw){
+  const v=String(raw||'').trim();
+  if(!v)return '';
+  if(/^https?:\/\//i.test(v))return v;
+  // Heurística: tem ponto e não tem espaço → assume https://
+  if(/^[^\s]+\.[^\s]+$/.test(v))return 'https://'+v;
+  return '';
+}
+// Dedupe case-insensitive preservando a ordem e a forma original do primeiro encontrado
+function _proDedupe(arr){
+  const seen=new Set();
+  const out=[];
+  for(const raw of arr){
+    const s=String(raw||'').trim();
+    if(!s)continue;
+    const key=s.toLowerCase();
+    if(seen.has(key))continue;
+    seen.add(key);
+    out.push(s);
+  }
+  return out;
+}
 function _proGetPublicoAlvo(p){
   if(!p)return [];
   const v=p.publicoAlvo;
-  if(Array.isArray(v))return v.filter(Boolean);
+  if(Array.isArray(v))return _proDedupe(v);
   if(typeof v==='string'&&v.trim())return [v.trim()];
   return [];
 }
 function _proGetResponsaveis(p){
   if(!p)return [];
-  if(Array.isArray(p.responsaveis))return p.responsaveis.filter(Boolean).map(x=>String(x).trim()).filter(Boolean);
+  if(Array.isArray(p.responsaveis))return _proDedupe(p.responsaveis);
   if(typeof p.responsaveis==='string'&&p.responsaveis.trim())return [p.responsaveis.trim()];
   if(typeof p.responsavel==='string'&&p.responsavel.trim())return [p.responsavel.trim()];
-  if(Array.isArray(p.responsavel))return p.responsavel.filter(Boolean).map(x=>String(x).trim()).filter(Boolean);
+  if(Array.isArray(p.responsavel))return _proDedupe(p.responsavel);
   return [];
 }
+// Normaliza o status de disponibilidade pra 'sim' | 'nao' | 'construcao'.
+// Compat: boolean true/false ainda é aceito (true→sim, false→nao).
+function _proFeatDisp(f){
+  if(!f)return 'sim';
+  const v=f.disponivel;
+  if(v==='nao'||v===false)return 'nao';
+  if(v==='construcao')return 'construcao';
+  return 'sim';
+}
+const PRO_FEAT_DISP_META={
+  sim:{label:'Incluído',short:'Incluído',color:'#22c55e',icon:'✓'},
+  nao:{label:'Não incluído',short:'Não incluído',color:'#ef4444',icon:'✗'},
+  construcao:{label:'Em construção',short:'Em construção',color:'#f59e0b',icon:'🛠'}
+};
+// Status da mentoria: 'sim' (incluída), 'opcional' (compra à parte), 'nao' (não há).
+// Compat: boolean true→sim, false→nao; string vazia ou outros valores→nao.
+function _proMentStatus(p){
+  if(!p)return 'nao';
+  const v=p.temMentoria;
+  if(v==='sim'||v===true)return 'sim';
+  if(v==='opcional')return 'opcional';
+  return 'nao';
+}
 function _proNormFeature(f){
-  // Modelo único: título + ícone + disponível + número-chave + descrição.
-  // Compat: docs antigos podem ter `tipo`, `quantidade`, `temVideoComentario`,
+  // Modelo único: título + ícone + disponível + quantidade (numeroChave) + diferenciais + link.
+  // Compat: docs antigos podem ter `tipo`, `quantidade`, `descricao`, `temVideoComentario`,
   // `bonusProdutoId` — ignorados silenciosamente.
   if(!f||typeof f!=='object')return null;
   return {
     id:f.id||_proUid(),
     icone:f.icone||PRO_FEAT_ICONE_DEFAULT,
     titulo:f.titulo||'',
-    disponivel:(f.disponivel!==false),
+    disponivel:_proFeatDisp(f),
     numeroChave:f.numeroChave||f.quantidade||'',
-    descricao:f.descricao||'',
+    diferenciais:f.diferenciais||f.observacao||f.descricao||'',
+    linkUrl:f.linkUrl||'',
+    linkLabel:f.linkLabel||'',
+    pdfUrl:f.pdfUrl||'',
+    pdfLabel:f.pdfLabel||'',
+    pdfPath:f.pdfPath||'',
+    pdfSize:typeof f.pdfSize==='number'?f.pdfSize:0,
+    pdfName:f.pdfName||'',
     updatedAt:f.updatedAt||null
   };
 }
@@ -27430,7 +27676,7 @@ function _proFeatIcone(f){return (f&&f.icone)||PRO_FEAT_ICONE_DEFAULT;}
 function _proFeatNumero(f){return (f&&f.numeroChave)||'';}
 function _proFeatEqual(a,b){
   if(!a||!b)return false;
-  const keys=['titulo','icone','descricao','numeroChave','disponivel'];
+  const keys=['titulo','icone','numeroChave','disponivel','diferenciais','linkUrl','linkLabel','pdfUrl','pdfLabel','pdfPath'];
   for(const k of keys){
     const va=(a[k]===undefined?null:a[k]);
     const vb=(b[k]===undefined?null:b[k]);
@@ -27591,6 +27837,7 @@ function _proRenderList(root){
     listHtml=`<div class="pro-list">${items.map(p=>_proRowHTML(p)).join('')}</div>`;
   }
 
+  const dexBtnOn=S.dexAberto?' on':'';
   root.innerHTML=`
     <div class="pro-header">
       <div>
@@ -27601,10 +27848,15 @@ function _proRenderList(root){
     </div>
     <div class="pro-toolbar">
       <input class="pro-search" id="pro-search" type="text" placeholder="🔍 Buscar por nome, pitch, público, features..." value="${_proEscAttr(S.produtosBusca)}" oninput="proSearchInput(this.value)"/>
+      <button class="pro-dex-btn${dexBtnOn}" onclick="proDexToggle()" title="Pergunte ao Dex sobre o catálogo">
+        <span class="pro-dex-btn-ico">🤖</span> Pergunte ao Dex
+      </button>
       ${filtrosHtml}
     </div>
+    <div id="pro-dex-container"></div>
     ${listHtml}
   `;
+  _proDexRender();
 }
 
 function _proRowHTML(p){
@@ -27624,6 +27876,187 @@ function _proRowHTML(p){
   </div>`;
 }
 
+// ─── Pergunte ao Dex ─────────────────────────────────────────────────────
+const DEX_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/perguntarDex';
+
+function _proDexRender(){
+  const c=document.getElementById('pro-dex-container');
+  if(!c)return;
+  if(!S.dexAberto){c.innerHTML='';return;}
+
+  const pergunta=S.dexPergunta||'';
+  const loading=!!S.dexLoading;
+  const resposta=S.dexResposta||null;
+  const erro=S.dexErro||null;
+  const usage=S.dexUsage||null;
+
+  let body='';
+  if(loading){
+    body=`<div class="pro-dex-loading"><span class="sp"></span> Dex está consultando o catálogo…</div>`;
+  } else if(erro){
+    body=`<div class="pro-dex-error">⚠️ ${_proEsc(erro)}</div>`;
+  } else if(resposta){
+    const html=_proDexFormatAnswer(resposta);
+    const meta=usage?`<div class="pro-dex-meta">${(usage.cache_read>0?'⚡ Cache · ':'')}${usage.input||0} in · ${usage.output||0} out tokens</div>`:'';
+    body=`<div class="pro-dex-answer">${html}</div>${meta}`;
+  }
+
+  c.innerHTML=`
+    <div class="pro-dex-panel">
+      <div class="pro-dex-head">
+        <div class="pro-dex-title"><span class="pro-dex-title-ico">🤖</span> Dex · Assistente do Catálogo MedReview</div>
+        <button class="pro-dex-close" onclick="proDexToggle()" title="Fechar">✕</button>
+      </div>
+      <form class="pro-dex-form" onsubmit="event.preventDefault();proDexAsk();">
+        <textarea class="pro-dex-input" id="pro-dex-input" placeholder="Ex: Qual produto serve pra TEA 2ª fase e inclui mentoria?" rows="1" oninput="S.dexPergunta=this.value" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();proDexAsk();}">${_proEsc(pergunta)}</textarea>
+        <button class="pro-dex-ask" type="submit" ${loading?'disabled':''}>${loading?'Aguarde…':'Perguntar'}</button>
+      </form>
+      <div class="pro-dex-hint">Pressione Enter para enviar · Shift+Enter para quebrar linha · Cada pergunta é independente</div>
+      ${body}
+    </div>
+  `;
+  _proDexBindLinks();
+  // Foco no input só quando o painel acabou de abrir (não em todo re-render —
+  // senão roubaria foco quando o user mexe em outros controles da tela)
+  if(S._dexFocusNext){
+    S._dexFocusNext=false;
+    const el=document.getElementById('pro-dex-input');
+    if(el)setTimeout(()=>{ try{ el.focus(); el.setSelectionRange(el.value.length,el.value.length); }catch(e){} },30);
+  }
+}
+
+function _proDexBindLinks(){
+  const c=document.getElementById('pro-dex-container');
+  if(!c)return;
+  c.querySelectorAll('.pro-dex-prod-link[data-pid]').forEach(a=>{
+    a.onclick=(e)=>{
+      e.preventDefault();
+      const pid=a.getAttribute('data-pid');
+      if(pid)proAbrir(pid);
+    };
+  });
+}
+
+window.proDexToggle=()=>{
+  S.dexAberto=!S.dexAberto;
+  if(S.dexAberto){
+    S._dexFocusNext=true; // pede foco no próximo render
+  } else {
+    // próxima abertura começa limpa (sem resposta/erro/pergunta antigos)
+    S.dexErro=null;
+    S.dexResposta=null;
+    S.dexPergunta='';
+    S.dexUsage=null;
+  }
+  _proRender();
+};
+
+window.proDexAsk=async()=>{
+  const el=document.getElementById('pro-dex-input');
+  const pergunta=(el?el.value:S.dexPergunta||'').trim();
+  if(!pergunta){
+    S.dexErro='Digite uma pergunta antes de enviar.';
+    _proDexRender();
+    return;
+  }
+  if(pergunta.length>2000){
+    S.dexErro='Pergunta muito longa (máx 2000 caracteres).';
+    _proDexRender();
+    return;
+  }
+
+  S.dexPergunta=pergunta;
+  S.dexLoading=true;
+  S.dexErro=null;
+  S.dexResposta=null;
+  S.dexUsage=null;
+  _proDexRender();
+
+  try{
+    const user=window._fbAuth?.auth?.currentUser;
+    if(!user){
+      throw new Error('Faça login com Google ou Email para usar o Dex. O login antigo (apenas senha) não dá acesso à IA.');
+    }
+    const token=await user.getIdToken();
+    const resp=await fetch(DEX_ENDPOINT,{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+      body:JSON.stringify({pergunta})
+    });
+    let data={};
+    try{ data=await resp.json(); }catch(e){ /* resposta não-JSON */ }
+    if(!resp.ok){
+      throw new Error(data.error||`Erro ${resp.status} ao consultar o Dex.`);
+    }
+    S.dexResposta=data.resposta||'(resposta vazia)';
+    S.dexUsage=data.usage||null;
+  }catch(e){
+    S.dexErro=e.message||String(e);
+  }finally{
+    S.dexLoading=false;
+    _proDexRender();
+  }
+};
+
+function _proDexFormatAnswer(text){
+  if(!text)return '';
+  const esc=s=>String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+  // Quebra em blocos (parágrafos vs listas)
+  const lines=String(text).split(/\r?\n/);
+  const blocks=[]; let cur=null;
+  for(const raw of lines){
+    const t=raw.trim();
+    if(!t){ if(cur){blocks.push(cur);cur=null;} continue; }
+    const isItem=/^[-*]\s+/.test(t);
+    if(isItem){
+      const content=t.replace(/^[-*]\s+/,'');
+      if(cur&&cur.type==='ul') cur.lines.push(content);
+      else { if(cur)blocks.push(cur); cur={type:'ul',lines:[content]}; }
+    } else {
+      if(cur&&cur.type==='p') cur.lines.push(t);
+      else { if(cur)blocks.push(cur); cur={type:'p',lines:[t]}; }
+    }
+  }
+  if(cur)blocks.push(cur);
+
+  const renderInline=s=>{
+    let h=esc(s);
+    // Links: [texto](produto:ID) ou [texto](http://...)
+    // Nota: `url` e `id` aqui já estão HTML-escapados (vieram do `h` pós-esc()).
+    // Não re-escapar pra evitar &amp;amp; em query strings.
+    h=h.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,(m,txt,url)=>{
+      const u=url.trim();
+      // Compara contra forma com `&` decodificado pra detectar `produto:` e `http(s):`
+      const uDecoded=u.replace(/&amp;/g,'&');
+      if(uDecoded.startsWith('produto:')){
+        const id=uDecoded.slice(8);
+        // id vai pro data-pid; precisa estar HTML-escapado pra atributo
+        return `<a class="pro-dex-prod-link" href="javascript:void(0)" data-pid="${esc(id)}">${txt}</a>`;
+      }
+      if(/^https?:\/\//i.test(uDecoded)){
+        // url já vem escapada pra HTML (e.g. &amp;) — usa direto no href
+        return `<a class="pro-dex-ext-link" href="${u}" target="_blank" rel="noopener noreferrer">${txt}</a>`;
+      }
+      return txt; // url desconhecida → só o texto (bloqueia javascript:, data:, etc)
+    });
+    // **negrito**
+    h=h.replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>');
+    // `código`
+    h=h.replace(/`([^`\n]+)`/g,'<code>$1</code>');
+    // *itálico* — só fora de palavras
+    h=h.replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s.,;:!?)]|$)/g,'$1<em>$2</em>');
+    return h;
+  };
+
+  return blocks.map(b=>{
+    if(b.type==='ul')return `<ul>${b.lines.map(l=>`<li>${renderInline(l)}</li>`).join('')}</ul>`;
+    return `<p>${b.lines.map(renderInline).join('<br/>')}</p>`;
+  }).join('');
+}
+
 window.proSearchInput=v=>{S.produtosBusca=v;_proRender();};
 window.proToggleFiltro=t=>{
   const i=S.produtosFiltroProvas.indexOf(t);
@@ -27636,10 +28069,18 @@ window.proAbrir=id=>{
   // Normaliza compat: features sem tipo viram livre; publicoAlvo string vira array
   copy.features=Array.isArray(copy.features)?copy.features.map(_proNormFeature).filter(Boolean):[];
   copy.mentoriaFeatures=Array.isArray(copy.mentoriaFeatures)?copy.mentoriaFeatures.map(_proNormFeature).filter(Boolean):[];
+  copy.mentoriaDescricao=String(copy.mentoriaDescricao||'');
+  copy.bonusFeatures=Array.isArray(copy.bonusFeatures)?copy.bonusFeatures.map(_proNormFeature).filter(Boolean):[];
+  copy.bonusProdutoIds=Array.isArray(copy.bonusProdutoIds)?copy.bonusProdutoIds.filter(x=>typeof x==='string'&&x):[];
+  copy.duvidas=Array.isArray(copy.duvidas)?copy.duvidas.filter(d=>d&&(d.pergunta||d.resposta)).map(d=>({id:d.id||_proUid(),pergunta:String(d.pergunta||''),resposta:String(d.resposta||'')})):[];
   copy.publicoAlvo=_proGetPublicoAlvo(copy);
   copy.breveDescricao=_proGetBreveDescricao(copy);
   copy.responsaveis=_proGetResponsaveis(copy);
-  if(copy.temMentoria==null)copy.temMentoria=false;
+  copy.temMentoria=_proMentStatus(copy);
+  // Reset: ao abrir um produto, todos os dropdowns começam fechados
+  S._proDisc=null;
+  S._proFeatOpen={};
+  S._proFeatDetOpen={};
   S.produtoAtual=copy;
   S.produtosView='detail';_proRender();
 };
@@ -27652,16 +28093,30 @@ window.proNovo=()=>{
   S.produtoAtual={
     id:null,nome:'',breveDescricao:'',publicoAlvo:[],capa:null,
     provasAlvo:[],status:'rascunho',responsaveis:[],features:[],
-    temMentoria:false,mentoriaFeatures:[],
-    argumentosVenda:[],objecoes:[],links:[],anexos:[],
+    temMentoria:'nao',mentoriaDescricao:'',mentoriaFeatures:[],
+    bonusProdutoIds:[],bonusFeatures:[],
+    argumentosVenda:[],objecoes:[],duvidas:[],links:[],anexos:[],
     ordem:Date.now()
   };
+  S._proDisc=null;S._proFeatOpen={};
   S.produtosView='new';_proDirty=false;_proRender();
 };
 window.proEditar=()=>{
   if(!_proCanEdit())return alert('Você não tem permissão para editar.');
   if(!S.produtoAtual)return;
+  S._proFeatOpen={}; // features fechadas ao entrar no modo de edição
   S.produtosView='edit';_proDirty=false;_proRender();
+};
+window.proToggleDisc=(id)=>{
+  if(!S._proDisc)S._proDisc={publico:false,provas:false};
+  S._proDisc[id]=!S._proDisc[id];
+  // Atualiza só o elemento alvo (sem re-render completo) pra preservar scroll
+  const el=document.querySelector(`#tab-produtos .pro-disc[data-disc="${id}"]`);
+  if(!el){_proRender();return;}
+  const open=!!S._proDisc[id];
+  el.classList.toggle('open',open);
+  const btn=el.querySelector('.pro-disc-head');
+  if(btn)btn.setAttribute('aria-expanded',String(open));
 };
 
 // ── Tela de detalhe ──────────────────────────────────────────────────────
@@ -27670,22 +28125,83 @@ function _proRenderDetail(root){
   const canEdit=_proCanEdit();
   const st=p.status||'rascunho';
   const publicos=_proGetPublicoAlvo(p);
-  const provas=Array.isArray(p.provasAlvo)?p.provasAlvo.filter(Boolean):[];
+  const provas=Array.isArray(p.provasAlvo)?_proDedupe(p.provasAlvo):[];
   const responsaveis=_proGetResponsaveis(p);
   const breve=_proGetBreveDescricao(p);
 
-  const publicoChips=publicos.map(t=>`<span class="pro-detail-chip publico" title="Público-alvo">👥 ${_proEsc(t)}</span>`).join('');
-  const provaChips=provas.map(t=>`<span class="pro-detail-chip" title="Prova-alvo">🎯 ${_proEsc(t)}</span>`).join('');
-  const respLabel=responsaveis.length===1?'Responsável':'Responsável';
-  const respChips=responsaveis.map(t=>`<span class="pro-detail-chip responsavel" title="${respLabel}">👤 ${_proEsc(t)}</span>`).join('');
+  // Chips sem ícone repetido — o ícone agora vive no header do disclosure
+  const publicoChips=publicos.map(t=>`<span class="pro-detail-chip publico">${_proEsc(t)}</span>`).join('');
+  const provaChips=provas.map(t=>`<span class="pro-detail-chip">${_proEsc(t)}</span>`).join('');
+  const respChips=responsaveis.map(t=>`<span class="pro-detail-chip responsavel">${_proEsc(t)}</span>`).join('');
+
+  // Estado dos disclosures (preserva entre re-renders; ambos fechados por default)
+  if(!S._proDisc)S._proDisc={publico:false,provas:false};
+  const dPub=!!S._proDisc.publico;
+  const dPrv=!!S._proDisc.provas;
+  const discPublico=publicos.length?`<div class="pro-disc${dPub?' open':''}" data-disc="publico">
+    <button class="pro-disc-head" type="button" onclick="proToggleDisc('publico')" aria-expanded="${dPub}" aria-controls="pro-disc-body-publico">
+      <span class="pro-disc-label"><span class="pro-disc-ico">👥</span> Público-alvo</span>
+      <span class="pro-disc-count">${publicos.length}</span>
+      <span class="pro-disc-chevron" aria-hidden="true">▾</span>
+    </button>
+    <div class="pro-disc-body" id="pro-disc-body-publico" role="region">
+      <div class="pro-detail-chips">${publicoChips}</div>
+    </div>
+  </div>`:'';
+  const discProvas=provas.length?`<div class="pro-disc provas${dPrv?' open':''}" data-disc="provas">
+    <button class="pro-disc-head" type="button" onclick="proToggleDisc('provas')" aria-expanded="${dPrv}" aria-controls="pro-disc-body-provas">
+      <span class="pro-disc-label"><span class="pro-disc-ico">🎯</span> Provas-alvo</span>
+      <span class="pro-disc-count">${provas.length}</span>
+      <span class="pro-disc-chevron" aria-hidden="true">▾</span>
+    </button>
+    <div class="pro-disc-body" id="pro-disc-body-provas" role="region">
+      <div class="pro-detail-chips">${provaChips}</div>
+    </div>
+  </div>`:'';
 
   const feats=(Array.isArray(p.features)?p.features:[]).map(_proNormFeature).filter(Boolean);
   const featsHtml=feats.length?`<div class="pro-feat-grid">${feats.map(f=>_proFeatDetailHTML(f,p.updatedAt)).join('')}</div>`:'<p class="pro-text-block" style="color:var(--t2);font-style:italic">Nenhuma feature cadastrada ainda.</p>';
 
   const mentFeats=(Array.isArray(p.mentoriaFeatures)?p.mentoriaFeatures:[]).map(_proNormFeature).filter(Boolean);
-  const mentBlock=p.temMentoria?`<div class="pro-section pro-section-mentoria">
-    <h4 class="pro-section-title pro-section-title-mentoria">Mentoria</h4>
-    ${mentFeats.length?`<div class="pro-feat-grid">${mentFeats.map(f=>_proFeatDetailHTML(f,p.updatedAt)).join('')}</div>`:'<p class="pro-text-block" style="color:var(--t2);font-style:italic">Inclui mentoria, mas nenhuma feature foi cadastrada ainda.</p>'}
+  const mentStatus=_proMentStatus(p);
+  const mentTitle=mentStatus==='opcional'
+    ?'Mentoria <span class="pro-ment-tag">Opcional</span>'
+    :'Mentoria';
+  const mentEmpty=mentStatus==='opcional'
+    ?'Mentoria disponível como opcional, mas nenhuma feature foi cadastrada ainda.'
+    :'Inclui mentoria, mas nenhuma feature foi cadastrada ainda.';
+  const mentDesc=String(p.mentoriaDescricao||'').trim();
+  const mentDescHtml=mentDesc?`<p class="pro-ment-desc">${_proEsc(mentDesc)}</p>`:'';
+  const mentBlock=(mentStatus!=='nao')?`<div class="pro-section pro-section-mentoria">
+    <h4 class="pro-section-title pro-section-title-mentoria">${mentTitle}</h4>
+    ${mentDescHtml}
+    ${mentFeats.length?`<div class="pro-feat-grid">${mentFeats.map(f=>_proFeatDetailHTML(f,p.updatedAt)).join('')}</div>`:(mentDesc?'':`<p class="pro-text-block" style="color:var(--t2);font-style:italic">${mentEmpty}</p>`)}
+  </div>`:'';
+
+  // ── Bônus: produtos vinculados + features bônus livres ──
+  const bonusProdIds=Array.isArray(p.bonusProdutoIds)?p.bonusProdutoIds:[];
+  const bonusFeats=(Array.isArray(p.bonusFeatures)?p.bonusFeatures:[]).map(_proNormFeature).filter(Boolean);
+  const bonusProdsHtml=bonusProdIds.length?bonusProdIds.map(id=>{
+    const bp=(S.produtos||[]).find(x=>x.id===id);
+    if(!bp)return `<div class="pro-bonus-card orphan"><span>⚠️ Produto removido</span></div>`;
+    const st=bp.status||'rascunho';
+    const stLabel=PRO_STATUS_LABEL[st]||st;
+    const capa=bp.capa?`<div class="pro-bonus-card-capa" style="background-image:url('${_proEscAttr(bp.capa)}')"></div>`:`<div class="pro-bonus-card-capa"><span>📦</span></div>`;
+    return `<div class="pro-bonus-card" onclick="proAbrir('${_proEscAttr(bp.id)}')" title="Abrir ${_proEscAttr(bp.nome||'')}">
+      ${capa}
+      <div class="pro-bonus-card-info">
+        <div class="pro-bonus-card-name">${_proEsc(bp.nome||'(sem nome)')}</div>
+        <div class="pro-bonus-card-pitch">${_proEsc(_proGetBreveDescricao(bp)||'')}</div>
+        <div class="pro-bonus-card-meta"><span class="pro-badge s-${st}">${_proEsc(stLabel)}</span></div>
+      </div>
+      <span class="pro-bonus-card-arrow">›</span>
+    </div>`;
+  }).join(''):'';
+  const bonusFeatsHtml=bonusFeats.length?`<div class="pro-feat-grid" style="margin-top:${bonusProdsHtml?'14px':'0'}">${bonusFeats.map(f=>_proFeatDetailHTML(f,p.updatedAt)).join('')}</div>`:'';
+  const bonusBlock=(bonusProdsHtml||bonusFeatsHtml)?`<div class="pro-section pro-section-bonus">
+    <h4 class="pro-section-title pro-section-title-bonus">🎁 Bônus</h4>
+    ${bonusProdsHtml?`<div class="pro-bonus-cards">${bonusProdsHtml}</div>`:''}
+    ${bonusFeatsHtml}
   </div>`:'';
 
   const argumentos=Array.isArray(p.argumentosVenda)?p.argumentosVenda.filter(Boolean):[];
@@ -27693,6 +28209,9 @@ function _proRenderDetail(root){
 
   const objs=Array.isArray(p.objecoes)?p.objecoes.filter(o=>o&&(o.pergunta||o.resposta)):[];
   const objHtml=objs.length?objs.map(o=>`<div class="pro-obj"><div class="pro-obj-q">${_proEsc(o.pergunta||'')}</div><div class="pro-obj-a">${_proEsc(o.resposta||'')}</div></div>`).join(''):'';
+
+  const duvs=Array.isArray(p.duvidas)?p.duvidas.filter(d=>d&&(d.pergunta||d.resposta)):[];
+  const duvHtml=duvs.length?duvs.map(d=>`<div class="pro-obj"><div class="pro-obj-q">❓ ${_proEsc(d.pergunta||'')}</div><div class="pro-obj-a">${_proEsc(d.resposta||'')}</div></div>`).join(''):'';
 
   const links=Array.isArray(p.links)?p.links.filter(l=>l&&l.url):[];
   const linksHtml=links.length?`<div class="pro-links">${links.map(l=>`<a class="pro-link" href="${_proEscAttr(l.url)}" target="_blank" rel="noopener noreferrer">🔗 ${_proEsc(l.label||l.url)}</a>`).join('')}</div>`:'';
@@ -27724,10 +28243,9 @@ function _proRenderDetail(root){
         ${breve?`<p class="pro-detail-pitch">${_proEsc(breve)}</p>`:''}
         <div class="pro-detail-chips">
           <span class="pro-badge s-${st}">${_proEsc(PRO_STATUS_LABEL[st]||st)}</span>
-          ${publicoChips}
-          ${provaChips}
           ${respChips}
         </div>
+        ${(discPublico||discProvas)?`<div class="pro-disc-row">${discPublico}${discProvas}</div>`:''}
       </div>
       ${adminActions}
     </div>
@@ -27738,8 +28256,10 @@ function _proRenderDetail(root){
     </div>
 
     ${mentBlock}
+    ${bonusBlock}
     ${argHtml?`<div class="pro-section"><h4 class="pro-section-title">Argumentos de venda</h4>${argHtml}</div>`:''}
     ${objHtml?`<div class="pro-section"><h4 class="pro-section-title">Objeções frequentes</h4>${objHtml}</div>`:''}
+    ${duvHtml?`<div class="pro-section"><h4 class="pro-section-title">❓ Dúvidas frequentes</h4>${duvHtml}</div>`:''}
     ${linksHtml?`<div class="pro-section"><h4 class="pro-section-title">Links úteis</h4>${linksHtml}</div>`:''}
     ${anexHtml?`<div class="pro-section"><h4 class="pro-section-title">Anexos</h4>${anexHtml}</div>`:''}
 
@@ -27755,27 +28275,83 @@ function _proFeatDetailHTML(f,productUpdatedAt){
   const titulo=nf.titulo;
   const icone=nf.icone;
   const numero=nf.numeroChave;
-  const isDisp=nf.disponivel;
-  const flagHtml=isDisp
-    ?`<div><span class="pro-feat-flag ok">✓ Incluído</span></div>`
-    :`<div><span class="pro-feat-flag no">✗ Não incluído</span></div>`;
-  // updatedAt
+  const dispKey=_proFeatDisp(nf);          // 'sim' | 'nao' | 'construcao'
+  const isDisp=dispKey==='sim';
+  const isWip=dispKey==='construcao';
+  const dispMeta=PRO_FEAT_DISP_META[dispKey]||PRO_FEAT_DISP_META.sim;
+  const featId=nf.id||'';
+
   const upd=nf.updatedAt||productUpdatedAt;
   const updStr=_proFmtDateShort(upd);
+
+  // Diferenciais é HTML rico — sanitiza. Texto puro antigo é envolvido em <p> via _proRtInitialHTML.
+  const difRaw=String(nf.diferenciais||'').trim();
+  const difHtml=difRaw?`<div class="pro-feat-dif"><span class="pro-feat-dif-label">⭐ Diferenciais</span><div class="pro-feat-dif-body">${_comSanitizePostHTML(_proRtInitialHTML(difRaw))}</div></div>`:'';
+  // Link clicável (validado pra http/https no save). Usa label customizado se houver, senão domínio
+  const linkUrl=String(nf.linkUrl||'').trim();
+  const linkLabel=String(nf.linkLabel||'').trim();
+  const linkText=linkLabel||_proLinkLabel(linkUrl);
+  const linkHtml=linkUrl?`<a class="pro-feat-link" href="${_proEscAttr(linkUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="${_proEscAttr(linkUrl)}"><span class="pro-feat-link-ico">🔗</span> <span>${_proEsc(linkText)}</span></a>`:'';
+  // PDF anexo: botão pra abrir/baixar em nova aba
+  const pdfUrl=String(nf.pdfUrl||'').trim();
+  const pdfLabel=String(nf.pdfLabel||'').trim()||nf.pdfName||'Baixar PDF';
+  const pdfSizeStr=nf.pdfSize?_proFmtSizeShort(nf.pdfSize):'';
+  const pdfHtml=pdfUrl?`<a class="pro-feat-link pro-feat-pdf-btn" href="${_proEscAttr(pdfUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="${_proEscAttr(nf.pdfName||pdfLabel)}${pdfSizeStr?' · '+pdfSizeStr:''}" download><span class="pro-feat-link-ico">📄</span> <span>${_proEsc(pdfLabel)}${pdfSizeStr?` <span class="pro-feat-pdf-size">· ${_proEsc(pdfSizeStr)}</span>`:''}</span></a>`:'';
   const updHtml=updStr?`<span class="pro-feat-updated">Atualizado em ${_proEsc(updStr)}</span>`:'';
 
-  const cls='pro-feat-card'+(isDisp?'':' unavailable');
-  return `<div class="${cls}">
-    <div class="pro-feat-icon">${_proEsc(icone||'•')}</div>
-    <div class="pro-feat-body">
-      <div class="pro-feat-titulo">${_proEsc(titulo)}</div>
-      ${numero?`<span class="pro-feat-numero">${_proEsc(numero)}</span>`:''}
-      ${flagHtml}
-      ${nf.descricao?`<div class="pro-feat-desc">${_proEsc(nf.descricao)}</div>`:''}
-      ${updHtml}
+  // Tem conteúdo expandível? (diferenciais, link, PDF ou data de atualização)
+  const hasDetail=!!(difHtml||linkHtml||pdfHtml||updHtml);
+  if(!S._proFeatDetOpen)S._proFeatDetOpen={};
+  const isOpen=hasDetail&&!!S._proFeatDetOpen[featId];
+
+  const dispCls=dispKey==='nao'?'unavailable':(isWip?'wip':'');
+  const cls=['pro-feat-card',dispCls,hasDetail?'has-detail':'',isOpen?'open':''].filter(Boolean).join(' ');
+  const statusCls=isDisp?'':(isWip?'wip':'no');
+  const statusHtml=`<span class="pro-feat-status ${statusCls}" title="${_proEscAttr(dispMeta.label)}"><span class="pro-feat-dot"></span>${_proEsc(dispMeta.short)}</span>`;
+  const chev=hasDetail?`<button type="button" class="pro-feat-chev" onclick="event.stopPropagation();proToggleFeatDet('${_proEscAttr(featId)}')" aria-label="${isOpen?'Recolher':'Expandir'} feature" title="${isOpen?'Recolher':'Expandir'}">▾</button>`:'';
+  const onclickHead=hasDetail?` onclick="proToggleFeatDet('${_proEscAttr(featId)}')" role="button" aria-expanded="${isOpen}" aria-controls="pro-feat-det-${_proEscAttr(featId)}"`:'';
+  const numHtml=numero?`<span class="pro-feat-numero">${_proEsc(numero)}</span>`:'';
+
+  return `<div class="${cls}" data-feat-det-id="${_proEscAttr(featId)}">
+    <div class="pro-feat-head"${onclickHead}>
+      <div class="pro-feat-icon">${_proEsc(icone||'•')}</div>
+      <div class="pro-feat-headline">
+        <span class="pro-feat-titulo">${_proEsc(titulo)}</span>
+        ${numHtml}
+      </div>
+      ${statusHtml}
+      ${chev}
     </div>
+    ${hasDetail?`<div class="pro-feat-detail" id="pro-feat-det-${_proEscAttr(featId)}">
+      ${difHtml}
+      ${(linkHtml||pdfHtml)?`<div class="pro-feat-actions">${linkHtml}${pdfHtml}</div>`:''}
+      ${updHtml}
+    </div>`:''}
   </div>`;
 }
+
+// Extrai um label amigável a partir da URL pra mostrar como texto do link.
+// Ex: "https://anestreview.com.br/cursos/extensive" → "anestreview.com.br/cursos/extensive"
+function _proLinkLabel(url){
+  const v=String(url||'').trim();
+  if(!v)return '';
+  let s=v.replace(/^https?:\/\//i,'').replace(/^www\./i,'');
+  // Trunca se for muito longo
+  if(s.length>72)s=s.slice(0,70)+'…';
+  return s;
+}
+
+window.proToggleFeatDet=(featId)=>{
+  if(!featId)return;
+  if(!S._proFeatDetOpen)S._proFeatDetOpen={};
+  S._proFeatDetOpen[featId]=!S._proFeatDetOpen[featId];
+  const card=document.querySelector(`#tab-produtos .pro-feat-card[data-feat-det-id="${featId.replace(/"/g,'\\"')}"]`);
+  if(!card)return;
+  const open=!!S._proFeatDetOpen[featId];
+  card.classList.toggle('open',open);
+  const head=card.querySelector('.pro-feat-head');
+  if(head)head.setAttribute('aria-expanded',String(open));
+};
 
 window.proDuplicar=async()=>{
   if(!_proCanEdit()||!S.produtoAtual)return;
@@ -27791,7 +28367,11 @@ window.proDuplicar=async()=>{
   delete copia.responsavel;
   copia.features=(Array.isArray(src.features)?src.features:[]).map(_proNormFeature).filter(Boolean);
   copia.mentoriaFeatures=(Array.isArray(src.mentoriaFeatures)?src.mentoriaFeatures:[]).map(_proNormFeature).filter(Boolean);
-  if(copia.temMentoria==null)copia.temMentoria=false;
+  copia.mentoriaDescricao=String(src.mentoriaDescricao||'');
+  copia.bonusFeatures=(Array.isArray(src.bonusFeatures)?src.bonusFeatures:[]).map(_proNormFeature).filter(Boolean);
+  copia.bonusProdutoIds=(Array.isArray(src.bonusProdutoIds)?src.bonusProdutoIds:[]).filter(x=>typeof x==='string'&&x);
+  copia.duvidas=(Array.isArray(src.duvidas)?src.duvidas:[]).filter(d=>d&&(d.pergunta||d.resposta)).map(d=>({id:_proUid(),pergunta:String(d.pergunta||''),resposta:String(d.resposta||'')}));
+  copia.temMentoria=_proMentStatus(copia);
   copia.nome=src.nome+' (cópia)';copia.status='rascunho';copia.ordem=Date.now();
   copia.createdAt=serverTimestamp();copia.updatedAt=serverTimestamp();
   copia.createdBy=S.currentUser?.username||'?';copia.updatedBy=S.currentUser?.username||'?';
@@ -27823,7 +28403,7 @@ function _proRenderEdit(root){
   const capaLabel=p.capa?'':'Sem capa';
   const breve=_proGetBreveDescricao(p);
   const publicos=_proGetPublicoAlvo(p);
-  const provas=Array.isArray(p.provasAlvo)?p.provasAlvo.filter(Boolean):[];
+  const provas=Array.isArray(p.provasAlvo)?_proDedupe(p.provasAlvo):[];
   const responsaveis=_proGetResponsaveis(p);
   if(!Array.isArray(p.publicoAlvo))p.publicoAlvo=publicos;
   if(!Array.isArray(p.provasAlvo))p.provasAlvo=provas;
@@ -27836,7 +28416,7 @@ function _proRenderEdit(root){
     <h2 class="pro-detail-nome" style="font-size:24px;margin-bottom:16px">${isNew?'Novo produto':'Editar produto'}</h2>
     <div class="pro-edit-form">
 
-      <div class="pro-edit-accordion open" data-acc="basico">
+      <div class="pro-edit-accordion" data-acc="basico">
         <div class="pro-edit-acc-head" onclick="_proToggleAcc('basico')">
           <span class="pro-edit-acc-title">Básico</span><span class="pro-edit-acc-caret">▾</span>
         </div>
@@ -27899,14 +28479,40 @@ function _proRenderEdit(root){
         <div class="pro-edit-acc-body">
           <div class="pro-toggle-wrap" style="margin-bottom:14px">
             <label class="fl" style="margin:0">Tem mentoria?</label>
-            <div class="pro-toggle">
-              <button type="button" class="${p.temMentoria?'on':''}" onclick="_proSetMentoria(true)">Sim</button>
-              <button type="button" class="${!p.temMentoria?'on':''}" onclick="_proSetMentoria(false)">Não</button>
+            <div class="pro-toggle pro-toggle-3">
+              <button type="button" class="${_proMentStatus(p)==='sim'?'on':''}" onclick="_proSetMentoria('sim')">Sim</button>
+              <button type="button" class="${_proMentStatus(p)==='opcional'?'on wip':''}" onclick="_proSetMentoria('opcional')">Opcional</button>
+              <button type="button" class="${_proMentStatus(p)==='nao'?'on':''}" onclick="_proSetMentoria('nao')">Não</button>
             </div>
           </div>
-          <div id="pro-mentoria-body" style="${p.temMentoria?'':'display:none'}">
+          <div id="pro-mentoria-body" style="${_proMentStatus(p)==='nao'?'display:none':''}">
+            <div class="fg" style="margin-bottom:14px">
+              <label class="fl">Descrição da mentoria</label>
+              <textarea class="fc" rows="3" placeholder="Descreva brevemente o que está incluído na mentoria (aparece no catálogo abaixo do título Mentoria)" oninput="S.produtoAtual.mentoriaDescricao=this.value;_proMark()">${_proEsc(p.mentoriaDescricao||'')}</textarea>
+            </div>
             <div id="pro-f-mentfeatures">${(p.mentoriaFeatures||[]).map((f,i)=>_proFeatEditHTML(f,i,'mentoriaFeatures')).join('')}</div>
             <button class="btn btn-s btn-sm" onclick="_proFeatAdd('mentoriaFeatures')" style="margin-top:8px">＋ Adicionar feature de mentoria</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pro-edit-accordion" data-acc="bonus">
+        <div class="pro-edit-acc-head" onclick="_proToggleAcc('bonus')">
+          <span class="pro-edit-acc-title">🎁 Bônus${(((p.bonusProdutoIds||[]).length+(p.bonusFeatures||[]).length)>0)?(' · '+((p.bonusProdutoIds||[]).length+(p.bonusFeatures||[]).length)):''}</span><span class="pro-edit-acc-caret">▾</span>
+        </div>
+        <div class="pro-edit-acc-body">
+          <p style="font-size:12px;color:var(--t2);margin:0 0 14px;line-height:1.5">Vincule produtos do catálogo que vão como bônus deste produto, e adicione features bônus livres (cursos, materiais, brindes etc).</p>
+
+          <div class="pro-bonus-block">
+            <label class="fl" style="margin:0 0 8px;display:flex;align-items:center;gap:8px"><span>📦 Produtos vinculados</span><span class="pro-edit-acc-caret" style="font-size:10px;color:var(--t2);font-family:'JetBrains Mono',monospace">${(p.bonusProdutoIds||[]).length}</span></label>
+            <div id="pro-f-bonus-prods">${_proBonusProdutosEditHTML(p.bonusProdutoIds||[])}</div>
+            <button class="btn btn-s btn-sm" onclick="_proBonusOpenProdPicker(event)" style="margin-top:8px">＋ Vincular produto do catálogo</button>
+          </div>
+
+          <div class="pro-bonus-block" style="margin-top:18px">
+            <label class="fl" style="margin:0 0 8px;display:block">✨ Features bônus livres</label>
+            <div id="pro-f-bonusfeatures">${(p.bonusFeatures||[]).map((f,i)=>_proFeatEditHTML(f,i,'bonusFeatures')).join('')}</div>
+            <button class="btn btn-s btn-sm" onclick="_proFeatAdd('bonusFeatures')" style="margin-top:8px">＋ Adicionar feature bônus</button>
           </div>
         </div>
       </div>
@@ -27928,6 +28534,17 @@ function _proRenderEdit(root){
         <div class="pro-edit-acc-body">
           <div id="pro-f-objs">${(p.objecoes||[]).map((o,i)=>_proObjEditHTML(o,i)).join('')}</div>
           <button class="btn btn-s btn-sm" onclick="_proObjAdd()" style="margin-top:8px">＋ Adicionar objeção</button>
+        </div>
+      </div>
+
+      <div class="pro-edit-accordion" data-acc="duvidas">
+        <div class="pro-edit-acc-head" onclick="_proToggleAcc('duvidas')">
+          <span class="pro-edit-acc-title">❓ Dúvidas frequentes · ${(p.duvidas||[]).length}</span><span class="pro-edit-acc-caret">▾</span>
+        </div>
+        <div class="pro-edit-acc-body">
+          <p style="font-size:12px;color:var(--t2);margin:0 0 10px;line-height:1.5">FAQ pra suporte: perguntas comuns que alunos/clientes fazem sobre o produto, com a resposta oficial.</p>
+          <div id="pro-f-duvs">${(p.duvidas||[]).map((d,i)=>_proDuvEditHTML(d,i)).join('')}</div>
+          <button class="btn btn-s btn-sm" onclick="_proDuvAdd()" style="margin-top:8px">＋ Adicionar dúvida</button>
         </div>
       </div>
 
@@ -27959,7 +28576,8 @@ function _proRenderEdit(root){
     <div class="pro-edit-footer">
       ${dirtyPill}
       <button class="btn btn-s" onclick="proVoltarLista()">Cancelar</button>
-      <button class="btn btn-p" onclick="_proSalvar()">💾 Salvar</button>
+      <button class="btn btn-p" id="pro-save-btn" onclick="_proSalvar()">💾 Salvar</button>
+      <span id="pro-save-feedback" class="pro-save-feedback" style="display:none"></span>
     </div>
   `;
   _proBindDropzone();
@@ -28072,60 +28690,382 @@ window._proRespFlush=(inp)=>{
 };
 
 // Toggle mentoria — atualiza só o bloco da mentoria (preserva accordions abertos)
+// Aceita 'sim' | 'opcional' | 'nao'. Compat: bool antigo true→'sim', false→'nao'.
 window._proSetMentoria=(v)=>{
-  S.produtoAtual.temMentoria=!!v;
-  if(v&&!Array.isArray(S.produtoAtual.mentoriaFeatures))S.produtoAtual.mentoriaFeatures=[];
+  const status=(v==='sim'||v===true)?'sim':(v==='opcional'?'opcional':'nao');
+  S.produtoAtual.temMentoria=status;
+  const showFeats=(status!=='nao');
+  if(showFeats&&!Array.isArray(S.produtoAtual.mentoriaFeatures))S.produtoAtual.mentoriaFeatures=[];
   _proMark();
-  // Atualiza toggle visual
+  // Atualiza toggle visual (3 botões: Sim / Opcional / Não)
   const accHead=document.querySelector('#tab-produtos .pro-edit-accordion[data-acc="mentoria"] .pro-toggle-wrap');
   if(accHead){
     const btns=accHead.querySelectorAll('.pro-toggle button');
-    if(btns[0])btns[0].classList.toggle('on',!!v);
-    if(btns[1])btns[1].classList.toggle('on',!v);
+    if(btns[0]){btns[0].classList.toggle('on',status==='sim');btns[0].classList.remove('wip');}
+    if(btns[1]){btns[1].classList.toggle('on',status==='opcional');btns[1].classList.toggle('wip',status==='opcional');}
+    if(btns[2]){btns[2].classList.toggle('on',status==='nao');btns[2].classList.remove('wip');}
   }
-  // Show/hide body interno
+  // Show/hide body interno (mostra pra sim/opcional, esconde só pra 'nao')
   const body=document.getElementById('pro-mentoria-body');
-  if(body)body.style.display=v?'':'none';
+  if(body)body.style.display=showFeats?'':'none';
   // Atualiza título do accordion
   const accTitle=document.querySelector('#tab-produtos .pro-edit-accordion[data-acc="mentoria"] .pro-edit-acc-title');
   if(accTitle){
     const count=(S.produtoAtual.mentoriaFeatures||[]).length;
-    accTitle.textContent='Mentoria'+(v?(' · '+count):'');
+    const tag=status==='opcional'?' · opcional':'';
+    accTitle.textContent='Mentoria'+(showFeats?(' · '+count+tag):'');
   }
 };
 
 function _proFeatEditHTML(f,i,source){
   source=source||'features';
   const icone=f.icone||PRO_FEAT_ICONE_DEFAULT;
-  const disp=(f.disponivel!==false);
+  const disp=_proFeatDisp(f);
   const titleInputId=`pro-feat-titulo-${source}-${i}`;
-  return `<div class="pro-feat-edit" data-feat-i="${i}" data-feat-source="${source}">
-    <div class="pro-feat-edit-head">
-      <span class="pro-feat-handle" title="Arrastar">⠿</span>
-      <div class="pro-feat-edit-icon" onclick="_proOpenIconPop(event,${i},'${source}')" title="Trocar ícone">${_proEsc(icone)}</div>
-      <input class="fc" id="${titleInputId}" placeholder="Título da feature" value="${_proEscAttr(f.titulo)}" oninput="_proFeatSet(${i},'titulo',this.value,'${source}')" style="flex:1"/>
+  const featId=f.id||'';
+  if(!S._proFeatOpen)S._proFeatOpen={};
+  const isOpen=!!S._proFeatOpen[featId];
+  const qty=(f.numeroChave||'').trim();
+  // Micro-resumo no head pra dar contexto quando fechado
+  const dispMeta=PRO_FEAT_DISP_META[disp]||PRO_FEAT_DISP_META.sim;
+  const dispPillCls=disp==='sim'?'ok':(disp==='construcao'?'wip':'no');
+  const headPills=[
+    `<span class="pro-feat-edit-head-pill ${dispPillCls}">${dispMeta.icon} ${_proEsc(dispMeta.short)}</span>`,
+    qty?`<span class="pro-feat-edit-head-pill qty">${_proEsc(qty)}</span>`:''
+  ].filter(Boolean).join('');
+  return `<div class="pro-feat-edit${isOpen?' open':''}" data-feat-i="${i}" data-feat-source="${source}" data-feat-id="${_proEscAttr(featId)}" ondragover="_proFeatDragOver(event)" ondragleave="_proFeatDragLeave(event)" ondrop="_proFeatDrop(event)">
+    <div class="pro-feat-edit-head" onclick="_proFeatHeadClick(event,'${_proEscAttr(featId)}')">
+      <span class="pro-feat-handle" title="Arrastar pra reordenar" draggable="true" ondragstart="_proFeatDragStart(event)" ondragend="_proFeatDragEnd(event)">⠿</span>
+      <div class="pro-feat-edit-icon" onclick="event.stopPropagation();_proOpenIconPop(event,${i},'${source}')" title="Trocar ícone">${_proEsc(icone)}</div>
+      <input class="fc" id="${titleInputId}" placeholder="Título da feature" value="${_proEscAttr(f.titulo)}" oninput="_proFeatSet(${i},'titulo',this.value,'${source}')" onclick="event.stopPropagation()" style="flex:1;min-width:0"/>
+      <div class="pro-feat-edit-head-meta">${headPills}</div>
       <div class="pro-item-actions">
-        <button class="pro-icon-btn" onclick="_proFeatUp(${i},'${source}')" title="Mover pra cima">↑</button>
-        <button class="pro-icon-btn" onclick="_proFeatDown(${i},'${source}')" title="Mover pra baixo">↓</button>
-        <button class="pro-icon-btn" onclick="_proFeatRm(${i},'${source}')" title="Remover">🗑</button>
+        <button class="pro-icon-btn" onclick="event.stopPropagation();_proFeatUp(${i},'${source}')" title="Mover pra cima">↑</button>
+        <button class="pro-icon-btn" onclick="event.stopPropagation();_proFeatDown(${i},'${source}')" title="Mover pra baixo">↓</button>
+        <button class="pro-icon-btn" onclick="event.stopPropagation();_proFeatRm(${i},'${source}')" title="Remover">🗑</button>
+        <button class="pro-feat-edit-toggle" type="button" onclick="event.stopPropagation();_proFeatToggle('${_proEscAttr(featId)}')" aria-expanded="${isOpen}" aria-controls="pro-feat-body-${_proEscAttr(featId)}" title="${isOpen?'Recolher':'Expandir'}">▾</button>
       </div>
     </div>
-    <div class="pro-feat-edit-fields">
-      <div class="pro-feat-edit-row">
-        <label class="fl" style="min-width:140px">Disponível?</label>
-        <div class="pro-toggle">
-          <button type="button" class="${disp?'on':''}" onclick="_proFeatSet(${i},'disponivel',true,'${source}')">Sim</button>
-          <button type="button" class="${!disp?'on':''}" onclick="_proFeatSet(${i},'disponivel',false,'${source}')">Não</button>
+    <div class="pro-feat-edit-body" id="pro-feat-body-${_proEscAttr(featId)}">
+      <div class="pro-feat-edit-fields">
+        <div class="pro-feat-edit-row">
+          <label class="fl" style="min-width:140px">Disponível?</label>
+          <div class="pro-toggle pro-toggle-3">
+            <button type="button" class="${disp==='sim'?'on':''}" onclick="_proFeatSet(${i},'disponivel','sim','${source}')">Sim</button>
+            <button type="button" class="${disp==='construcao'?'on wip':''}" onclick="_proFeatSet(${i},'disponivel','construcao','${source}')">🛠 Em construção</button>
+            <button type="button" class="${disp==='nao'?'on':''}" onclick="_proFeatSet(${i},'disponivel','nao','${source}')">Não</button>
+          </div>
+        </div>
+        <div class="pro-feat-edit-row">
+          <label class="fl" style="min-width:140px">Quantidade</label>
+          <input class="fc" placeholder="ex: 50h, R$ 199, 1.200..." value="${_proEscAttr(f.numeroChave||'')}" oninput="_proFeatSet(${i},'numeroChave',this.value,'${source}')" style="flex:1;min-width:160px"/>
+        </div>
+        ${_proRtFieldHTML({id:`pro-rt-dif-${f.id||'idx'+i}`, value:f.diferenciais||'', placeholder:'Diferenciais / observações (o que torna essa feature especial?)', label:'Diferenciais', featI:i, featSource:source, featField:'diferenciais', featId:f.id||''})}
+        <div class="pro-feat-edit-row" style="align-items:flex-start">
+          <label class="fl" style="min-width:140px;padding-top:8px">🔗 Link</label>
+          <div style="display:flex;gap:8px;flex:1;min-width:200px;flex-wrap:wrap">
+            <input class="fc" type="text" placeholder="Texto do botão (ex: Ver na Hotmart)" maxlength="60" value="${_proEscAttr(f.linkLabel||'')}" oninput="_proFeatSet(${i},'linkLabel',this.value,'${source}')" style="flex:1 1 180px;min-width:140px"/>
+            <input class="fc" type="url" placeholder="https://..." value="${_proEscAttr(f.linkUrl||'')}" oninput="_proFeatSet(${i},'linkUrl',this.value,'${source}')" style="flex:2 1 240px;min-width:200px"/>
+          </div>
+        </div>
+        <div class="pro-feat-edit-row" style="align-items:flex-start">
+          <label class="fl" style="min-width:140px;padding-top:8px">📄 PDF</label>
+          <div style="display:flex;gap:8px;flex:1;min-width:200px;flex-wrap:wrap;align-items:center">
+            <input class="fc" type="text" placeholder="Texto do botão (ex: Baixar ementa)" maxlength="60" value="${_proEscAttr(f.pdfLabel||'')}" oninput="_proFeatSet(${i},'pdfLabel',this.value,'${source}')" style="flex:1 1 180px;min-width:140px"/>
+            <input type="file" id="pro-feat-pdf-file-${f.id}" accept="application/pdf,.pdf" style="display:none" onchange="_proFeatPdfUpload(${i},'${source}',this)"/>
+            ${f.pdfUrl?`
+              <div class="pro-feat-pdf-current">
+                <a href="${_proEscAttr(f.pdfUrl)}" target="_blank" rel="noopener noreferrer" class="pro-feat-pdf-link" title="Abrir PDF atual">📄 ${_proEsc(f.pdfName||'arquivo.pdf')}${f.pdfSize?` <span class="pro-feat-pdf-size">· ${_proEsc(_proFmtSizeShort(f.pdfSize))}</span>`:''}</a>
+                <button type="button" class="pro-icon-btn" onclick="_proFeatPdfRemove(${i},'${source}')" title="Remover PDF">🗑</button>
+                <button type="button" class="btn btn-s btn-sm" id="pro-feat-pdf-btn-${f.id}" onclick="document.getElementById('pro-feat-pdf-file-${f.id}').click()">Trocar</button>
+              </div>
+            `:`<button type="button" class="btn btn-s btn-sm" id="pro-feat-pdf-btn-${f.id}" onclick="document.getElementById('pro-feat-pdf-file-${f.id}').click()">📎 Anexar PDF (máx 20MB)</button>`}
+          </div>
         </div>
       </div>
-      <div class="pro-feat-edit-row">
-        <label class="fl" style="min-width:140px">Número-chave (opcional)</label>
-        <input class="fc" placeholder="ex: 50h, R$ 199, 1.200..." value="${_proEscAttr(f.numeroChave||'')}" oninput="_proFeatSet(${i},'numeroChave',this.value,'${source}')" style="flex:1;min-width:160px"/>
-      </div>
-      <textarea class="fc" rows="2" placeholder="Descrição (opcional)" oninput="_proFeatSet(${i},'descricao',this.value,'${source}')">${_proEsc(f.descricao||'')}</textarea>
     </div>
   </div>`;
 }
+
+// ─── Drag-and-drop pra reordenar features ──────────────────────────────
+// O handle ⠿ é o único elemento draggable. O card todo aceita drop.
+// Funciona apenas dentro do mesmo source (features/mentoriaFeatures/bonusFeatures).
+let _proFeatDragState=null; // {source, featId}
+
+window._proFeatDragStart=(e)=>{
+  const handle=e.target.closest('.pro-feat-handle');
+  if(!handle){e.preventDefault();return;}
+  const card=handle.closest('.pro-feat-edit');
+  if(!card){e.preventDefault();return;}
+  const source=card.getAttribute('data-feat-source');
+  const featId=card.getAttribute('data-feat-id');
+  if(!source||!featId){e.preventDefault();return;}
+  _proFeatDragState={source,featId};
+  try{
+    e.dataTransfer.effectAllowed='move';
+    e.dataTransfer.setData('text/plain',featId);
+    // Ghost: usa o card inteiro como preview, alinhado ao cursor pelo handle
+    const rect=card.getBoundingClientRect();
+    e.dataTransfer.setDragImage(card,e.clientX-rect.left,e.clientY-rect.top);
+  }catch(err){}
+  // Aplica classe num tick pra evitar que o browser capture o estado .dragging como ghost
+  setTimeout(()=>card.classList.add('pro-feat-dragging'),0);
+};
+
+window._proFeatDragOver=(e)=>{
+  if(!_proFeatDragState)return;
+  const card=e.currentTarget;
+  if(card.getAttribute('data-feat-source')!==_proFeatDragState.source)return;
+  if(card.getAttribute('data-feat-id')===_proFeatDragState.featId)return;
+  e.preventDefault();
+  try{e.dataTransfer.dropEffect='move';}catch(err){}
+  const rect=card.getBoundingClientRect();
+  const insertAfter=e.clientY>(rect.top+rect.height/2);
+  card.classList.remove('drop-before','drop-after');
+  card.classList.add(insertAfter?'drop-after':'drop-before');
+};
+
+window._proFeatDragLeave=(e)=>{
+  const card=e.currentTarget;
+  // Só limpa se realmente saiu pra fora do card (não pra um filho)
+  const to=e.relatedTarget;
+  if(to&&card.contains(to))return;
+  card.classList.remove('drop-before','drop-after');
+};
+
+window._proFeatDrop=(e)=>{
+  if(!_proFeatDragState)return;
+  const card=e.currentTarget;
+  if(card.getAttribute('data-feat-source')!==_proFeatDragState.source){_proFeatDragClear();return;}
+  if(card.getAttribute('data-feat-id')===_proFeatDragState.featId){_proFeatDragClear();return;}
+  e.preventDefault();
+  const source=_proFeatDragState.source;
+  const fromId=_proFeatDragState.featId;
+  const arr=_proFeatArr(source);
+  const fromIdx=arr.findIndex(f=>f&&f.id===fromId);
+  const toCardId=card.getAttribute('data-feat-id');
+  let toIdx=arr.findIndex(f=>f&&f.id===toCardId);
+  if(fromIdx<0||toIdx<0){_proFeatDragClear();return;}
+  const rect=card.getBoundingClientRect();
+  const insertAfter=e.clientY>(rect.top+rect.height/2);
+  // Reordena: tira do fromIdx, ajusta toIdx se necessário, insere
+  const [moved]=arr.splice(fromIdx,1);
+  if(fromIdx<toIdx)toIdx--;
+  if(insertAfter)toIdx++;
+  // clamp
+  if(toIdx<0)toIdx=0;
+  if(toIdx>arr.length)toIdx=arr.length;
+  arr.splice(toIdx,0,moved);
+  _proMark();
+  _proFeatDragClear();
+  _proRefreshFeats(source); // re-render preserva accordion aberto via featId
+};
+
+window._proFeatDragEnd=(e)=>{_proFeatDragClear();};
+
+function _proFeatDragClear(){
+  _proFeatDragState=null;
+  document.querySelectorAll('#tab-produtos .pro-feat-edit').forEach(el=>{
+    el.classList.remove('pro-feat-dragging','drop-before','drop-after');
+  });
+}
+
+window._proFeatToggle=(featId)=>{
+  if(!featId)return;
+  if(!S._proFeatOpen)S._proFeatOpen={};
+  S._proFeatOpen[featId]=!S._proFeatOpen[featId];
+  const card=document.querySelector(`#tab-produtos .pro-feat-edit[data-feat-id="${featId.replace(/"/g,'\\"')}"]`);
+  if(!card)return;
+  const open=!!S._proFeatOpen[featId];
+  card.classList.toggle('open',open);
+  const btn=card.querySelector('.pro-feat-edit-toggle');
+  if(btn){btn.setAttribute('aria-expanded',String(open));btn.title=open?'Recolher':'Expandir';}
+};
+// Click no head do editor de feature: abre/fecha o dropdown.
+// Elementos interativos dentro do head (input, botões) usam stopPropagation()
+// pra não disparar o toggle quando o user só quer interagir com eles.
+window._proFeatHeadClick=(ev,featId)=>{
+  if(!featId)return;
+  const t=ev.target;
+  if(!t)return;
+  const tag=(t.tagName||'').toLowerCase();
+  if(tag==='input'||tag==='textarea'||tag==='select'||tag==='button'||tag==='a')return;
+  _proFeatToggle(featId);
+};
+
+// ─── Mini editor rich-text (reutilizável dentro da aba Produtos) ────────
+// Cada editor é um contenteditable identificado por `id`. Os dados-attrs
+// `data-feat-i`, `data-feat-source`, `data-feat-field` ligam o editor à
+// posição correta no estado, pra o commit gravar via _proFeatSet.
+function _proRtInitialHTML(value){
+  const v=String(value||'').trim();
+  if(!v)return '';
+  // Se já é HTML (tem alguma tag), retorna como veio (será sanitizado no save)
+  if(/<[a-z][^>]*>/i.test(v))return v;
+  // Texto puro: escapa e envolve em <p>, preservando quebras de linha como <br>
+  const esc=v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return '<p>'+esc.replace(/\n/g,'<br>')+'</p>';
+}
+function _proRtFieldHTML(opts){
+  const id=opts.id, value=opts.value||'', placeholder=opts.placeholder||'';
+  const label=opts.label||'';
+  const i=opts.featI, src=opts.featSource||'features', field=opts.featField||'diferenciais';
+  const fid=opts.featId||'';
+  const innerHtml=_proRtInitialHTML(value);
+  const empty=innerHtml?'0':'1';
+  // Color palette compacta (texto + fundo) baseada no padrão do projeto
+  const txtCs=['#e6edf3','#f85149','#fb8f44','#d29922','#3fb950','#2f81f7','#a371f7'];
+  const bgCs=['transparent','rgba(248,81,73,.25)','rgba(251,143,68,.25)','rgba(210,153,34,.25)','rgba(63,185,80,.25)','rgba(47,129,247,.25)'];
+  const swT=txtCs.map(c=>`<button type="button" onclick="_proRtColor('${id}','foreColor','${c}')" class="ftb-c" style="background:${c}" title="Texto ${c}"></button>`).join('');
+  const swB=bgCs.map(c=>`<button type="button" onclick="_proRtColor('${id}','hiliteColor','${c}')" class="ftb-c" style="background:${c==='transparent'?'transparent':c};${c==='transparent'?'border:1px dashed var(--t2)':''}" title="Fundo"></button>`).join('');
+  return `<div class="pro-rt">
+    <div class="pro-rt-tb">
+      ${label?`<span class="pro-rt-label">${_proEsc(label)}</span>`:''}
+      <button type="button" class="ftb" onclick="_proRtExec('${id}','bold')" title="Negrito (Ctrl+B)"><strong>B</strong></button>
+      <button type="button" class="ftb" onclick="_proRtExec('${id}','italic')" title="Itálico (Ctrl+I)"><em>I</em></button>
+      <button type="button" class="ftb" onclick="_proRtExec('${id}','underline')" title="Sublinhado"><u>U</u></button>
+      <button type="button" class="ftb" onclick="_proRtExec('${id}','strikeThrough')" title="Riscado"><s>S</s></button>
+      <span class="ftb-sep"></span>
+      <button type="button" class="ftb" onclick="_proRtExec('${id}','insertUnorderedList')" title="Lista">• Lista</button>
+      <button type="button" class="ftb" onclick="_proRtExec('${id}','insertOrderedList')" title="Lista numerada">1. Lista</button>
+      <button type="button" class="ftb" onclick="_proRtCode('${id}')" title="Código inline"><code style="font-size:11px">&lt;/&gt;</code></button>
+      <button type="button" class="ftb" onclick="_proRtLink('${id}')" title="Inserir link">🔗</button>
+      <button type="button" class="ftb" onclick="_proRtClean('${id}')" title="Limpar formatação externa (mantém texto, listas e links)">🧹</button>
+      <span class="ftb-sep"></span>
+      <div class="pro-rt-colors" title="Cor do texto">${swT}</div>
+      <span class="ftb-sep"></span>
+      <div class="pro-rt-colors" title="Cor de fundo">${swB}</div>
+    </div>
+    <div class="pro-rt-body fc" id="${id}" contenteditable="true" data-placeholder="${_proEscAttr(placeholder)}" data-empty="${empty}" data-feat-i="${i}" data-feat-id="${_proEscAttr(fid)}" data-feat-source="${src}" data-feat-field="${field}" oninput="_proRtCommit('${id}')" onfocus="this.dataset.empty='0'" onblur="_proRtMaybeEmpty('${id}')">${innerHtml}</div>
+  </div>`;
+}
+function _proRtFocus(id){const el=document.getElementById(id);if(el)el.focus();return el;}
+window._proRtExec=(id,cmd)=>{
+  if(!_proRtFocus(id))return;
+  try{document.execCommand('styleWithCSS',false,true);}catch(e){}
+  document.execCommand(cmd,false,null);
+  _proRtCommit(id);
+};
+window._proRtColor=(id,cmd,val)=>{
+  if(!_proRtFocus(id))return;
+  try{document.execCommand('styleWithCSS',false,true);}catch(e){}
+  document.execCommand(cmd,false,val);
+  _proRtCommit(id);
+};
+window._proRtCode=(id)=>{
+  const el=_proRtFocus(id);if(!el)return;
+  const sel=window.getSelection();if(!sel||!sel.rangeCount){_proRtCommit(id);return;}
+  const r=sel.getRangeAt(0);const txt=r.toString()||'codigo';
+  const code=document.createElement('code');code.textContent=txt;
+  r.deleteContents();r.insertNode(code);
+  r.setStartAfter(code);r.setEndAfter(code);sel.removeAllRanges();sel.addRange(r);
+  _proRtCommit(id);
+};
+// Limpa formatação externa (cola do Word, Google Docs, web) — mantém só estrutura
+// básica: p, br, ul/ol/li, strong/b, em/i, u, s, code, a[href].
+// Se há seleção, tenta aplicar só nela via execCommand; senão limpa tudo.
+window._proRtClean=(id)=>{
+  const el=_proRtFocus(id);if(!el)return;
+  const sel=window.getSelection();
+  const hasSel=sel&&sel.rangeCount&&sel.toString().trim().length>0;
+  // Tenta removeFormat nativo primeiro (apaga inline styles inline básicos)
+  try{document.execCommand('removeFormat',false,null);}catch(e){}
+  // Independente do execCommand, faz pass adicional limpando spans/styles/classes
+  // no innerHTML inteiro — captura coisa que o execCommand não pega (atributos
+  // style em parágrafos, classes, font tags, etc).
+  el.innerHTML=_proRtStripStyle(el.innerHTML);
+  _proRtCommit(id);
+  if(!hasSel){
+    // Sem seleção, dá um feedback discreto que limpou
+    el.dataset.empty=el.textContent.trim()?'0':'1';
+  }
+};
+function _proRtStripStyle(html){
+  if(!html)return '';
+  const tmp=document.createElement('div');
+  tmp.innerHTML=String(html);
+  const allowed=new Set(['P','BR','UL','OL','LI','STRONG','B','EM','I','U','S','CODE','A','DIV']);
+  function walk(node){
+    [...node.childNodes].forEach(child=>{
+      if(child.nodeType===8){child.remove();return;} // comentário
+      if(child.nodeType!==1){return;}                 // texto: mantém
+      const tag=child.tagName;
+      if(!allowed.has(tag)){
+        // Tag não-whitelist → desempacota (mantém conteúdo, descarta a tag)
+        while(child.firstChild)child.parentNode.insertBefore(child.firstChild,child);
+        child.remove();
+        return;
+      }
+      // DIV vira P pra simplificar (cola do Docs cria muitos divs)
+      if(tag==='DIV'){
+        const p=document.createElement('p');
+        while(child.firstChild)p.appendChild(child.firstChild);
+        child.parentNode.replaceChild(p,child);
+        walk(p);
+        return;
+      }
+      // Whitelisted: remove TODOS os atributos (style, class, id, etc)
+      // Exceção: <a> mantém href, target, rel
+      [...child.attributes].forEach(attr=>{
+        const n=attr.name.toLowerCase();
+        if(tag==='A'&&(n==='href'||n==='target'||n==='rel'))return;
+        child.removeAttribute(attr.name);
+      });
+      if(tag==='A'){
+        const h=child.getAttribute('href')||'';
+        if(/^javascript:/i.test(h)){child.removeAttribute('href');}
+        else{child.setAttribute('target','_blank');child.setAttribute('rel','noopener noreferrer');}
+      }
+      walk(child);
+    });
+  }
+  walk(tmp);
+  return tmp.innerHTML;
+}
+window._proRtLink=(id)=>{
+  const el=_proRtFocus(id);if(!el)return;
+  const sel=window.getSelection();
+  const selectedText=sel&&sel.rangeCount?sel.toString():'';
+  const url=prompt('URL do link (https://...)','https://');
+  if(!url)return;
+  if(!/^https?:\/\//i.test(url)){alert('Use uma URL começando com http:// ou https://');return;}
+  if(selectedText){
+    document.execCommand('createLink',false,url);
+  }else{
+    const label=prompt('Texto do link:',url)||url;
+    const a=document.createElement('a');a.href=url;a.textContent=label;a.target='_blank';a.rel='noopener';
+    if(sel&&sel.rangeCount){const r=sel.getRangeAt(0);r.insertNode(a);r.setStartAfter(a);r.setEndAfter(a);sel.removeAllRanges();sel.addRange(r);}
+    else{el.appendChild(a);}
+  }
+  _proRtCommit(id);
+};
+window._proRtCommit=(id)=>{
+  const el=document.getElementById(id);if(!el)return;
+  const source=el.dataset.featSource;
+  const field=el.dataset.featField;
+  const fid=el.dataset.featId;
+  el.dataset.empty=(el.textContent.trim()||el.querySelector('img'))?'0':'1';
+  if(!source||!field)return;
+  // Busca a feature pelo ID estável (não pelo índice — índice pode descasar
+  // entre features após add/remove/reorder, causando escrita no item errado).
+  const arr=_proFeatArr(source);
+  let i=-1;
+  if(fid)i=arr.findIndex(f=>f&&f.id===fid);
+  if(i<0){
+    // Fallback pro índice cru se id não bater (compat retroativa)
+    const ii=parseInt(el.dataset.featI,10);
+    if(!isNaN(ii)&&arr[ii])i=ii;
+  }
+  if(i<0)return;
+  // Grava HTML cru no estado; sanitização acontece no save (_proPrepareFeatures)
+  _proFeatSet(i,field,el.innerHTML,source);
+};
+window._proRtMaybeEmpty=(id)=>{
+  const el=document.getElementById(id);if(!el)return;
+  // Se o user saiu sem digitar nada, mostra o placeholder
+  const clean=el.innerHTML.replace(/<br\s*\/?\s*>/gi,'').replace(/<p>\s*<\/p>/gi,'').trim();
+  if(!clean||clean==='<p></p>'){el.innerHTML='';el.dataset.empty='1';}
+};
 
 function _proArgEditHTML(a,i){
   return `<div class="pro-edit-row" data-arg-i="${i}">
@@ -28147,6 +29087,22 @@ function _proObjEditHTML(o,i){
     </div>
     <input class="fc" placeholder="Pergunta/objeção do cliente" value="${_proEscAttr(o.pergunta)}" oninput="_proObjSet(${i},'pergunta',this.value)" style="margin-bottom:8px"/>
     <textarea class="fc" rows="2" placeholder="Resposta sugerida" oninput="_proObjSet(${i},'resposta',this.value)">${_proEsc(o.resposta)}</textarea>
+  </div>`;
+}
+
+function _proDuvEditHTML(d,i){
+  return `<div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg3);margin-bottom:8px" data-duv-i="${i}">
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+      <span class="pro-feat-handle">⠿</span>
+      <strong style="font-size:12px;color:var(--t2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase">Dúvida ${i+1}</strong>
+      <div class="pro-item-actions">
+        <button class="pro-icon-btn" onclick="_proDuvUp(${i})">↑</button>
+        <button class="pro-icon-btn" onclick="_proDuvDown(${i})">↓</button>
+        <button class="pro-icon-btn" onclick="_proDuvRm(${i})">🗑</button>
+      </div>
+    </div>
+    <input class="fc" placeholder="Pergunta (ex: Tem certificado?)" value="${_proEscAttr(d.pergunta)}" oninput="_proDuvSet(${i},'pergunta',this.value)" style="margin-bottom:8px"/>
+    <textarea class="fc" rows="3" placeholder="Resposta" oninput="_proDuvSet(${i},'resposta',this.value)">${_proEsc(d.resposta)}</textarea>
   </div>`;
 }
 
@@ -28190,7 +29146,11 @@ function _proFeatArr(source){
   if(!Array.isArray(S.produtoAtual[source]))S.produtoAtual[source]=[];
   return S.produtoAtual[source];
 }
-function _proFeatWrapId(source){return source==='mentoriaFeatures'?'pro-f-mentfeatures':'pro-f-features';}
+function _proFeatWrapId(source){
+  if(source==='mentoriaFeatures')return 'pro-f-mentfeatures';
+  if(source==='bonusFeatures')return 'pro-f-bonusfeatures';
+  return 'pro-f-features';
+}
 
 window._proFeatAdd=(source)=>{
   source=source||'features';
@@ -28199,11 +29159,20 @@ window._proFeatAdd=(source)=>{
     id:_proUid(),
     icone:PRO_FEAT_ICONE_DEFAULT,
     titulo:'',
-    disponivel:true,
+    disponivel:'sim',
     numeroChave:'',
-    descricao:''
+    diferenciais:'',
+    linkUrl:'',
+    linkLabel:'',
+    pdfUrl:'',
+    pdfLabel:'',
+    pdfPath:'',
+    pdfSize:0,
+    pdfName:''
   };
   arr.push(base);
+  if(!S._proFeatOpen)S._proFeatOpen={};
+  S._proFeatOpen[base.id]=true; // nova feature já abre expandida
   _proMark();_proRefreshFeats(source);
   // Autofocus no título da feature recém-adicionada
   setTimeout(()=>{
@@ -28218,7 +29187,15 @@ window._proFeatSet=(i,k,v,source)=>{
   // Re-render parcial pra refletir toggle visual (Sim/Não)
   if(k==='disponivel')_proRefreshFeats(source);
 };
-window._proFeatRm=(i,source)=>{source=source||'features';_proFeatArr(source).splice(i,1);_proMark();_proRefreshFeats(source);};
+window._proFeatRm=(i,source)=>{
+  source=source||'features';
+  const arr=_proFeatArr(source);
+  const f=arr[i];if(!f)return;
+  const nome=(f.titulo||'').trim()||'(sem título)';
+  if(!confirm(`Remover a feature "${nome}"?\n\nEssa ação não pode ser desfeita.`))return;
+  arr.splice(i,1);
+  _proMark();_proRefreshFeats(source);
+};
 window._proFeatUp=(i,source)=>{source=source||'features';const arr=_proFeatArr(source);if(i<=0)return;[arr[i-1],arr[i]]=[arr[i],arr[i-1]];_proMark();_proRefreshFeats(source);};
 window._proFeatDown=(i,source)=>{source=source||'features';const arr=_proFeatArr(source);if(i>=arr.length-1)return;[arr[i],arr[i+1]]=[arr[i+1],arr[i]];_proMark();_proRefreshFeats(source);};
 function _proRefreshFeats(source){
@@ -28430,6 +29407,24 @@ function _proRefreshObjs(){
   wrap.innerHTML=(S.produtoAtual.objecoes||[]).map((o,i)=>_proObjEditHTML(o,i)).join('');
 }
 
+// Duvidas (FAQ)
+window._proDuvAdd=()=>{
+  if(!Array.isArray(S.produtoAtual.duvidas))S.produtoAtual.duvidas=[];
+  S.produtoAtual.duvidas.push({id:_proUid(),pergunta:'',resposta:''});_proMark();_proRefreshDuvs();_proRefreshDuvAccTitle();
+};
+window._proDuvSet=(i,k,v)=>{S.produtoAtual.duvidas[i][k]=v;_proMark();};
+window._proDuvRm=(i)=>{S.produtoAtual.duvidas.splice(i,1);_proMark();_proRefreshDuvs();_proRefreshDuvAccTitle();};
+window._proDuvUp=(i)=>{if(i<=0)return;const arr=S.produtoAtual.duvidas;[arr[i-1],arr[i]]=[arr[i],arr[i-1]];_proMark();_proRefreshDuvs();};
+window._proDuvDown=(i)=>{const arr=S.produtoAtual.duvidas;if(i>=arr.length-1)return;[arr[i],arr[i+1]]=[arr[i+1],arr[i]];_proMark();_proRefreshDuvs();};
+function _proRefreshDuvs(){
+  const wrap=document.getElementById('pro-f-duvs');if(!wrap)return;
+  wrap.innerHTML=(S.produtoAtual.duvidas||[]).map((d,i)=>_proDuvEditHTML(d,i)).join('');
+}
+function _proRefreshDuvAccTitle(){
+  const el=document.querySelector('#tab-produtos .pro-edit-accordion[data-acc="duvidas"] .pro-edit-acc-title');
+  if(el)el.textContent='❓ Dúvidas frequentes · '+((S.produtoAtual.duvidas||[]).length);
+}
+
 // Links
 window._proLinkAdd=()=>{
   if(!Array.isArray(S.produtoAtual.links))S.produtoAtual.links=[];
@@ -28496,6 +29491,148 @@ window._proUploadAnexos=async(files)=>{
 window._proAnexSet=(i,k,v)=>{S.produtoAtual.anexos[i][k]=v;_proMark();};
 window._proAnexRm=(i)=>{S.produtoAtual.anexos.splice(i,1);_proMark();_proRender();};
 
+// ─── Bônus: produtos vinculados ────────────────────────────────────────
+// Renderiza chips dos produtos vinculados (cada chip = nome + status + X remover)
+function _proBonusProdutosEditHTML(ids){
+  if(!Array.isArray(ids)||!ids.length){
+    return '<p class="pro-text-block" style="color:var(--t2);font-style:italic;font-size:12.5px;margin:0">Nenhum produto vinculado ainda.</p>';
+  }
+  const rows=ids.map((id,i)=>{
+    const p=(S.produtos||[]).find(x=>x.id===id);
+    if(!p){
+      // Produto deletado/órfão — mostra placeholder cinza
+      return `<div class="pro-bonus-prod-chip orphan"><span class="pro-bonus-prod-name">⚠️ Produto removido (id: ${_proEsc(id.slice(0,8))}…)</span><button class="pro-icon-btn" onclick="_proBonusProdRm(${i})" title="Remover">🗑</button></div>`;
+    }
+    const st=p.status||'rascunho';
+    const stLabel=PRO_STATUS_LABEL[st]||st;
+    const capa=p.capa?`<div class="pro-bonus-prod-capa" style="background-image:url('${_proEscAttr(p.capa)}')"></div>`:`<div class="pro-bonus-prod-capa"><span>📦</span></div>`;
+    return `<div class="pro-bonus-prod-chip">
+      ${capa}
+      <div class="pro-bonus-prod-info">
+        <div class="pro-bonus-prod-name">${_proEsc(p.nome||'(sem nome)')}</div>
+        <div class="pro-bonus-prod-meta"><span class="pro-badge s-${st}" style="font-size:8.5px">${_proEsc(stLabel)}</span></div>
+      </div>
+      <button class="pro-icon-btn" onclick="_proBonusProdRm(${i})" title="Desvincular">🗑</button>
+    </div>`;
+  }).join('');
+  return rows;
+}
+
+window._proBonusProdAdd=(id)=>{
+  if(!id||!S.produtoAtual)return;
+  if(!Array.isArray(S.produtoAtual.bonusProdutoIds))S.produtoAtual.bonusProdutoIds=[];
+  // evita duplicata e auto-referência
+  if(id===S.produtoAtual.id)return alert('Não dá pra vincular o produto a ele mesmo.');
+  if(S.produtoAtual.bonusProdutoIds.includes(id))return;
+  S.produtoAtual.bonusProdutoIds.push(id);
+  _proMark();_proRefreshBonusProds();_proRefreshBonusAccTitle();
+};
+window._proBonusProdRm=(i)=>{
+  if(!Array.isArray(S.produtoAtual.bonusProdutoIds))return;
+  S.produtoAtual.bonusProdutoIds.splice(i,1);
+  _proMark();_proRefreshBonusProds();_proRefreshBonusAccTitle();
+};
+function _proRefreshBonusProds(){
+  const wrap=document.getElementById('pro-f-bonus-prods');
+  if(wrap)wrap.innerHTML=_proBonusProdutosEditHTML(S.produtoAtual.bonusProdutoIds||[]);
+}
+function _proRefreshBonusAccTitle(){
+  const el=document.querySelector('#tab-produtos .pro-edit-accordion[data-acc="bonus"] .pro-edit-acc-title');
+  if(!el)return;
+  const p=S.produtoAtual;
+  const cnt=(p.bonusProdutoIds||[]).length+(p.bonusFeatures||[]).length;
+  el.textContent='🎁 Bônus'+(cnt>0?(' · '+cnt):'');
+}
+
+// Picker: lista produtos do catálogo (exceto o atual e os já vinculados)
+window._proBonusOpenProdPicker=(ev)=>{
+  ev&&ev.stopPropagation&&ev.stopPropagation();
+  const pop=document.getElementById('pro-picker-pop');if(!pop)return;
+  const atual=S.produtoAtual;
+  const linkedSet=new Set(atual.bonusProdutoIds||[]);
+  const opts=(S.produtos||[])
+    .filter(p=>p.id&&p.id!==atual.id&&!linkedSet.has(p.id))
+    .sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'));
+  const itemsHtml=opts.length?opts.map(p=>{
+    const st=p.status||'rascunho';
+    const stLabel=PRO_STATUS_LABEL[st]||st;
+    const capa=p.capa?`<div class="pro-bonus-prod-capa" style="background-image:url('${_proEscAttr(p.capa)}');width:28px;height:28px"></div>`:`<div class="pro-bonus-prod-capa" style="width:28px;height:28px"><span style="font-size:14px">📦</span></div>`;
+    return `<button type="button" class="pro-picker-opt" onclick="_proBonusProdAdd('${_proEscAttr(p.id)}');_proCloseOpenPopovers()">
+      ${capa}
+      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_proEsc(p.nome||'(sem nome)')}</span>
+      <span class="pro-badge s-${st}" style="font-size:8.5px">${_proEsc(stLabel)}</span>
+    </button>`;
+  }).join(''):'<div class="pro-picker-empty">Nenhum outro produto disponível pra vincular.</div>';
+  pop.innerHTML=`<div class="pro-picker-head">Vincular produto como bônus</div><div class="pro-picker-body" style="max-height:380px;overflow-y:auto">${itemsHtml}</div>`;
+  // Posiciona perto do botão
+  const r=(ev&&ev.target&&ev.target.closest('button'))?ev.target.closest('button').getBoundingClientRect():{left:100,bottom:100};
+  pop.style.left=Math.min(r.left,window.innerWidth-360)+'px';
+  pop.style.top=(r.bottom+8)+'px';
+  pop.classList.remove('hidden');
+  _proEnsureGlobalDismiss();
+};
+
+// ── PDF anexo por feature ──────────────────────────────────────────────
+window._proFeatPdfUpload=async(i,source,fileInput)=>{
+  const file=fileInput&&fileInput.files&&fileInput.files[0];
+  if(!file){fileInput.value='';return;}
+  if(file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name)){
+    alert('Apenas arquivos PDF são aceitos.');fileInput.value='';return;
+  }
+  if(file.size>20*1024*1024){
+    alert(`"${file.name}" tem ${(file.size/1024/1024).toFixed(1)}MB — limite é 20MB.`);
+    fileInput.value='';return;
+  }
+  const arr=_proFeatArr(source);
+  const f=arr[i];if(!f){fileInput.value='';return;}
+  const pid=S.produtoAtual.id||S.produtoAtual._pidTmp||('tmp_'+_proUid());
+  if(!S.produtoAtual.id)S.produtoAtual._pidTmp=pid;
+  const ext=(file.name.split('.').pop()||'pdf').toLowerCase();
+  const path=`produtos/${pid}/features/${f.id}/pdf-${Date.now()}.${ext}`;
+  // Feedback visual no botão
+  const btn=document.getElementById(`pro-feat-pdf-btn-${f.id}`);
+  const txtSpan=document.getElementById(`pro-feat-pdf-name-${f.id}`);
+  const origLabel=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='⏳ Enviando…';}
+  try{
+    // Se já tinha PDF anterior, tenta apagar do Storage (best-effort)
+    if(f.pdfPath){
+      try{await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,f.pdfPath));}catch(e){/* ignora */}
+    }
+    const r=window._fbStorage.ref(window._fbStorage.storage,path);
+    await window._fbStorage.uploadBytes(r,file);
+    const url=await window._fbStorage.getDownloadURL(r);
+    f.pdfUrl=url;
+    f.pdfPath=path;
+    f.pdfName=file.name;
+    f.pdfSize=file.size;
+    if(!f.pdfLabel)f.pdfLabel=file.name.replace(/\.pdf$/i,'').slice(0,60);
+    _proMark();
+    _proRefreshFeats(source);
+  }catch(e){
+    alert('Erro no upload do PDF: '+(e.message||e));
+    if(btn){btn.disabled=false;btn.textContent=origLabel||'Anexar PDF';}
+  }finally{
+    fileInput.value='';
+  }
+};
+window._proFeatPdfRemove=async(i,source)=>{
+  const arr=_proFeatArr(source);
+  const f=arr[i];if(!f)return;
+  if(!confirm(`Remover o PDF anexado "${f.pdfName||f.pdfLabel||'arquivo'}"?`))return;
+  if(f.pdfPath){
+    try{await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,f.pdfPath));}catch(e){/* ignora — arquivo já pode ter sido removido */}
+  }
+  f.pdfUrl='';f.pdfPath='';f.pdfName='';f.pdfSize=0;f.pdfLabel='';
+  _proMark();_proRefreshFeats(source);
+};
+function _proFmtSizeShort(n){
+  if(!n||n<1)return '';
+  if(n<1024)return n+' B';
+  if(n<1024*1024)return (n/1024).toFixed(1)+' KB';
+  return (n/1024/1024).toFixed(1)+' MB';
+}
+
 // Normaliza array de features → shape persistido + compara com `before` pra updatedAt
 function _proPrepareFeatures(arr,beforeArr){
   if(!Array.isArray(arr))return [];
@@ -28507,12 +29644,25 @@ function _proPrepareFeatures(arr,beforeArr){
       id:f.id,
       icone:f.icone||PRO_FEAT_ICONE_DEFAULT,
       titulo:String(f.titulo||''),
-      disponivel:(f.disponivel!==false),
+      disponivel:_proFeatDisp(f),
       numeroChave:String(f.numeroChave||''),
-      descricao:String(f.descricao||'')
+      // Diferenciais aceita HTML rico — sanitiza pra remover script/style/handlers
+      diferenciais:_comSanitizePostHTML(String(f.diferenciais||'')),
+      // Link aceita só http(s) — strings inválidas viram vazio
+      linkUrl:_proNormalizeUrl(f.linkUrl),
+      linkLabel:String(f.linkLabel||'').trim().slice(0,60),
+      // PDF anexo: URL + path do Storage + label customizável + metadata
+      pdfUrl:String(f.pdfUrl||''),
+      pdfLabel:String(f.pdfLabel||'').trim().slice(0,60),
+      pdfPath:String(f.pdfPath||''),
+      pdfSize:typeof f.pdfSize==='number'?f.pdfSize:0,
+      pdfName:String(f.pdfName||'')
     };
 
-    // updatedAt: se mudou (ou é nova), pega serverTimestamp; senão preserva
+    // updatedAt: se mudou (ou é nova), gera Timestamp client-side; senão preserva.
+    // Importante: serverTimestamp() NÃO é aceito dentro de arrays pelo Firestore
+    // — por isso usamos Timestamp.now() aqui. O updatedAt do PRODUTO continua
+    // usando serverTimestamp (top-level field).
     const prev=beforeMap.get(out.id);
     if(prev&&_proFeatEqual(out,prev)){
       // Preserva updatedAt anterior. Pós-JSON-clone vira {seconds,nanoseconds} —
@@ -28521,10 +29671,10 @@ function _proPrepareFeatures(arr,beforeArr){
       if(u){
         if(typeof u.toDate==='function')out.updatedAt=u;
         else if(typeof u.seconds==='number')out.updatedAt=new Timestamp(u.seconds,u.nanoseconds||0);
-        else out.updatedAt=serverTimestamp();
+        else out.updatedAt=Timestamp.now();
       }
     }else{
-      out.updatedAt=serverTimestamp();
+      out.updatedAt=Timestamp.now();
     }
     return out;
   }).filter(Boolean);
@@ -28548,14 +29698,18 @@ window._proSalvar=async()=>{
     breveDescricao,
     publicoAlvo:publicoAlvoArr,
     capa:p.capa||null,
-    provasAlvo:Array.isArray(p.provasAlvo)?p.provasAlvo.filter(Boolean):[],
+    provasAlvo:Array.isArray(p.provasAlvo)?_proDedupe(p.provasAlvo):[],
     responsaveis:responsaveisArr,
     status:p.status||'rascunho',
-    temMentoria:!!p.temMentoria,
+    temMentoria:_proMentStatus(p),
+    mentoriaDescricao:(_proMentStatus(p)!=='nao')?String(p.mentoriaDescricao||'').trim():'',
     features:_proPrepareFeatures(p.features,before&&before.features),
-    mentoriaFeatures:p.temMentoria?_proPrepareFeatures(p.mentoriaFeatures,before&&before.mentoriaFeatures):[],
+    mentoriaFeatures:(_proMentStatus(p)!=='nao')?_proPrepareFeatures(p.mentoriaFeatures,before&&before.mentoriaFeatures):[],
+    bonusFeatures:_proPrepareFeatures(p.bonusFeatures,before&&before.bonusFeatures),
+    bonusProdutoIds:Array.isArray(p.bonusProdutoIds)?p.bonusProdutoIds.filter(x=>typeof x==='string'&&x):[],
     argumentosVenda:Array.isArray(p.argumentosVenda)?p.argumentosVenda.filter(a=>String(a||'').trim()):[],
     objecoes:Array.isArray(p.objecoes)?p.objecoes.filter(o=>o&&(o.pergunta||o.resposta)):[],
+    duvidas:Array.isArray(p.duvidas)?p.duvidas.filter(d=>d&&(d.pergunta||d.resposta)).map(d=>({id:d.id||_proUid(),pergunta:String(d.pergunta||'').trim(),resposta:String(d.resposta||'').trim()})):[],
     links:Array.isArray(p.links)?p.links.filter(l=>l&&l.url):[],
     anexos:Array.isArray(p.anexos)?p.anexos:[],
     ordem:typeof p.ordem==='number'?p.ordem:Date.now(),
@@ -28581,14 +29735,54 @@ window._proSalvar=async()=>{
       }
     }
     _proDirty=false;
-    S.produtosView='detail';
-    // Atualiza S.produtoAtual com payload + id pra detalhe renderizar
+    // Captura accordions abertos pra restaurar após re-render (evita perder
+    // o contexto de edição que o usuário tinha aberto antes de salvar)
+    const accAbertos=[...document.querySelectorAll('#tab-produtos .pro-edit-accordion.open')]
+      .map(el=>el.getAttribute('data-acc')).filter(Boolean);
+    // Continua na edição (não volta pra detail/lista). Se era 'new', vira 'edit'.
+    if(isNew)S.produtosView='edit';
+    // Atualiza S.produtoAtual com payload + id pra renderizar atualizado
     S.produtoAtual={...S.produtoAtual,...payload};
     delete S.produtoAtual.pitchCurto;
     delete S.produtoAtual.responsavel;
     _proRender();
-  }catch(e){alert('Erro ao salvar: '+e.message);}
+    // Restaura accordions e dá feedback visual de salvo
+    accAbertos.forEach(acc=>{
+      const el=document.querySelector(`#tab-produtos .pro-edit-accordion[data-acc="${acc}"]`);
+      if(el)el.classList.add('open');
+    });
+    _proSaveFeedback('ok');
+  }catch(e){
+    _proSaveFeedback('err',e.message);
+    alert('Erro ao salvar: '+e.message);
+  }
 };
+
+// Feedback de "salvo" / "erro" no botão Salvar
+function _proSaveFeedback(kind,msg){
+  const el=document.getElementById('pro-save-feedback');
+  if(!el)return;
+  const now=new Date();
+  const hh=String(now.getHours()).padStart(2,'0');
+  const mm=String(now.getMinutes()).padStart(2,'0');
+  const ss=String(now.getSeconds()).padStart(2,'0');
+  if(kind==='ok'){
+    el.textContent=`✓ salvo às ${hh}:${mm}:${ss}`;
+    el.className='pro-save-feedback ok';
+  } else {
+    el.textContent=`⚠️ ${msg||'erro'}`;
+    el.className='pro-save-feedback err';
+  }
+  el.style.display='';
+  // Some sozinho depois de 6s (só pro success — err fica até salvar de novo)
+  if(kind==='ok'){
+    clearTimeout(window._proSaveFeedbackTimer);
+    window._proSaveFeedbackTimer=setTimeout(()=>{
+      const e2=document.getElementById('pro-save-feedback');
+      if(e2&&e2.classList.contains('ok'))e2.style.display='none';
+    },6000);
+  }
+}
 
 // Confirma antes de sair com dirty
 window.addEventListener('beforeunload',e=>{

@@ -39,7 +39,21 @@ npx -y firebase-tools deploy --only firestore:rules
 cd cloud-function-hotmart && npm install
 ```
 
-Env vars da Cloud Function ficam em `cloud-function-hotmart/.env` (gitignored): `HOTMART_TOKEN`, `SLACK_WEBHOOK`. Editar e redeployar.
+Env vars da Cloud Function ficam em `cloud-function-hotmart/.env` (gitignored): `HOTMART_TOKEN`, `SLACK_WEBHOOK`, `ANTHROPIC_API_KEY`. Editar e redeployar.
+
+## Cloud Function: Pergunte ao Dex (catálogo de produtos · IA)
+
+Segunda function exportada em `cloud-function-hotmart/index.js` → `perguntarDex` (código em `dex.js`). Endpoint público:
+- `https://us-central1-simulados-confirmacao.cloudfunctions.net/perguntarDex`
+
+Recebe POST `{pergunta: string}` com header `Authorization: Bearer <Firebase ID token>`. Lê todos os `produtos` (exceto `descontinuado`) do Firestore via Admin SDK, monta prompt restrito ao catálogo, chama **Claude Haiku 4.5** (modelo `claude-haiku-4-5-20251001`) com prompt caching (system cacheado por 5min). Retorna `{resposta, usage}`. Login custom legado **NÃO funciona** — exige Firebase Auth (Google ou Email/Password).
+
+**Setup da API key (apenas uma vez):**
+1. Gerar key em https://console.anthropic.com → Settings → API Keys (na org corporativa MedReview)
+2. Adicionar linha ao `cloud-function-hotmart/.env`: `ANTHROPIC_API_KEY=sk-ant-api03-...`
+3. Deploy: `npx -y firebase-tools deploy --only functions --force` (precisa autorização do usuário)
+
+UI no frontend: botão "🤖 Pergunte ao Dex" na toolbar da aba Produtos. Painel inline com textarea + render markdown leve (negrito, listas, código, links). Links no formato `[texto](produto:ID)` viram chips clicáveis que abrem o detalhe do produto. Cada pergunta é isolada (sem histórico).
 
 Não há build, lint, nem suíte de testes. Mudanças no `index.html` são validadas abrindo o arquivo no navegador.
 

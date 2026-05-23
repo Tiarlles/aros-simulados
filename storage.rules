@@ -98,18 +98,21 @@ service firebase.storage {
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // PRODUTOS — Catálogo interno. Capa + anexos.
+    // PRODUTOS — Catálogo interno. Capa + anexos + PDF por feature.
     // Paths aceitos:
-    //   produtos/{produtoId}/capa.{ext}              — capa (img)
-    //   produtos/{produtoId}/anexos/{anexoId}.{ext}  — anexos (PDF ou img)
-    // Limite único: 5MB para qualquer arquivo. Gating de tipo (capa só img)
-    // é feito na UI; aqui só barramos por contentType (image/* ou pdf).
+    //   produtos/{produtoId}/capa.{ext}                        — capa (img)
+    //   produtos/{produtoId}/anexos/{anexoId}.{ext}            — anexos (PDF ou img)
+    //   produtos/{produtoId}/features/{featId}/pdf-{ts}.pdf    — PDF anexo por feature
+    // Limite: 20MB pra acomodar PDFs grandes (ementa, material didático,
+    // apostilas digitalizadas com imagens).
+    // Gating de tipo (capa só img) é feito na UI; aqui só barramos por
+    // contentType (image/* ou pdf).
     // Read e write exigem auth — alunos não veem este catálogo.
     // ────────────────────────────────────────────────────────────────────────
     match /produtos/{produtoId}/{allPaths=**} {
       allow read: if request.auth != null;
       allow write: if request.auth != null
-                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.size < 20 * 1024 * 1024
                    && (request.resource.contentType.matches('image/.*')
                        || request.resource.contentType == 'application/pdf');
       allow delete: if request.auth != null;

@@ -230,21 +230,37 @@ produtos/{produtoId}                — Catálogo Interno de Produtos (descritiv
   {
     nome, breveDescricao,           // sem limite de chars (legado: pitchCurto)
     capa,                           // URL Storage (1:1, só thumb na listagem; NÃO no detalhe)
-    publicoAlvo:[str],              // multi-select de config/catalogoConfig.publicosAlvo
-    provasAlvo:[str],               // multi-select de config/catalogoConfig.provasAlvo
-    responsaveis:[str],             // tags livres multi (texto livre)
+    publicoAlvo:[str],              // multi-select de config/catalogoConfig.publicosAlvo (dedup auto)
+    provasAlvo:[str],               // multi-select de config/catalogoConfig.provasAlvo (dedup auto)
+    responsaveis:[str],             // tags livres multi (dedup auto)
     status:'rascunho'|'ativo'|'em-breve'|'descontinuado',
-    features:[                      // modelo único (sem tipos)
-      { id, icone, titulo, disponivel, numeroChave, descricao, updatedAt }
-    ],
-    temMentoria:bool,
-    mentoriaFeatures:[Feature],     // mesma shape de features, só se temMentoria=true
+    features:[Feature],             // shape detalhada abaixo
+    temMentoria:'sim'|'opcional'|'nao',   // string 3-estados (compat: bool true→sim, false→nao)
+    mentoriaDescricao:'',           // breve descrição da mentoria (textarea no editor, parágrafo no detalhe quando temMentoria != 'nao')
+    mentoriaFeatures:[Feature],     // mesma shape de features
+    bonusProdutoIds:[str],          // IDs de outros produtos vinculados como bônus (catalogo cruzado)
+    bonusFeatures:[Feature],        // features bônus livres (mesma shape)
     argumentosVenda:[str],          // bullets
-    objecoes:[{id, pergunta, resposta}],
+    objecoes:[{id, pergunta, resposta}],   // perguntas de vendas (rebater objeções)
+    duvidas:[{id, pergunta, resposta}],    // FAQ de suporte (separada de objeções)
     links:[{id, label, url}],
     anexos:[{id, label, path, url, sizeBytes, mime}],
     ordem, createdAt, createdBy, updatedAt, updatedBy
   }
+
+// Shape de Feature (usada em features, mentoriaFeatures, bonusFeatures)
+Feature = {
+  id,                              // UID estável (gerado por _proUid no add — usado pra lookup em _proRtCommit)
+  icone,                           // emoji (catálogo curado + custom)
+  titulo,
+  disponivel:'sim'|'nao'|'construcao',  // string 3-estados (compat: bool true→sim, false→nao)
+  numeroChave,                     // texto livre (renomeado de "número-chave" → label "Quantidade")
+  diferenciais,                    // HTML rico (toolbar B/I/U/S, listas, código, link, 7 cores texto + 6 fundo, 🧹 limpar formatação externa)
+  linkUrl, linkLabel,              // botão de link nomeável (gradient azul→roxo no detalhe)
+  pdfUrl, pdfLabel, pdfPath, pdfSize, pdfName,  // anexo PDF nomeável (gradient âmbar/vermelho)
+                                   // Storage: produtos/{pid}/features/{fid}/pdf-{ts}.pdf, limite 20MB
+  updatedAt                        // Timestamp.now() — NÃO serverTimestamp (proibido dentro de array)
+}
 ```
 
 ## Distinção crítica: simulados oficiais vs extras
@@ -952,10 +968,160 @@ Aba `tab-orcamento` em Admin → Orçamento (ADMIN_ONLY_TABS). Controle de despe
 - Audit: `CATALOGO_OPCAO_ADICIONADA` / `CATALOGO_OPCAO_REMOVIDA`.
 
 **Anexos:**
-- Storage path `produtos/{produtoId}/capa.{ext}` (capa) + `produtos/{produtoId}/anexos/{anexoId}.{ext}`.
-- Limite 5MB, image/* OR application/pdf. Rules exigem auth (alunos não acessam).
+- Capa: `produtos/{produtoId}/capa.{ext}` (img). Anexos: `produtos/{produtoId}/anexos/{anexoId}.{ext}` (PDF ou img).
+- **PDF por feature** (2026-05-23): `produtos/{produtoId}/features/{featId}/pdf-{ts}.pdf`.
+- Limite **20MB** (subido de 5MB em 2026-05-23), image/* OR application/pdf. Rules exigem auth (alunos não acessam).
 
 **Audit log:** `PRODUTO_CRIADO`, `PRODUTO_EDITADO`, `PRODUTO_EXCLUIDO`, `PRODUTO_STATUS_ALTERADO`, `CATALOGO_OPCAO_ADICIONADA`, `CATALOGO_OPCAO_REMOVIDA`.
+
+### Catálogo de Produtos — refinos UX (2026-05-23)
+
+Sessão grande de polimento em cima da v1 do catálogo (mantida estrutura, mudou UX/modelo de features e detalhes).
+
+**Detalhe do produto — disclosure groups Apple-like:**
+- Status badge + responsáveis ficam SEMPRE visíveis (linha inline acima dos disclosures).
+- **Público-alvo** e **Provas-alvo** viram dois disclosure groups colapsáveis (header com `// LABEL · N` + chevron rotacionando 180° quando aberto). Ambos começam **fechados ao abrir o produto**.
+- Chips dentro de cada disclosure ficam em **coluna única** (não wrap), com bolinha colorida indicando categoria, hover sutil, texto Plus Jakarta Sans (não mais mono apertado).
+- Dedupe centralizado em `_proDedupe(arr)` (case-insensitive, preserva primeira ocorrência): aplicado em `_proGetPublicoAlvo`, `_proGetResponsaveis`, no save e na renderização de `provasAlvo`.
+- Helper `proToggleDisc(id)` alterna disclosure sem re-render completo (preserva scroll).
+- **Estado `S._proDisc`** preserva entre re-renders, mas é **resetado a `null` ao abrir um novo produto** (proAbrir/proNovo/proEditar).
+
+**Card de feature compactado (detalhe — view leitura):**
+- Ícone: 48px → **26px**. Padding do head reduzido pra 7px vertical.
+- Quantidade ("462 aulas"): de display 22px gigante pra **pill compacto inline 11px ao lado do título**.
+- Status: pill grande "✓ Incluído" virou **mono pequeno 9.5px com dot colorido** (verde/vermelho/amarelo). Sem bordas adicionais no card (decisão UX 2026-05-23: status `construcao` não muda borda do card, só o chip do canto).
+- **Features em coluna única** no detalhe (`pro-feat-grid` virou `flex-direction:column` em todos os tamanhos).
+- **Cada feature vira dropdown** no detalhe: head sempre visível, body colapsável (descrição + diferenciais + link + PDF + updatedAt). Toggle via `proToggleFeatDet(featId)`. Click no head OU no chevron abre/fecha. Começa **fechado**.
+- Botões/links dentro do drawer usam `event.stopPropagation()` pra não fechar o dropdown ao clicar.
+
+**Editor de feature — accordion com micro-resumo + drag-and-drop:**
+- Cada feature vira accordion (`_proFeatToggle(featId)`): head sempre visível (handle + ícone + título + micro-pills de status/quantidade + ↑↓🗑 + chevron ▾), body colapsa.
+- Estado `S._proFeatOpen[featId]` controla qual está aberta (preserva entre re-renders via featId, **resetado em proAbrir/proEditar/proNovo**).
+- Feature nova criada via `_proFeatAdd` abre automaticamente (foco no título).
+- **Click no head do editor abre/fecha** (helper `_proFeatHeadClick`). Botões internos têm `event.stopPropagation()`.
+- **Drag-and-drop funcional** (HTML5 nativo) pelo handle ⠿:
+  - Handle é o único `draggable=true`. Card todo aceita drop.
+  - Funciona só dentro do mesmo source (não move feature principal pra mentoria).
+  - Indicadores `drop-before`/`drop-after` (linha accent no topo ou base).
+  - Estado `_proFeatDragState` global. Limpo no dragend.
+
+**Confirm ao remover feature:** `_proFeatRm` exige `confirm()` mostrando o nome da feature.
+
+**Campo Quantidade** (renomeado de "Número-chave (opcional)" pra `Quantidade`, placeholder mantido).
+
+**Campo Diferenciais (rich-text) — substituiu Descrição:**
+- Mini editor rich-text reutilizável `_proRtFieldHTML({id, value, placeholder, label, featI, featSource, featField, featId})`.
+- Toolbar completa: B/I/U/S, listas (• e numerada), código inline `</>`, link 🔗, 🧹 limpar formatação externa, 7 cores texto + 6 cores fundo.
+- HTML cru é gravado no estado via `_proRtCommit(id)` (busca feature pelo **ID estável** via `data-feat-id`, com fallback pro índice). **Bug histórico**: usar índice no lookup quebrava ao adicionar/reordenar features — solução foi `data-feat-id` + `arr.findIndex(f=>f.id===fid)`.
+- Sanitização via `_comSanitizePostHTML` só no save (`_proPrepareFeatures`) — não a cada keystroke.
+- 🧹 limpar formatação: `_proRtClean(id)` → `removeFormat` nativo + `_proRtStripStyle(html)` que mantém só `p,br,ul,ol,li,strong,b,em,i,u,s,code,a[href]`, desempacota o resto, remove todos os atributos exceto href/target/rel em `<a>`. Resolve cola do Word/Docs/web.
+- **Detalhe** renderiza diferenciais com `<div class="pro-feat-dif">⭐ DIFERENCIAIS<br>{html sanitizado}</div>` (caixa amarela discreta).
+- Compat retroativa: feature antiga com `descricao`/`observacao` migra automaticamente pra `diferenciais` em `_proNormFeature`.
+
+**Campo Link (botão nomeável):**
+- 2 inputs lado a lado: label do botão (max 60) + URL (type=url).
+- `_proNormalizeUrl` aceita `https://...`, `http://...`, ou adiciona `https://` se for tipo "site.com/foo" sem scheme. URLs inválidas viram `''`.
+- Detalhe: botão gradient azul→roxo com label customizado (ou domínio limpo via `_proLinkLabel` como fallback). Click NÃO fecha o dropdown (`event.stopPropagation`).
+
+**Campo PDF anexável (botão nomeável):**
+- 1 PDF por feature. Campos: `pdfUrl, pdfLabel, pdfPath, pdfSize, pdfName`.
+- Editor: label customizável + botão "📎 Anexar PDF (máx 20MB)". Após upload mostra caixa âmbar com nome + tamanho + 🗑 remover + Trocar.
+- Storage: `produtos/{pid}/features/{fid}/pdf-{ts}.pdf`. Apaga PDF antigo do Storage ao trocar/remover.
+- Detalhe: botão **gradient âmbar/vermelho** "📄 {label}" — visualmente diferente do link azul/roxo. Abre em nova aba com `download` attr.
+- Limite 20MB enforced em 2 lugares: JS (`_proFeatPdfUpload`) + Storage Rules (`produtos/{produtoId}/{allPaths=**}`).
+
+**Status da feature — 3-way (2026-05-23):**
+- `disponivel` deixa de ser boolean → string `'sim'|'nao'|'construcao'`.
+- Helper `_proFeatDisp(f)` normaliza (compat: bool true→sim, false→nao).
+- `PRO_FEAT_DISP_META` define label/color/icon de cada estado: sim (verde ✓), nao (vermelho ✗), construcao (laranja 🛠).
+- Editor: 3 botões segmented (`.pro-toggle.pro-toggle-3`) com botão "Em construção" em laranja quando ativo.
+- Detalhe: status no canto direito como dot+label. Card **NÃO muda borda** pra status `construcao` — decisão UX explícita (era poluído demais).
+- Dex prompt distingue os 3: ` (NÃO incluído)` ou ` (EM CONSTRUÇÃO — ainda não disponível)` ou normal.
+
+**Mentoria — 3 estados (2026-05-23):**
+- `temMentoria` deixa de ser boolean → string `'sim'|'opcional'|'nao'`.
+- 'opcional' = mentoria existe mas é compra à parte.
+- Helper `_proMentStatus(p)` normaliza (compat: bool true→sim, false→nao).
+- Editor: 3 botões segmented (Sim / Opcional / Não). Botão "Opcional" usa class `wip` (laranja). Body do accordion fica visível pra sim/opcional, escondido só pra 'nao'.
+- Detalhe: bloco Mentoria aparece pra sim/opcional, com pill laranja `OPCIONAL` ao lado do título quando opcional.
+- **Campo `mentoriaDescricao`** (2026-05-23): textarea no editor (3 linhas) + parágrafo destacado com borda lateral roxa no detalhe (`.pro-ment-desc`). Visível por inteiro quando temMentoria != 'nao'. Inclui no prompt do Dex.
+- Dex prompt: '**Mentoria inclusa:**' pra sim, '**Mentoria (opcional — compra à parte):**' pra opcional + descrição se houver.
+
+**Seção Bônus (2026-05-23):**
+- Novo accordion **🎁 Bônus** abaixo de Mentoria. Modelo: `bonusProdutoIds:[str]` (referências a outros produtos do catálogo) + `bonusFeatures:[Feature]` (features livres mesma shape).
+- Vincular produto: picker `_proBonusOpenProdPicker` lista todos os outros produtos do catálogo (exceto o próprio e os já vinculados), com mini-capa+nome+status. Click adiciona como chip.
+- Features bônus livres: mesma interface das features principais (drag, dropdown, etc), source='bonusFeatures'. `_proFeatWrapId` aceita os 3: 'features', 'mentoriaFeatures', 'bonusFeatures'.
+- Detalhe: seção **`// 🎁 BÔNUS`** (amarelo dourado #fbbf24) com cards horizontais clicáveis dos produtos vinculados (cada um abre `proAbrir(id)`) + features bônus em lista.
+- Dex prompt: resolve nomes dos produtos vinculados a partir da lista de produtos passada (`formatarProduto(p, todosProdutos)`).
+- Bloqueia auto-referência e duplicatas. Produto deletado vira chip "⚠️ Produto removido" (mantém ID, permite desvincular).
+
+**Seção Dúvidas frequentes / FAQ (2026-05-23):**
+- Novo accordion **❓ Dúvidas frequentes** entre Objeções e Links. Modelo: `duvidas:[{id, pergunta, resposta}]`.
+- Distinção semântica vs Objeções: Objeções = vendas (rebater "tá caro"), Dúvidas = suporte (FAQ tipo "tem certificado?").
+- Funções `_proDuv*` clonadas do padrão `_proObj*`. Editor: input pergunta + textarea resposta 3 linhas, com ↑↓🗑.
+- Detalhe: bloco `// ❓ DÚVIDAS FREQUENTES` reusando `.pro-obj` (mesma caixa de objeções), pergunta prefixada com ❓.
+- Dex prompt: '**Dúvidas frequentes (FAQ):**'.
+
+**Salvar produto — permanece na edição (2026-05-23):**
+- `_proSalvar` antes voltava pra view 'detail' após save. Agora **mantém em 'edit'** (se era 'new', vira 'edit').
+- Captura accordions abertos antes do re-render e re-aplica `.open` após.
+- Feedback visual no rodapé: chip verde `✓ SALVO ÀS HH:MM:SS` (some após 6s) ou chip vermelho `⚠️ erro` (fica até salvar de novo).
+- Botão Salvar ganha id `pro-save-btn` + span `pro-save-feedback`.
+
+**Todos os accordions começam fechados ao entrar em edit/new (2026-05-23):**
+- Accordion "Básico" era hardcoded com `class="pro-edit-accordion open"`. Removido. Agora todos começam fechados.
+- Reset de `S._proDisc`, `S._proFeatOpen`, `S._proFeatDetOpen` em `proAbrir`/`proEditar`/`proNovo`.
+
+**Bug crítico do Firestore — `serverTimestamp` em array (2026-05-23):**
+- Cada feature tem `updatedAt`. Antes usava `serverTimestamp()`, que NÃO é aceito pelo Firestore dentro de arrays.
+- Fix: usar `Timestamp.now()` (client-side) — válido em arrays. O `updatedAt` top-level do produto continua usando `serverTimestamp`.
+- Helper de comparação `_proFeatEqual` ignora `updatedAt` no diff (compara só campos editáveis), e só atualiza quando há mudança real.
+
+### Pergunte ao Dex — assistente IA do Catálogo MedReview (2026-05-23)
+
+Feature de busca conversacional com Claude API integrada à aba Produtos.
+
+**Arquitetura:**
+- **Cloud Function nova** `perguntarDex` exportada em `cloud-function-hotmart/index.js` → código em `cloud-function-hotmart/dex.js`.
+- HTTP endpoint público (CORS limitado): `https://us-central1-simulados-confirmacao.cloudfunctions.net/perguntarDex`
+- Recebe POST `{pergunta:string}` + header `Authorization: Bearer <Firebase ID token>`.
+- Valida Firebase Auth via `admin.auth().verifyIdToken` — **login custom legado NÃO funciona** (precisa Firebase Auth real).
+- Lê coleção `produtos` do Firestore via Admin SDK (filtra `descontinuado`).
+- Chama **Claude Haiku 4.5** (`claude-haiku-4-5-20251001`) com **prompt caching** ephemeral (system cacheado por 5min — primeira pergunta paga o catálogo, próximas pagam 10%).
+- Retorna `{resposta, usage}` (in/out/cache_read/cache_write tokens).
+- Estimativa de custo: ~$1-3/mês com uso moderado (200 perguntas/dia).
+
+**API Key:** `ANTHROPIC_API_KEY` no `cloud-function-hotmart/.env` (gitignored). Gerada no console.anthropic.com da org corporativa MedReview.
+
+**Prompt restrito ao catálogo:**
+- Instrução rígida: "Use APENAS as informações do catálogo abaixo. Se não souber, responda exatamente: 'Não tenho essa informação no catálogo.'"
+- Formato de link: `[Nome do Produto](produto:ID_DO_PRODUTO)` — frontend converte em chip clicável que abre `proAbrir(id)`.
+- Bloqueia respostas fora de escopo (dúvidas clínicas, comparação com concorrentes, etc).
+- Inclui todas as seções do produto: nome, descrição, público-alvo, provas-alvo, responsáveis, status, features (com diferenciais HTML→texto via `stripHtml`, link, PDF), mentoria (com descrição), bônus (resolve IDs pra nomes), argumentos, objeções, dúvidas, links.
+
+**UI (aba Produtos):**
+- Botão **🤖 Pergunte ao Dex** na toolbar (gradient azul/roxo/laranja, pill capsule Apple-like).
+- Click abre painel inline `pro-dex-panel` acima da lista de produtos (liquid glass, animação `dexSlideIn`).
+- Textarea pra pergunta (Enter envia, Shift+Enter quebra linha).
+- Loading state com spinner. Erro state vermelho. Resposta em card com markdown leve parseado por `_proDexFormatAnswer(text)`.
+- Parser de markdown seguro: escapa HTML primeiro, depois substitui `[txt](url)` (links produto: e https: only — bloqueia `javascript:`), `**bold**`, `` `code` ``, `*italic*`, listas `- item`, parágrafos.
+- Links de produto: `<a class="pro-dex-prod-link" data-pid="..."` ligados via `_proDexBindLinks` (delegation com `proAbrir`).
+- Estado `S.dexAberto/dexPergunta/dexLoading/dexResposta/dexErro/dexUsage/_dexFocusNext` (todos com fallback `||`).
+- Foco no input só quando o painel acabou de abrir (flag `_dexFocusNext`), não em todo re-render.
+- Ao fechar o painel: limpa erro/resposta/pergunta/usage (próxima abertura começa limpa).
+
+**Permissão:** qualquer usuário logado via Firebase Auth com acesso à aba Produtos. Backend não checa permissão granular extra (intencional — quem vê o catálogo pode perguntar).
+
+**Riscos mitigados:**
+- API key nunca exposta no frontend (sempre via Cloud Function).
+- CORS restrito a `aros.anestreview.com.br` + `localhost:8080/8081/127.0.0.1`.
+- Validação de tamanho da pergunta (max 2000 chars).
+- Erro 401 se sem token. Erro 500 com detail se sem API key configurada.
+
+**Endpoint de monitoramento:**
+```bash
+npx -y firebase-tools functions:log --only perguntarDex --lines 50
+```
 
 **Compat retroativa (read tolerante):**
 - `pitchCurto` → lido como `breveDescricao` via `_proGetBreveDescricao`.

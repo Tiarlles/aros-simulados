@@ -7,6 +7,9 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 
+// Re-exporta a function do Dex (pergunta IA sobre catálogo de produtos)
+exports.perguntarDex = require('./dex').perguntarDex;
+
 // Tokens lidos de variáveis de ambiente (definidas em .env ou via firebase functions:secrets:set)
 const HOTMART_TOKEN = process.env.HOTMART_TOKEN || '';
 const SLACK_WEBHOOK = process.env.SLACK_WEBHOOK || '';
