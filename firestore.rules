@@ -348,7 +348,7 @@ service cloud.firestore {
                             && request.resource.data.nome is string
                             && request.resource.data.nome.size() > 0
                             && request.resource.data.nome.size() < 300
-                            && request.resource.data.status in ['rascunho','ativo','em-breve','descontinuado'];
+                            && request.resource.data.status in ['rascunho','ativo','aguardando-descricao','em-breve','descontinuado'];
       allow delete: if isAuth();
     }
 

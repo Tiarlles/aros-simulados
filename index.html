@@ -1814,6 +1814,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-card .pro-badge{flex-shrink:0}
 #tab-produtos .pro-badge{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:4px 8px;border-radius:6px;border:1px solid;white-space:nowrap}
 #tab-produtos .pro-badge.s-ativo{background:color-mix(in srgb, #22c55e 14%, transparent);border-color:color-mix(in srgb, #22c55e 50%, var(--border));color:#22c55e}
+#tab-produtos .pro-badge.s-aguardando-descricao{background:color-mix(in srgb, #06b6d4 14%, transparent);border-color:color-mix(in srgb, #06b6d4 50%, var(--border));color:#06b6d4}
 #tab-produtos .pro-badge.s-em-breve{background:color-mix(in srgb, var(--accent) 14%, transparent);border-color:color-mix(in srgb, var(--accent) 50%, var(--border));color:var(--accent)}
 #tab-produtos .pro-badge.s-rascunho{background:color-mix(in srgb, #f59e0b 14%, transparent);border-color:color-mix(in srgb, #f59e0b 50%, var(--border));color:#f59e0b}
 #tab-produtos .pro-badge.s-descontinuado{background:var(--bg3);border-color:var(--border);color:var(--t2)}
@@ -1827,7 +1828,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-detail-cover.has-img::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.5) 100%)}
 #tab-produtos .pro-detail-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
 #tab-produtos .pro-detail-nome{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;letter-spacing:-.5px;line-height:1.1;margin:0 0 6px}
-#tab-produtos .pro-detail-pitch{font-size:15px;color:var(--t2);line-height:1.45;max-width:760px}
+#tab-produtos .pro-detail-pitch{font-size:15px;color:var(--t2);line-height:1.45;max-width:760px;text-align:justify}
 #tab-produtos .pro-detail-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
 #tab-produtos .pro-detail-actions{display:flex;gap:8px}
 #tab-produtos .pro-section{margin:28px 0}
@@ -1838,13 +1839,22 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-section-title-mentoria::before{color:#a855f7;opacity:.5}
 #tab-produtos .pro-ment-tag{display:inline-flex;align-items:center;margin-left:8px;padding:2px 9px;border-radius:999px;background:color-mix(in srgb,#f59e0b 14%,transparent);border:1px solid color-mix(in srgb,#f59e0b 40%,var(--border));color:#f59e0b;font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
 /* Descrição da mentoria: aparece logo abaixo do título, sempre visível por inteiro */
-#tab-produtos .pro-ment-desc{font-size:14px;line-height:1.55;color:var(--text);margin:0 0 14px;max-width:820px;white-space:pre-wrap;border-left:3px solid color-mix(in srgb,#a855f7 50%,transparent);padding:2px 0 2px 12px}
+#tab-produtos .pro-ment-desc{font-size:14px;line-height:1.55;color:var(--text);margin:0 0 14px;max-width:820px;white-space:pre-wrap;border-left:3px solid color-mix(in srgb,#a855f7 50%,transparent);padding:2px 0 2px 12px;text-align:justify}
 
 /* Seção Bônus (detalhe) — amarelo dourado pra distinguir das outras */
 #tab-produtos .pro-section-bonus{border-top:1px solid var(--border);padding-top:28px;margin-top:32px}
 #tab-produtos .pro-section-title-bonus{color:#fbbf24}
 #tab-produtos .pro-section-title-bonus::before{color:#fbbf24;opacity:.5}
 #tab-produtos .pro-bonus-cards{display:flex;flex-direction:column;gap:8px}
+/* Cards de produtos vinculados (minimal): só nome + chevron, ciano/teal */
+#tab-produtos .pro-link-cards{display:flex;flex-direction:column;gap:6px}
+#tab-produtos .pro-link-card{display:flex;align-items:center;gap:10px;padding:12px 16px;background:color-mix(in srgb,#06b6d4 7%,var(--bg2));border:1px solid color-mix(in srgb,#06b6d4 32%,var(--border));border-radius:10px;cursor:pointer;transition:all .15s;text-decoration:none}
+#tab-produtos .pro-link-card:hover{background:color-mix(in srgb,#06b6d4 14%,var(--bg2));border-color:#06b6d4;transform:translateY(-1px);box-shadow:0 4px 12px rgba(6,182,212,.12)}
+#tab-produtos .pro-link-card.orphan{border-style:dashed;background:var(--bg3);color:var(--t2);cursor:not-allowed}
+#tab-produtos .pro-link-card.orphan:hover{transform:none;box-shadow:none;border-color:var(--border)}
+#tab-produtos .pro-link-card-name{flex:1;min-width:0;font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
+#tab-produtos .pro-link-card-arrow{flex-shrink:0;color:#06b6d4;font-size:18px;font-weight:300;line-height:1;opacity:.7;transition:transform .15s,opacity .15s}
+#tab-produtos .pro-link-card:hover .pro-link-card-arrow{opacity:1;transform:translateX(2px)}
 #tab-produtos .pro-bonus-card{display:flex;align-items:center;gap:12px;padding:10px 14px;background:color-mix(in srgb,#fbbf24 4%,var(--bg2));border:1px solid color-mix(in srgb,#fbbf24 22%,var(--border));border-radius:12px;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
 #tab-produtos .pro-bonus-card:hover{border-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,var(--bg2));transform:translateY(-1px)}
 #tab-produtos .pro-bonus-card.orphan{border-style:dashed;color:var(--t2);cursor:default;background:var(--bg3)}
@@ -1856,7 +1866,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-bonus-card-meta{display:flex;gap:4px;margin-top:2px;flex-wrap:wrap}
 #tab-produtos .pro-bonus-card-arrow{color:var(--t2);font-size:18px;font-weight:300;line-height:1;flex-shrink:0;transition:color .15s,transform .15s}
 #tab-produtos .pro-bonus-card:hover .pro-bonus-card-arrow{color:#fbbf24;transform:translateX(3px)}
-#tab-produtos .pro-text-block{font-size:14px;line-height:1.6;color:var(--text);max-width:820px;white-space:pre-wrap}
+#tab-produtos .pro-text-block{font-size:14px;line-height:1.6;color:var(--text);max-width:820px;white-space:pre-wrap;text-align:justify}
 
 /* Features renderizam uma por linha (não mais 2 colunas) — facilita scanning
    vertical, especialmente quando descrições/diferenciais ficam longos. */
@@ -1884,7 +1894,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-feat-desc{font-size:13px;color:var(--t2);line-height:1.5}
 #tab-produtos .pro-feat-dif{margin-top:10px;padding:10px 12px;background:color-mix(in srgb,#fbbf24 8%,var(--bg3));border:1px solid color-mix(in srgb,#fbbf24 32%,var(--border));border-radius:10px}
 #tab-produtos .pro-feat-dif-label{display:inline-block;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#f59e0b;margin-bottom:4px}
-#tab-produtos .pro-feat-dif-body{font-size:13px;color:var(--text);line-height:1.5}
+#tab-produtos .pro-feat-dif-body{font-size:13px;color:var(--text);line-height:1.5;text-align:justify}
 #tab-produtos .pro-feat-dif-body p{margin:0 0 6px}
 #tab-produtos .pro-feat-dif-body p:last-child{margin-bottom:0}
 #tab-produtos .pro-feat-dif-body ul,#tab-produtos .pro-feat-dif-body ol{margin:6px 0;padding-left:22px}
@@ -1932,7 +1942,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-obj-q{font-weight:700;font-size:14px;color:var(--text);margin-bottom:6px}
 #tab-produtos .pro-obj-q::before{content:"Q: ";color:var(--accent);font-family:'JetBrains Mono','SF Mono',monospace;font-weight:700;margin-right:2px}
 #tab-produtos .pro-obj-q > p:first-child,#tab-produtos .pro-obj-q > div:first-child,#tab-produtos .pro-obj-q > span:first-child{display:inline;margin:0}
-#tab-produtos .pro-obj-a{font-size:13.5px;line-height:1.55;color:var(--t2)}
+#tab-produtos .pro-obj-a{font-size:13.5px;line-height:1.55;color:var(--t2);text-align:justify}
 #tab-produtos .pro-obj-a::before{content:"R: ";color:var(--accent);font-family:'JetBrains Mono','SF Mono',monospace;font-weight:700;margin-right:2px}
 /* Primeiro elemento da resposta vira inline pra colar no R: */
 #tab-produtos .pro-obj-a > p:first-child,
@@ -1971,6 +1981,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-edit-accordion.open .pro-edit-acc-caret{transform:rotate(180deg)}
 #tab-produtos .pro-edit-acc-body{max-height:0;opacity:0;overflow:hidden;padding:0 18px;border-top:1px solid transparent;transition:max-height .22s ease-out,opacity .15s ease-out,padding .22s ease-out,border-color .22s ease-out}
 #tab-produtos .pro-edit-accordion.open .pro-edit-acc-body{max-height:2500px;opacity:1;padding:16px 18px;border-top-color:var(--border)}
+#tab-produtos .pro-edit-accordion.open.fully-open .pro-edit-acc-body{max-height:none}
 #tab-produtos .pro-edit-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
 #tab-produtos .pro-edit-row .fc{flex:1}
 #tab-produtos .pro-edit-tags-wrap{display:flex;gap:6px;flex-wrap:wrap;padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;min-height:42px;align-items:center}
@@ -1995,6 +2006,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-feat-edit.open .pro-feat-edit-toggle{transform:rotate(180deg);color:var(--accent)}
 #tab-produtos .pro-feat-edit-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .3s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,padding .2s,border-top-color .2s;border-top:1px solid transparent}
 #tab-produtos .pro-feat-edit.open .pro-feat-edit-body{max-height:1200px;opacity:1;padding:14px;border-top-color:var(--border)}
+#tab-produtos .pro-feat-edit.open.fully-open .pro-feat-edit-body{max-height:none}
 #tab-produtos .pro-feat-edit-head-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-width:0}
 #tab-produtos .pro-feat-edit-head-pill{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid;white-space:nowrap}
 #tab-produtos .pro-feat-edit-head-pill.ok{background:color-mix(in srgb,#22c55e 12%,transparent);border-color:color-mix(in srgb,#22c55e 36%,var(--border));color:#22c55e}
@@ -2054,6 +2066,13 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 .pro-picker-opt{display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:1px solid transparent;color:var(--text);padding:8px 10px;border-radius:9px;cursor:pointer;text-align:left;font:inherit;font-size:13px;transition:background .12s,border-color .12s}
 .pro-picker-opt:hover{background:color-mix(in srgb,var(--accent) 8%,transparent);border-color:color-mix(in srgb,var(--accent) 22%,var(--border))}
 .pro-picker-empty{padding:18px 8px;text-align:center;color:var(--t2);font-size:12.5px;font-style:italic}
+.pro-picker-multi-opt{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;cursor:pointer;border:1px solid transparent;transition:background .12s,border-color .12s}
+.pro-picker-multi-opt:hover{background:color-mix(in srgb,var(--accent) 8%,transparent);border-color:color-mix(in srgb,var(--accent) 22%,var(--border))}
+.pro-picker-multi-opt.checked{background:color-mix(in srgb,var(--accent) 14%,var(--bg3));border-color:color-mix(in srgb,var(--accent) 42%,var(--border))}
+.pro-picker-multi-opt input[type="checkbox"]{flex-shrink:0;width:16px;height:16px;cursor:pointer;accent-color:var(--accent)}
+.pro-picker-multi-name{flex:1;min-width:0;font-size:13.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
+.pro-picker-multi-foot{display:flex;align-items:center;gap:8px;padding:10px 4px 2px;margin-top:8px;border-top:1px solid var(--border)}
+.pro-picker-multi-count{flex:1;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;color:var(--t2);letter-spacing:.4px}
 
 /* Chips de produto vinculado no editor do Bônus */
 #tab-produtos .pro-bonus-block{}
@@ -2127,6 +2146,15 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-disc-label .pro-disc-ico{font-size:13px;opacity:.85}
 #tab-produtos .pro-disc-count{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);background:color-mix(in srgb, var(--accent) 12%, transparent);border:1px solid color-mix(in srgb, var(--accent) 28%, transparent);padding:1px 8px;border-radius:999px;letter-spacing:.6px;font-variant-numeric:tabular-nums}
 #tab-produtos .pro-disc.provas .pro-disc-count{color:#fb923c;background:color-mix(in srgb, #fb923c 12%, transparent);border-color:color-mix(in srgb, #fb923c 30%, transparent)}
+/* Disclosure de Tempo de acesso — chips inline no header */
+#tab-produtos .pro-disc.tempos{border-color:color-mix(in srgb, #14b8a6 24%, var(--border))}
+#tab-produtos .pro-disc.tempos:hover{border-color:color-mix(in srgb, #14b8a6 38%, var(--border))}
+#tab-produtos .pro-disc.tempos.open{border-color:color-mix(in srgb, #14b8a6 48%, var(--border))}
+#tab-produtos .pro-disc.tempos .pro-disc-label{color:#14b8a6}
+#tab-produtos .pro-disc-inline-chips{display:inline-flex;flex-wrap:wrap;gap:5px;margin-left:6px;flex:1}
+#tab-produtos .pro-disc-inline-chip{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.4px;padding:2px 9px;border-radius:999px;background:color-mix(in srgb, #14b8a6 12%, transparent);border:1px solid color-mix(in srgb, #14b8a6 32%, var(--border));color:#14b8a6;white-space:nowrap}
+#tab-produtos .pro-disc-obs{font-size:13.5px;line-height:1.55;color:var(--text);margin:0;padding:8px 0;text-align:justify;white-space:pre-wrap}
+#tab-produtos .pro-disc-obs.empty{color:var(--t2);font-style:italic;text-align:left}
 #tab-produtos .pro-disc-chevron{font-family:'JetBrains Mono','SF Mono',monospace;color:var(--t2);font-size:11px;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));margin-left:auto;line-height:1}
 #tab-produtos .pro-disc.open .pro-disc-chevron{transform:rotate(180deg);color:var(--accent)}
 #tab-produtos .pro-disc-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .3s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,padding .2s}
@@ -2208,6 +2236,36 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-ment-resp-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#a855f7;opacity:.85}
 #tab-produtos .pro-ment-resp-names{color:var(--text);font-weight:500}
 
+/* Jornada do Cliente — box no topo do catálogo */
+#tab-produtos .pro-jornada-disc{margin:14px 0 20px;background:color-mix(in srgb,#06b6d4 6%,var(--bg2));border:1px solid color-mix(in srgb,#06b6d4 28%,var(--border));border-radius:14px;overflow:hidden;backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);transition:border-color .2s,box-shadow .2s}
+#tab-produtos .pro-jornada-disc:hover{border-color:color-mix(in srgb,#06b6d4 42%,var(--border))}
+#tab-produtos .pro-jornada-disc.open{border-color:color-mix(in srgb,#06b6d4 50%,var(--border));box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 6px 18px rgba(0,0,0,.10)}
+#tab-produtos .pro-jornada-head{display:flex;align-items:center;gap:10px;width:100%;padding:14px 18px;background:transparent;color:inherit;cursor:pointer;text-align:left;font:inherit;transition:background .15s}
+#tab-produtos .pro-jornada-head:hover{background:color-mix(in srgb,#06b6d4 4%,transparent)}
+#tab-produtos .pro-jornada-head:focus-visible{outline:2px solid #06b6d4;outline-offset:-2px}
+#tab-produtos .pro-jornada-title{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#06b6d4}
+#tab-produtos .pro-jornada-title::before{content:"// ";color:var(--t2);opacity:.6}
+#tab-produtos .pro-jornada-ico{font-size:14px;opacity:.95}
+#tab-produtos .pro-jornada-meta{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;color:var(--t2);margin-left:auto;letter-spacing:.4px}
+#tab-produtos .pro-jornada-caret{font-family:'JetBrains Mono','SF Mono',monospace;color:var(--t2);font-size:11px;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));line-height:1;margin-left:8px}
+#tab-produtos .pro-jornada-disc:not(.open) .pro-jornada-caret{margin-left:auto}
+#tab-produtos .pro-jornada-disc.open .pro-jornada-caret{transform:rotate(180deg);color:#06b6d4}
+#tab-produtos .pro-jornada-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .4s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .25s,padding .2s}
+#tab-produtos .pro-jornada-disc.open .pro-jornada-body{max-height:3000px;opacity:1;padding:6px 20px 20px;overflow-y:auto}
+#tab-produtos .pro-jornada-hint{font-size:12.5px;color:var(--t2);line-height:1.5;margin:0 0 14px;font-style:italic}
+#tab-produtos .pro-jornada-dirty{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#f59e0b;background:color-mix(in srgb,#f59e0b 12%,transparent);border:1px solid color-mix(in srgb,#f59e0b 40%,var(--border));padding:3px 8px;border-radius:6px}
+#tab-produtos .pro-jornada-text{font-size:14px;line-height:1.6;color:var(--text);text-align:justify}
+#tab-produtos .pro-jornada-text p{margin:8px 0}
+#tab-produtos .pro-jornada-text ul,#tab-produtos .pro-jornada-text ol{margin:8px 0 8px 22px;padding:0}
+#tab-produtos .pro-jornada-text a{color:#06b6d4;text-decoration:underline}
+#tab-produtos .pro-jornada-video{position:relative;width:100%;max-width:720px;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+#tab-produtos .pro-jornada-video iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+#tab-produtos .pro-jornada-video-link{display:inline-flex;align-items:center;gap:6px;color:#06b6d4;text-decoration:none;font-size:13px;font-weight:600;padding:6px 12px;border:1px solid color-mix(in srgb,#06b6d4 30%,var(--border));border-radius:8px;background:color-mix(in srgb,#06b6d4 6%,var(--bg3));transition:all .15s}
+#tab-produtos .pro-jornada-video-link:hover{background:color-mix(in srgb,#06b6d4 12%,var(--bg3));border-color:#06b6d4}
+#tab-produtos .pro-jornada-img-wrap{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+#tab-produtos .pro-jornada-img{max-width:100%;max-height:340px;border-radius:12px;border:1px solid var(--border);display:block}
+#tab-produtos .pro-jornada-foot{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid color-mix(in srgb,#06b6d4 18%,var(--border))}
+
 /* Título de seção do detalhe com botão ✏️ contextual */
 #tab-produtos .pro-section-head{display:flex;align-items:center;gap:10px;margin:0 0 12px}
 #tab-produtos .pro-section-head .pro-section-title{margin:0!important}
@@ -2258,6 +2316,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-qa-edit.open .pro-qa-caret{transform:rotate(180deg);color:var(--accent)}
 #tab-produtos .pro-qa-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .35s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,padding .2s,border-top-color .2s;border-top:1px solid transparent;padding:0 14px}
 #tab-produtos .pro-qa-edit.open .pro-qa-body{max-height:1500px;opacity:1;padding:14px;border-top-color:var(--border)}
+#tab-produtos .pro-qa-edit.open.fully-open .pro-qa-body{max-height:none}
 
 /* Rich-text mini editor (resposta de obj/dúvida) */
 #tab-produtos .pro-rt{border:1px solid var(--border);border-radius:10px;background:var(--bg);overflow:hidden;transition:border-color .15s,box-shadow .15s}
@@ -2269,6 +2328,90 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-rt-tb button.underline{text-decoration:underline}
 #tab-produtos .pro-rt-tb-sep{width:1px;height:18px;background:var(--border);margin:0 4px}
 #tab-produtos .pro-rt-ed{padding:10px 12px;min-height:84px;max-height:340px;overflow-y:auto;outline:none;font-size:13.5px;line-height:1.55;color:var(--text)}
+#tab-produtos .pro-rt-ed.tall{min-height:260px;max-height:560px;padding:14px 16px;font-size:14px;line-height:1.65}
+#tab-produtos .pro-rt-ed.justify{text-align:justify}
+#tab-produtos .pro-rt-tb-expand{margin-left:auto;font-size:14px}
+
+/* Modal expandido do editor rich-text (portal pra document.body) */
+body.pro-rt-fs-on{overflow:hidden}
+.pro-rt-fs-backdrop{position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:32px 16px;opacity:0;transition:opacity .22s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
+.pro-rt-fs-backdrop.show{opacity:1}
+.pro-rt.fullscreen{position:relative;z-index:99999;background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:100%;max-width:960px;height:auto;max-height:calc(100vh - 64px);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.55),0 0 0 1px var(--accent-dim);transform:scale(.96);opacity:0;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .22s}
+.pro-rt.fullscreen.fs-in{transform:scale(1);opacity:1}
+.pro-rt.fullscreen .pro-rt-tb{flex-shrink:0;position:sticky;top:0;z-index:1}
+.pro-rt.fullscreen .pro-rt-ed{flex:1;min-height:0;max-height:none;padding:28px 36px;font-size:15.5px;line-height:1.7;overflow-y:auto}
+.pro-rt.fullscreen .pro-rt-tb-expand{color:#ef4444;background:color-mix(in srgb,#ef4444 12%,transparent);border-color:color-mix(in srgb,#ef4444 35%,var(--border))}
+.pro-rt.fullscreen .pro-rt-tb-expand:hover{background:color-mix(in srgb,#ef4444 22%,transparent);color:#ef4444;border-color:#ef4444}
+@media (max-width:700px){.pro-rt-fs-backdrop{padding:0}.pro-rt.fullscreen{max-width:none;height:100vh;max-height:100vh;border-radius:0;border:none}}
+
+/* Bloco colapsável dentro do texto rico (<details>) */
+#tab-produtos .pro-rt-ed details,
+#tab-produtos .pro-obj-a details,
+#tab-produtos .pro-feat-dif-body details,
+#tab-produtos .pro-jornada-text details,
+#tab-produtos .pro-ment-desc details{display:block;margin:10px 0;background:color-mix(in srgb,var(--accent) 6%,var(--bg2));border:1px solid color-mix(in srgb,var(--accent) 28%,var(--border));border-radius:10px;padding:0;overflow:hidden;transition:border-color .15s}
+#tab-produtos .pro-rt-ed details:hover,
+#tab-produtos .pro-obj-a details:hover,
+#tab-produtos .pro-feat-dif-body details:hover,
+#tab-produtos .pro-jornada-text details:hover,
+#tab-produtos .pro-ment-desc details:hover{border-color:color-mix(in srgb,var(--accent) 44%,var(--border))}
+#tab-produtos .pro-rt-ed details > summary,
+#tab-produtos .pro-obj-a details > summary,
+#tab-produtos .pro-feat-dif-body details > summary,
+#tab-produtos .pro-jornada-text details > summary,
+#tab-produtos .pro-ment-desc details > summary{cursor:pointer;padding:10px 14px;font-weight:600;font-size:14px;color:var(--accent);list-style:none;display:flex;align-items:center;gap:8px;outline:none;user-select:none;background:color-mix(in srgb,var(--accent) 4%,transparent);transition:background .15s}
+#tab-produtos .pro-rt-ed details > summary::-webkit-details-marker,
+#tab-produtos .pro-obj-a details > summary::-webkit-details-marker,
+#tab-produtos .pro-feat-dif-body details > summary::-webkit-details-marker,
+#tab-produtos .pro-jornada-text details > summary::-webkit-details-marker,
+#tab-produtos .pro-ment-desc details > summary::-webkit-details-marker{display:none}
+#tab-produtos .pro-rt-ed details > summary::before,
+#tab-produtos .pro-obj-a details > summary::before,
+#tab-produtos .pro-feat-dif-body details > summary::before,
+#tab-produtos .pro-jornada-text details > summary::before,
+#tab-produtos .pro-ment-desc details > summary::before{content:"▸";font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;color:var(--accent);transition:transform .2s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));display:inline-block;flex-shrink:0}
+#tab-produtos .pro-rt-ed details[open] > summary::before,
+#tab-produtos .pro-obj-a details[open] > summary::before,
+#tab-produtos .pro-feat-dif-body details[open] > summary::before,
+#tab-produtos .pro-jornada-text details[open] > summary::before,
+#tab-produtos .pro-ment-desc details[open] > summary::before{transform:rotate(90deg)}
+#tab-produtos .pro-rt-ed details[open] > summary,
+#tab-produtos .pro-obj-a details[open] > summary,
+#tab-produtos .pro-feat-dif-body details[open] > summary,
+#tab-produtos .pro-jornada-text details[open] > summary,
+#tab-produtos .pro-ment-desc details[open] > summary{border-bottom:1px solid color-mix(in srgb,var(--accent) 18%,var(--border))}
+#tab-produtos .pro-rt-ed details > *:not(summary),
+#tab-produtos .pro-obj-a details > *:not(summary),
+#tab-produtos .pro-feat-dif-body details > *:not(summary),
+#tab-produtos .pro-jornada-text details > *:not(summary),
+#tab-produtos .pro-ment-desc details > *:not(summary){padding:0 14px}
+#tab-produtos .pro-rt-ed details > p:first-of-type:not(summary),
+#tab-produtos .pro-obj-a details > p:first-of-type:not(summary),
+#tab-produtos .pro-feat-dif-body details > p:first-of-type:not(summary),
+#tab-produtos .pro-jornada-text details > p:first-of-type:not(summary),
+#tab-produtos .pro-ment-desc details > p:first-of-type:not(summary){padding-top:10px}
+#tab-produtos .pro-rt-ed details > p:last-of-type,
+#tab-produtos .pro-obj-a details > p:last-of-type,
+#tab-produtos .pro-feat-dif-body details > p:last-of-type,
+#tab-produtos .pro-jornada-text details > p:last-of-type,
+#tab-produtos .pro-ment-desc details > p:last-of-type{padding-bottom:12px}
+
+/* Bloco colapsável dentro do editor — relativo pra ancorar o botão ✕ */
+#tab-produtos .pro-rt-ed details.pro-collapsible{position:relative;padding-right:32px}
+#tab-produtos .pro-rt-ed details.pro-collapsible > summary{padding-right:4px}
+#tab-produtos .pro-rt-ed .pro-collapsible-body{padding:0}
+#tab-produtos .pro-rt-ed .pro-collapsible-body p{padding:6px 14px}
+#tab-produtos .pro-rt-ed .pro-collapsible-body p:first-child{padding-top:10px}
+#tab-produtos .pro-rt-ed .pro-collapsible-body p:last-child{padding-bottom:12px}
+#tab-produtos .pro-collapsible-del{position:absolute;top:6px;right:6px;background:transparent;border:1px solid transparent;color:var(--t2);width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:12px;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;padding:0;user-select:none;z-index:2}
+#tab-produtos .pro-collapsible-del:hover{background:color-mix(in srgb,#ef4444 18%,transparent);border-color:#ef4444;color:#ef4444}
+/* Bloqueia aninhamento visual (caso aconteça mesmo assim, mostra alerta sutil) */
+#tab-produtos details.pro-collapsible details.pro-collapsible{outline:2px dashed #f59e0b;outline-offset:-2px}
+#tab-produtos .pro-rt-ed.justify p{text-align:justify}
+#tab-produtos .pro-rt-tb-colors{display:inline-flex;align-items:center;gap:3px;padding:0 2px}
+#tab-produtos .pro-rt-tb-lbl{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;color:var(--t2);font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-right:3px}
+#tab-produtos .pro-rt-tb-c{width:16px;height:16px;border-radius:50%;border:1px solid var(--border);padding:0;cursor:pointer;display:inline-block;transition:transform .12s,box-shadow .12s;flex-shrink:0}
+#tab-produtos .pro-rt-tb-c:hover{transform:scale(1.18);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 25%,transparent)}
 #tab-produtos .pro-rt-ed:empty:before{content:attr(data-placeholder);color:var(--t2);font-style:italic;pointer-events:none}
 #tab-produtos .pro-rt-ed ul,#tab-produtos .pro-rt-ed ol{margin:6px 0 6px 22px;padding:0}
 #tab-produtos .pro-rt-ed li{margin-bottom:2px}
@@ -27925,16 +28068,21 @@ S.produtos=[];
 S.produtosLoaded=false;
 S.produtosView='list';   // 'list' | 'detail' | 'edit' | 'new'
 S.produtoAtual=null;     // objeto sendo visto/editado (cópia trabalho)
+S._proNavStack=[];       // pilha de IDs pra voltar pra produto-anterior em vez de catálogo
 S.produtosBusca='';
 S.produtosFiltroProvas=[];
 S.catalogoConfig={publicosAlvo:[],provasAlvo:[],loaded:false};
+S.jornadaCliente={texto:'',videoUrl:'',imagemUrl:'',imagemPath:'',updatedAt:null,updatedBy:'',loaded:false};
+S._jornadaOpen=false;
+S._jornadaDirty=false;
+let _proJornadaUnsub=null;
 let _proUnsub=null;
 let _proCatUnsub=null;
 let _proDirty=false;
 let _proCatSeeded=false;
 
 const PRO_ICONES_CURADOS=['🎥','📚','🗂️','📝','🎯','🏆','💬','📊','🧠','🎓','⏱️','🔬','💊','🩺','📖','📋','🎙️','🧪','🎬','📺','🔖','🗓️','👥','💡','📈'];
-const PRO_STATUS_LABEL={ativo:'Ativo','em-breve':'Em breve',rascunho:'Rascunho',descontinuado:'Descontinuado'};
+const PRO_STATUS_LABEL={ativo:'Ativo','aguardando-descricao':'Ativo · aguardando descrição','em-breve':'Em breve',rascunho:'Rascunho',descontinuado:'Descontinuado'};
 const PRO_STATUS_ORDER={ativo:0,'em-breve':1,rascunho:2,descontinuado:3};
 
 const PRO_FEAT_ICONE_DEFAULT='✨';
@@ -28103,6 +28251,24 @@ window.initProdutos=function(){
       if(S.produtosLoaded&&(S.produtosView==='edit'||S.produtosView==='new'))_proRefreshPickerIfOpen();
     },err=>{console.warn('catalogoConfig onSnapshot:',err);S.catalogoConfig.loaded=true;});
   }
+  if(!_proJornadaUnsub){
+    _proJornadaUnsub=onSnapshot(doc(db,'config','jornadaCliente'),snap=>{
+      if(snap.exists()){
+        const d=snap.data()||{};
+        // Não sobrescreve se o user tem alterações não salvas
+        if(!S._jornadaDirty){
+          S.jornadaCliente.texto=String(d.texto||'');
+          S.jornadaCliente.videoUrl=String(d.videoUrl||'');
+          S.jornadaCliente.imagemUrl=String(d.imagemUrl||'');
+          S.jornadaCliente.imagemPath=String(d.imagemPath||'');
+          S.jornadaCliente.updatedAt=d.updatedAt||null;
+          S.jornadaCliente.updatedBy=String(d.updatedBy||'');
+        }
+      }
+      S.jornadaCliente.loaded=true;
+      if(S.produtosLoaded&&S.produtosView==='list'&&!S._jornadaDirty)_proJornadaRefresh();
+    },err=>{console.warn('jornadaCliente onSnapshot:',err);S.jornadaCliente.loaded=true;});
+  }
   if(_proUnsub)return _proRender();
   _proUnsub=onSnapshot(collection(db,'produtos'),snap=>{
     S.produtos=snap.docs.map(d=>({id:d.id,...d.data()}));
@@ -28209,6 +28375,7 @@ function _proRenderList(root){
       <input class="pro-search" id="pro-search" type="text" placeholder="🔍 Buscar por nome, pitch, público, features..." value="${_proEscAttr(S.produtosBusca)}" oninput="proSearchInput(this.value)"/>
     </div>
     <div id="pro-dex-container"></div>
+    <div id="pro-jornada-wrap">${_proJornadaHTML()}</div>
     ${listHtml}
   `;
   _proDexRender();
@@ -28227,9 +28394,8 @@ function _proRowHTML(p){
     ?`draggable="true" ondragstart="_proCardDragStart(event,'${_proEscAttr(p.id)}')" ondragover="_proCardDragOver(event)" ondragleave="_proCardDragLeave(event)" ondrop="_proCardDrop(event,'${_proEscAttr(p.id)}')" ondragend="_proCardDragEnd(event)"`
     :'';
   const dragHandle=canEdit?`<span class="pro-card-handle" title="Arrastar pra reordenar">⠿</span>`:'';
-  return `<div class="pro-card" data-pro-card-id="${_proEscAttr(p.id)}" ${dragAttrs} onclick="proAbrir('${_proEscAttr(p.id)}')">
+  return `<div class="pro-card" data-pro-card-id="${_proEscAttr(p.id)}" ${dragAttrs} onclick="S._proNavStack=[];proAbrir('${_proEscAttr(p.id)}')">
     ${dragHandle}
-    <div class="pro-card-ico">📦</div>
     <div class="pro-card-main">
       <div class="pro-card-name">${_proEsc(p.nome||'Sem nome')}</div>
       <div class="pro-card-resp">${respHtml}</div>
@@ -28240,6 +28406,189 @@ function _proRowHTML(p){
 
 // ─── Pergunte ao Dex ─────────────────────────────────────────────────────
 const DEX_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/perguntarDex';
+
+// ════════════════════════════════════════════════════════════════════════
+// JORNADA DO CLIENTE — box no topo do catálogo (alimenta IA + vendedores)
+// ════════════════════════════════════════════════════════════════════════
+function _proJornadaEmbedHTML(url){
+  const u=String(url||'').trim();
+  if(!u)return '';
+  // YouTube
+  let m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if(m){
+    return `<div class="pro-jornada-video"><iframe src="https://www.youtube.com/embed/${m[1]}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+  }
+  // Vimeo
+  m=u.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if(m){
+    return `<div class="pro-jornada-video"><iframe src="https://player.vimeo.com/video/${m[1]}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
+  }
+  // Outras URLs: link clicável
+  return `<a class="pro-jornada-video-link" href="${_proEscAttr(u)}" target="_blank" rel="noopener noreferrer">🎬 ${_proEsc(u)}</a>`;
+}
+
+function _proJornadaHTML(){
+  const j=S.jornadaCliente;
+  const canEdit=_proCanEdit();
+  const open=!!S._jornadaOpen;
+  const dirty=!!S._jornadaDirty;
+  const loaded=!!j.loaded;
+  const dirtyPill=dirty?'<span class="pro-jornada-dirty">● Não salvo</span>':'';
+  const updMeta=(j.updatedAt&&j.updatedBy)?`<span class="pro-jornada-meta">Atualizado em ${_proEsc(_proFmtDate(j.updatedAt))} por ${_proEsc(j.updatedBy)}</span>`:'';
+  // Body
+  let bodyHtml;
+  if(!loaded){
+    bodyHtml=`<p style="color:var(--t2);font-style:italic;margin:0">Carregando…</p>`;
+  }else if(canEdit){
+    const videoEmbed=j.videoUrl?_proJornadaEmbedHTML(j.videoUrl):'';
+    const imgPreview=j.imagemUrl?`<div class="pro-jornada-img-wrap">
+      <img src="${_proEscAttr(j.imagemUrl)}" alt="Imagem da jornada" class="pro-jornada-img"/>
+      <button class="btn btn-d btn-sm" onclick="_proJornadaRemoverImagem()" type="button">🗑 Remover imagem</button>
+    </div>`:'';
+    bodyHtml=`
+      <p class="pro-jornada-hint">Descreva quem é o cliente que compra esses produtos — perfil, dores, jornada de compra, gatilhos. Esse conteúdo alimenta a IA do Dex e serve de consulta pros vendedores.</p>
+      <div class="fg">
+        <label class="fl">Descrição da jornada</label>
+        ${_proRtHTML('jornada-cliente',j.texto,'Quem é o cliente, o que ele procura, como ele decide…',"_proJornadaSetTexto(_proRtGet('jornada-cliente'))",{colors:true,justify:true,tall:true,expandable:true,collapsibles:true})}
+      </div>
+      <div class="fg">
+        <label class="fl">Vídeo explicativo (URL — YouTube ou Vimeo embeda automaticamente)</label>
+        <input type="url" class="fc" placeholder="https://youtube.com/watch?v=… ou https://vimeo.com/…" value="${_proEscAttr(j.videoUrl)}" oninput="_proJornadaSetVideo(this.value)"/>
+        ${videoEmbed?`<div style="margin-top:10px">${videoEmbed}</div>`:''}
+      </div>
+      <div class="fg" style="margin-bottom:0">
+        <label class="fl">Imagem da jornada</label>
+        <input type="file" id="pro-jornada-img-file" accept="image/jpeg,image/jpg,image/png,image/webp" style="display:none" onchange="_proJornadaUploadImagem(this.files[0])"/>
+        <div id="pro-jornada-img-area">${imgPreview||`<button class="btn btn-s btn-sm" type="button" onclick="document.getElementById('pro-jornada-img-file').click()">📷 Enviar imagem</button>`}</div>
+        <p style="font-size:11px;color:var(--t2);margin:6px 2px 0;font-family:'JetBrains Mono',monospace;letter-spacing:.4px">JPG / PNG / WebP · máx 5MB</p>
+      </div>
+      <div class="pro-jornada-foot">
+        ${dirtyPill}
+        <button class="btn btn-p btn-sm" id="pro-jornada-save-btn" onclick="_proJornadaSalvar()" type="button">💾 Salvar</button>
+      </div>`;
+  }else{
+    // Modo somente leitura (vendedor sem permissão de edit)
+    const txtHtml=String(j.texto||'').trim()?`<div class="pro-jornada-text">${_renderRichText(j.texto)}</div>`:`<p style="color:var(--t2);font-style:italic;margin:0">Jornada ainda não foi descrita.</p>`;
+    const videoEmbed=j.videoUrl?`<div style="margin-top:14px">${_proJornadaEmbedHTML(j.videoUrl)}</div>`:'';
+    const img=j.imagemUrl?`<div style="margin-top:14px"><img src="${_proEscAttr(j.imagemUrl)}" alt="Imagem da jornada" class="pro-jornada-img"/></div>`:'';
+    bodyHtml=`${txtHtml}${videoEmbed}${img}`;
+  }
+  return `<div class="pro-jornada-disc${open?' open':''}" data-jornada-disc>
+    <div class="pro-jornada-head" role="button" tabindex="0" onclick="proToggleJornada()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proToggleJornada()}" aria-expanded="${open}">
+      <span class="pro-jornada-title"><span class="pro-jornada-ico">🧭</span> Jornada do Cliente</span>
+      ${dirtyPill}
+      ${updMeta}
+      <span class="pro-jornada-caret">▾</span>
+    </div>
+    <div class="pro-jornada-body">${bodyHtml}</div>
+  </div>`;
+}
+
+function _proJornadaRefresh(){
+  const wrap=document.getElementById('pro-jornada-wrap');
+  if(!wrap)return;
+  // Preserva foco/seleção do editor rich-text se estiver digitando
+  const ed=document.querySelector('[data-rt-ed="jornada-cliente"]');
+  const wasFocused=ed&&document.activeElement===ed;
+  wrap.innerHTML=_proJornadaHTML();
+  if(wasFocused){
+    const ed2=document.querySelector('[data-rt-ed="jornada-cliente"]');
+    if(ed2)ed2.focus();
+  }
+}
+
+window.proToggleJornada=()=>{
+  S._jornadaOpen=!S._jornadaOpen;
+  const el=document.querySelector('#tab-produtos [data-jornada-disc]');
+  if(el)el.classList.toggle('open',!!S._jornadaOpen);
+};
+
+window._proJornadaSetTexto=(html)=>{
+  S.jornadaCliente.texto=String(html||'');
+  _proJornadaMark();
+};
+window._proJornadaSetVideo=(url)=>{
+  S.jornadaCliente.videoUrl=String(url||'').trim();
+  _proJornadaMark();
+  // Re-render só pra atualizar o preview do embed
+  clearTimeout(window._proJornadaVideoTimer);
+  window._proJornadaVideoTimer=setTimeout(()=>_proJornadaRefresh(),400);
+};
+function _proJornadaMark(){
+  if(S._jornadaDirty)return;
+  S._jornadaDirty=true;
+  // Atualiza só o pill (sem re-render completo pra não perder cursor do editor)
+  const head=document.querySelector('#tab-produtos [data-jornada-disc] .pro-jornada-head');
+  if(head&&!head.querySelector('.pro-jornada-dirty')){
+    const pill=document.createElement('span');
+    pill.className='pro-jornada-dirty';
+    pill.textContent='● Não salvo';
+    head.insertBefore(pill,head.querySelector('.pro-jornada-caret'));
+  }
+}
+
+window._proJornadaUploadImagem=async(file)=>{
+  if(!file)return;
+  if(file.size>5*1024*1024){alert('Imagem maior que 5MB.');return;}
+  if(!/^image\/(jpeg|jpg|png|webp)$/i.test(file.type)){alert('Use JPG, PNG ou WebP.');return;}
+  const area=document.getElementById('pro-jornada-img-area');
+  if(area)area.innerHTML=`<div class="pro-anex-uploading"><div class="pro-anex-spinner"></div><div class="pro-anex-uploading-info"><div class="pro-anex-uploading-name">${_proEsc(file.name)}</div><div class="pro-anex-uploading-meta">enviando · ${_proFmtSize(file.size)}</div></div></div>`;
+  try{
+    const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+    const path=`produtos/_jornadaCliente/imagem-${Date.now()}.${ext}`;
+    const r=window._fbStorage.ref(window._fbStorage.storage,path);
+    await window._fbStorage.uploadBytes(r,file);
+    const url=await window._fbStorage.getDownloadURL(r);
+    // Limpa imagem anterior (best-effort)
+    const oldPath=S.jornadaCliente.imagemPath;
+    S.jornadaCliente.imagemUrl=url;
+    S.jornadaCliente.imagemPath=path;
+    if(oldPath&&oldPath!==path){
+      try{await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,oldPath));}catch(e){}
+    }
+    _proJornadaMark();_proJornadaRefresh();
+  }catch(e){
+    alert('Erro no upload: '+e.message);
+    _proJornadaRefresh();
+  }
+};
+
+window._proJornadaRemoverImagem=async()=>{
+  if(!confirm('Remover a imagem da jornada?'))return;
+  const oldPath=S.jornadaCliente.imagemPath;
+  S.jornadaCliente.imagemUrl='';
+  S.jornadaCliente.imagemPath='';
+  if(oldPath){
+    try{await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,oldPath));}catch(e){}
+  }
+  _proJornadaMark();_proJornadaRefresh();
+};
+
+window._proJornadaSalvar=async()=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const btn=document.getElementById('pro-jornada-save-btn');
+  if(btn){btn.disabled=true;btn.textContent='Salvando…';}
+  try{
+    const user=S.currentUser?.username||'?';
+    const payload={
+      texto:_proSanitizeResp(S.jornadaCliente.texto),
+      videoUrl:String(S.jornadaCliente.videoUrl||'').trim(),
+      imagemUrl:String(S.jornadaCliente.imagemUrl||'').trim(),
+      imagemPath:String(S.jornadaCliente.imagemPath||'').trim(),
+      updatedAt:serverTimestamp(),
+      updatedBy:user
+    };
+    await setDoc(doc(db,'config','jornadaCliente'),payload,{merge:true});
+    if(typeof audit==='function')audit('JORNADA_CLIENTE_SALVA',{collection:'config',id:'jornadaCliente'},{after:{hasTexto:!!payload.texto,hasVideo:!!payload.videoUrl,hasImagem:!!payload.imagemUrl}});
+    S._jornadaDirty=false;
+    _proSaveFeedback('ok');
+    _proJornadaRefresh();
+  }catch(e){
+    _proSaveFeedback('err',e.message);
+    alert('Erro ao salvar: '+e.message);
+    if(btn){btn.disabled=false;btn.textContent='💾 Salvar';}
+  }
+};
 
 function _proDexRender(){
   const c=document.getElementById('pro-dex-container');
@@ -28535,6 +28884,17 @@ window.proToggleFiltro=t=>{
 };
 window.proAbrir=id=>{
   const p=S.produtos.find(x=>x.id===id);if(!p)return;
+  // Se já estamos vendo um produto e clicamos em outro (vinculado/bônus),
+  // empilha o atual pra voltar nele depois. _proSkipStackPush é setado por
+  // proVoltarLista pra evitar loop ao desempilhar.
+  if(!Array.isArray(S._proNavStack))S._proNavStack=[];
+  const skipPush=!!S._proSkipStackPush;S._proSkipStackPush=false;
+  if(!skipPush&&S.produtoAtual&&S.produtoAtual.id&&S.produtoAtual.id!==id&&(S.produtosView==='detail'||S.produtosView==='edit')){
+    // Evita loops: se o ID já está na stack, trunca daquele ponto
+    const existingIdx=S._proNavStack.indexOf(S.produtoAtual.id);
+    if(existingIdx>=0)S._proNavStack=S._proNavStack.slice(0,existingIdx);
+    S._proNavStack.push(S.produtoAtual.id);
+  }
   const copy=JSON.parse(JSON.stringify(p));
   // Normaliza compat: features sem tipo viram livre; publicoAlvo string vira array
   copy.features=Array.isArray(copy.features)?copy.features.map(_proNormFeature).filter(Boolean):[];
@@ -28542,6 +28902,7 @@ window.proAbrir=id=>{
   copy.mentoriaDescricao=String(copy.mentoriaDescricao||'');
   copy.bonusFeatures=Array.isArray(copy.bonusFeatures)?copy.bonusFeatures.map(_proNormFeature).filter(Boolean):[];
   copy.bonusProdutoIds=Array.isArray(copy.bonusProdutoIds)?copy.bonusProdutoIds.filter(x=>typeof x==='string'&&x):[];
+  copy.featuresProdutoIds=Array.isArray(copy.featuresProdutoIds)?copy.featuresProdutoIds.filter(x=>typeof x==='string'&&x):[];
   copy.duvidas=Array.isArray(copy.duvidas)?copy.duvidas.filter(d=>d&&(d.pergunta||d.resposta)).map(d=>({id:d.id||_proUid(),pergunta:String(d.pergunta||''),resposta:String(d.resposta||'')})):[];
   copy.publicoAlvo=_proGetPublicoAlvo(copy);
   copy.breveDescricao=_proGetBreveDescricao(copy);
@@ -28572,13 +28933,23 @@ window.proVoltarLista=async()=>{
     S.produtosView='detail';_proDirty=false;_proRender();
     return;
   }
+  // Voltar do detalhe: se há um produto anterior na pilha (clique em produto vinculado/bônus),
+  // volta pra ele em vez de ir pra lista
+  if(fromView==='detail'&&Array.isArray(S._proNavStack)&&S._proNavStack.length){
+    const prevId=S._proNavStack.pop();
+    _proDirty=false;
+    S._proSkipStackPush=true; // não empilha o atual ao abrir o anterior
+    proAbrir(prevId);
+    return;
+  }
+  S._proNavStack=[];
   S.produtosView='list';S.produtoAtual=null;_proDirty=false;_proRender();
 };
 window.proNovo=()=>{
   if(!_proCanEdit())return alert('Você não tem permissão para criar produtos.');
   S.produtoAtual={
     id:null,nome:'',breveDescricao:'',publicoAlvo:[],capa:null,
-    provasAlvo:[],status:'rascunho',responsaveis:[],features:[],
+    provasAlvo:[],temposAcesso:[],temposAcessoObs:'',status:'rascunho',responsaveis:[],features:[],featuresProdutoIds:[],
     sazonal:false,sazonalidadeDescricao:'',janelaVendasInicio:'',janelaVendasFim:'',
     vagasLimitadas:false,vagasLimitacaoDescricao:'',
     mentoriaResponsaveis:[],
@@ -28658,9 +29029,39 @@ function _proRenderDetail(root){
       <div class="pro-detail-chips">${provaChips}</div>
     </div>
   </div>`:'';
+  // Tempo de acesso — chips inline no header + observação no body
+  const tempos=Array.isArray(p.temposAcesso)?p.temposAcesso.filter(Boolean):[];
+  const temposObs=String(p.temposAcessoObs||'').trim();
+  if(!S._proDisc)S._proDisc={publico:false,provas:false,tempos:false};
+  const dTmp=!!S._proDisc.tempos;
+  const temposChipsInline=tempos.map(t=>`<span class="pro-disc-inline-chip">${_proEsc(t)}</span>`).join('');
+  const discTempos=tempos.length?`<div class="pro-disc tempos${dTmp?' open':''}" data-disc="tempos">
+    <button class="pro-disc-head" type="button" onclick="proToggleDisc('tempos')" aria-expanded="${dTmp}" aria-controls="pro-disc-body-tempos">
+      <span class="pro-disc-label"><span class="pro-disc-ico">⏱️</span> Tempo de acesso</span>
+      <span class="pro-disc-inline-chips">${temposChipsInline}</span>
+      <span class="pro-disc-chevron" aria-hidden="true">▾</span>
+    </button>
+    <div class="pro-disc-body" id="pro-disc-body-tempos" role="region">
+      ${temposObs?`<p class="pro-disc-obs">${_proEsc(temposObs)}</p>`:`<p class="pro-disc-obs empty">Sem observações sobre os tempos de acesso.</p>`}
+    </div>
+  </div>`:'';
 
   const feats=(Array.isArray(p.features)?p.features:[]).map(_proNormFeature).filter(Boolean);
-  const featsHtml=feats.length?`<div class="pro-feat-grid">${feats.map(f=>_proFeatDetailHTML(f,p.updatedAt)).join('')}</div>`:'<p class="pro-text-block" style="color:var(--t2);font-style:italic">Nenhuma feature cadastrada ainda.</p>';
+  // Produtos vinculados ao box Features (renderiza como cards antes das features livres)
+  const featProdIds=Array.isArray(p.featuresProdutoIds)?p.featuresProdutoIds:[];
+  const featProdsCardsHtml=featProdIds.length?featProdIds.map(id=>{
+    const bp=(S.produtos||[]).find(x=>x.id===id);
+    if(!bp)return `<div class="pro-link-card orphan"><span>⚠️ Produto removido</span></div>`;
+    return `<div class="pro-link-card" onclick="proAbrir('${_proEscAttr(bp.id)}')" title="Abrir ${_proEscAttr(bp.nome||'')}">
+      <span class="pro-link-card-name">${_proEsc(bp.nome||'(sem nome)')}</span>
+      <span class="pro-link-card-arrow">›</span>
+    </div>`;
+  }).join(''):'';
+  const featProdsBlock=featProdsCardsHtml?`<div class="pro-link-cards" style="margin-bottom:14px">${featProdsCardsHtml}</div>`:'';
+  const featsBody=(feats.length||featProdsBlock)
+    ? featProdsBlock+(feats.length?`<div class="pro-feat-grid">${feats.map(f=>_proFeatDetailHTML(f,p.updatedAt)).join('')}</div>`:'')
+    : '<p class="pro-text-block" style="color:var(--t2);font-style:italic">Nenhuma feature cadastrada ainda.</p>';
+  const featsHtml=featsBody;
 
   const mentFeats=(Array.isArray(p.mentoriaFeatures)?p.mentoriaFeatures:[]).map(_proNormFeature).filter(Boolean);
   const mentStatus=_proMentStatus(p);
@@ -28717,10 +29118,10 @@ function _proRenderDetail(root){
   const argHtml=argumentos.length?`<ul class="pro-bullets">${argumentos.map(a=>`<li class="pro-bullet">${_proEsc(a)}</li>`).join('')}</ul>`:'';
 
   const objs=Array.isArray(p.objecoes)?p.objecoes.filter(o=>o&&(o.pergunta||o.resposta)):[];
-  const objHtml=objs.length?objs.map(o=>`<div class="pro-obj"><div class="pro-obj-q">${_proEsc(o.pergunta||'')}</div><div class="pro-obj-a">${_renderRichText(o.resposta||'')}</div></div>`).join(''):'';
+  const objHtml=objs.length?objs.map(o=>`<div class="pro-obj"><div class="pro-obj-q">${_proEsc(o.pergunta||'')}</div><div class="pro-obj-a">${_proRespRender(o.resposta||'')}</div></div>`).join(''):'';
 
   const duvs=Array.isArray(p.duvidas)?p.duvidas.filter(d=>d&&(d.pergunta||d.resposta)):[];
-  const duvHtml=duvs.length?duvs.map(d=>`<div class="pro-obj"><div class="pro-obj-q">❓ ${_proEsc(d.pergunta||'')}</div><div class="pro-obj-a">${_renderRichText(d.resposta||'')}</div></div>`).join(''):'';
+  const duvHtml=duvs.length?duvs.map(d=>`<div class="pro-obj"><div class="pro-obj-q">❓ ${_proEsc(d.pergunta||'')}</div><div class="pro-obj-a">${_proRespRender(d.resposta||'')}</div></div>`).join(''):'';
 
   const links=Array.isArray(p.links)?p.links.filter(l=>l&&l.url):[];
   const linksHtml=links.length?`<div class="pro-links">${links.map(l=>`<a class="pro-link" href="${_proEscAttr(l.url)}" target="_blank" rel="noopener noreferrer">🔗 ${_proEsc(l.label||l.url)}</a>`).join('')}</div>`:'';
@@ -28745,7 +29146,7 @@ function _proRenderDetail(root){
   </div>`:'';
 
   root.innerHTML=`
-    <button class="pro-back" onclick="proVoltarLista()">← Voltar ao catálogo</button>
+    <button class="pro-back" onclick="proVoltarLista()">${(Array.isArray(S._proNavStack)&&S._proNavStack.length)?(()=>{const prev=S.produtos.find(x=>x.id===S._proNavStack[S._proNavStack.length-1]);return prev?'← Voltar para '+_proEsc(prev.nome||'produto anterior'):'← Voltar';})():'← Voltar ao catálogo'}</button>
     <div class="pro-detail-header">
       <div style="flex:1;min-width:0">
         <h2 class="pro-detail-nome">${_proEsc(p.nome||'Sem nome')}</h2>
@@ -28756,7 +29157,7 @@ function _proRenderDetail(root){
         </div>
         ${_proSazonalDetailHTML(p)}
         ${_proVagasDetailHTML(p)}
-        ${(discPublico||discProvas)?`<div class="pro-disc-row">${discPublico}${discProvas}</div>`:''}
+        ${(discPublico||discProvas||discTempos)?`<div class="pro-disc-row">${discPublico}${discProvas}${discTempos}</div>`:''}
       </div>
       ${adminActions}
     </div>
@@ -28920,6 +29321,9 @@ function _proRenderEdit(root){
   if(!Array.isArray(p.provasAlvo))p.provasAlvo=provas;
   if(!Array.isArray(p.responsaveis))p.responsaveis=responsaveis;
   if(!Array.isArray(p.mentoriaResponsaveis))p.mentoriaResponsaveis=[];
+  if(!Array.isArray(p.temposAcesso))p.temposAcesso=[];
+  if(typeof p.temposAcessoObs!=='string')p.temposAcessoObs='';
+  if(!Array.isArray(p.featuresProdutoIds))p.featuresProdutoIds=[];
   const featsCount=(p.features||[]).length;
   const mentFeatsCount=(p.mentoriaFeatures||[]).length;
 
@@ -28958,6 +29362,11 @@ function _proRenderEdit(root){
             ${_proMultiSelectHTML('provaAlvo',p.provasAlvo)}
           </div>
 
+          <div class="fg"><label class="fl">Tempo de acesso</label>
+            ${_proTempoAcessoInputHTML(p.temposAcesso)}
+            <textarea class="fc" rows="2" placeholder="Observação sobre o tempo de acesso (ex: pacote anual com 12 meses inclui mentoria estendida)" oninput="S.produtoAtual.temposAcessoObs=this.value;_proMark()" style="resize:vertical;min-height:60px;margin-top:8px">${_proEsc(p.temposAcessoObs||'')}</textarea>
+          </div>
+
           <div class="fg"><label class="fl">${(p.responsaveis||[]).length===1?'Responsável':'Responsáveis'}</label>
             ${_proRespInputHTML(p.responsaveis)}
           </div>
@@ -28966,11 +29375,19 @@ function _proRenderEdit(root){
 
       <div class="pro-edit-accordion" data-acc="features">
         <div class="pro-edit-acc-head" onclick="_proToggleAcc('features')">
-          <span class="pro-edit-acc-title">Features · ${featsCount}</span><span class="pro-edit-acc-caret">▾</span>
+          <span class="pro-edit-acc-title">Features · ${featsCount+((p.featuresProdutoIds||[]).length)}</span><span class="pro-edit-acc-caret">▾</span>
         </div>
         <div class="pro-edit-acc-body">
-          <div id="pro-f-features">${(p.features||[]).map((f,i)=>_proFeatEditHTML(f,i,'features')).join('')}</div>
-          <button class="btn btn-s btn-sm" onclick="_proFeatAdd('features')" style="margin-top:8px">＋ Adicionar feature</button>
+          <div class="pro-bonus-block">
+            <label class="fl" style="margin:0 0 8px;display:flex;align-items:center;gap:8px"><span>📦 Produtos vinculados</span><span class="pro-edit-acc-caret" style="font-size:10px;color:var(--t2);font-family:'JetBrains Mono',monospace">${(p.featuresProdutoIds||[]).length}</span></label>
+            <div id="pro-f-feat-prods">${_proFeatuProdutosEditHTML(p.featuresProdutoIds||[])}</div>
+            <button class="btn btn-s btn-sm" onclick="_proFeatuOpenProdPicker(event)" style="margin-top:8px">＋ Vincular produto do catálogo</button>
+          </div>
+          <div class="pro-bonus-block" style="margin-top:18px">
+            <label class="fl" style="margin:0 0 8px;display:block">✨ Features livres</label>
+            <div id="pro-f-features">${(p.features||[]).map((f,i)=>_proFeatEditHTML(f,i,'features')).join('')}</div>
+            <button class="btn btn-s btn-sm" onclick="_proFeatAdd('features')" style="margin-top:8px">＋ Adicionar feature</button>
+          </div>
         </div>
       </div>
 
@@ -29096,7 +29513,7 @@ function _proRenderEdit(root){
       Object.keys(pref).forEach(k=>{
         const el=document.querySelector(`#tab-produtos .pro-edit-accordion[data-acc="${k}"]`);
         if(el){
-          el.classList.add('open');
+          _proAnimOpen(el,'.pro-edit-acc-body');
           el.scrollIntoView({behavior:'smooth',block:'start'});
         }
       });
@@ -29546,6 +29963,74 @@ window._proRespFlush=(inp)=>{
   }
 };
 
+// Tempo de acesso — multi-tags (Enter ou vírgula adiciona; placeholder sugere "6", "12 meses", etc)
+// Normaliza: se for só número, vira "N meses"; senão mantém o texto como digitado.
+function _proTempoAcessoNorm(raw){
+  const t=String(raw||'').trim();
+  if(!t)return '';
+  // Se for puramente numérico, vira "N meses"
+  if(/^\d+$/.test(t))return t+' meses';
+  return t;
+}
+function _proTempoAcessoInputHTML(valores){
+  const vals=Array.isArray(valores)?valores:[];
+  const chipsHtml=vals.length
+    ?vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proTempoAcessoRm(${i})" title="Remover" type="button">×</button></span>`).join('')
+    :`<span class="pro-ms-empty">Nenhum tempo de acesso definido</span>`;
+  return `<div class="pro-ms" data-ms="temposAcesso">
+    <div class="pro-ms-chips" id="pro-ms-chips-temposAcesso">${chipsHtml}</div>
+    <div class="pro-ms-actions" style="flex:1;min-width:200px">
+      <input type="text" class="fc" id="pro-f-tempo-input" placeholder="Ex: 6, 12 meses, 18 meses, 24 — tecle Enter ou vírgula" style="flex:1;min-width:200px" onkeydown="_proTempoAcessoKey(event)" onblur="_proTempoAcessoFlush(this)"/>
+    </div>
+  </div>`;
+}
+function _proRefreshTempoAcesso(){
+  const wrap=document.querySelector('#tab-produtos .pro-ms[data-ms="temposAcesso"] .pro-ms-chips');
+  if(!wrap)return;
+  const vals=Array.isArray(S.produtoAtual.temposAcesso)?S.produtoAtual.temposAcesso:[];
+  wrap.innerHTML=vals.length
+    ?vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proTempoAcessoRm(${i})" title="Remover" type="button">×</button></span>`).join('')
+    :`<span class="pro-ms-empty">Nenhum tempo de acesso definido</span>`;
+}
+window._proTempoAcessoAdd=(raw)=>{
+  const txt=String(raw||'').trim();
+  if(!txt)return false;
+  if(!Array.isArray(S.produtoAtual.temposAcesso))S.produtoAtual.temposAcesso=[];
+  const partes=txt.split(',').map(s=>_proTempoAcessoNorm(s)).filter(Boolean);
+  let added=false;
+  partes.forEach(part=>{
+    if(!S.produtoAtual.temposAcesso.includes(part)){
+      S.produtoAtual.temposAcesso.push(part);
+      added=true;
+    }
+  });
+  if(added){_proMark();_proRefreshTempoAcesso();}
+  return added;
+};
+window._proTempoAcessoRm=(idx)=>{
+  if(!Array.isArray(S.produtoAtual.temposAcesso))return;
+  S.produtoAtual.temposAcesso.splice(idx,1);
+  _proMark();_proRefreshTempoAcesso();
+};
+window._proTempoAcessoKey=(ev)=>{
+  if(ev.key==='Enter'||ev.key===','){
+    ev.preventDefault();
+    const inp=ev.target;
+    if(_proTempoAcessoAdd(inp.value))inp.value='';
+    else inp.value='';
+  }else if(ev.key==='Backspace'&&!ev.target.value){
+    const arr=S.produtoAtual.temposAcesso;
+    if(Array.isArray(arr)&&arr.length){
+      arr.pop();_proMark();_proRefreshTempoAcesso();
+    }
+  }
+};
+window._proTempoAcessoFlush=(inp)=>{
+  if(inp&&inp.value&&inp.value.trim()){
+    if(_proTempoAcessoAdd(inp.value))inp.value='';
+  }
+};
+
 // Coordenação da mentoria — mesmo padrão de responsáveis, isolado em mentoriaResponsaveis
 function _proMentRespInputHTML(valores){
   const vals=Array.isArray(valores)?valores:[];
@@ -29796,9 +30281,20 @@ window._proFeatToggle=(featId)=>{
   const card=document.querySelector(`#tab-produtos .pro-feat-edit[data-feat-id="${featId.replace(/"/g,'\\"')}"]`);
   if(!card)return;
   const open=!!S._proFeatOpen[featId];
-  card.classList.toggle('open',open);
+  if(open)_proAnimOpen(card,'.pro-feat-edit-body');
+  else _proAnimClose(card,'.pro-feat-edit-body');
   const btn=card.querySelector('.pro-feat-edit-toggle');
   if(btn){btn.setAttribute('aria-expanded',String(open));btn.title=open?'Recolher':'Expandir';}
+  // Garante que o accordion-pai (Features/Mentoria/Bônus) reflua sua altura tb
+  const parentAcc=card.closest('.pro-edit-accordion');
+  if(parentAcc&&parentAcc.classList.contains('open')){
+    // Já está em fully-open ou vai entrar — força refluxo via reaplicação rápida
+    if(parentAcc.classList.contains('fully-open')){/* nada — max-height: none */}
+    else{
+      // Reabre pra recalcular cap (raro chegar aqui — só durante 380ms iniciais)
+      _proAnimOpen(parentAcc,'.pro-edit-acc-body');
+    }
+  }
 };
 // Click no head do editor de feature: abre/fecha o dropdown.
 // Elementos interativos dentro do head (input, botões) usam stopPropagation()
@@ -30033,8 +30529,8 @@ window._proQaToggle=(kind,id,ev)=>{
   const set=kind==='obj'?(S._proObjOpen=S._proObjOpen||new Set()):(S._proDuvOpen=S._proDuvOpen||new Set());
   const card=document.querySelector(`#tab-produtos .pro-qa-edit[data-qa-kind="${kind}"][data-qa-id="${id}"]`);
   if(!card)return;
-  if(set.has(id)){set.delete(id);card.classList.remove('open');}
-  else{set.add(id);card.classList.add('open');}
+  if(set.has(id)){set.delete(id);_proAnimClose(card,'.pro-qa-body');}
+  else{set.add(id);_proAnimOpen(card,'.pro-qa-body');}
 };
 
 // Disclosure de seções do detalhe (Argumentos / Objeções / Dúvidas) — default fechado
@@ -30071,18 +30567,103 @@ function _proSecTitleHTML(title,accKey,extraClass){
   </div>`;
 }
 
+// Desempacota o primeiro bloco (<p>/<div>) pra resposta começar inline e colar no "R: "
+function _proInlineFirstBlock(html){
+  const s=String(html||'').trim();
+  if(!s)return '';
+  const tmp=document.createElement('div');
+  tmp.innerHTML=s;
+  // Remove <br> ou blocos vazios no início
+  let guard=0;
+  while(tmp.firstChild&&guard++<10){
+    const f=tmp.firstChild;
+    if(f.nodeType===3&&!f.nodeValue.trim()){tmp.removeChild(f);continue;}
+    if(f.nodeType===1){
+      const tag=f.tagName;
+      if(tag==='BR'){tmp.removeChild(f);continue;}
+      const txt=f.textContent.replace(/ /g,' ').trim();
+      const hasMedia=f.querySelector&&f.querySelector('img,a,strong,em,b,i,u,code');
+      if(!txt&&!hasMedia){tmp.removeChild(f);continue;}
+    }
+    break;
+  }
+  // Desempacota primeiro bloco <p>/<div>
+  const first=tmp.firstChild;
+  if(first&&first.nodeType===1&&(first.tagName==='P'||first.tagName==='DIV')){
+    const hadSibling=!!first.nextSibling;
+    const frag=document.createDocumentFragment();
+    while(first.firstChild)frag.appendChild(first.firstChild);
+    const anchor=first.nextSibling;
+    tmp.removeChild(first);
+    if(hadSibling){
+      // Adiciona <br> pra separar o conteúdo desempacotado do próximo bloco
+      const br=document.createElement('br');
+      tmp.insertBefore(br,anchor);
+      tmp.insertBefore(frag,br);
+    }else{
+      tmp.appendChild(frag);
+    }
+  }
+  return tmp.innerHTML;
+}
+
+// Renderiza resposta de obj/duvida pro detalhe (rich-text + desempacota primeiro bloco)
+function _proRespRender(txt){
+  return _proInlineFirstBlock(_renderRichText(txt));
+}
+
 // Sanitiza HTML da resposta antes de persistir (reusa o sanitizer dos avisos)
+// e também limpa botões de UI internos dos blocos colapsáveis
 function _proSanitizeResp(html){
   const s=String(html||'').trim();
   if(!s)return '';
-  try{ return _comSanitizePostHTML(s); }
-  catch(e){ return s; }
+  try{
+    let out=_comSanitizePostHTML(s);
+    const tmp=document.createElement('div');
+    tmp.innerHTML=out;
+    // Remove botões de delete dos blocos colapsáveis (só fazem sentido durante edição)
+    tmp.querySelectorAll('button.pro-collapsible-del').forEach(b=>b.remove());
+    // Remove atributo contenteditable que sobra de elementos do editor
+    tmp.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
+    return tmp.innerHTML.trim();
+  }catch(e){ return s; }
 }
 
 // Mini rich-text editor — toolbar + contenteditable. Salva HTML cru no estado via onChangeFn.
-function _proRtHTML(uid,value,placeholder,onChangeExpr){
+function _proRtHTML(uid,value,placeholder,onChangeExpr,opts){
   const html=String(value||'');
-  return `<div class="pro-rt" data-rt-uid="${_proEscAttr(uid)}">
+  const o=opts||{};
+  const withColors=!!o.colors;
+  const justify=!!o.justify;
+  const tall=!!o.tall;
+  const expandable=!!o.expandable;
+  const collapsibles=!!o.collapsibles;
+  const colorsHtml=withColors?`
+      <span class="pro-rt-tb-sep"></span>
+      <span class="pro-rt-tb-colors" title="Cor do texto">
+        <span class="pro-rt-tb-lbl">A:</span>
+        <button type="button" class="pro-rt-tb-c" title="Padrão" style="background:#e6edf3" onclick="_proRtColor('${uid}','foreColor','#e6edf3')"></button>
+        <button type="button" class="pro-rt-tb-c" title="Vermelho" style="background:#f85149" onclick="_proRtColor('${uid}','foreColor','#f85149')"></button>
+        <button type="button" class="pro-rt-tb-c" title="Laranja" style="background:#fb8f44" onclick="_proRtColor('${uid}','foreColor','#fb8f44')"></button>
+        <button type="button" class="pro-rt-tb-c" title="Amarelo" style="background:#d29922" onclick="_proRtColor('${uid}','foreColor','#d29922')"></button>
+        <button type="button" class="pro-rt-tb-c" title="Verde" style="background:#3fb950" onclick="_proRtColor('${uid}','foreColor','#3fb950')"></button>
+        <button type="button" class="pro-rt-tb-c" title="Azul" style="background:#2f81f7" onclick="_proRtColor('${uid}','foreColor','#2f81f7')"></button>
+        <button type="button" class="pro-rt-tb-c" title="Roxo" style="background:#a371f7" onclick="_proRtColor('${uid}','foreColor','#a371f7')"></button>
+      </span>
+      <span class="pro-rt-tb-colors" title="Cor de fundo (marca-texto)">
+        <span class="pro-rt-tb-lbl">Fundo:</span>
+        <button type="button" class="pro-rt-tb-c" title="Sem fundo" style="background:transparent;border:1px dashed var(--t2)" onclick="_proRtColor('${uid}','hiliteColor','transparent')"></button>
+        <button type="button" class="pro-rt-tb-c" title="Vermelho" style="background:rgba(248,81,73,.5)" onclick="_proRtColor('${uid}','hiliteColor','rgba(248,81,73,.25)')"></button>
+        <button type="button" class="pro-rt-tb-c" title="Amarelo" style="background:rgba(210,153,34,.6)" onclick="_proRtColor('${uid}','hiliteColor','rgba(210,153,34,.3)')"></button>
+        <button type="button" class="pro-rt-tb-c" title="Verde" style="background:rgba(63,185,80,.5)" onclick="_proRtColor('${uid}','hiliteColor','rgba(63,185,80,.25)')"></button>
+        <button type="button" class="pro-rt-tb-c" title="Azul" style="background:rgba(47,129,247,.5)" onclick="_proRtColor('${uid}','hiliteColor','rgba(47,129,247,.25)')"></button>
+      </span>`:'';
+  const edClass=['pro-rt-ed',justify?'justify':'',tall?'tall':''].filter(Boolean).join(' ');
+  // Bind handlers de collapsibles ao focar (se já houver blocos)
+  const focusHook='_proRtBindCollapsibleHandlers(this)';
+  const wrapClass=['pro-rt',tall?'tall':''].filter(Boolean).join(' ');
+  const expandBtn=expandable?`<span class="pro-rt-tb-sep"></span><button type="button" title="Expandir editor (tela cheia)" class="pro-rt-tb-expand" onclick="_proRtExpand('${uid}')">⛶</button>`:'';
+  return `<div class="${wrapClass}" data-rt-uid="${_proEscAttr(uid)}">
     <div class="pro-rt-tb" onmousedown="event.preventDefault()">
       <button type="button" title="Negrito (Ctrl+B)" onclick="_proRtExec('${uid}','bold')"><b>B</b></button>
       <button type="button" class="italic" title="Itálico (Ctrl+I)" onclick="_proRtExec('${uid}','italic')">I</button>
@@ -30092,14 +30673,220 @@ function _proRtHTML(uid,value,placeholder,onChangeExpr){
       <button type="button" title="Lista numerada" onclick="_proRtExec('${uid}','insertOrderedList')">1.</button>
       <span class="pro-rt-tb-sep"></span>
       <button type="button" title="Inserir link" onclick="_proRtLink('${uid}')">🔗</button>
-      <button type="button" title="Limpar formatação" onclick="_proRtExec('${uid}','removeFormat');_proRtExec('${uid}','unlink')">⌫</button>
+      ${collapsibles?`<button type="button" title="Inserir bloco colapsável (dropdown dentro do texto)" onclick="_proRtCollapsible('${uid}')">▾</button>`:''}
+      <button type="button" title="Limpar formatação" onclick="_proRtExec('${uid}','removeFormat');_proRtExec('${uid}','unlink')">⌫</button>${colorsHtml}${expandBtn}
     </div>
-    <div class="pro-rt-ed" contenteditable="true" data-rt-ed="${_proEscAttr(uid)}" data-placeholder="${_proEscAttr(placeholder||'')}" oninput="${onChangeExpr}" onblur="${onChangeExpr}">${html}</div>
+    <div class="${edClass}" contenteditable="true" data-rt-ed="${_proEscAttr(uid)}" data-placeholder="${_proEscAttr(placeholder||'')}" oninput="${onChangeExpr}" onblur="${onChangeExpr}" onfocus="${focusHook}">${html}</div>
   </div>`;
 }
+// Insere bloco <details> colapsável no editor (dropdown dentro do texto)
+// Usa execCommand('insertHTML') pra registrar na pilha nativa de undo (Ctrl/Cmd+Z funciona)
+window._proRtCollapsible=(uid)=>{
+  const el=document.querySelector(`[data-rt-ed="${uid}"]`);
+  if(!el)return;
+  el.focus();
+  // Bloqueia aninhamento: se o cursor está dentro de um <details>, move pra DEPOIS dele
+  const sel=window.getSelection();
+  if(sel&&sel.anchorNode){
+    let node=sel.anchorNode;
+    while(node&&node!==el){
+      if(node.nodeType===1&&node.tagName==='DETAILS'){
+        const r=document.createRange();
+        r.setStartAfter(node);
+        r.collapse(true);
+        sel.removeAllRanges();sel.addRange(r);
+        break;
+      }
+      node=node.parentNode;
+    }
+  }
+  const html=`<details class="pro-collapsible" open><summary>Título do bloco</summary><div class="pro-collapsible-body"><p>Escreva o conteúdo aqui…</p></div><button type="button" class="pro-collapsible-del" contenteditable="false" onmousedown="event.preventDefault()" onclick="_proRtCollapsibleDel(this,event)" title="Remover bloco">✕</button></details><p><br></p>`;
+  try{
+    document.execCommand('insertHTML',false,html);
+  }catch(e){
+    // Fallback: insere manualmente se execCommand falhar
+    const tmp=document.createElement('div');tmp.innerHTML=html;
+    while(tmp.firstChild)el.appendChild(tmp.firstChild);
+  }
+  // Foca no summary do último bloco inserido
+  setTimeout(()=>{
+    const dets=el.querySelectorAll('details.pro-collapsible');
+    const last=dets[dets.length-1];
+    if(last){
+      const sum=last.querySelector('summary');
+      if(sum){
+        const r=document.createRange();r.selectNodeContents(sum);
+        const s=window.getSelection();s.removeAllRanges();s.addRange(r);
+      }
+    }
+  },10);
+  _proRtBindCollapsibleHandlers(el);
+  el.dispatchEvent(new Event('input',{bubbles:true}));
+};
+
+// Remove bloco colapsável via botão ✕ — usa execCommand pra entrar no undo
+window._proRtCollapsibleDel=(btn,ev)=>{
+  if(ev){ev.preventDefault();ev.stopPropagation();}
+  const det=btn.closest('details');
+  if(!det)return;
+  const ed=det.closest('[data-rt-ed]');
+  const sum=det.querySelector('summary');
+  const titulo=(sum&&sum.textContent.trim())||'sem título';
+  if(!confirm(`Remover o bloco "${titulo}"?`))return;
+  if(ed){
+    ed.focus();
+    // Seleciona o <details> inteiro e deleta via execCommand (vai pra pilha de undo)
+    const r=document.createRange();
+    r.selectNode(det);
+    const s=window.getSelection();
+    s.removeAllRanges();s.addRange(r);
+    try{
+      document.execCommand('delete',false);
+    }catch(e){
+      det.remove();
+    }
+    ed.dispatchEvent(new Event('input',{bubbles:true}));
+  }else{
+    det.remove();
+  }
+};
+
+// Handlers de teclado pra Backspace/Enter dentro do <details>
+window._proRtBindCollapsibleHandlers=function(el){return _proRtBindCollapsibleHandlers(el);};
+function _proRtBindCollapsibleHandlers(el){
+  if(el._proColHandlersBound)return;
+  el._proColHandlersBound=true;
+  el.addEventListener('keydown',(e)=>{
+    const sel=window.getSelection();
+    if(!sel||!sel.rangeCount)return;
+    const node=sel.anchorNode;
+    if(!node)return;
+    // Procura summary/details ancestral
+    let inSummary=null,inDetails=null;
+    let n=node;
+    while(n&&n!==el){
+      if(n.nodeType===1){
+        if(n.tagName==='SUMMARY')inSummary=n;
+        if(n.tagName==='DETAILS'){inDetails=n;break;}
+      }
+      n=n.parentNode;
+    }
+    if(!inDetails)return;
+    // Backspace: se bloco vazio (sem conteúdo no body), remove o details inteiro
+    if(e.key==='Backspace'){
+      const body=inDetails.querySelector('.pro-collapsible-body');
+      const sumTxt=(inDetails.querySelector('summary')?.textContent||'').trim();
+      const bodyTxt=body?(body.textContent||'').trim():'';
+      // Caso 1: backspace no início do summary E summary já vazio → remove tudo
+      if(inSummary&&!sumTxt&&!bodyTxt){
+        e.preventDefault();
+        const next=inDetails.nextSibling;
+        inDetails.remove();
+        if(next){const r=document.createRange();r.setStart(next,0);r.collapse(true);sel.removeAllRanges();sel.addRange(r);}
+        el.dispatchEvent(new Event('input',{bubbles:true}));
+      }
+    }
+    // Enter no summary: pula pro corpo em vez de criar novo summary
+    if(e.key==='Enter'&&inSummary){
+      e.preventDefault();
+      const body=inDetails.querySelector('.pro-collapsible-body');
+      if(body){
+        const firstP=body.querySelector('p')||body;
+        const r=document.createRange();
+        r.selectNodeContents(firstP);
+        r.collapse(true);
+        sel.removeAllRanges();sel.addRange(r);
+      }
+    }
+  });
+}
+
+// Modal expandido do editor rich-text: faz "portal" do elemento pro document.body
+// pra escapar de containing blocks (transform/backdrop-filter em ancestors)
+window._proRtExpand=(uid)=>{
+  const wrap=document.querySelector(`.pro-rt[data-rt-uid="${uid.replace(/"/g,'\\"')}"]`);
+  if(!wrap)return;
+  const isFs=wrap.classList.contains('fullscreen');
+  if(isFs){
+    _proRtExpandClose(wrap);
+  }else{
+    _proRtExpandOpen(wrap);
+  }
+};
+function _proRtExpandOpen(wrap){
+  // Backdrop overlay
+  let backdrop=document.getElementById('pro-rt-fs-backdrop');
+  if(!backdrop){
+    backdrop=document.createElement('div');
+    backdrop.id='pro-rt-fs-backdrop';
+    backdrop.className='pro-rt-fs-backdrop';
+    backdrop.addEventListener('click',(e)=>{
+      if(e.target!==backdrop)return;
+      const open=document.querySelector('.pro-rt.fullscreen');
+      if(open)_proRtExpandClose(open);
+    });
+    document.body.appendChild(backdrop);
+  }
+  // Guarda posição original pra restaurar
+  wrap._proRtFsPlaceholder=document.createComment('pro-rt-fs-placeholder');
+  wrap.parentNode.insertBefore(wrap._proRtFsPlaceholder,wrap);
+  // Move pra body + classes
+  backdrop.appendChild(wrap);
+  wrap.classList.add('fullscreen');
+  document.body.classList.add('pro-rt-fs-on');
+  requestAnimationFrame(()=>{
+    backdrop.classList.add('show');
+    wrap.classList.add('fs-in');
+  });
+  const btn=wrap.querySelector('.pro-rt-tb-expand');
+  if(btn){btn.textContent='✕';btn.title='Fechar (Esc)';}
+  // Foca o editor
+  const ed=wrap.querySelector('[data-rt-ed]');
+  if(ed)setTimeout(()=>ed.focus(),100);
+  // Bind Escape uma vez
+  if(!window._proRtFsEscBound){
+    window._proRtFsEscBound=true;
+    document.addEventListener('keydown',(e)=>{
+      if(e.key!=='Escape')return;
+      const open=document.querySelector('.pro-rt.fullscreen');
+      if(!open)return;
+      e.stopPropagation();
+      _proRtExpandClose(open);
+    });
+  }
+}
+function _proRtExpandClose(wrap){
+  const backdrop=document.getElementById('pro-rt-fs-backdrop');
+  wrap.classList.remove('fullscreen','fs-in');
+  if(backdrop)backdrop.classList.remove('show');
+  document.body.classList.remove('pro-rt-fs-on');
+  const btn=wrap.querySelector('.pro-rt-tb-expand');
+  if(btn){btn.textContent='⛶';btn.title='Expandir editor (tela cheia)';}
+  // Devolve pro lugar original
+  const placeholder=wrap._proRtFsPlaceholder;
+  if(placeholder&&placeholder.parentNode){
+    placeholder.parentNode.insertBefore(wrap,placeholder);
+    placeholder.remove();
+    delete wrap._proRtFsPlaceholder;
+  }
+  // Remove backdrop após animação
+  setTimeout(()=>{
+    if(backdrop&&!document.querySelector('.pro-rt.fullscreen'))backdrop.remove();
+  },250);
+}
+window._proRtColor=(uid,cmd,val)=>{
+  const el=document.querySelector(`[data-rt-ed="${uid}"]`);
+  if(!el)return;
+  el.focus();
+  try{document.execCommand('styleWithCSS',false,true);}catch(e){}
+  document.execCommand(cmd,false,val);
+  el.dispatchEvent(new Event('input',{bubbles:true}));
+};
 window._proRtGet=(uid)=>{
   const el=document.querySelector(`[data-rt-ed="${uid}"]`);
   if(!el)return '';
+  // Bind handlers de bloco colapsável se houver pelo menos um
+  if(el.querySelector('details.pro-collapsible'))_proRtBindCollapsibleHandlers(el);
   return el.innerHTML.trim();
 };
 window._proRtExec=(uid,cmd)=>{
@@ -30158,9 +30945,42 @@ function _proUpdateDirtyPill(){
   if(!_proDirty&&existing)existing.remove();
 }
 
+// Helpers de animação de accordion: depois de abrir, libera o max-height
+// pra acompanhar conteúdo dinâmico (editor rich-text, toolbar de cores, etc).
+// Ao fechar, captura altura atual pra animar suavemente até 0.
+function _proAnimOpen(el,bodySel){
+  if(!el)return;
+  const body=el.querySelector(bodySel);
+  el.classList.add('open');
+  // Libera o cap depois da transição (mantém animação suave)
+  clearTimeout(el._proAnimT);
+  el._proAnimT=setTimeout(()=>{
+    if(el.classList.contains('open'))el.classList.add('fully-open');
+    if(body)body.style.maxHeight='';
+  },380);
+}
+function _proAnimClose(el,bodySel){
+  if(!el)return;
+  const body=el.querySelector(bodySel);
+  clearTimeout(el._proAnimT);
+  // Se está "fully-open" (sem cap), captura altura atual pra poder animar
+  if(el.classList.contains('fully-open')&&body){
+    body.style.maxHeight=body.scrollHeight+'px';
+    el.classList.remove('fully-open');
+    void body.offsetHeight; // force reflow
+  }
+  if(body)body.style.maxHeight='';
+  el.classList.remove('open');
+}
+function _proAnimToggle(el,bodySel){
+  if(!el)return;
+  if(el.classList.contains('open'))_proAnimClose(el,bodySel);
+  else _proAnimOpen(el,bodySel);
+}
+
 window._proToggleAcc=key=>{
   const acc=document.querySelector(`#tab-produtos .pro-edit-accordion[data-acc="${key}"]`);
-  if(acc)acc.classList.toggle('open');
+  _proAnimToggle(acc,'.pro-edit-acc-body');
 };
 
 window._proSetField=(k,v)=>{S.produtoAtual[k]=v;_proMark();};
@@ -30348,13 +31168,31 @@ window._proOpenIconPop=(ev,featIdx,source)=>{
       <input type="text" placeholder="ou cole emoji custom" id="pro-icon-custom" oninput="_proClampEmojiInput(this)"/>
       <button class="btn btn-p btn-sm" onclick="_proPickIconCustom()">OK</button>
     </div>`;
+  // Mostra primeiro pra poder medir o tamanho real
+  pop.style.visibility='hidden';
   pop.classList.remove('hidden');
   const rect=ev.currentTarget.getBoundingClientRect();
-  let top=rect.bottom+8, left=rect.left;
   const pw=pop.offsetWidth||300;
-  if(left+pw>window.innerWidth-12)left=window.innerWidth-pw-12;
-  if(top+360>window.innerHeight)top=Math.max(12,rect.top-360);
-  pop.style.top=top+'px';pop.style.left=left+'px';
+  const ph=pop.offsetHeight||300;
+  const vh=window.innerHeight, vw=window.innerWidth;
+  let top=rect.bottom+8;
+  let left=rect.left;
+  // Se não cabe abaixo, tenta acima do ícone
+  if(top+ph>vh-12){
+    const acima=rect.top-ph-8;
+    if(acima>=12){
+      top=acima;
+    }else{
+      // Não cabe nem acima nem abaixo: ancora na borda do ícone e limita à viewport
+      top=Math.max(12,Math.min(rect.top,vh-ph-12));
+    }
+  }
+  // Limita horizontalmente
+  if(left+pw>vw-12)left=vw-pw-12;
+  if(left<12)left=12;
+  pop.style.top=top+'px';
+  pop.style.left=left+'px';
+  pop.style.visibility='';
   _proEnsureGlobalDismiss();
 };
 window._proClampEmojiInput=(inp)=>{
@@ -30630,32 +31468,126 @@ function _proRefreshBonusAccTitle(){
   el.textContent='🎁 Bônus'+(cnt>0?(' · '+cnt):'');
 }
 
-// Picker: lista produtos do catálogo (exceto o atual e os já vinculados)
-window._proBonusOpenProdPicker=(ev)=>{
+// ── Produtos vinculados no BOX FEATURES (igual ao bônus, mas dentro de Features) ──
+function _proFeatuProdutosEditHTML(ids){
+  if(!Array.isArray(ids)||!ids.length){
+    return '<p class="pro-text-block" style="color:var(--t2);font-style:italic;font-size:12.5px;margin:0">Nenhum produto vinculado ainda.</p>';
+  }
+  return ids.map((id,i)=>{
+    const p=(S.produtos||[]).find(x=>x.id===id);
+    if(!p){
+      return `<div class="pro-bonus-prod-chip orphan"><span class="pro-bonus-prod-name">⚠️ Produto removido (id: ${_proEsc(id.slice(0,8))}…)</span><button class="pro-icon-btn" type="button" onclick="_proFeatuProdRm(${i})" title="Remover">🗑</button></div>`;
+    }
+    const st=p.status||'rascunho';
+    const stLabel=PRO_STATUS_LABEL[st]||st;
+    const capa=p.capa?`<div class="pro-bonus-prod-capa" style="background-image:url('${_proEscAttr(p.capa)}')"></div>`:`<div class="pro-bonus-prod-capa"><span>📦</span></div>`;
+    return `<div class="pro-bonus-prod-chip">
+      ${capa}
+      <div class="pro-bonus-prod-info">
+        <div class="pro-bonus-prod-name">${_proEsc(p.nome||'(sem nome)')}</div>
+        <div class="pro-bonus-prod-meta"><span class="pro-badge s-${st}" style="font-size:8.5px">${_proEsc(stLabel)}</span></div>
+      </div>
+      <button class="pro-icon-btn" type="button" onclick="_proFeatuProdRm(${i})" title="Desvincular">🗑</button>
+    </div>`;
+  }).join('');
+}
+window._proFeatuProdAdd=(id)=>{
+  if(!id||!S.produtoAtual)return;
+  if(!Array.isArray(S.produtoAtual.featuresProdutoIds))S.produtoAtual.featuresProdutoIds=[];
+  if(id===S.produtoAtual.id)return alert('Não dá pra vincular o produto a ele mesmo.');
+  if(S.produtoAtual.featuresProdutoIds.includes(id))return;
+  S.produtoAtual.featuresProdutoIds.push(id);
+  _proMark();_proRefreshFeatuProds();_proRefreshFeatuAccTitle();
+};
+window._proFeatuProdRm=(i)=>{
+  if(!Array.isArray(S.produtoAtual.featuresProdutoIds))return;
+  const id=S.produtoAtual.featuresProdutoIds[i];
+  const bp=(S.produtos||[]).find(x=>x.id===id);
+  const nome=(bp&&String(bp.nome||'').trim())||'este produto';
+  if(!confirm(`Desvincular "${nome}" das features?`))return;
+  S.produtoAtual.featuresProdutoIds.splice(i,1);
+  _proMark();_proRefreshFeatuProds();_proRefreshFeatuAccTitle();
+};
+function _proRefreshFeatuProds(){
+  const wrap=document.getElementById('pro-f-feat-prods');
+  if(wrap)wrap.innerHTML=_proFeatuProdutosEditHTML(S.produtoAtual.featuresProdutoIds||[]);
+}
+function _proRefreshFeatuAccTitle(){
+  const el=document.querySelector('#tab-produtos .pro-edit-accordion[data-acc="features"] .pro-edit-acc-title');
+  if(!el)return;
+  const p=S.produtoAtual;
+  const cnt=(Array.isArray(p.features)?p.features.length:0)+(Array.isArray(p.featuresProdutoIds)?p.featuresProdutoIds.length:0);
+  el.textContent='Features · '+cnt;
+}
+window._proFeatuOpenProdPicker=(ev)=>{
+  _proOpenProdMultiPicker(ev,{
+    title:'Vincular produtos às Features',
+    alreadyLinked:S.produtoAtual.featuresProdutoIds||[],
+    onConfirm:(ids)=>{ids.forEach(id=>_proFeatuProdAdd(id));}
+  });
+};
+
+// Picker multi-seleção genérico (features + bônus) — só nome + checkbox + confirmar
+let _proMultiPickSel=new Set();
+let _proMultiPickConfirmFn=null;
+window._proOpenProdMultiPicker=(ev,ctx)=>{
   ev&&ev.stopPropagation&&ev.stopPropagation();
   const pop=document.getElementById('pro-picker-pop');if(!pop)return;
   const atual=S.produtoAtual;
-  const linkedSet=new Set(atual.bonusProdutoIds||[]);
+  const linked=new Set(ctx.alreadyLinked||[]);
   const opts=(S.produtos||[])
-    .filter(p=>p.id&&p.id!==atual.id&&!linkedSet.has(p.id))
+    .filter(p=>p.id&&p.id!==atual.id&&!linked.has(p.id))
     .sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'));
-  const itemsHtml=opts.length?opts.map(p=>{
-    const st=p.status||'rascunho';
-    const stLabel=PRO_STATUS_LABEL[st]||st;
-    const capa=p.capa?`<div class="pro-bonus-prod-capa" style="background-image:url('${_proEscAttr(p.capa)}');width:28px;height:28px"></div>`:`<div class="pro-bonus-prod-capa" style="width:28px;height:28px"><span style="font-size:14px">📦</span></div>`;
-    return `<button type="button" class="pro-picker-opt" onclick="_proBonusProdAdd('${_proEscAttr(p.id)}');_proCloseOpenPopovers()">
-      ${capa}
-      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_proEsc(p.nome||'(sem nome)')}</span>
-      <span class="pro-badge s-${st}" style="font-size:8.5px">${_proEsc(stLabel)}</span>
-    </button>`;
-  }).join(''):'<div class="pro-picker-empty">Nenhum outro produto disponível pra vincular.</div>';
-  pop.innerHTML=`<div class="pro-picker-head">Vincular produto como bônus</div><div class="pro-picker-body" style="max-height:380px;overflow-y:auto">${itemsHtml}</div>`;
-  // Posiciona perto do botão
+  _proMultiPickSel=new Set();
+  _proMultiPickConfirmFn=ctx.onConfirm||null;
+  const itemsHtml=opts.length?opts.map(p=>`
+    <label class="pro-picker-multi-opt" data-pid="${_proEscAttr(p.id)}">
+      <input type="checkbox" onchange="_proMultiPickToggle('${_proEscAttr(p.id)}',this.checked)"/>
+      <span class="pro-picker-multi-name">${_proEsc(p.nome||'(sem nome)')}</span>
+    </label>`).join(''):'<div class="pro-picker-empty">Nenhum outro produto disponível pra vincular.</div>';
+  pop.innerHTML=`
+    <div class="pro-picker-head">${_proEsc(ctx.title||'Vincular produtos')}</div>
+    <div class="pro-picker-body" style="max-height:380px;overflow-y:auto">${itemsHtml}</div>
+    ${opts.length?`<div class="pro-picker-multi-foot">
+      <span class="pro-picker-multi-count" id="pro-multi-count">0 selecionado(s)</span>
+      <button type="button" class="btn btn-s btn-sm" onclick="_proCloseOpenPopovers()">Cancelar</button>
+      <button type="button" class="btn btn-p btn-sm" id="pro-multi-confirm" onclick="_proMultiPickConfirm()" disabled>Confirmar</button>
+    </div>`:''}`;
   const r=(ev&&ev.target&&ev.target.closest('button'))?ev.target.closest('button').getBoundingClientRect():{left:100,bottom:100};
   pop.style.left=Math.min(r.left,window.innerWidth-360)+'px';
   pop.style.top=(r.bottom+8)+'px';
   pop.classList.remove('hidden');
   _proEnsureGlobalDismiss();
+};
+window._proMultiPickToggle=(id,checked)=>{
+  if(checked)_proMultiPickSel.add(id);
+  else _proMultiPickSel.delete(id);
+  // Atualiza visual do item
+  const lbl=document.querySelector(`#pro-picker-pop .pro-picker-multi-opt[data-pid="${id.replace(/"/g,'\\"')}"]`);
+  if(lbl)lbl.classList.toggle('checked',!!checked);
+  // Atualiza contador e botão confirmar
+  const n=_proMultiPickSel.size;
+  const cnt=document.getElementById('pro-multi-count');
+  if(cnt)cnt.textContent=`${n} selecionado${n===1?'':'s'}`;
+  const btn=document.getElementById('pro-multi-confirm');
+  if(btn){btn.disabled=n===0;btn.textContent=n?`Confirmar (${n})`:'Confirmar';}
+};
+window._proMultiPickConfirm=()=>{
+  if(!_proMultiPickConfirmFn||!_proMultiPickSel.size)return;
+  const ids=[..._proMultiPickSel];
+  _proMultiPickConfirmFn(ids);
+  _proMultiPickSel=new Set();
+  _proMultiPickConfirmFn=null;
+  _proCloseOpenPopovers();
+};
+
+// Picker: lista produtos do catálogo (exceto o atual e os já vinculados)
+window._proBonusOpenProdPicker=(ev)=>{
+  _proOpenProdMultiPicker(ev,{
+    title:'Vincular produtos como bônus',
+    alreadyLinked:S.produtoAtual.bonusProdutoIds||[],
+    onConfirm:(ids)=>{ids.forEach(id=>_proBonusProdAdd(id));}
+  });
 };
 
 // ── PDF anexo por feature ──────────────────────────────────────────────
@@ -30785,6 +31717,8 @@ window._proSalvar=async()=>{
     publicoAlvo:publicoAlvoArr,
     capa:p.capa||null,
     provasAlvo:Array.isArray(p.provasAlvo)?_proDedupe(p.provasAlvo):[],
+    temposAcesso:Array.isArray(p.temposAcesso)?_proDedupe(p.temposAcesso.map(t=>_proTempoAcessoNorm(t)).filter(Boolean)):[],
+    temposAcessoObs:String(p.temposAcessoObs||'').trim(),
     responsaveis:responsaveisArr,
     status:p.status||'rascunho',
     sazonal:!!p.sazonal,
@@ -30803,6 +31737,7 @@ window._proSalvar=async()=>{
     mentoriaVagasLimitadas:(_proMentStatus(p)!=='nao')?!!p.mentoriaVagasLimitadas:false,
     mentoriaVagasLimitacaoDescricao:(_proMentStatus(p)!=='nao'&&p.mentoriaVagasLimitadas)?String(p.mentoriaVagasLimitacaoDescricao||'').trim():'',
     features:_proPrepareFeatures(p.features,before&&before.features),
+    featuresProdutoIds:Array.isArray(p.featuresProdutoIds)?_proDedupe(p.featuresProdutoIds.filter(x=>typeof x==='string'&&x)):[],
     mentoriaFeatures:(_proMentStatus(p)!=='nao')?_proPrepareFeatures(p.mentoriaFeatures,before&&before.mentoriaFeatures):[],
     bonusFeatures:_proPrepareFeatures(p.bonusFeatures,before&&before.bonusFeatures),
     bonusProdutoIds:Array.isArray(p.bonusProdutoIds)?p.bonusProdutoIds.filter(x=>typeof x==='string'&&x):[],
@@ -30848,7 +31783,7 @@ window._proSalvar=async()=>{
     // Restaura accordions e dá feedback visual de salvo
     accAbertos.forEach(acc=>{
       const el=document.querySelector(`#tab-produtos .pro-edit-accordion[data-acc="${acc}"]`);
-      if(el)el.classList.add('open');
+      if(el)_proAnimOpen(el,'.pro-edit-acc-body');
     });
     _proSaveFeedback('ok');
   }catch(e){
