@@ -1805,7 +1805,8 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-card-ico{width:38px;height:38px;border-radius:10px;background:color-mix(in srgb, var(--accent) 8%, var(--bg3));border:1px solid color-mix(in srgb, var(--accent) 18%, var(--border));display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--t2);flex-shrink:0}
 #tab-produtos .pro-card-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:4px}
 #tab-produtos .pro-card-name{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;color:var(--text);line-height:1.2;letter-spacing:-.1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#tab-produtos .pro-card-resp{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+#tab-produtos .pro-card-resp{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+#tab-produtos .pro-card-resp-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--t2);opacity:.85;margin-right:2px}
 #tab-produtos .pro-card-resp-chip{display:inline-flex;align-items:center;gap:4px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11.5px;font-weight:500;color:#b08bff;background:color-mix(in srgb, #b08bff 8%, transparent);border:1px solid color-mix(in srgb, #b08bff 22%, var(--border));padding:2px 9px 2px 7px;border-radius:999px;line-height:1.35}
 #tab-produtos .pro-card-resp-chip::before{content:"👤";font-size:10px}
 #tab-produtos .pro-card-resp-chip.more::before{content:""}
@@ -1929,9 +1930,22 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 
 #tab-produtos .pro-obj{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px}
 #tab-produtos .pro-obj-q{font-weight:700;font-size:14px;color:var(--text);margin-bottom:6px}
-#tab-produtos .pro-obj-q::before{content:"Q: ";color:var(--accent);font-family:'JetBrains Mono','SF Mono',monospace;font-weight:700}
-#tab-produtos .pro-obj-a{font-size:13.5px;line-height:1.55;color:var(--t2);white-space:pre-wrap}
-#tab-produtos .pro-obj-a::before{content:"R: ";color:var(--accent);font-family:'JetBrains Mono','SF Mono',monospace;font-weight:700}
+#tab-produtos .pro-obj-q::before{content:"Q: ";color:var(--accent);font-family:'JetBrains Mono','SF Mono',monospace;font-weight:700;margin-right:2px}
+#tab-produtos .pro-obj-q > p:first-child,#tab-produtos .pro-obj-q > div:first-child,#tab-produtos .pro-obj-q > span:first-child{display:inline;margin:0}
+#tab-produtos .pro-obj-a{font-size:13.5px;line-height:1.55;color:var(--t2)}
+#tab-produtos .pro-obj-a::before{content:"R: ";color:var(--accent);font-family:'JetBrains Mono','SF Mono',monospace;font-weight:700;margin-right:2px}
+/* Primeiro elemento da resposta vira inline pra colar no R: */
+#tab-produtos .pro-obj-a > p:first-child,
+#tab-produtos .pro-obj-a > div:first-child,
+#tab-produtos .pro-obj-a > span:first-child,
+#tab-produtos .pro-obj-a > strong:first-child,
+#tab-produtos .pro-obj-a > em:first-child,
+#tab-produtos .pro-obj-a > b:first-child,
+#tab-produtos .pro-obj-a > i:first-child,
+#tab-produtos .pro-obj-a > a:first-child{display:inline;margin:0}
+/* Se a resposta começa com lista, dá quebra antes pra não colar feio */
+#tab-produtos .pro-obj-a > ul:first-child,
+#tab-produtos .pro-obj-a > ol:first-child{margin-top:6px}
 
 #tab-produtos .pro-links{display:flex;flex-direction:column;gap:6px}
 #tab-produtos .pro-link{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);text-decoration:none;font-size:14px;font-weight:500;transition:all .15s}
@@ -2127,6 +2141,165 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 
 /* Capa thumb dentro do Básico */
 #tab-produtos .pro-capa-mini-wrap{display:flex;gap:14px;align-items:flex-start;margin-top:6px}
+
+/* Público-alvo — container único limpo: chips em cima, separador, dropdown integrado */
+#tab-produtos .pro-pub-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .15s}
+#tab-produtos .pro-pub-wrap:focus-within{border-color:var(--accent)}
+#tab-produtos .pro-pub-chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;min-height:44px;align-items:center}
+#tab-produtos .pro-pub-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 12px;border-radius:999px;background:color-mix(in srgb,var(--accent) 14%,var(--bg2));border:1px solid var(--accent-dim);font-size:12.5px;font-weight:600;color:var(--text);line-height:1.2}
+#tab-produtos .pro-pub-chip button{background:transparent;border:none;color:var(--t2);cursor:pointer;font-size:15px;line-height:1;padding:2px 6px;border-radius:50%;transition:color .12s}
+#tab-produtos .pro-pub-chip button:hover{color:#ef4444}
+#tab-produtos .pro-pub-empty{font-size:12.5px;color:var(--t2);font-style:italic;padding:4px 2px}
+#tab-produtos .pro-pub-sep{height:1px;background:var(--border);margin:0}
+#tab-produtos .pro-pub-dd-row{padding:0}
+#tab-produtos .pro-pub-select{appearance:none;-webkit-appearance:none;background:transparent;border:none;color:var(--text);padding:11px 36px 11px 14px;font:inherit;font-size:13px;cursor:pointer;width:100%;background-image:linear-gradient(45deg,transparent 50%,var(--t2) 50%),linear-gradient(135deg,var(--t2) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;outline:none;font-weight:500}
+#tab-produtos .pro-pub-select:hover{background-color:color-mix(in srgb,var(--accent) 5%,transparent)}
+#tab-produtos .pro-pub-select:disabled{opacity:.6;cursor:not-allowed}
+#tab-produtos .pro-pub-select option{background:var(--bg2);color:var(--text)}
+#tab-produtos .pro-pub-hint{font-size:11.5px;color:var(--t2);margin:0;padding:8px 14px 12px;font-style:italic;border-top:1px dashed var(--border)}
+
+/* Sazonalidade no editor */
+#tab-produtos .pro-sazonal-block{margin-top:10px;padding:12px 14px;background:color-mix(in srgb,#f59e0b 6%,var(--bg3));border:1px solid color-mix(in srgb,#f59e0b 28%,var(--border));border-radius:12px}
+#tab-produtos .pro-sazonal-head{display:flex;align-items:center;justify-content:flex-start;gap:14px;flex-wrap:wrap;border-radius:8px;padding:2px 4px;margin:-2px -4px;transition:background .15s}
+#tab-produtos .pro-sazonal-head.clickable{cursor:pointer}
+#tab-produtos .pro-sazonal-head.clickable:hover{background:color-mix(in srgb,var(--text) 4%,transparent)}
+#tab-produtos .pro-sazonal-caret-head{margin-left:auto;font-family:'JetBrains Mono','SF Mono',monospace;color:var(--t2);font-size:11px;line-height:1;padding:6px;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
+#tab-produtos .pro-sazonal-block.open .pro-sazonal-caret-head,
+#tab-produtos .pro-vagas-block.open .pro-sazonal-caret-head{transform:rotate(180deg)}
+#tab-produtos .pro-sazonal-label{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#f59e0b}
+#tab-produtos .pro-sazonal-body{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+#tab-produtos .pro-sazonal-body .fg{margin-bottom:0}
+#tab-produtos .pro-sazonal-janela{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:600px){#tab-produtos .pro-sazonal-janela{grid-template-columns:1fr}}
+#tab-produtos .pro-sazonal-janela .fl{font-size:10.5px}
+#tab-produtos .pro-sazonal-body input[type="date"]{font-family:inherit;color-scheme:dark light}
+
+/* Sazonalidade no detail: botão + painel */
+#tab-produtos .pro-sazonal-detail{margin-top:10px}
+#tab-produtos .pro-sazonal-btn{display:inline-flex;align-items:center;gap:8px;background:color-mix(in srgb,#f59e0b 10%,var(--bg2));border:1px solid color-mix(in srgb,#f59e0b 40%,var(--border));color:#f59e0b;padding:7px 14px 7px 12px;border-radius:999px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;cursor:pointer;transition:all .15s}
+#tab-produtos .pro-sazonal-btn:hover{background:color-mix(in srgb,#f59e0b 18%,var(--bg2));border-color:#f59e0b}
+#tab-produtos .pro-sazonal-btn .pro-sazonal-caret{font-size:10px;opacity:.75;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
+#tab-produtos .pro-sazonal-detail.open .pro-sazonal-btn .pro-sazonal-caret{transform:rotate(180deg)}
+#tab-produtos .pro-sazonal-panel{max-height:0;opacity:0;overflow:hidden;transition:max-height .3s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,margin-top .2s,padding .2s;background:color-mix(in srgb,#f59e0b 5%,var(--bg2));border:1px solid color-mix(in srgb,#f59e0b 24%,var(--border));border-radius:12px;margin-top:0;padding:0 14px}
+#tab-produtos .pro-sazonal-detail.open .pro-sazonal-panel{max-height:600px;opacity:1;margin-top:8px;padding:12px 14px}
+#tab-produtos .pro-sazonal-panel-desc{font-size:13.5px;line-height:1.55;color:var(--text);margin:0 0 10px;white-space:pre-wrap}
+#tab-produtos .pro-sazonal-panel-janela{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:color-mix(in srgb,#f59e0b 12%,var(--bg3));border:1px solid color-mix(in srgb,#f59e0b 34%,var(--border));border-radius:8px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11.5px;font-weight:700;color:#f59e0b;letter-spacing:.4px}
+#tab-produtos .pro-sazonal-panel-janela.empty{background:var(--bg3);border-color:var(--border);color:var(--t2);font-weight:500;font-style:italic;letter-spacing:0;font-family:inherit;font-size:12.5px}
+#tab-produtos .pro-sazonal-panel-janela-lbl{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:1px;font-size:10px;color:var(--t2);margin-right:4px}
+
+/* Limite de vagas no editor — mesma estrutura do sazonal, cor vermelha */
+#tab-produtos .pro-vagas-block{margin-top:10px;padding:12px 14px;background:color-mix(in srgb,#ef4444 6%,var(--bg3));border:1px solid color-mix(in srgb,#ef4444 26%,var(--border));border-radius:12px}
+#tab-produtos .pro-vagas-label{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#ef4444}
+#tab-produtos .pro-toggle button.on.red{background:#ef4444;color:#fff}
+
+/* Limite de vagas no detalhe — botão + painel */
+#tab-produtos .pro-vagas-detail{margin-top:8px}
+#tab-produtos .pro-vagas-btn{display:inline-flex;align-items:center;gap:8px;background:color-mix(in srgb,#ef4444 10%,var(--bg2));border:1px solid color-mix(in srgb,#ef4444 40%,var(--border));color:#ef4444;padding:7px 14px 7px 12px;border-radius:999px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;cursor:pointer;transition:all .15s}
+#tab-produtos .pro-vagas-btn:hover{background:color-mix(in srgb,#ef4444 18%,var(--bg2));border-color:#ef4444}
+#tab-produtos .pro-vagas-detail.open .pro-sazonal-caret{transform:rotate(180deg)}
+#tab-produtos .pro-vagas-panel{max-height:0;opacity:0;overflow:hidden;transition:max-height .3s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,margin-top .2s,padding .2s;background:color-mix(in srgb,#ef4444 5%,var(--bg2));border:1px solid color-mix(in srgb,#ef4444 24%,var(--border));border-radius:12px;margin-top:0;padding:0 14px}
+#tab-produtos .pro-vagas-detail.open .pro-vagas-panel{max-height:600px;opacity:1;margin-top:8px;padding:12px 14px}
+
+/* Mentoria — flags (sazonal + vagas) lado a lado */
+#tab-produtos .pro-ment-flags{display:flex;flex-direction:column;gap:6px;margin:2px 0 14px}
+
+/* Mentoria — coordenadores no detalhe (mesma linguagem do card do catálogo) */
+#tab-produtos .pro-ment-resp{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;margin:6px 0 12px;font-size:13px;line-height:1.4}
+#tab-produtos .pro-ment-resp-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#a855f7;opacity:.85}
+#tab-produtos .pro-ment-resp-names{color:var(--text);font-weight:500}
+
+/* Título de seção do detalhe com botão ✏️ contextual */
+#tab-produtos .pro-section-head{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+#tab-produtos .pro-section-head .pro-section-title{margin:0!important}
+#tab-produtos .pro-sec-edit-btn-inline{background:transparent;border:1px solid transparent;color:var(--t2);width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;padding:0;line-height:1;opacity:.6}
+#tab-produtos .pro-section-head:hover .pro-sec-edit-btn-inline{opacity:1}
+#tab-produtos .pro-sec-edit-btn-inline:hover{background:color-mix(in srgb,var(--accent) 10%,transparent);border-color:var(--accent-dim);color:var(--accent);opacity:1!important}
+#tab-produtos .pro-sec-edit-btn{background:transparent;border:1px solid transparent;color:var(--t2);width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;padding:0;line-height:1;margin-left:4px;opacity:.65}
+#tab-produtos .pro-sec-disc:hover .pro-sec-edit-btn{opacity:1}
+#tab-produtos .pro-sec-edit-btn:hover{background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:var(--accent-dim);color:var(--accent);opacity:1!important}
+
+/* Disclosure de seção no detalhe (argumentos / objeções / dúvidas) */
+#tab-produtos .pro-sec-disc{margin:18px 0;background:color-mix(in srgb,var(--bg2) 92%,transparent);border:1px solid var(--border);border-radius:14px;overflow:hidden;backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);transition:border-color .2s,box-shadow .2s}
+#tab-produtos .pro-sec-disc:hover{border-color:color-mix(in srgb,var(--accent) 28%,var(--border))}
+#tab-produtos .pro-sec-disc.open{border-color:color-mix(in srgb,var(--accent) 36%,var(--border));box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 4px 14px rgba(0,0,0,.10)}
+#tab-produtos .pro-sec-disc-head{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px 18px;background:transparent;border:none;color:inherit;cursor:pointer;text-align:left;font:inherit;transition:background .15s}
+#tab-produtos .pro-sec-disc-head:hover{background:color-mix(in srgb,var(--accent) 4%,transparent)}
+#tab-produtos .pro-sec-disc-head:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+#tab-produtos .pro-sec-disc-title{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--accent);opacity:.95}
+#tab-produtos .pro-sec-disc-title::before{content:"// ";color:var(--t2);opacity:.6}
+#tab-produtos .pro-sec-disc-ico{font-size:13px;opacity:.9}
+#tab-produtos .pro-sec-disc-count{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);padding:1px 9px;border-radius:999px;letter-spacing:.6px;font-variant-numeric:tabular-nums;margin-left:auto}
+#tab-produtos .pro-sec-disc-head{cursor:pointer}
+#tab-produtos .pro-sec-disc-head:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+#tab-produtos .pro-sec-disc-caret{font-family:'JetBrains Mono','SF Mono',monospace;color:var(--t2);font-size:11px;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));line-height:1}
+#tab-produtos .pro-sec-disc.open .pro-sec-disc-caret{transform:rotate(180deg);color:var(--accent)}
+#tab-produtos .pro-sec-disc-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .35s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,padding .2s}
+#tab-produtos .pro-sec-disc.open .pro-sec-disc-body{max-height:4000px;opacity:1;padding:4px 18px 18px;overflow-y:auto}
+
+/* Argumento de venda — textarea maior */
+#tab-produtos .pro-arg-edit{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}
+#tab-produtos .pro-arg-edit textarea{flex:1;min-height:72px;resize:vertical;line-height:1.5}
+
+/* Q&A accordion (objeções + dúvidas) */
+#tab-produtos .pro-qa-edit{border:1px solid var(--border);border-radius:12px;background:var(--bg3);margin-bottom:10px;overflow:hidden;transition:border-color .15s,box-shadow .2s}
+#tab-produtos .pro-qa-edit:hover{border-color:color-mix(in srgb,var(--accent) 22%,var(--border))}
+#tab-produtos .pro-qa-edit.open{border-color:color-mix(in srgb,var(--accent) 36%,var(--border));box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 4px 14px rgba(0,0,0,.08)}
+#tab-produtos .pro-qa-head{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;min-width:0}
+#tab-produtos .pro-qa-handle{cursor:grab;color:var(--t2);font-size:16px;padding:4px 2px;user-select:none;flex-shrink:0}
+#tab-produtos .pro-qa-num{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--t2);background:var(--bg2);border:1px solid var(--border);padding:2px 7px;border-radius:999px;flex-shrink:0}
+#tab-produtos .pro-qa-title{flex:1;min-width:0;font-weight:600;font-size:13.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
+#tab-produtos .pro-qa-title.empty{color:var(--t2);font-style:italic;font-weight:400}
+#tab-produtos .pro-qa-title-input{flex:1;min-width:0;background:transparent;border:1px solid transparent;border-radius:8px;color:var(--text);font-family:inherit;font-size:14px;font-weight:600;line-height:1.3;padding:6px 10px;outline:none;transition:background .15s,border-color .15s}
+#tab-produtos .pro-qa-title-input::placeholder{color:var(--t2);font-style:italic;font-weight:400}
+#tab-produtos .pro-qa-title-input:hover{background:color-mix(in srgb,var(--accent) 5%,transparent)}
+#tab-produtos .pro-qa-title-input:focus{background:var(--bg2);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+#tab-produtos .pro-qa-actions{display:flex;gap:4px;align-items:center;flex-shrink:0}
+#tab-produtos .pro-qa-caret{font-family:'JetBrains Mono','SF Mono',monospace;color:var(--t2);font-size:11px;line-height:1;padding:6px;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));flex-shrink:0;background:transparent;border:none;cursor:pointer}
+#tab-produtos .pro-qa-edit.open .pro-qa-caret{transform:rotate(180deg);color:var(--accent)}
+#tab-produtos .pro-qa-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .35s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,padding .2s,border-top-color .2s;border-top:1px solid transparent;padding:0 14px}
+#tab-produtos .pro-qa-edit.open .pro-qa-body{max-height:1500px;opacity:1;padding:14px;border-top-color:var(--border)}
+
+/* Rich-text mini editor (resposta de obj/dúvida) */
+#tab-produtos .pro-rt{border:1px solid var(--border);border-radius:10px;background:var(--bg);overflow:hidden;transition:border-color .15s,box-shadow .15s}
+#tab-produtos .pro-rt:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+#tab-produtos .pro-rt-tb{display:flex;gap:2px;flex-wrap:wrap;align-items:center;padding:6px 8px;background:var(--bg3);border-bottom:1px solid var(--border)}
+#tab-produtos .pro-rt-tb button{background:transparent;border:1px solid transparent;color:var(--t2);width:30px;height:28px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;padding:0;line-height:1}
+#tab-produtos .pro-rt-tb button:hover{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--text);border-color:var(--accent-dim)}
+#tab-produtos .pro-rt-tb button.italic{font-style:italic}
+#tab-produtos .pro-rt-tb button.underline{text-decoration:underline}
+#tab-produtos .pro-rt-tb-sep{width:1px;height:18px;background:var(--border);margin:0 4px}
+#tab-produtos .pro-rt-ed{padding:10px 12px;min-height:84px;max-height:340px;overflow-y:auto;outline:none;font-size:13.5px;line-height:1.55;color:var(--text)}
+#tab-produtos .pro-rt-ed:empty:before{content:attr(data-placeholder);color:var(--t2);font-style:italic;pointer-events:none}
+#tab-produtos .pro-rt-ed ul,#tab-produtos .pro-rt-ed ol{margin:6px 0 6px 22px;padding:0}
+#tab-produtos .pro-rt-ed li{margin-bottom:2px}
+#tab-produtos .pro-rt-ed p{margin:5px 0}
+#tab-produtos .pro-rt-ed a{color:var(--accent);text-decoration:underline}
+
+/* Resposta no detalhe — herda formatação do rich-text */
+#tab-produtos .pro-obj-a ul,#tab-produtos .pro-obj-a ol{margin:6px 0 6px 22px;padding:0}
+#tab-produtos .pro-obj-a li{margin-bottom:3px}
+#tab-produtos .pro-obj-a p{margin:6px 0}
+#tab-produtos .pro-obj-a a{color:var(--accent);text-decoration:underline}
+#tab-produtos .pro-obj-a strong,#tab-produtos .pro-obj-a b{font-weight:700}
+
+/* Anexo — feedback de upload em andamento */
+#tab-produtos .pro-anex-uploading{display:flex;align-items:center;gap:12px;padding:12px 14px;background:color-mix(in srgb,var(--accent) 6%,var(--bg3));border:1px solid color-mix(in srgb,var(--accent) 32%,var(--border));border-radius:10px;margin-bottom:8px;animation:dexSlideIn .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
+#tab-produtos .pro-anex-spinner{width:18px;height:18px;border:2.2px solid color-mix(in srgb,var(--accent) 25%,transparent);border-top-color:var(--accent);border-radius:50%;animation:proAnexSpin .8s linear infinite;flex-shrink:0}
+@keyframes proAnexSpin{to{transform:rotate(360deg)}}
+#tab-produtos .pro-anex-uploading-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+#tab-produtos .pro-anex-uploading-name{font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tab-produtos .pro-anex-uploading-meta{font-size:11px;color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.4px}
+#tab-produtos .pro-anex-uploading.done{background:color-mix(in srgb,#22c55e 8%,var(--bg3));border-color:color-mix(in srgb,#22c55e 32%,var(--border))}
+#tab-produtos .pro-anex-uploading.err{background:color-mix(in srgb,#ef4444 8%,var(--bg3));border-color:color-mix(in srgb,#ef4444 32%,var(--border))}
+#tab-produtos .pro-anex-uploading-icon{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+
+/* Toast de salvo — mais proeminente */
+.pro-save-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:color-mix(in srgb,#22c55e 14%,var(--bg2));border:1px solid color-mix(in srgb,#22c55e 48%,var(--border));color:#22c55e;padding:11px 20px 11px 16px;border-radius:999px;display:inline-flex;align-items:center;gap:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;font-weight:700;letter-spacing:.2px;box-shadow:0 12px 36px rgba(0,0,0,.28),0 0 0 1px color-mix(in srgb,#22c55e 22%,transparent);z-index:9999;opacity:0;pointer-events:none;transition:opacity .22s,transform .35s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
+.pro-save-toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.pro-save-toast.err{background:color-mix(in srgb,#ef4444 14%,var(--bg2));border-color:color-mix(in srgb,#ef4444 48%,var(--border));color:#ef4444;box-shadow:0 12px 36px rgba(0,0,0,.28),0 0 0 1px color-mix(in srgb,#ef4444 22%,transparent)}
+.pro-save-toast-icon{width:22px;height:22px;border-radius:50%;background:#22c55e;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex-shrink:0}
+.pro-save-toast.err .pro-save-toast-icon{background:#ef4444}
+.pro-save-toast-time{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:600;opacity:.85;letter-spacing:.4px}
 
 @media (max-width:720px){
   #tab-produtos .pro-card{flex-wrap:wrap;padding:14px}
@@ -28045,7 +28218,8 @@ function _proRowHTML(p){
   const st=p.status||'rascunho';
   const responsaveis=_proGetResponsaveis(p);
   const respHtml=responsaveis.length
-    ?responsaveis.slice(0,3).map(r=>`<span class="pro-card-resp-chip">${_proEsc(r)}</span>`).join('')
+    ?`<span class="pro-card-resp-label">Coordenação:</span>`
+      +responsaveis.slice(0,3).map(r=>`<span class="pro-card-resp-chip">${_proEsc(r)}</span>`).join('')
       +(responsaveis.length>3?`<span class="pro-card-resp-chip more">+${responsaveis.length-3}</span>`:'')
     :'<span class="pro-card-resp-none">Sem responsável</span>';
   const canEdit=_proCanEdit();
@@ -28380,8 +28554,24 @@ window.proAbrir=id=>{
   S.produtoAtual=copy;
   S.produtosView='detail';_proRender();
 };
-window.proVoltarLista=()=>{
-  if(_proDirty&&!confirm('Você tem alterações não salvas. Sair sem salvar?'))return;
+window.proVoltarLista=async()=>{
+  const fromView=S.produtosView;
+  // Voltar é só voltar — se houver alterações, salva silenciosamente antes
+  if(_proDirty&&S.produtoAtual){
+    const p=S.produtoAtual;
+    if(p.nome&&String(p.nome).trim()){
+      try{ await _proSalvar(); }catch(e){ alert('Erro ao salvar: '+e.message); return; }
+      if(_proDirty)return; // salvar abortou (validação interna)
+    }else{
+      if(!confirm('Este produto ainda não tem nome — não pode ser salvo. Voltar e descartar?'))return;
+    }
+  }
+  // Edit → volta pro detalhe do produto (se já existe). Detail/new sem id → vai pro catálogo.
+  const goingToDetail=(fromView==='edit'||fromView==='new')&&S.produtoAtual&&S.produtoAtual.id;
+  if(goingToDetail){
+    S.produtosView='detail';_proDirty=false;_proRender();
+    return;
+  }
   S.produtosView='list';S.produtoAtual=null;_proDirty=false;_proRender();
 };
 window.proNovo=()=>{
@@ -28389,6 +28579,11 @@ window.proNovo=()=>{
   S.produtoAtual={
     id:null,nome:'',breveDescricao:'',publicoAlvo:[],capa:null,
     provasAlvo:[],status:'rascunho',responsaveis:[],features:[],
+    sazonal:false,sazonalidadeDescricao:'',janelaVendasInicio:'',janelaVendasFim:'',
+    vagasLimitadas:false,vagasLimitacaoDescricao:'',
+    mentoriaResponsaveis:[],
+    mentoriaSazonal:false,mentoriaSazonalidadeDescricao:'',mentoriaJanelaInicio:'',mentoriaJanelaFim:'',
+    mentoriaVagasLimitadas:false,mentoriaVagasLimitacaoDescricao:'',
     temMentoria:'nao',mentoriaDescricao:'',mentoriaFeatures:[],
     bonusProdutoIds:[],bonusFeatures:[],
     argumentosVenda:[],objecoes:[],duvidas:[],links:[],anexos:[],
@@ -28401,6 +28596,15 @@ window.proEditar=()=>{
   if(!_proCanEdit())return alert('Você não tem permissão para editar.');
   if(!S.produtoAtual)return;
   S._proFeatOpen={}; // features fechadas ao entrar no modo de edição
+  S._proAccPref=null;
+  S.produtosView='edit';_proDirty=false;_proRender();
+};
+// Editar pulando direto para uma seção específica (abre só aquele accordion)
+window.proEditarSecao=(accKey)=>{
+  if(!_proCanEdit())return alert('Você não tem permissão para editar.');
+  if(!S.produtoAtual)return;
+  S._proFeatOpen={};
+  S._proAccPref={[accKey]:true};
   S.produtosView='edit';_proDirty=false;_proRender();
 };
 window.proToggleDisc=(id)=>{
@@ -28468,9 +28672,18 @@ function _proRenderDetail(root){
     :'Inclui mentoria, mas nenhuma feature foi cadastrada ainda.';
   const mentDesc=String(p.mentoriaDescricao||'').trim();
   const mentDescHtml=mentDesc?`<p class="pro-ment-desc">${_proEsc(mentDesc)}</p>`:'';
+  const mentResps=Array.isArray(p.mentoriaResponsaveis)?p.mentoriaResponsaveis.filter(Boolean):[];
+  const mentRespsHtml=mentResps.length
+    ?`<div class="pro-ment-resp"><span class="pro-ment-resp-label">Coordenação da mentoria:</span> <span class="pro-ment-resp-names">${mentResps.map(r=>_proEsc(r)).join('. ')}</span></div>`
+    :'';
+  const mentSazonalBtn=_proMentSazonalDetailHTML(p);
+  const mentVagasBtn=_proMentVagasDetailHTML(p);
+  const mentFlagsHtml=(mentSazonalBtn||mentVagasBtn)?`<div class="pro-ment-flags">${mentSazonalBtn}${mentVagasBtn}</div>`:'';
   const mentBlock=(mentStatus!=='nao')?`<div class="pro-section pro-section-mentoria">
-    <h4 class="pro-section-title pro-section-title-mentoria">${mentTitle}</h4>
+    ${_proSecTitleHTML(mentTitle,'mentoria','pro-section-title-mentoria')}
     ${mentDescHtml}
+    ${mentRespsHtml}
+    ${mentFlagsHtml}
     ${mentFeats.length?`<div class="pro-feat-grid">${mentFeats.map(f=>_proFeatDetailHTML(f,p.updatedAt)).join('')}</div>`:(mentDesc?'':`<p class="pro-text-block" style="color:var(--t2);font-style:italic">${mentEmpty}</p>`)}
   </div>`:'';
 
@@ -28495,7 +28708,7 @@ function _proRenderDetail(root){
   }).join(''):'';
   const bonusFeatsHtml=bonusFeats.length?`<div class="pro-feat-grid" style="margin-top:${bonusProdsHtml?'14px':'0'}">${bonusFeats.map(f=>_proFeatDetailHTML(f,p.updatedAt)).join('')}</div>`:'';
   const bonusBlock=(bonusProdsHtml||bonusFeatsHtml)?`<div class="pro-section pro-section-bonus">
-    <h4 class="pro-section-title pro-section-title-bonus">🎁 Bônus</h4>
+    ${_proSecTitleHTML('🎁 Bônus','bonus','pro-section-title-bonus')}
     ${bonusProdsHtml?`<div class="pro-bonus-cards">${bonusProdsHtml}</div>`:''}
     ${bonusFeatsHtml}
   </div>`:'';
@@ -28504,10 +28717,10 @@ function _proRenderDetail(root){
   const argHtml=argumentos.length?`<ul class="pro-bullets">${argumentos.map(a=>`<li class="pro-bullet">${_proEsc(a)}</li>`).join('')}</ul>`:'';
 
   const objs=Array.isArray(p.objecoes)?p.objecoes.filter(o=>o&&(o.pergunta||o.resposta)):[];
-  const objHtml=objs.length?objs.map(o=>`<div class="pro-obj"><div class="pro-obj-q">${_proEsc(o.pergunta||'')}</div><div class="pro-obj-a">${_proEsc(o.resposta||'')}</div></div>`).join(''):'';
+  const objHtml=objs.length?objs.map(o=>`<div class="pro-obj"><div class="pro-obj-q">${_proEsc(o.pergunta||'')}</div><div class="pro-obj-a">${_renderRichText(o.resposta||'')}</div></div>`).join(''):'';
 
   const duvs=Array.isArray(p.duvidas)?p.duvidas.filter(d=>d&&(d.pergunta||d.resposta)):[];
-  const duvHtml=duvs.length?duvs.map(d=>`<div class="pro-obj"><div class="pro-obj-q">❓ ${_proEsc(d.pergunta||'')}</div><div class="pro-obj-a">${_proEsc(d.resposta||'')}</div></div>`).join(''):'';
+  const duvHtml=duvs.length?duvs.map(d=>`<div class="pro-obj"><div class="pro-obj-q">❓ ${_proEsc(d.pergunta||'')}</div><div class="pro-obj-a">${_renderRichText(d.resposta||'')}</div></div>`).join(''):'';
 
   const links=Array.isArray(p.links)?p.links.filter(l=>l&&l.url):[];
   const linksHtml=links.length?`<div class="pro-links">${links.map(l=>`<a class="pro-link" href="${_proEscAttr(l.url)}" target="_blank" rel="noopener noreferrer">🔗 ${_proEsc(l.label||l.url)}</a>`).join('')}</div>`:'';
@@ -28541,23 +28754,25 @@ function _proRenderDetail(root){
           <span class="pro-badge s-${st}">${_proEsc(PRO_STATUS_LABEL[st]||st)}</span>
           ${respChips}
         </div>
+        ${_proSazonalDetailHTML(p)}
+        ${_proVagasDetailHTML(p)}
         ${(discPublico||discProvas)?`<div class="pro-disc-row">${discPublico}${discProvas}</div>`:''}
       </div>
       ${adminActions}
     </div>
 
     <div class="pro-section">
-      <h4 class="pro-section-title">O que está incluído</h4>
+      ${_proSecTitleHTML('O que está incluído','features')}
       ${featsHtml}
     </div>
 
     ${mentBlock}
     ${bonusBlock}
-    ${argHtml?`<div class="pro-section"><h4 class="pro-section-title">Argumentos de venda</h4>${argHtml}</div>`:''}
-    ${objHtml?`<div class="pro-section"><h4 class="pro-section-title">Objeções frequentes</h4>${objHtml}</div>`:''}
-    ${duvHtml?`<div class="pro-section"><h4 class="pro-section-title">❓ Dúvidas frequentes</h4>${duvHtml}</div>`:''}
-    ${linksHtml?`<div class="pro-section"><h4 class="pro-section-title">Links úteis</h4>${linksHtml}</div>`:''}
-    ${anexHtml?`<div class="pro-section"><h4 class="pro-section-title">Anexos</h4>${anexHtml}</div>`:''}
+    ${argumentos.length?_proSecDiscHTML('argumentos','Argumentos de venda',argumentos.length,argHtml,'','argumentos'):''}
+    ${objs.length?_proSecDiscHTML('objecoes','Objeções frequentes',objs.length,objHtml,'','objecoes'):''}
+    ${duvs.length?_proSecDiscHTML('duvidas','Dúvidas frequentes',duvs.length,duvHtml,'❓','duvidas'):''}
+    ${linksHtml?`<div class="pro-section">${_proSecTitleHTML('Links úteis','links')}${linksHtml}</div>`:''}
+    ${anexHtml?`<div class="pro-section">${_proSecTitleHTML('Anexos','anexos')}${anexHtml}</div>`:''}
 
     <div class="pro-footer-meta">
       Atualizado em ${_proFmtDate(p.updatedAt||p.createdAt)} ${p.updatedBy?'por '+_proEsc(p.updatedBy):''}
@@ -28704,11 +28919,12 @@ function _proRenderEdit(root){
   if(!Array.isArray(p.publicoAlvo))p.publicoAlvo=publicos;
   if(!Array.isArray(p.provasAlvo))p.provasAlvo=provas;
   if(!Array.isArray(p.responsaveis))p.responsaveis=responsaveis;
+  if(!Array.isArray(p.mentoriaResponsaveis))p.mentoriaResponsaveis=[];
   const featsCount=(p.features||[]).length;
   const mentFeatsCount=(p.mentoriaFeatures||[]).length;
 
   root.innerHTML=`
-    <button class="pro-back" onclick="proVoltarLista()">← Cancelar e voltar</button>
+    <button class="pro-back" onclick="proVoltarLista()">← Voltar</button>
     <h2 class="pro-detail-nome" style="font-size:24px;margin-bottom:16px">${isNew?'Novo produto':'Editar produto'}</h2>
     <div class="pro-edit-form">
 
@@ -28720,36 +28936,26 @@ function _proRenderEdit(root){
           <div class="fg"><label class="fl">Nome do produto</label>
             <input class="fc" id="pro-f-nome" value="${_proEscAttr(p.nome)}" oninput="_proSetField('nome',this.value)"/>
           </div>
+
+          <div class="fg"><label class="fl">Status</label>
+            <select class="fc" onchange="_proSetField('status',this.value)">
+              ${Object.keys(PRO_STATUS_LABEL).map(s=>`<option value="${s}" ${p.status===s?'selected':''}>${PRO_STATUS_LABEL[s]}</option>`).join('')}
+            </select>
+          </div>
+
           <div class="fg"><label class="fl">Breve descrição</label>
             <textarea class="fc" id="pro-f-breve" rows="2" placeholder="Frase ou parágrafo curto que resume o produto" oninput="_proSetBreve(this)" style="resize:vertical;min-height:60px">${_proEsc(breve)}</textarea>
           </div>
 
-          <div class="fg"><label class="fl">Capa</label>
-            <div class="pro-capa-mini-wrap">
-              <div class="pro-capa-preview" style="${capaStyle}">${capaLabel}</div>
-              <div style="display:flex;flex-direction:column;gap:8px">
-                <input type="file" id="pro-f-capa-file" accept="image/jpeg,image/jpg,image/png,image/webp" style="display:none" onchange="_proUploadCapa(this.files[0])"/>
-                <button class="btn btn-p btn-sm" onclick="document.getElementById('pro-f-capa-file').click()">📷 Escolher imagem</button>
-                ${p.capa?`<button class="btn btn-d btn-sm" onclick="_proRemoveCapa()">🗑 Remover capa</button>`:''}
-                <p style="font-size:11px;color:var(--t2);font-family:'JetBrains Mono',monospace;letter-spacing:.4px">JPG/PNG/WebP, máx 2MB</p>
-              </div>
-            </div>
-          </div>
+          ${_proSazonalEditHTML(p)}
+          ${_proVagasEditHTML(p)}
 
-          <div class="fg"><label class="fl">Público-alvo · pra quem é</label>
-            ${_proMultiSelectHTML('publicoAlvo',p.publicoAlvo)}
+          <div class="fg" style="margin-top:24px"><label class="fl">Público-alvo · pra quem é</label>
+            ${_proPublicoDropdownHTML(p)}
           </div>
 
           <div class="fg"><label class="fl">Provas-alvo</label>
             ${_proMultiSelectHTML('provaAlvo',p.provasAlvo)}
-          </div>
-
-          <div class="pro-edit-row" style="gap:14px">
-            <div class="fg" style="flex:1;margin:0"><label class="fl">Status</label>
-              <select class="fc" onchange="_proSetField('status',this.value)">
-                ${Object.keys(PRO_STATUS_LABEL).map(s=>`<option value="${s}" ${p.status===s?'selected':''}>${PRO_STATUS_LABEL[s]}</option>`).join('')}
-              </select>
-            </div>
           </div>
 
           <div class="fg"><label class="fl">${(p.responsaveis||[]).length===1?'Responsável':'Responsáveis'}</label>
@@ -28786,7 +28992,13 @@ function _proRenderEdit(root){
               <label class="fl">Descrição da mentoria</label>
               <textarea class="fc" rows="3" placeholder="Descreva brevemente o que está incluído na mentoria (aparece no catálogo abaixo do título Mentoria)" oninput="S.produtoAtual.mentoriaDescricao=this.value;_proMark()">${_proEsc(p.mentoriaDescricao||'')}</textarea>
             </div>
-            <div id="pro-f-mentfeatures">${(p.mentoriaFeatures||[]).map((f,i)=>_proFeatEditHTML(f,i,'mentoriaFeatures')).join('')}</div>
+            <div class="fg" style="margin-bottom:14px">
+              <label class="fl">${(Array.isArray(p.mentoriaResponsaveis)&&p.mentoriaResponsaveis.length===1)?'Coordenador da mentoria':'Coordenadores da mentoria'}</label>
+              ${_proMentRespInputHTML(p.mentoriaResponsaveis)}
+            </div>
+            ${_proMentSazonalEditHTML(p)}
+            ${_proMentVagasEditHTML(p)}
+            <div id="pro-f-mentfeatures" style="margin-top:14px">${(p.mentoriaFeatures||[]).map((f,i)=>_proFeatEditHTML(f,i,'mentoriaFeatures')).join('')}</div>
             <button class="btn btn-s btn-sm" onclick="_proFeatAdd('mentoriaFeatures')" style="margin-top:8px">＋ Adicionar feature de mentoria</button>
           </div>
         </div>
@@ -28860,8 +29072,9 @@ function _proRenderEdit(root){
         </div>
         <div class="pro-edit-acc-body">
           <div class="pro-dropzone" id="pro-f-dropzone" onclick="document.getElementById('pro-f-anex-file').click()">
-            📎 Clique ou arraste arquivos · PDF / JPG / PNG / WebP · máx 5MB
+            📎 Clique ou arraste arquivos · PDF / JPG / PNG / WebP · máx 20MB
           </div>
+          <div id="pro-f-uploading" style="margin-top:10px"></div>
           <input type="file" id="pro-f-anex-file" accept="application/pdf,image/jpeg,image/jpg,image/png,image/webp" multiple style="display:none" onchange="_proUploadAnexos(this.files)"/>
           <div id="pro-f-anexos" style="margin-top:10px">${(p.anexos||[]).map((a,i)=>_proAnexEditHTML(a,i)).join('')}</div>
         </div>
@@ -28871,12 +29084,24 @@ function _proRenderEdit(root){
 
     <div class="pro-edit-footer">
       ${dirtyPill}
-      <button class="btn btn-s" onclick="proVoltarLista()">Cancelar</button>
       <button class="btn btn-p" id="pro-save-btn" onclick="_proSalvar()">💾 Salvar</button>
       <span id="pro-save-feedback" class="pro-save-feedback" style="display:none"></span>
     </div>
   `;
   _proBindDropzone();
+  // Aplicar preferência de accordion aberto (vinda do botão "Editar esta seção")
+  if(S._proAccPref){
+    const pref=S._proAccPref;S._proAccPref=null;
+    setTimeout(()=>{
+      Object.keys(pref).forEach(k=>{
+        const el=document.querySelector(`#tab-produtos .pro-edit-accordion[data-acc="${k}"]`);
+        if(el){
+          el.classList.add('open');
+          el.scrollIntoView({behavior:'smooth',block:'start'});
+        }
+      });
+    },30);
+  }
 }
 
 // Breve descrição: salva em `breveDescricao` + autosize textarea
@@ -28887,6 +29112,340 @@ window._proSetBreve=(el)=>{
   el.style.height='auto';
   el.style.height=Math.min(el.scrollHeight,400)+'px';
   _proMark();
+};
+
+// Público-alvo: dropdown nativo + chips
+function _proPublicoDropdownHTML(p){
+  const vals=Array.isArray(p.publicoAlvo)?p.publicoAlvo:[];
+  const all=(S.catalogoConfig&&Array.isArray(S.catalogoConfig.publicosAlvo))?S.catalogoConfig.publicosAlvo:[];
+  const loaded=!!(S.catalogoConfig&&S.catalogoConfig.loaded);
+  const dispo=all.filter(x=>!vals.includes(x));
+  const chipsHtml=vals.length
+    ?vals.map((v,i)=>`<span class="pro-pub-chip">${_proEsc(v)}<button onclick="_proMsRm('publicoAlvo',${i})" title="Remover" type="button">×</button></span>`).join('')
+    :`<span class="pro-pub-empty">Nenhum público selecionado</span>`;
+  let opts,hint='',placeholder='＋ Adicionar público-alvo…';
+  if(!loaded){
+    opts=`<option value="" disabled>Carregando opções…</option>`;
+    placeholder='Carregando catálogo…';
+  }else if(!all.length){
+    opts=`<option value="" disabled>Catálogo vazio</option>`;
+    placeholder='Catálogo vazio';
+    hint=`<p class="pro-pub-hint">Nenhum público cadastrado no catálogo. Cadastre nas configurações antes.</p>`;
+  }else if(!dispo.length){
+    opts='';
+    placeholder='Todos os públicos já foram adicionados';
+  }else{
+    opts=dispo.map(v=>`<option value="${_proEscAttr(v)}">${_proEsc(v)}</option>`).join('');
+  }
+  return `<div class="pro-pub-wrap pro-ms" data-ms="publicoAlvo">
+    <div class="pro-pub-chips">${chipsHtml}</div>
+    <div class="pro-pub-sep"></div>
+    <div class="pro-pub-dd-row">
+      <select class="pro-pub-select" ${dispo.length?'':'disabled'} onchange="_proPublicoAdd(this.value);this.value=''">
+        <option value="" selected>${placeholder}</option>
+        ${opts}
+      </select>
+    </div>
+    ${hint}
+  </div>`;
+}
+window._proPublicoAdd=(val)=>{
+  const v=String(val||'').trim();if(!v)return;
+  if(!Array.isArray(S.produtoAtual.publicoAlvo))S.produtoAtual.publicoAlvo=[];
+  if(S.produtoAtual.publicoAlvo.includes(v))return;
+  S.produtoAtual.publicoAlvo.push(v);
+  _proMark();_proRefreshPublicoDd();
+};
+function _proRefreshPublicoDd(){
+  const wrap=document.querySelector('#tab-produtos .pro-ms[data-ms="publicoAlvo"]');
+  if(!wrap)return;
+  // Substitui apenas o .pro-ms preservando o <label> acima
+  wrap.outerHTML=_proPublicoDropdownHTML(S.produtoAtual);
+}
+
+// Sazonalidade — bloco no editor (head clicável: abre/fecha o body sem desmarcar Sim)
+function _proSazonalEditHTML(p){
+  const on=!!p.sazonal;
+  const editOpen=on&&!!S._proSazonalEditOpen;
+  const desc=String(p.sazonalidadeDescricao||'');
+  const ini=String(p.janelaVendasInicio||'');
+  const fim=String(p.janelaVendasFim||'');
+  return `<div class="pro-sazonal-block${editOpen?' open':''}" data-sazonal-block>
+    <div class="pro-sazonal-head ${on?'clickable':''}" onclick="${on?'_proToggleSazonalEdit()':''}">
+      <span class="pro-sazonal-label">⚠️ Produto sazonal?</span>
+      <div class="pro-toggle" onclick="event.stopPropagation()">
+        <button type="button" class="${on?'on wip':''}" onclick="_proSetSazonal(true)">Sim</button>
+        <button type="button" class="${!on?'on':''}" onclick="_proSetSazonal(false)">Não</button>
+      </div>
+      ${on?`<span class="pro-sazonal-caret-head" aria-hidden="true">▾</span>`:''}
+    </div>
+    <div class="pro-sazonal-body" id="pro-sazonal-body" style="${editOpen?'':'display:none'}">
+      <div class="fg"><label class="fl">Quando esse produto pode ser vendido</label>
+        <textarea class="fc" rows="2" placeholder="Ex: Apenas nos meses que antecedem a prova TSA (jan–mar). Geralmente abre em janeiro e fecha quando atinge a turma." oninput="S.produtoAtual.sazonalidadeDescricao=this.value;_proMark()" style="resize:vertical;min-height:60px">${_proEsc(desc)}</textarea>
+      </div>
+      <div class="fg" style="margin-bottom:0"><label class="fl">Próxima janela de vendas</label>
+        <div class="pro-sazonal-janela">
+          <div><label class="fl">De</label>
+            <input type="date" class="fc" value="${_proEscAttr(ini)}" oninput="S.produtoAtual.janelaVendasInicio=this.value;_proMark()"/>
+          </div>
+          <div><label class="fl">Até</label>
+            <input type="date" class="fc" value="${_proEscAttr(fim)}" oninput="S.produtoAtual.janelaVendasFim=this.value;_proMark()"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+window._proSetSazonal=(v)=>{
+  S.produtoAtual.sazonal=!!v;
+  S._proSazonalEditOpen=!!v; // marcar Sim abre o editor; Não fecha
+  _proMark();
+  const block=document.querySelector('#tab-produtos [data-sazonal-block]');
+  if(!block)return;
+  block.outerHTML=_proSazonalEditHTML(S.produtoAtual);
+};
+window._proToggleSazonalEdit=()=>{
+  if(!S.produtoAtual.sazonal)return;
+  S._proSazonalEditOpen=!S._proSazonalEditOpen;
+  const block=document.querySelector('#tab-produtos [data-sazonal-block]');
+  if(!block)return;
+  block.outerHTML=_proSazonalEditHTML(S.produtoAtual);
+};
+
+// Limite de vagas — bloco no editor (head clicável: abre/fecha o body sem desmarcar Sim)
+function _proVagasEditHTML(p){
+  const on=!!p.vagasLimitadas;
+  const editOpen=on&&!!S._proVagasEditOpen;
+  const desc=String(p.vagasLimitacaoDescricao||'');
+  return `<div class="pro-vagas-block${editOpen?' open':''}" data-vagas-block>
+    <div class="pro-sazonal-head ${on?'clickable':''}" onclick="${on?'_proToggleVagasEdit()':''}">
+      <span class="pro-vagas-label">🎟️ Tem limite de vagas?</span>
+      <div class="pro-toggle" onclick="event.stopPropagation()">
+        <button type="button" class="${on?'on red':''}" onclick="_proSetVagas(true)">Sim</button>
+        <button type="button" class="${!on?'on':''}" onclick="_proSetVagas(false)">Não</button>
+      </div>
+      ${on?`<span class="pro-sazonal-caret-head" aria-hidden="true">▾</span>`:''}
+    </div>
+    <div class="pro-sazonal-body" style="${editOpen?'':'display:none'}">
+      <div class="fg" style="margin-bottom:0"><label class="fl">Por que tem limite de vagas?</label>
+        <textarea class="fc" rows="2" placeholder="Ex: Turma máxima de 12 alunos pra preservar a qualidade da mentoria 1:1 com o coordenador." oninput="S.produtoAtual.vagasLimitacaoDescricao=this.value;_proMark()" style="resize:vertical;min-height:60px">${_proEsc(desc)}</textarea>
+      </div>
+    </div>
+  </div>`;
+}
+window._proSetVagas=(v)=>{
+  S.produtoAtual.vagasLimitadas=!!v;
+  S._proVagasEditOpen=!!v;
+  _proMark();
+  const block=document.querySelector('#tab-produtos [data-vagas-block]');
+  if(!block)return;
+  block.outerHTML=_proVagasEditHTML(S.produtoAtual);
+};
+window._proToggleVagasEdit=()=>{
+  if(!S.produtoAtual.vagasLimitadas)return;
+  S._proVagasEditOpen=!S._proVagasEditOpen;
+  const block=document.querySelector('#tab-produtos [data-vagas-block]');
+  if(!block)return;
+  block.outerHTML=_proVagasEditHTML(S.produtoAtual);
+};
+
+// Limite de vagas — render no detalhe (botão + painel expansível)
+function _proVagasDetailHTML(p){
+  if(!p||!p.vagasLimitadas)return '';
+  const desc=String(p.vagasLimitacaoDescricao||'').trim();
+  const open=!!(S._proVagasOpen);
+  const descHtml=desc
+    ?`<p class="pro-sazonal-panel-desc">${_proEsc(desc)}</p>`
+    :`<p class="pro-sazonal-panel-desc" style="color:var(--t2);font-style:italic">Motivo da limitação ainda não descrito.</p>`;
+  return `<div class="pro-vagas-detail${open?' open':''}" id="pro-vagas-detail">
+    <button type="button" class="pro-vagas-btn" onclick="proToggleVagas()" aria-expanded="${open}">
+      🎟️ Tem limite de vagas
+      <span class="pro-sazonal-caret">▾</span>
+    </button>
+    <div class="pro-vagas-panel">
+      ${descHtml}
+    </div>
+  </div>`;
+}
+window.proToggleVagas=()=>{
+  S._proVagasOpen=!S._proVagasOpen;
+  const el=document.getElementById('pro-vagas-detail');
+  if(el)el.classList.toggle('open',!!S._proVagasOpen);
+};
+
+// Mentoria — Sazonalidade (head clicável)
+function _proMentSazonalEditHTML(p){
+  const on=!!p.mentoriaSazonal;
+  const editOpen=on&&!!S._proMentSazonalEditOpen;
+  const desc=String(p.mentoriaSazonalidadeDescricao||'');
+  const ini=String(p.mentoriaJanelaInicio||'');
+  const fim=String(p.mentoriaJanelaFim||'');
+  return `<div class="pro-sazonal-block${editOpen?' open':''}" data-ment-sazonal-block>
+    <div class="pro-sazonal-head ${on?'clickable':''}" onclick="${on?'_proToggleMentSazonalEdit()':''}">
+      <span class="pro-sazonal-label">⚠️ Mentoria é sazonal?</span>
+      <div class="pro-toggle" onclick="event.stopPropagation()">
+        <button type="button" class="${on?'on wip':''}" onclick="_proSetMentSazonal(true)">Sim</button>
+        <button type="button" class="${!on?'on':''}" onclick="_proSetMentSazonal(false)">Não</button>
+      </div>
+      ${on?`<span class="pro-sazonal-caret-head" aria-hidden="true">▾</span>`:''}
+    </div>
+    <div class="pro-sazonal-body" style="${editOpen?'':'display:none'}">
+      <div class="fg"><label class="fl">Quando a mentoria pode ser contratada</label>
+        <textarea class="fc" rows="2" placeholder="Ex: Mentoria roda apenas no semestre que antecede a prova oral." oninput="S.produtoAtual.mentoriaSazonalidadeDescricao=this.value;_proMark()" style="resize:vertical;min-height:60px">${_proEsc(desc)}</textarea>
+      </div>
+      <div class="fg" style="margin-bottom:0"><label class="fl">Próxima janela de vendas</label>
+        <div class="pro-sazonal-janela">
+          <div><label class="fl">De</label>
+            <input type="date" class="fc" value="${_proEscAttr(ini)}" oninput="S.produtoAtual.mentoriaJanelaInicio=this.value;_proMark()"/>
+          </div>
+          <div><label class="fl">Até</label>
+            <input type="date" class="fc" value="${_proEscAttr(fim)}" oninput="S.produtoAtual.mentoriaJanelaFim=this.value;_proMark()"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+window._proSetMentSazonal=(v)=>{
+  S.produtoAtual.mentoriaSazonal=!!v;
+  S._proMentSazonalEditOpen=!!v;
+  _proMark();
+  const b=document.querySelector('#tab-produtos [data-ment-sazonal-block]');
+  if(b)b.outerHTML=_proMentSazonalEditHTML(S.produtoAtual);
+};
+window._proToggleMentSazonalEdit=()=>{
+  if(!S.produtoAtual.mentoriaSazonal)return;
+  S._proMentSazonalEditOpen=!S._proMentSazonalEditOpen;
+  const b=document.querySelector('#tab-produtos [data-ment-sazonal-block]');
+  if(b)b.outerHTML=_proMentSazonalEditHTML(S.produtoAtual);
+};
+
+// Mentoria — Limite de vagas (head clicável)
+function _proMentVagasEditHTML(p){
+  const on=!!p.mentoriaVagasLimitadas;
+  const editOpen=on&&!!S._proMentVagasEditOpen;
+  const desc=String(p.mentoriaVagasLimitacaoDescricao||'');
+  return `<div class="pro-vagas-block${editOpen?' open':''}" data-ment-vagas-block>
+    <div class="pro-sazonal-head ${on?'clickable':''}" onclick="${on?'_proToggleMentVagasEdit()':''}">
+      <span class="pro-vagas-label">🎟️ Mentoria tem limite de vagas?</span>
+      <div class="pro-toggle" onclick="event.stopPropagation()">
+        <button type="button" class="${on?'on red':''}" onclick="_proSetMentVagas(true)">Sim</button>
+        <button type="button" class="${!on?'on':''}" onclick="_proSetMentVagas(false)">Não</button>
+      </div>
+      ${on?`<span class="pro-sazonal-caret-head" aria-hidden="true">▾</span>`:''}
+    </div>
+    <div class="pro-sazonal-body" style="${editOpen?'':'display:none'}">
+      <div class="fg" style="margin-bottom:0"><label class="fl">Por que tem limite de vagas?</label>
+        <textarea class="fc" rows="2" placeholder="Ex: Mentoria 1:1 com coordenador, limite de 8 alunos por turma." oninput="S.produtoAtual.mentoriaVagasLimitacaoDescricao=this.value;_proMark()" style="resize:vertical;min-height:60px">${_proEsc(desc)}</textarea>
+      </div>
+    </div>
+  </div>`;
+}
+window._proSetMentVagas=(v)=>{
+  S.produtoAtual.mentoriaVagasLimitadas=!!v;
+  S._proMentVagasEditOpen=!!v;
+  _proMark();
+  const b=document.querySelector('#tab-produtos [data-ment-vagas-block]');
+  if(b)b.outerHTML=_proMentVagasEditHTML(S.produtoAtual);
+};
+window._proToggleMentVagasEdit=()=>{
+  if(!S.produtoAtual.mentoriaVagasLimitadas)return;
+  S._proMentVagasEditOpen=!S._proMentVagasEditOpen;
+  const b=document.querySelector('#tab-produtos [data-ment-vagas-block]');
+  if(b)b.outerHTML=_proMentVagasEditHTML(S.produtoAtual);
+};
+
+// Mentoria — render no detalhe (botões sazonal + vagas, mesma lógica)
+function _proMentSazonalDetailHTML(p){
+  if(!p||!p.mentoriaSazonal)return '';
+  const desc=String(p.mentoriaSazonalidadeDescricao||'').trim();
+  const ini=String(p.mentoriaJanelaInicio||'').trim();
+  const fim=String(p.mentoriaJanelaFim||'').trim();
+  const open=!!(S._proMentSazonalOpen);
+  let janelaHtml='';
+  if(ini&&fim){janelaHtml=`<div class="pro-sazonal-panel-janela"><span class="pro-sazonal-panel-janela-lbl">Próxima janela de vendas</span>${_proFmtDataBR(ini)} até ${_proFmtDataBR(fim)}</div>`;}
+  else if(ini){janelaHtml=`<div class="pro-sazonal-panel-janela"><span class="pro-sazonal-panel-janela-lbl">Abre em</span>${_proFmtDataBR(ini)}</div>`;}
+  else if(fim){janelaHtml=`<div class="pro-sazonal-panel-janela"><span class="pro-sazonal-panel-janela-lbl">Fecha em</span>${_proFmtDataBR(fim)}</div>`;}
+  else{janelaHtml=`<div class="pro-sazonal-panel-janela empty">Próxima janela de vendas ainda não definida</div>`;}
+  const descHtml=desc?`<p class="pro-sazonal-panel-desc">${_proEsc(desc)}</p>`:'';
+  return `<div class="pro-sazonal-detail${open?' open':''}" id="pro-ment-sazonal-detail">
+    <button type="button" class="pro-sazonal-btn" onclick="proToggleMentSazonal()" aria-expanded="${open}">
+      ⚠️ Tem sazonalidade
+      <span class="pro-sazonal-caret">▾</span>
+    </button>
+    <div class="pro-sazonal-panel">
+      ${descHtml}
+      ${janelaHtml}
+    </div>
+  </div>`;
+}
+window.proToggleMentSazonal=()=>{
+  S._proMentSazonalOpen=!S._proMentSazonalOpen;
+  const el=document.getElementById('pro-ment-sazonal-detail');
+  if(el)el.classList.toggle('open',!!S._proMentSazonalOpen);
+};
+function _proMentVagasDetailHTML(p){
+  if(!p||!p.mentoriaVagasLimitadas)return '';
+  const desc=String(p.mentoriaVagasLimitacaoDescricao||'').trim();
+  const open=!!(S._proMentVagasOpen);
+  const descHtml=desc
+    ?`<p class="pro-sazonal-panel-desc">${_proEsc(desc)}</p>`
+    :`<p class="pro-sazonal-panel-desc" style="color:var(--t2);font-style:italic">Motivo da limitação ainda não descrito.</p>`;
+  return `<div class="pro-vagas-detail${open?' open':''}" id="pro-ment-vagas-detail">
+    <button type="button" class="pro-vagas-btn" onclick="proToggleMentVagas()" aria-expanded="${open}">
+      🎟️ Tem limite de vagas
+      <span class="pro-sazonal-caret">▾</span>
+    </button>
+    <div class="pro-vagas-panel">
+      ${descHtml}
+    </div>
+  </div>`;
+}
+window.proToggleMentVagas=()=>{
+  S._proMentVagasOpen=!S._proMentVagasOpen;
+  const el=document.getElementById('pro-ment-vagas-detail');
+  if(el)el.classList.toggle('open',!!S._proMentVagasOpen);
+};
+
+// Sazonalidade — render no detalhe (botão + painel expansível)
+function _proFmtDataBR(iso){
+  if(!iso)return '';
+  const m=String(iso).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m)return String(iso);
+  return `${m[3]}/${m[2]}/${m[1]}`;
+}
+function _proSazonalDetailHTML(p){
+  if(!p||!p.sazonal)return '';
+  const desc=String(p.sazonalidadeDescricao||'').trim();
+  const ini=String(p.janelaVendasInicio||'').trim();
+  const fim=String(p.janelaVendasFim||'').trim();
+  const open=!!(S._proSazonalOpen);
+  let janelaHtml='';
+  if(ini&&fim){
+    janelaHtml=`<div class="pro-sazonal-panel-janela"><span class="pro-sazonal-panel-janela-lbl">Próxima janela de vendas</span>${_proFmtDataBR(ini)} até ${_proFmtDataBR(fim)}</div>`;
+  }else if(ini){
+    janelaHtml=`<div class="pro-sazonal-panel-janela"><span class="pro-sazonal-panel-janela-lbl">Abre em</span>${_proFmtDataBR(ini)}</div>`;
+  }else if(fim){
+    janelaHtml=`<div class="pro-sazonal-panel-janela"><span class="pro-sazonal-panel-janela-lbl">Fecha em</span>${_proFmtDataBR(fim)}</div>`;
+  }else{
+    janelaHtml=`<div class="pro-sazonal-panel-janela empty">Próxima janela de vendas ainda não definida</div>`;
+  }
+  const descHtml=desc?`<p class="pro-sazonal-panel-desc">${_proEsc(desc)}</p>`:'';
+  return `<div class="pro-sazonal-detail${open?' open':''}" id="pro-sazonal-detail">
+    <button type="button" class="pro-sazonal-btn" onclick="proToggleSazonal()" aria-expanded="${open}">
+      ⚠️ Produto sazonal
+      <span class="pro-sazonal-caret">▾</span>
+    </button>
+    <div class="pro-sazonal-panel">
+      ${descHtml}
+      ${janelaHtml}
+    </div>
+  </div>`;
+}
+window.proToggleSazonal=()=>{
+  S._proSazonalOpen=!S._proSazonalOpen;
+  const el=document.getElementById('pro-sazonal-detail');
+  if(el)el.classList.toggle('open',!!S._proSazonalOpen);
 };
 
 // Multi-select (público/provas)
@@ -28909,7 +29468,9 @@ window._proMsRm=(tipo,idx)=>{
   const field=tipo==='publicoAlvo'?'publicoAlvo':'provasAlvo';
   if(!Array.isArray(S.produtoAtual[field]))return;
   S.produtoAtual[field].splice(idx,1);
-  _proMark();_proRefreshMs(tipo);
+  _proMark();
+  if(tipo==='publicoAlvo')_proRefreshPublicoDd();
+  else _proRefreshMs(tipo);
 };
 function _proRefreshMs(tipo){
   const wrap=document.querySelector(`#tab-produtos .pro-ms[data-ms="${tipo}"] .pro-ms-chips`);
@@ -28982,6 +29543,68 @@ window._proRespKey=(ev)=>{
 window._proRespFlush=(inp)=>{
   if(inp&&inp.value&&inp.value.trim()){
     if(_proRespAdd(inp.value))inp.value='';
+  }
+};
+
+// Coordenação da mentoria — mesmo padrão de responsáveis, isolado em mentoriaResponsaveis
+function _proMentRespInputHTML(valores){
+  const vals=Array.isArray(valores)?valores:[];
+  const chipsHtml=vals.length
+    ?vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proMentRespRm(${i})" title="Remover">×</button></span>`).join('')
+    :`<span class="pro-ms-empty">Nenhum coordenador da mentoria</span>`;
+  return `<div class="pro-ms" data-ms="mentoriaResponsaveis">
+    <div class="pro-ms-chips" id="pro-ms-chips-mentoriaResponsaveis">${chipsHtml}</div>
+    <div class="pro-ms-actions" style="flex:1;min-width:160px">
+      <input type="text" class="fc" id="pro-f-mentresp-input" placeholder="Digite e tecle Enter ou vírgula" style="flex:1;min-width:160px" onkeydown="_proMentRespKey(event)" onblur="_proMentRespFlush(this)"/>
+    </div>
+  </div>`;
+}
+function _proRefreshMentResp(){
+  const wrap=document.querySelector('#tab-produtos .pro-ms[data-ms="mentoriaResponsaveis"] .pro-ms-chips');
+  if(!wrap)return;
+  const vals=Array.isArray(S.produtoAtual.mentoriaResponsaveis)?S.produtoAtual.mentoriaResponsaveis:[];
+  wrap.innerHTML=vals.length
+    ?vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proMentRespRm(${i})" title="Remover">×</button></span>`).join('')
+    :`<span class="pro-ms-empty">Nenhum coordenador da mentoria</span>`;
+  const lbl=wrap.closest('.fg')?.querySelector('.fl');
+  if(lbl)lbl.textContent=vals.length===1?'Coordenador da mentoria':'Coordenadores da mentoria';
+}
+window._proMentRespAdd=(raw)=>{
+  const txt=String(raw||'').trim();
+  if(!txt)return false;
+  if(!Array.isArray(S.produtoAtual.mentoriaResponsaveis))S.produtoAtual.mentoriaResponsaveis=[];
+  const partes=txt.split(',').map(s=>s.trim()).filter(Boolean);
+  let added=false;
+  partes.forEach(part=>{
+    if(!S.produtoAtual.mentoriaResponsaveis.includes(part)){
+      S.produtoAtual.mentoriaResponsaveis.push(part);
+      added=true;
+    }
+  });
+  if(added){_proMark();_proRefreshMentResp();}
+  return added;
+};
+window._proMentRespRm=(idx)=>{
+  if(!Array.isArray(S.produtoAtual.mentoriaResponsaveis))return;
+  S.produtoAtual.mentoriaResponsaveis.splice(idx,1);
+  _proMark();_proRefreshMentResp();
+};
+window._proMentRespKey=(ev)=>{
+  if(ev.key==='Enter'||ev.key===','){
+    ev.preventDefault();
+    const inp=ev.target;
+    if(_proMentRespAdd(inp.value))inp.value='';
+    else inp.value='';
+  }else if(ev.key==='Backspace'&&!ev.target.value){
+    const arr=S.produtoAtual.mentoriaResponsaveis;
+    if(Array.isArray(arr)&&arr.length){
+      arr.pop();_proMark();_proRefreshMentResp();
+    }
+  }
+};
+window._proMentRespFlush=(inp)=>{
+  if(inp&&inp.value&&inp.value.trim()){
+    if(_proMentRespAdd(inp.value))inp.value='';
   }
 };
 
@@ -29364,43 +29987,149 @@ window._proRtMaybeEmpty=(id)=>{
 };
 
 function _proArgEditHTML(a,i){
-  return `<div class="pro-edit-row" data-arg-i="${i}">
-    <input class="fc" value="${_proEscAttr(a)}" placeholder="ex: Maior taxa de aprovação do mercado" oninput="_proArgSet(${i},this.value)"/>
+  return `<div class="pro-arg-edit" data-arg-i="${i}">
+    <textarea class="fc" placeholder="ex: Maior taxa de aprovação do mercado — explique o argumento com calma" oninput="_proArgSet(${i},this.value)">${_proEsc(a)}</textarea>
     <button class="pro-icon-btn" onclick="_proArgRm(${i})" title="Remover">🗑</button>
   </div>`;
 }
 
-function _proObjEditHTML(o,i){
-  return `<div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg3);margin-bottom:8px" data-obj-i="${i}">
-    <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
-      <span class="pro-feat-handle">⠿</span>
-      <strong style="font-size:12px;color:var(--t2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase">Objeção ${i+1}</strong>
-      <div class="pro-item-actions">
-        <button class="pro-icon-btn" onclick="_proObjUp(${i})">↑</button>
-        <button class="pro-icon-btn" onclick="_proObjDown(${i})">↓</button>
-        <button class="pro-icon-btn" onclick="_proObjRm(${i})">🗑</button>
+function _proObjEditHTML(o,i){return _proQaEditHTML(o,i,'obj');}
+function _proDuvEditHTML(d,i){return _proQaEditHTML(d,i,'duv');}
+
+// Q&A genérico (objeção/dúvida) — sem numeração; pergunta editável inline no header; body só com a resposta
+function _proQaEditHTML(item,i,kind){
+  // kind: 'obj' | 'duv'
+  const id=item.id||(item.id=_proUid());
+  const openSet=kind==='obj'?(S._proObjOpen=S._proObjOpen||new Set()):(S._proDuvOpen=S._proDuvOpen||new Set());
+  const open=openSet.has(id);
+  const upFn=kind==='obj'?'_proObjUp':'_proDuvUp';
+  const dnFn=kind==='obj'?'_proObjDown':'_proDuvDown';
+  const rmFn=kind==='obj'?'_proObjRm':'_proDuvRm';
+  const setFn=kind==='obj'?'_proObjSet':'_proDuvSet';
+  const rtUid=`qa-${kind}-${id}`;
+  const respHtml=String(item.resposta||'');
+  const phPerg=kind==='obj'?'Escreva a objeção (ex: Não tenho dinheiro)':'Escreva a dúvida (ex: Tem certificado?)';
+  const respLbl=kind==='obj'?'Como contornar':'Resposta';
+  const respPh=kind==='obj'?'Como contornar essa objeção — use negrito, listas, links…':'Resposta — use negrito, listas, links…';
+  return `<div class="pro-qa-edit${open?' open':''}" data-qa-kind="${kind}" data-qa-id="${id}" data-qa-i="${i}">
+    <div class="pro-qa-head" onclick="_proQaToggle('${kind}','${id}')">
+      <span class="pro-qa-handle" title="Arrastar (em breve)" onclick="event.stopPropagation()">⠿</span>
+      <input class="pro-qa-title-input" placeholder="${phPerg}" value="${_proEscAttr(item.pergunta)}" oninput="${setFn}(${i},'pergunta',this.value)" onclick="event.stopPropagation()"/>
+      <div class="pro-qa-actions" onclick="event.stopPropagation()">
+        <button class="pro-icon-btn" onclick="event.stopPropagation();${upFn}(${i})" title="Subir">↑</button>
+        <button class="pro-icon-btn" onclick="event.stopPropagation();${dnFn}(${i})" title="Descer">↓</button>
+        <button class="pro-icon-btn" onclick="event.stopPropagation();${rmFn}(${i})" title="Remover">🗑</button>
+      </div>
+      <span class="pro-qa-caret" title="Expandir/recolher" aria-hidden="true">▾</span>
+    </div>
+    <div class="pro-qa-body">
+      <div class="fg" style="margin-bottom:0"><label class="fl">${respLbl}</label>
+        ${_proRtHTML(rtUid,respHtml,respPh,`${setFn}(${i},'resposta',_proRtGet('${rtUid}'))`)}
       </div>
     </div>
-    <input class="fc" placeholder="Pergunta/objeção do cliente" value="${_proEscAttr(o.pergunta)}" oninput="_proObjSet(${i},'pergunta',this.value)" style="margin-bottom:8px"/>
-    <textarea class="fc" rows="2" placeholder="Resposta sugerida" oninput="_proObjSet(${i},'resposta',this.value)">${_proEsc(o.resposta)}</textarea>
+  </div>`;
+}
+window._proQaToggle=(kind,id,ev)=>{
+  const set=kind==='obj'?(S._proObjOpen=S._proObjOpen||new Set()):(S._proDuvOpen=S._proDuvOpen||new Set());
+  const card=document.querySelector(`#tab-produtos .pro-qa-edit[data-qa-kind="${kind}"][data-qa-id="${id}"]`);
+  if(!card)return;
+  if(set.has(id)){set.delete(id);card.classList.remove('open');}
+  else{set.add(id);card.classList.add('open');}
+};
+
+// Disclosure de seções do detalhe (Argumentos / Objeções / Dúvidas) — default fechado
+// accKey: se passado, renderiza botão ✏️ pra editar direto essa seção no editor
+function _proSecDiscHTML(key,title,count,bodyHtml,icon,accKey){
+  const open=!!(S._proSecDiscOpen&&S._proSecDiscOpen[key]);
+  const ico=icon?`<span class="pro-sec-disc-ico">${icon}</span> `:'';
+  const editBtn=(_proCanEdit()&&accKey)?`<span class="pro-sec-edit-btn" role="button" tabindex="0" onclick="event.stopPropagation();proEditarSecao('${accKey}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();proEditarSecao('${accKey}')}" title="Editar esta seção">✏️</span>`:'';
+  return `<div class="pro-section pro-sec-disc${open?' open':''}" data-sec-disc="${key}">
+    <div class="pro-sec-disc-head" role="button" tabindex="0" onclick="proToggleSecDisc('${key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proToggleSecDisc('${key}')}" aria-expanded="${open}">
+      <span class="pro-sec-disc-title">${ico}${_proEsc(title)}</span>
+      ${editBtn}
+      <span class="pro-sec-disc-count">${count}</span>
+      <span class="pro-sec-disc-caret">▾</span>
+    </div>
+    <div class="pro-sec-disc-body">${bodyHtml}</div>
+  </div>`;
+}
+window.proToggleSecDisc=(key)=>{
+  if(!S._proSecDiscOpen)S._proSecDiscOpen={};
+  S._proSecDiscOpen[key]=!S._proSecDiscOpen[key];
+  const el=document.querySelector(`#tab-produtos [data-sec-disc="${key}"]`);
+  if(el)el.classList.toggle('open',!!S._proSecDiscOpen[key]);
+};
+
+// Título de seção com botão ✏️ pra editar direto aquele accordion
+function _proSecTitleHTML(title,accKey,extraClass){
+  const xc=extraClass?(' '+extraClass):'';
+  const canEdit=_proCanEdit();
+  const edit=(canEdit&&accKey)?`<button type="button" class="pro-sec-edit-btn-inline" onclick="proEditarSecao('${accKey}')" title="Editar esta seção">✏️</button>`:'';
+  return `<div class="pro-section-head${xc}">
+    <h4 class="pro-section-title${xc}" style="margin:0">${title}</h4>
+    ${edit}
   </div>`;
 }
 
-function _proDuvEditHTML(d,i){
-  return `<div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg3);margin-bottom:8px" data-duv-i="${i}">
-    <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
-      <span class="pro-feat-handle">⠿</span>
-      <strong style="font-size:12px;color:var(--t2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase">Dúvida ${i+1}</strong>
-      <div class="pro-item-actions">
-        <button class="pro-icon-btn" onclick="_proDuvUp(${i})">↑</button>
-        <button class="pro-icon-btn" onclick="_proDuvDown(${i})">↓</button>
-        <button class="pro-icon-btn" onclick="_proDuvRm(${i})">🗑</button>
-      </div>
+// Sanitiza HTML da resposta antes de persistir (reusa o sanitizer dos avisos)
+function _proSanitizeResp(html){
+  const s=String(html||'').trim();
+  if(!s)return '';
+  try{ return _comSanitizePostHTML(s); }
+  catch(e){ return s; }
+}
+
+// Mini rich-text editor — toolbar + contenteditable. Salva HTML cru no estado via onChangeFn.
+function _proRtHTML(uid,value,placeholder,onChangeExpr){
+  const html=String(value||'');
+  return `<div class="pro-rt" data-rt-uid="${_proEscAttr(uid)}">
+    <div class="pro-rt-tb" onmousedown="event.preventDefault()">
+      <button type="button" title="Negrito (Ctrl+B)" onclick="_proRtExec('${uid}','bold')"><b>B</b></button>
+      <button type="button" class="italic" title="Itálico (Ctrl+I)" onclick="_proRtExec('${uid}','italic')">I</button>
+      <button type="button" class="underline" title="Sublinhado" onclick="_proRtExec('${uid}','underline')">U</button>
+      <span class="pro-rt-tb-sep"></span>
+      <button type="button" title="Lista com marcadores" onclick="_proRtExec('${uid}','insertUnorderedList')">•</button>
+      <button type="button" title="Lista numerada" onclick="_proRtExec('${uid}','insertOrderedList')">1.</button>
+      <span class="pro-rt-tb-sep"></span>
+      <button type="button" title="Inserir link" onclick="_proRtLink('${uid}')">🔗</button>
+      <button type="button" title="Limpar formatação" onclick="_proRtExec('${uid}','removeFormat');_proRtExec('${uid}','unlink')">⌫</button>
     </div>
-    <input class="fc" placeholder="Pergunta (ex: Tem certificado?)" value="${_proEscAttr(d.pergunta)}" oninput="_proDuvSet(${i},'pergunta',this.value)" style="margin-bottom:8px"/>
-    <textarea class="fc" rows="3" placeholder="Resposta" oninput="_proDuvSet(${i},'resposta',this.value)">${_proEsc(d.resposta)}</textarea>
+    <div class="pro-rt-ed" contenteditable="true" data-rt-ed="${_proEscAttr(uid)}" data-placeholder="${_proEscAttr(placeholder||'')}" oninput="${onChangeExpr}" onblur="${onChangeExpr}">${html}</div>
   </div>`;
 }
+window._proRtGet=(uid)=>{
+  const el=document.querySelector(`[data-rt-ed="${uid}"]`);
+  if(!el)return '';
+  return el.innerHTML.trim();
+};
+window._proRtExec=(uid,cmd)=>{
+  const el=document.querySelector(`[data-rt-ed="${uid}"]`);
+  if(!el)return;
+  el.focus();
+  try{document.execCommand('styleWithCSS',false,true);}catch(e){}
+  document.execCommand(cmd,false,null);
+  // dispara oninput pra salvar
+  el.dispatchEvent(new Event('input',{bubbles:true}));
+};
+window._proRtLink=(uid)=>{
+  const el=document.querySelector(`[data-rt-ed="${uid}"]`);
+  if(!el)return;
+  el.focus();
+  const sel=window.getSelection();
+  const selectedText=sel&&sel.rangeCount?sel.toString():'';
+  const url=prompt('URL do link (https://...)','https://');
+  if(!url)return;
+  if(!/^https?:\/\//i.test(url)){alert('Use uma URL começando com http:// ou https://');return;}
+  if(selectedText){
+    document.execCommand('createLink',false,url);
+  }else{
+    const label=prompt('Texto do link:',url)||url;
+    const a=document.createElement('a');a.href=url;a.textContent=label;a.target='_blank';a.rel='noopener';
+    if(sel&&sel.rangeCount){const r=sel.getRangeAt(0);r.insertNode(a);r.setStartAfter(a);r.setEndAfter(a);sel.removeAllRanges();sel.addRange(r);}
+    else{el.appendChild(a);}
+  }
+  el.dispatchEvent(new Event('input',{bubbles:true}));
+};
 
 function _proLinkEditHTML(l,i){
   return `<div class="pro-edit-row" data-link-i="${i}">
@@ -29683,7 +30412,10 @@ window._proArgAdd=()=>{
   S.produtoAtual.argumentosVenda.push('');_proMark();_proRefreshArgs();
 };
 window._proArgSet=(i,v)=>{S.produtoAtual.argumentosVenda[i]=v;_proMark();};
-window._proArgRm=(i)=>{S.produtoAtual.argumentosVenda.splice(i,1);_proMark();_proRefreshArgs();};
+window._proArgRm=(i)=>{
+  if(!confirm('Excluir este argumento de venda?'))return;
+  S.produtoAtual.argumentosVenda.splice(i,1);_proMark();_proRefreshArgs();
+};
 function _proRefreshArgs(){
   const wrap=document.getElementById('pro-f-args');if(!wrap)return;
   wrap.innerHTML=(S.produtoAtual.argumentosVenda||[]).map((a,i)=>_proArgEditHTML(a,i)).join('');
@@ -29695,7 +30427,12 @@ window._proObjAdd=()=>{
   S.produtoAtual.objecoes.push({id:_proUid(),pergunta:'',resposta:''});_proMark();_proRefreshObjs();
 };
 window._proObjSet=(i,k,v)=>{S.produtoAtual.objecoes[i][k]=v;_proMark();};
-window._proObjRm=(i)=>{S.produtoAtual.objecoes.splice(i,1);_proMark();_proRefreshObjs();};
+window._proObjRm=(i)=>{
+  const o=S.produtoAtual.objecoes&&S.produtoAtual.objecoes[i];
+  const nome=(o&&String(o.pergunta||'').trim())||`Objeção ${i+1}`;
+  if(!confirm(`Excluir "${nome}"?`))return;
+  S.produtoAtual.objecoes.splice(i,1);_proMark();_proRefreshObjs();
+};
 window._proObjUp=(i)=>{if(i<=0)return;const arr=S.produtoAtual.objecoes;[arr[i-1],arr[i]]=[arr[i],arr[i-1]];_proMark();_proRefreshObjs();};
 window._proObjDown=(i)=>{const arr=S.produtoAtual.objecoes;if(i>=arr.length-1)return;[arr[i],arr[i+1]]=[arr[i+1],arr[i]];_proMark();_proRefreshObjs();};
 function _proRefreshObjs(){
@@ -29709,7 +30446,12 @@ window._proDuvAdd=()=>{
   S.produtoAtual.duvidas.push({id:_proUid(),pergunta:'',resposta:''});_proMark();_proRefreshDuvs();_proRefreshDuvAccTitle();
 };
 window._proDuvSet=(i,k,v)=>{S.produtoAtual.duvidas[i][k]=v;_proMark();};
-window._proDuvRm=(i)=>{S.produtoAtual.duvidas.splice(i,1);_proMark();_proRefreshDuvs();_proRefreshDuvAccTitle();};
+window._proDuvRm=(i)=>{
+  const d=S.produtoAtual.duvidas&&S.produtoAtual.duvidas[i];
+  const nome=(d&&String(d.pergunta||'').trim())||`Dúvida ${i+1}`;
+  if(!confirm(`Excluir "${nome}"?`))return;
+  S.produtoAtual.duvidas.splice(i,1);_proMark();_proRefreshDuvs();_proRefreshDuvAccTitle();
+};
 window._proDuvUp=(i)=>{if(i<=0)return;const arr=S.produtoAtual.duvidas;[arr[i-1],arr[i]]=[arr[i],arr[i-1]];_proMark();_proRefreshDuvs();};
 window._proDuvDown=(i)=>{const arr=S.produtoAtual.duvidas;if(i>=arr.length-1)return;[arr[i],arr[i+1]]=[arr[i+1],arr[i]];_proMark();_proRefreshDuvs();};
 function _proRefreshDuvs(){
@@ -29727,7 +30469,12 @@ window._proLinkAdd=()=>{
   S.produtoAtual.links.push({id:_proUid(),label:'',url:''});_proMark();_proRefreshLinks();
 };
 window._proLinkSet=(i,k,v)=>{S.produtoAtual.links[i][k]=v;_proMark();};
-window._proLinkRm=(i)=>{S.produtoAtual.links.splice(i,1);_proMark();_proRefreshLinks();};
+window._proLinkRm=(i)=>{
+  const l=S.produtoAtual.links&&S.produtoAtual.links[i];
+  const nome=(l&&(String(l.label||'').trim()||String(l.url||'').trim()))||`Link ${i+1}`;
+  if(!confirm(`Excluir o link "${nome}"?`))return;
+  S.produtoAtual.links.splice(i,1);_proMark();_proRefreshLinks();
+};
 function _proRefreshLinks(){
   const wrap=document.getElementById('pro-f-links');if(!wrap)return;
   wrap.innerHTML=(S.produtoAtual.links||[]).map((l,i)=>_proLinkEditHTML(l,i)).join('');
@@ -29769,9 +30516,21 @@ window._proUploadAnexos=async(files)=>{
   const pid=S.produtoAtual.id||('tmp_'+_proUid());
   if(!S.produtoAtual.id)S.produtoAtual._pidTmp=pid;
   if(!Array.isArray(S.produtoAtual.anexos))S.produtoAtual.anexos=[];
+  const wrap=document.getElementById('pro-f-uploading');
   for(const file of files){
-    if(file.size>5*1024*1024){alert(`"${file.name}" >5MB, ignorado.`);continue;}
-    if(!/^(application\/pdf|image\/(jpeg|jpg|png|webp))$/i.test(file.type)){alert(`"${file.name}" tipo inválido.`);continue;}
+    if(file.size>20*1024*1024){alert(`"${file.name}" passa de 20MB. Reduza o arquivo.`);continue;}
+    if(!/^(application\/pdf|image\/(jpeg|jpg|png|webp))$/i.test(file.type)){alert(`"${file.name}" tipo inválido (use PDF, JPG, PNG ou WebP).`);continue;}
+    // Card de feedback visual durante o upload
+    const tmpId='up-'+_proUid();
+    if(wrap){
+      wrap.insertAdjacentHTML('beforeend',`<div class="pro-anex-uploading" id="${tmpId}">
+        <div class="pro-anex-spinner"></div>
+        <div class="pro-anex-uploading-info">
+          <div class="pro-anex-uploading-name">${_proEsc(file.name)}</div>
+          <div class="pro-anex-uploading-meta">enviando · ${_proFmtSize(file.size)}</div>
+        </div>
+      </div>`);
+    }
     try{
       const aid=_proUid();
       const ext=(file.name.split('.').pop()||'bin').toLowerCase();
@@ -29780,12 +30539,39 @@ window._proUploadAnexos=async(files)=>{
       await window._fbStorage.uploadBytes(r,file);
       const url=await window._fbStorage.getDownloadURL(r);
       S.produtoAtual.anexos.push({id:aid,label:file.name,path,url,sizeBytes:file.size,mime:file.type});
-    }catch(e){alert(`Erro upload "${file.name}": ${e.message}`);}
+      const card=document.getElementById(tmpId);
+      if(card){
+        card.classList.add('done');
+        card.innerHTML=`<div class="pro-anex-uploading-icon" style="color:#22c55e">✓</div>
+          <div class="pro-anex-uploading-info">
+            <div class="pro-anex-uploading-name">${_proEsc(file.name)}</div>
+            <div class="pro-anex-uploading-meta">enviado · ${_proFmtSize(file.size)}</div>
+          </div>`;
+        setTimeout(()=>{const c=document.getElementById(tmpId);if(c)c.remove();},1800);
+      }
+    }catch(e){
+      const card=document.getElementById(tmpId);
+      if(card){
+        card.classList.add('err');
+        card.innerHTML=`<div class="pro-anex-uploading-icon" style="color:#ef4444">⚠</div>
+          <div class="pro-anex-uploading-info">
+            <div class="pro-anex-uploading-name">${_proEsc(file.name)}</div>
+            <div class="pro-anex-uploading-meta">erro · ${_proEsc(e.message||'falha no envio')}</div>
+          </div>`;
+        setTimeout(()=>{const c=document.getElementById(tmpId);if(c)c.remove();},4500);
+      }
+      alert(`Erro upload "${file.name}": ${e.message}`);
+    }
   }
   _proMark();_proRender();
 };
 window._proAnexSet=(i,k,v)=>{S.produtoAtual.anexos[i][k]=v;_proMark();};
-window._proAnexRm=(i)=>{S.produtoAtual.anexos.splice(i,1);_proMark();_proRender();};
+window._proAnexRm=(i)=>{
+  const a=S.produtoAtual.anexos&&S.produtoAtual.anexos[i];
+  const nome=(a&&String(a.label||'').trim())||`Anexo ${i+1}`;
+  if(!confirm(`Excluir o anexo "${nome}"?`))return;
+  S.produtoAtual.anexos.splice(i,1);_proMark();_proRender();
+};
 
 // ─── Bônus: produtos vinculados ────────────────────────────────────────
 // Renderiza chips dos produtos vinculados (cada chip = nome + status + X remover)
@@ -29825,6 +30611,10 @@ window._proBonusProdAdd=(id)=>{
 };
 window._proBonusProdRm=(i)=>{
   if(!Array.isArray(S.produtoAtual.bonusProdutoIds))return;
+  const id=S.produtoAtual.bonusProdutoIds[i];
+  const bp=(S.produtos||[]).find(x=>x.id===id);
+  const nome=(bp&&String(bp.nome||'').trim())||'este bônus';
+  if(!confirm(`Desvincular "${nome}" como bônus?`))return;
   S.produtoAtual.bonusProdutoIds.splice(i,1);
   _proMark();_proRefreshBonusProds();_proRefreshBonusAccTitle();
 };
@@ -29997,15 +30787,28 @@ window._proSalvar=async()=>{
     provasAlvo:Array.isArray(p.provasAlvo)?_proDedupe(p.provasAlvo):[],
     responsaveis:responsaveisArr,
     status:p.status||'rascunho',
+    sazonal:!!p.sazonal,
+    sazonalidadeDescricao:p.sazonal?String(p.sazonalidadeDescricao||'').trim():'',
+    janelaVendasInicio:p.sazonal?String(p.janelaVendasInicio||'').trim():'',
+    janelaVendasFim:p.sazonal?String(p.janelaVendasFim||'').trim():'',
+    vagasLimitadas:!!p.vagasLimitadas,
+    vagasLimitacaoDescricao:p.vagasLimitadas?String(p.vagasLimitacaoDescricao||'').trim():'',
     temMentoria:_proMentStatus(p),
     mentoriaDescricao:(_proMentStatus(p)!=='nao')?String(p.mentoriaDescricao||'').trim():'',
+    mentoriaResponsaveis:(_proMentStatus(p)!=='nao'&&Array.isArray(p.mentoriaResponsaveis))?_proDedupe(p.mentoriaResponsaveis.map(s=>String(s||'').trim()).filter(Boolean)):[],
+    mentoriaSazonal:(_proMentStatus(p)!=='nao')?!!p.mentoriaSazonal:false,
+    mentoriaSazonalidadeDescricao:(_proMentStatus(p)!=='nao'&&p.mentoriaSazonal)?String(p.mentoriaSazonalidadeDescricao||'').trim():'',
+    mentoriaJanelaInicio:(_proMentStatus(p)!=='nao'&&p.mentoriaSazonal)?String(p.mentoriaJanelaInicio||'').trim():'',
+    mentoriaJanelaFim:(_proMentStatus(p)!=='nao'&&p.mentoriaSazonal)?String(p.mentoriaJanelaFim||'').trim():'',
+    mentoriaVagasLimitadas:(_proMentStatus(p)!=='nao')?!!p.mentoriaVagasLimitadas:false,
+    mentoriaVagasLimitacaoDescricao:(_proMentStatus(p)!=='nao'&&p.mentoriaVagasLimitadas)?String(p.mentoriaVagasLimitacaoDescricao||'').trim():'',
     features:_proPrepareFeatures(p.features,before&&before.features),
     mentoriaFeatures:(_proMentStatus(p)!=='nao')?_proPrepareFeatures(p.mentoriaFeatures,before&&before.mentoriaFeatures):[],
     bonusFeatures:_proPrepareFeatures(p.bonusFeatures,before&&before.bonusFeatures),
     bonusProdutoIds:Array.isArray(p.bonusProdutoIds)?p.bonusProdutoIds.filter(x=>typeof x==='string'&&x):[],
     argumentosVenda:Array.isArray(p.argumentosVenda)?p.argumentosVenda.filter(a=>String(a||'').trim()):[],
-    objecoes:Array.isArray(p.objecoes)?p.objecoes.filter(o=>o&&(o.pergunta||o.resposta)):[],
-    duvidas:Array.isArray(p.duvidas)?p.duvidas.filter(d=>d&&(d.pergunta||d.resposta)).map(d=>({id:d.id||_proUid(),pergunta:String(d.pergunta||'').trim(),resposta:String(d.resposta||'').trim()})):[],
+    objecoes:Array.isArray(p.objecoes)?p.objecoes.filter(o=>o&&(o.pergunta||o.resposta)).map(o=>({id:o.id||_proUid(),pergunta:String(o.pergunta||'').trim(),resposta:_proSanitizeResp(o.resposta)})):[],
+    duvidas:Array.isArray(p.duvidas)?p.duvidas.filter(d=>d&&(d.pergunta||d.resposta)).map(d=>({id:d.id||_proUid(),pergunta:String(d.pergunta||'').trim(),resposta:_proSanitizeResp(d.resposta)})):[],
     links:Array.isArray(p.links)?p.links.filter(l=>l&&l.url):[],
     anexos:Array.isArray(p.anexos)?p.anexos:[],
     ordem:typeof p.ordem==='number'?p.ordem:Date.now(),
@@ -30054,30 +30857,48 @@ window._proSalvar=async()=>{
   }
 };
 
-// Feedback de "salvo" / "erro" no botão Salvar
+// Feedback de "salvo" / "erro" — toast central proeminente + pill discreto no rodapé
 function _proSaveFeedback(kind,msg){
-  const el=document.getElementById('pro-save-feedback');
-  if(!el)return;
   const now=new Date();
   const hh=String(now.getHours()).padStart(2,'0');
   const mm=String(now.getMinutes()).padStart(2,'0');
   const ss=String(now.getSeconds()).padStart(2,'0');
-  if(kind==='ok'){
-    el.textContent=`✓ salvo às ${hh}:${mm}:${ss}`;
-    el.className='pro-save-feedback ok';
-  } else {
-    el.textContent=`⚠️ ${msg||'erro'}`;
-    el.className='pro-save-feedback err';
+  // Pill no rodapé (mantém histórico discreto)
+  const el=document.getElementById('pro-save-feedback');
+  if(el){
+    if(kind==='ok'){el.textContent=`✓ salvo às ${hh}:${mm}:${ss}`;el.className='pro-save-feedback ok';}
+    else{el.textContent=`⚠️ ${msg||'erro'}`;el.className='pro-save-feedback err';}
+    el.style.display='';
+    if(kind==='ok'){
+      clearTimeout(window._proSaveFeedbackTimer);
+      window._proSaveFeedbackTimer=setTimeout(()=>{
+        const e2=document.getElementById('pro-save-feedback');
+        if(e2&&e2.classList.contains('ok'))e2.style.display='none';
+      },6000);
+    }
   }
-  el.style.display='';
-  // Some sozinho depois de 6s (só pro success — err fica até salvar de novo)
-  if(kind==='ok'){
-    clearTimeout(window._proSaveFeedbackTimer);
-    window._proSaveFeedbackTimer=setTimeout(()=>{
-      const e2=document.getElementById('pro-save-feedback');
-      if(e2&&e2.classList.contains('ok'))e2.style.display='none';
-    },6000);
+  // Toast proeminente
+  let toast=document.getElementById('pro-save-toast');
+  if(!toast){
+    toast=document.createElement('div');
+    toast.id='pro-save-toast';
+    toast.className='pro-save-toast';
+    document.body.appendChild(toast);
   }
+  if(kind==='ok'){
+    toast.className='pro-save-toast';
+    toast.innerHTML=`<span class="pro-save-toast-icon">✓</span><span>Produto salvo</span><span class="pro-save-toast-time">${hh}:${mm}:${ss}</span>`;
+  }else{
+    toast.className='pro-save-toast err';
+    toast.innerHTML=`<span class="pro-save-toast-icon">!</span><span>Erro ao salvar</span><span class="pro-save-toast-time">${_proEsc(String(msg||'').slice(0,60))}</span>`;
+  }
+  // força reflow pra animação rodar de novo
+  toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show');
+  clearTimeout(window._proSaveToastTimer);
+  window._proSaveToastTimer=setTimeout(()=>{
+    const t=document.getElementById('pro-save-toast');
+    if(t)t.classList.remove('show');
+  },kind==='ok'?2400:5000);
 }
 
 // Confirma antes de sair com dirty
