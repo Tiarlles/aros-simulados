@@ -1781,28 +1781,36 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 
 /* ─── Catálogo Interno de Produtos ────────────────────────────────────── */
 #tab-produtos .pro-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
-#tab-produtos .pro-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-spacing:-.3px;line-height:1.15;margin:0}
-#tab-produtos .pro-sub{font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;color:var(--accent);font-size:10.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:4px}
-#tab-produtos .pro-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;padding:8px 0}
-#tab-produtos .pro-search{flex:1;min-width:200px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .15s,box-shadow .15s}
+#tab-produtos .pro-title{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;letter-spacing:-.3px;line-height:1.15;margin:0}
+
+/* ─── Toolbar: ações principais + busca em linha separada ──────────── */
+#tab-produtos .pro-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+#tab-produtos .pro-btn-cadastrar{padding:10px 18px;font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:600;letter-spacing:.2px}
+#tab-produtos .pro-search-row{margin-bottom:16px}
+#tab-produtos .pro-search{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .15s,box-shadow .15s}
 #tab-produtos .pro-search:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
-#tab-produtos .pro-filter-chips{display:flex;gap:6px;flex-wrap:wrap}
-#tab-produtos .pro-chip{display:inline-flex;align-items:center;padding:5px 11px;border-radius:999px;font-size:11px;font-weight:600;font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.6px;text-transform:uppercase;background:color-mix(in srgb, var(--accent) 8%, var(--bg2));border:1px solid var(--border);color:var(--t2);cursor:pointer;transition:all .15s;backdrop-filter:blur(14px) saturate(140%)}
-#tab-produtos .pro-chip:hover{border-color:var(--accent);color:var(--text)}
-#tab-produtos .pro-chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
 #tab-produtos .pro-section-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--t2);margin:14px 0 8px}
 
-#tab-produtos .pro-list{display:flex;flex-direction:column;background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-#tab-produtos .pro-row{display:grid;grid-template-columns:48px 1fr auto auto;gap:14px;align-items:center;padding:14px 16px;border-bottom:1px solid color-mix(in srgb, var(--border) 60%, transparent);cursor:pointer;transition:background .15s}
-#tab-produtos .pro-row:hover{background:color-mix(in srgb, var(--accent) 4%, transparent)}
-#tab-produtos .pro-row:last-child{border-bottom:none}
-#tab-produtos .pro-row-capa{width:48px;height:48px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--t2);flex-shrink:0}
-#tab-produtos .pro-row-main{min-width:0}
-#tab-produtos .pro-row-nome{font-size:15px;font-weight:700;color:var(--text);font-family:'Space Grotesk',sans-serif;line-height:1.25;letter-spacing:-.1px;margin-bottom:2px}
-#tab-produtos .pro-row-pitch{font-size:12.5px;color:var(--t2);line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical}
-#tab-produtos .pro-row-tags{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:240px}
-#tab-produtos .pro-row .pro-badge{flex-shrink:0}
-#tab-produtos .pro-row-tag{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;background:var(--bg3);border:1px solid var(--border);padding:3px 7px;border-radius:6px;color:var(--t2);white-space:nowrap}
+/* ─── Lista de produtos: cada item é um card separado com espaço entre ──── */
+#tab-produtos .pro-list{display:flex;flex-direction:column;gap:12px;background:transparent;border:none;overflow:visible}
+#tab-produtos .pro-card{display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 0 rgba(255,255,255,.03) inset,0 1px 2px rgba(0,0,0,.08);cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s,background .15s}
+#tab-produtos .pro-card:hover{border-color:color-mix(in srgb, var(--accent) 32%, var(--border));box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 6px 22px rgba(0,0,0,.16);transform:translateY(-2px);background:color-mix(in srgb, var(--accent) 3%, var(--bg2))}
+#tab-produtos .pro-card.dragging{opacity:.45;cursor:grabbing}
+#tab-produtos .pro-card.drop-before{box-shadow:0 -3px 0 0 var(--accent),0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent),0 6px 22px rgba(0,0,0,.16);border-color:color-mix(in srgb, var(--accent) 40%, var(--border))}
+#tab-produtos .pro-card.drop-after{box-shadow:0 3px 0 0 var(--accent),0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent),0 6px 22px rgba(0,0,0,.16);border-color:color-mix(in srgb, var(--accent) 40%, var(--border))}
+#tab-produtos .pro-card-handle{color:var(--t2);font-size:18px;line-height:1;cursor:grab;user-select:none;padding:4px;flex-shrink:0;opacity:.4;transition:opacity .15s,color .15s}
+#tab-produtos .pro-card:hover .pro-card-handle{opacity:1}
+#tab-produtos .pro-card-handle:hover{color:var(--accent)}
+#tab-produtos .pro-card-handle:active{cursor:grabbing}
+#tab-produtos .pro-card-ico{width:38px;height:38px;border-radius:10px;background:color-mix(in srgb, var(--accent) 8%, var(--bg3));border:1px solid color-mix(in srgb, var(--accent) 18%, var(--border));display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--t2);flex-shrink:0}
+#tab-produtos .pro-card-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:4px}
+#tab-produtos .pro-card-name{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;color:var(--text);line-height:1.2;letter-spacing:-.1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tab-produtos .pro-card-resp{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+#tab-produtos .pro-card-resp-chip{display:inline-flex;align-items:center;gap:4px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11.5px;font-weight:500;color:#b08bff;background:color-mix(in srgb, #b08bff 8%, transparent);border:1px solid color-mix(in srgb, #b08bff 22%, var(--border));padding:2px 9px 2px 7px;border-radius:999px;line-height:1.35}
+#tab-produtos .pro-card-resp-chip::before{content:"👤";font-size:10px}
+#tab-produtos .pro-card-resp-chip.more::before{content:""}
+#tab-produtos .pro-card-resp-none{font-size:11px;color:var(--t2);font-style:italic;opacity:.7}
+#tab-produtos .pro-card .pro-badge{flex-shrink:0}
 #tab-produtos .pro-badge{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:4px 8px;border-radius:6px;border:1px solid;white-space:nowrap}
 #tab-produtos .pro-badge.s-ativo{background:color-mix(in srgb, #22c55e 14%, transparent);border-color:color-mix(in srgb, #22c55e 50%, var(--border));color:#22c55e}
 #tab-produtos .pro-badge.s-em-breve{background:color-mix(in srgb, var(--accent) 14%, transparent);border-color:color-mix(in srgb, var(--accent) 50%, var(--border));color:var(--accent)}
@@ -2120,26 +2128,217 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 /* Capa thumb dentro do Básico */
 #tab-produtos .pro-capa-mini-wrap{display:flex;gap:14px;align-items:flex-start;margin-top:6px}
 
-@media (min-width:900px) and (max-width:1200px){
-  #tab-produtos .pro-row-tags{max-width:160px;gap:3px}
-}
 @media (max-width:720px){
-  #tab-produtos .pro-row{grid-template-columns:48px 1fr;gap:12px}
-  #tab-produtos .pro-row-tags,#tab-produtos .pro-row .pro-badge{grid-column:1/-1;margin-top:6px}
-  #tab-produtos .pro-row-tags{justify-content:flex-start}
+  #tab-produtos .pro-card{flex-wrap:wrap;padding:14px}
+  #tab-produtos .pro-card-handle{display:none}
+  #tab-produtos .pro-card-main{order:2}
+  #tab-produtos .pro-card .pro-badge{order:3;margin-left:auto}
   #tab-produtos .pro-detail-nome{font-size:24px}
   .pro-picker-pop{width:calc(100vw - 24px)}
   #tab-produtos .pro-feat-edit-row{align-items:flex-start;flex-direction:column}
 }
-@media (max-width:480px){
-  #tab-produtos .pro-row-tags{display:none}
+
+/* ════════════════════════════════════════════════════════════════════════
+   APPLE DARK GLASS — overrides finais escopados a #tab-produtos.
+   Aplicado em listagem, detalhe e edição. Glass blur + gradient bg sutil +
+   accent ciano discreto + hover lift/glow + easings premium.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Background decorativo: mesh gradient sutil no topo */
+#tab-produtos{position:relative;isolation:isolate}
+#tab-produtos::before{
+  content:"";position:absolute;top:-40px;left:-10%;right:-10%;height:340px;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(ellipse 600px 200px at 25% 30%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+    radial-gradient(ellipse 400px 180px at 75% 40%, color-mix(in srgb, #22d3ee 12%, transparent), transparent 70%);
+  filter:blur(40px) saturate(140%);opacity:.55;
+  mask-image:linear-gradient(180deg, #000 0%, transparent 100%);
+  -webkit-mask-image:linear-gradient(180deg, #000 0%, transparent 100%);
 }
 
-/* ─── Pergunte ao Dex (assistente IA do catálogo) ─────────────────────── */
-#tab-produtos .pro-dex-btn{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#3b82f6 0%,#a855f7 60%,#fb923c 100%);border:none;color:#fff;padding:9px 16px;border-radius:999px;font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.2px;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 4px 14px rgba(168,85,247,.32);transition:transform .2s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),box-shadow .2s;flex-shrink:0}
-#tab-produtos .pro-dex-btn:hover{transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 6px 20px rgba(168,85,247,.44)}
-#tab-produtos .pro-dex-btn.on{background:linear-gradient(135deg,#0ea5e9 0%,#6366f1 100%)}
-#tab-produtos .pro-dex-btn-ico{font-size:14px;line-height:1}
+/* Listagem — cards mais glass */
+#tab-produtos .pro-card{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--bg2) 95%, transparent), color-mix(in srgb, var(--bg) 92%, transparent));
+  border-color:color-mix(in srgb, var(--border) 75%, transparent);
+  backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 1px 2px rgba(0,0,0,.10), 0 4px 18px rgba(0,0,0,.10);
+}
+#tab-produtos .pro-card:hover{
+  border-color:color-mix(in srgb, var(--accent) 40%, var(--border));
+  box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 8px 30px rgba(0,0,0,.22), 0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+/* Inputs (.fc) e busca: glass + focus accent escopado */
+#tab-produtos .fc,
+#tab-produtos .pro-search{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--bg2) 92%, transparent), color-mix(in srgb, var(--bg) 88%, transparent));
+  border:1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);
+  transition:border-color .2s, box-shadow .2s, background .2s;
+}
+#tab-produtos .fc:focus,
+#tab-produtos .pro-search:focus{
+  outline:none;border-color:color-mix(in srgb, var(--accent) 60%, transparent);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent), 0 0 18px color-mix(in srgb, var(--accent) 22%, transparent);
+  background:linear-gradient(180deg, color-mix(in srgb, var(--bg2) 96%, transparent), var(--bg2));
+}
+
+/* Botão Cadastrar Produto: glass primário */
+#tab-produtos .pro-btn-cadastrar{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 96%, #fff), var(--accent));
+  border:1px solid color-mix(in srgb, var(--accent) 80%, #fff);
+  box-shadow:0 1px 0 rgba(255,255,255,.22) inset, 0 2px 8px color-mix(in srgb, var(--accent) 28%, transparent), 0 0 18px color-mix(in srgb, var(--accent) 16%, transparent);
+  transition:transform .15s, box-shadow .2s, filter .15s;
+}
+#tab-produtos .pro-btn-cadastrar:hover{
+  transform:translateY(-1px);filter:brightness(1.06);
+  box-shadow:0 1px 0 rgba(255,255,255,.26) inset, 0 4px 16px color-mix(in srgb, var(--accent) 40%, transparent), 0 0 28px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+/* Detalhe — voltar + tipografia hero */
+#tab-produtos .pro-back{
+  font-family:'JetBrains Mono','SF Mono',monospace;font-size:11.5px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;
+  padding:8px 14px 8px 10px;border-radius:999px;
+  background:color-mix(in srgb, var(--bg2) 70%, transparent);border:1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  backdrop-filter:blur(10px);
+}
+#tab-produtos .pro-back:hover{background:color-mix(in srgb, var(--accent) 8%, var(--bg2));border-color:color-mix(in srgb, var(--accent) 30%, var(--border))}
+#tab-produtos .pro-detail-nome{
+  font-size:clamp(28px, 4vw, 40px);letter-spacing:-1px;line-height:1.05;
+  background:linear-gradient(180deg, var(--text) 0%, color-mix(in srgb, var(--text) 78%, transparent) 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+#tab-produtos .pro-detail-pitch{font-size:15.5px;line-height:1.55;color:var(--t2);max-width:780px}
+
+/* Disclosures (público/provas-alvo) — glass mais marcado */
+#tab-produtos .pro-disc{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--bg2) 88%, transparent), color-mix(in srgb, var(--bg) 84%, transparent));
+  border-color:color-mix(in srgb, var(--border) 70%, transparent);
+  backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
+  box-shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 2px 8px rgba(0,0,0,.08);
+}
+
+/* Cards de feature no detalhe — glass */
+#tab-produtos .pro-feat-card{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--bg2) 88%, transparent), color-mix(in srgb, var(--bg) 84%, transparent));
+  border-color:color-mix(in srgb, var(--border) 70%, transparent);
+  backdrop-filter:blur(12px) saturate(140%);-webkit-backdrop-filter:blur(12px) saturate(140%);
+}
+#tab-produtos .pro-feat-card:hover{
+  border-color:color-mix(in srgb, var(--accent) 30%, var(--border));
+  box-shadow:0 4px 16px rgba(0,0,0,.10);
+}
+#tab-produtos .pro-feat-card.has-detail .pro-feat-head:hover{background:color-mix(in srgb, var(--accent) 6%, transparent)}
+
+/* Card de produto bônus vinculado — glass dourado discreto */
+#tab-produtos .pro-bonus-card{
+  background:linear-gradient(180deg, color-mix(in srgb, #fbbf24 5%, var(--bg2)), color-mix(in srgb, #fbbf24 2%, var(--bg)));
+  border-color:color-mix(in srgb, #fbbf24 28%, var(--border));
+  backdrop-filter:blur(12px) saturate(140%);-webkit-backdrop-filter:blur(12px) saturate(140%);
+}
+
+/* Editor: accordions liquid glass */
+#tab-produtos .pro-edit-accordion{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--bg2) 90%, transparent), color-mix(in srgb, var(--bg) 86%, transparent));
+  border-color:color-mix(in srgb, var(--border) 75%, transparent);
+  backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 1px 2px rgba(0,0,0,.06);
+  transition:border-color .25s, box-shadow .25s;
+}
+#tab-produtos .pro-edit-accordion.open{
+  border-color:color-mix(in srgb, var(--accent) 26%, var(--border));
+  box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 6px 24px rgba(0,0,0,.12), 0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+#tab-produtos .pro-edit-acc-head{
+  background:transparent;padding:16px 20px;
+  border-bottom:1px solid transparent;
+  transition:background .2s, color .15s;
+}
+#tab-produtos .pro-edit-acc-head:hover{background:color-mix(in srgb, var(--accent) 5%, transparent)}
+#tab-produtos .pro-edit-acc-title{
+  font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;letter-spacing:-.1px;color:var(--text);
+}
+#tab-produtos .pro-edit-acc-caret{
+  font-family:'JetBrains Mono','SF Mono',monospace;font-size:12px;color:var(--t2);
+  transition:transform .3s var(--ease-out-soft, cubic-bezier(0.16,1,0.3,1)), color .15s;
+}
+#tab-produtos .pro-edit-accordion.open .pro-edit-acc-caret{color:var(--accent)}
+#tab-produtos .pro-edit-accordion.open .pro-edit-acc-head{border-bottom-color:color-mix(in srgb, var(--border) 80%, transparent)}
+
+/* Card de feature no editor — glass */
+#tab-produtos .pro-feat-edit{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--bg3) 88%, transparent), color-mix(in srgb, var(--bg2) 84%, transparent));
+  border-color:color-mix(in srgb, var(--border) 70%, transparent);
+  backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);
+}
+
+/* Footer da edição: sticky glass real */
+#tab-produtos .pro-edit-footer{
+  background:linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--bg) 94%, transparent) 35%, var(--bg) 70%);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+
+/* Toolbar do mini editor rich-text: glass */
+#tab-produtos .pro-rt{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--bg2) 90%, transparent), color-mix(in srgb, var(--bg) 88%, transparent));
+  border-color:color-mix(in srgb, var(--border) 70%, transparent);
+  backdrop-filter:blur(10px);
+}
+#tab-produtos .pro-rt-tb{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--bg) 80%, transparent), color-mix(in srgb, var(--bg2) 70%, transparent));
+}
+
+/* Botões secundários (.btn-s) dentro do editor — glass refinado */
+#tab-produtos .pro-edit-acc-body .btn-s,
+#tab-produtos .pro-edit-acc-body .btn-s.btn-sm{
+  background:color-mix(in srgb, var(--bg) 70%, transparent);
+  border:1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  backdrop-filter:blur(8px);
+  transition:border-color .15s, background .15s, transform .15s;
+}
+#tab-produtos .pro-edit-acc-body .btn-s:hover{
+  border-color:color-mix(in srgb, var(--accent) 36%, var(--border));
+  background:color-mix(in srgb, var(--accent) 8%, var(--bg));
+  transform:translateY(-1px);
+}
+
+/* Panel do Dex — refina o glass pra match com botão tech */
+#tab-produtos .pro-dex-panel{
+  background:linear-gradient(180deg, color-mix(in srgb, #0e2030 70%, transparent), color-mix(in srgb, #0a1521 60%, transparent));
+  border-color:color-mix(in srgb, #22d3ee 28%, var(--border));
+  backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 8px 32px rgba(0,0,0,.4), 0 0 0 1px color-mix(in srgb, #22d3ee 12%, transparent), 0 0 40px rgba(34,211,238,.08);
+}
+#tab-produtos .pro-dex-panel::before{
+  background:linear-gradient(90deg, transparent, #22d3ee, #06b6d4, #22d3ee, transparent);
+  opacity:.9;
+}
+
+/* Mobile: desliga blur pra economizar GPU + reduce-motion */
+@media (max-width:820px){
+  #tab-produtos .pro-card,
+  #tab-produtos .pro-edit-accordion,
+  #tab-produtos .pro-disc,
+  #tab-produtos .pro-feat-card,
+  #tab-produtos .pro-feat-edit,
+  #tab-produtos .pro-dex-panel,
+  #tab-produtos .pro-rt{
+    backdrop-filter:none;-webkit-backdrop-filter:none;
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  #tab-produtos .pro-card,
+  #tab-produtos .pro-edit-accordion{transition:none}
+}
+
+/* ─── Pergunte ao Dex — botão tech-apple (glass dark + accent ciano) ──── */
+#tab-produtos .pro-dex-btn{position:relative;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg,#1a2332 0%,#0f1825 100%);border:1px solid color-mix(in srgb,#22d3ee 26%,var(--border));color:#e0f2fe;padding:10px 18px;border-radius:12px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;letter-spacing:.2px;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px rgba(34,211,238,.08),0 2px 6px rgba(0,0,0,.3),0 0 18px rgba(34,211,238,.12);backdrop-filter:blur(12px) saturate(140%);-webkit-backdrop-filter:blur(12px) saturate(140%);transition:border-color .25s,box-shadow .25s,transform .15s,background .25s;flex-shrink:0;overflow:hidden}
+#tab-produtos .pro-dex-btn::before{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(34,211,238,.12),transparent);transition:left .6s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));pointer-events:none}
+#tab-produtos .pro-dex-btn:hover{border-color:#22d3ee;color:#fff;transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 0 0 1px rgba(34,211,238,.2),0 6px 18px rgba(0,0,0,.4),0 0 28px rgba(34,211,238,.32);background:linear-gradient(180deg,#1e2a3d 0%,#13202f 100%)}
+#tab-produtos .pro-dex-btn:hover::before{left:100%}
+#tab-produtos .pro-dex-btn.on{border-color:#22d3ee;background:linear-gradient(180deg,#0c2030 0%,#081521 100%);box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px #22d3ee,0 0 24px rgba(34,211,238,.4)}
+#tab-produtos .pro-dex-btn-ico{font-size:15px;line-height:1;filter:drop-shadow(0 0 6px rgba(34,211,238,.6))}
+#tab-produtos .pro-dex-btn-label{position:relative;z-index:1}
 
 #tab-produtos .pro-dex-panel{position:relative;margin:0 0 16px;padding:18px;background:linear-gradient(180deg,color-mix(in srgb,#a855f7 6%,var(--bg2)),color-mix(in srgb,#3b82f6 4%,var(--bg2)));border:1px solid color-mix(in srgb,#a855f7 36%,var(--border));border-radius:16px;box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 6px 22px rgba(168,85,247,.10);overflow:hidden;animation:dexSlideIn .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
 #tab-produtos .pro-dex-panel::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#3b82f6,#a855f7,#fb923c);opacity:.8}
@@ -27803,55 +28002,38 @@ function _proRenderList(root){
       return hay.includes(q);
     });
   }
-  const filtros=S.produtosFiltroProvas;
-  if(filtros&&filtros.length){
-    items=items.filter(p=>{
-      const tags=Array.isArray(p.provasAlvo)?p.provasAlvo:[];
-      return filtros.some(f=>tags.includes(f));
-    });
-  }
+  // Ordem: respeita o campo `ordem` (definido por drag-and-drop), com fallback
+  // alfabético pra produtos antigos sem ordem. Sem agrupar por status —
+  // admin define manualmente quem fica em cima arrastando.
   items.sort((a,b)=>{
-    const so=(PRO_STATUS_ORDER[a.status]??99)-(PRO_STATUS_ORDER[b.status]??99);
-    if(so!==0)return so;
-    const oa=(typeof a.ordem==='number')?a.ordem:0;
-    const ob=(typeof b.ordem==='number')?b.ordem:0;
+    const oa=(typeof a.ordem==='number')?a.ordem:Number.MAX_SAFE_INTEGER;
+    const ob=(typeof b.ordem==='number')?b.ordem:Number.MAX_SAFE_INTEGER;
     if(oa!==ob)return oa-ob;
     return String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR');
   });
-  // Tags efetivamente em uso (na base inteira, não na filtrada)
-  const allTags=new Set();
-  S.produtos.forEach(p=>(p.provasAlvo||[]).forEach(t=>allTags.add(t)));
-  const tagsArr=[...allTags].sort();
-
-  const btnNovo=canEdit?`<button class="btn btn-p" onclick="proNovo()">＋ Novo produto</button>`:'';
-  const filtrosHtml=tagsArr.length?`<div class="pro-filter-chips">${tagsArr.map(t=>{
-    const on=filtros.includes(t);
-    return `<button class="pro-chip${on?' on':''}" onclick="proToggleFiltro('${_proEscAttr(t)}')">${_proEsc(t)}</button>`;
-  }).join('')}</div>`:'';
 
   let listHtml;
   if(!items.length){
-    const msg=S.produtos.length?'Nenhum produto corresponde aos filtros.':'Nenhum produto cadastrado ainda.';
+    const msg=S.produtos.length?'Nenhum produto corresponde à busca.':'Nenhum produto cadastrado ainda.';
     listHtml=`<div class="pro-empty"><div class="pro-empty-icon">🛍️</div><p>${msg}</p></div>`;
   }else{
     listHtml=`<div class="pro-list">${items.map(p=>_proRowHTML(p)).join('')}</div>`;
   }
 
   const dexBtnOn=S.dexAberto?' on':'';
+  const btnCadastrar=canEdit?`<button class="btn btn-p pro-btn-cadastrar" onclick="proNovo()">＋ Cadastrar Produto</button>`:'';
   root.innerHTML=`
     <div class="pro-header">
-      <div>
-        <h3 class="pro-title">Catálogo de Produtos</h3>
-        <p class="pro-sub">Catálogo interno · marketing, vendas, suporte</p>
-      </div>
-      ${btnNovo}
+      <h3 class="pro-title">Catálogo de Produtos</h3>
     </div>
-    <div class="pro-toolbar">
-      <input class="pro-search" id="pro-search" type="text" placeholder="🔍 Buscar por nome, pitch, público, features..." value="${_proEscAttr(S.produtosBusca)}" oninput="proSearchInput(this.value)"/>
+    <div class="pro-actions">
+      ${btnCadastrar}
       <button class="pro-dex-btn${dexBtnOn}" onclick="proDexToggle()" title="Pergunte ao Dex sobre o catálogo">
-        <span class="pro-dex-btn-ico">🤖</span> Pergunte ao Dex
+        <span class="pro-dex-btn-ico">🤖</span> <span class="pro-dex-btn-label">Pergunte ao Dex</span>
       </button>
-      ${filtrosHtml}
+    </div>
+    <div class="pro-search-row">
+      <input class="pro-search" id="pro-search" type="text" placeholder="🔍 Buscar por nome, pitch, público, features..." value="${_proEscAttr(S.produtosBusca)}" oninput="proSearchInput(this.value)"/>
     </div>
     <div id="pro-dex-container"></div>
     ${listHtml}
@@ -27860,18 +28042,24 @@ function _proRenderList(root){
 }
 
 function _proRowHTML(p){
-  const tags=Array.isArray(p.provasAlvo)?p.provasAlvo:[];
-  const tagsHtml=tags.slice(0,3).map(t=>`<span class="pro-row-tag">${_proEsc(t)}</span>`).join('')+(tags.length>3?`<span class="pro-row-tag">+${tags.length-3}</span>`:'');
-  const capa=p.capa?`style="background-image:url('${_proEscAttr(p.capa)}')"`:'';
-  const capaFb=p.capa?'':'<span>📦</span>';
   const st=p.status||'rascunho';
-  return `<div class="pro-row" data-pro-row="${_proEscAttr(p.id)}" onclick="proAbrir('${_proEscAttr(p.id)}')">
-    <div class="pro-row-capa" ${capa}>${capaFb}</div>
-    <div class="pro-row-main">
-      <div class="pro-row-nome">${_proEsc(p.nome||'Sem nome')}</div>
-      <div class="pro-row-pitch">${_proEsc(_proGetBreveDescricao(p))}</div>
+  const responsaveis=_proGetResponsaveis(p);
+  const respHtml=responsaveis.length
+    ?responsaveis.slice(0,3).map(r=>`<span class="pro-card-resp-chip">${_proEsc(r)}</span>`).join('')
+      +(responsaveis.length>3?`<span class="pro-card-resp-chip more">+${responsaveis.length-3}</span>`:'')
+    :'<span class="pro-card-resp-none">Sem responsável</span>';
+  const canEdit=_proCanEdit();
+  const dragAttrs=canEdit
+    ?`draggable="true" ondragstart="_proCardDragStart(event,'${_proEscAttr(p.id)}')" ondragover="_proCardDragOver(event)" ondragleave="_proCardDragLeave(event)" ondrop="_proCardDrop(event,'${_proEscAttr(p.id)}')" ondragend="_proCardDragEnd(event)"`
+    :'';
+  const dragHandle=canEdit?`<span class="pro-card-handle" title="Arrastar pra reordenar">⠿</span>`:'';
+  return `<div class="pro-card" data-pro-card-id="${_proEscAttr(p.id)}" ${dragAttrs} onclick="proAbrir('${_proEscAttr(p.id)}')">
+    ${dragHandle}
+    <div class="pro-card-ico">📦</div>
+    <div class="pro-card-main">
+      <div class="pro-card-name">${_proEsc(p.nome||'Sem nome')}</div>
+      <div class="pro-card-resp">${respHtml}</div>
     </div>
-    <div class="pro-row-tags">${tagsHtml}</div>
     <span class="pro-badge s-${st}">${_proEsc(PRO_STATUS_LABEL[st]||st)}</span>
   </div>`;
 }
@@ -28055,6 +28243,114 @@ function _proDexFormatAnswer(text){
     if(b.type==='ul')return `<ul>${b.lines.map(l=>`<li>${renderInline(l)}</li>`).join('')}</ul>`;
     return `<p>${b.lines.map(renderInline).join('<br/>')}</p>`;
   }).join('');
+}
+
+// ─── Drag-and-drop pra reordenar produtos na listagem ──────────────────
+// Só admin pode mover. Persiste o campo `ordem` em batch no Firestore.
+let _proCardDragState=null; // {id}
+
+window._proCardDragStart=(e,id)=>{
+  if(!_proCanEdit()){e.preventDefault();return;}
+  _proCardDragState={id};
+  try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',id);}catch(err){}
+  const card=e.currentTarget;
+  setTimeout(()=>card.classList.add('dragging'),0);
+};
+
+window._proCardDragOver=(e)=>{
+  if(!_proCardDragState)return;
+  const card=e.currentTarget;
+  const targetId=card.getAttribute('data-pro-card-id');
+  if(!targetId||targetId===_proCardDragState.id)return;
+  e.preventDefault();
+  try{e.dataTransfer.dropEffect='move';}catch(err){}
+  const rect=card.getBoundingClientRect();
+  const insertAfter=e.clientY>(rect.top+rect.height/2);
+  card.classList.remove('drop-before','drop-after');
+  card.classList.add(insertAfter?'drop-after':'drop-before');
+};
+
+window._proCardDragLeave=(e)=>{
+  const card=e.currentTarget;
+  const to=e.relatedTarget;
+  if(to&&card.contains(to))return;
+  card.classList.remove('drop-before','drop-after');
+};
+
+window._proCardDrop=async(e,toId)=>{
+  if(!_proCardDragState){return;}
+  const card=e.currentTarget;
+  if(!toId||toId===_proCardDragState.id){_proCardDragClear();return;}
+  e.preventDefault();
+  e.stopPropagation(); // evita disparar onclick=proAbrir
+  const fromId=_proCardDragState.id;
+  // Calcula posição absoluta usando os elementos visíveis no DOM (respeita
+  // filtros/busca: só reordena entre os que estão sendo exibidos)
+  const visibleCards=[...document.querySelectorAll('#tab-produtos .pro-card[data-pro-card-id]')]
+    .map(el=>el.getAttribute('data-pro-card-id'));
+  const fromVis=visibleCards.indexOf(fromId);
+  let toVis=visibleCards.indexOf(toId);
+  if(fromVis<0||toVis<0){_proCardDragClear();return;}
+  const rect=card.getBoundingClientRect();
+  const insertAfter=e.clientY>(rect.top+rect.height/2);
+  // Remove e re-insere na nova posição
+  const moved=visibleCards.splice(fromVis,1)[0];
+  if(fromVis<toVis)toVis--;
+  if(insertAfter)toVis++;
+  if(toVis<0)toVis=0;
+  if(toVis>visibleCards.length)toVis=visibleCards.length;
+  visibleCards.splice(toVis,0,moved);
+
+  // Aplica nova ordem em S.produtos pros itens visíveis (não-visíveis
+  // mantêm a ordem relativa antiga). Estratégia: pra cada item visível na
+  // nova sequência, atribui ordem incremental. Os não-visíveis recebem
+  // valores acima ou abaixo conforme a posição original.
+  // Pra simplicidade e robustez: recalcula ordem usando index*1000 pra TODOS
+  // os produtos, na ordem em que aparecem em S.produtos após aplicar a
+  // reordenação dos visíveis. Isso preserva a relação entre invisíveis.
+  const visibleSet=new Set(visibleCards);
+  const newOrder=[];
+  let visIdx=0;
+  for(const p of S.produtos){
+    if(visibleSet.has(p.id)){
+      // pega o próximo id da sequência visible reordenada
+      const nextId=visibleCards[visIdx++];
+      const nextP=S.produtos.find(x=>x.id===nextId);
+      if(nextP)newOrder.push(nextP);
+    } else {
+      newOrder.push(p);
+    }
+  }
+  S.produtos=newOrder;
+
+  _proCardDragClear();
+  // Re-render imediato pro user ver o resultado
+  _proRender();
+
+  // Persiste no Firestore em batch (em background)
+  try{
+    const batch=writeBatch(db);
+    S.produtos.forEach((p,i)=>{
+      const novaOrdem=(i+1)*1000;
+      if(p.ordem!==novaOrdem){
+        p.ordem=novaOrdem;
+        batch.update(doc(db,'produtos',p.id),{ordem:novaOrdem});
+      }
+    });
+    await batch.commit();
+  }catch(err){
+    console.error('Erro ao salvar nova ordem:',err);
+    alert('Erro ao salvar nova ordem: '+err.message);
+  }
+};
+
+window._proCardDragEnd=(e)=>{_proCardDragClear();};
+
+function _proCardDragClear(){
+  _proCardDragState=null;
+  document.querySelectorAll('#tab-produtos .pro-card').forEach(el=>{
+    el.classList.remove('dragging','drop-before','drop-after');
+  });
 }
 
 window.proSearchInput=v=>{S.produtosBusca=v;_proRender();};
