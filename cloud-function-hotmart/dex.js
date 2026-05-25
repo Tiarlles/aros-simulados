@@ -164,6 +164,14 @@ exports.perguntarDex = onRequest(
     const perfilRaw = String(req.body?.perfil || '').toLowerCase();
     const perfil = PERFIS.includes(perfilRaw) ? perfilRaw : DEFAULT_PERFIL;
 
+    // Histórico de conversa (turnos anteriores) — array de {role, content}.
+    // Limitado a 20 mensagens (10 turnos user+assistant) por defesa.
+    const historicoRaw = Array.isArray(req.body?.historico) ? req.body.historico : [];
+    const historico = historicoRaw
+      .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim())
+      .slice(-20)
+      .map(m => ({ role: m.role, content: String(m.content).trim() }));
+
     try {
       const db = admin.firestore();
       // Lê produtos + jornada + configuração do Dex em paralelo
@@ -213,12 +221,9 @@ exports.perguntarDex = onRequest(
       if (!Number.isFinite(maxTokens) || maxTokens < 256) maxTokens = DEFAULT_MAX_TOKENS;
       if (maxTokens > 4096) maxTokens = 4096;
 
-      // Monta o conteúdo da mensagem do usuário:
-      // [doc1 (cache), doc2 (cache), ..., texto_pergunta]
-      // cache_control nos documentos faz o Claude cachear o prefixo (~5min),
-      // então perguntas seguidas no mesmo perfil pagam ~10% do custo de tokens.
-      const userContent = [];
-      pdfs.forEach((p, i) => {
+      // Monta blocos `document` dos PDFs com cache_control no último
+      // (cacheia o prefixo system + docs por ~5min na API).
+      const pdfBlocks = pdfs.map((p, i) => {
         const block = {
           type: 'document',
           source: { type: 'url', url: String(p.url) },
@@ -226,14 +231,40 @@ exports.perguntarDex = onRequest(
         if (p.label || p.name) {
           block.title = String(p.label || p.name).slice(0, 120);
         }
-        // Marca o ÚLTIMO documento com cache_control — isso cacheia todo o prefixo
-        // anterior, incluindo todos os PDFs e o system prompt
         if (i === pdfs.length - 1) {
           block.cache_control = { type: 'ephemeral' };
         }
-        userContent.push(block);
+        return block;
       });
-      userContent.push({ type: 'text', text: pergunta });
+
+      // Monta o array de mensagens:
+      // - Se NÃO há histórico: 1 user message com [PDFs + texto da pergunta]
+      // - Se há histórico: PDFs vão no PRIMEIRO user message do histórico
+      //   (ou seja, anexados ao content do primeiro user), depois o resto do
+      //   histórico segue como está, e por fim a nova pergunta como user.
+      const messages = [];
+      if (historico.length > 0) {
+        // Encontra o primeiro user no histórico — anexa PDFs no content dele
+        let firstUserIdx = historico.findIndex(m => m.role === 'user');
+        if (firstUserIdx < 0) firstUserIdx = 0; // fallback (não deveria acontecer)
+        historico.forEach((m, i) => {
+          if (i === firstUserIdx && pdfBlocks.length > 0) {
+            messages.push({
+              role: m.role,
+              content: [...pdfBlocks, { type: 'text', text: m.content }],
+            });
+          } else {
+            messages.push({ role: m.role, content: m.content });
+          }
+        });
+        messages.push({ role: 'user', content: pergunta });
+      } else {
+        // Sem histórico — primeira pergunta carrega os PDFs
+        const userContent = pdfBlocks.length > 0
+          ? [...pdfBlocks, { type: 'text', text: pergunta }]
+          : pergunta;
+        messages.push({ role: 'user', content: userContent });
+      }
 
       const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
       const resp = await client.messages.create({
@@ -246,7 +277,7 @@ exports.perguntarDex = onRequest(
             cache_control: { type: 'ephemeral' },
           },
         ],
-        messages: [{ role: 'user', content: userContent }],
+        messages,
       });
 
       const texto = resp.content
@@ -263,6 +294,7 @@ exports.perguntarDex = onRequest(
         max_tokens: maxTokens,
         prompt_custom: !!String(dexCfg[perfilField] || '').trim(),
         pdfs_count: pdfs.length,
+        historico_msgs: historico.length,
         pergunta_len: pergunta.length,
         resposta_len: texto.length,
         input_tokens: usage.input_tokens,
