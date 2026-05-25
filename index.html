@@ -2394,7 +2394,7 @@ body.pro-rt-fs-on{overflow:hidden}
 #tab-produtos .pro-ment-desc details > p:last-of-type{padding-bottom:12px}
 
 /* Bloco colapsável dentro do editor — relativo pra ancorar o botão ✕ */
-#tab-produtos .pro-rt-ed details.pro-collapsible{position:relative;padding-right:32px}
+#tab-produtos .pro-rt-ed details.pro-collapsible{position:relative;padding-right:86px}
 #tab-produtos .pro-rt-ed details.pro-collapsible > summary{padding-right:4px}
 #tab-produtos .pro-rt-ed .pro-collapsible-body{padding:0}
 #tab-produtos .pro-rt-ed .pro-collapsible-body p{padding:6px 14px}
@@ -2402,6 +2402,11 @@ body.pro-rt-fs-on{overflow:hidden}
 #tab-produtos .pro-rt-ed .pro-collapsible-body p:last-child{padding-bottom:12px}
 #tab-produtos .pro-collapsible-del{position:absolute;top:6px;right:6px;background:transparent;border:1px solid transparent;color:var(--t2);width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:12px;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;padding:0;user-select:none;z-index:2}
 #tab-produtos .pro-collapsible-del:hover{background:color-mix(in srgb,#ef4444 18%,transparent);border-color:#ef4444;color:#ef4444}
+/* Grupo de ações ↑ ↓ ✕ no topo direito do bloco colapsável */
+#tab-produtos .pro-collapsible-actions{position:absolute;top:5px;right:5px;display:inline-flex;gap:2px;z-index:2;user-select:none}
+#tab-produtos .pro-collapsible-act{background:transparent;border:1px solid transparent;color:var(--t2);width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;padding:0}
+#tab-produtos .pro-collapsible-act:hover{background:color-mix(in srgb,var(--accent) 14%,transparent);border-color:color-mix(in srgb,var(--accent) 38%,var(--border));color:var(--text)}
+#tab-produtos .pro-collapsible-del-act:hover{background:color-mix(in srgb,#ef4444 18%,transparent);border-color:#ef4444;color:#ef4444}
 /* Bloqueia aninhamento visual (caso aconteça mesmo assim, mostra alerta sutil) */
 #tab-produtos details.pro-collapsible details.pro-collapsible{outline:2px dashed #f59e0b;outline-offset:-2px}
 #tab-produtos .pro-rt-ed.justify p{text-align:justify}
@@ -31305,8 +31310,10 @@ function _proSanitizeResp(html){
     let out=_comSanitizePostHTML(s);
     const tmp=document.createElement('div');
     tmp.innerHTML=out;
-    // Remove botões de delete dos blocos colapsáveis (só fazem sentido durante edição)
-    tmp.querySelectorAll('button.pro-collapsible-del').forEach(b=>b.remove());
+    // Remove UI dos blocos colapsáveis (só fazem sentido durante edição):
+    // - botão ✕ standalone antigo
+    // - bloco de ações ↑↓✕ novo
+    tmp.querySelectorAll('button.pro-collapsible-del, .pro-collapsible-actions').forEach(b=>b.remove());
     // Remove atributo contenteditable que sobra de elementos do editor
     tmp.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
     return tmp.innerHTML.trim();
@@ -31384,7 +31391,7 @@ window._proRtCollapsible=(uid)=>{
       node=node.parentNode;
     }
   }
-  const html=`<details class="pro-collapsible" open><summary>Título do bloco</summary><div class="pro-collapsible-body"><p>Escreva o conteúdo aqui…</p></div><button type="button" class="pro-collapsible-del" contenteditable="false" onmousedown="event.preventDefault()" onclick="_proRtCollapsibleDel(this,event)" title="Remover bloco">✕</button></details><p><br></p>`;
+  const html=`<details class="pro-collapsible" open><summary>Título do bloco</summary><div class="pro-collapsible-body"><p>Escreva o conteúdo aqui…</p></div><div class="pro-collapsible-actions" contenteditable="false" onmousedown="event.preventDefault()"><button type="button" class="pro-collapsible-act" onclick="_proRtCollapsibleMove(this,-1,event)" title="Mover bloco para cima">↑</button><button type="button" class="pro-collapsible-act" onclick="_proRtCollapsibleMove(this,1,event)" title="Mover bloco para baixo">↓</button><button type="button" class="pro-collapsible-act pro-collapsible-del-act" onclick="_proRtCollapsibleDel(this,event)" title="Remover bloco">✕</button></div></details><p><br></p>`;
   try{
     document.execCommand('insertHTML',false,html);
   }catch(e){
@@ -31459,38 +31466,68 @@ function _proRtRepairDetails(html){
   tmp.querySelectorAll('details').forEach(det=>{
     // Garante a classe pra herdar estilo
     if(!det.classList.contains('pro-collapsible'))det.classList.add('pro-collapsible');
-    // Se já tem body, ok
-    if(det.querySelector(':scope > .pro-collapsible-body'))return;
-    // Coleta filhos pra mover pro body (mantém summary e o botão de delete fora)
-    const stray=[];
-    [...det.childNodes].forEach(c=>{
-      if(c.nodeType===1){
-        if(c.tagName==='SUMMARY')return;
-        if(c.classList&&c.classList.contains('pro-collapsible-del'))return;
-      }
-      // texto ou outro elemento → vai pro body
-      stray.push(c);
-    });
-    if(!stray.length){
-      // details vazio: cria body com placeholder pra ele renderizar
+    // Repara body se faltar
+    if(!det.querySelector(':scope > .pro-collapsible-body')){
+      const stray=[];
+      [...det.childNodes].forEach(c=>{
+        if(c.nodeType===1){
+          if(c.tagName==='SUMMARY')return;
+          if(c.classList&&(c.classList.contains('pro-collapsible-del')||c.classList.contains('pro-collapsible-actions')))return;
+        }
+        stray.push(c);
+      });
       const body=document.createElement('div');
       body.className='pro-collapsible-body';
-      body.innerHTML='<p><br></p>';
-      // insere depois do summary
+      if(stray.length)stray.forEach(n=>body.appendChild(n));
+      else body.innerHTML='<p><br></p>';
       const sum=det.querySelector(':scope > summary');
       if(sum&&sum.nextSibling)det.insertBefore(body,sum.nextSibling);
       else det.appendChild(body);
-      return;
     }
-    const body=document.createElement('div');
-    body.className='pro-collapsible-body';
-    stray.forEach(n=>body.appendChild(n));
-    // Insere o body logo após o summary (mantém ordem visual)
-    const sum=det.querySelector(':scope > summary');
-    if(sum&&sum.nextSibling)det.insertBefore(body,sum.nextSibling);
-    else det.appendChild(body);
+    // Migra botão antigo ✕ standalone pro novo bloco .pro-collapsible-actions
+    const oldDel=det.querySelector(':scope > button.pro-collapsible-del');
+    if(oldDel)oldDel.remove();
+    // Garante que o bloco de ações (↑ ↓ ✕) existe
+    if(!det.querySelector(':scope > .pro-collapsible-actions')){
+      const actions=document.createElement('div');
+      actions.className='pro-collapsible-actions';
+      actions.setAttribute('contenteditable','false');
+      actions.setAttribute('onmousedown','event.preventDefault()');
+      actions.innerHTML=`<button type="button" class="pro-collapsible-act" onclick="_proRtCollapsibleMove(this,-1,event)" title="Mover bloco para cima">↑</button><button type="button" class="pro-collapsible-act" onclick="_proRtCollapsibleMove(this,1,event)" title="Mover bloco para baixo">↓</button><button type="button" class="pro-collapsible-act pro-collapsible-del-act" onclick="_proRtCollapsibleDel(this,event)" title="Remover bloco">✕</button>`;
+      det.appendChild(actions);
+    }
   });
+  // Garante espaço respirável antes/depois/entre details
+  _proRtEnsureSpacers(tmp);
   return tmp.innerHTML;
+}
+
+// Garante <p><br></p> em pontos onde o cursor precisa poder pousar:
+// - Antes do primeiro details (se for o primeiro filho)
+// - Depois do último details (se for o último filho)
+// - Entre dois details adjacentes
+function _proRtEnsureSpacers(root){
+  if(!root)return;
+  const dets=[...root.querySelectorAll(':scope > details, :scope > details.pro-collapsible')];
+  // querySelectorAll com :scope retorna só filhos diretos; vamos garantir
+  const direct=dets.filter(d=>d.parentNode===root);
+  direct.forEach((det,idx)=>{
+    // Antes do primeiro: precisa ter algo "atravessável" (P/DIV) antes
+    if(idx===0&&!det.previousElementSibling){
+      // Adiciona um <p><br></p> antes
+      const p=document.createElement('p');p.innerHTML='<br>';
+      root.insertBefore(p,det);
+    }else if(det.previousElementSibling&&det.previousElementSibling.tagName==='DETAILS'){
+      // Dois details adjacentes: insere <p> entre
+      const p=document.createElement('p');p.innerHTML='<br>';
+      root.insertBefore(p,det);
+    }
+    // Depois do último: precisa ter algo depois
+    if(idx===direct.length-1&&!det.nextElementSibling){
+      const p=document.createElement('p');p.innerHTML='<br>';
+      root.appendChild(p);
+    }
+  });
 }
 
 // Roda _proRtStripInline em loop até o HTML estabilizar (resolve aninhamentos profundos)
@@ -31587,6 +31624,46 @@ window._proRtPaste=(ev,uid)=>{
   el.dispatchEvent(new Event('input',{bubbles:true}));
 };
 
+// Move bloco colapsável pra cima (-1) ou pra baixo (+1) na mesma raiz do editor
+window._proRtCollapsibleMove=(btn,dir,ev)=>{
+  if(ev){ev.preventDefault();ev.stopPropagation();}
+  const det=btn.closest('details');
+  if(!det)return;
+  const ed=det.closest('[data-rt-ed]');
+  if(!ed)return;
+  // Acha o irmão imediato (pulando text nodes vazios)
+  const parent=det.parentNode;
+  let sibling=null;
+  if(dir<0){
+    // Pra cima: anterior. Pula spacer <p> vazio também (move com ele junto).
+    sibling=det.previousElementSibling;
+    // Se o anterior é um spacer (<p> vazio ou só <br>), e tem outro antes dele, pula
+    if(sibling&&_proIsSpacerP(sibling)&&sibling.previousElementSibling){
+      sibling=sibling.previousElementSibling;
+    }
+    if(!sibling)return; // já é o primeiro
+    parent.insertBefore(det,sibling);
+  }else{
+    sibling=det.nextElementSibling;
+    if(sibling&&_proIsSpacerP(sibling)&&sibling.nextElementSibling){
+      sibling=sibling.nextElementSibling;
+    }
+    if(!sibling)return; // já é o último
+    if(sibling.nextSibling)parent.insertBefore(det,sibling.nextSibling);
+    else parent.appendChild(det);
+  }
+  // Garante spacers nas novas posições
+  _proRtEnsureSpacers(ed);
+  ed.dispatchEvent(new Event('input',{bubbles:true}));
+};
+function _proIsSpacerP(node){
+  if(!node||node.tagName!=='P')return false;
+  const txt=(node.textContent||'').trim();
+  if(txt)return false;
+  // Aceita <p></p> ou <p><br></p>
+  return true;
+}
+
 // Remove bloco colapsável via botão ✕ — usa execCommand pra entrar no undo
 window._proRtCollapsibleDel=(btn,ev)=>{
   if(ev){ev.preventDefault();ev.stopPropagation();}
@@ -31608,6 +31685,7 @@ window._proRtCollapsibleDel=(btn,ev)=>{
     }catch(e){
       det.remove();
     }
+    _proRtEnsureSpacers(ed);
     ed.dispatchEvent(new Event('input',{bubbles:true}));
   }else{
     det.remove();
@@ -31660,6 +31738,40 @@ function _proRtBindCollapsibleHandlers(el){
         r.collapse(true);
         sel.removeAllRanges();sel.addRange(r);
       }
+    }
+    // Enter no FINAL do último <p> do body (sem Shift): sai do details e
+    // cria/foca um <p> depois dele — pra continuar escrevendo fora do dropdown.
+    if(e.key==='Enter'&&!e.shiftKey&&!inSummary){
+      const body=inDetails.querySelector(':scope > .pro-collapsible-body');
+      if(!body)return;
+      // Confirma: o cursor está dentro do body
+      let inBody=false;let bn=node;
+      while(bn&&bn!==el){if(bn===body){inBody=true;break;}bn=bn.parentNode;}
+      if(!inBody)return;
+      // Confirma: cursor está no FINAL do último parágrafo do body E o parágrafo está vazio
+      const paragrafos=[...body.querySelectorAll(':scope > p')];
+      const lastP=paragrafos[paragrafos.length-1];
+      if(!lastP)return;
+      const cursorInLastP=lastP.contains(node)||lastP===node;
+      if(!cursorInLastP)return;
+      const lastPTxt=(lastP.textContent||'').trim();
+      // Só sai do details se o último parágrafo está vazio (sinal de "Enter duplo")
+      if(lastPTxt!=='')return;
+      e.preventDefault();
+      // Remove o parágrafo vazio do final do body
+      lastP.remove();
+      // Garante que o body tenha pelo menos um <p>
+      if(!body.querySelector('p')){body.innerHTML='<p><br></p>';}
+      // Insere ou foca um <p> depois do details
+      let after=inDetails.nextElementSibling;
+      if(!after||after.tagName!=='P'){
+        after=document.createElement('p');after.innerHTML='<br>';
+        if(inDetails.nextSibling)inDetails.parentNode.insertBefore(after,inDetails.nextSibling);
+        else inDetails.parentNode.appendChild(after);
+      }
+      const r=document.createRange();r.setStart(after,0);r.collapse(true);
+      sel.removeAllRanges();sel.addRange(r);
+      el.dispatchEvent(new Event('input',{bubbles:true}));
     }
   });
 }
