@@ -12,14 +12,90 @@ const admin = require('firebase-admin');
 const Anthropic = require('@anthropic-ai/sdk').default;
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || '';
-const MODEL = 'claude-haiku-4-5-20251001';
+const DEFAULT_MODEL = 'claude-haiku-4-5-20251001';
+const DEFAULT_MAX_TOKENS = 1024;
+// Mapeia aliases curtos pra model IDs completos
+const MODEL_MAP = {
+  haiku: 'claude-haiku-4-5-20251001',
+  sonnet: 'claude-sonnet-4-6',
+  opus: 'claude-opus-4-7',
+};
+
+// Perfis suportados — cada um aponta pro campo correspondente em config/dexPrompt
+// 'geral' é o default e fica no topo da lista
+const PERFIS = ['geral', 'suporte', 'vendas', 'marketing'];
+const DEFAULT_PERFIL = 'geral';
+function perfilToField(perfil) {
+  return 'template' + perfil.charAt(0).toUpperCase() + perfil.slice(1);
+}
+
+// Instruções padrão por perfil — usadas quando o admin não personalizou
+const DEFAULT_INSTRUCTIONS = {
+  geral: `Você é o Dex, assistente do catálogo da MedReview — modo **Geral**.
+
+Seu trabalho: responder qualquer pergunta sobre o catálogo de produtos da MedReview de forma direta, precisa e útil, sem assumir um papel específico de suporte, vendas ou marketing.
+
+REGRAS:
+1. Use APENAS as informações da jornada do cliente e do catálogo abaixo. Não invente nada que não esteja escrito.
+2. Sempre entregue o que você sabe primeiro. Só depois mencione o que falta.
+3. Quando mencionar um produto pelo nome, formate como [Nome do Produto](produto:ID_DO_PRODUTO) usando o ID exato do catálogo.
+4. Responda de forma direta e objetiva. Frases curtas. Português brasileiro.
+5. Se a pergunta envolve comparar produtos, organize em tópicos com a diferença clara entre eles.
+6. Se a pergunta for genuinamente ambígua, peça esclarecimento — mas se der pra inferir o sentido, responda.
+7. Nunca invente preço, data, link ou contato que não esteja no catálogo.
+8. Não dê opinião clínica/médica.
+9. Se a informação não está no catálogo nem na jornada, diga claramente e sugira consultar a fonte oficial.`,
+
+  suporte: `Você é o Dex, assistente do time de **Suporte** da MedReview.
+
+Seu trabalho: ajudar quem está respondendo um ticket ou dúvida de cliente a entender rapidamente qual produto/recurso o cliente está mencionando e o que dizer.
+
+REGRAS:
+1. Resposta curta e objetiva. O suporte precisa de informação rápida pra repassar ao cliente.
+2. Sempre que mencionar um produto, formate como [Nome do Produto](produto:ID_DO_PRODUTO) usando o ID exato do catálogo.
+3. Para perguntas do tipo "tenho acesso ao X?" ou "isso está incluído?", responda com base estritamente no catálogo (em qual produto a feature está, se é incluída ou opcional, etc).
+4. Para dúvidas técnicas (como acessar, login, suporte de uso): não invente — diga apenas o que está documentado no catálogo.
+5. Nunca dê opinião clínica/médica. Limite-se ao escopo do catálogo.
+6. Se a informação não está nem na jornada nem no catálogo, diga claramente que não tem e sugira consultar a fonte oficial (edital, suporte direto).
+7. Português brasileiro, frases curtas.`,
+
+  vendas: `Você é o Dex, assistente do time de **Vendas** da MedReview.
+
+Seu trabalho: ajudar o vendedor a conectar a dor do cliente com a solução certa do catálogo, entregar argumentos prontos e ajudar a contornar objeções.
+
+REGRAS:
+1. Sempre que possível, primeiro entenda a situação do cliente (qual prova vai prestar, qual ano da residência, momento da jornada) — use a Jornada do Cliente como guia.
+2. Recomende o produto mais aderente à situação. Cite o nome como link [Nome](produto:ID).
+3. Se houver mais de uma opção válida, apresente as 2-3 melhores com a diferença clara entre elas.
+4. Entregue argumentos de venda do produto recomendado, puxando da seção "Argumentos de venda" do catálogo.
+5. Se o cliente apresenta uma objeção (preço, tempo, dúvida), busque no catálogo a resposta documentada pra essa objeção e use ela como base.
+6. Tom: profissional e consultivo. Ajudar o cliente a escolher certo, não empurrar.
+7. Nunca invente preço, desconto ou condição que não esteja no catálogo.
+8. Português brasileiro.`,
+
+  marketing: `Você é o Dex, assistente do time de **Marketing** da MedReview.
+
+Seu trabalho: ajudar o marketing a entender posicionamento, diferenciais e público-alvo de cada produto pra produzir copy, anúncios e campanhas.
+
+REGRAS:
+1. Quando perguntarem sobre um produto, traga de forma estruturada: público-alvo, prova-alvo, principais features, diferenciais (puxe da seção "Diferenciais") e argumentos de venda.
+2. Se perguntarem "qual gancho de copy usar pra X?", combine os argumentos de venda do catálogo com a dor correspondente na jornada do cliente.
+3. Cite produtos como [Nome](produto:ID).
+4. Quando relevante, sugira qual momento da jornada do cliente o produto atinge melhor.
+5. Tom: estratégico e estruturado. Resposta organizada — use tópicos quando fizer sentido.
+6. Nunca compare diretamente com concorrentes que não estejam citados no catálogo.
+7. Não invente fatos de mercado, estatísticas ou dados que não estejam no catálogo.
+8. Português brasileiro.`,
+};
 
 const ALLOWED_ORIGINS = [
   'https://aros.anestreview.com.br',
   'http://localhost:8081',
   'http://localhost:8080',
+  'http://localhost:8765',
   'http://127.0.0.1:8081',
   'http://127.0.0.1:8080',
+  'http://127.0.0.1:8765',
 ];
 
 function setCors(req, res) {
@@ -84,10 +160,18 @@ exports.perguntarDex = onRequest(
       res.status(400).json({ error: 'Pergunta muito longa (máx 2000 caracteres)' });
       return;
     }
+    // Perfil de quem está perguntando — escolhe o template apropriado
+    const perfilRaw = String(req.body?.perfil || '').toLowerCase();
+    const perfil = PERFIS.includes(perfilRaw) ? perfilRaw : DEFAULT_PERFIL;
 
     try {
       const db = admin.firestore();
-      const snap = await db.collection('produtos').get();
+      // Lê produtos + jornada + configuração do Dex em paralelo
+      const [snap, jornadaSnap, dexCfgSnap] = await Promise.all([
+        db.collection('produtos').get(),
+        db.collection('config').doc('jornadaCliente').get(),
+        db.collection('config').doc('dexPrompt').get(),
+      ]);
       const produtos = [];
       snap.forEach(d => {
         const data = d.data() || {};
@@ -103,13 +187,58 @@ exports.perguntarDex = onRequest(
       }
 
       const catalogoFmt = produtos.map(p => formatarProduto(p, produtos)).join('\n\n---\n\n');
+      const jornadaTxt = jornadaSnap.exists ? stripHtml(jornadaSnap.data()?.texto || '') : '';
 
-      const systemPrompt = buildSystemPrompt(catalogoFmt);
+      // Lê config editável (templates por perfil, modelo, maxTokens, pdfs)
+      const dexCfg = dexCfgSnap.exists ? (dexCfgSnap.data() || {}) : {};
+      // Pega o template do perfil escolhido. Fallback: template legado (campo 'template')
+      // e por fim o exemplo embutido do perfil.
+      const perfilField = perfilToField(perfil);
+      const customInstructions =
+        String(dexCfg[perfilField] || '').trim() ||
+        String(dexCfg.template || '').trim() ||
+        DEFAULT_INSTRUCTIONS[perfil];
+      // Jornada e Catálogo SEMPRE anexados automaticamente.
+      const systemPrompt = buildSystemPromptFromInstructions(customInstructions, catalogoFmt, jornadaTxt);
+
+      // PDFs anexados pra este perfil — viram blocos `document` no user message
+      const pdfsField = 'pdfs' + perfil.charAt(0).toUpperCase() + perfil.slice(1);
+      const pdfs = Array.isArray(dexCfg[pdfsField]) ? dexCfg[pdfsField].filter(p => p && p.url) : [];
+
+      // Resolve modelo: aceita alias curto ('haiku', 'sonnet', 'opus') ou ID completo
+      const modeloRaw = String(dexCfg.modelo || '').trim().toLowerCase();
+      const modelo = MODEL_MAP[modeloRaw] || (modeloRaw.startsWith('claude-') ? modeloRaw : DEFAULT_MODEL);
+      // Resolve max_tokens (entre 256 e 4096, default 1024)
+      let maxTokens = Number(dexCfg.maxTokens);
+      if (!Number.isFinite(maxTokens) || maxTokens < 256) maxTokens = DEFAULT_MAX_TOKENS;
+      if (maxTokens > 4096) maxTokens = 4096;
+
+      // Monta o conteúdo da mensagem do usuário:
+      // [doc1 (cache), doc2 (cache), ..., texto_pergunta]
+      // cache_control nos documentos faz o Claude cachear o prefixo (~5min),
+      // então perguntas seguidas no mesmo perfil pagam ~10% do custo de tokens.
+      const userContent = [];
+      pdfs.forEach((p, i) => {
+        const block = {
+          type: 'document',
+          source: { type: 'url', url: String(p.url) },
+        };
+        if (p.label || p.name) {
+          block.title = String(p.label || p.name).slice(0, 120);
+        }
+        // Marca o ÚLTIMO documento com cache_control — isso cacheia todo o prefixo
+        // anterior, incluindo todos os PDFs e o system prompt
+        if (i === pdfs.length - 1) {
+          block.cache_control = { type: 'ephemeral' };
+        }
+        userContent.push(block);
+      });
+      userContent.push({ type: 'text', text: pergunta });
 
       const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
       const resp = await client.messages.create({
-        model: MODEL,
-        max_tokens: 1024,
+        model: modelo,
+        max_tokens: maxTokens,
         system: [
           {
             type: 'text',
@@ -117,7 +246,7 @@ exports.perguntarDex = onRequest(
             cache_control: { type: 'ephemeral' },
           },
         ],
-        messages: [{ role: 'user', content: pergunta }],
+        messages: [{ role: 'user', content: userContent }],
       });
 
       const texto = resp.content
@@ -129,6 +258,11 @@ exports.perguntarDex = onRequest(
       const usage = resp.usage || {};
       console.log('Dex OK', {
         user: decoded.email || decoded.uid,
+        perfil,
+        modelo,
+        max_tokens: maxTokens,
+        prompt_custom: !!String(dexCfg[perfilField] || '').trim(),
+        pdfs_count: pdfs.length,
         pergunta_len: pergunta.length,
         resposta_len: texto.length,
         input_tokens: usage.input_tokens,
@@ -154,26 +288,15 @@ exports.perguntarDex = onRequest(
   }
 );
 
-function buildSystemPrompt(catalogoFmt) {
-  return `Você é o Dex, assistente do **Catálogo de Produtos MedReview**.
-
-Sua função: ajudar a equipe interna (suporte, vendas, marketing) a encontrar e entender os produtos disponíveis.
-
-REGRAS RÍGIDAS:
-1. Use APENAS as informações do catálogo abaixo. Não invente nada que não esteja escrito.
-2. Se a informação pedida não está no catálogo, responda exatamente: "Não tenho essa informação no catálogo."
-3. Quando mencionar um produto pelo nome, formate como link Markdown: [Nome do Produto](produto:ID_DO_PRODUTO) — use o ID exato que aparece no cabeçalho de cada produto no catálogo.
-4. Seja direto e objetivo. Frases curtas. Português brasileiro.
-5. Se a pergunta for ambígua, peça esclarecimento antes de responder.
-6. Não invente preços, datas, links ou contatos que não estejam no catálogo.
-7. Não responda perguntas fora do escopo do catálogo (dúvidas clínicas, opiniões pessoais, comparação com concorrentes não citados). Redirecione gentilmente.
-8. Se citar listas de features ou argumentos, use marcadores Markdown ( - item ).
-
-=== CATÁLOGO DE PRODUTOS MEDREVIEW ===
-
-${catalogoFmt}
-
-=== FIM DO CATÁLOGO ===`;
+// Monta o system prompt anexando Jornada + Catálogo às instruções customizadas
+// do usuário. Sempre coloca os blocos de dados no final pra otimizar prompt
+// caching: instruções (que mudam pouco) vêm primeiro, dados (que mudam mais)
+// depois. Como o cache é por prefixo, isso mantém o cache válido por mais tempo.
+function buildSystemPromptFromInstructions(instructions, catalogoFmt, jornadaTxt) {
+  const jornadaSec = jornadaTxt
+    ? `=== JORNADA DO CLIENTE ===\n\nContexto sobre o perfil do cliente, dores, jornada de compra e gatilhos.\n\n${jornadaTxt}\n\n=== FIM DA JORNADA ===\n\n`
+    : '';
+  return `${instructions}\n\n${jornadaSec}=== CATÁLOGO DE PRODUTOS MEDREVIEW ===\n\n${catalogoFmt}\n\n=== FIM DO CATÁLOGO ===`;
 }
 
 function formatarProduto(p, todosProdutos) {

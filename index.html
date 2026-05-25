@@ -2253,6 +2253,17 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-jornada-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .4s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .25s,padding .2s}
 #tab-produtos .pro-jornada-disc.open .pro-jornada-body{max-height:3000px;opacity:1;padding:6px 20px 20px;overflow-y:auto}
 #tab-produtos .pro-jornada-hint{font-size:12.5px;color:var(--t2);line-height:1.5;margin:0 0 14px;font-style:italic}
+/* Banner de rascunho não-salvo (auto-save local sobrevivente de reload) */
+#tab-produtos .pro-jornada-draft-banner{display:flex;align-items:center;gap:14px;padding:14px 16px;margin:0 0 16px;background:color-mix(in srgb,#f59e0b 8%,var(--bg2));border:1px solid color-mix(in srgb,#f59e0b 42%,var(--border));border-radius:12px;box-shadow:0 4px 12px color-mix(in srgb,#f59e0b 12%,transparent)}
+#tab-produtos .pro-jornada-draft-icon{font-size:24px;flex-shrink:0;line-height:1}
+#tab-produtos .pro-jornada-draft-body{flex:1;min-width:0}
+#tab-produtos .pro-jornada-draft-title{font-size:14px;font-weight:700;color:#f59e0b;margin-bottom:2px}
+#tab-produtos .pro-jornada-draft-meta{font-size:11.5px;color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.3px}
+#tab-produtos .pro-jornada-draft-actions{display:flex;gap:8px;flex-shrink:0}
+@media (max-width:640px){
+  #tab-produtos .pro-jornada-draft-banner{flex-wrap:wrap}
+  #tab-produtos .pro-jornada-draft-actions{width:100%;justify-content:flex-end}
+}
 #tab-produtos .pro-jornada-dirty{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#f59e0b;background:color-mix(in srgb,#f59e0b 12%,transparent);border:1px solid color-mix(in srgb,#f59e0b 40%,var(--border));padding:3px 8px;border-radius:6px}
 #tab-produtos .pro-jornada-text{font-size:14px;line-height:1.6;color:var(--text);text-align:justify}
 #tab-produtos .pro-jornada-text p{margin:8px 0}
@@ -2664,6 +2675,54 @@ body.pro-rt-fs-on{overflow:hidden}
 #tab-produtos .pro-dex-title-ico{font-size:13px;background:linear-gradient(135deg,#3b82f6,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 #tab-produtos .pro-dex-close{background:transparent;border:none;color:var(--t2);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:6px;line-height:1;transition:color .15s,background .15s}
 #tab-produtos .pro-dex-close:hover{color:var(--text);background:color-mix(in srgb,var(--accent) 8%,transparent)}
+#tab-produtos .pro-dex-head-actions{display:inline-flex;align-items:center;gap:4px}
+#tab-produtos .pro-dex-cfg-btn{background:transparent;border:none;color:var(--t2);font-size:15px;cursor:pointer;padding:4px 7px;border-radius:6px;line-height:1;transition:color .15s,background .15s,transform .12s}
+#tab-produtos .pro-dex-cfg-btn:hover{color:#a855f7;background:color-mix(in srgb,#a855f7 12%,transparent);transform:rotate(45deg)}
+#tab-produtos .pro-dex-cfg-btn.on{color:#a855f7;background:color-mix(in srgb,#a855f7 16%,transparent);transform:rotate(45deg)}
+
+/* Painel de configuração do Dex (admin) */
+#tab-produtos .pro-dex-cfg-panel{margin:0 0 14px;padding:16px;background:color-mix(in srgb,#a855f7 4%,var(--bg));border:1px solid color-mix(in srgb,#a855f7 32%,var(--border));border-radius:12px;animation:dexSlideIn .22s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
+#tab-produtos .pro-dex-cfg-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+#tab-produtos .pro-dex-cfg-title{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#a855f7}
+#tab-produtos .pro-dex-cfg-meta{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;color:var(--t2);letter-spacing:.3px;margin-left:auto}
+#tab-produtos .pro-dex-cfg-dirty{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#f59e0b;background:color-mix(in srgb,#f59e0b 12%,transparent);border:1px solid color-mix(in srgb,#f59e0b 40%,var(--border));padding:3px 8px;border-radius:6px}
+#tab-produtos .pro-dex-cfg-fg{margin-bottom:14px;display:flex;flex-direction:column;gap:6px}
+#tab-produtos .pro-dex-cfg-lbl{font-size:12px;font-weight:600;color:var(--text);font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.4px}
+#tab-produtos .pro-dex-cfg-sel{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+#tab-produtos .pro-dex-cfg-sel:focus{outline:none;border-color:#a855f7;box-shadow:0 0 0 2px color-mix(in srgb,#a855f7 22%,transparent)}
+#tab-produtos .pro-dex-cfg-range{accent-color:#a855f7;width:100%;height:6px;cursor:pointer}
+#tab-produtos .pro-dex-cfg-ta{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:12.5px;font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;line-height:1.55;min-height:180px;resize:vertical;transition:border-color .15s,box-shadow .15s}
+#tab-produtos .pro-dex-cfg-ta:focus{outline:none;border-color:#a855f7;box-shadow:0 0 0 2px color-mix(in srgb,#a855f7 22%,transparent)}
+#tab-produtos .pro-dex-cfg-ta::placeholder{color:var(--t2);opacity:.6}
+#tab-produtos .pro-dex-cfg-hint{font-size:11.5px;color:var(--t2);line-height:1.5;margin-top:2px}
+#tab-produtos .pro-dex-cfg-hint code{background:color-mix(in srgb,#a855f7 12%,var(--bg));border:1px solid color-mix(in srgb,#a855f7 24%,var(--border));border-radius:4px;padding:1px 5px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;color:#a855f7}
+#tab-produtos .pro-dex-cfg-foot{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding-top:10px;border-top:1px solid color-mix(in srgb,#a855f7 14%,var(--border));margin-top:6px;flex-wrap:wrap}
+
+/* Abas de perfil dentro do painel de configuração */
+#tab-produtos .pro-dex-cfg-tabs{display:flex;gap:4px;margin:8px 0 14px;padding:4px;background:color-mix(in srgb,#a855f7 5%,var(--bg));border:1px solid color-mix(in srgb,#a855f7 18%,var(--border));border-radius:10px}
+#tab-produtos .pro-dex-cfg-tab{flex:1;background:transparent;border:none;color:var(--t2);padding:8px 12px;border-radius:7px;font-size:12.5px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
+#tab-produtos .pro-dex-cfg-tab:hover{color:var(--text);background:color-mix(in srgb,#a855f7 8%,transparent)}
+#tab-produtos .pro-dex-cfg-tab.on{color:#fff;background:linear-gradient(135deg,#3b82f6,#a855f7);box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 6px rgba(168,85,247,.28)}
+
+/* Chips de perfil acima do input (no painel do Dex) */
+#tab-produtos .pro-dex-perfil-row{display:flex;gap:6px;margin:0 0 10px;flex-wrap:wrap}
+#tab-produtos .pro-dex-chip{background:var(--bg);border:1px solid var(--border);color:var(--t2);padding:6px 12px;border-radius:999px;font-size:12px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+#tab-produtos .pro-dex-chip:hover{color:var(--text);border-color:color-mix(in srgb,#a855f7 32%,var(--border));background:color-mix(in srgb,#a855f7 6%,var(--bg))}
+#tab-produtos .pro-dex-chip.on{color:#fff;background:linear-gradient(135deg,#3b82f6,#a855f7);border-color:transparent;box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 8px rgba(168,85,247,.32)}
+
+/* Lista de PDFs anexados por perfil */
+#tab-produtos .pro-dex-pdf-list{display:flex;flex-direction:column;gap:6px}
+#tab-produtos .pro-dex-pdf-empty{padding:14px;background:color-mix(in srgb,#a855f7 3%,var(--bg));border:1px dashed color-mix(in srgb,#a855f7 22%,var(--border));border-radius:10px;color:var(--t2);font-size:12.5px;font-style:italic;text-align:center}
+#tab-produtos .pro-dex-pdf-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;transition:border-color .15s,background .15s}
+#tab-produtos .pro-dex-pdf-item:hover{border-color:color-mix(in srgb,#a855f7 32%,var(--border));background:color-mix(in srgb,#a855f7 4%,var(--bg))}
+#tab-produtos .pro-dex-pdf-item.uploading{opacity:.7;border-style:dashed}
+#tab-produtos .pro-dex-pdf-icon{font-size:20px;flex-shrink:0;line-height:1}
+#tab-produtos .pro-dex-pdf-info{flex:1;min-width:0}
+#tab-produtos .pro-dex-pdf-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tab-produtos .pro-dex-pdf-meta{font-size:11px;color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.3px;margin-top:1px}
+#tab-produtos .pro-dex-pdf-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:transparent;border:1px solid transparent;color:var(--t2);border-radius:7px;font-size:13px;cursor:pointer;text-decoration:none;transition:all .12s;flex-shrink:0}
+#tab-produtos .pro-dex-pdf-btn:hover{color:var(--text);background:color-mix(in srgb,var(--accent) 10%,transparent);border-color:color-mix(in srgb,var(--accent) 30%,var(--border))}
+#tab-produtos .pro-dex-pdf-rm:hover{color:#ef4444;background:color-mix(in srgb,#ef4444 12%,transparent);border-color:#ef4444}
 #tab-produtos .pro-dex-form{display:flex;gap:8px;align-items:flex-end}
 #tab-produtos .pro-dex-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;resize:vertical;min-height:44px;max-height:140px;line-height:1.4;transition:border-color .15s,box-shadow .15s}
 #tab-produtos .pro-dex-input:focus{outline:none;border-color:#a855f7;box-shadow:0 0 0 3px color-mix(in srgb,#a855f7 22%,transparent)}
@@ -8233,6 +8292,28 @@ function _arosBindTilt(){
 }
 // Reveal global pós-boot (hero, cards iniciais)
 window.addEventListener('load',()=>{setTimeout(_arosObserveReveal,80);setTimeout(_arosUpdateNavIndicator,120);});
+
+// Delegação global: clique em <summary> dentro de editor rich-text com contenteditable.
+// Cancela o toggle nativo (preventDefault no click) e toggla manualmente — assim
+// funciona uniforme em todos browsers, mesmo dentro de contenteditable.
+document.addEventListener('click',(e)=>{
+  const t=e.target;if(!t||!t.closest)return;
+  const editor=t.closest('.pro-rt-ed');
+  if(!editor||!editor.isContentEditable)return;
+  if(t.closest('.pro-collapsible-del'))return;
+  const summary=t.closest('summary');
+  if(!summary)return;
+  const det=summary.parentNode;
+  if(!det||det.tagName!=='DETAILS'||!editor.contains(det))return;
+  // Cancela o toggle nativo do browser (que já aconteceu ou vai acontecer)
+  e.preventDefault();
+  // Força o estado oposto ao que estava ANTES do clique
+  // (no click handler o nativo já pode ter togglado; refazemos com base no atual)
+  const isOpen=det.hasAttribute('open');
+  if(isOpen)det.removeAttribute('open');
+  else det.setAttribute('open','');
+  editor.dispatchEvent(new Event('input',{bubbles:true}));
+},true);
 
 // ── Sliding pill indicator (Apple-like) sob a aba ativa ──
 function _arosUpdateNavIndicator(){
@@ -28075,9 +28156,27 @@ S.catalogoConfig={publicosAlvo:[],provasAlvo:[],loaded:false};
 S.jornadaCliente={texto:'',videoUrl:'',imagemUrl:'',imagemPath:'',updatedAt:null,updatedBy:'',loaded:false};
 S._jornadaOpen=false;
 S._jornadaDirty=false;
+// Configuração editável do Dex (prompts por perfil, modelo, max_tokens, PDFs)
+S.dexConfig={
+  templateGeral:'',templateSuporte:'',templateVendas:'',templateMarketing:'',
+  pdfsGeral:[],pdfsSuporte:[],pdfsVendas:[],pdfsMarketing:[],
+  modelo:'haiku',maxTokens:1024,
+  updatedAt:null,updatedBy:'',loaded:false
+};
+const DEX_PDF_MAX_BYTES=32*1024*1024; // limite da API Anthropic
+const DEX_PDF_MAX_QTDE=5; // máximo de PDFs por perfil
+S._dexConfigOpen=false;
+S._dexConfigDirty=false;
+S._dexConfigDraft=null;
+S._dexConfigTab='geral'; // qual perfil está sendo editado no painel
+// Perfil de quem está perguntando (chips acima do input) — persiste em localStorage.
+// Default: 'geral' (modo neutro, sem viés de papel).
+const _DEX_PERFIS=['geral','suporte','vendas','marketing'];
+S.dexPerfil=(()=>{try{const v=localStorage.getItem('aros.dex.perfil');return _DEX_PERFIS.includes(v)?v:'geral';}catch(e){return 'geral';}})();
 let _proJornadaUnsub=null;
 let _proUnsub=null;
 let _proCatUnsub=null;
+let _proDexCfgUnsub=null;
 let _proDirty=false;
 let _proCatSeeded=false;
 
@@ -28107,6 +28206,63 @@ const PRO_CATALOGO_SEED={
 
 // ── Helpers de leitura tolerante (compat com docs antigos) ──────────────
 function _proGetBreveDescricao(p){return (p&&(p.breveDescricao??p.pitchCurto))||'';}
+
+// Normaliza string pra busca: minúsculas + sem acento. NFD separa o caractere
+// do diacrítico, depois removemos a categoria \p{Mn} (marks not spacing).
+function _proNormBusca(s){
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+}
+// Tira tags HTML pra deixar só o texto pesquisável (diferenciais e mentoriaDescricao
+// podem ter rich-text). Não precisa ser sanitização — é só pra busca local.
+function _proBuscaStripHtml(s){
+  return String(s||'').replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/\s+/g,' ');
+}
+// Monta um "haystack" cobrindo todos os campos textuais relevantes do produto.
+function _proBuscaHaystack(p){
+  if(!p)return '';
+  const parts=[];
+  parts.push(p.nome,p.id,p.status);
+  parts.push(_proGetBreveDescricao(p));
+  parts.push(p.pitchCurto,p.pitchLongo);
+  parts.push(..._proGetPublicoAlvo(p));
+  if(Array.isArray(p.provasAlvo))parts.push(...p.provasAlvo);
+  if(Array.isArray(p.responsaveis))parts.push(...p.responsaveis);
+  else if(p.responsavel)parts.push(p.responsavel);
+  // Features
+  (p.features||[]).forEach(f=>{
+    parts.push(f.titulo,f.descricao,f.numeroChave,f.linkLabel,f.pdfLabel);
+    parts.push(_proBuscaStripHtml(f.diferenciais));
+  });
+  // Mentoria
+  if(p.temMentoria&&p.temMentoria!=='nao'&&p.temMentoria!==false){
+    parts.push('mentoria'); // termo explícito — facilita encontrar produtos com mentoria
+    if(p.temMentoria==='opcional')parts.push('mentoria opcional');
+    parts.push(_proBuscaStripHtml(p.mentoriaDescricao));
+    (p.mentoriaFeatures||[]).forEach(f=>{
+      parts.push(f.titulo,f.descricao,f.numeroChave,f.linkLabel,f.pdfLabel);
+      parts.push(_proBuscaStripHtml(f.diferenciais));
+    });
+  }
+  // Bônus
+  (p.bonusFeatures||[]).forEach(f=>{
+    parts.push(f.titulo,f.descricao,f.numeroChave,f.linkLabel,f.pdfLabel);
+    parts.push(_proBuscaStripHtml(f.diferenciais));
+  });
+  if(Array.isArray(p.bonusProdutoIds)&&p.bonusProdutoIds.length){
+    parts.push('bonus','bônus');
+    p.bonusProdutoIds.forEach(bid=>{
+      const bp=(S.produtos||[]).find(x=>x.id===bid);
+      if(bp)parts.push(bp.nome);
+    });
+  }
+  // Argumentos, objeções, dúvidas
+  if(Array.isArray(p.argumentosVenda))parts.push(...p.argumentosVenda);
+  (p.objecoes||[]).forEach(o=>{parts.push(o.pergunta);parts.push(_proBuscaStripHtml(o.resposta));});
+  (p.duvidas||[]).forEach(d=>{parts.push(d.pergunta);parts.push(_proBuscaStripHtml(d.resposta));});
+  // Links
+  (p.links||[]).forEach(l=>{parts.push(l.label,l.url);});
+  return parts.filter(Boolean).join(' ');
+}
 // Normaliza URL: aceita só http/https. Adiciona https:// se for tipo "site.com/path"
 // sem scheme. Retorna '' pra valores inválidos.
 function _proNormalizeUrl(raw){
@@ -28263,11 +28419,38 @@ window.initProdutos=function(){
           S.jornadaCliente.imagemPath=String(d.imagemPath||'');
           S.jornadaCliente.updatedAt=d.updatedAt||null;
           S.jornadaCliente.updatedBy=String(d.updatedBy||'');
+          // Verifica se há rascunho local divergente — oferece restaurar via banner
+          if(!S.jornadaCliente.loaded)setTimeout(_proJornadaDraftCheck,0);
         }
       }
       S.jornadaCliente.loaded=true;
       if(S.produtosLoaded&&S.produtosView==='list'&&!S._jornadaDirty)_proJornadaRefresh();
     },err=>{console.warn('jornadaCliente onSnapshot:',err);S.jornadaCliente.loaded=true;});
+  }
+  if(!_proDexCfgUnsub){
+    _proDexCfgUnsub=onSnapshot(doc(db,'config','dexPrompt'),snap=>{
+      const d=snap.exists()?(snap.data()||{}):{};
+      // Não sobrescreve se o user está editando (dirty)
+      if(!S._dexConfigDirty){
+        // Compat: se ainda existe o campo legado 'template' (versão anterior),
+        // usa ele como fallback inicial pros perfis até o user salvar específicos
+        const legacy=String(d.template||'');
+        S.dexConfig.templateGeral=String(d.templateGeral||legacy||'');
+        S.dexConfig.templateSuporte=String(d.templateSuporte||legacy||'');
+        S.dexConfig.templateVendas=String(d.templateVendas||legacy||'');
+        S.dexConfig.templateMarketing=String(d.templateMarketing||legacy||'');
+        S.dexConfig.pdfsGeral=Array.isArray(d.pdfsGeral)?d.pdfsGeral:[];
+        S.dexConfig.pdfsSuporte=Array.isArray(d.pdfsSuporte)?d.pdfsSuporte:[];
+        S.dexConfig.pdfsVendas=Array.isArray(d.pdfsVendas)?d.pdfsVendas:[];
+        S.dexConfig.pdfsMarketing=Array.isArray(d.pdfsMarketing)?d.pdfsMarketing:[];
+        S.dexConfig.modelo=String(d.modelo||'haiku');
+        S.dexConfig.maxTokens=Number(d.maxTokens)||1024;
+        S.dexConfig.updatedAt=d.updatedAt||null;
+        S.dexConfig.updatedBy=String(d.updatedBy||'');
+      }
+      S.dexConfig.loaded=true;
+      if(S.dexAberto&&S._dexConfigOpen)_proDexRender();
+    },err=>{console.warn('dexPrompt onSnapshot:',err);S.dexConfig.loaded=true;});
   }
   if(_proUnsub)return _proRender();
   _proUnsub=onSnapshot(collection(db,'produtos'),snap=>{
@@ -28332,13 +28515,15 @@ function _proRenderList(root){
   // Lista filtrada
   let items=S.produtos.slice();
   if(!canEdit)items=items.filter(p=>p.status!=='rascunho');
-  const q=(S.produtosBusca||'').trim().toLowerCase();
-  if(q){
+  const qRaw=(S.produtosBusca||'').trim();
+  if(qRaw){
+    // Normaliza (lowercase + remove acentos) e quebra em termos.
+    // Cada termo precisa aparecer no produto (busca AND).
+    const norm=_proNormBusca;
+    const termos=norm(qRaw).split(/\s+/).filter(Boolean);
     items=items.filter(p=>{
-      const pubs=_proGetPublicoAlvo(p).join(' ');
-      const hay=[p.nome,_proGetBreveDescricao(p),pubs,
-        ...(p.features||[]).map(f=>(f.titulo||'')+' '+(f.descricao||''))].join(' ').toLowerCase();
-      return hay.includes(q);
+      const hay=norm(_proBuscaHaystack(p));
+      return termos.every(t=>hay.includes(t));
     });
   }
   // Ordem: respeita o campo `ordem` (definido por drag-and-drop), com fallback
@@ -28445,7 +28630,25 @@ function _proJornadaHTML(){
       <img src="${_proEscAttr(j.imagemUrl)}" alt="Imagem da jornada" class="pro-jornada-img"/>
       <button class="btn btn-d btn-sm" onclick="_proJornadaRemoverImagem()" type="button">🗑 Remover imagem</button>
     </div>`:'';
+    // Banner de rascunho não-salvo (sobrevivente de reload/crash)
+    let draftBanner='';
+    if(S._jornadaDraft){
+      const ageMin=Math.max(1,Math.round((Date.now()-(S._jornadaDraft.savedAt||Date.now()))/60000));
+      const ageTxt=ageMin<60?`${ageMin} min atrás`:`${Math.round(ageMin/60)} h atrás`;
+      draftBanner=`<div class="pro-jornada-draft-banner">
+        <div class="pro-jornada-draft-icon">💾</div>
+        <div class="pro-jornada-draft-body">
+          <div class="pro-jornada-draft-title">Rascunho não salvo encontrado</div>
+          <div class="pro-jornada-draft-meta">Última edição: ${ageTxt} · Conteúdo diferente do salvo no servidor</div>
+        </div>
+        <div class="pro-jornada-draft-actions">
+          <button class="btn btn-p btn-sm" type="button" onclick="_proJornadaDraftRestaurar()">↩ Restaurar</button>
+          <button class="btn btn-d btn-sm" type="button" onclick="_proJornadaDraftDescartar()">🗑 Descartar</button>
+        </div>
+      </div>`;
+    }
     bodyHtml=`
+      ${draftBanner}
       <p class="pro-jornada-hint">Descreva quem é o cliente que compra esses produtos — perfil, dores, jornada de compra, gatilhos. Esse conteúdo alimenta a IA do Dex e serve de consulta pros vendedores.</p>
       <div class="fg">
         <label class="fl">Descrição da jornada</label>
@@ -28468,7 +28671,7 @@ function _proJornadaHTML(){
       </div>`;
   }else{
     // Modo somente leitura (vendedor sem permissão de edit)
-    const txtHtml=String(j.texto||'').trim()?`<div class="pro-jornada-text">${_renderRichText(j.texto)}</div>`:`<p style="color:var(--t2);font-style:italic;margin:0">Jornada ainda não foi descrita.</p>`;
+    const txtHtml=String(j.texto||'').trim()?`<div class="pro-jornada-text">${_proRtRepairDetails(_renderRichText(j.texto))}</div>`:`<p style="color:var(--t2);font-style:italic;margin:0">Jornada ainda não foi descrita.</p>`;
     const videoEmbed=j.videoUrl?`<div style="margin-top:14px">${_proJornadaEmbedHTML(j.videoUrl)}</div>`:'';
     const img=j.imagemUrl?`<div style="margin-top:14px"><img src="${_proEscAttr(j.imagemUrl)}" alt="Imagem da jornada" class="pro-jornada-img"/></div>`:'';
     bodyHtml=`${txtHtml}${videoEmbed}${img}`;
@@ -28506,13 +28709,72 @@ window.proToggleJornada=()=>{
 window._proJornadaSetTexto=(html)=>{
   S.jornadaCliente.texto=String(html||'');
   _proJornadaMark();
+  _proJornadaDraftScheduleSave();
 };
 window._proJornadaSetVideo=(url)=>{
   S.jornadaCliente.videoUrl=String(url||'').trim();
   _proJornadaMark();
+  _proJornadaDraftScheduleSave();
   // Re-render só pra atualizar o preview do embed
   clearTimeout(window._proJornadaVideoTimer);
   window._proJornadaVideoTimer=setTimeout(()=>_proJornadaRefresh(),400);
+};
+
+// ── Auto-save em rascunho (localStorage) ──────────────────────────────────
+// Sobrevive a reload/crash do navegador. Não vai pro Firestore — só local.
+// Limpo automaticamente após salvar com sucesso no Firestore.
+const _proJornadaDraftKey='aros.jornadaCliente.draft.v1';
+let _proJornadaDraftTimer=null;
+function _proJornadaDraftScheduleSave(){
+  clearTimeout(_proJornadaDraftTimer);
+  _proJornadaDraftTimer=setTimeout(_proJornadaDraftSave,600);
+}
+function _proJornadaDraftSave(){
+  try{
+    const payload={
+      texto:String(S.jornadaCliente.texto||''),
+      videoUrl:String(S.jornadaCliente.videoUrl||''),
+      imagemUrl:String(S.jornadaCliente.imagemUrl||''),
+      imagemPath:String(S.jornadaCliente.imagemPath||''),
+      savedAt:Date.now()
+    };
+    localStorage.setItem(_proJornadaDraftKey,JSON.stringify(payload));
+  }catch(e){console.warn('jornadaDraftSave:',e);}
+}
+function _proJornadaDraftClear(){
+  try{localStorage.removeItem(_proJornadaDraftKey);}catch(e){}
+}
+function _proJornadaDraftLoad(){
+  try{const raw=localStorage.getItem(_proJornadaDraftKey);if(!raw)return null;return JSON.parse(raw);}catch(e){return null;}
+}
+// Compara rascunho local com Firestore. Se rascunho tem conteúdo diferente
+// E é "razoavelmente recente" (até 30 dias), sinaliza banner pra restaurar.
+function _proJornadaDraftCheck(){
+  const d=_proJornadaDraftLoad();
+  if(!d)return;
+  const texto=String(d.texto||'').trim();
+  const remote=String(S.jornadaCliente.texto||'').trim();
+  if(!texto||texto===remote){_proJornadaDraftClear();return;}
+  // Janela de 30 dias pra evitar ressuscitar rascunho antiquíssimo
+  const age=Date.now()-(d.savedAt||0);
+  if(age>30*24*60*60*1000){_proJornadaDraftClear();return;}
+  S._jornadaDraft=d;
+  _proJornadaRefresh();
+}
+window._proJornadaDraftRestaurar=()=>{
+  const d=S._jornadaDraft;if(!d)return;
+  S.jornadaCliente.texto=String(d.texto||'');
+  S.jornadaCliente.videoUrl=String(d.videoUrl||'');
+  if(d.imagemUrl){S.jornadaCliente.imagemUrl=String(d.imagemUrl||'');S.jornadaCliente.imagemPath=String(d.imagemPath||'');}
+  S._jornadaDraft=null;
+  _proJornadaMark();
+  _proJornadaRefresh();
+};
+window._proJornadaDraftDescartar=()=>{
+  if(!confirm('Descartar o rascunho não salvo? Esta ação não pode ser desfeita.'))return;
+  _proJornadaDraftClear();
+  S._jornadaDraft=null;
+  _proJornadaRefresh();
 };
 function _proJornadaMark(){
   if(S._jornadaDirty)return;
@@ -28581,6 +28843,9 @@ window._proJornadaSalvar=async()=>{
     await setDoc(doc(db,'config','jornadaCliente'),payload,{merge:true});
     if(typeof audit==='function')audit('JORNADA_CLIENTE_SALVA',{collection:'config',id:'jornadaCliente'},{after:{hasTexto:!!payload.texto,hasVideo:!!payload.videoUrl,hasImagem:!!payload.imagemUrl}});
     S._jornadaDirty=false;
+    // Limpa rascunho local — agora está oficialmente salvo no servidor
+    _proJornadaDraftClear();
+    S._jornadaDraft=null;
     _proSaveFeedback('ok');
     _proJornadaRefresh();
   }catch(e){
@@ -28612,12 +28877,32 @@ function _proDexRender(){
     body=`<div class="pro-dex-answer">${html}</div>${meta}`;
   }
 
+  // Botão de configuração — só pra quem pode editar (admin/coord)
+  const cfgBtn=_proCanEdit()?`<button class="pro-dex-cfg-btn${S._dexConfigOpen?' on':''}" onclick="proDexConfigToggle()" title="Configurar comportamento do Dex (prompt, modelo)">⚙️</button>`:'';
+  // Painel de configuração (inline disclosure)
+  const cfgPanel=(S._dexConfigOpen&&_proCanEdit())?_proDexConfigHTML():'';
+
+  // Chips de perfil — quem está perguntando agora
+  const perfis=[
+    {id:'geral',ico:'🧭',lbl:'Geral'},
+    {id:'suporte',ico:'💁',lbl:'Suporte'},
+    {id:'vendas',ico:'💰',lbl:'Vendas'},
+    {id:'marketing',ico:'📢',lbl:'Marketing'},
+  ];
+  const perfilAtual=S.dexPerfil||'geral';
+  const chips=perfis.map(p=>`<button type="button" class="pro-dex-chip${perfilAtual===p.id?' on':''}" onclick="_proDexSetPerfil('${p.id}')" title="${p.id==='geral'?'Pergunta neutra, sem viés de papel':'Pergunto como '+p.lbl}">${p.ico} ${p.lbl}</button>`).join('');
+
   c.innerHTML=`
     <div class="pro-dex-panel">
       <div class="pro-dex-head">
         <div class="pro-dex-title"><span class="pro-dex-title-ico">🤖</span> Dex · Assistente do Catálogo MedReview</div>
-        <button class="pro-dex-close" onclick="proDexToggle()" title="Fechar">✕</button>
+        <div class="pro-dex-head-actions">
+          ${cfgBtn}
+          <button class="pro-dex-close" onclick="proDexToggle()" title="Fechar">✕</button>
+        </div>
       </div>
+      ${cfgPanel}
+      <div class="pro-dex-perfil-row" role="radiogroup" aria-label="Perfil de quem está perguntando">${chips}</div>
       <form class="pro-dex-form" onsubmit="event.preventDefault();proDexAsk();">
         <textarea class="pro-dex-input" id="pro-dex-input" placeholder="Ex: Qual produto serve pra TEA 2ª fase e inclui mentoria?" rows="1" oninput="S.dexPergunta=this.value" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();proDexAsk();}">${_proEsc(pergunta)}</textarea>
         <button class="pro-dex-ask" type="submit" ${loading?'disabled':''}>${loading?'Aguarde…':'Perguntar'}</button>
@@ -28647,6 +28932,364 @@ function _proDexBindLinks(){
     };
   });
 }
+
+window._proDexSetPerfil=(perfil)=>{
+  if(!_DEX_PERFIS.includes(perfil))return;
+  S.dexPerfil=perfil;
+  try{localStorage.setItem('aros.dex.perfil',perfil);}catch(e){}
+  _proDexRender();
+};
+
+// ── Configuração editável do Dex (prompt, modelo, max_tokens) ──────────
+function _proDexConfigHTML(){
+  // Usa draft se existir (edição em andamento), senão usa o estado oficial
+  const d=S._dexConfigDraft||S.dexConfig;
+  const modelo=String(d.modelo||'haiku').toLowerCase();
+  const maxTokens=Number(d.maxTokens)||1024;
+  const dirty=!!S._dexConfigDirty;
+  const upd=(S.dexConfig.updatedAt&&S.dexConfig.updatedBy)?`<span class="pro-dex-cfg-meta">Atualizado em ${_proEsc(_proFmtDate(S.dexConfig.updatedAt))} por ${_proEsc(S.dexConfig.updatedBy)}</span>`:'<span class="pro-dex-cfg-meta">Configuração ainda não personalizada</span>';
+  // Lista de modelos
+  const modelos=[
+    {v:'haiku',l:'Haiku 4.5',d:'mais rápido e barato (recomendado)'},
+    {v:'sonnet',l:'Sonnet 4.6',d:'equilíbrio entre qualidade e custo (~3x mais caro)'},
+    {v:'opus',l:'Opus 4.7',d:'máxima inteligência (~15x mais caro)'},
+  ];
+  const opts=modelos.map(m=>`<option value="${m.v}"${modelo===m.v?' selected':''}>${_proEsc(m.l)} — ${_proEsc(m.d)}</option>`).join('');
+
+  // Abas por perfil
+  const perfis=[
+    {id:'geral',ico:'🧭',lbl:'Geral',campo:'templateGeral'},
+    {id:'suporte',ico:'💁',lbl:'Suporte',campo:'templateSuporte'},
+    {id:'vendas',ico:'💰',lbl:'Vendas',campo:'templateVendas'},
+    {id:'marketing',ico:'📢',lbl:'Marketing',campo:'templateMarketing'},
+  ];
+  const tabAtiva=S._dexConfigTab||'geral';
+  const tabsHtml=perfis.map(p=>`<button type="button" class="pro-dex-cfg-tab${tabAtiva===p.id?' on':''}" onclick="_proDexConfigSetTab('${p.id}')">${p.ico} ${p.lbl}</button>`).join('');
+  const perfilAtivo=perfis.find(p=>p.id===tabAtiva)||perfis[0];
+  const template=String(d[perfilAtivo.campo]||'');
+
+  return `
+    <div class="pro-dex-cfg-panel">
+      <div class="pro-dex-cfg-head">
+        <div class="pro-dex-cfg-title">⚙️ Configuração do Dex</div>
+        ${upd}
+        ${dirty?'<span class="pro-dex-cfg-dirty">● Não salvo</span>':''}
+      </div>
+
+      <div class="pro-dex-cfg-fg">
+        <label class="pro-dex-cfg-lbl">Modelo de IA (vale pra todos os perfis)</label>
+        <select class="pro-dex-cfg-sel" onchange="_proDexConfigSet('modelo',this.value)">${opts}</select>
+        <div class="pro-dex-cfg-hint">Modelos mais inteligentes dão respostas melhores mas custam mais por pergunta.</div>
+      </div>
+
+      <div class="pro-dex-cfg-fg">
+        <label class="pro-dex-cfg-lbl">Tamanho máximo da resposta · ${maxTokens} tokens (vale pra todos os perfis)</label>
+        <input type="range" min="256" max="4096" step="128" value="${maxTokens}" class="pro-dex-cfg-range" oninput="_proDexConfigSet('maxTokens',parseInt(this.value,10));this.previousElementSibling.textContent='Tamanho máximo da resposta · '+this.value+' tokens (vale pra todos os perfis)'"/>
+        <div class="pro-dex-cfg-hint">~750 palavras por 1000 tokens. Padrão: 1024.</div>
+      </div>
+
+      <div class="pro-dex-cfg-tabs">${tabsHtml}</div>
+
+      <div class="pro-dex-cfg-fg">
+        <label class="pro-dex-cfg-lbl">Instruções para o perfil <strong>${perfilAtivo.lbl}</strong></label>
+        <textarea class="pro-dex-cfg-ta" placeholder="Deixe vazio pra usar o exemplo padrão deste perfil. Ou escreva instruções personalizadas." oninput="_proDexConfigSet('${perfilAtivo.campo}',this.value)">${_proEsc(template)}</textarea>
+        <div class="pro-dex-cfg-hint">
+          A <strong>Jornada do Cliente</strong> e o <strong>Catálogo de Produtos</strong> são sempre anexados automaticamente. Você só escreve as instruções de comportamento pra este perfil. Se deixar vazio, o Dex usa o exemplo padrão.
+        </div>
+      </div>
+
+      ${_proDexConfigPdfsHTML(perfilAtivo.id)}
+
+      <div class="pro-dex-cfg-foot">
+        <button class="btn btn-s btn-sm" type="button" onclick="_proDexConfigCarregarExemplo()" title="Preenche a textarea com o exemplo padrão deste perfil — você pode editar a partir dele">📋 Carregar exemplo</button>
+        <button class="btn btn-d btn-sm" type="button" onclick="_proDexConfigRestaurar()" title="Limpa as instruções deste perfil — volta a usar o exemplo padrão">↶ Usar padrão</button>
+        <span style="flex:1"></span>
+        <button class="btn btn-s btn-sm" type="button" onclick="_proDexConfigCancelar()">Cancelar</button>
+        <button class="btn btn-p btn-sm" type="button" onclick="_proDexConfigSalvar()" ${dirty?'':'disabled'}>💾 Salvar</button>
+      </div>
+    </div>
+  `;
+}
+
+// Exemplos padrão por perfil (espelham os DEFAULT_INSTRUCTIONS do backend)
+const _proDexExemplos={
+  geral:`Você é o Dex, assistente do catálogo da MedReview — modo **Geral**.
+
+Seu trabalho: responder qualquer pergunta sobre o catálogo de produtos da MedReview de forma direta, precisa e útil, sem assumir um papel específico de suporte, vendas ou marketing.
+
+REGRAS:
+1. Use APENAS as informações da jornada do cliente e do catálogo abaixo. Não invente nada que não esteja escrito.
+2. Sempre entregue o que você sabe primeiro. Só depois mencione o que falta.
+3. Quando mencionar um produto pelo nome, formate como [Nome do Produto](produto:ID_DO_PRODUTO) usando o ID exato do catálogo.
+4. Responda de forma direta e objetiva. Frases curtas. Português brasileiro.
+5. Se a pergunta envolve comparar produtos, organize em tópicos com a diferença clara entre eles.
+6. Se a pergunta for genuinamente ambígua, peça esclarecimento — mas se der pra inferir o sentido, responda.
+7. Nunca invente preço, data, link ou contato que não esteja no catálogo.
+8. Não dê opinião clínica/médica.
+9. Se a informação não está no catálogo nem na jornada, diga claramente e sugira consultar a fonte oficial.`,
+  suporte:`Você é o Dex, assistente do time de **Suporte** da MedReview.
+
+Seu trabalho: ajudar quem está respondendo um ticket ou dúvida de cliente a entender rapidamente qual produto/recurso o cliente está mencionando e o que dizer.
+
+REGRAS:
+1. Resposta curta e objetiva. O suporte precisa de informação rápida pra repassar ao cliente.
+2. Sempre que mencionar um produto, formate como [Nome do Produto](produto:ID_DO_PRODUTO) usando o ID exato do catálogo.
+3. Para perguntas do tipo "tenho acesso ao X?" ou "isso está incluído?", responda com base estritamente no catálogo (em qual produto a feature está, se é incluída ou opcional, etc).
+4. Para dúvidas técnicas (como acessar, login, suporte de uso): não invente — diga apenas o que está documentado no catálogo.
+5. Nunca dê opinião clínica/médica. Limite-se ao escopo do catálogo.
+6. Se a informação não está nem na jornada nem no catálogo, diga claramente que não tem e sugira consultar a fonte oficial (edital, suporte direto).
+7. Português brasileiro, frases curtas.`,
+  vendas:`Você é o Dex, assistente do time de **Vendas** da MedReview.
+
+Seu trabalho: ajudar o vendedor a conectar a dor do cliente com a solução certa do catálogo, entregar argumentos prontos e ajudar a contornar objeções.
+
+REGRAS:
+1. Sempre que possível, primeiro entenda a situação do cliente (qual prova vai prestar, qual ano da residência, momento da jornada) — use a Jornada do Cliente como guia.
+2. Recomende o produto mais aderente à situação. Cite o nome como link [Nome](produto:ID).
+3. Se houver mais de uma opção válida, apresente as 2-3 melhores com a diferença clara entre elas.
+4. Entregue argumentos de venda do produto recomendado, puxando da seção "Argumentos de venda" do catálogo.
+5. Se o cliente apresenta uma objeção (preço, tempo, dúvida), busque no catálogo a resposta documentada pra essa objeção e use ela como base.
+6. Tom: profissional e consultivo. Ajudar o cliente a escolher certo, não empurrar.
+7. Nunca invente preço, desconto ou condição que não esteja no catálogo.
+8. Português brasileiro.`,
+  marketing:`Você é o Dex, assistente do time de **Marketing** da MedReview.
+
+Seu trabalho: ajudar o marketing a entender posicionamento, diferenciais e público-alvo de cada produto pra produzir copy, anúncios e campanhas.
+
+REGRAS:
+1. Quando perguntarem sobre um produto, traga de forma estruturada: público-alvo, prova-alvo, principais features, diferenciais (puxe da seção "Diferenciais") e argumentos de venda.
+2. Se perguntarem "qual gancho de copy usar pra X?", combine os argumentos de venda do catálogo com a dor correspondente na jornada do cliente.
+3. Cite produtos como [Nome](produto:ID).
+4. Quando relevante, sugira qual momento da jornada do cliente o produto atinge melhor.
+5. Tom: estratégico e estruturado. Resposta organizada — use tópicos quando fizer sentido.
+6. Nunca compare diretamente com concorrentes que não estejam citados no catálogo.
+7. Não invente fatos de mercado, estatísticas ou dados que não estejam no catálogo.
+8. Português brasileiro.`,
+};
+
+window._proDexConfigSetTab=(tab)=>{
+  if(!_DEX_PERFIS.includes(tab))return;
+  S._dexConfigTab=tab;
+  _proDexRender();
+};
+
+// ── PDFs anexados por perfil (vão pro Claude como documentos de referência) ──
+function _proDexConfigPdfsHTML(perfil){
+  const campo='pdfs'+perfil.charAt(0).toUpperCase()+perfil.slice(1);
+  const pdfs=Array.isArray(S.dexConfig[campo])?S.dexConfig[campo]:[];
+  const podeAdicionar=pdfs.length<DEX_PDF_MAX_QTDE;
+  const lista=pdfs.length?pdfs.map((p,i)=>`
+    <div class="pro-dex-pdf-item" data-idx="${i}">
+      <div class="pro-dex-pdf-icon">📄</div>
+      <div class="pro-dex-pdf-info">
+        <div class="pro-dex-pdf-name" title="${_proEscAttr(p.label||p.name||'PDF')}">${_proEsc(p.label||p.name||'PDF')}</div>
+        <div class="pro-dex-pdf-meta">${_proFmtSize(p.sizeBytes||0)}${p.uploadedBy?' · '+_proEsc(p.uploadedBy):''}</div>
+      </div>
+      <a class="pro-dex-pdf-btn" href="${_proEscAttr(p.url||'#')}" target="_blank" rel="noopener" title="Abrir PDF">👁</a>
+      <button type="button" class="pro-dex-pdf-btn pro-dex-pdf-rm" onclick="_proDexConfigPdfRemove('${perfil}',${i})" title="Remover PDF">🗑</button>
+    </div>
+  `).join(''):`<div class="pro-dex-pdf-empty">Nenhum PDF anexado ainda</div>`;
+  const addBtn=podeAdicionar
+    ?`<button type="button" class="btn btn-s btn-sm" onclick="document.getElementById('pro-dex-pdf-file-${perfil}').click()">📎 Anexar PDF</button>
+       <input type="file" id="pro-dex-pdf-file-${perfil}" accept="application/pdf,.pdf" style="display:none" onchange="_proDexConfigPdfUpload('${perfil}',this)"/>`
+    :`<div class="pro-dex-cfg-hint" style="color:#f59e0b">Limite de ${DEX_PDF_MAX_QTDE} PDFs por perfil atingido. Remova algum antes de adicionar outro.</div>`;
+  return `
+    <div class="pro-dex-cfg-fg">
+      <label class="pro-dex-cfg-lbl">Documentos PDF anexados (referência adicional para este perfil)</label>
+      <div class="pro-dex-pdf-list">${lista}</div>
+      <div style="margin-top:8px">${addBtn}</div>
+      <div class="pro-dex-cfg-hint">
+        PDFs enviados aqui são lidos pelo Dex em toda pergunta deste perfil. Ideais: editais de prova, manuais, tabelas. Limite: ${DEX_PDF_MAX_QTDE} PDFs · 32MB cada · 100 páginas cada. <strong>Custa mais por pergunta</strong> (cada PDF adiciona milhares de tokens). Cache de 5min mitiga em consultas seguidas.
+      </div>
+    </div>
+  `;
+}
+
+window._proDexConfigPdfUpload=async(perfil,fileInput)=>{
+  const file=fileInput&&fileInput.files&&fileInput.files[0];
+  if(!file){fileInput.value='';return;}
+  if(!_proCanEdit()){alert('Sem permissão.');fileInput.value='';return;}
+  if(file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name)){
+    alert('Apenas arquivos PDF são aceitos.');fileInput.value='';return;
+  }
+  if(file.size>DEX_PDF_MAX_BYTES){
+    alert(`"${file.name}" tem ${(file.size/1024/1024).toFixed(1)}MB — limite é ${DEX_PDF_MAX_BYTES/1024/1024}MB.`);
+    fileInput.value='';return;
+  }
+  const campo='pdfs'+perfil.charAt(0).toUpperCase()+perfil.slice(1);
+  const atuais=Array.isArray(S.dexConfig[campo])?S.dexConfig[campo].slice():[];
+  if(atuais.length>=DEX_PDF_MAX_QTDE){
+    alert(`Limite de ${DEX_PDF_MAX_QTDE} PDFs atingido para o perfil ${perfil}.`);
+    fileInput.value='';return;
+  }
+  const path=`dex/pdfs/${perfil}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+  // Feedback visual
+  const lista=document.querySelector('.pro-dex-pdf-list');
+  if(lista){
+    const tmp=document.createElement('div');
+    tmp.className='pro-dex-pdf-item uploading';
+    tmp.innerHTML=`<div class="pro-dex-pdf-icon">⏳</div><div class="pro-dex-pdf-info"><div class="pro-dex-pdf-name">${_proEsc(file.name)}</div><div class="pro-dex-pdf-meta">Enviando…</div></div>`;
+    lista.appendChild(tmp);
+  }
+  try{
+    const r=window._fbStorage.ref(window._fbStorage.storage,path);
+    await window._fbStorage.uploadBytes(r,file,{contentType:'application/pdf'});
+    const url=await window._fbStorage.getDownloadURL(r);
+    const user=S.currentUser?.username||'?';
+    const novo={
+      label:file.name.replace(/\.pdf$/i,'').slice(0,80),
+      name:file.name,
+      url,
+      path,
+      sizeBytes:file.size,
+      uploadedAt:new Date().toISOString(),
+      uploadedBy:user
+    };
+    atuais.push(novo);
+    // Escreve direto no Firestore (não usa draft — PDFs commitam imediatamente)
+    await setDoc(doc(db,'config','dexPrompt'),{[campo]:atuais,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    if(typeof audit==='function')audit('DEX_PDF_ANEXADO',{collection:'config',id:'dexPrompt'},{after:{perfil,arquivo:file.name,sizeBytes:file.size}});
+    _proSaveFeedback('ok');
+  }catch(e){
+    alert('Erro no upload: '+(e.message||e));
+    // Tenta apagar do Storage se falhou depois do upload
+    try{await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,path));}catch(_){}
+  }finally{
+    fileInput.value='';
+    _proDexRender();
+  }
+};
+
+window._proDexConfigPdfRemove=async(perfil,idx)=>{
+  if(!_proCanEdit()){alert('Sem permissão.');return;}
+  const campo='pdfs'+perfil.charAt(0).toUpperCase()+perfil.slice(1);
+  const atuais=Array.isArray(S.dexConfig[campo])?S.dexConfig[campo].slice():[];
+  const alvo=atuais[idx];if(!alvo)return;
+  if(!confirm(`Remover "${alvo.label||alvo.name||'PDF'}"?`))return;
+  atuais.splice(idx,1);
+  try{
+    const user=S.currentUser?.username||'?';
+    await setDoc(doc(db,'config','dexPrompt'),{[campo]:atuais,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    // Best-effort: apaga do Storage
+    if(alvo.path){
+      try{await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,alvo.path));}catch(e){console.warn('Falha ao remover do Storage:',e);}
+    }
+    if(typeof audit==='function')audit('DEX_PDF_REMOVIDO',{collection:'config',id:'dexPrompt'},{after:{perfil,arquivo:alvo.label||alvo.name}});
+    _proSaveFeedback('ok');
+  }catch(e){
+    alert('Erro ao remover: '+(e.message||e));
+  }
+  _proDexRender();
+};
+
+window._proDexConfigCarregarExemplo=()=>{
+  const tab=S._dexConfigTab||'geral';
+  const campo='template'+tab.charAt(0).toUpperCase()+tab.slice(1);
+  const atual=String((S._dexConfigDraft||S.dexConfig)[campo]||'').trim();
+  if(atual&&!confirm('Já existe texto no perfil '+tab+'. Substituir pelo exemplo?'))return;
+  _proDexConfigEnsureDraft();
+  S._dexConfigDraft[campo]=_proDexExemplos[tab]||'';
+  S._dexConfigDirty=true;
+  _proDexRender();
+};
+
+function _proDexConfigEnsureDraft(){
+  if(!S._dexConfigDraft){
+    S._dexConfigDraft={
+      templateGeral:String(S.dexConfig.templateGeral||''),
+      templateSuporte:String(S.dexConfig.templateSuporte||''),
+      templateVendas:String(S.dexConfig.templateVendas||''),
+      templateMarketing:String(S.dexConfig.templateMarketing||''),
+      modelo:String(S.dexConfig.modelo||'haiku'),
+      maxTokens:Number(S.dexConfig.maxTokens)||1024,
+    };
+  }
+}
+
+window._proDexConfigSet=(field,value)=>{
+  _proDexConfigEnsureDraft();
+  S._dexConfigDraft[field]=value;
+  S._dexConfigDirty=true;
+  // Atualiza só o botão de salvar e o dirty pill (sem re-render completo
+  // pra não roubar o foco do textarea/range que o user está mexendo)
+  const foot=document.querySelector('.pro-dex-cfg-foot .btn-p');
+  if(foot)foot.disabled=false;
+  const head=document.querySelector('.pro-dex-cfg-head');
+  if(head&&!head.querySelector('.pro-dex-cfg-dirty')){
+    const pill=document.createElement('span');
+    pill.className='pro-dex-cfg-dirty';
+    pill.textContent='● Não salvo';
+    head.appendChild(pill);
+  }
+};
+
+window.proDexConfigToggle=()=>{
+  if(!_proCanEdit())return;
+  if(S._dexConfigOpen){
+    // Fechando: se tem mudanças não salvas, pergunta
+    if(S._dexConfigDirty){
+      if(!confirm('Há alterações não salvas na configuração do Dex. Descartar?'))return;
+    }
+    S._dexConfigOpen=false;
+    S._dexConfigDirty=false;
+    S._dexConfigDraft=null;
+  }else{
+    S._dexConfigOpen=true;
+    _proDexConfigEnsureDraft();
+  }
+  _proDexRender();
+};
+
+window._proDexConfigCancelar=()=>{
+  if(S._dexConfigDirty){
+    if(!confirm('Descartar alterações?'))return;
+  }
+  S._dexConfigOpen=false;
+  S._dexConfigDirty=false;
+  S._dexConfigDraft=null;
+  _proDexRender();
+};
+
+window._proDexConfigRestaurar=()=>{
+  const tab=S._dexConfigTab||'geral';
+  const campo='template'+tab.charAt(0).toUpperCase()+tab.slice(1);
+  if(!confirm('Limpar as instruções do perfil '+tab+' e voltar a usar o exemplo padrão?'))return;
+  _proDexConfigEnsureDraft();
+  S._dexConfigDraft[campo]='';
+  S._dexConfigDirty=true;
+  _proDexRender();
+};
+
+window._proDexConfigSalvar=async()=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  if(!S._dexConfigDraft){alert('Nada para salvar.');return;}
+  const d=S._dexConfigDraft;
+  const btn=document.querySelector('.pro-dex-cfg-foot .btn-p');
+  if(btn){btn.disabled=true;btn.textContent='Salvando…';}
+  try{
+    const user=S.currentUser?.username||'?';
+    const payload={
+      templateGeral:String(d.templateGeral||'').trim(),
+      templateSuporte:String(d.templateSuporte||'').trim(),
+      templateVendas:String(d.templateVendas||'').trim(),
+      templateMarketing:String(d.templateMarketing||'').trim(),
+      modelo:String(d.modelo||'haiku').toLowerCase(),
+      maxTokens:Math.max(256,Math.min(4096,Number(d.maxTokens)||1024)),
+      updatedAt:serverTimestamp(),
+      updatedBy:user
+    };
+    await setDoc(doc(db,'config','dexPrompt'),payload,{merge:true});
+    if(typeof audit==='function')audit('DEX_PROMPT_SALVO',{collection:'config',id:'dexPrompt'},{after:{modelo:payload.modelo,maxTokens:payload.maxTokens,custom:{geral:!!payload.templateGeral,suporte:!!payload.templateSuporte,vendas:!!payload.templateVendas,marketing:!!payload.templateMarketing}}});
+    S._dexConfigDirty=false;
+    S._dexConfigDraft=null;
+    _proSaveFeedback('ok');
+    _proDexRender();
+  }catch(e){
+    _proSaveFeedback('err',e.message);
+    alert('Erro ao salvar: '+e.message);
+    if(btn){btn.disabled=false;btn.textContent='💾 Salvar';}
+  }
+};
 
 window.proDexToggle=()=>{
   S.dexAberto=!S.dexAberto;
@@ -28692,7 +29335,7 @@ window.proDexAsk=async()=>{
     const resp=await fetch(DEX_ENDPOINT,{
       method:'POST',
       headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
-      body:JSON.stringify({pergunta})
+      body:JSON.stringify({pergunta,perfil:S.dexPerfil||'suporte'})
     });
     let data={};
     try{ data=await resp.json(); }catch(e){ /* resposta não-JSON */ }
@@ -28876,7 +29519,24 @@ function _proCardDragClear(){
   });
 }
 
-window.proSearchInput=v=>{S.produtosBusca=v;_proRender();};
+let _proSearchTimer=null;
+window.proSearchInput=v=>{
+  S.produtosBusca=v;
+  // Debounce: re-render só depois de 220ms sem digitar — evita re-criar o DOM
+  // a cada tecla e perder o foco do input
+  clearTimeout(_proSearchTimer);
+  _proSearchTimer=setTimeout(()=>{
+    const ed=document.getElementById('pro-search');
+    const wasFocused=ed&&document.activeElement===ed;
+    const selStart=wasFocused?ed.selectionStart:null;
+    const selEnd=wasFocused?ed.selectionEnd:null;
+    _proRender();
+    if(wasFocused){
+      const ed2=document.getElementById('pro-search');
+      if(ed2){try{ed2.focus();if(selStart!=null)ed2.setSelectionRange(selStart,selEnd);}catch(e){}}
+    }
+  },220);
+};
 window.proToggleFiltro=t=>{
   const i=S.produtosFiltroProvas.indexOf(t);
   if(i>=0)S.produtosFiltroProvas.splice(i,1);else S.produtosFiltroProvas.push(t);
@@ -30315,8 +30975,8 @@ window._proFeatHeadClick=(ev,featId)=>{
 function _proRtInitialHTML(value){
   const v=String(value||'').trim();
   if(!v)return '';
-  // Se já é HTML (tem alguma tag), retorna como veio (será sanitizado no save)
-  if(/<[a-z][^>]*>/i.test(v))return v;
+  // Se já é HTML (tem alguma tag), repara details quebrados antes de retornar
+  if(/<[a-z][^>]*>/i.test(v))return _proRtRepairDetails(v);
   // Texto puro: escapa e envolve em <p>, preservando quebras de linha como <br>
   const esc=v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   return '<p>'+esc.replace(/\n/g,'<br>')+'</p>';
@@ -30631,7 +31291,7 @@ function _proSanitizeResp(html){
 
 // Mini rich-text editor — toolbar + contenteditable. Salva HTML cru no estado via onChangeFn.
 function _proRtHTML(uid,value,placeholder,onChangeExpr,opts){
-  const html=String(value||'');
+  const html=_proRtRepairDetails(String(value||''));
   const o=opts||{};
   const withColors=!!o.colors;
   const justify=!!o.justify;
@@ -30674,9 +31334,9 @@ function _proRtHTML(uid,value,placeholder,onChangeExpr,opts){
       <span class="pro-rt-tb-sep"></span>
       <button type="button" title="Inserir link" onclick="_proRtLink('${uid}')">🔗</button>
       ${collapsibles?`<button type="button" title="Inserir bloco colapsável (dropdown dentro do texto)" onclick="_proRtCollapsible('${uid}')">▾</button>`:''}
-      <button type="button" title="Limpar formatação" onclick="_proRtExec('${uid}','removeFormat');_proRtExec('${uid}','unlink')">⌫</button>${colorsHtml}${expandBtn}
+      <button type="button" title="Limpar formatação (cor, fundo, fonte) — funciona na seleção ou em tudo se nada estiver selecionado" onclick="_proRtClear('${uid}')">⌫</button>${colorsHtml}${expandBtn}
     </div>
-    <div class="${edClass}" contenteditable="true" data-rt-ed="${_proEscAttr(uid)}" data-placeholder="${_proEscAttr(placeholder||'')}" oninput="${onChangeExpr}" onblur="${onChangeExpr}" onfocus="${focusHook}">${html}</div>
+    <div class="${edClass}" contenteditable="true" data-rt-ed="${_proEscAttr(uid)}" data-placeholder="${_proEscAttr(placeholder||'')}" oninput="${onChangeExpr}" onblur="${onChangeExpr}" onfocus="${focusHook}" onpaste="_proRtPaste(event,'${uid}')">${html}</div>
   </div>`;
 }
 // Insere bloco <details> colapsável no editor (dropdown dentro do texto)
@@ -30721,6 +31381,185 @@ window._proRtCollapsible=(uid)=>{
     }
   },10);
   _proRtBindCollapsibleHandlers(el);
+  el.dispatchEvent(new Event('input',{bubbles:true}));
+};
+
+// Strippa cores/fundos/fontes inline em todos os descendentes de `root`.
+// Preserva estrutura (incluindo <details> colapsáveis e botão de delete interno).
+// Remove FONT tag e SPAN sem atributos significativos (desempacota).
+function _proRtStripInline(root){
+  if(!root)return;
+  const toUnwrap=[];
+  const all=root.querySelectorAll('*');
+  all.forEach(node=>{
+    const tag=node.tagName;
+    // Preserva botão de delete do colapsável (tem estilos próprios via classe)
+    if(node.classList&&node.classList.contains('pro-collapsible-del'))return;
+    // FONT (legado do execCommand) → desempacota
+    if(tag==='FONT'){toUnwrap.push(node);return;}
+    // Limpa atributos de cor/fundo legados
+    node.removeAttribute('bgcolor');
+    node.removeAttribute('color');
+    node.removeAttribute('face');
+    // Strippa só props relacionadas a cor/fundo/fonte do style inline, preserva o resto
+    if(node.hasAttribute('style')){
+      const s=node.getAttribute('style')||'';
+      const cleaned=s
+        .replace(/(?:^|;)\s*(?:background[\w-]*|color|font-family|font-size|font-weight)\s*:[^;]*/gi,'')
+        .replace(/^[\s;]+/,'')
+        .replace(/;\s*$/,'')
+        .trim();
+      if(cleaned)node.setAttribute('style',cleaned);
+      else node.removeAttribute('style');
+    }
+    // SPAN/B/I/U sem atributos significativos depois da limpeza → desempacota
+    // (não desempacota se for parte de um colapsável: summary, body)
+    if(tag==='SPAN'){
+      node.removeAttribute('class');
+      if(node.attributes.length===0)toUnwrap.push(node);
+    }
+  });
+  toUnwrap.forEach(n=>{
+    while(n.firstChild)n.parentNode.insertBefore(n.firstChild,n);
+    n.remove();
+  });
+}
+
+// Repara <details class="pro-collapsible"> sem .pro-collapsible-body:
+// envolve filhos não-summary (e não-button-delete) num <div class="pro-collapsible-body">.
+// Acontece quando o user cola conteúdo dentro do colapsável e o wrapper é perdido.
+function _proRtRepairDetails(html){
+  if(!html||!/<details/i.test(html))return html;
+  const tmp=document.createElement('div');
+  tmp.innerHTML=String(html);
+  tmp.querySelectorAll('details').forEach(det=>{
+    // Garante a classe pra herdar estilo
+    if(!det.classList.contains('pro-collapsible'))det.classList.add('pro-collapsible');
+    // Se já tem body, ok
+    if(det.querySelector(':scope > .pro-collapsible-body'))return;
+    // Coleta filhos pra mover pro body (mantém summary e o botão de delete fora)
+    const stray=[];
+    [...det.childNodes].forEach(c=>{
+      if(c.nodeType===1){
+        if(c.tagName==='SUMMARY')return;
+        if(c.classList&&c.classList.contains('pro-collapsible-del'))return;
+      }
+      // texto ou outro elemento → vai pro body
+      stray.push(c);
+    });
+    if(!stray.length){
+      // details vazio: cria body com placeholder pra ele renderizar
+      const body=document.createElement('div');
+      body.className='pro-collapsible-body';
+      body.innerHTML='<p><br></p>';
+      // insere depois do summary
+      const sum=det.querySelector(':scope > summary');
+      if(sum&&sum.nextSibling)det.insertBefore(body,sum.nextSibling);
+      else det.appendChild(body);
+      return;
+    }
+    const body=document.createElement('div');
+    body.className='pro-collapsible-body';
+    stray.forEach(n=>body.appendChild(n));
+    // Insere o body logo após o summary (mantém ordem visual)
+    const sum=det.querySelector(':scope > summary');
+    if(sum&&sum.nextSibling)det.insertBefore(body,sum.nextSibling);
+    else det.appendChild(body);
+  });
+  return tmp.innerHTML;
+}
+
+// Roda _proRtStripInline em loop até o HTML estabilizar (resolve aninhamentos profundos)
+function _proRtStripInlineDeep(root){
+  if(!root)return;
+  let prev='';let cur=root.innerHTML;let iter=0;
+  while(prev!==cur&&iter<8){
+    prev=cur;
+    _proRtStripInline(root);
+    cur=root.innerHTML;
+    iter++;
+  }
+}
+
+// Limpa formatação: cor/fundo/fonte. Atua na seleção se houver; senão em tudo.
+// Sempre limpa também os ancestrais wrappers da seleção dentro do editor, pra
+// não exigir múltiplos cliques quando há spans aninhados.
+window._proRtClear=(uid)=>{
+  const el=document.querySelector(`[data-rt-ed="${uid}"]`);
+  if(!el)return;
+  el.focus();
+  try{document.execCommand('styleWithCSS',false,true);}catch(e){}
+  try{document.execCommand('unlink',false,null);}catch(e){}
+  const sel=window.getSelection();
+  const hasSel=sel&&sel.rangeCount&&!sel.getRangeAt(0).collapsed;
+  if(hasSel){
+    // Pega o ancestral comum da seleção (mas não passa do editor)
+    const range=sel.getRangeAt(0);
+    let scope=range.commonAncestorContainer;
+    if(scope.nodeType!==1)scope=scope.parentNode;
+    // Sobe até englobar todos os wrappers de cor/fundo dentro do editor
+    while(scope&&scope!==el&&scope.parentNode&&scope.parentNode!==el.parentNode){
+      const p=scope.parentNode;
+      if(p===el)break;
+      // Se o pai tem style/class de cor ou é span/font, engloba ele também
+      if(p.nodeType===1&&(p.tagName==='SPAN'||p.tagName==='FONT'||(p.hasAttribute&&p.hasAttribute('style')))){
+        scope=p;
+      }else break;
+    }
+    if(!scope||scope===el){_proRtStripInlineDeep(el);}
+    else{
+      const tmpWrap=document.createElement('div');
+      tmpWrap.innerHTML=scope.outerHTML;
+      _proRtStripInlineDeep(tmpWrap);
+      // Substitui o scope pelo conteúdo limpo
+      const parent=scope.parentNode;
+      const anchor=scope.nextSibling;
+      parent.removeChild(scope);
+      while(tmpWrap.firstChild)parent.insertBefore(tmpWrap.firstChild,anchor);
+    }
+  }else{
+    _proRtStripInlineDeep(el);
+  }
+  el.dispatchEvent(new Event('input',{bubbles:true}));
+};
+
+// Sanitiza conteúdo colado: remove estilos inline de cor/fundo/fonte, tags inseguras,
+// preserva estrutura básica (parágrafos, listas, negrito, links).
+window._proRtPaste=(ev,uid)=>{
+  const el=document.querySelector(`[data-rt-ed="${uid}"]`);
+  if(!el)return;
+  const dt=ev.clipboardData||window.clipboardData;
+  if(!dt)return;
+  ev.preventDefault();
+  let html=dt.getData('text/html');
+  const text=dt.getData('text/plain');
+  if(html){
+    const tmp=document.createElement('div');
+    tmp.innerHTML=html;
+    // Remove tags inseguras / lixo do MS Word / Google Docs
+    tmp.querySelectorAll('script,style,meta,link,iframe,object,embed,o\\:p,xml').forEach(n=>n.remove());
+    // Remove comentários
+    const walker=document.createTreeWalker(tmp,NodeFilter.SHOW_COMMENT,null);
+    const comments=[];let c;while((c=walker.nextNode()))comments.push(c);
+    comments.forEach(n=>n.remove());
+    _proRtStripInline(tmp);
+    html=tmp.innerHTML.trim();
+  }else if(text){
+    html=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\r?\n/g,'<br>');
+  }else{
+    return;
+  }
+  try{document.execCommand('insertHTML',false,html);}catch(e){
+    const sel=window.getSelection();
+    if(sel&&sel.rangeCount){
+      const r=sel.getRangeAt(0);r.deleteContents();
+      const tmp2=document.createElement('div');tmp2.innerHTML=html;
+      const frag=document.createDocumentFragment();
+      while(tmp2.firstChild)frag.appendChild(tmp2.firstChild);
+      r.insertNode(frag);r.collapse(false);
+      sel.removeAllRanges();sel.addRange(r);
+    }
+  }
   el.dispatchEvent(new Event('input',{bubbles:true}));
 };
 
@@ -31836,9 +32675,9 @@ function _proSaveFeedback(kind,msg){
   },kind==='ok'?2400:5000);
 }
 
-// Confirma antes de sair com dirty
+// Confirma antes de sair com dirty (produto sendo editado OU jornada do cliente)
 window.addEventListener('beforeunload',e=>{
-  if(_proDirty){e.preventDefault();e.returnValue='';}
+  if(_proDirty||S._jornadaDirty){e.preventDefault();e.returnValue='';}
 });
 
 // MODAL HELPERS

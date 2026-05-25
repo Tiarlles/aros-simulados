@@ -1130,6 +1130,106 @@ npx -y firebase-tools functions:log --only perguntarDex --lines 50
 - Features com `tipo` (v2) → ignora o campo, lê os demais. `quantidade` antigo herda como `numeroChave`. `temVideoComentario` / `bonusProdutoId` ignorados silenciosamente.
 - Ao salvar, normaliza: grava `breveDescricao` + `deleteField(pitchCurto)`, `responsaveis` array + `deleteField(responsavel)`. Campos antigos de features não são removidos com `deleteField` (apenas ignorados na UI).
 
+### Pergunte ao Dex — evolução (2026-05-25)
+
+**Jornada do Cliente integrada ao contexto:**
+- Cloud Function lê `config/jornadaCliente` em paralelo com produtos (Promise.all).
+- HTML do texto é strippado via `stripHtml`, depois injetado como bloco `=== JORNADA DO CLIENTE ===` ANTES do catálogo no system prompt.
+- Sempre anexada — não é mais opcional, não usa placeholders.
+
+**Editor de prompt personalizável (UI admin):**
+- Botão **⚙️** no head do painel do Dex (só `_proCanEdit()`).
+- Painel inline `pro-dex-cfg-panel` com:
+  - Dropdown de **modelo** (Haiku 4.5 / Sonnet 4.6 / Opus 4.7) — alias curto resolvido pra ID via `MODEL_MAP` no backend.
+  - Slider de **max_tokens** (256–4096, default 1024).
+  - **Abas de perfil**: Geral · Suporte · Vendas · Marketing.
+  - Textarea por perfil (instruções/personalidade/regras — Jornada e Catálogo são SEMPRE injetados automaticamente, sem placeholders).
+  - Botão **📋 Carregar exemplo** preenche com o template padrão do perfil (espelhado entre frontend `_proDexExemplos` e backend `DEFAULT_INSTRUCTIONS`).
+  - Botão **↶ Usar padrão** limpa o campo (vazio = backend cai pro `DEFAULT_INSTRUCTIONS[perfil]`).
+  - Salvar/Cancelar usam draft em `S._dexConfigDraft` (preserva edição contra snapshot listener).
+- Doc Firestore: `config/dexPrompt` com campos `templateGeral`, `templateSuporte`, `templateVendas`, `templateMarketing`, `modelo`, `maxTokens`, `pdfsGeral[]`, `pdfsSuporte[]`, `pdfsVendas[]`, `pdfsMarketing[]`, `updatedAt`, `updatedBy`. Campo legado `template` ainda aceito como fallback inicial nos 4 perfis (compat).
+- Audit log: `DEX_PROMPT_SALVO` (com flags `custom.{perfil}: boolean`), `DEX_PDF_ANEXADO`, `DEX_PDF_REMOVIDO`.
+
+**Chips de perfil no painel do Dex (todos os users):**
+- 4 chips acima do input: **🧭 Geral** (default), **💁 Suporte**, **💰 Vendas**, **📢 Marketing**.
+- Escolha persiste em `localStorage` chave `aros.dex.perfil`.
+- Cada pergunta envia `perfil` no body — backend usa template e PDFs correspondentes.
+- Constante frontend `_DEX_PERFIS = ['geral','suporte','vendas','marketing']` (mantém em sync com `PERFIS` do backend).
+- Backend default `DEFAULT_PERFIL = 'geral'` (também usado quando perfil inválido).
+
+**PDFs anexados por perfil (referência adicional pra IA):**
+- Limite: **5 PDFs por perfil · 32MB cada · só `application/pdf`**.
+- Storage path: `dex/pdfs/{perfil}/{Date.now()}-{nome_sanitizado}`.
+- Storage rule nova `match /dex/pdfs/{perfil}/{allPaths=**}` (read auth, write auth+pdf+32MB, delete auth).
+- Upload IMEDIATO no Firestore (não usa draft) via `setDoc(...,{merge:true})` — independente do save do textarea.
+- Botão 🗑 remove de Firestore + Storage (best-effort, ignora falha de delete do Storage).
+- Backend monta `user message content` com array `[doc1, doc2, ..., text]`:
+  - Cada PDF como bloco `type:'document', source:{type:'url', url:p.url}, title:p.label`.
+  - **Cache_control no ÚLTIMO documento** → cacheia todo o prefixo (system + PDFs) por 5min.
+  - Order matters pra prompt caching: PDFs primeiro (estáveis), texto da pergunta depois (variável).
+- Custo aproximado: PDF de 20 páginas ≈ 40k tokens input/pergunta. Primeira chamada paga full (cache write); seguidas pagam ~10% (cache read).
+
+**Backend (`dex.js`) refatorado:**
+- `PERFIS = ['geral','suporte','vendas','marketing']`, `DEFAULT_PERFIL = 'geral'`.
+- `perfilToField(perfil)` → `'template' + Capitalized`.
+- `DEFAULT_INSTRUCTIONS` é objeto `{geral, suporte, vendas, marketing}` — cada um com prompt completo.
+- `buildSystemPromptFromInstructions(instructions, catalogoFmt, jornadaTxt)` — append automático de jornada + catálogo. Função antiga `buildSystemPrompt` removida (era dead code).
+- `MODEL_MAP = {haiku, sonnet, opus}` resolve aliases curtos pra IDs completos. Aceita também ID completo `claude-*` direto.
+- `max_tokens` validado entre 256 e 4096 (default 1024).
+- Logs incluem `perfil`, `modelo`, `max_tokens`, `pdfs_count`, `prompt_custom`.
+
+**Origens CORS atualizadas em `dex.js`:**
+- Aceita `localhost:8080`, `localhost:8081`, `localhost:8765`, `127.0.0.1:8080`, `127.0.0.1:8081`, `127.0.0.1:8765`, `aros.anestreview.com.br`.
+
+**Gotchas:**
+- **`@anthropic-ai/sdk` precisa estar instalado em `cloud-function-hotmart/node_modules/`** antes do deploy. Firebase analisa o source localmente durante o deploy — se o `require()` falha, o export é silenciosamente ignorado e a função some do deploy. Rodar `npm install` em `cloud-function-hotmart/` antes de deployar.
+- **Login custom legado NÃO funciona com Dex** — exige Firebase Auth (Google ou Email/Password).
+- `S._dexConfigDirty` impede o snapshot listener de sobrescrever edições em andamento.
+- Save dos PDFs é independente do save do textarea (PDFs commitam imediatamente; textarea via Salvar/Cancelar).
+
+### Jornada do Cliente — auto-save em rascunho (2026-05-25)
+
+**Sobrevivência a reload/crash do navegador:**
+- Toda edição em `_proJornadaSetTexto` / `_proJornadaSetVideo` chama `_proJornadaDraftScheduleSave()` com debounce 600ms.
+- Snapshot é serializado em `localStorage` chave `aros.jornadaCliente.draft.v1`: `{texto, videoUrl, imagemUrl, imagemPath, savedAt}`.
+- Ao recarregar: snapshot listener carrega Firestore primeiro, depois `_proJornadaDraftCheck()` compara com o rascunho local.
+- Se rascunho difere E é recente (≤30 dias): seta `S._jornadaDraft` e mostra banner laranja `pro-jornada-draft-banner` com botões **↩ Restaurar** e **🗑 Descartar**.
+- Após salvar com sucesso no Firestore: `_proJornadaDraftClear()` apaga o rascunho local.
+- `beforeunload` global também checa `S._jornadaDirty` (não só `_proDirty` do editor de produto).
+
+### Editor rich-text de Produtos — melhorias (2026-05-25)
+
+**Paste sanitizer (`_proRtPaste`):**
+- Bound via `onpaste` attribute em `_proRtHTML`.
+- Captura `clipboardData.getData('text/html')` ou `text/plain`.
+- Remove `script/style/meta/link/iframe/object/embed/o:p/xml`, comentários HTML, e roda `_proRtStripInline` (limpa cor/fundo/fonte/font-family/font-size/font-weight + desempacota `<font>` e spans vazios).
+- Inserção via `execCommand('insertHTML')` com fallback manual.
+
+**Botão ⌫ Limpar reescrito (`_proRtClear`):**
+- Roda `removeFormat` nativo + `unlink`.
+- Se há seleção: expande `commonAncestorContainer` pra cobrir wrappers ancestrais com style/span/font, extrai → limpa → re-insere.
+- Se não há seleção: limpa o editor inteiro.
+- `_proRtStripInlineDeep` roda strip em loop até estabilizar (até 8 iterações) — resolve spans aninhados profundos em uma chamada só (antes precisava clicar 3x).
+
+**Toggle de dropdown em contenteditable (`<details>`):**
+- Bug Chrome: click em summary dentro de `contenteditable` às vezes só posiciona cursor, não toggla.
+- Fix: handler global no `document` (delegação, capture phase) — detecta click em summary dentro de `.pro-rt-ed[contenteditable]`, chama `preventDefault()` e toggla `[open]` manualmente.
+- Ignora cliques no `.pro-collapsible-del` (botão ✕).
+
+**Auto-reparo de `<details>` quebrados (`_proRtRepairDetails`):**
+- Quando user cola conteúdo de fora (ex: Claude.ai com classe `font-claude-response-body`), às vezes o `<details>` perde o wrapper `.pro-collapsible-body`.
+- Função roda em `_proRtHTML` (render do editor) E em `_proRtRepairDetails(_renderRichText(j.texto))` (visualização readonly).
+- Garante classe `pro-collapsible` em todo `<details>`, e envolve filhos não-summary/não-button em `.pro-collapsible-body`.
+
+### Busca do Catálogo de Produtos — melhorias (2026-05-25)
+
+- **Debounce 220ms** em `proSearchInput` antes do `_proRender()` — evita perder foco do input a cada tecla.
+- Refoca + restaura cursor (`selectionStart/End`) em `#pro-search` após re-render.
+- Normalização **case + acento insensível**: `_proNormBusca` usa `.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')`.
+- Busca por **múltiplos termos com AND**: query é split em palavras, todas devem aparecer no haystack do produto.
+- Haystack ampliado via `_proBuscaHaystack(p)` cobrindo: nome, id, status, breve descrição, pitch curto/longo, público-alvo, provas-alvo, responsáveis, features (título/descrição/numeroChave/labels/diferenciais), mentoria (descrição + features + palavra "mentoria" se ativa), bônus (features + nomes de produtos vinculados + palavra "bônus"), argumentos de venda, objeções (pergunta+resposta), dúvidas (pergunta+resposta), links (label+url).
+- `_proBuscaStripHtml` strippa tags pra busca em campos rich-text (diferenciais, mentoriaDescricao, respostas).
+
 **Polimento UX (Apple-like) aplicado em 2026-05-22:**
 - Emoji de feature reduzido (32→20px no detalhe, 26→20px na edição) + número-chave (28→22px).
 - Popover de ícone fecha com clique fora **e** Esc — handler global único em capture phase (`_proEnsureGlobalDismiss`, flag `window._proGlobalDismissBound`).
@@ -1187,21 +1287,46 @@ simulados, simulados/alunos (create), usuarios, listas, config (com 1 exceção)
 - `simulados/{simId}/slides/{allPaths=**}`: idem (slides de projeção).
 - `provas/{provaId}/{allPaths=**}`: idem (imagens de questão, contestação, parecer).
 - `checklists/{simId}/tpl_imgs/{allPaths=**}` (2026-05-14): imagens do enunciado/pergunta/gabarito no template do checklist. Paths usados: `tpl_imgs/{bloco}/enun_{ci}/{file}`, `tpl_imgs/{bloco}/perg_{ci}_{pi}/{file}`, `tpl_imgs/{bloco}/gab_{ci}_{pi}/{file}`.
+- `produtos/{produtoId}/{allPaths=**}`: read+write+delete auth; up to 20MB; imagens ou PDF.
+- `dex/pdfs/{perfil}/{allPaths=**}` (2026-05-25): PDFs de referência do Dex por perfil. Read+delete auth; write auth + `application/pdf` + 32MB max. Claude API lê via URL assinada (bypassa rules).
 - Default deny.
 
 Deploy: `npx -y firebase-tools deploy --only storage` (precisa autorização do usuário).
 
-## Cloud Function (Hotmart)
+## Cloud Functions
 
-Pasta: `cloud-function-hotmart/`
-- Gen 2, Node 20, region `us-central1`, invoker `public`.
-- Env vars em `.env` (gitignored): `HOTMART_TOKEN`, `SLACK_WEBHOOK`.
+Pasta: `cloud-function-hotmart/` (Gen 2, Node 20, region `us-central1`, invoker `public`).
+
+Env vars em `.env` (gitignored):
+- `HOTMART_TOKEN` — token de validação do webhook Hotmart.
+- `SLACK_WEBHOOK` — webhook do Slack pra notificações.
+- `ANTHROPIC_API_KEY` — key da Anthropic Console (org MedReview) pro Dex.
+
+**`hotmartWebhook`** (`index.js`):
 - Valida HOTTOK no header `X-HOTMART-HOTTOK` ou body.
 - Extrai `xcod` de `purchase.origin.xcod` (formato Hotmart 2.0.0).
 - Atualiza `solicitacoesExtra/{xcod}` → status `pago` + `paidVia: 'hotmart'`.
 - Notifica Slack se `SLACK_WEBHOOK` configurado.
 
+**`perguntarDex`** (`dex.js`, re-exportado de `index.js`):
+- POST `{pergunta, perfil}` + header `Authorization: Bearer <Firebase ID token>`.
+- Valida Firebase Auth via `admin.auth().verifyIdToken` — **login custom legado NÃO funciona**.
+- Lê em paralelo: `produtos` collection, `config/jornadaCliente`, `config/dexPrompt`.
+- Resolve template baseado em `perfil` (geral/suporte/vendas/marketing). Fallback: template legado → `DEFAULT_INSTRUCTIONS[perfil]`.
+- Resolve modelo via `MODEL_MAP` (haiku/sonnet/opus → IDs completos).
+- Monta system prompt: instructions + jornada (HTML strippado) + catálogo formatado.
+- Monta user message: array com PDFs do perfil (cada um `type:'document', source:{type:'url', url}`) + `{type:'text', text:pergunta}`. **Cache_control no último PDF** cacheia todo o prefixo por 5min.
+- Chama Anthropic SDK com `cache_control` no system + último PDF.
+- CORS restrito (origens listadas em `ALLOWED_ORIGINS`).
+
+**Pré-requisitos do deploy:**
+1. `cd cloud-function-hotmart && npm install` (instala `@anthropic-ai/sdk`, `firebase-admin`, `firebase-functions`).
+2. `.env` deve existir com as 3 keys (HOTMART_TOKEN, SLACK_WEBHOOK, ANTHROPIC_API_KEY).
+3. Firebase analisa o source localmente — se `require()` falha, a function é silenciosamente removida do deploy. SEMPRE checar `firebase functions:list` após deploy.
+
 Deploy: `npx -y firebase-tools deploy --only functions --force` (**SÓ quando o usuário autorizar**).
+
+Logs: `npx -y firebase-tools functions:log --only perguntarDex --lines 50`.
 
 ## Comandos úteis
 
