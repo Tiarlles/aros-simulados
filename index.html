@@ -1807,9 +1807,13 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-card-name{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;color:var(--text);line-height:1.2;letter-spacing:-.1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #tab-produtos .pro-card-resp{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 #tab-produtos .pro-card-resp-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--t2);opacity:.85;margin-right:2px}
-#tab-produtos .pro-card-resp-chip{display:inline-flex;align-items:center;gap:4px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11.5px;font-weight:500;color:#b08bff;background:color-mix(in srgb, #b08bff 8%, transparent);border:1px solid color-mix(in srgb, #b08bff 22%, var(--border));padding:2px 9px 2px 7px;border-radius:999px;line-height:1.35}
+#tab-produtos .pro-card-resp-chip{display:inline-flex;align-items:center;gap:4px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11.5px;font-weight:500;color:#b08bff;background:color-mix(in srgb, #b08bff 8%, transparent);border:1px solid color-mix(in srgb, #b08bff 22%, var(--border));padding:2px 9px 2px 7px;border-radius:999px;line-height:1.35;text-decoration:none}
 #tab-produtos .pro-card-resp-chip::before{content:"👤";font-size:10px}
 #tab-produtos .pro-card-resp-chip.more::before{content:""}
+/* Chip de responsável com Slack mapeado: vira link clicável */
+#tab-produtos .pro-card-resp-chip.has-slack{cursor:pointer;color:#4A154B}
+#tab-produtos .pro-card-resp-chip.has-slack::before{content:"💬"}
+#tab-produtos .pro-card-resp-chip.has-slack:hover{background:color-mix(in srgb,#4A154B 12%,transparent);border-color:color-mix(in srgb,#4A154B 42%,var(--border));transform:translateY(-1px)}
 #tab-produtos .pro-card-resp-none{font-size:11px;color:var(--t2);font-style:italic;opacity:.7}
 #tab-produtos .pro-card .pro-badge{flex-shrink:0}
 #tab-produtos .pro-badge{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:4px 8px;border-radius:6px;border:1px solid;white-space:nowrap}
@@ -2131,8 +2135,11 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-detail-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}
 #tab-produtos .pro-detail-chip{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;background:var(--bg3);border:1px solid var(--border);padding:4px 11px;border-radius:999px;color:var(--t2);white-space:nowrap}
 #tab-produtos .pro-detail-chip.publico{background:color-mix(in srgb, var(--accent) 8%, var(--bg2));border-color:color-mix(in srgb, var(--accent) 32%, var(--border));color:var(--accent)}
-#tab-produtos .pro-detail-chip.responsavel{display:inline-flex;align-items:center;gap:5px;background:color-mix(in srgb, #b08bff 10%, var(--bg2));border-color:color-mix(in srgb, #b08bff 32%, var(--border));color:#b08bff;text-transform:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;letter-spacing:0;font-weight:600;padding:3px 10px 3px 8px}
+#tab-produtos .pro-detail-chip.responsavel{display:inline-flex;align-items:center;gap:5px;background:color-mix(in srgb, #b08bff 10%, var(--bg2));border-color:color-mix(in srgb, #b08bff 32%, var(--border));color:#b08bff;text-transform:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;letter-spacing:0;font-weight:600;padding:3px 10px 3px 8px;text-decoration:none}
 #tab-produtos .pro-detail-chip.responsavel::before{content:"👤";font-size:11px;opacity:.85}
+#tab-produtos .pro-detail-chip.responsavel.has-slack{cursor:pointer;color:#4A154B;background:color-mix(in srgb,#4A154B 10%,var(--bg2));border-color:color-mix(in srgb,#4A154B 36%,var(--border))}
+#tab-produtos .pro-detail-chip.responsavel.has-slack::before{content:"💬";opacity:1}
+#tab-produtos .pro-detail-chip.responsavel.has-slack:hover{background:color-mix(in srgb,#4A154B 18%,var(--bg2));transform:translateY(-1px)}
 
 /* ─── Disclosure groups (público-alvo, provas-alvo) — Apple-like ─────── */
 #tab-produtos .pro-disc-row{display:flex;flex-direction:column;gap:8px;margin-top:14px}
@@ -2394,7 +2401,7 @@ body.pro-rt-fs-on{overflow:hidden}
 #tab-produtos .pro-ment-desc details > p:last-of-type{padding-bottom:12px}
 
 /* Bloco colapsável dentro do editor — relativo pra ancorar o botão ✕ */
-#tab-produtos .pro-rt-ed details.pro-collapsible{position:relative;padding-right:86px}
+#tab-produtos .pro-rt-ed details.pro-collapsible{position:relative}
 #tab-produtos .pro-rt-ed details.pro-collapsible > summary{padding-right:4px}
 #tab-produtos .pro-rt-ed .pro-collapsible-body{padding:0}
 #tab-produtos .pro-rt-ed .pro-collapsible-body p{padding:6px 14px}
@@ -2402,9 +2409,9 @@ body.pro-rt-fs-on{overflow:hidden}
 #tab-produtos .pro-rt-ed .pro-collapsible-body p:last-child{padding-bottom:12px}
 #tab-produtos .pro-collapsible-del{position:absolute;top:6px;right:6px;background:transparent;border:1px solid transparent;color:var(--t2);width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:12px;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;padding:0;user-select:none;z-index:2}
 #tab-produtos .pro-collapsible-del:hover{background:color-mix(in srgb,#ef4444 18%,transparent);border-color:#ef4444;color:#ef4444}
-/* Grupo de ações ↑ ↓ ✕ no topo direito do bloco colapsável */
-#tab-produtos .pro-collapsible-actions{position:absolute;top:5px;right:5px;display:inline-flex;gap:2px;z-index:2;user-select:none}
-#tab-produtos .pro-collapsible-act{background:transparent;border:1px solid transparent;color:var(--t2);width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;padding:0}
+/* Grupo de ações ↑ ↓ ✕ DENTRO do <summary> — sempre visível (aberto E fechado) */
+#tab-produtos .pro-collapsible-actions{display:inline-flex;gap:2px;margin-left:auto;align-items:center;flex-shrink:0;user-select:none}
+#tab-produtos .pro-collapsible-act{background:transparent;border:1px solid transparent;color:var(--t2);width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;padding:0;font-family:inherit}
 #tab-produtos .pro-collapsible-act:hover{background:color-mix(in srgb,var(--accent) 14%,transparent);border-color:color-mix(in srgb,var(--accent) 38%,var(--border));color:var(--text)}
 #tab-produtos .pro-collapsible-del-act:hover{background:color-mix(in srgb,#ef4444 18%,transparent);border-color:#ef4444;color:#ef4444}
 /* Bloqueia aninhamento visual (caso aconteça mesmo assim, mostra alerta sutil) */
@@ -3552,6 +3559,23 @@ body.pro-rt-fs-on{overflow:hidden}
               <button class="btn btn-p btn-sm" onclick="saveMenuLabels()" style="margin-left:auto">💾 Salvar</button>
             </div>
             <div id="menu-labels-msg" class="hidden" style="margin-top:8px"></div>
+          </div>
+        </div>
+
+        <!-- Membros do Time (Slack) -->
+        <div style="border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden">
+          <div onclick="cfgToggle('cfg-slack-body','cfg-slack-arr');if(document.getElementById('cfg-slack-body').style.display==='block')renderSlackTimeForm()" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg2);cursor:pointer;user-select:none" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:18px">💬</span>
+              <div>
+                <p style="font-weight:700;font-size:15px">Membros do Time (Slack)</p>
+                <p style="font-size:12px;color:var(--t2)">Cadastre o ID Slack de cada pessoa pra ativar o link "falar no Slack" nos chips de responsável dos produtos</p>
+              </div>
+            </div>
+            <span id="cfg-slack-arr" style="font-size:14px;color:var(--t2);transition:transform .2s">▼</span>
+          </div>
+          <div id="cfg-slack-body" style="display:none;padding:16px 18px;border-top:1px solid var(--border)">
+            <div id="slack-time-form"></div>
           </div>
         </div>
 
@@ -8317,6 +8341,8 @@ document.addEventListener('click',(e)=>{
   const editor=t.closest('.pro-rt-ed');
   if(!editor||!editor.isContentEditable)return;
   if(t.closest('.pro-collapsible-del'))return;
+  // Ignora cliques nos botões de ação (↑ ↓ ✕) dentro do summary
+  if(t.closest('.pro-collapsible-actions'))return;
   const summary=t.closest('summary');
   if(!summary)return;
   const det=summary.parentNode;
@@ -19652,6 +19678,103 @@ async function salvarTiposPresets(){
 window.renderTiposPresets=renderTiposPresets;
 window.salvarTiposPresets=salvarTiposPresets;
 
+// ───────── Membros do Time / Slack ─────────
+// Renderiza o form da seção "Membros do Time" na aba Configurações.
+// Cadastra: teamId (workspace) + lista de membros (nome + slackId).
+// Usado em produtos pra criar link "💬 falar no Slack" nos chips de responsável.
+window.renderSlackTimeForm=()=>{
+  const host=document.getElementById('slack-time-form');
+  if(!host)return;
+  // Garante que o listener do Firestore esteja ativo (caso usuário não tenha passado pela aba Produtos)
+  _ensureSlackTimeListener();
+  // Se ainda não carregou os dados do Firestore, mostra spinner e espera
+  if(!S.slackTime.loaded){
+    host.innerHTML=`<p style="color:var(--t2);font-style:italic;font-size:13px;padding:12px 0">Carregando dados do servidor…</p>`;
+    return;
+  }
+  // Garante draft separado pra edição (só depois que loaded=true, pra não cadastrar vazio)
+  if(!S._slackDraft){
+    S._slackDraft={
+      teamId:String(S.slackTime.teamId||''),
+      membros:Array.isArray(S.slackTime.membros)?S.slackTime.membros.map(m=>({nome:String(m.nome||''),slackId:String(m.slackId||'')})):[]
+    };
+  }
+  const d=S._slackDraft;
+  const membrosHtml=d.membros.length?d.membros.map((m,i)=>`
+    <div class="slack-membro-row" style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+      <input type="text" class="fc" placeholder="Nome (igual ao usado em responsáveis)" value="${_proEscAttr(m.nome)}" oninput="_slackSetMembro(${i},'nome',this.value)" style="flex:2;min-width:120px"/>
+      <input type="text" class="fc" placeholder="ID Slack (Uxxx)" value="${_proEscAttr(m.slackId)}" oninput="_slackSetMembro(${i},'slackId',this.value)" style="flex:1;min-width:100px;font-family:'JetBrains Mono',monospace;font-size:12px"/>
+      <button class="pro-icon-btn" type="button" onclick="_slackRmMembro(${i})" title="Remover">🗑</button>
+    </div>
+  `).join(''):'<p style="color:var(--t2);font-style:italic;font-size:12.5px;margin:4px 0 12px">Nenhum membro cadastrado. Clica em "Adicionar membro" pra começar.</p>';
+  host.innerHTML=`
+    <div class="fg">
+      <label class="fl">Workspace ID (Team ID) do Slack</label>
+      <input type="text" class="fc" placeholder="Txxxxxxxx" value="${_proEscAttr(d.teamId)}" oninput="_slackSetTeamId(this.value)" style="font-family:'JetBrains Mono',monospace;font-size:13px"/>
+      <p style="font-size:11.5px;color:var(--t2);margin:6px 2px 0;line-height:1.5">No Slack web, abra <strong>https://app.slack.com/client/</strong> — o ID do workspace é o <code>T...</code> logo após <code>/client/</code> na URL.</p>
+    </div>
+    <div class="fg">
+      <label class="fl">Membros (${d.membros.length})</label>
+      <div id="slack-membros-list">${membrosHtml}</div>
+      <button class="btn btn-s btn-sm" type="button" onclick="_slackAddMembro()" style="margin-top:6px">＋ Adicionar membro</button>
+      <p style="font-size:11.5px;color:var(--t2);margin:10px 2px 0;line-height:1.5">Pra pegar o ID de uma pessoa: no Slack desktop, clica no nome dela → <em>Mais</em> → <em>Copiar ID do membro</em> (formato <code>U0...</code>). O nome cadastrado precisa bater (sem distinção de maiúscula/acento) com o que está no campo "Responsável" do produto.</p>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+      <button class="btn btn-s btn-sm" type="button" onclick="_slackCancelar()">Cancelar</button>
+      <button class="btn btn-p btn-sm" type="button" onclick="_slackSalvar()">💾 Salvar</button>
+    </div>
+  `;
+};
+
+window._slackSetTeamId=(v)=>{
+  if(!S._slackDraft)return;
+  S._slackDraft.teamId=String(v||'').trim();
+};
+window._slackSetMembro=(i,field,v)=>{
+  if(!S._slackDraft||!S._slackDraft.membros[i])return;
+  S._slackDraft.membros[i][field]=String(v||'').trim();
+};
+window._slackAddMembro=()=>{
+  if(!S._slackDraft)S._slackDraft={teamId:'',membros:[]};
+  S._slackDraft.membros.push({nome:'',slackId:''});
+  renderSlackTimeForm();
+};
+window._slackRmMembro=(i)=>{
+  if(!S._slackDraft||!S._slackDraft.membros[i])return;
+  S._slackDraft.membros.splice(i,1);
+  renderSlackTimeForm();
+};
+window._slackCancelar=()=>{
+  S._slackDraft=null;
+  renderSlackTimeForm();
+};
+window._slackSalvar=async()=>{
+  if(!S._slackDraft){alert('Nada para salvar.');return;}
+  const teamId=String(S._slackDraft.teamId||'').trim();
+  const membros=S._slackDraft.membros
+    .map(m=>({nome:String(m.nome||'').trim(),slackId:String(m.slackId||'').trim()}))
+    .filter(m=>m.nome&&m.slackId);
+  if(membros.length&&!teamId){
+    if(!confirm('Tem membros mas o Workspace ID está vazio — os links não vão funcionar. Salvar mesmo assim?'))return;
+  }
+  try{
+    const user=(S.currentUser&&S.currentUser.username)||'?';
+    await setDoc(doc(db,'config','slackTime'),{
+      teamId,
+      membros,
+      updatedAt:serverTimestamp(),
+      updatedBy:user
+    },{merge:true});
+    if(typeof audit==='function')audit('SLACK_TIME_SALVO',{collection:'config',id:'slackTime'},{after:{teamId:!!teamId,qtdMembros:membros.length}});
+    S._slackDraft=null;
+    alert('Membros do time salvos!');
+    renderSlackTimeForm();
+  }catch(e){
+    console.error(e);
+    alert('Erro ao salvar: '+(e.message||e));
+  }
+};
+
 // Popula o <select id="mu-tipo"> dinamicamente com defaults + customs.
 function popMuTipoSelect(currentTipo){
   const sel=document.getElementById('mu-tipo');if(!sel)return;
@@ -28191,6 +28314,30 @@ const _DEX_PERFIS=['geral','suporte','vendas','marketing'];
 S.dexPerfil=(()=>{try{const v=localStorage.getItem('aros.dex.perfil');return _DEX_PERFIS.includes(v)?v:'geral';}catch(e){return 'geral';}})();
 // Histórico de conversa do Dex — array de {role:'user'|'assistant', content, usage?, ts}
 S.dexHistorico=[];
+
+// Cadastro de membros do time + workspace Slack
+// Estrutura Firestore: config/slackTime = {teamId, membros:[{nome,slackId}], updatedAt, updatedBy}
+S.slackTime={teamId:'',membros:[],loaded:false,updatedAt:null,updatedBy:''};
+let _slackTimeUnsub=null;
+// Liga o listener do Firestore — pode ser chamado de vários lugares (Produtos OU Configurações)
+function _ensureSlackTimeListener(){
+  if(_slackTimeUnsub)return;
+  _slackTimeUnsub=onSnapshot(doc(db,'config','slackTime'),snap=>{
+    const d=snap.exists()?(snap.data()||{}):{};
+    S.slackTime.teamId=String(d.teamId||'').trim();
+    S.slackTime.membros=Array.isArray(d.membros)?d.membros.filter(m=>m&&m.nome&&m.slackId):[];
+    S.slackTime.updatedAt=d.updatedAt||null;
+    S.slackTime.updatedBy=String(d.updatedBy||'');
+    S.slackTime.loaded=true;
+    // Re-render do catálogo pra atualizar os chips com Slack
+    if(S.produtosLoaded&&(S.produtosView==='list'||S.produtosView==='detail'))_proRender();
+    // Se o form de Configurações está aberto, re-renderiza ele também (sem draft em andamento)
+    const formHost=document.getElementById('slack-time-form');
+    if(formHost&&formHost.children.length&&!S._slackDraft&&typeof window.renderSlackTimeForm==='function'){
+      window.renderSlackTimeForm();
+    }
+  },err=>{console.warn('slackTime onSnapshot:',err);S.slackTime.loaded=true;});
+}
 let _proJornadaUnsub=null;
 let _proUnsub=null;
 let _proCatUnsub=null;
@@ -28320,6 +28467,28 @@ function _proGetResponsaveis(p){
   if(Array.isArray(p.responsavel))return _proDedupe(p.responsavel);
   return [];
 }
+// Procura um membro do time pelo nome (case-insensitive, sem acento)
+function _slackFindMembro(nome){
+  if(!nome||!S.slackTime||!Array.isArray(S.slackTime.membros))return null;
+  const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+  const alvo=norm(nome);
+  return S.slackTime.membros.find(m=>norm(m.nome)===alvo)||null;
+}
+// Devolve URL Slack pra DM com a pessoa, ou null se não tem mapeamento
+function _slackUserUrl(nome){
+  const membro=_slackFindMembro(nome);
+  if(!membro||!membro.slackId)return null;
+  const teamId=S.slackTime&&S.slackTime.teamId;
+  if(!teamId)return null;
+  // slack:// abre o app desktop; com fallback web pelo browser se necessário
+  return `slack://user?team=${encodeURIComponent(teamId)}&id=${encodeURIComponent(membro.slackId)}`;
+}
+// Devolve atributos HTML pra um chip de responsável: vira <a> clicável se há Slack mapeado
+function _slackChipAttrs(nome){
+  const url=_slackUserUrl(nome);
+  if(!url)return {tag:'span',attrs:''};
+  return {tag:'a',attrs:` href="${_proEscAttr(url)}" target="_blank" rel="noopener" title="Falar com ${_proEscAttr(nome)} no Slack"`};
+}
 // Normaliza o status de disponibilidade pra 'sim' | 'nao' | 'construcao'.
 // Compat: boolean true/false ainda é aceito (true→sim, false→nao).
 function _proFeatDisp(f){
@@ -28445,6 +28614,7 @@ window.initProdutos=function(){
       if(S.produtosLoaded&&S.produtosView==='list'&&!S._jornadaDirty)_proJornadaRefresh();
     },err=>{console.warn('jornadaCliente onSnapshot:',err);S.jornadaCliente.loaded=true;});
   }
+  _ensureSlackTimeListener();
   if(!_proDexCfgUnsub){
     _proDexCfgUnsub=onSnapshot(doc(db,'config','dexPrompt'),snap=>{
       const d=snap.exists()?(snap.data()||{}):{};
@@ -28589,7 +28759,7 @@ function _proRowHTML(p){
   const responsaveis=_proGetResponsaveis(p);
   const respHtml=responsaveis.length
     ?`<span class="pro-card-resp-label">Coordenação:</span>`
-      +responsaveis.slice(0,3).map(r=>`<span class="pro-card-resp-chip">${_proEsc(r)}</span>`).join('')
+      +responsaveis.slice(0,3).map(r=>{const a=_slackChipAttrs(r);return `<${a.tag} class="pro-card-resp-chip${a.tag==='a'?' has-slack':''}"${a.attrs} onclick="event.stopPropagation()">${_proEsc(r)}</${a.tag}>`;}).join('')
       +(responsaveis.length>3?`<span class="pro-card-resp-chip more">+${responsaveis.length-3}</span>`:'')
     :'<span class="pro-card-resp-none">Sem responsável</span>';
   const canEdit=_proCanEdit();
@@ -29742,7 +29912,7 @@ function _proRenderDetail(root){
   // Chips sem ícone repetido — o ícone agora vive no header do disclosure
   const publicoChips=publicos.map(t=>`<span class="pro-detail-chip publico">${_proEsc(t)}</span>`).join('');
   const provaChips=provas.map(t=>`<span class="pro-detail-chip">${_proEsc(t)}</span>`).join('');
-  const respChips=responsaveis.map(t=>`<span class="pro-detail-chip responsavel">${_proEsc(t)}</span>`).join('');
+  const respChips=responsaveis.map(t=>{const a=_slackChipAttrs(t);return `<${a.tag} class="pro-detail-chip responsavel${a.tag==='a'?' has-slack':''}"${a.attrs}>${_proEsc(t)}</${a.tag}>`;}).join('');
 
   // Estado dos disclosures (preserva entre re-renders; ambos fechados por default)
   if(!S._proDisc)S._proDisc={publico:false,provas:false};
@@ -31043,18 +31213,31 @@ function _proRtFieldHTML(opts){
     <div class="pro-rt-body fc" id="${id}" contenteditable="true" data-placeholder="${_proEscAttr(placeholder)}" data-empty="${empty}" data-feat-i="${i}" data-feat-id="${_proEscAttr(fid)}" data-feat-source="${src}" data-feat-field="${field}" oninput="_proRtCommit('${id}')" onfocus="this.dataset.empty='0'" onblur="_proRtMaybeEmpty('${id}')">${innerHtml}</div>
   </div>`;
 }
-function _proRtFocus(id){const el=document.getElementById(id);if(el)el.focus();return el;}
-window._proRtExec=(id,cmd)=>{
-  if(!_proRtFocus(id))return;
+// Resolve o elemento contenteditable por ID (features) ou data-rt-ed (jornada)
+function _proRtFocus(idOrUid){
+  let el=document.getElementById(idOrUid);
+  if(!el)el=document.querySelector(`[data-rt-ed="${idOrUid}"]`);
+  if(el)el.focus();
+  return el;
+}
+// Após qualquer comando, sincroniza estado: chama _proRtCommit (features) E dispara
+// input event (jornada/outros editores que escutam oninput pra salvar)
+function _proRtSync(idOrUid){
+  _proRtCommit(idOrUid);
+  const el=document.getElementById(idOrUid)||document.querySelector(`[data-rt-ed="${idOrUid}"]`);
+  if(el)el.dispatchEvent(new Event('input',{bubbles:true}));
+}
+window._proRtExec=(idOrUid,cmd)=>{
+  if(!_proRtFocus(idOrUid))return;
   try{document.execCommand('styleWithCSS',false,true);}catch(e){}
   document.execCommand(cmd,false,null);
-  _proRtCommit(id);
+  _proRtSync(idOrUid);
 };
-window._proRtColor=(id,cmd,val)=>{
-  if(!_proRtFocus(id))return;
+window._proRtColor=(idOrUid,cmd,val)=>{
+  if(!_proRtFocus(idOrUid))return;
   try{document.execCommand('styleWithCSS',false,true);}catch(e){}
   document.execCommand(cmd,false,val);
-  _proRtCommit(id);
+  _proRtSync(idOrUid);
 };
 window._proRtCode=(id)=>{
   const el=_proRtFocus(id);if(!el)return;
@@ -31126,8 +31309,8 @@ function _proRtStripStyle(html){
   walk(tmp);
   return tmp.innerHTML;
 }
-window._proRtLink=(id)=>{
-  const el=_proRtFocus(id);if(!el)return;
+window._proRtLink=(idOrUid)=>{
+  const el=_proRtFocus(idOrUid);if(!el)return;
   const sel=window.getSelection();
   const selectedText=sel&&sel.rangeCount?sel.toString():'';
   const url=prompt('URL do link (https://...)','https://');
@@ -31141,7 +31324,7 @@ window._proRtLink=(id)=>{
     if(sel&&sel.rangeCount){const r=sel.getRangeAt(0);r.insertNode(a);r.setStartAfter(a);r.setEndAfter(a);sel.removeAllRanges();sel.addRange(r);}
     else{el.appendChild(a);}
   }
-  _proRtCommit(id);
+  _proRtSync(idOrUid);
 };
 window._proRtCommit=(id)=>{
   const el=document.getElementById(id);if(!el)return;
@@ -31391,7 +31574,8 @@ window._proRtCollapsible=(uid)=>{
       node=node.parentNode;
     }
   }
-  const html=`<details class="pro-collapsible" open><summary>Título do bloco</summary><div class="pro-collapsible-body"><p>Escreva o conteúdo aqui…</p></div><div class="pro-collapsible-actions" contenteditable="false" onmousedown="event.preventDefault()"><button type="button" class="pro-collapsible-act" onclick="_proRtCollapsibleMove(this,-1,event)" title="Mover bloco para cima">↑</button><button type="button" class="pro-collapsible-act" onclick="_proRtCollapsibleMove(this,1,event)" title="Mover bloco para baixo">↓</button><button type="button" class="pro-collapsible-act pro-collapsible-del-act" onclick="_proRtCollapsibleDel(this,event)" title="Remover bloco">✕</button></div></details><p><br></p>`;
+  const actionsHtml=`<span class="pro-collapsible-actions" contenteditable="false" onmousedown="event.preventDefault();event.stopPropagation()" onclick="event.stopPropagation()"><button type="button" class="pro-collapsible-act" onclick="event.stopPropagation();_proRtCollapsibleMove(this,-1,event)" title="Mover bloco para cima">↑</button><button type="button" class="pro-collapsible-act" onclick="event.stopPropagation();_proRtCollapsibleMove(this,1,event)" title="Mover bloco para baixo">↓</button><button type="button" class="pro-collapsible-act pro-collapsible-del-act" onclick="event.stopPropagation();_proRtCollapsibleDel(this,event)" title="Remover bloco">✕</button></span>`;
+  const html=`<details class="pro-collapsible" open><summary>Título do bloco${actionsHtml}</summary><div class="pro-collapsible-body"><p>Escreva o conteúdo aqui…</p></div></details><p><br></p>`;
   try{
     document.execCommand('insertHTML',false,html);
   }catch(e){
@@ -31484,17 +31668,25 @@ function _proRtRepairDetails(html){
       if(sum&&sum.nextSibling)det.insertBefore(body,sum.nextSibling);
       else det.appendChild(body);
     }
-    // Migra botão antigo ✕ standalone pro novo bloco .pro-collapsible-actions
+    // Migra botão antigo ✕ standalone (raiz do details) — vai pro lixo
     const oldDel=det.querySelector(':scope > button.pro-collapsible-del');
     if(oldDel)oldDel.remove();
-    // Garante que o bloco de ações (↑ ↓ ✕) existe
-    if(!det.querySelector(':scope > .pro-collapsible-actions')){
-      const actions=document.createElement('div');
+    // Localiza summary (precisa existir pros botões irem dentro dele — sempre visíveis)
+    const summary=det.querySelector(':scope > summary');
+    if(!summary)return; // sem summary, pula (caso patológico)
+    // Se já existem actions FORA do summary (filho direto de details, formato antigo),
+    // remove e deixa pro próximo passo recriar dentro do summary
+    const oldActions=det.querySelector(':scope > .pro-collapsible-actions');
+    if(oldActions)oldActions.remove();
+    // Garante que os botões existem DENTRO do summary (visíveis quando aberto E fechado)
+    if(!summary.querySelector(':scope > .pro-collapsible-actions')){
+      const actions=document.createElement('span');
       actions.className='pro-collapsible-actions';
       actions.setAttribute('contenteditable','false');
-      actions.setAttribute('onmousedown','event.preventDefault()');
-      actions.innerHTML=`<button type="button" class="pro-collapsible-act" onclick="_proRtCollapsibleMove(this,-1,event)" title="Mover bloco para cima">↑</button><button type="button" class="pro-collapsible-act" onclick="_proRtCollapsibleMove(this,1,event)" title="Mover bloco para baixo">↓</button><button type="button" class="pro-collapsible-act pro-collapsible-del-act" onclick="_proRtCollapsibleDel(this,event)" title="Remover bloco">✕</button>`;
-      det.appendChild(actions);
+      actions.setAttribute('onmousedown','event.preventDefault();event.stopPropagation()');
+      actions.setAttribute('onclick','event.stopPropagation()');
+      actions.innerHTML=`<button type="button" class="pro-collapsible-act" onclick="event.stopPropagation();_proRtCollapsibleMove(this,-1,event)" title="Mover bloco para cima">↑</button><button type="button" class="pro-collapsible-act" onclick="event.stopPropagation();_proRtCollapsibleMove(this,1,event)" title="Mover bloco para baixo">↓</button><button type="button" class="pro-collapsible-act pro-collapsible-del-act" onclick="event.stopPropagation();_proRtCollapsibleDel(this,event)" title="Remover bloco">✕</button>`;
+      summary.appendChild(actions);
     }
   });
   // Garante espaço respirável antes/depois/entre details
@@ -31503,29 +31695,25 @@ function _proRtRepairDetails(html){
 }
 
 // Garante <p><br></p> em pontos onde o cursor precisa poder pousar:
-// - Antes do primeiro details (se for o primeiro filho)
-// - Depois do último details (se for o último filho)
-// - Entre dois details adjacentes
+// - Antes de cada <details> que não tem sibling (ou tem outro details antes)
+// - Depois de cada <details> que não tem sibling (ou tem outro details depois)
+// Funciona em QUALQUER nível de profundidade — não só filhos diretos do root.
 function _proRtEnsureSpacers(root){
   if(!root)return;
-  const dets=[...root.querySelectorAll(':scope > details, :scope > details.pro-collapsible')];
-  // querySelectorAll com :scope retorna só filhos diretos; vamos garantir
-  const direct=dets.filter(d=>d.parentNode===root);
-  direct.forEach((det,idx)=>{
-    // Antes do primeiro: precisa ter algo "atravessável" (P/DIV) antes
-    if(idx===0&&!det.previousElementSibling){
-      // Adiciona um <p><br></p> antes
+  const dets=[...root.querySelectorAll('details')];
+  dets.forEach(det=>{
+    const parent=det.parentNode;
+    if(!parent)return;
+    const prev=det.previousElementSibling;
+    if(!prev||prev.tagName==='DETAILS'){
       const p=document.createElement('p');p.innerHTML='<br>';
-      root.insertBefore(p,det);
-    }else if(det.previousElementSibling&&det.previousElementSibling.tagName==='DETAILS'){
-      // Dois details adjacentes: insere <p> entre
-      const p=document.createElement('p');p.innerHTML='<br>';
-      root.insertBefore(p,det);
+      parent.insertBefore(p,det);
     }
-    // Depois do último: precisa ter algo depois
-    if(idx===direct.length-1&&!det.nextElementSibling){
+    const next=det.nextElementSibling;
+    if(!next||next.tagName==='DETAILS'){
       const p=document.createElement('p');p.innerHTML='<br>';
-      root.appendChild(p);
+      if(det.nextSibling)parent.insertBefore(p,det.nextSibling);
+      else parent.appendChild(p);
     }
   });
 }
@@ -31849,14 +32037,7 @@ function _proRtExpandClose(wrap){
     if(backdrop&&!document.querySelector('.pro-rt.fullscreen'))backdrop.remove();
   },250);
 }
-window._proRtColor=(uid,cmd,val)=>{
-  const el=document.querySelector(`[data-rt-ed="${uid}"]`);
-  if(!el)return;
-  el.focus();
-  try{document.execCommand('styleWithCSS',false,true);}catch(e){}
-  document.execCommand(cmd,false,val);
-  el.dispatchEvent(new Event('input',{bubbles:true}));
-};
+// _proRtGet é específico do editor da jornada (uid-based) — sem colisão
 window._proRtGet=(uid)=>{
   const el=document.querySelector(`[data-rt-ed="${uid}"]`);
   if(!el)return '';
@@ -31864,34 +32045,7 @@ window._proRtGet=(uid)=>{
   if(el.querySelector('details.pro-collapsible'))_proRtBindCollapsibleHandlers(el);
   return el.innerHTML.trim();
 };
-window._proRtExec=(uid,cmd)=>{
-  const el=document.querySelector(`[data-rt-ed="${uid}"]`);
-  if(!el)return;
-  el.focus();
-  try{document.execCommand('styleWithCSS',false,true);}catch(e){}
-  document.execCommand(cmd,false,null);
-  // dispara oninput pra salvar
-  el.dispatchEvent(new Event('input',{bubbles:true}));
-};
-window._proRtLink=(uid)=>{
-  const el=document.querySelector(`[data-rt-ed="${uid}"]`);
-  if(!el)return;
-  el.focus();
-  const sel=window.getSelection();
-  const selectedText=sel&&sel.rangeCount?sel.toString():'';
-  const url=prompt('URL do link (https://...)','https://');
-  if(!url)return;
-  if(!/^https?:\/\//i.test(url)){alert('Use uma URL começando com http:// ou https://');return;}
-  if(selectedText){
-    document.execCommand('createLink',false,url);
-  }else{
-    const label=prompt('Texto do link:',url)||url;
-    const a=document.createElement('a');a.href=url;a.textContent=label;a.target='_blank';a.rel='noopener';
-    if(sel&&sel.rangeCount){const r=sel.getRangeAt(0);r.insertNode(a);r.setStartAfter(a);r.setEndAfter(a);sel.removeAllRanges();sel.addRange(r);}
-    else{el.appendChild(a);}
-  }
-  el.dispatchEvent(new Event('input',{bubbles:true}));
-};
+// _proRtExec, _proRtColor e _proRtLink são unificados acima (id OU data-rt-ed via _proRtFocus)
 
 function _proLinkEditHTML(l,i){
   return `<div class="pro-edit-row" data-link-i="${i}">
