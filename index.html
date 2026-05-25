@@ -1810,10 +1810,11 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-card-resp-chip{display:inline-flex;align-items:center;gap:4px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11.5px;font-weight:500;color:#b08bff;background:color-mix(in srgb, #b08bff 8%, transparent);border:1px solid color-mix(in srgb, #b08bff 22%, var(--border));padding:2px 9px 2px 7px;border-radius:999px;line-height:1.35;text-decoration:none}
 #tab-produtos .pro-card-resp-chip::before{content:"👤";font-size:10px}
 #tab-produtos .pro-card-resp-chip.more::before{content:""}
-/* Chip de responsável com Slack mapeado: vira link clicável */
-#tab-produtos .pro-card-resp-chip.has-slack{cursor:pointer;color:#4A154B}
+/* Chip de responsável com Slack mapeado: vira link clicável.
+   Mantém a cor lilás original (boa em dark+light) — só troca o ícone e adiciona hover. */
+#tab-produtos .pro-card-resp-chip.has-slack{cursor:pointer}
 #tab-produtos .pro-card-resp-chip.has-slack::before{content:"💬"}
-#tab-produtos .pro-card-resp-chip.has-slack:hover{background:color-mix(in srgb,#4A154B 12%,transparent);border-color:color-mix(in srgb,#4A154B 42%,var(--border));transform:translateY(-1px)}
+#tab-produtos .pro-card-resp-chip.has-slack:hover{background:color-mix(in srgb,#b08bff 18%,transparent);border-color:color-mix(in srgb,#b08bff 48%,var(--border));transform:translateY(-1px)}
 #tab-produtos .pro-card-resp-none{font-size:11px;color:var(--t2);font-style:italic;opacity:.7}
 #tab-produtos .pro-card .pro-badge{flex-shrink:0}
 #tab-produtos .pro-badge{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:4px 8px;border-radius:6px;border:1px solid;white-space:nowrap}
@@ -2137,9 +2138,9 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-detail-chip.publico{background:color-mix(in srgb, var(--accent) 8%, var(--bg2));border-color:color-mix(in srgb, var(--accent) 32%, var(--border));color:var(--accent)}
 #tab-produtos .pro-detail-chip.responsavel{display:inline-flex;align-items:center;gap:5px;background:color-mix(in srgb, #b08bff 10%, var(--bg2));border-color:color-mix(in srgb, #b08bff 32%, var(--border));color:#b08bff;text-transform:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;letter-spacing:0;font-weight:600;padding:3px 10px 3px 8px;text-decoration:none}
 #tab-produtos .pro-detail-chip.responsavel::before{content:"👤";font-size:11px;opacity:.85}
-#tab-produtos .pro-detail-chip.responsavel.has-slack{cursor:pointer;color:#4A154B;background:color-mix(in srgb,#4A154B 10%,var(--bg2));border-color:color-mix(in srgb,#4A154B 36%,var(--border))}
+#tab-produtos .pro-detail-chip.responsavel.has-slack{cursor:pointer}
 #tab-produtos .pro-detail-chip.responsavel.has-slack::before{content:"💬";opacity:1}
-#tab-produtos .pro-detail-chip.responsavel.has-slack:hover{background:color-mix(in srgb,#4A154B 18%,var(--bg2));transform:translateY(-1px)}
+#tab-produtos .pro-detail-chip.responsavel.has-slack:hover{background:color-mix(in srgb,#b08bff 20%,var(--bg2));border-color:color-mix(in srgb,#b08bff 50%,var(--border));transform:translateY(-1px)}
 
 /* ─── Disclosure groups (público-alvo, provas-alvo) — Apple-like ─────── */
 #tab-produtos .pro-disc-row{display:flex;flex-direction:column;gap:8px;margin-top:14px}
