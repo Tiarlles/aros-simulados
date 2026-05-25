@@ -2734,6 +2734,31 @@ body.pro-rt-fs-on{overflow:hidden}
 #tab-produtos .pro-dex-prod-link:hover{border-color:#a855f7;background:linear-gradient(135deg,color-mix(in srgb,#3b82f6 24%,transparent),color-mix(in srgb,#a855f7 24%,transparent));transform:translateY(-1px)}
 #tab-produtos .pro-dex-ext-link{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
 #tab-produtos .pro-dex-meta{margin-top:10px;font-size:10.5px;color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.6px;text-transform:uppercase;opacity:.7}
+
+/* Histórico de chat — balões empilhados */
+#tab-produtos .pro-dex-history{margin:10px 0 12px;max-height:520px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px;scroll-behavior:smooth}
+#tab-produtos .pro-dex-history::-webkit-scrollbar{width:6px}
+#tab-produtos .pro-dex-history::-webkit-scrollbar-thumb{background:color-mix(in srgb,#a855f7 28%,transparent);border-radius:6px}
+#tab-produtos .pro-dex-bubble{max-width:88%;padding:11px 14px;border-radius:14px;font-size:14px;line-height:1.55;animation:dexSlideIn .2s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));word-wrap:break-word;overflow-wrap:anywhere}
+#tab-produtos .pro-dex-bubble.user{align-self:flex-end;background:linear-gradient(135deg,#3b82f6,#a855f7);color:#fff;border-bottom-right-radius:4px;box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 8px rgba(168,85,247,.22)}
+#tab-produtos .pro-dex-bubble.user .pro-dex-bubble-content{white-space:pre-wrap}
+#tab-produtos .pro-dex-bubble.assistant{align-self:flex-start;background:var(--bg);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px}
+#tab-produtos .pro-dex-bubble.assistant.loading{padding:14px 16px;min-width:60px}
+#tab-produtos .pro-dex-bubble-content p{margin:0 0 8px}
+#tab-produtos .pro-dex-bubble-content p:last-child{margin-bottom:0}
+#tab-produtos .pro-dex-bubble-content ul{margin:6px 0 8px;padding-left:22px}
+#tab-produtos .pro-dex-bubble-content li{margin-bottom:3px}
+#tab-produtos .pro-dex-bubble-content strong{font-weight:700}
+#tab-produtos .pro-dex-bubble-content em{font-style:italic;opacity:.85}
+#tab-produtos .pro-dex-bubble-content code{background:color-mix(in srgb,var(--accent) 12%,var(--bg3));border:1px solid color-mix(in srgb,var(--accent) 22%,var(--border));border-radius:4px;padding:1px 6px;font-size:12.5px;font-family:'JetBrains Mono','SF Mono',monospace}
+#tab-produtos .pro-dex-bubble.user .pro-dex-bubble-content code{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.28);color:#fff}
+#tab-produtos .pro-dex-bubble-meta{margin-top:8px;font-size:10px;color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.5px;text-transform:uppercase;opacity:.65}
+/* Typing indicator (3 bolinhas) */
+#tab-produtos .pro-dex-typing{display:inline-flex;gap:5px;align-items:center;height:14px}
+#tab-produtos .pro-dex-typing span{width:7px;height:7px;border-radius:50%;background:#a855f7;opacity:.4;animation:dexTyping 1.2s infinite ease-in-out}
+#tab-produtos .pro-dex-typing span:nth-child(2){animation-delay:.15s}
+#tab-produtos .pro-dex-typing span:nth-child(3){animation-delay:.3s}
+@keyframes dexTyping{0%,60%,100%{opacity:.4;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
 #tab-produtos .pro-dex-auth-cta{margin-top:8px}
 #tab-produtos .pro-dex-auth-cta .btn-sm{font-size:11.5px;padding:5px 12px}
 @media (max-width:720px){
@@ -28159,6 +28184,8 @@ S._dexConfigTab='geral'; // qual perfil está sendo editado no painel
 // Default: 'geral' (modo neutro, sem viés de papel).
 const _DEX_PERFIS=['geral','suporte','vendas','marketing'];
 S.dexPerfil=(()=>{try{const v=localStorage.getItem('aros.dex.perfil');return _DEX_PERFIS.includes(v)?v:'geral';}catch(e){return 'geral';}})();
+// Histórico de conversa do Dex — array de {role:'user'|'assistant', content, usage?, ts}
+S.dexHistorico=[];
 let _proJornadaUnsub=null;
 let _proUnsub=null;
 let _proCatUnsub=null;
@@ -28848,23 +28875,33 @@ function _proDexRender(){
 
   const pergunta=S.dexPergunta||'';
   const loading=!!S.dexLoading;
-  const resposta=S.dexResposta||null;
   const erro=S.dexErro||null;
-  const usage=S.dexUsage||null;
+  const historico=Array.isArray(S.dexHistorico)?S.dexHistorico:[];
 
-  let body='';
-  if(loading){
-    body=`<div class="pro-dex-loading"><span class="sp"></span> Dex está consultando o catálogo…</div>`;
-  } else if(erro){
-    body=`<div class="pro-dex-error">⚠️ ${_proEsc(erro)}</div>`;
-  } else if(resposta){
-    const html=_proDexFormatAnswer(resposta);
-    const meta=usage?`<div class="pro-dex-meta">${(usage.cache_read>0?'⚡ Cache · ':'')}${usage.input||0} in · ${usage.output||0} out tokens</div>`:'';
-    body=`<div class="pro-dex-answer">${html}</div>${meta}`;
+  // Monta o histórico como balões de chat
+  let historicoHtml='';
+  if(historico.length){
+    historicoHtml=historico.map(m=>{
+      if(m.role==='user'){
+        return `<div class="pro-dex-bubble user"><div class="pro-dex-bubble-content">${_proEsc(m.content)}</div></div>`;
+      }
+      const html=_proDexFormatAnswer(m.content||'');
+      const meta=m.usage?`<div class="pro-dex-bubble-meta">${(m.usage.cache_read>0?'⚡ Cache · ':'')}${m.usage.input||0} in · ${m.usage.output||0} out tokens</div>`:'';
+      return `<div class="pro-dex-bubble assistant"><div class="pro-dex-bubble-content">${html}</div>${meta}</div>`;
+    }).join('');
   }
+  if(loading){
+    historicoHtml+=`<div class="pro-dex-bubble assistant loading"><div class="pro-dex-typing"><span></span><span></span><span></span></div></div>`;
+  }
+  if(erro){
+    historicoHtml+=`<div class="pro-dex-error">⚠️ ${_proEsc(erro)}</div>`;
+  }
+  const historicoBlock=historicoHtml?`<div class="pro-dex-history" id="pro-dex-history">${historicoHtml}</div>`:'';
 
   // Botão de configuração — só pra quem pode editar (admin/coord)
   const cfgBtn=_proCanEdit()?`<button class="pro-dex-cfg-btn${S._dexConfigOpen?' on':''}" onclick="proDexConfigToggle()" title="Configurar comportamento do Dex (prompt, modelo)">⚙️</button>`:'';
+  // Botão de nova conversa — só aparece se já tem histórico
+  const novaBtn=historico.length?`<button class="pro-dex-cfg-btn" onclick="proDexNovaConversa()" title="Nova conversa (limpa o histórico)">🔄</button>`:'';
   // Painel de configuração (inline disclosure)
   const cfgPanel=(S._dexConfigOpen&&_proCanEdit())?_proDexConfigHTML():'';
 
@@ -28878,25 +28915,37 @@ function _proDexRender(){
   const perfilAtual=S.dexPerfil||'geral';
   const chips=perfis.map(p=>`<button type="button" class="pro-dex-chip${perfilAtual===p.id?' on':''}" onclick="_proDexSetPerfil('${p.id}')" title="${p.id==='geral'?'Pergunta neutra, sem viés de papel':'Pergunto como '+p.lbl}">${p.ico} ${p.lbl}</button>`).join('');
 
+  const hint=historico.length
+    ?'Enter envia · Shift+Enter quebra linha · A conversa lembra os turnos anteriores'
+    :'Enter envia · Shift+Enter quebra linha · Faça uma pergunta, depois continue a conversa';
+  const placeholder=historico.length
+    ?'Faça uma pergunta de continuação…'
+    :'Ex: Qual produto serve pra TEA 2ª fase e inclui mentoria?';
+
   c.innerHTML=`
     <div class="pro-dex-panel">
       <div class="pro-dex-head">
         <div class="pro-dex-title"><span class="pro-dex-title-ico">🤖</span> Dex · Assistente do Catálogo MedReview</div>
         <div class="pro-dex-head-actions">
+          ${novaBtn}
           ${cfgBtn}
           <button class="pro-dex-close" onclick="proDexToggle()" title="Fechar">✕</button>
         </div>
       </div>
       ${cfgPanel}
       <div class="pro-dex-perfil-row" role="radiogroup" aria-label="Perfil de quem está perguntando">${chips}</div>
+      ${historicoBlock}
       <form class="pro-dex-form" onsubmit="event.preventDefault();proDexAsk();">
-        <textarea class="pro-dex-input" id="pro-dex-input" placeholder="Ex: Qual produto serve pra TEA 2ª fase e inclui mentoria?" rows="1" oninput="S.dexPergunta=this.value" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();proDexAsk();}">${_proEsc(pergunta)}</textarea>
+        <textarea class="pro-dex-input" id="pro-dex-input" placeholder="${_proEscAttr(placeholder)}" rows="1" oninput="S.dexPergunta=this.value" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();proDexAsk();}">${_proEsc(pergunta)}</textarea>
         <button class="pro-dex-ask" type="submit" ${loading?'disabled':''}>${loading?'Aguarde…':'Perguntar'}</button>
       </form>
-      <div class="pro-dex-hint">Pressione Enter para enviar · Shift+Enter para quebrar linha · Cada pergunta é independente</div>
-      ${body}
+      <div class="pro-dex-hint">${hint}</div>
     </div>
   `;
+
+  // Auto-scroll pro final do histórico
+  const hist=document.getElementById('pro-dex-history');
+  if(hist)hist.scrollTop=hist.scrollHeight;
   _proDexBindLinks();
   // Foco no input só quando o painel acabou de abrir (não em todo re-render —
   // senão roubaria foco quando o user mexe em outros controles da tela)
@@ -28921,6 +28970,16 @@ function _proDexBindLinks(){
 
 window._proDexSetPerfil=(perfil)=>{
   if(!_DEX_PERFIS.includes(perfil))return;
+  if(perfil===S.dexPerfil)return;
+  // Se tem histórico, alerta — instruções do novo perfil vão se aplicar mas
+  // a IA ainda enxerga o histórico anterior (que foi gerado com outras instruções).
+  const tem=Array.isArray(S.dexHistorico)&&S.dexHistorico.length>0;
+  if(tem){
+    const lblAtual={geral:'Geral',suporte:'Suporte',vendas:'Vendas',marketing:'Marketing'}[S.dexPerfil||'geral'];
+    const lblNovo={geral:'Geral',suporte:'Suporte',vendas:'Vendas',marketing:'Marketing'}[perfil];
+    const ok=confirm(`Trocar de ${lblAtual} pra ${lblNovo}?\n\nA conversa atual continua, mas as próximas perguntas vão usar as instruções de ${lblNovo}. A IA ainda enxerga o que foi conversado com ${lblAtual}.\n\nSe preferir começar do zero, cancele e clique em 🔄 Nova conversa antes.`);
+    if(!ok)return;
+  }
   S.dexPerfil=perfil;
   try{localStorage.setItem('aros.dex.perfil',perfil);}catch(e){}
   _proDexRender();
@@ -29282,13 +29341,24 @@ window.proDexToggle=()=>{
   if(S.dexAberto){
     S._dexFocusNext=true; // pede foco no próximo render
   } else {
-    // próxima abertura começa limpa (sem resposta/erro/pergunta antigos)
+    // Próxima abertura começa limpa (input e erro). O histórico É preservado
+    // intencionalmente — fechar e reabrir o painel não perde a conversa em curso.
     S.dexErro=null;
-    S.dexResposta=null;
     S.dexPergunta='';
-    S.dexUsage=null;
   }
   _proRender();
+};
+
+// Limpa o histórico e começa uma conversa nova
+window.proDexNovaConversa=()=>{
+  const tem=Array.isArray(S.dexHistorico)&&S.dexHistorico.length>0;
+  if(tem&&!confirm('Limpar a conversa atual e começar uma nova?'))return;
+  S.dexHistorico=[];
+  S.dexErro=null;
+  S.dexPergunta='';
+  _proDexRender();
+  // Foca de volta no input
+  setTimeout(()=>{const el=document.getElementById('pro-dex-input');if(el)el.focus();},30);
 };
 
 window.proDexAsk=async()=>{
@@ -29305,11 +29375,15 @@ window.proDexAsk=async()=>{
     return;
   }
 
-  S.dexPergunta=pergunta;
-  S.dexLoading=true;
+  // Garante que histórico existe
+  if(!Array.isArray(S.dexHistorico))S.dexHistorico=[];
+  // Push da pergunta do user no histórico (otimista — aparece já)
+  S.dexHistorico.push({role:'user',content:pergunta,ts:Date.now()});
+  // Limita a 20 mensagens (10 turnos)
+  if(S.dexHistorico.length>20)S.dexHistorico=S.dexHistorico.slice(-20);
+  S.dexPergunta='';
   S.dexErro=null;
-  S.dexResposta=null;
-  S.dexUsage=null;
+  S.dexLoading=true;
   _proDexRender();
 
   try{
@@ -29318,23 +29392,37 @@ window.proDexAsk=async()=>{
       throw new Error('Faça login com Google ou Email para usar o Dex. O login antigo (apenas senha) não dá acesso à IA.');
     }
     const token=await user.getIdToken();
+    // Envia tudo MENOS a última msg (que é a pergunta atual que vai no campo 'pergunta')
+    const historicoPraEnviar=S.dexHistorico.slice(0,-1).map(m=>({role:m.role,content:m.content}));
     const resp=await fetch(DEX_ENDPOINT,{
       method:'POST',
       headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
-      body:JSON.stringify({pergunta,perfil:S.dexPerfil||'suporte'})
+      body:JSON.stringify({pergunta,perfil:S.dexPerfil||'geral',historico:historicoPraEnviar})
     });
     let data={};
     try{ data=await resp.json(); }catch(e){ /* resposta não-JSON */ }
     if(!resp.ok){
       throw new Error(data.error||`Erro ${resp.status} ao consultar o Dex.`);
     }
-    S.dexResposta=data.resposta||'(resposta vazia)';
-    S.dexUsage=data.usage||null;
+    S.dexHistorico.push({
+      role:'assistant',
+      content:data.resposta||'(resposta vazia)',
+      usage:data.usage||null,
+      ts:Date.now()
+    });
+    if(S.dexHistorico.length>20)S.dexHistorico=S.dexHistorico.slice(-20);
   }catch(e){
     S.dexErro=e.message||String(e);
+    // Remove a pergunta do histórico se falhou — pra ela voltar pro input ao tentar de novo
+    if(S.dexHistorico.length&&S.dexHistorico[S.dexHistorico.length-1].role==='user'){
+      S.dexHistorico.pop();
+    }
+    S.dexPergunta=pergunta; // restaura no input
   }finally{
     S.dexLoading=false;
     _proDexRender();
+    // Foca de volta no input pra próxima pergunta
+    setTimeout(()=>{const el=document.getElementById('pro-dex-input');if(el)el.focus();},30);
   }
 };
 
