@@ -1842,7 +1842,13 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-section-mentoria{border-top:1px solid var(--border);padding-top:28px;margin-top:32px}
 #tab-produtos .pro-section-title-mentoria{color:#a855f7}
 #tab-produtos .pro-section-title-mentoria::before{color:#a855f7;opacity:.5}
-#tab-produtos .pro-ment-tag{display:inline-flex;align-items:center;margin-left:8px;padding:2px 9px;border-radius:999px;background:color-mix(in srgb,#f59e0b 14%,transparent);border:1px solid color-mix(in srgb,#f59e0b 40%,var(--border));color:#f59e0b;font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+/* Mentoria/Bônus como disclosure colapsável — cor temática no header */
+#tab-produtos .pro-sec-disc.pro-sec-mentoria .pro-sec-disc-title{color:#a855f7}
+#tab-produtos .pro-sec-disc.pro-sec-mentoria .pro-sec-disc-head{border-color:color-mix(in srgb,#a855f7 24%,var(--border))}
+#tab-produtos .pro-sec-disc.pro-sec-mentoria.open .pro-sec-disc-head{background:color-mix(in srgb,#a855f7 6%,var(--bg2))}
+#tab-produtos .pro-ment-tag{display:inline-flex;align-items:center;margin-left:8px;padding:2px 9px;border-radius:999px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+#tab-produtos .pro-ment-tag-opcional{background:color-mix(in srgb,#f59e0b 14%,transparent);border:1px solid color-mix(in srgb,#f59e0b 40%,var(--border));color:#f59e0b}
+#tab-produtos .pro-ment-tag-sim{background:color-mix(in srgb,#22c55e 14%,transparent);border:1px solid color-mix(in srgb,#22c55e 40%,var(--border));color:#22c55e}
 /* Descrição da mentoria: aparece logo abaixo do título, sempre visível por inteiro */
 #tab-produtos .pro-ment-desc{font-size:14px;line-height:1.55;color:var(--text);margin:0 0 14px;max-width:820px;white-space:pre-wrap;border-left:3px solid color-mix(in srgb,#a855f7 50%,transparent);padding:2px 0 2px 12px;text-align:justify}
 
@@ -1850,6 +1856,9 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-section-bonus{border-top:1px solid var(--border);padding-top:28px;margin-top:32px}
 #tab-produtos .pro-section-title-bonus{color:#fbbf24}
 #tab-produtos .pro-section-title-bonus::before{color:#fbbf24;opacity:.5}
+#tab-produtos .pro-sec-disc.pro-sec-bonus .pro-sec-disc-title{color:#fbbf24}
+#tab-produtos .pro-sec-disc.pro-sec-bonus .pro-sec-disc-head{border-color:color-mix(in srgb,#fbbf24 28%,var(--border))}
+#tab-produtos .pro-sec-disc.pro-sec-bonus.open .pro-sec-disc-head{background:color-mix(in srgb,#fbbf24 6%,var(--bg2))}
 #tab-produtos .pro-bonus-cards{display:flex;flex-direction:column;gap:8px}
 /* Cards de produtos vinculados (minimal): só nome + chevron, ciano/teal */
 #tab-produtos .pro-link-cards{display:flex;flex-direction:column;gap:6px}
@@ -1944,23 +1953,21 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-bullet::before{content:"✓";color:#22c55e;font-weight:700;flex-shrink:0;width:22px;height:22px;border-radius:50%;background:color-mix(in srgb, #22c55e 14%, transparent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-top:1px}
 
 #tab-produtos .pro-obj{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px}
-#tab-produtos .pro-obj-q{font-weight:700;font-size:14px;color:var(--text);margin-bottom:6px}
-#tab-produtos .pro-obj-q::before{content:"Q: ";color:var(--accent);font-family:'JetBrains Mono','SF Mono',monospace;font-weight:700;margin-right:2px}
-#tab-produtos .pro-obj-q > p:first-child,#tab-produtos .pro-obj-q > div:first-child,#tab-produtos .pro-obj-q > span:first-child{display:inline;margin:0}
-#tab-produtos .pro-obj-a{font-size:13.5px;line-height:1.55;color:var(--t2);text-align:justify}
-#tab-produtos .pro-obj-a::before{content:"R: ";color:var(--accent);font-family:'JetBrains Mono','SF Mono',monospace;font-weight:700;margin-right:2px}
-/* Primeiro elemento da resposta vira inline pra colar no R: */
-#tab-produtos .pro-obj-a > p:first-child,
-#tab-produtos .pro-obj-a > div:first-child,
-#tab-produtos .pro-obj-a > span:first-child,
-#tab-produtos .pro-obj-a > strong:first-child,
-#tab-produtos .pro-obj-a > em:first-child,
-#tab-produtos .pro-obj-a > b:first-child,
-#tab-produtos .pro-obj-a > i:first-child,
-#tab-produtos .pro-obj-a > a:first-child{display:inline;margin:0}
-/* Se a resposta começa com lista, dá quebra antes pra não colar feio */
-#tab-produtos .pro-obj-a > ul:first-child,
-#tab-produtos .pro-obj-a > ol:first-child{margin-top:6px}
+/* Estrutura nova: linha flex com "Q:" / "R:" / "❓" à esquerda + texto à direita.
+   O prefixo nunca quebra de linha. O texto justifica e quebra naturalmente
+   entre palavras (sem hifenização, sem quebrar palavra no meio). */
+#tab-produtos .pro-obj-row{display:flex;gap:10px;align-items:flex-start;min-width:0}
+#tab-produtos .pro-obj-row + .pro-obj-row{margin-top:8px}
+#tab-produtos .pro-obj-prefix{flex-shrink:0;font-family:'JetBrains Mono','SF Mono',monospace;font-weight:700;color:var(--accent);font-size:13.5px;line-height:1.55;padding-top:1px}
+#tab-produtos .pro-obj-text{flex:1;min-width:0;text-align:justify;hyphens:none;-webkit-hyphens:none;overflow-wrap:break-word;word-break:normal}
+#tab-produtos .pro-obj-q-row .pro-obj-text{font-weight:700;font-size:14px;color:var(--text)}
+#tab-produtos .pro-obj-a-row .pro-obj-text{font-size:13.5px;line-height:1.55;color:var(--t2)}
+/* Parágrafos dentro do texto da resposta — primeiro sem margin-top pra colar no R: */
+#tab-produtos .pro-obj-a-text > p{margin:0 0 8px;text-align:justify;hyphens:none;-webkit-hyphens:none;overflow-wrap:break-word;word-break:normal}
+#tab-produtos .pro-obj-a-text > p:first-child{margin-top:0}
+#tab-produtos .pro-obj-a-text > p:last-child{margin-bottom:0}
+#tab-produtos .pro-obj-a-text > ul,#tab-produtos .pro-obj-a-text > ol{margin:4px 0 8px 22px;padding:0}
+#tab-produtos .pro-obj-a-text > ul li,#tab-produtos .pro-obj-a-text > ol li{margin-bottom:2px}
 
 #tab-produtos .pro-links{display:flex;flex-direction:column;gap:6px}
 #tab-produtos .pro-link{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);text-decoration:none;font-size:14px;font-weight:500;transition:all .15s}
@@ -2246,6 +2253,44 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-jornada-disc.open .pro-jornada-caret{transform:rotate(180deg);color:#06b6d4}
 #tab-produtos .pro-jornada-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .4s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .25s,padding .2s}
 #tab-produtos .pro-jornada-disc.open .pro-jornada-body{max-height:3000px;opacity:1;padding:6px 20px 20px;overflow-y:auto}
+
+/* Editais — cards colapsáveis dentro do box principal */
+#tab-produtos .pro-editais-lista{display:flex;flex-direction:column;gap:8px}
+#tab-produtos .pro-edital-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .15s}
+#tab-produtos .pro-edital-card:hover{border-color:color-mix(in srgb,#06b6d4 36%,var(--border))}
+#tab-produtos .pro-edital-card.open{border-color:color-mix(in srgb,#06b6d4 46%,var(--border))}
+#tab-produtos .pro-edital-head{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;transition:background .15s}
+#tab-produtos .pro-edital-head:hover{background:color-mix(in srgb,#06b6d4 5%,var(--bg2))}
+#tab-produtos .pro-edital-icon{font-size:16px;flex-shrink:0;line-height:1}
+#tab-produtos .pro-edital-title-group{flex:1;min-width:0;display:inline-flex;align-items:center;gap:8px}
+#tab-produtos .pro-edital-nome{min-width:0;font-weight:600;font-size:14px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tab-produtos .pro-edital-ano{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.6px;color:#06b6d4;background:color-mix(in srgb,#06b6d4 12%,transparent);border:1px solid color-mix(in srgb,#06b6d4 32%,var(--border));padding:2px 8px;border-radius:6px;flex-shrink:0}
+#tab-produtos .pro-edital-actions{display:inline-flex;gap:2px;flex-shrink:0;margin-left:auto}
+#tab-produtos .pro-edital-caret{font-size:12px;color:var(--t2);transition:transform .2s;flex-shrink:0}
+#tab-produtos .pro-edital-card.open .pro-edital-caret{transform:rotate(180deg);color:#06b6d4}
+#tab-produtos .pro-edital-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .35s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,padding .2s,border-top-color .2s;border-top:1px solid transparent;padding:0 16px}
+#tab-produtos .pro-edital-card.open .pro-edital-body{max-height:6000px;opacity:1;padding:14px 16px;border-top-color:var(--border)}
+#tab-produtos .pro-edital-info{font-size:13.5px;line-height:1.6;color:var(--text);hyphens:none;-webkit-hyphens:none;overflow-wrap:break-word;word-break:normal;width:100%;max-width:none;box-sizing:border-box}
+#tab-produtos .pro-edital-info p{margin:0 0 8px;hyphens:none;-webkit-hyphens:none;overflow-wrap:break-word;word-break:normal;width:100%;max-width:none}
+#tab-produtos .pro-edital-info p:last-child{margin-bottom:0}
+#tab-produtos .pro-edital-info ul,#tab-produtos .pro-edital-info ol{margin:4px 0 8px 22px;padding:0}
+#tab-produtos .pro-edital-info li{margin-bottom:2px}
+#tab-produtos .pro-edital-info a{color:#06b6d4;text-decoration:underline}
+#tab-produtos .pro-edital-info strong{color:var(--text);font-weight:700}
+
+/* Modal de cadastro/edição de edital */
+.pro-editais-modal-backdrop{position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:32px 16px;animation:dexSlideIn .22s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
+.pro-editais-modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:100%;max-width:820px;max-height:calc(100vh - 64px);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.45),0 0 0 1px color-mix(in srgb,#06b6d4 22%,transparent)}
+.pro-editais-modal-head{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.pro-editais-modal-title{flex:1;font-size:16px;font-weight:700;color:var(--text);margin:0;font-family:'Plus Jakarta Sans',sans-serif}
+.pro-editais-modal-close{background:transparent;border:none;color:var(--t2);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;line-height:1;transition:all .15s}
+.pro-editais-modal-close:hover{color:#ef4444;background:color-mix(in srgb,#ef4444 12%,transparent)}
+.pro-editais-modal-body{flex:1;min-height:0;overflow-y:auto;padding:16px 20px}
+.pro-editais-modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg);flex-shrink:0}
+@media (max-width:640px){
+  .pro-editais-modal-backdrop{padding:0}
+  .pro-editais-modal{max-width:none;height:100vh;max-height:100vh;border-radius:0;border:none}
+}
 #tab-produtos .pro-jornada-hint{font-size:12.5px;color:var(--t2);line-height:1.5;margin:0 0 14px;font-style:italic}
 /* Banner de rascunho não-salvo (auto-save local sobrevivente de reload) */
 #tab-produtos .pro-jornada-draft-banner{display:flex;align-items:center;gap:14px;padding:14px 16px;margin:0 0 16px;background:color-mix(in srgb,#f59e0b 8%,var(--bg2));border:1px solid color-mix(in srgb,#f59e0b 42%,var(--border));border-radius:12px;box-shadow:0 4px 12px color-mix(in srgb,#f59e0b 12%,transparent)}
@@ -2322,6 +2367,36 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-qa-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .35s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,padding .2s,border-top-color .2s;border-top:1px solid transparent;padding:0 14px}
 #tab-produtos .pro-qa-edit.open .pro-qa-body{max-height:1500px;opacity:1;padding:14px;border-top-color:var(--border)}
 #tab-produtos .pro-qa-edit.open.fully-open .pro-qa-body{max-height:none}
+
+/* Concorrentes — feature individual dentro do card do concorrente (edit) */
+#tab-produtos .pro-conc-feat{border:1px dashed color-mix(in srgb,var(--accent) 22%,var(--border));border-radius:10px;padding:10px 12px;margin-bottom:10px;background:color-mix(in srgb,var(--accent) 2%,var(--bg))}
+#tab-produtos .pro-conc-feat:last-child{margin-bottom:0}
+#tab-produtos .pro-conc-feat-head{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+#tab-produtos .pro-conc-feat-titulo{flex:1;min-width:120px}
+#tab-produtos .pro-conc-feat-actions{display:inline-flex;gap:2px;flex-shrink:0}
+#tab-produtos .pro-conc-feat-body label.fl{font-size:11px;font-weight:700;color:var(--t2);letter-spacing:.4px;text-transform:uppercase;margin-bottom:5px;display:block}
+
+/* Concorrentes — card colapsável no detalhe (read) */
+#tab-produtos .pro-conc-detail-card{margin-bottom:8px;border:1px solid var(--border);border-radius:10px;background:var(--bg);overflow:hidden;transition:border-color .15s}
+#tab-produtos .pro-conc-detail-card:hover{border-color:color-mix(in srgb,var(--accent) 30%,var(--border))}
+#tab-produtos .pro-conc-detail-card > summary{cursor:pointer;padding:10px 14px;display:flex;align-items:center;gap:10px;list-style:none;user-select:none;background:color-mix(in srgb,var(--accent) 4%,var(--bg2));transition:background .15s}
+#tab-produtos .pro-conc-detail-card > summary::-webkit-details-marker{display:none}
+#tab-produtos .pro-conc-detail-card > summary::before{content:"▸";font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;color:var(--accent);transition:transform .2s}
+#tab-produtos .pro-conc-detail-card[open] > summary::before{transform:rotate(90deg)}
+#tab-produtos .pro-conc-detail-card[open] > summary{border-bottom:1px solid var(--border)}
+#tab-produtos .pro-conc-detail-card > summary:hover{background:color-mix(in srgb,var(--accent) 8%,var(--bg2))}
+#tab-produtos .pro-conc-detail-nome{flex:1;min-width:0;font-weight:600;font-size:14px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tab-produtos .pro-conc-detail-count{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;color:var(--t2);letter-spacing:.4px;flex-shrink:0}
+#tab-produtos .pro-conc-detail-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+#tab-produtos .pro-conc-detail-feat{padding:10px 12px;background:color-mix(in srgb,var(--accent) 3%,var(--bg2));border:1px solid var(--border);border-radius:8px}
+#tab-produtos .pro-conc-detail-feat-titulo{font-weight:600;font-size:13.5px;color:var(--text);margin-bottom:6px}
+#tab-produtos .pro-conc-detail-feat-dif{margin-top:6px;padding-top:8px;border-top:1px dashed var(--border)}
+#tab-produtos .pro-conc-detail-feat-dif-label{display:inline-block;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#22c55e;background:color-mix(in srgb,#22c55e 10%,transparent);border:1px solid color-mix(in srgb,#22c55e 32%,var(--border));padding:2px 8px;border-radius:6px;margin-bottom:6px}
+#tab-produtos .pro-conc-detail-feat-dif-body{font-size:13.5px;line-height:1.55;color:var(--text);text-align:justify;hyphens:none;-webkit-hyphens:none;overflow-wrap:break-word;word-break:normal}
+#tab-produtos .pro-conc-detail-feat-dif-body p{margin:0 0 6px;text-align:justify;hyphens:none;-webkit-hyphens:none;overflow-wrap:break-word;word-break:normal}
+#tab-produtos .pro-conc-detail-feat-dif-body p:last-child{margin-bottom:0}
+#tab-produtos .pro-conc-detail-feat-dif-body ul,#tab-produtos .pro-conc-detail-feat-dif-body ol{margin:4px 0 6px 22px;padding:0}
+#tab-produtos .pro-conc-detail-feat-dif-body li{margin-bottom:2px}
 
 /* Rich-text mini editor (resposta de obj/dúvida) */
 #tab-produtos .pro-rt{border:1px solid var(--border);border-radius:10px;background:var(--bg);overflow:hidden;transition:border-color .15s,box-shadow .15s}
@@ -2678,6 +2753,14 @@ body.pro-rt-fs-on{overflow:hidden}
 #tab-produtos .pro-dex-cfg-btn{background:transparent;border:none;color:var(--t2);font-size:15px;cursor:pointer;padding:4px 7px;border-radius:6px;line-height:1;transition:color .15s,background .15s,transform .12s}
 #tab-produtos .pro-dex-cfg-btn:hover{color:#a855f7;background:color-mix(in srgb,#a855f7 12%,transparent);transform:rotate(45deg)}
 #tab-produtos .pro-dex-cfg-btn.on{color:#a855f7;background:color-mix(in srgb,#a855f7 16%,transparent);transform:rotate(45deg)}
+/* Botão Resetar conversa — visível com ícone + texto */
+#tab-produtos .pro-dex-reset-btn{display:inline-flex;align-items:center;gap:6px;background:color-mix(in srgb,#fb923c 12%,transparent);border:1px solid color-mix(in srgb,#fb923c 42%,var(--border));color:#fb923c;padding:5px 11px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;line-height:1;transition:all .15s}
+#tab-produtos .pro-dex-reset-btn:hover{background:color-mix(in srgb,#fb923c 22%,transparent);border-color:#fb923c;transform:translateY(-1px);box-shadow:0 2px 8px color-mix(in srgb,#fb923c 18%,transparent)}
+#tab-produtos .pro-dex-reset-ico{font-size:13px;line-height:1}
+@media (max-width:520px){
+  #tab-produtos .pro-dex-reset-lbl{display:none}
+  #tab-produtos .pro-dex-reset-btn{padding:6px 8px}
+}
 
 /* Painel de configuração do Dex (admin) */
 #tab-produtos .pro-dex-cfg-panel{margin:0 0 14px;padding:16px;background:color-mix(in srgb,#a855f7 4%,var(--bg));border:1px solid color-mix(in srgb,#a855f7 32%,var(--border));border-radius:12px;animation:dexSlideIn .22s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
@@ -2748,8 +2831,15 @@ body.pro-rt-fs-on{overflow:hidden}
 #tab-produtos .pro-dex-ext-link{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
 #tab-produtos .pro-dex-meta{margin-top:10px;font-size:10.5px;color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.6px;text-transform:uppercase;opacity:.7}
 
-/* Histórico de chat — balões empilhados */
-#tab-produtos .pro-dex-history{margin:10px 0 12px;max-height:520px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px;scroll-behavior:smooth}
+/* Wrapper colapsável do histórico (toggle dropdown quando conversa fica longa) */
+#tab-produtos .pro-dex-history-wrap{margin:10px 0 12px;border:1px solid color-mix(in srgb,#a855f7 22%,var(--border));border-radius:12px;background:color-mix(in srgb,#a855f7 3%,var(--bg));overflow:hidden}
+#tab-produtos .pro-dex-history-toggle{display:flex;align-items:center;gap:8px;width:100%;background:transparent;border:none;padding:8px 14px;color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:background .12s,color .12s}
+#tab-produtos .pro-dex-history-toggle:hover{background:color-mix(in srgb,#a855f7 8%,transparent);color:var(--text)}
+#tab-produtos .pro-dex-history-caret{display:inline-block;font-size:11px;color:#a855f7;transition:transform .2s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
+#tab-produtos .pro-dex-history-wrap.collapsed .pro-dex-history-caret{transform:rotate(-90deg)}
+#tab-produtos .pro-dex-history-wrap.collapsed .pro-dex-history{display:none}
+/* Histórico de chat — balões empilhados (dentro do wrapper colapsável) */
+#tab-produtos .pro-dex-history{margin:0;padding:6px 12px 10px;max-height:520px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;border-top:1px solid color-mix(in srgb,#a855f7 14%,var(--border))}
 #tab-produtos .pro-dex-history::-webkit-scrollbar{width:6px}
 #tab-produtos .pro-dex-history::-webkit-scrollbar-thumb{background:color-mix(in srgb,#a855f7 28%,transparent);border-radius:6px}
 #tab-produtos .pro-dex-bubble{max-width:88%;padding:11px 14px;border-radius:14px;font-size:14px;line-height:1.55;animation:dexSlideIn .2s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));word-wrap:break-word;overflow-wrap:anywhere}
@@ -28296,6 +28386,12 @@ S.catalogoConfig={publicosAlvo:[],provasAlvo:[],loaded:false};
 S.jornadaCliente={texto:'',videoUrl:'',imagemUrl:'',imagemPath:'',updatedAt:null,updatedBy:'',loaded:false};
 S._jornadaOpen=false;
 S._jornadaDirty=false;
+// Editais — coleção de editais de prova com info relevante editável (rich-text)
+S.editais={lista:[],loaded:false,updatedAt:null,updatedBy:''};
+S._editaisOpen=false; // box principal aberto/fechado
+S._editaisModalOpen=false; // modal de cadastro/edição aberto
+S._editaisEditando=null; // {id, nomeProva, ano, info} sendo editado (ou null pra novo)
+S._editalAbertos=new Set(); // ids dos editais expandidos na lista
 // Configuração editável do Dex (prompts por perfil, modelo, max_tokens, PDFs)
 S.dexConfig={
   templateGeral:'',templateSuporte:'',templateVendas:'',templateMarketing:'',
@@ -28309,12 +28405,13 @@ S._dexConfigOpen=false;
 S._dexConfigDirty=false;
 S._dexConfigDraft=null;
 S._dexConfigTab='geral'; // qual perfil está sendo editado no painel
-// Perfil de quem está perguntando (chips acima do input) — persiste em localStorage.
-// Default: 'geral' (modo neutro, sem viés de papel).
+// Perfil de quem está perguntando (chips acima do input).
+// Sempre começa em 'geral' a cada page load. Durante a sessão, troca livre.
 const _DEX_PERFIS=['geral','suporte','vendas','marketing'];
-S.dexPerfil=(()=>{try{const v=localStorage.getItem('aros.dex.perfil');return _DEX_PERFIS.includes(v)?v:'geral';}catch(e){return 'geral';}})();
+S.dexPerfil='geral';
 // Histórico de conversa do Dex — array de {role:'user'|'assistant', content, usage?, ts}
 S.dexHistorico=[];
+S._dexHistoricoColapsado=false; // toggle pra colapsar o painel quando conversa fica longa
 
 // Cadastro de membros do time + workspace Slack
 // Estrutura Firestore: config/slackTime = {teamId, membros:[{nome,slackId}], updatedAt, updatedBy}
@@ -28340,6 +28437,7 @@ function _ensureSlackTimeListener(){
   },err=>{console.warn('slackTime onSnapshot:',err);S.slackTime.loaded=true;});
 }
 let _proJornadaUnsub=null;
+let _proEditaisUnsub=null;
 let _proUnsub=null;
 let _proCatUnsub=null;
 let _proDexCfgUnsub=null;
@@ -28390,6 +28488,7 @@ function _proBuscaHaystack(p){
   parts.push(p.nome,p.id,p.status);
   parts.push(_proGetBreveDescricao(p));
   parts.push(p.pitchCurto,p.pitchLongo);
+  parts.push(p.tempoTesteRecomendado);
   parts.push(..._proGetPublicoAlvo(p));
   if(Array.isArray(p.provasAlvo))parts.push(...p.provasAlvo);
   if(Array.isArray(p.responsaveis))parts.push(...p.responsaveis);
@@ -28425,6 +28524,12 @@ function _proBuscaHaystack(p){
   if(Array.isArray(p.argumentosVenda))parts.push(...p.argumentosVenda);
   (p.objecoes||[]).forEach(o=>{parts.push(o.pergunta);parts.push(_proBuscaStripHtml(o.resposta));});
   (p.duvidas||[]).forEach(d=>{parts.push(d.pergunta);parts.push(_proBuscaStripHtml(d.resposta));});
+  // Concorrentes (nome + features + diferenciais)
+  (p.concorrentes||[]).forEach(c=>{
+    parts.push(c.nome);
+    parts.push('concorrente'); // termo explícito ajuda achar "concorrente X" ou "concorrentes"
+    (c.features||[]).forEach(f=>{parts.push(f.titulo);parts.push(_proBuscaStripHtml(f.nossoDiferencial));});
+  });
   // Links
   (p.links||[]).forEach(l=>{parts.push(l.label,l.url);});
   return parts.filter(Boolean).join(' ');
@@ -28615,6 +28720,16 @@ window.initProdutos=function(){
       if(S.produtosLoaded&&S.produtosView==='list'&&!S._jornadaDirty)_proJornadaRefresh();
     },err=>{console.warn('jornadaCliente onSnapshot:',err);S.jornadaCliente.loaded=true;});
   }
+  if(!_proEditaisUnsub){
+    _proEditaisUnsub=onSnapshot(doc(db,'config','editais'),snap=>{
+      const d=snap.exists()?(snap.data()||{}):{};
+      S.editais.lista=Array.isArray(d.lista)?d.lista.filter(e=>e&&e.id):[];
+      S.editais.updatedAt=d.updatedAt||null;
+      S.editais.updatedBy=String(d.updatedBy||'');
+      S.editais.loaded=true;
+      if(S.produtosLoaded&&S.produtosView==='list'&&!S._editaisModalOpen)_proEditaisRefresh();
+    },err=>{console.warn('editais onSnapshot:',err);S.editais.loaded=true;});
+  }
   _ensureSlackTimeListener();
   if(!_proDexCfgUnsub){
     _proDexCfgUnsub=onSnapshot(doc(db,'config','dexPrompt'),snap=>{
@@ -28750,6 +28865,7 @@ function _proRenderList(root){
     </div>
     <div id="pro-dex-container"></div>
     <div id="pro-jornada-wrap">${_proJornadaHTML()}</div>
+    <div id="pro-editais-wrap">${_proEditaisHTML()}</div>
     ${listHtml}
   `;
   _proDexRender();
@@ -28888,6 +29004,204 @@ function _proJornadaRefresh(){
     if(ed2)ed2.focus();
   }
 }
+
+// ════════════════════════════════════════════════════════════════════════
+// EDITAIS — caixa colapsável entre Jornada e a lista de produtos
+// Cada edital: {id, nomeProva, ano, info (HTML rich-text), updatedAt, updatedBy}
+// Persistido em config/editais com campo `lista`
+// ════════════════════════════════════════════════════════════════════════
+function _proEditaisHTML(){
+  const canEdit=_proCanEdit();
+  const open=!!S._editaisOpen;
+  const loaded=!!S.editais.loaded;
+  const lista=Array.isArray(S.editais.lista)?S.editais.lista:[];
+  // Ordena: ano desc, depois nome
+  const ord=lista.slice().sort((a,b)=>{
+    const ya=parseInt(a.ano,10)||0,yb=parseInt(b.ano,10)||0;
+    if(yb!==ya)return yb-ya;
+    return String(a.nomeProva||'').localeCompare(String(b.nomeProva||''),'pt-BR');
+  });
+  let bodyHtml;
+  if(!loaded){
+    bodyHtml=`<p style="color:var(--t2);font-style:italic;margin:0">Carregando…</p>`;
+  }else{
+    const cadastrarBtn=canEdit?`<button class="btn btn-p btn-sm" type="button" onclick="proEditaisAbrirNovo()" style="margin-bottom:14px">＋ Cadastrar edital</button>`:'';
+    const listaHtml=ord.length?ord.map(e=>_proEditalItemHTML(e,canEdit)).join(''):
+      `<p style="color:var(--t2);font-style:italic;margin:0">Nenhum edital cadastrado ainda.${canEdit?' Clique em "Cadastrar edital" pra começar.':''}</p>`;
+    bodyHtml=`${cadastrarBtn}<div class="pro-editais-lista">${listaHtml}</div>`;
+  }
+  const updMeta=(S.editais.updatedAt&&S.editais.updatedBy)?`<span class="pro-jornada-meta">Atualizado em ${_proEsc(_proFmtDate(S.editais.updatedAt))} por ${_proEsc(S.editais.updatedBy)}</span>`:'';
+  const modalHtml=S._editaisModalOpen?_proEditaisModalHTML():'';
+  return `<div class="pro-jornada-disc${open?' open':''}" data-editais-disc>
+    <div class="pro-jornada-head" role="button" tabindex="0" onclick="proToggleEditais()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proToggleEditais()}" aria-expanded="${open}">
+      <span class="pro-jornada-title"><span class="pro-jornada-ico">📋</span> Editais</span>
+      ${updMeta}
+      <span class="pro-jornada-caret">▾</span>
+    </div>
+    <div class="pro-jornada-body">${bodyHtml}</div>
+  </div>${modalHtml}`;
+}
+
+function _proEditalItemHTML(e,canEdit){
+  const id=String(e.id||'');
+  const aberto=S._editalAbertos.has(id);
+  const nome=String(e.nomeProva||'').trim()||'(sem nome)';
+  const ano=String(e.ano||'').trim();
+  const info=String(e.info||'').trim();
+  const actions=canEdit?`<div class="pro-edital-actions" onclick="event.stopPropagation()">
+    <button class="pro-icon-btn" type="button" onclick="event.stopPropagation();proEditaisEditar('${_proEscAttr(id)}')" title="Editar edital">✏️</button>
+    <button class="pro-icon-btn" type="button" onclick="event.stopPropagation();proEditaisRemover('${_proEscAttr(id)}')" title="Remover edital">🗑</button>
+  </div>`:'';
+  const infoBody=info?_proRtRepairDetails(_renderRichText(info)):'<p style="color:var(--t2);font-style:italic;margin:0">Sem informações cadastradas.</p>';
+  return `<div class="pro-edital-card${aberto?' open':''}" data-edital-id="${_proEscAttr(id)}">
+    <div class="pro-edital-head" role="button" tabindex="0" onclick="proEditalToggle('${_proEscAttr(id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proEditalToggle('${_proEscAttr(id)}')}" aria-expanded="${aberto}">
+      <span class="pro-edital-icon">📄</span>
+      <span class="pro-edital-title-group">
+        <span class="pro-edital-nome">${_proEsc(nome)}</span>
+        ${ano?`<span class="pro-edital-ano">${_proEsc(ano)}</span>`:''}
+      </span>
+      ${actions}
+      <span class="pro-edital-caret">▾</span>
+    </div>
+    <div class="pro-edital-body"><div class="pro-edital-info">${infoBody}</div></div>
+  </div>`;
+}
+
+function _proEditaisModalHTML(){
+  const e=S._editaisEditando||{nomeProva:'',ano:'',info:''};
+  const isEdit=!!e.id;
+  const titulo=isEdit?'Editar edital':'Cadastrar edital';
+  const anoAtual=new Date().getFullYear();
+  return `<div class="pro-editais-modal-backdrop">
+    <div class="pro-editais-modal" role="dialog" aria-modal="true">
+      <div class="pro-editais-modal-head">
+        <h3 class="pro-editais-modal-title">📋 ${titulo}</h3>
+        <button class="pro-editais-modal-close" type="button" onclick="proEditaisModalFechar()" title="Fechar">✕</button>
+      </div>
+      <div class="pro-editais-modal-body">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+          <div class="fg" style="flex:2;min-width:200px;margin-bottom:0">
+            <label class="fl">Nome da prova</label>
+            <input type="text" class="fc" id="pro-edital-nome" placeholder="Ex: TEA 2026 — 1ª Fase" value="${_proEscAttr(e.nomeProva||'')}" oninput="_proEditaisSetCampo('nomeProva',this.value)"/>
+          </div>
+          <div class="fg" style="flex:1;min-width:120px;margin-bottom:0">
+            <label class="fl">Ano do edital</label>
+            <input type="number" class="fc" id="pro-edital-ano" placeholder="${anoAtual}" min="2000" max="2100" value="${_proEscAttr(e.ano||'')}" oninput="_proEditaisSetCampo('ano',this.value)"/>
+          </div>
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label class="fl">Informações relevantes</label>
+          ${_proRtHTML('edital-info',e.info||'','Cole ou digite as informações relevantes do edital (datas, locais, regras, conteúdo programático, link oficial, etc).',"_proEditaisSetCampo('info',_proRtGet('edital-info'))",{colors:true,justify:true,tall:true,expandable:true,collapsibles:true})}
+        </div>
+      </div>
+      <div class="pro-editais-modal-foot">
+        <button class="btn btn-s btn-sm" type="button" onclick="proEditaisModalFechar()">Cancelar</button>
+        <button class="btn btn-p btn-sm" type="button" onclick="proEditaisModalSalvar()">💾 Salvar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function _proEditaisRefresh(){
+  const wrap=document.getElementById('pro-editais-wrap');
+  if(!wrap)return;
+  // Preserva foco do editor do modal se houver
+  const ed=document.querySelector('[data-rt-ed="edital-info"]');
+  const wasFocused=ed&&document.activeElement===ed;
+  wrap.innerHTML=_proEditaisHTML();
+  if(wasFocused){
+    const ed2=document.querySelector('[data-rt-ed="edital-info"]');
+    if(ed2)ed2.focus();
+  }
+}
+
+window.proToggleEditais=()=>{
+  S._editaisOpen=!S._editaisOpen;
+  const el=document.querySelector('#tab-produtos [data-editais-disc]');
+  if(el)el.classList.toggle('open',!!S._editaisOpen);
+};
+
+window.proEditalToggle=(id)=>{
+  if(S._editalAbertos.has(id))S._editalAbertos.delete(id);else S._editalAbertos.add(id);
+  const el=document.querySelector(`#tab-produtos .pro-edital-card[data-edital-id="${id}"]`);
+  if(el)el.classList.toggle('open',S._editalAbertos.has(id));
+};
+
+window.proEditaisAbrirNovo=()=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  S._editaisEditando={id:null,nomeProva:'',ano:String(new Date().getFullYear()),info:''};
+  S._editaisModalOpen=true;
+  _proEditaisRefresh();
+};
+
+window.proEditaisEditar=(id)=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const e=S.editais.lista.find(x=>x.id===id);
+  if(!e)return alert('Edital não encontrado.');
+  S._editaisEditando={id:e.id,nomeProva:String(e.nomeProva||''),ano:String(e.ano||''),info:String(e.info||'')};
+  S._editaisModalOpen=true;
+  _proEditaisRefresh();
+};
+
+window.proEditaisModalFechar=()=>{
+  S._editaisModalOpen=false;
+  S._editaisEditando=null;
+  _proEditaisRefresh();
+};
+
+window._proEditaisSetCampo=(campo,valor)=>{
+  if(!S._editaisEditando)return;
+  S._editaisEditando[campo]=valor;
+};
+
+window.proEditaisModalSalvar=async()=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const e=S._editaisEditando;
+  if(!e)return;
+  const nome=String(e.nomeProva||'').trim();
+  if(!nome)return alert('Informe o nome da prova.');
+  const ano=String(e.ano||'').trim();
+  const info=_proSanitizeResp(e.info||'');
+  try{
+    const user=(S.currentUser&&S.currentUser.username)||'?';
+    const novaLista=S.editais.lista.slice();
+    if(e.id){
+      // edit
+      const idx=novaLista.findIndex(x=>x.id===e.id);
+      if(idx>=0)novaLista[idx]={...novaLista[idx],nomeProva:nome,ano,info,updatedAt:new Date().toISOString(),updatedBy:user};
+    }else{
+      // novo
+      novaLista.push({id:_proUid(),nomeProva:nome,ano,info,updatedAt:new Date().toISOString(),updatedBy:user});
+    }
+    await setDoc(doc(db,'config','editais'),{lista:novaLista,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    if(typeof audit==='function')audit(e.id?'EDITAL_EDITADO':'EDITAL_CRIADO',{collection:'config',id:'editais'},{after:{nomeProva:nome,ano}});
+    S._editaisModalOpen=false;
+    S._editaisEditando=null;
+    _proSaveFeedback('ok');
+    _proEditaisRefresh();
+  }catch(err){
+    alert('Erro ao salvar: '+(err.message||err));
+  }
+};
+
+window.proEditaisRemover=async(id)=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const e=S.editais.lista.find(x=>x.id===id);
+  if(!e)return;
+  const lbl=String(e.nomeProva||'').trim()||'(sem nome)';
+  if(!confirm(`Remover o edital "${lbl}"? Esta ação não pode ser desfeita.`))return;
+  try{
+    const user=(S.currentUser&&S.currentUser.username)||'?';
+    const novaLista=S.editais.lista.filter(x=>x.id!==id);
+    await setDoc(doc(db,'config','editais'),{lista:novaLista,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    if(typeof audit==='function')audit('EDITAL_REMOVIDO',{collection:'config',id:'editais'},{after:{nomeProva:lbl}});
+    S._editalAbertos.delete(id);
+    _proSaveFeedback('ok');
+    _proEditaisRefresh();
+  }catch(err){
+    alert('Erro ao remover: '+(err.message||err));
+  }
+};
 
 window.proToggleJornada=()=>{
   S._jornadaOpen=!S._jornadaOpen;
@@ -29054,10 +29368,12 @@ function _proDexRender(){
   const erro=S.dexErro||null;
   const historico=Array.isArray(S.dexHistorico)?S.dexHistorico:[];
 
+  // Toggle de colapsar histórico
+  const colapsado=!!S._dexHistoricoColapsado;
   // Monta o histórico como balões de chat
-  let historicoHtml='';
+  let historicoInnerHtml='';
   if(historico.length){
-    historicoHtml=historico.map(m=>{
+    historicoInnerHtml=historico.map(m=>{
       if(m.role==='user'){
         return `<div class="pro-dex-bubble user"><div class="pro-dex-bubble-content">${_proEsc(m.content)}</div></div>`;
       }
@@ -29067,17 +29383,31 @@ function _proDexRender(){
     }).join('');
   }
   if(loading){
-    historicoHtml+=`<div class="pro-dex-bubble assistant loading"><div class="pro-dex-typing"><span></span><span></span><span></span></div></div>`;
+    historicoInnerHtml+=`<div class="pro-dex-bubble assistant loading"><div class="pro-dex-typing"><span></span><span></span><span></span></div></div>`;
   }
   if(erro){
-    historicoHtml+=`<div class="pro-dex-error">⚠️ ${_proEsc(erro)}</div>`;
+    historicoInnerHtml+=`<div class="pro-dex-error">⚠️ ${_proEsc(erro)}</div>`;
   }
-  const historicoBlock=historicoHtml?`<div class="pro-dex-history" id="pro-dex-history">${historicoHtml}</div>`:'';
+  // Wraper colapsável — header com contagem + caret + container do histórico
+  let historicoBlock='';
+  if(historicoInnerHtml){
+    const qtdTurnos=Math.ceil(historico.length/2);
+    const lblTurnos=qtdTurnos===1?'1 turno':`${qtdTurnos} turnos`;
+    historicoBlock=`
+      <div class="pro-dex-history-wrap${colapsado?' collapsed':''}">
+        <button type="button" class="pro-dex-history-toggle" onclick="proDexHistoricoToggle()" title="${colapsado?'Mostrar':'Esconder'} a conversa">
+          <span class="pro-dex-history-caret">▾</span>
+          <span class="pro-dex-history-label">Conversa atual · ${lblTurnos}</span>
+        </button>
+        <div class="pro-dex-history" id="pro-dex-history">${historicoInnerHtml}</div>
+      </div>
+    `;
+  }
 
   // Botão de configuração — só pra quem pode editar (admin/coord)
   const cfgBtn=_proCanEdit()?`<button class="pro-dex-cfg-btn${S._dexConfigOpen?' on':''}" onclick="proDexConfigToggle()" title="Configurar comportamento do Dex (prompt, modelo)">⚙️</button>`:'';
-  // Botão de nova conversa — só aparece se já tem histórico
-  const novaBtn=historico.length?`<button class="pro-dex-cfg-btn" onclick="proDexNovaConversa()" title="Nova conversa (limpa o histórico)">🔄</button>`:'';
+  // Botão de nova conversa — só aparece se já tem histórico, com texto visível
+  const novaBtn=historico.length?`<button class="pro-dex-reset-btn" onclick="proDexNovaConversa()" title="Limpa o histórico e começa do zero"><span class="pro-dex-reset-ico">🔄</span><span class="pro-dex-reset-lbl">Resetar conversa</span></button>`:'';
   // Painel de configuração (inline disclosure)
   const cfgPanel=(S._dexConfigOpen&&_proCanEdit())?_proDexConfigHTML():'';
 
@@ -29153,11 +29483,10 @@ window._proDexSetPerfil=(perfil)=>{
   if(tem){
     const lblAtual={geral:'Geral',suporte:'Suporte',vendas:'Vendas',marketing:'Marketing'}[S.dexPerfil||'geral'];
     const lblNovo={geral:'Geral',suporte:'Suporte',vendas:'Vendas',marketing:'Marketing'}[perfil];
-    const ok=confirm(`Trocar de ${lblAtual} pra ${lblNovo}?\n\nA conversa atual continua, mas as próximas perguntas vão usar as instruções de ${lblNovo}. A IA ainda enxerga o que foi conversado com ${lblAtual}.\n\nSe preferir começar do zero, cancele e clique em 🔄 Nova conversa antes.`);
+    const ok=confirm(`Trocar de ${lblAtual} pra ${lblNovo}?\n\nA conversa atual continua, mas as próximas perguntas vão usar as instruções de ${lblNovo}. A IA ainda enxerga o que foi conversado com ${lblAtual}.\n\nSe preferir começar do zero, cancele e clique em "Resetar conversa" antes.`);
     if(!ok)return;
   }
   S.dexPerfil=perfil;
-  try{localStorage.setItem('aros.dex.perfil',perfil);}catch(e){}
   _proDexRender();
 };
 
@@ -29525,6 +29854,12 @@ window.proDexToggle=()=>{
   _proRender();
 };
 
+// Colapsa/expande o painel do histórico (dropdown) — útil quando conversa fica longa
+window.proDexHistoricoToggle=()=>{
+  S._dexHistoricoColapsado=!S._dexHistoricoColapsado;
+  _proDexRender();
+};
+
 // Limpa o histórico e começa uma conversa nova
 window.proDexNovaConversa=()=>{
   const tem=Array.isArray(S.dexHistorico)&&S.dexHistorico.length>0;
@@ -29859,7 +30194,7 @@ window.proNovo=()=>{
   if(!_proCanEdit())return alert('Você não tem permissão para criar produtos.');
   S.produtoAtual={
     id:null,nome:'',breveDescricao:'',publicoAlvo:[],capa:null,
-    provasAlvo:[],temposAcesso:[],temposAcessoObs:'',status:'rascunho',responsaveis:[],features:[],featuresProdutoIds:[],
+    provasAlvo:[],temposAcesso:[],temposAcessoObs:'',tempoTesteRecomendado:'',status:'rascunho',responsaveis:[],features:[],featuresProdutoIds:[],
     sazonal:false,sazonalidadeDescricao:'',janelaVendasInicio:'',janelaVendasFim:'',
     vagasLimitadas:false,vagasLimitacaoDescricao:'',
     mentoriaResponsaveis:[],
@@ -29867,7 +30202,7 @@ window.proNovo=()=>{
     mentoriaVagasLimitadas:false,mentoriaVagasLimitacaoDescricao:'',
     temMentoria:'nao',mentoriaDescricao:'',mentoriaFeatures:[],
     bonusProdutoIds:[],bonusFeatures:[],
-    argumentosVenda:[],objecoes:[],duvidas:[],links:[],anexos:[],
+    argumentosVenda:[],concorrentes:[],objecoes:[],duvidas:[],links:[],anexos:[],
     ordem:Date.now()
   };
   S._proDisc=null;S._proFeatOpen={};
@@ -29942,7 +30277,7 @@ function _proRenderDetail(root){
   // Tempo de acesso — chips inline no header + observação no body
   const tempos=Array.isArray(p.temposAcesso)?p.temposAcesso.filter(Boolean):[];
   const temposObs=String(p.temposAcessoObs||'').trim();
-  if(!S._proDisc)S._proDisc={publico:false,provas:false,tempos:false};
+  if(!S._proDisc)S._proDisc={publico:false,provas:false,tempos:false,teste:false};
   const dTmp=!!S._proDisc.tempos;
   const temposChipsInline=tempos.map(t=>`<span class="pro-disc-inline-chip">${_proEsc(t)}</span>`).join('');
   const discTempos=tempos.length?`<div class="pro-disc tempos${dTmp?' open':''}" data-disc="tempos">
@@ -29953,6 +30288,22 @@ function _proRenderDetail(root){
     </button>
     <div class="pro-disc-body" id="pro-disc-body-tempos" role="region">
       ${temposObs?`<p class="pro-disc-obs">${_proEsc(temposObs)}</p>`:`<p class="pro-disc-obs empty">Sem observações sobre os tempos de acesso.</p>`}
+    </div>
+  </div>`:'';
+
+  // Tempo de teste recomendado — disclosure com preview no header
+  const tempoTesteTxt=String(p.tempoTesteRecomendado||'').trim();
+  const dTst=!!S._proDisc.teste;
+  // Preview no header: primeira linha truncada
+  const tempoTestePreview=tempoTesteTxt?_proEsc(tempoTesteTxt.split(/\r?\n/)[0].slice(0,80)):'';
+  const discTeste=tempoTesteTxt?`<div class="pro-disc teste${dTst?' open':''}" data-disc="teste">
+    <button class="pro-disc-head" type="button" onclick="proToggleDisc('teste')" aria-expanded="${dTst}" aria-controls="pro-disc-body-teste">
+      <span class="pro-disc-label"><span class="pro-disc-ico">🧪</span> Tempo de teste recomendado</span>
+      <span class="pro-disc-inline-chips">${tempoTestePreview?`<span class="pro-disc-inline-chip">${tempoTestePreview}</span>`:''}</span>
+      <span class="pro-disc-chevron" aria-hidden="true">▾</span>
+    </button>
+    <div class="pro-disc-body" id="pro-disc-body-teste" role="region">
+      <p class="pro-disc-obs" style="white-space:pre-wrap">${_proEsc(tempoTesteTxt)}</p>
     </div>
   </div>`:'';
 
@@ -29975,9 +30326,11 @@ function _proRenderDetail(root){
 
   const mentFeats=(Array.isArray(p.mentoriaFeatures)?p.mentoriaFeatures:[]).map(_proNormFeature).filter(Boolean);
   const mentStatus=_proMentStatus(p);
-  const mentTitle=mentStatus==='opcional'
-    ?'Mentoria <span class="pro-ment-tag">Opcional</span>'
-    :'Mentoria';
+  // Tag de status: 'sim' = incluída, 'opcional' = compra à parte
+  const mentTagHtml=mentStatus==='opcional'
+    ?'<span class="pro-ment-tag pro-ment-tag-opcional">Opcional</span>'
+    :'<span class="pro-ment-tag pro-ment-tag-sim">Incluída</span>';
+  const mentTitle=`Mentoria ${mentTagHtml}`;
   const mentEmpty=mentStatus==='opcional'
     ?'Mentoria disponível como opcional, mas nenhuma feature foi cadastrada ainda.'
     :'Inclui mentoria, mas nenhuma feature foi cadastrada ainda.';
@@ -29990,13 +30343,10 @@ function _proRenderDetail(root){
   const mentSazonalBtn=_proMentSazonalDetailHTML(p);
   const mentVagasBtn=_proMentVagasDetailHTML(p);
   const mentFlagsHtml=(mentSazonalBtn||mentVagasBtn)?`<div class="pro-ment-flags">${mentSazonalBtn}${mentVagasBtn}</div>`:'';
-  const mentBlock=(mentStatus!=='nao')?`<div class="pro-section pro-section-mentoria">
-    ${_proSecTitleHTML(mentTitle,'mentoria','pro-section-title-mentoria')}
-    ${mentDescHtml}
-    ${mentRespsHtml}
-    ${mentFlagsHtml}
-    ${mentFeats.length?`<div class="pro-feat-grid">${mentFeats.map(f=>_proFeatDetailHTML(f,p.updatedAt)).join('')}</div>`:(mentDesc?'':`<p class="pro-text-block" style="color:var(--t2);font-style:italic">${mentEmpty}</p>`)}
-  </div>`:'';
+  // Mentoria como bloco colapsável (fechado por default).
+  // Conta = total de features (ou 0). Título dinâmico baseado no mentStatus.
+  const mentBodyHtml=`${mentDescHtml}${mentRespsHtml}${mentFlagsHtml}${mentFeats.length?`<div class="pro-feat-grid">${mentFeats.map(f=>_proFeatDetailHTML(f,p.updatedAt)).join('')}</div>`:(mentDesc?'':`<p class="pro-text-block" style="color:var(--t2);font-style:italic">${mentEmpty}</p>`)}`;
+  const mentBlock=(mentStatus!=='nao')?_proSecDiscHTML('mentoria',mentTitle,mentFeats.length||'',mentBodyHtml,'🎓','mentoria','pro-sec-mentoria',true):'';
 
   // ── Bônus: produtos vinculados + features bônus livres ──
   const bonusProdIds=Array.isArray(p.bonusProdutoIds)?p.bonusProdutoIds:[];
@@ -30018,20 +30368,57 @@ function _proRenderDetail(root){
     </div>`;
   }).join(''):'';
   const bonusFeatsHtml=bonusFeats.length?`<div class="pro-feat-grid" style="margin-top:${bonusProdsHtml?'14px':'0'}">${bonusFeats.map(f=>_proFeatDetailHTML(f,p.updatedAt)).join('')}</div>`:'';
-  const bonusBlock=(bonusProdsHtml||bonusFeatsHtml)?`<div class="pro-section pro-section-bonus">
-    ${_proSecTitleHTML('🎁 Bônus','bonus','pro-section-title-bonus')}
-    ${bonusProdsHtml?`<div class="pro-bonus-cards">${bonusProdsHtml}</div>`:''}
-    ${bonusFeatsHtml}
-  </div>`:'';
+  // Bônus como bloco colapsável (fechado por default).
+  const bonusBodyHtml=`${bonusProdsHtml?`<div class="pro-bonus-cards">${bonusProdsHtml}</div>`:''}${bonusFeatsHtml}`;
+  const bonusCount=(bonusProdIds.length+bonusFeats.length)||'';
+  const bonusBlock=(bonusProdsHtml||bonusFeatsHtml)?_proSecDiscHTML('bonus','Bônus',bonusCount,bonusBodyHtml,'🎁','','pro-sec-bonus'):'';
 
   const argumentos=Array.isArray(p.argumentosVenda)?p.argumentosVenda.filter(Boolean):[];
   const argHtml=argumentos.length?`<ul class="pro-bullets">${argumentos.map(a=>`<li class="pro-bullet">${_proEsc(a)}</li>`).join('')}</ul>`:'';
 
   const objs=Array.isArray(p.objecoes)?p.objecoes.filter(o=>o&&(o.pergunta||o.resposta)):[];
-  const objHtml=objs.length?objs.map(o=>`<div class="pro-obj"><div class="pro-obj-q">${_proEsc(o.pergunta||'')}</div><div class="pro-obj-a">${_proRespRender(o.resposta||'')}</div></div>`).join(''):'';
+  const objHtml=objs.length?objs.map(o=>`<div class="pro-obj">
+    <div class="pro-obj-row pro-obj-q-row">
+      <span class="pro-obj-prefix">Q:</span>
+      <div class="pro-obj-text">${_proEsc(o.pergunta||'')}</div>
+    </div>
+    <div class="pro-obj-row pro-obj-a-row">
+      <span class="pro-obj-prefix">R:</span>
+      <div class="pro-obj-text pro-obj-a-text">${_renderRichText(o.resposta||'')}</div>
+    </div>
+  </div>`).join(''):'';
 
   const duvs=Array.isArray(p.duvidas)?p.duvidas.filter(d=>d&&(d.pergunta||d.resposta)):[];
-  const duvHtml=duvs.length?duvs.map(d=>`<div class="pro-obj"><div class="pro-obj-q">❓ ${_proEsc(d.pergunta||'')}</div><div class="pro-obj-a">${_proRespRender(d.resposta||'')}</div></div>`).join(''):'';
+  const duvHtml=duvs.length?duvs.map(d=>`<div class="pro-obj">
+    <div class="pro-obj-row pro-obj-q-row">
+      <span class="pro-obj-prefix">❓</span>
+      <div class="pro-obj-text">${_proEsc(d.pergunta||'')}</div>
+    </div>
+    <div class="pro-obj-row pro-obj-a-row">
+      <span class="pro-obj-prefix">R:</span>
+      <div class="pro-obj-text pro-obj-a-text">${_renderRichText(d.resposta||'')}</div>
+    </div>
+  </div>`).join(''):'';
+
+  // Concorrentes — cada um colapsável, com lista de features deles + nosso diferencial em rich text
+  const concs=Array.isArray(p.concorrentes)?p.concorrentes.filter(c=>c&&(String(c.nome||'').trim()||(Array.isArray(c.features)&&c.features.length))):[];
+  const concsHtml=concs.length?concs.map((c,ci)=>{
+    const nome=String(c.nome||'').trim()||'(sem nome)';
+    const feats=Array.isArray(c.features)?c.features.filter(f=>f&&(String(f.titulo||'').trim()||String(f.nossoDiferencial||'').trim())):[];
+    const featsBody=feats.length
+      ?feats.map(f=>`<div class="pro-conc-detail-feat">
+          <div class="pro-conc-detail-feat-titulo">${_proEsc(f.titulo||'(sem título)')}</div>
+          <div class="pro-conc-detail-feat-dif">
+            <span class="pro-conc-detail-feat-dif-label">Nosso diferencial</span>
+            <div class="pro-conc-detail-feat-dif-body">${_proRespRender(f.nossoDiferencial||'')}</div>
+          </div>
+        </div>`).join('')
+      :`<p style="color:var(--t2);font-style:italic;margin:0;font-size:13px">Sem features mapeadas ainda.</p>`;
+    return `<details class="pro-conc-detail-card">
+      <summary><span class="pro-conc-detail-nome">🥊 ${_proEsc(nome)}</span><span class="pro-conc-detail-count">${feats.length} feature${feats.length===1?'':'s'}</span></summary>
+      <div class="pro-conc-detail-body">${featsBody}</div>
+    </details>`;
+  }).join(''):'';
 
   const links=Array.isArray(p.links)?p.links.filter(l=>l&&l.url):[];
   const linksHtml=links.length?`<div class="pro-links">${links.map(l=>`<a class="pro-link" href="${_proEscAttr(l.url)}" target="_blank" rel="noopener noreferrer">🔗 ${_proEsc(l.label||l.url)}</a>`).join('')}</div>`:'';
@@ -30067,7 +30454,7 @@ function _proRenderDetail(root){
         </div>
         ${_proSazonalDetailHTML(p)}
         ${_proVagasDetailHTML(p)}
-        ${(discPublico||discProvas||discTempos)?`<div class="pro-disc-row">${discPublico}${discProvas}${discTempos}</div>`:''}
+        ${(discPublico||discProvas||discTempos||discTeste)?`<div class="pro-disc-row">${discPublico}${discProvas}${discTempos}${discTeste}</div>`:''}
       </div>
       ${adminActions}
     </div>
@@ -30080,6 +30467,7 @@ function _proRenderDetail(root){
     ${mentBlock}
     ${bonusBlock}
     ${argumentos.length?_proSecDiscHTML('argumentos','Argumentos de venda',argumentos.length,argHtml,'','argumentos'):''}
+    ${concs.length?_proSecDiscHTML('concorrentes','Concorrentes — quem são?',concs.length,concsHtml,'🥊','concorrentes'):''}
     ${objs.length?_proSecDiscHTML('objecoes','Objeções frequentes',objs.length,objHtml,'','objecoes'):''}
     ${duvs.length?_proSecDiscHTML('duvidas','Dúvidas frequentes',duvs.length,duvHtml,'❓','duvidas'):''}
     ${linksHtml?`<div class="pro-section">${_proSecTitleHTML('Links úteis','links')}${linksHtml}</div>`:''}
@@ -30233,6 +30621,7 @@ function _proRenderEdit(root){
   if(!Array.isArray(p.mentoriaResponsaveis))p.mentoriaResponsaveis=[];
   if(!Array.isArray(p.temposAcesso))p.temposAcesso=[];
   if(typeof p.temposAcessoObs!=='string')p.temposAcessoObs='';
+  if(typeof p.tempoTesteRecomendado!=='string')p.tempoTesteRecomendado='';
   if(!Array.isArray(p.featuresProdutoIds))p.featuresProdutoIds=[];
   const featsCount=(p.features||[]).length;
   const mentFeatsCount=(p.mentoriaFeatures||[]).length;
@@ -30275,6 +30664,10 @@ function _proRenderEdit(root){
           <div class="fg"><label class="fl">Tempo de acesso</label>
             ${_proTempoAcessoInputHTML(p.temposAcesso)}
             <textarea class="fc" rows="2" placeholder="Observação sobre o tempo de acesso (ex: pacote anual com 12 meses inclui mentoria estendida)" oninput="S.produtoAtual.temposAcessoObs=this.value;_proMark()" style="resize:vertical;min-height:60px;margin-top:8px">${_proEsc(p.temposAcessoObs||'')}</textarea>
+          </div>
+
+          <div class="fg"><label class="fl">Tempo de teste recomendado</label>
+            <textarea class="fc" rows="2" placeholder="Quanto tempo o vendedor deve oferecer de teste (ex: 7 dias com acesso completo; 14 dias só nas aulas teóricas)" oninput="S.produtoAtual.tempoTesteRecomendado=this.value;_proMark()" style="resize:vertical;min-height:60px">${_proEsc(p.tempoTesteRecomendado||'')}</textarea>
           </div>
 
           <div class="fg"><label class="fl">${(p.responsaveis||[]).length===1?'Responsável':'Responsáveis'}</label>
@@ -30359,6 +30752,17 @@ function _proRenderEdit(root){
         <div class="pro-edit-acc-body">
           <div id="pro-f-args">${(p.argumentosVenda||[]).map((a,i)=>_proArgEditHTML(a,i)).join('')}</div>
           <button class="btn btn-s btn-sm" onclick="_proArgAdd()" style="margin-top:8px">＋ Adicionar argumento</button>
+        </div>
+      </div>
+
+      <div class="pro-edit-accordion" data-acc="concorrentes">
+        <div class="pro-edit-acc-head" onclick="_proToggleAcc('concorrentes')">
+          <span class="pro-edit-acc-title">🥊 Concorrentes — quem são? · ${(p.concorrentes||[]).length}</span><span class="pro-edit-acc-caret">▾</span>
+        </div>
+        <div class="pro-edit-acc-body">
+          <p style="font-size:12px;color:var(--t2);margin:0 0 10px;line-height:1.5">Mapeie cada concorrente que disputa o mesmo cliente. Pra cada um, liste as features deles que concorrem com as nossas e descreva o nosso diferencial em relação a cada feature.</p>
+          <div id="pro-f-concs">${(p.concorrentes||[]).map((c,i)=>_proConcEditHTML(c,i)).join('')}</div>
+          <button class="btn btn-s btn-sm" onclick="_proConcAdd()" style="margin-top:8px">＋ Adicionar concorrente</button>
         </div>
       </div>
 
@@ -31365,6 +31769,115 @@ function _proArgEditHTML(a,i){
 function _proObjEditHTML(o,i){return _proQaEditHTML(o,i,'obj');}
 function _proDuvEditHTML(d,i){return _proQaEditHTML(d,i,'duv');}
 
+// ─── Concorrentes (cada um tem nome + lista de features deles vs nossas) ───
+function _proConcEditHTML(c,i){
+  const id=c.id||(c.id=_proUid());
+  const openSet=(S._proConcOpen=S._proConcOpen||new Set());
+  const open=openSet.has(id);
+  const feats=Array.isArray(c.features)?c.features:[];
+  return `<div class="pro-qa-edit pro-conc-edit${open?' open':''}" data-conc-id="${id}" data-conc-i="${i}">
+    <div class="pro-qa-head" onclick="_proConcToggle('${id}')">
+      <span class="pro-qa-handle" title="Reordenar (use ↑↓)" onclick="event.stopPropagation()">⠿</span>
+      <input class="pro-qa-title-input" placeholder="Nome do concorrente (ex: Concorrente X)" value="${_proEscAttr(c.nome||'')}" oninput="_proConcSet(${i},'nome',this.value)" onclick="event.stopPropagation()"/>
+      <div class="pro-qa-actions" onclick="event.stopPropagation()">
+        <button class="pro-icon-btn" onclick="event.stopPropagation();_proConcUp(${i})" title="Subir">↑</button>
+        <button class="pro-icon-btn" onclick="event.stopPropagation();_proConcDown(${i})" title="Descer">↓</button>
+        <button class="pro-icon-btn" onclick="event.stopPropagation();_proConcRm(${i})" title="Remover concorrente">🗑</button>
+      </div>
+      <span class="pro-qa-caret" title="Expandir/recolher" aria-hidden="true">▾</span>
+    </div>
+    <div class="pro-qa-body">
+      <div class="fg" style="margin-bottom:6px"><label class="fl">Features do concorrente · ${feats.length}</label>
+        <p style="font-size:11.5px;color:var(--t2);margin:0 0 10px;line-height:1.5">Pra cada feature do concorrente que disputa com a sua, descreva o seu diferencial. O diferencial aceita formatação rica (negrito, listas, links).</p>
+        <div id="pro-conc-feats-${id}">${feats.map((f,fi)=>_proConcFeatEditHTML(c,f,i,fi)).join('')}</div>
+        <button class="btn btn-s btn-sm" type="button" onclick="_proConcFeatAdd(${i})" style="margin-top:6px">＋ Adicionar feature do concorrente</button>
+      </div>
+    </div>
+  </div>`;
+}
+function _proConcFeatEditHTML(conc,f,ci,fi){
+  const fid=f.id||(f.id=_proUid());
+  const rtUid=`conc-${conc.id||ci}-feat-${fid}`;
+  const difHtml=String(f.nossoDiferencial||'');
+  return `<div class="pro-conc-feat" data-feat-id="${fid}">
+    <div class="pro-conc-feat-head">
+      <input class="fc pro-conc-feat-titulo" placeholder="Feature do concorrente (ex: 200h de aulas gravadas)" value="${_proEscAttr(f.titulo||'')}" oninput="_proConcFeatSet(${ci},${fi},'titulo',this.value)"/>
+      <div class="pro-conc-feat-actions">
+        <button type="button" class="pro-icon-btn" onclick="_proConcFeatUp(${ci},${fi})" title="Subir">↑</button>
+        <button type="button" class="pro-icon-btn" onclick="_proConcFeatDown(${ci},${fi})" title="Descer">↓</button>
+        <button type="button" class="pro-icon-btn" onclick="_proConcFeatRm(${ci},${fi})" title="Remover">🗑</button>
+      </div>
+    </div>
+    <div class="pro-conc-feat-body">
+      <label class="fl" style="font-size:11px">Nosso diferencial em relação a essa feature</label>
+      ${_proRtHTML(rtUid,difHtml,'Por que a gente é melhor que isso? Cite vantagens concretas…',`_proConcFeatSet(${ci},${fi},'nossoDiferencial',_proRtGet('${rtUid}'))`,{colors:false,justify:false,tall:false})}
+    </div>
+  </div>`;
+}
+window._proConcToggle=(id)=>{
+  const set=(S._proConcOpen=S._proConcOpen||new Set());
+  const card=document.querySelector(`#tab-produtos .pro-conc-edit[data-conc-id="${id}"]`);
+  if(!card)return;
+  if(set.has(id)){set.delete(id);_proAnimClose(card,'.pro-qa-body');}
+  else{set.add(id);_proAnimOpen(card,'.pro-qa-body');}
+};
+window._proConcAdd=()=>{
+  if(!Array.isArray(S.produtoAtual.concorrentes))S.produtoAtual.concorrentes=[];
+  S.produtoAtual.concorrentes.push({id:_proUid(),nome:'',features:[]});
+  _proMark();_proRefreshConcs();
+};
+window._proConcSet=(i,k,v)=>{
+  if(!S.produtoAtual.concorrentes||!S.produtoAtual.concorrentes[i])return;
+  S.produtoAtual.concorrentes[i][k]=v;_proMark();
+};
+window._proConcRm=(i)=>{
+  const c=S.produtoAtual.concorrentes&&S.produtoAtual.concorrentes[i];
+  if(!c)return;
+  const lbl=String(c.nome||'').trim()||'(sem nome)';
+  if(!confirm(`Remover o concorrente "${lbl}" e todas as features dele?`))return;
+  S.produtoAtual.concorrentes.splice(i,1);_proMark();_proRefreshConcs();
+};
+window._proConcUp=(i)=>{if(i<=0)return;const arr=S.produtoAtual.concorrentes;[arr[i-1],arr[i]]=[arr[i],arr[i-1]];_proMark();_proRefreshConcs();};
+window._proConcDown=(i)=>{const arr=S.produtoAtual.concorrentes;if(!arr||i>=arr.length-1)return;[arr[i],arr[i+1]]=[arr[i+1],arr[i]];_proMark();_proRefreshConcs();};
+function _proRefreshConcs(){
+  const wrap=document.getElementById('pro-f-concs');if(!wrap)return;
+  wrap.innerHTML=(S.produtoAtual.concorrentes||[]).map((c,i)=>_proConcEditHTML(c,i)).join('');
+  // Atualiza contagem no header do accordion
+  const head=document.querySelector('#tab-produtos .pro-edit-accordion[data-acc="concorrentes"] .pro-edit-acc-title');
+  if(head)head.textContent=`🥊 Concorrentes — quem são? · ${(S.produtoAtual.concorrentes||[]).length}`;
+}
+window._proConcFeatAdd=(ci)=>{
+  const conc=S.produtoAtual.concorrentes&&S.produtoAtual.concorrentes[ci];
+  if(!conc)return;
+  if(!Array.isArray(conc.features))conc.features=[];
+  conc.features.push({id:_proUid(),titulo:'',nossoDiferencial:''});
+  _proMark();_proRefreshConcs();
+};
+window._proConcFeatSet=(ci,fi,k,v)=>{
+  const conc=S.produtoAtual.concorrentes&&S.produtoAtual.concorrentes[ci];
+  if(!conc||!conc.features||!conc.features[fi])return;
+  conc.features[fi][k]=v;_proMark();
+};
+window._proConcFeatRm=(ci,fi)=>{
+  const conc=S.produtoAtual.concorrentes&&S.produtoAtual.concorrentes[ci];
+  if(!conc||!conc.features||!conc.features[fi])return;
+  const lbl=String(conc.features[fi].titulo||'').trim()||'(sem título)';
+  if(!confirm(`Remover a feature "${lbl}"?`))return;
+  conc.features.splice(fi,1);_proMark();_proRefreshConcs();
+};
+window._proConcFeatUp=(ci,fi)=>{
+  const conc=S.produtoAtual.concorrentes&&S.produtoAtual.concorrentes[ci];
+  if(!conc||!conc.features||fi<=0)return;
+  [conc.features[fi-1],conc.features[fi]]=[conc.features[fi],conc.features[fi-1]];
+  _proMark();_proRefreshConcs();
+};
+window._proConcFeatDown=(ci,fi)=>{
+  const conc=S.produtoAtual.concorrentes&&S.produtoAtual.concorrentes[ci];
+  if(!conc||!conc.features||fi>=conc.features.length-1)return;
+  [conc.features[fi],conc.features[fi+1]]=[conc.features[fi+1],conc.features[fi]];
+  _proMark();_proRefreshConcs();
+};
+
 // Q&A genérico (objeção/dúvida) — sem numeração; pergunta editável inline no header; body só com a resposta
 function _proQaEditHTML(item,i,kind){
   // kind: 'obj' | 'duv'
@@ -31408,15 +31921,19 @@ window._proQaToggle=(kind,id,ev)=>{
 
 // Disclosure de seções do detalhe (Argumentos / Objeções / Dúvidas) — default fechado
 // accKey: se passado, renderiza botão ✏️ pra editar direto essa seção no editor
-function _proSecDiscHTML(key,title,count,bodyHtml,icon,accKey){
+function _proSecDiscHTML(key,title,count,bodyHtml,icon,accKey,extraClass,titleIsHtml){
   const open=!!(S._proSecDiscOpen&&S._proSecDiscOpen[key]);
   const ico=icon?`<span class="pro-sec-disc-ico">${icon}</span> `:'';
   const editBtn=(_proCanEdit()&&accKey)?`<span class="pro-sec-edit-btn" role="button" tabindex="0" onclick="event.stopPropagation();proEditarSecao('${accKey}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();proEditarSecao('${accKey}')}" title="Editar esta seção">✏️</span>`:'';
-  return `<div class="pro-section pro-sec-disc${open?' open':''}" data-sec-disc="${key}">
+  const cls=['pro-section','pro-sec-disc',extraClass||'',open?'open':''].filter(Boolean).join(' ');
+  const countHtml=(count==null||count==='')?'':`<span class="pro-sec-disc-count">${count}</span>`;
+  // Quando titleIsHtml=true, o caller assume responsabilidade por sanitização do HTML inserido
+  const titleContent=titleIsHtml?String(title||''):_proEsc(title);
+  return `<div class="${cls}" data-sec-disc="${key}">
     <div class="pro-sec-disc-head" role="button" tabindex="0" onclick="proToggleSecDisc('${key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proToggleSecDisc('${key}')}" aria-expanded="${open}">
-      <span class="pro-sec-disc-title">${ico}${_proEsc(title)}</span>
+      <span class="pro-sec-disc-title">${ico}${titleContent}</span>
       ${editBtn}
-      <span class="pro-sec-disc-count">${count}</span>
+      ${countHtml}
       <span class="pro-sec-disc-caret">▾</span>
     </div>
     <div class="pro-sec-disc-body">${bodyHtml}</div>
@@ -31513,6 +32030,14 @@ function _proRtHTML(uid,value,placeholder,onChangeExpr,opts){
   const tall=!!o.tall;
   const expandable=!!o.expandable;
   const collapsibles=!!o.collapsibles;
+  // Botões de alinhamento — habilitados por default quando não foi explicitamente desligado
+  const withAlign=o.align!==false;
+  const alignHtml=withAlign?`
+      <span class="pro-rt-tb-sep"></span>
+      <button type="button" title="Alinhar à esquerda" onclick="_proRtExec('${uid}','justifyLeft')" style="padding:6px 8px"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="2" y1="3" x2="14" y2="3"/><line x1="2" y1="7" x2="10" y2="7"/><line x1="2" y1="11" x2="13" y2="11"/></svg></button>
+      <button type="button" title="Centralizar" onclick="_proRtExec('${uid}','justifyCenter')" style="padding:6px 8px"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="2" y1="3" x2="14" y2="3"/><line x1="4" y1="7" x2="12" y2="7"/><line x1="3" y1="11" x2="13" y2="11"/></svg></button>
+      <button type="button" title="Alinhar à direita" onclick="_proRtExec('${uid}','justifyRight')" style="padding:6px 8px"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="2" y1="3" x2="14" y2="3"/><line x1="6" y1="7" x2="14" y2="7"/><line x1="3" y1="11" x2="14" y2="11"/></svg></button>
+      <button type="button" title="Justificar" onclick="_proRtExec('${uid}','justifyFull')" style="padding:6px 8px"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="2" y1="3" x2="14" y2="3"/><line x1="2" y1="7" x2="14" y2="7"/><line x1="2" y1="11" x2="14" y2="11"/></svg></button>`:'';
   const colorsHtml=withColors?`
       <span class="pro-rt-tb-sep"></span>
       <span class="pro-rt-tb-colors" title="Cor do texto">
@@ -31545,7 +32070,7 @@ function _proRtHTML(uid,value,placeholder,onChangeExpr,opts){
       <button type="button" class="underline" title="Sublinhado" onclick="_proRtExec('${uid}','underline')">U</button>
       <span class="pro-rt-tb-sep"></span>
       <button type="button" title="Lista com marcadores" onclick="_proRtExec('${uid}','insertUnorderedList')">•</button>
-      <button type="button" title="Lista numerada" onclick="_proRtExec('${uid}','insertOrderedList')">1.</button>
+      <button type="button" title="Lista numerada" onclick="_proRtExec('${uid}','insertOrderedList')">1.</button>${alignHtml}
       <span class="pro-rt-tb-sep"></span>
       <button type="button" title="Inserir link" onclick="_proRtLink('${uid}')">🔗</button>
       ${collapsibles?`<button type="button" title="Inserir bloco colapsável (dropdown dentro do texto)" onclick="_proRtCollapsible('${uid}')">▾</button>`:''}
@@ -32849,6 +33374,7 @@ window._proSalvar=async()=>{
     provasAlvo:Array.isArray(p.provasAlvo)?_proDedupe(p.provasAlvo):[],
     temposAcesso:Array.isArray(p.temposAcesso)?_proDedupe(p.temposAcesso.map(t=>_proTempoAcessoNorm(t)).filter(Boolean)):[],
     temposAcessoObs:String(p.temposAcessoObs||'').trim(),
+    tempoTesteRecomendado:String(p.tempoTesteRecomendado||'').trim(),
     responsaveis:responsaveisArr,
     status:p.status||'rascunho',
     sazonal:!!p.sazonal,
@@ -32874,6 +33400,15 @@ window._proSalvar=async()=>{
     argumentosVenda:Array.isArray(p.argumentosVenda)?p.argumentosVenda.filter(a=>String(a||'').trim()):[],
     objecoes:Array.isArray(p.objecoes)?p.objecoes.filter(o=>o&&(o.pergunta||o.resposta)).map(o=>({id:o.id||_proUid(),pergunta:String(o.pergunta||'').trim(),resposta:_proSanitizeResp(o.resposta)})):[],
     duvidas:Array.isArray(p.duvidas)?p.duvidas.filter(d=>d&&(d.pergunta||d.resposta)).map(d=>({id:d.id||_proUid(),pergunta:String(d.pergunta||'').trim(),resposta:_proSanitizeResp(d.resposta)})):[],
+    concorrentes:Array.isArray(p.concorrentes)?p.concorrentes.filter(c=>c&&(String(c.nome||'').trim()||(Array.isArray(c.features)&&c.features.length))).map(c=>({
+      id:c.id||_proUid(),
+      nome:String(c.nome||'').trim(),
+      features:Array.isArray(c.features)?c.features.filter(f=>f&&(String(f.titulo||'').trim()||String(f.nossoDiferencial||'').trim())).map(f=>({
+        id:f.id||_proUid(),
+        titulo:String(f.titulo||'').trim(),
+        nossoDiferencial:_proSanitizeResp(f.nossoDiferencial)
+      })):[]
+    })):[],
     links:Array.isArray(p.links)?p.links.filter(l=>l&&l.url):[],
     anexos:Array.isArray(p.anexos)?p.anexos:[],
     ordem:typeof p.ordem==='number'?p.ordem:Date.now(),

@@ -174,11 +174,12 @@ exports.perguntarDex = onRequest(
 
     try {
       const db = admin.firestore();
-      // Lê produtos + jornada + configuração do Dex em paralelo
-      const [snap, jornadaSnap, dexCfgSnap] = await Promise.all([
+      // Lê produtos + jornada + configuração do Dex + editais em paralelo
+      const [snap, jornadaSnap, dexCfgSnap, editaisSnap] = await Promise.all([
         db.collection('produtos').get(),
         db.collection('config').doc('jornadaCliente').get(),
         db.collection('config').doc('dexPrompt').get(),
+        db.collection('config').doc('editais').get(),
       ]);
       const produtos = [];
       snap.forEach(d => {
@@ -196,6 +197,9 @@ exports.perguntarDex = onRequest(
 
       const catalogoFmt = produtos.map(p => formatarProduto(p, produtos)).join('\n\n---\n\n');
       const jornadaTxt = jornadaSnap.exists ? stripHtml(jornadaSnap.data()?.texto || '') : '';
+      // Editais cadastrados — formata com ano destacado pra IA distinguir atual vs anteriores
+      const editaisLista = editaisSnap.exists ? (Array.isArray(editaisSnap.data()?.lista) ? editaisSnap.data().lista : []) : [];
+      const editaisFmt = formatarEditais(editaisLista);
 
       // Lê config editável (templates por perfil, modelo, maxTokens, pdfs)
       const dexCfg = dexCfgSnap.exists ? (dexCfgSnap.data() || {}) : {};
@@ -206,8 +210,8 @@ exports.perguntarDex = onRequest(
         String(dexCfg[perfilField] || '').trim() ||
         String(dexCfg.template || '').trim() ||
         DEFAULT_INSTRUCTIONS[perfil];
-      // Jornada e Catálogo SEMPRE anexados automaticamente.
-      const systemPrompt = buildSystemPromptFromInstructions(customInstructions, catalogoFmt, jornadaTxt);
+      // Jornada, Editais e Catálogo SEMPRE anexados automaticamente.
+      const systemPrompt = buildSystemPromptFromInstructions(customInstructions, catalogoFmt, jornadaTxt, editaisFmt);
 
       // PDFs anexados pra este perfil — viram blocos `document` no user message
       const pdfsField = 'pdfs' + perfil.charAt(0).toUpperCase() + perfil.slice(1);
@@ -326,17 +330,41 @@ exports.perguntarDex = onRequest(
 const ESTILO_UNIVERSAL = `## REGRAS DE ESTILO (sempre aplicadas)
 - Nunca use travessões (— ou –) nas respostas. Substitua por vírgulas, pontos, dois-pontos ou parênteses conforme o sentido.
 - Nunca use hífen entre espaços como pontuação ( - ). Se precisar separar trechos, use vírgula ou ponto.
-- Português brasileiro natural, sem afetação ou tom literário.`;
+- Português brasileiro natural, sem afetação ou tom literário.
+- **Nunca devolva perguntas pro usuário.** Responda diretamente com o que você sabe. Não termine respostas com "Quer saber mais?", "Posso te ajudar com mais alguma coisa?", "Em que mais posso ajudar?" ou variações. Não pergunte de volta "você quer dizer X ou Y?" — escolha a interpretação mais provável e responda.
+- Se realmente faltar informação crítica pra responder, diga objetivamente o que falta numa frase curta no final (ex: "Faltam detalhes sobre o ano da prova"), sem formato de pergunta.
+- **Editais de anos anteriores:** se a resposta usar informação de um edital de ano ANTERIOR ao ano atual (informado no bloco EDITAIS CADASTRADOS), comece a resposta deixando isso explícito (ex: "Com base no edital de 2025 (ainda não há edital atualizado para o ano vigente)..."). Não responda como se a informação fosse necessariamente válida pro ano atual.`;
 
-// Monta o system prompt anexando Jornada + Catálogo às instruções customizadas
-// do usuário. Sempre coloca os blocos de dados no final pra otimizar prompt
-// caching: instruções (que mudam pouco) vêm primeiro, dados (que mudam mais)
+// Monta o system prompt anexando Jornada + Editais + Catálogo às instruções
+// customizadas do usuário. Sempre coloca os blocos de dados no final pra otimizar
+// prompt caching: instruções (que mudam pouco) vêm primeiro, dados (que mudam mais)
 // depois. Como o cache é por prefixo, isso mantém o cache válido por mais tempo.
-function buildSystemPromptFromInstructions(instructions, catalogoFmt, jornadaTxt) {
+function buildSystemPromptFromInstructions(instructions, catalogoFmt, jornadaTxt, editaisFmt) {
   const jornadaSec = jornadaTxt
     ? `=== JORNADA DO CLIENTE ===\n\nContexto sobre o perfil do cliente, dores, jornada de compra e gatilhos.\n\n${jornadaTxt}\n\n=== FIM DA JORNADA ===\n\n`
     : '';
-  return `${instructions}\n\n${ESTILO_UNIVERSAL}\n\n${jornadaSec}=== CATÁLOGO DE PRODUTOS MEDREVIEW ===\n\n${catalogoFmt}\n\n=== FIM DO CATÁLOGO ===`;
+  const editaisSec = editaisFmt
+    ? `=== EDITAIS CADASTRADOS ===\n\nInformações de editais de prova publicados. Cada edital traz o ano em que foi publicado. **Ano atual de referência: ${new Date().getFullYear()}.** Se for usar informação de um edital de ano ANTERIOR ao atual pra responder, comece a resposta deixando claro que o dado é do edital daquele ano (ex: "Segundo o edital de XXXX..."), porque pode haver mudanças no edital atual.\n\n${editaisFmt}\n\n=== FIM DOS EDITAIS ===\n\n`
+    : '';
+  return `${instructions}\n\n${ESTILO_UNIVERSAL}\n\n${jornadaSec}${editaisSec}=== CATÁLOGO DE PRODUTOS MEDREVIEW ===\n\n${catalogoFmt}\n\n=== FIM DO CATÁLOGO ===`;
+}
+
+// Formata a lista de editais como texto plano pra incluir no prompt da IA.
+// Cada edital: nome + ano + info (HTML strippado pra texto).
+function formatarEditais(lista) {
+  if (!Array.isArray(lista) || !lista.length) return '';
+  // Ordena por ano descendente (mais recente primeiro)
+  const ord = lista.slice().sort((a, b) => {
+    const ya = parseInt(a.ano, 10) || 0;
+    const yb = parseInt(b.ano, 10) || 0;
+    return yb - ya;
+  });
+  return ord.map(e => {
+    const nome = String(e.nomeProva || '').trim() || '(sem nome)';
+    const ano = String(e.ano || '').trim() || '(sem ano)';
+    const info = stripHtml(e.info || '').trim();
+    return `### ${nome} — Ano: ${ano}\n${info || '(sem informações cadastradas)'}`;
+  }).join('\n\n---\n\n');
 }
 
 function formatarProduto(p, todosProdutos) {
@@ -355,6 +383,9 @@ function formatarProduto(p, todosProdutos) {
 
   const responsaveis = arr(p.responsaveis).length ? arr(p.responsaveis) : arr(p.responsavel);
   if (responsaveis.length) linhas.push(`**Responsáveis:** ${responsaveis.join(', ')}`);
+
+  const tempoTeste = String(p.tempoTesteRecomendado || '').trim();
+  if (tempoTeste) linhas.push(`**Tempo de teste recomendado:** ${tempoTeste}`);
 
   if (Array.isArray(p.features) && p.features.length) {
     linhas.push('');
@@ -405,6 +436,25 @@ function formatarProduto(p, todosProdutos) {
     linhas.push('');
     linhas.push('**Argumentos de venda:**');
     p.argumentosVenda.forEach(a => linhas.push(`- ${a}`));
+  }
+
+  // Concorrentes: nome + features deles + nosso diferencial em cada feature
+  if (Array.isArray(p.concorrentes) && p.concorrentes.length) {
+    linhas.push('');
+    linhas.push('**Concorrentes diretos:**');
+    p.concorrentes.forEach(c => {
+      const nome = String(c.nome || '').trim() || '(sem nome)';
+      linhas.push(`- Concorrente: ${nome}`);
+      const feats = Array.isArray(c.features) ? c.features : [];
+      if (feats.length) {
+        feats.forEach(f => {
+          const titulo = String(f.titulo || '').trim() || '(sem título)';
+          const dif = stripHtml(f.nossoDiferencial || '').trim();
+          linhas.push(`  - Feature deles: ${titulo}`);
+          if (dif) linhas.push(`    Nosso diferencial: ${dif}`);
+        });
+      }
+    });
   }
 
   if (Array.isArray(p.objecoes) && p.objecoes.length) {
