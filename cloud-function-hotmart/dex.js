@@ -320,6 +320,14 @@ exports.perguntarDex = onRequest(
   }
 );
 
+// Regras de estilo universais — aplicadas a TODO perfil, mesmo se o admin
+// customizou o template. Ficam no system prompt antes dos dados pra serem
+// percebidas como restrição global de escrita.
+const ESTILO_UNIVERSAL = `## REGRAS DE ESTILO (sempre aplicadas)
+- Nunca use travessões (— ou –) nas respostas. Substitua por vírgulas, pontos, dois-pontos ou parênteses conforme o sentido.
+- Nunca use hífen entre espaços como pontuação ( - ). Se precisar separar trechos, use vírgula ou ponto.
+- Português brasileiro natural, sem afetação ou tom literário.`;
+
 // Monta o system prompt anexando Jornada + Catálogo às instruções customizadas
 // do usuário. Sempre coloca os blocos de dados no final pra otimizar prompt
 // caching: instruções (que mudam pouco) vêm primeiro, dados (que mudam mais)
@@ -328,7 +336,7 @@ function buildSystemPromptFromInstructions(instructions, catalogoFmt, jornadaTxt
   const jornadaSec = jornadaTxt
     ? `=== JORNADA DO CLIENTE ===\n\nContexto sobre o perfil do cliente, dores, jornada de compra e gatilhos.\n\n${jornadaTxt}\n\n=== FIM DA JORNADA ===\n\n`
     : '';
-  return `${instructions}\n\n${jornadaSec}=== CATÁLOGO DE PRODUTOS MEDREVIEW ===\n\n${catalogoFmt}\n\n=== FIM DO CATÁLOGO ===`;
+  return `${instructions}\n\n${ESTILO_UNIVERSAL}\n\n${jornadaSec}=== CATÁLOGO DE PRODUTOS MEDREVIEW ===\n\n${catalogoFmt}\n\n=== FIM DO CATÁLOGO ===`;
 }
 
 function formatarProduto(p, todosProdutos) {
