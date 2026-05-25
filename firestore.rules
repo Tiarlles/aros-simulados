@@ -338,12 +338,14 @@ service cloud.firestore {
 
     // ────────────────────────────────────────────────────────────────────────
     // PRODUTOS — Catálogo Interno (marketing/vendas/suporte).
-    // Read exige auth (catálogo interno, alunos NÃO acessam).
-    // Write exige auth. Permissão granular `gerenciarCatalogo` é gateada na UI
-    // (segue o padrão atual do AROS — rules não distinguem permissões dentro de coord/prof).
+    // Read aberto pra compat com login custom legado (igual a outras coleções
+    // do AROS). Alunos não acessam a aba na UI; risco é só leitura direta via
+    // SDK por quem souber explorar — aceitável dado o padrão atual do projeto.
+    // Write exige auth (Firebase Auth real). Permissão granular `gerenciarCatalogo`
+    // é gateada na UI; rules não distinguem permissões dentro de coord/prof.
     // ────────────────────────────────────────────────────────────────────────
     match /produtos/{produtoId} {
-      allow read: if isAuth();
+      allow read: if true;
       allow create, update: if isAuth()
                             && request.resource.data.nome is string
                             && request.resource.data.nome.size() > 0
