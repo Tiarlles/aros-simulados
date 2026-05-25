@@ -2171,20 +2171,6 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-capa-mini-wrap{display:flex;gap:14px;align-items:flex-start;margin-top:6px}
 
 /* Público-alvo — container único limpo: chips em cima, separador, dropdown integrado */
-#tab-produtos .pro-pub-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .15s}
-#tab-produtos .pro-pub-wrap:focus-within{border-color:var(--accent)}
-#tab-produtos .pro-pub-chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;min-height:44px;align-items:center}
-#tab-produtos .pro-pub-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 12px;border-radius:999px;background:color-mix(in srgb,var(--accent) 14%,var(--bg2));border:1px solid var(--accent-dim);font-size:12.5px;font-weight:600;color:var(--text);line-height:1.2}
-#tab-produtos .pro-pub-chip button{background:transparent;border:none;color:var(--t2);cursor:pointer;font-size:15px;line-height:1;padding:2px 6px;border-radius:50%;transition:color .12s}
-#tab-produtos .pro-pub-chip button:hover{color:#ef4444}
-#tab-produtos .pro-pub-empty{font-size:12.5px;color:var(--t2);font-style:italic;padding:4px 2px}
-#tab-produtos .pro-pub-sep{height:1px;background:var(--border);margin:0}
-#tab-produtos .pro-pub-dd-row{padding:0}
-#tab-produtos .pro-pub-select{appearance:none;-webkit-appearance:none;background:transparent;border:none;color:var(--text);padding:11px 36px 11px 14px;font:inherit;font-size:13px;cursor:pointer;width:100%;background-image:linear-gradient(45deg,transparent 50%,var(--t2) 50%),linear-gradient(135deg,var(--t2) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;outline:none;font-weight:500}
-#tab-produtos .pro-pub-select:hover{background-color:color-mix(in srgb,var(--accent) 5%,transparent)}
-#tab-produtos .pro-pub-select:disabled{opacity:.6;cursor:not-allowed}
-#tab-produtos .pro-pub-select option{background:var(--bg2);color:var(--text)}
-#tab-produtos .pro-pub-hint{font-size:11.5px;color:var(--t2);margin:0;padding:8px 14px 12px;font-style:italic;border-top:1px dashed var(--border)}
 
 /* Sazonalidade no editor */
 #tab-produtos .pro-sazonal-block{margin-top:10px;padding:12px 14px;background:color-mix(in srgb,#f59e0b 6%,var(--bg3));border:1px solid color-mix(in srgb,#f59e0b 28%,var(--border));border-radius:12px}
@@ -30015,7 +30001,7 @@ function _proRenderEdit(root){
           ${_proVagasEditHTML(p)}
 
           <div class="fg" style="margin-top:24px"><label class="fl">Público-alvo · pra quem é</label>
-            ${_proPublicoDropdownHTML(p)}
+            ${_proMultiSelectHTML('publicoAlvo',p.publicoAlvo)}
           </div>
 
           <div class="fg"><label class="fl">Provas-alvo</label>
@@ -30190,55 +30176,6 @@ window._proSetBreve=(el)=>{
   el.style.height=Math.min(el.scrollHeight,400)+'px';
   _proMark();
 };
-
-// Público-alvo: dropdown nativo + chips
-function _proPublicoDropdownHTML(p){
-  const vals=Array.isArray(p.publicoAlvo)?p.publicoAlvo:[];
-  const all=(S.catalogoConfig&&Array.isArray(S.catalogoConfig.publicosAlvo))?S.catalogoConfig.publicosAlvo:[];
-  const loaded=!!(S.catalogoConfig&&S.catalogoConfig.loaded);
-  const dispo=all.filter(x=>!vals.includes(x));
-  const chipsHtml=vals.length
-    ?vals.map((v,i)=>`<span class="pro-pub-chip">${_proEsc(v)}<button onclick="_proMsRm('publicoAlvo',${i})" title="Remover" type="button">×</button></span>`).join('')
-    :`<span class="pro-pub-empty">Nenhum público selecionado</span>`;
-  let opts,hint='',placeholder='＋ Adicionar público-alvo…';
-  if(!loaded){
-    opts=`<option value="" disabled>Carregando opções…</option>`;
-    placeholder='Carregando catálogo…';
-  }else if(!all.length){
-    opts=`<option value="" disabled>Catálogo vazio</option>`;
-    placeholder='Catálogo vazio';
-    hint=`<p class="pro-pub-hint">Nenhum público cadastrado no catálogo. Cadastre nas configurações antes.</p>`;
-  }else if(!dispo.length){
-    opts='';
-    placeholder='Todos os públicos já foram adicionados';
-  }else{
-    opts=dispo.map(v=>`<option value="${_proEscAttr(v)}">${_proEsc(v)}</option>`).join('');
-  }
-  return `<div class="pro-pub-wrap pro-ms" data-ms="publicoAlvo">
-    <div class="pro-pub-chips">${chipsHtml}</div>
-    <div class="pro-pub-sep"></div>
-    <div class="pro-pub-dd-row">
-      <select class="pro-pub-select" ${dispo.length?'':'disabled'} onchange="_proPublicoAdd(this.value);this.value=''">
-        <option value="" selected>${placeholder}</option>
-        ${opts}
-      </select>
-    </div>
-    ${hint}
-  </div>`;
-}
-window._proPublicoAdd=(val)=>{
-  const v=String(val||'').trim();if(!v)return;
-  if(!Array.isArray(S.produtoAtual.publicoAlvo))S.produtoAtual.publicoAlvo=[];
-  if(S.produtoAtual.publicoAlvo.includes(v))return;
-  S.produtoAtual.publicoAlvo.push(v);
-  _proMark();_proRefreshPublicoDd();
-};
-function _proRefreshPublicoDd(){
-  const wrap=document.querySelector('#tab-produtos .pro-ms[data-ms="publicoAlvo"]');
-  if(!wrap)return;
-  // Substitui apenas o .pro-ms preservando o <label> acima
-  wrap.outerHTML=_proPublicoDropdownHTML(S.produtoAtual);
-}
 
 // Sazonalidade — bloco no editor (head clicável: abre/fecha o body sem desmarcar Sim)
 function _proSazonalEditHTML(p){
@@ -30546,8 +30483,7 @@ window._proMsRm=(tipo,idx)=>{
   if(!Array.isArray(S.produtoAtual[field]))return;
   S.produtoAtual[field].splice(idx,1);
   _proMark();
-  if(tipo==='publicoAlvo')_proRefreshPublicoDd();
-  else _proRefreshMs(tipo);
+  _proRefreshMs(tipo);
 };
 function _proRefreshMs(tipo){
   const wrap=document.querySelector(`#tab-produtos .pro-ms[data-ms="${tipo}"] .pro-ms-chips`);
