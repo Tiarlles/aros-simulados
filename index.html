@@ -2394,7 +2394,7 @@ body.pro-rt-fs-on{overflow:hidden}
 #tab-produtos .pro-ment-desc details > p:last-of-type{padding-bottom:12px}
 
 /* Bloco colapsável dentro do editor — relativo pra ancorar o botão ✕ */
-#tab-produtos .pro-rt-ed details.pro-collapsible{position:relative;padding-right:86px}
+#tab-produtos .pro-rt-ed details.pro-collapsible{position:relative}
 #tab-produtos .pro-rt-ed details.pro-collapsible > summary{padding-right:4px}
 #tab-produtos .pro-rt-ed .pro-collapsible-body{padding:0}
 #tab-produtos .pro-rt-ed .pro-collapsible-body p{padding:6px 14px}
@@ -2402,9 +2402,9 @@ body.pro-rt-fs-on{overflow:hidden}
 #tab-produtos .pro-rt-ed .pro-collapsible-body p:last-child{padding-bottom:12px}
 #tab-produtos .pro-collapsible-del{position:absolute;top:6px;right:6px;background:transparent;border:1px solid transparent;color:var(--t2);width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:12px;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;padding:0;user-select:none;z-index:2}
 #tab-produtos .pro-collapsible-del:hover{background:color-mix(in srgb,#ef4444 18%,transparent);border-color:#ef4444;color:#ef4444}
-/* Grupo de ações ↑ ↓ ✕ no topo direito do bloco colapsável */
-#tab-produtos .pro-collapsible-actions{position:absolute;top:5px;right:5px;display:inline-flex;gap:2px;z-index:2;user-select:none}
-#tab-produtos .pro-collapsible-act{background:transparent;border:1px solid transparent;color:var(--t2);width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;padding:0}
+/* Grupo de ações ↑ ↓ ✕ DENTRO do <summary> — sempre visível (aberto E fechado) */
+#tab-produtos .pro-collapsible-actions{display:inline-flex;gap:2px;margin-left:auto;align-items:center;flex-shrink:0;user-select:none}
+#tab-produtos .pro-collapsible-act{background:transparent;border:1px solid transparent;color:var(--t2);width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;padding:0;font-family:inherit}
 #tab-produtos .pro-collapsible-act:hover{background:color-mix(in srgb,var(--accent) 14%,transparent);border-color:color-mix(in srgb,var(--accent) 38%,var(--border));color:var(--text)}
 #tab-produtos .pro-collapsible-del-act:hover{background:color-mix(in srgb,#ef4444 18%,transparent);border-color:#ef4444;color:#ef4444}
 /* Bloqueia aninhamento visual (caso aconteça mesmo assim, mostra alerta sutil) */
@@ -8317,6 +8317,8 @@ document.addEventListener('click',(e)=>{
   const editor=t.closest('.pro-rt-ed');
   if(!editor||!editor.isContentEditable)return;
   if(t.closest('.pro-collapsible-del'))return;
+  // Ignora cliques nos botões de ação (↑ ↓ ✕) dentro do summary
+  if(t.closest('.pro-collapsible-actions'))return;
   const summary=t.closest('summary');
   if(!summary)return;
   const det=summary.parentNode;
@@ -31391,7 +31393,8 @@ window._proRtCollapsible=(uid)=>{
       node=node.parentNode;
     }
   }
-  const html=`<details class="pro-collapsible" open><summary>Título do bloco</summary><div class="pro-collapsible-body"><p>Escreva o conteúdo aqui…</p></div><div class="pro-collapsible-actions" contenteditable="false" onmousedown="event.preventDefault()"><button type="button" class="pro-collapsible-act" onclick="_proRtCollapsibleMove(this,-1,event)" title="Mover bloco para cima">↑</button><button type="button" class="pro-collapsible-act" onclick="_proRtCollapsibleMove(this,1,event)" title="Mover bloco para baixo">↓</button><button type="button" class="pro-collapsible-act pro-collapsible-del-act" onclick="_proRtCollapsibleDel(this,event)" title="Remover bloco">✕</button></div></details><p><br></p>`;
+  const actionsHtml=`<span class="pro-collapsible-actions" contenteditable="false" onmousedown="event.preventDefault();event.stopPropagation()" onclick="event.stopPropagation()"><button type="button" class="pro-collapsible-act" onclick="event.stopPropagation();_proRtCollapsibleMove(this,-1,event)" title="Mover bloco para cima">↑</button><button type="button" class="pro-collapsible-act" onclick="event.stopPropagation();_proRtCollapsibleMove(this,1,event)" title="Mover bloco para baixo">↓</button><button type="button" class="pro-collapsible-act pro-collapsible-del-act" onclick="event.stopPropagation();_proRtCollapsibleDel(this,event)" title="Remover bloco">✕</button></span>`;
+  const html=`<details class="pro-collapsible" open><summary>Título do bloco${actionsHtml}</summary><div class="pro-collapsible-body"><p>Escreva o conteúdo aqui…</p></div></details><p><br></p>`;
   try{
     document.execCommand('insertHTML',false,html);
   }catch(e){
@@ -31484,17 +31487,25 @@ function _proRtRepairDetails(html){
       if(sum&&sum.nextSibling)det.insertBefore(body,sum.nextSibling);
       else det.appendChild(body);
     }
-    // Migra botão antigo ✕ standalone pro novo bloco .pro-collapsible-actions
+    // Migra botão antigo ✕ standalone (raiz do details) — vai pro lixo
     const oldDel=det.querySelector(':scope > button.pro-collapsible-del');
     if(oldDel)oldDel.remove();
-    // Garante que o bloco de ações (↑ ↓ ✕) existe
-    if(!det.querySelector(':scope > .pro-collapsible-actions')){
-      const actions=document.createElement('div');
+    // Localiza summary (precisa existir pros botões irem dentro dele — sempre visíveis)
+    const summary=det.querySelector(':scope > summary');
+    if(!summary)return; // sem summary, pula (caso patológico)
+    // Se já existem actions FORA do summary (filho direto de details, formato antigo),
+    // remove e deixa pro próximo passo recriar dentro do summary
+    const oldActions=det.querySelector(':scope > .pro-collapsible-actions');
+    if(oldActions)oldActions.remove();
+    // Garante que os botões existem DENTRO do summary (visíveis quando aberto E fechado)
+    if(!summary.querySelector(':scope > .pro-collapsible-actions')){
+      const actions=document.createElement('span');
       actions.className='pro-collapsible-actions';
       actions.setAttribute('contenteditable','false');
-      actions.setAttribute('onmousedown','event.preventDefault()');
-      actions.innerHTML=`<button type="button" class="pro-collapsible-act" onclick="_proRtCollapsibleMove(this,-1,event)" title="Mover bloco para cima">↑</button><button type="button" class="pro-collapsible-act" onclick="_proRtCollapsibleMove(this,1,event)" title="Mover bloco para baixo">↓</button><button type="button" class="pro-collapsible-act pro-collapsible-del-act" onclick="_proRtCollapsibleDel(this,event)" title="Remover bloco">✕</button>`;
-      det.appendChild(actions);
+      actions.setAttribute('onmousedown','event.preventDefault();event.stopPropagation()');
+      actions.setAttribute('onclick','event.stopPropagation()');
+      actions.innerHTML=`<button type="button" class="pro-collapsible-act" onclick="event.stopPropagation();_proRtCollapsibleMove(this,-1,event)" title="Mover bloco para cima">↑</button><button type="button" class="pro-collapsible-act" onclick="event.stopPropagation();_proRtCollapsibleMove(this,1,event)" title="Mover bloco para baixo">↓</button><button type="button" class="pro-collapsible-act pro-collapsible-del-act" onclick="event.stopPropagation();_proRtCollapsibleDel(this,event)" title="Remover bloco">✕</button>`;
+      summary.appendChild(actions);
     }
   });
   // Garante espaço respirável antes/depois/entre details
@@ -31503,29 +31514,25 @@ function _proRtRepairDetails(html){
 }
 
 // Garante <p><br></p> em pontos onde o cursor precisa poder pousar:
-// - Antes do primeiro details (se for o primeiro filho)
-// - Depois do último details (se for o último filho)
-// - Entre dois details adjacentes
+// - Antes de cada <details> que não tem sibling (ou tem outro details antes)
+// - Depois de cada <details> que não tem sibling (ou tem outro details depois)
+// Funciona em QUALQUER nível de profundidade — não só filhos diretos do root.
 function _proRtEnsureSpacers(root){
   if(!root)return;
-  const dets=[...root.querySelectorAll(':scope > details, :scope > details.pro-collapsible')];
-  // querySelectorAll com :scope retorna só filhos diretos; vamos garantir
-  const direct=dets.filter(d=>d.parentNode===root);
-  direct.forEach((det,idx)=>{
-    // Antes do primeiro: precisa ter algo "atravessável" (P/DIV) antes
-    if(idx===0&&!det.previousElementSibling){
-      // Adiciona um <p><br></p> antes
+  const dets=[...root.querySelectorAll('details')];
+  dets.forEach(det=>{
+    const parent=det.parentNode;
+    if(!parent)return;
+    const prev=det.previousElementSibling;
+    if(!prev||prev.tagName==='DETAILS'){
       const p=document.createElement('p');p.innerHTML='<br>';
-      root.insertBefore(p,det);
-    }else if(det.previousElementSibling&&det.previousElementSibling.tagName==='DETAILS'){
-      // Dois details adjacentes: insere <p> entre
-      const p=document.createElement('p');p.innerHTML='<br>';
-      root.insertBefore(p,det);
+      parent.insertBefore(p,det);
     }
-    // Depois do último: precisa ter algo depois
-    if(idx===direct.length-1&&!det.nextElementSibling){
+    const next=det.nextElementSibling;
+    if(!next||next.tagName==='DETAILS'){
       const p=document.createElement('p');p.innerHTML='<br>';
-      root.appendChild(p);
+      if(det.nextSibling)parent.insertBefore(p,det.nextSibling);
+      else parent.appendChild(p);
     }
   });
 }
