@@ -1221,6 +1221,185 @@ npx -y firebase-tools functions:log --only perguntarDex --lines 50
 - Função roda em `_proRtHTML` (render do editor) E em `_proRtRepairDetails(_renderRichText(j.texto))` (visualização readonly).
 - Garante classe `pro-collapsible` em todo `<details>`, e envolve filhos não-summary/não-button em `.pro-collapsible-body`.
 
+### Catálogo de Produtos — Verticais (2026-05-26)
+
+**Separação completa por vertical do grupo MedReview.** O catálogo agora é o portal de entrada pra 4 verticais independentes, cada uma com produtos/jornada/editais/IA próprios.
+
+**4 verticais cadastradas:**
+| id | Nome | Cor | Avatar IA | Artigo |
+|---|---|---|---|---|
+| `anestreview` | AnestReview | `#2563eb` (azul) | **Dex** | ao |
+| `oftreview` | OftReview | `#eab308` (amarelo) | **Íris** | à |
+| `ortopreview` | OrtopReview | `#92400e` (marrom) | **Thor** | ao |
+| `medreview` | MedReview | `#a855f7` (roxo) | **Lux** | ao |
+
+Const `VERTICAIS` em `index.html` é fonte única de verdade — `{id,nome,ico,cor,cor2,avatar,artigo,tag,subtitulo}`. Helpers: `_verticalById/Avatar/Artigo/Cor/Nome`.
+
+**Tela inicial do catálogo:**
+- `S.produtosView==='verticals'` → renderiza `_proRenderVerticals(root)` com 4 cards estilo **home-card** (mesma engine de tilt 3D + glow follow-cursor + shine sweep + reveal staggered da Home).
+- Cada card tem capa 16:10 com gradient da cor + ícone gigante (96px), corpo com nome + subtítulo + CTA "Abrir catálogo →".
+- `_arosBindTilt()` é chamado após render — handlers de mouse aplicam `--tilt-x/y` e `--mx/my` via CSS vars.
+- Click no card → `proSelectVertical(id)` seta `S.verticalAtual`, persiste em `localStorage` (`aros.catalogo.vertical`), chama `_proRebindVerticalListeners()`, troca pra `S.produtosView='list'`.
+- Botão `proVoltarVerticais()` no breadcrumb da listagem volta pra seleção.
+
+**Modelo de dados:**
+- **Produtos**: campo `vertical` no doc (`'anestreview'|'oftreview'|'ortopreview'|'medreview'`). Produtos sem o campo são tratados como `'anestreview'` por compat. Save sempre força `vertical: S.verticalAtual`.
+- **Configs por vertical** com sufixo: `config/jornadaCliente_${vertical}`, `config/editais_${vertical}`, `config/catalogoConfig_${vertical}`, `config/dexPrompt_${vertical}`.
+- **AnestReview usa docs SEM sufixo (legado preservado)** — `_verticalDocId('jornadaCliente') === 'jornadaCliente'` quando vertical é anestreview, senão `'jornadaCliente_${vertical}'`.
+- **slackTime continua GLOBAL** (mesma equipe atende todas as verticais).
+
+**Listeners dinâmicos:**
+- `_proRebindVerticalListeners()` cancela os 4 listeners antigos e cria novos apontando pros docs da vertical atual.
+- Reseta state local (catalogoConfig/jornadaCliente/editais/dexConfig) antes pra evitar flash de dados da vertical anterior.
+- Chamado em `proSelectVertical` e em `initProdutos` se já tem vertical persistida.
+
+**Backend `dex.js`:**
+- Aceita `vertical` no body. Valida contra `VERTICAIS_VALIDAS=['anestreview','oftreview','ortopreview','medreview']`. Default `'anestreview'`.
+- `verticalDoc(baseDoc)` helper resolve sufixo (mesma regra do frontend).
+- Filtra produtos: `if (data.vertical||'anestreview') !== vertical) return;`
+- Lê `config/{jornadaCliente|dexPrompt|editais}_${vertical}` (ou sem sufixo pra anestreview).
+- `VERTICAL_AVATAR` e `VERTICAL_NOME` map IDs → labels (Dex/Íris/Thor/Lux + nomes oficiais).
+- `buildSystemPromptFromInstructions` recebe `{avatarNome, verticalNome}` em `ctx` — gera bloco `## IDENTIDADE\nVocê é ${avatar}, assistente do catálogo da vertical **${vertical}**...` no topo do prompt.
+- Logs incluem `vertical, avatar`.
+
+**Frontend Dex UI:**
+- Título do painel: `${avatar} · Assistente do Catálogo ${nome}` (muda por vertical).
+- Botão: "Pergunte ${artigo} ${avatar}" — usa o artigo correto ("ao Dex", "à Íris", "ao Thor", "ao Lux").
+- `proDexAsk` envia `vertical: S.verticalAtual||'anestreview'` no body.
+
+**Migração:** zero impacto pra AnestReview (usa docs originais). Outras verticais começam vazias — admin cadastra do zero ao entrar nelas.
+
+### Catálogo de Produtos — Editais (2026-05-26)
+
+Nova seção colapsável "📋 Editais" entre Jornada do Cliente e a lista de produtos.
+
+**UI:**
+- Box principal com toggle (mesmo padrão visual do `pro-jornada-disc`).
+- Botão "+ Cadastrar edital" abre modal com:
+  - Input nome da prova
+  - Input ano
+  - Editor rich-text completo (toolbar com cores, listas, alinhamento, dropdowns colapsáveis).
+- Modal **não fecha ao clicar fora** — só via ✕ ou Cancelar (pra evitar perda acidental de dados durante edição).
+- Cada edital salvo vira card colapsável com: ícone 📄, nome do edital, badge azul do ano (colado ao nome), botões ✏️ e 🗑.
+- Lista ordenada por ano descendente, depois alfabético.
+- Texto da info no read-mode: width:100%, sem hifenização, respeita alinhamento escolhido no editor.
+
+**Persistência:**
+- `config/editais_${vertical}` → `{lista:[{id,nomeProva,ano,info,updatedAt,updatedBy}], updatedAt, updatedBy}`.
+- `_proSanitizeResp` aplicado em `info` no save (mesma sanitização de obj/dúvidas).
+- Audit log: `EDITAL_CRIADO/EDITAL_EDITADO/EDITAL_REMOVIDO`.
+
+**Contexto pro Dex:**
+- `formatarEditais()` em `dex.js` exporta cada edital como `### {Nome} — Ano: {ano}\n{info strippado}`.
+- Bloco `=== EDITAIS CADASTRADOS (${verticalNome}) ===` injetado no system prompt, com **ano atual** (`new Date().getFullYear()`) explícito.
+- Regra de estilo no `ESTILO_UNIVERSAL`: se a resposta usar info de edital de ano anterior ao atual, começa avisando ("Com base no edital de XXXX...").
+
+### Catálogo de Produtos — Concorrentes (2026-05-26)
+
+Nova seção `concorrentes` no produto (entre Argumentos de venda e Objeções).
+
+**Estrutura:**
+```
+concorrentes: [
+  { id, nome,
+    features: [{ id, titulo, nossoDiferencial: '<HTML rich-text>' }]
+  }
+]
+```
+
+**UI editor (accordion no produto):**
+- "🥊 Concorrentes — quem são? · N" — accordion colapsável.
+- Cada concorrente é um card colapsável (`.pro-conc-edit`, reusa `.pro-qa-edit`) com: handle ⠿, input nome, botões ↑↓🗑, body com features.
+- Cada feature do concorrente: input título + rich-text editor pro nosso diferencial + ↑↓🗑.
+- Handlers: `_proConcAdd/Set/Rm/Up/Down`, `_proConcFeatAdd/Set/Rm/Up/Down`, `_proConcToggle`, `_proRefreshConcs`.
+
+**UI detalhe (read mode):**
+- Section colapsável `_proSecDiscHTML('concorrentes',...)` ícone 🥊.
+- Dentro: cada concorrente vira `<details class="pro-conc-detail-card">` (colapsável nativo) com summary "🥊 Nome · N features".
+- Cada feature renderizada com título + badge verde "Nosso diferencial" + body HTML do diferencial (justify, sem hifenização).
+
+**Save:** sanitização filtra concorrentes vazios e features vazias; `nossoDiferencial` passa por `_proSanitizeResp`.
+
+**Busca:** haystack inclui nome do concorrente + título + diferencial (HTML strippado) + palavra "concorrente".
+
+**Dex:** `formatarProduto` em `dex.js` adiciona bloco `**Concorrentes diretos:**` com nome + features deles + nosso diferencial (HTML strippado).
+
+### Catálogo de Produtos — Tempo de teste recomendado (2026-05-26)
+
+Novo campo `p.tempoTesteRecomendado` (string).
+- Editor: textarea abaixo do Tempo de acesso na seção Básico.
+- Detalhe: disclosure 🧪 logo após o ⏱️ Tempo de acesso. Header mostra preview da 1ª linha; body com texto completo.
+- Save normaliza com `String(v).trim()`.
+- Incluído no `_proBuscaHaystack` e no `formatarProduto` do Dex (`**Tempo de teste recomendado:** ...`).
+
+### Catálogo de Produtos — Detalhes do produto (2026-05-26)
+
+**Mentoria e Bônus como dropdowns colapsáveis (fechados por default):**
+- Mentoria usa `_proSecDiscHTML('mentoria', mentTitle, ...)` com `titleIsHtml=true` (pra renderizar a tag inline).
+- Tag visual ao lado do nome:
+  - `mentStatus='sim'` → badge verde **INCLUÍDA** (`.pro-ment-tag-sim`)
+  - `mentStatus='opcional'` → badge laranja **OPCIONAL** (`.pro-ment-tag-opcional`)
+- Bônus segue mesmo padrão (`_proSecDiscHTML('bonus','Bônus',...)`).
+- Cor temática preservada no header (roxo pra mentoria, amarelo pro bônus) via classes `.pro-sec-mentoria` / `.pro-sec-bonus`.
+
+**Obj/Dúv/Concorrentes — layout flex:**
+- Cada par Q/R agora é renderizado como `.pro-obj-row` com `[.pro-obj-prefix Q:/R:/❓] [.pro-obj-text conteúdo]` em flex.
+- Texto **sempre cola** no prefixo (não mais "R:" sozinho em uma linha, depois resposta na próxima).
+- `.pro-obj-text` com `text-align:justify`, `hyphens:none`, `overflow-wrap:break-word`, `word-break:normal`.
+- Substitui o antigo `::before "R: "` que tinha falhas de unwrap intermitentes.
+
+**Alinhamento do ✏️ nos disclosures:**
+- Removido `justify-content:space-between` do `.pro-sec-disc-head`.
+- Adicionado `margin-left:auto` no `.pro-sec-disc-caret`.
+- `.pro-sec-disc-count + .pro-sec-disc-caret{margin-left:0}` pra colar o caret quando há count.
+- Fix do bug onde ✏️ ficava no meio do header em seções sem count (caso da Mentoria com 0 features).
+
+### Catálogo de Produtos — Jornada do Cliente: auto-save ao fechar (2026-05-26)
+
+`proToggleJornada()` detecta se a box está sendo FECHADA (de aberta pra fechada) e dispara `_proJornadaSalvar()` em background se `S._jornadaDirty && _proCanEdit()`. Save acontece em paralelo (não bloqueia o toggle). Botão 💾 Salvar continua funcionando manualmente.
+
+### Catálogo de Produtos — Picker de público-alvo (2026-05-26)
+
+Substitui o dropdown nativo `<select>` antigo de público-alvo pelo mesmo picker `_proMultiSelectHTML('publicoAlvo',...)` usado em provas-alvo. Botão "+ Cadastrar novo público-alvo" sempre disponível, mesmo quando todas as opções já foram selecionadas. Remove código morto: `_proPublicoDropdownHTML`, `_proPublicoAdd`, `_proRefreshPublicoDd`, CSS `.pro-pub-*`.
+
+### Catálogo de Produtos — Responsáveis com link Slack (2026-05-26)
+
+Cadastro de **Membros do Time** em Configurações (`config/slackTime` = `{teamId, membros:[{nome,slackId}]}`). Chips de responsável em produtos viram `<a>` clicável (link `slack://user?team=T...&id=U...`) quando nome bate (case+acento insensível) com membro cadastrado. Ícone 💬 substitui 👤. Cor mantida (lilás original, boa em dark+light) — só hover e cursor mudam pra indicar clicabilidade.
+
+Listener `_ensureSlackTimeListener()` carrega sob demanda (chamado por `initProdutos` E `renderSlackTimeForm`) — funciona mesmo abrindo Configurações direto sem passar por Produtos. Form só renderiza após dados carregarem (evita sobrescrever com vazio).
+
+### Catálogo de Produtos — Conversa multi-turn no Dex (2026-05-26)
+
+**Frontend:**
+- `S.dexHistorico[]` mantém histórico de até 10 turnos (20 mensagens user+assistant).
+- Render como balões empilhados (`.pro-dex-bubble.user/.assistant`) — user à direita gradient azul/roxo, Dex à esquerda border.
+- Typing indicator (3 bolinhas animadas) durante loading.
+- Box colapsável `.pro-dex-history-wrap` com header "Conversa atual · N turnos" + caret — clica pra ocultar/mostrar quando conversa fica longa.
+- Botão "🔄 Resetar conversa" (laranja, com texto visível) aparece quando há histórico.
+- Trocar perfil mid-conversa: confirm explicando que IA mantém histórico anterior.
+- Fechar painel preserva histórico (intencional). Reset limpa.
+
+**Backend:**
+- Aceita `historico:[{role,content}]` no body, validado e limitado a 20 mensagens.
+- PDFs do perfil são injetados no PRIMEIRO user message do histórico (preserva cache).
+- Logs incluem `historico_msgs`.
+
+### Catálogo de Produtos — Campos enviados pro Dex (atualizado 2026-05-26)
+
+`formatarProduto` em `dex.js` agora envia (resumo):
+- nome, id, status, breveDescricao
+- publicoAlvo, provasAlvo, responsaveis
+- **tempoTesteRecomendado** (2026-05-26)
+- **temposAcesso + temposAcessoObs** (2026-05-26)
+- **sazonal + sazonalidadeDescricao + janelaVendasInicio/Fim** (2026-05-26)
+- **vagasLimitadas + vagasLimitacaoDescricao** (2026-05-26)
+- temMentoria, mentoriaDescricao, **mentoriaResponsaveis** (2026-05-26), **mentoriaSazonal + mentoriaSazonalidadeDescricao** (2026-05-26), mentoriaFeatures
+- bonusProdutoIds (resolve pra nomes via `todosProdutos`), bonusFeatures
+- argumentosVenda, concorrentes (nome + features + diferenciais), objecoes, duvidas, links
+
+`formatarFeature` agora envia (resumo):
+- titulo, numeroChave, disponivel, **descricao** (2026-05-26), diferenciais (HTML strippado), linkUrl/Label, pdfUrl/Label
+
 ### Busca do Catálogo de Produtos — melhorias (2026-05-25)
 
 - **Debounce 220ms** em `proSearchInput` antes do `_proRender()` — evita perder foco do input a cada tecla.

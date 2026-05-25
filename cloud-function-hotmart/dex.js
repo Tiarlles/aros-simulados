@@ -172,25 +172,50 @@ exports.perguntarDex = onRequest(
       .slice(-20)
       .map(m => ({ role: m.role, content: String(m.content).trim() }));
 
+    // Vertical do catálogo — define qual conjunto de configs e produtos consultar
+    const VERTICAIS_VALIDAS = ['anestreview', 'oftreview', 'ortopreview', 'medreview'];
+    const verticalRaw = String(req.body?.vertical || '').toLowerCase();
+    const vertical = VERTICAIS_VALIDAS.includes(verticalRaw) ? verticalRaw : 'anestreview';
+    // AnestReview usa docs sem sufixo (legado preservado). Outras verticais usam sufixo.
+    const verticalDoc = (baseDoc) => vertical === 'anestreview' ? baseDoc : `${baseDoc}_${vertical}`;
+    // Avatar do assistente por vertical
+    const VERTICAL_AVATAR = {
+      anestreview: 'Dex',
+      oftreview: 'Íris',
+      ortopreview: 'Thor',
+      medreview: 'Lux',
+    };
+    const VERTICAL_NOME = {
+      anestreview: 'AnestReview',
+      oftreview: 'OftReview',
+      ortopreview: 'OrtopReview',
+      medreview: 'MedReview',
+    };
+    const avatarNome = VERTICAL_AVATAR[vertical];
+    const verticalNomeFmt = VERTICAL_NOME[vertical];
+
     try {
       const db = admin.firestore();
-      // Lê produtos + jornada + configuração do Dex + editais em paralelo
+      // Lê produtos + jornada + dexPrompt + editais (todos da vertical correspondente)
       const [snap, jornadaSnap, dexCfgSnap, editaisSnap] = await Promise.all([
         db.collection('produtos').get(),
-        db.collection('config').doc('jornadaCliente').get(),
-        db.collection('config').doc('dexPrompt').get(),
-        db.collection('config').doc('editais').get(),
+        db.collection('config').doc(verticalDoc('jornadaCliente')).get(),
+        db.collection('config').doc(verticalDoc('dexPrompt')).get(),
+        db.collection('config').doc(verticalDoc('editais')).get(),
       ]);
+      // Filtra produtos pela vertical (produtos sem campo `vertical` são anestreview por compat)
       const produtos = [];
       snap.forEach(d => {
         const data = d.data() || {};
-        if (data.status === 'descontinuado') return; // não inclui descontinuados
+        if (data.status === 'descontinuado') return;
+        const pv = data.vertical || 'anestreview';
+        if (pv !== vertical) return;
         produtos.push({ id: d.id, ...data });
       });
 
       if (produtos.length === 0) {
         res.status(200).json({
-          resposta: 'O catálogo está vazio no momento. Não tenho produtos para consultar.',
+          resposta: `O catálogo da vertical ${verticalNomeFmt} está vazio no momento. Não tenho produtos para consultar.`,
         });
         return;
       }
@@ -211,7 +236,7 @@ exports.perguntarDex = onRequest(
         String(dexCfg.template || '').trim() ||
         DEFAULT_INSTRUCTIONS[perfil];
       // Jornada, Editais e Catálogo SEMPRE anexados automaticamente.
-      const systemPrompt = buildSystemPromptFromInstructions(customInstructions, catalogoFmt, jornadaTxt, editaisFmt);
+      const systemPrompt = buildSystemPromptFromInstructions(customInstructions, catalogoFmt, jornadaTxt, editaisFmt, { avatarNome, verticalNome: verticalNomeFmt });
 
       // PDFs anexados pra este perfil — viram blocos `document` no user message
       const pdfsField = 'pdfs' + perfil.charAt(0).toUpperCase() + perfil.slice(1);
@@ -293,6 +318,8 @@ exports.perguntarDex = onRequest(
       const usage = resp.usage || {};
       console.log('Dex OK', {
         user: decoded.email || decoded.uid,
+        vertical,
+        avatar: avatarNome,
         perfil,
         modelo,
         max_tokens: maxTokens,
@@ -339,14 +366,18 @@ const ESTILO_UNIVERSAL = `## REGRAS DE ESTILO (sempre aplicadas)
 // customizadas do usuário. Sempre coloca os blocos de dados no final pra otimizar
 // prompt caching: instruções (que mudam pouco) vêm primeiro, dados (que mudam mais)
 // depois. Como o cache é por prefixo, isso mantém o cache válido por mais tempo.
-function buildSystemPromptFromInstructions(instructions, catalogoFmt, jornadaTxt, editaisFmt) {
+function buildSystemPromptFromInstructions(instructions, catalogoFmt, jornadaTxt, editaisFmt, ctx) {
+  const c = ctx || {};
+  const avatarNome = c.avatarNome || 'Dex';
+  const verticalNome = c.verticalNome || 'MedReview';
+  const headerVertical = `## IDENTIDADE\nVocê é ${avatarNome}, assistente do catálogo da vertical **${verticalNome}** do grupo MedReview. Só responda sobre produtos, jornada do cliente e editais desta vertical específica — não misture com outras verticais.\n\n`;
   const jornadaSec = jornadaTxt
-    ? `=== JORNADA DO CLIENTE ===\n\nContexto sobre o perfil do cliente, dores, jornada de compra e gatilhos.\n\n${jornadaTxt}\n\n=== FIM DA JORNADA ===\n\n`
+    ? `=== JORNADA DO CLIENTE (${verticalNome}) ===\n\nContexto sobre o perfil do cliente, dores, jornada de compra e gatilhos.\n\n${jornadaTxt}\n\n=== FIM DA JORNADA ===\n\n`
     : '';
   const editaisSec = editaisFmt
-    ? `=== EDITAIS CADASTRADOS ===\n\nInformações de editais de prova publicados. Cada edital traz o ano em que foi publicado. **Ano atual de referência: ${new Date().getFullYear()}.** Se for usar informação de um edital de ano ANTERIOR ao atual pra responder, comece a resposta deixando claro que o dado é do edital daquele ano (ex: "Segundo o edital de XXXX..."), porque pode haver mudanças no edital atual.\n\n${editaisFmt}\n\n=== FIM DOS EDITAIS ===\n\n`
+    ? `=== EDITAIS CADASTRADOS (${verticalNome}) ===\n\nInformações de editais de prova publicados. Cada edital traz o ano em que foi publicado. **Ano atual de referência: ${new Date().getFullYear()}.** Se for usar informação de um edital de ano ANTERIOR ao atual pra responder, comece a resposta deixando claro que o dado é do edital daquele ano (ex: "Segundo o edital de XXXX..."), porque pode haver mudanças no edital atual.\n\n${editaisFmt}\n\n=== FIM DOS EDITAIS ===\n\n`
     : '';
-  return `${instructions}\n\n${ESTILO_UNIVERSAL}\n\n${jornadaSec}${editaisSec}=== CATÁLOGO DE PRODUTOS MEDREVIEW ===\n\n${catalogoFmt}\n\n=== FIM DO CATÁLOGO ===`;
+  return `${headerVertical}${instructions}\n\n${ESTILO_UNIVERSAL}\n\n${jornadaSec}${editaisSec}=== CATÁLOGO DE PRODUTOS ${verticalNome.toUpperCase()} ===\n\n${catalogoFmt}\n\n=== FIM DO CATÁLOGO ===`;
 }
 
 // Formata a lista de editais como texto plano pra incluir no prompt da IA.
@@ -387,6 +418,30 @@ function formatarProduto(p, todosProdutos) {
   const tempoTeste = String(p.tempoTesteRecomendado || '').trim();
   if (tempoTeste) linhas.push(`**Tempo de teste recomendado:** ${tempoTeste}`);
 
+  // Tempo de acesso do produto (ex: 6 meses, 12 meses)
+  const tempos = arr(p.temposAcesso);
+  if (tempos.length) {
+    const obsTempos = String(p.temposAcessoObs || '').trim();
+    linhas.push(`**Tempo de acesso:** ${tempos.join(', ')}${obsTempos ? ' — ' + obsTempos : ''}`);
+  }
+
+  // Sazonalidade: se o produto tem janela de vendas restrita
+  if (p.sazonal) {
+    const sazDesc = String(p.sazonalidadeDescricao || '').trim();
+    const ini = String(p.janelaVendasInicio || '').trim();
+    const fim = String(p.janelaVendasFim || '').trim();
+    const partes = [];
+    if (sazDesc) partes.push(sazDesc);
+    if (ini || fim) partes.push(`janela de vendas: ${ini || '?'} até ${fim || '?'}`);
+    linhas.push(`**⚠️ Produto sazonal:** ${partes.length ? partes.join(' · ') : 'sim (sem detalhes)'}`);
+  }
+
+  // Vagas limitadas
+  if (p.vagasLimitadas) {
+    const vagasDesc = String(p.vagasLimitacaoDescricao || '').trim();
+    linhas.push(`**🎫 Vagas limitadas:** ${vagasDesc || 'sim (sem detalhes)'}`);
+  }
+
   if (Array.isArray(p.features) && p.features.length) {
     linhas.push('');
     linhas.push('**O que está incluído:**');
@@ -404,9 +459,18 @@ function formatarProduto(p, todosProdutos) {
     linhas.push(label);
     const mentDesc = String(p.mentoriaDescricao || '').trim();
     if (mentDesc) linhas.push(mentDesc);
+    // Coordenadores/responsáveis da mentoria — campo dedicado, separado dos
+    // responsáveis gerais do produto
+    const mentResps = arr(p.mentoriaResponsaveis);
+    if (mentResps.length) linhas.push(`Coordenação da mentoria: ${mentResps.join(', ')}`);
+    // Sazonalidade da mentoria (pode ser diferente do produto)
+    if (p.mentoriaSazonal) {
+      const mentSazDesc = String(p.mentoriaSazonalidadeDescricao || '').trim();
+      linhas.push(`Mentoria sazonal: ${mentSazDesc || 'sim (sem detalhes)'}`);
+    }
     if (Array.isArray(p.mentoriaFeatures) && p.mentoriaFeatures.length) {
       p.mentoriaFeatures.forEach(f => linhas.push(formatarFeature(f)));
-    } else if (!mentDesc) {
+    } else if (!mentDesc && !mentResps.length) {
       linhas.push(`(${mentStatus === 'opcional' ? 'opcional (compra à parte)' : 'sim'})`);
     }
   }
@@ -492,12 +556,15 @@ function formatarFeature(f) {
   if (d === 'nao' || d === false) disp = ' (NÃO incluído)';
   else if (d === 'construcao') disp = ' (EM CONSTRUÇÃO — ainda não disponível)';
   const num = f.numeroChave ? ` — ${f.numeroChave}` : '';
+  // Descrição: campo de texto curto (legado mas ainda em uso em produtos cadastrados)
+  const descTxt = stripHtml(f.descricao || '').trim();
+  const desc = descTxt ? `\n    Descrição: ${descTxt}` : '';
   // Diferenciais vem como HTML rico — converte pra texto plano antes de mandar pro LLM
   const difTxt = stripHtml(f.diferenciais || '');
   const dif = difTxt ? `\n    Diferenciais: ${difTxt}` : '';
   const link = f.linkUrl ? `\n    Link${f.linkLabel ? ` (${f.linkLabel})` : ''}: ${f.linkUrl}` : '';
   const pdf = f.pdfUrl ? `\n    PDF anexo${f.pdfLabel ? ` (${f.pdfLabel})` : ''}: ${f.pdfUrl}` : '';
-  return `- ${f.titulo || '(sem título)'}${num}${disp}${dif}${link}${pdf}`;
+  return `- ${f.titulo || '(sem título)'}${num}${disp}${desc}${dif}${link}${pdf}`;
 }
 
 function stripHtml(s) {

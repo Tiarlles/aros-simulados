@@ -1787,6 +1787,30 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
 #tab-produtos .pro-btn-cadastrar{padding:10px 18px;font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:600;letter-spacing:.2px}
 #tab-produtos .pro-search-row{margin-bottom:16px}
+
+/* ─── Seletor de Vertical (tela inicial do catálogo, estilo home-card) ─── */
+#tab-produtos .pro-vert-wrap{padding:8px 0 32px;animation:dexSlideIn .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));perspective:1200px}
+#tab-produtos .pro-vert-header{margin:0 auto 32px;text-align:center;max-width:680px;padding:0 16px}
+#tab-produtos .pro-vert-titulo{margin:0 0 10px;font-family:'Fraunces','Space Grotesk','Plus Jakarta Sans',serif;font-size:clamp(28px,4vw,42px);font-weight:700;letter-spacing:-1px;line-height:1.1;color:var(--text)}
+#tab-produtos .pro-vert-subtitulo{margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:14.5px;color:var(--t2);line-height:1.5}
+#tab-produtos .pro-vert-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;max-width:1180px;margin:0 auto;padding:0 8px}
+@media (max-width:980px){#tab-produtos .pro-vert-grid{grid-template-columns:repeat(2,1fr);gap:18px}}
+@media (max-width:640px){#tab-produtos .pro-vert-grid{grid-template-columns:1fr;gap:16px}}
+/* Variante home-card pro contexto de catálogo: ícone gigante na capa em vez de imagem */
+#tab-produtos .pro-vert-home-card{min-height:340px}
+#tab-produtos .pro-vert-home-cover{position:relative;display:flex;align-items:center;justify-content:center}
+#tab-produtos .pro-vert-home-ico{font-size:96px;line-height:1;filter:drop-shadow(0 8px 24px color-mix(in srgb,var(--c) 70%,transparent)) drop-shadow(0 2px 6px rgba(0,0,0,.6));z-index:1;transition:transform 1.1s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),filter .6s var(--ease-out-soft)}
+#tab-produtos .pro-vert-home-card:hover .pro-vert-home-ico{transform:scale(1.08) translateY(-2px);filter:drop-shadow(0 12px 32px color-mix(in srgb,var(--c) 90%,transparent)) drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+@media (max-width:640px){
+  #tab-produtos .pro-vert-home-card{min-height:auto}
+  #tab-produtos .pro-vert-home-ico{font-size:64px}
+}
+
+/* Breadcrumb da vertical no header da listagem */
+#tab-produtos .pro-vert-breadcrumb{display:inline-flex;align-items:center;gap:8px;margin-bottom:8px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--t2)}
+#tab-produtos .pro-vert-breadcrumb-btn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid var(--border);color:var(--t2);padding:4px 10px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;transition:all .15s}
+#tab-produtos .pro-vert-breadcrumb-btn:hover{color:var(--text);border-color:var(--accent)}
+#tab-produtos .pro-vert-breadcrumb-atual{font-weight:700;color:var(--vert-cor-atual,var(--text));display:inline-flex;align-items:center;gap:6px}
 #tab-produtos .pro-search{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .15s,box-shadow .15s}
 #tab-produtos .pro-search:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
 #tab-produtos .pro-section-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--t2);margin:14px 0 8px}
@@ -2330,7 +2354,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-sec-disc{margin:18px 0;background:color-mix(in srgb,var(--bg2) 92%,transparent);border:1px solid var(--border);border-radius:14px;overflow:hidden;backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);transition:border-color .2s,box-shadow .2s}
 #tab-produtos .pro-sec-disc:hover{border-color:color-mix(in srgb,var(--accent) 28%,var(--border))}
 #tab-produtos .pro-sec-disc.open{border-color:color-mix(in srgb,var(--accent) 36%,var(--border));box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 4px 14px rgba(0,0,0,.10)}
-#tab-produtos .pro-sec-disc-head{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px 18px;background:transparent;border:none;color:inherit;cursor:pointer;text-align:left;font:inherit;transition:background .15s}
+#tab-produtos .pro-sec-disc-head{display:flex;align-items:center;gap:12px;width:100%;padding:14px 18px;background:transparent;border:none;color:inherit;cursor:pointer;text-align:left;font:inherit;transition:background .15s}
 #tab-produtos .pro-sec-disc-head:hover{background:color-mix(in srgb,var(--accent) 4%,transparent)}
 #tab-produtos .pro-sec-disc-head:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 #tab-produtos .pro-sec-disc-title{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--accent);opacity:.95}
@@ -2339,7 +2363,9 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-sec-disc-count{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);padding:1px 9px;border-radius:999px;letter-spacing:.6px;font-variant-numeric:tabular-nums;margin-left:auto}
 #tab-produtos .pro-sec-disc-head{cursor:pointer}
 #tab-produtos .pro-sec-disc-head:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-#tab-produtos .pro-sec-disc-caret{font-family:'JetBrains Mono','SF Mono',monospace;color:var(--t2);font-size:11px;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));line-height:1}
+#tab-produtos .pro-sec-disc-caret{font-family:'JetBrains Mono','SF Mono',monospace;color:var(--t2);font-size:11px;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));line-height:1;margin-left:auto}
+/* Quando há count antes do caret, o count consome o margin-left:auto e o caret fica colado */
+#tab-produtos .pro-sec-disc-count + .pro-sec-disc-caret{margin-left:0}
 #tab-produtos .pro-sec-disc.open .pro-sec-disc-caret{transform:rotate(180deg);color:var(--accent)}
 #tab-produtos .pro-sec-disc-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .35s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,padding .2s}
 #tab-produtos .pro-sec-disc.open .pro-sec-disc-body{max-height:4000px;opacity:1;padding:4px 18px 18px;overflow-y:auto}
@@ -28375,9 +28401,26 @@ function _renderExtraCasesPreview(data){
 // ════════════════════════════════════════════════════════════════════════
 // CATÁLOGO INTERNO DE PRODUTOS
 // ════════════════════════════════════════════════════════════════════════
+// Verticais do grupo MedReview — cada vertical tem seus produtos, jornada,
+// editais, catalogoConfig e dexPrompt em docs separados (sufixo no doc id).
+const VERTICAIS=[
+  {id:'anestreview',nome:'AnestReview',ico:'💉',cor:'#2563eb',cor2:'#60a5fa',avatar:'Dex',artigo:'ao',tag:'ANESTESIOLOGIA',subtitulo:'Catálogo da vertical de Anestesiologia — produtos, jornada e editais'},
+  {id:'oftreview',nome:'OftReview',ico:'👁️',cor:'#eab308',cor2:'#fde047',avatar:'Íris',artigo:'à',tag:'OFTALMOLOGIA',subtitulo:'Catálogo da vertical de Oftalmologia — produtos, jornada e editais'},
+  {id:'ortopreview',nome:'OrtopReview',ico:'🦴',cor:'#92400e',cor2:'#c2410c',avatar:'Thor',artigo:'ao',tag:'ORTOPEDIA',subtitulo:'Catálogo da vertical de Ortopedia — produtos, jornada e editais'},
+  {id:'medreview',nome:'MedReview',ico:'🎓',cor:'#a855f7',cor2:'#c084fc',avatar:'Lux',artigo:'ao',tag:'MEDREVIEW R1',subtitulo:'Catálogo da vertical R1 — produtos, jornada e editais'},
+];
+function _verticalById(id){return VERTICAIS.find(v=>v.id===id)||VERTICAIS[0];}
+function _verticalAvatar(id){return _verticalById(id).avatar;}
+function _verticalArtigo(id){return _verticalById(id).artigo||'ao';}
+function _verticalCor(id){return _verticalById(id).cor;}
+function _verticalNome(id){return _verticalById(id).nome;}
+// Vertical atual selecionada — persiste em localStorage pra não obrigar reescolher a cada reload
+S.verticalAtual=(()=>{try{const v=localStorage.getItem('aros.catalogo.vertical');return VERTICAIS.find(x=>x.id===v)?v:null;}catch(e){return null;}})();
 S.produtos=[];
 S.produtosLoaded=false;
-S.produtosView='list';   // 'list' | 'detail' | 'edit' | 'new'
+// 'verticals' = seletor de vertical (default quando nenhuma escolhida)
+// 'list' | 'detail' | 'edit' | 'new' = dentro de uma vertical
+S.produtosView=S.verticalAtual?'list':'verticals';
 S.produtoAtual=null;     // objeto sendo visto/editado (cópia trabalho)
 S._proNavStack=[];       // pilha de IDs pra voltar pra produto-anterior em vez de catálogo
 S.produtosBusca='';
@@ -28684,78 +28727,97 @@ function _proFmtDate(ts){if(!ts)return'—';try{
   return d.toLocaleDateString('pt-BR')+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
 }catch(e){return'—';}}
 
+// Resolve o ID do doc no Firestore por vertical. AnestReview usa o doc legado
+// (sem sufixo) pra preservar dados já cadastrados. Outras verticais usam sufixo.
+function _verticalDocId(baseDoc,vertical){
+  const v=vertical||S.verticalAtual||'anestreview';
+  if(v==='anestreview')return baseDoc;
+  return `${baseDoc}_${v}`;
+}
+
+// Re-sintoniza todos os listeners "por vertical" — cancela os antigos e cria
+// novos apontando pros docs da vertical atual. Chamado em proSelectVertical
+// e em initProdutos (se já tem vertical persistida).
+function _proRebindVerticalListeners(){
+  const v=S.verticalAtual;if(!v)return;
+  // Cancela listeners antigos
+  if(_proCatUnsub){try{_proCatUnsub();}catch(e){}_proCatUnsub=null;}
+  if(_proJornadaUnsub){try{_proJornadaUnsub();}catch(e){}_proJornadaUnsub=null;}
+  if(_proEditaisUnsub){try{_proEditaisUnsub();}catch(e){}_proEditaisUnsub=null;}
+  if(_proDexCfgUnsub){try{_proDexCfgUnsub();}catch(e){}_proDexCfgUnsub=null;}
+  // Reseta estado pra evitar mostrar dados de vertical anterior por um instante
+  S.catalogoConfig.publicosAlvo=[];S.catalogoConfig.provasAlvo=[];S.catalogoConfig.loaded=false;
+  S.jornadaCliente.texto='';S.jornadaCliente.videoUrl='';S.jornadaCliente.imagemUrl='';S.jornadaCliente.imagemPath='';S.jornadaCliente.updatedAt=null;S.jornadaCliente.updatedBy='';S.jornadaCliente.loaded=false;
+  S.editais.lista=[];S.editais.updatedAt=null;S.editais.updatedBy='';S.editais.loaded=false;
+  S.dexConfig.templateGeral='';S.dexConfig.templateSuporte='';S.dexConfig.templateVendas='';S.dexConfig.templateMarketing='';
+  S.dexConfig.pdfsGeral=[];S.dexConfig.pdfsSuporte=[];S.dexConfig.pdfsVendas=[];S.dexConfig.pdfsMarketing=[];
+  S.dexConfig.modelo='haiku';S.dexConfig.maxTokens=1024;S.dexConfig.updatedAt=null;S.dexConfig.updatedBy='';S.dexConfig.loaded=false;
+  // catalogoConfig
+  _proCatUnsub=onSnapshot(doc(db,'config',_verticalDocId('catalogoConfig')),snap=>{
+    if(snap.exists()){
+      const d=snap.data()||{};
+      S.catalogoConfig.publicosAlvo=Array.isArray(d.publicosAlvo)?d.publicosAlvo.filter(Boolean):[];
+      S.catalogoConfig.provasAlvo=Array.isArray(d.provasAlvo)?d.provasAlvo.filter(Boolean):[];
+      S.catalogoConfig.loaded=true;
+    }else{
+      S.catalogoConfig.publicosAlvo=[];S.catalogoConfig.provasAlvo=[];S.catalogoConfig.loaded=true;
+      _proSeedCatalogoConfigIfNeeded();
+    }
+    if(S.produtosLoaded&&(S.produtosView==='edit'||S.produtosView==='new'))_proRefreshPickerIfOpen();
+  },err=>{console.warn('catalogoConfig onSnapshot:',err);S.catalogoConfig.loaded=true;});
+  // jornadaCliente
+  _proJornadaUnsub=onSnapshot(doc(db,'config',_verticalDocId('jornadaCliente')),snap=>{
+    if(snap.exists()){
+      const d=snap.data()||{};
+      if(!S._jornadaDirty){
+        S.jornadaCliente.texto=String(d.texto||'');
+        S.jornadaCliente.videoUrl=String(d.videoUrl||'');
+        S.jornadaCliente.imagemUrl=String(d.imagemUrl||'');
+        S.jornadaCliente.imagemPath=String(d.imagemPath||'');
+        S.jornadaCliente.updatedAt=d.updatedAt||null;
+        S.jornadaCliente.updatedBy=String(d.updatedBy||'');
+        if(!S.jornadaCliente.loaded)setTimeout(_proJornadaDraftCheck,0);
+      }
+    }
+    S.jornadaCliente.loaded=true;
+    if(S.produtosLoaded&&S.produtosView==='list'&&!S._jornadaDirty)_proJornadaRefresh();
+  },err=>{console.warn('jornadaCliente onSnapshot:',err);S.jornadaCliente.loaded=true;});
+  // editais
+  _proEditaisUnsub=onSnapshot(doc(db,'config',_verticalDocId('editais')),snap=>{
+    const d=snap.exists()?(snap.data()||{}):{};
+    S.editais.lista=Array.isArray(d.lista)?d.lista.filter(e=>e&&e.id):[];
+    S.editais.updatedAt=d.updatedAt||null;
+    S.editais.updatedBy=String(d.updatedBy||'');
+    S.editais.loaded=true;
+    if(S.produtosLoaded&&S.produtosView==='list'&&!S._editaisModalOpen)_proEditaisRefresh();
+  },err=>{console.warn('editais onSnapshot:',err);S.editais.loaded=true;});
+  // dexPrompt
+  _proDexCfgUnsub=onSnapshot(doc(db,'config',_verticalDocId('dexPrompt')),snap=>{
+    const d=snap.exists()?(snap.data()||{}):{};
+    if(!S._dexConfigDirty){
+      const legacy=String(d.template||'');
+      S.dexConfig.templateGeral=String(d.templateGeral||legacy||'');
+      S.dexConfig.templateSuporte=String(d.templateSuporte||legacy||'');
+      S.dexConfig.templateVendas=String(d.templateVendas||legacy||'');
+      S.dexConfig.templateMarketing=String(d.templateMarketing||legacy||'');
+      S.dexConfig.pdfsGeral=Array.isArray(d.pdfsGeral)?d.pdfsGeral:[];
+      S.dexConfig.pdfsSuporte=Array.isArray(d.pdfsSuporte)?d.pdfsSuporte:[];
+      S.dexConfig.pdfsVendas=Array.isArray(d.pdfsVendas)?d.pdfsVendas:[];
+      S.dexConfig.pdfsMarketing=Array.isArray(d.pdfsMarketing)?d.pdfsMarketing:[];
+      S.dexConfig.modelo=String(d.modelo||'haiku');
+      S.dexConfig.maxTokens=Number(d.maxTokens)||1024;
+      S.dexConfig.updatedAt=d.updatedAt||null;
+      S.dexConfig.updatedBy=String(d.updatedBy||'');
+    }
+    S.dexConfig.loaded=true;
+    if(S.dexAberto&&S._dexConfigOpen)_proDexRender();
+  },err=>{console.warn('dexPrompt onSnapshot:',err);S.dexConfig.loaded=true;});
+}
+
 window.initProdutos=function(){
-  if(!_proCatUnsub){
-    _proCatUnsub=onSnapshot(doc(db,'config','catalogoConfig'),snap=>{
-      if(snap.exists()){
-        const d=snap.data()||{};
-        S.catalogoConfig.publicosAlvo=Array.isArray(d.publicosAlvo)?d.publicosAlvo.filter(Boolean):[];
-        S.catalogoConfig.provasAlvo=Array.isArray(d.provasAlvo)?d.provasAlvo.filter(Boolean):[];
-        S.catalogoConfig.loaded=true;
-      }else{
-        S.catalogoConfig.publicosAlvo=[];S.catalogoConfig.provasAlvo=[];S.catalogoConfig.loaded=true;
-        _proSeedCatalogoConfigIfNeeded();
-      }
-      // Re-render se já tava renderizando edição (pra refletir opções novas no picker)
-      if(S.produtosLoaded&&(S.produtosView==='edit'||S.produtosView==='new'))_proRefreshPickerIfOpen();
-    },err=>{console.warn('catalogoConfig onSnapshot:',err);S.catalogoConfig.loaded=true;});
-  }
-  if(!_proJornadaUnsub){
-    _proJornadaUnsub=onSnapshot(doc(db,'config','jornadaCliente'),snap=>{
-      if(snap.exists()){
-        const d=snap.data()||{};
-        // Não sobrescreve se o user tem alterações não salvas
-        if(!S._jornadaDirty){
-          S.jornadaCliente.texto=String(d.texto||'');
-          S.jornadaCliente.videoUrl=String(d.videoUrl||'');
-          S.jornadaCliente.imagemUrl=String(d.imagemUrl||'');
-          S.jornadaCliente.imagemPath=String(d.imagemPath||'');
-          S.jornadaCliente.updatedAt=d.updatedAt||null;
-          S.jornadaCliente.updatedBy=String(d.updatedBy||'');
-          // Verifica se há rascunho local divergente — oferece restaurar via banner
-          if(!S.jornadaCliente.loaded)setTimeout(_proJornadaDraftCheck,0);
-        }
-      }
-      S.jornadaCliente.loaded=true;
-      if(S.produtosLoaded&&S.produtosView==='list'&&!S._jornadaDirty)_proJornadaRefresh();
-    },err=>{console.warn('jornadaCliente onSnapshot:',err);S.jornadaCliente.loaded=true;});
-  }
-  if(!_proEditaisUnsub){
-    _proEditaisUnsub=onSnapshot(doc(db,'config','editais'),snap=>{
-      const d=snap.exists()?(snap.data()||{}):{};
-      S.editais.lista=Array.isArray(d.lista)?d.lista.filter(e=>e&&e.id):[];
-      S.editais.updatedAt=d.updatedAt||null;
-      S.editais.updatedBy=String(d.updatedBy||'');
-      S.editais.loaded=true;
-      if(S.produtosLoaded&&S.produtosView==='list'&&!S._editaisModalOpen)_proEditaisRefresh();
-    },err=>{console.warn('editais onSnapshot:',err);S.editais.loaded=true;});
-  }
+  // Listeners por vertical: só sintoniza se uma vertical foi escolhida
+  if(S.verticalAtual&&!_proCatUnsub)_proRebindVerticalListeners();
   _ensureSlackTimeListener();
-  if(!_proDexCfgUnsub){
-    _proDexCfgUnsub=onSnapshot(doc(db,'config','dexPrompt'),snap=>{
-      const d=snap.exists()?(snap.data()||{}):{};
-      // Não sobrescreve se o user está editando (dirty)
-      if(!S._dexConfigDirty){
-        // Compat: se ainda existe o campo legado 'template' (versão anterior),
-        // usa ele como fallback inicial pros perfis até o user salvar específicos
-        const legacy=String(d.template||'');
-        S.dexConfig.templateGeral=String(d.templateGeral||legacy||'');
-        S.dexConfig.templateSuporte=String(d.templateSuporte||legacy||'');
-        S.dexConfig.templateVendas=String(d.templateVendas||legacy||'');
-        S.dexConfig.templateMarketing=String(d.templateMarketing||legacy||'');
-        S.dexConfig.pdfsGeral=Array.isArray(d.pdfsGeral)?d.pdfsGeral:[];
-        S.dexConfig.pdfsSuporte=Array.isArray(d.pdfsSuporte)?d.pdfsSuporte:[];
-        S.dexConfig.pdfsVendas=Array.isArray(d.pdfsVendas)?d.pdfsVendas:[];
-        S.dexConfig.pdfsMarketing=Array.isArray(d.pdfsMarketing)?d.pdfsMarketing:[];
-        S.dexConfig.modelo=String(d.modelo||'haiku');
-        S.dexConfig.maxTokens=Number(d.maxTokens)||1024;
-        S.dexConfig.updatedAt=d.updatedAt||null;
-        S.dexConfig.updatedBy=String(d.updatedBy||'');
-      }
-      S.dexConfig.loaded=true;
-      if(S.dexAberto&&S._dexConfigOpen)_proDexRender();
-    },err=>{console.warn('dexPrompt onSnapshot:',err);S.dexConfig.loaded=true;});
-  }
   if(_proUnsub)return _proRender();
   _proUnsub=onSnapshot(collection(db,'produtos'),snap=>{
     S.produtos=snap.docs.map(d=>({id:d.id,...d.data()}));
@@ -28773,7 +28835,7 @@ async function _proSeedCatalogoConfigIfNeeded(){
   if(!_proCanEdit())return;
   _proCatSeeded=true;
   try{
-    const ref=doc(db,'config','catalogoConfig');
+    const ref=doc(db,'config',_verticalDocId('catalogoConfig'));
     const cur=await getDoc(ref);
     if(cur.exists())return;
     await setDoc(ref,{
@@ -28791,7 +28853,7 @@ async function _proAddCatalogoOption(tipo,valor){
   const v=String(valor||'').trim();
   if(!v)throw new Error('vazio');
   const field=(tipo==='publicoAlvo')?'publicosAlvo':'provasAlvo';
-  const ref=doc(db,'config','catalogoConfig');
+  const ref=doc(db,'config',_verticalDocId('catalogoConfig'));
   const snap=await getDoc(ref);
   if(!snap.exists()){
     await setDoc(ref,{
@@ -28808,16 +28870,71 @@ async function _proAddCatalogoOption(tipo,valor){
 
 function _proRender(){
   const root=document.getElementById('pro-root');if(!root)return;
+  // Antes de qualquer view de produto, seletor de vertical (se nenhuma escolhida)
+  if(S.produtosView==='verticals'||!S.verticalAtual)return _proRenderVerticals(root);
   if(!S.produtosLoaded){root.innerHTML='<div class="ld" style="padding:24px"><div class="sp"></div> Carregando catálogo...</div>';return;}
   if(S.produtosView==='detail')return _proRenderDetail(root);
   if(S.produtosView==='edit'||S.produtosView==='new')return _proRenderEdit(root);
   return _proRenderList(root);
 }
 
+// Tela inicial — 4 cards das verticais com estilo home-card (tilt 3D, glow
+// follow-cursor, shine sweep, borda gradient). Click em um card seleciona
+// a vertical e abre o catálogo dela.
+function _proRenderVerticals(root){
+  const cardsHtml=VERTICAIS.map((v,i)=>{
+    return `<button type="button" class="home-card reveal pro-vert-home-card" data-tilt data-vert-id="${v.id}" style="--c:${v.cor};--c2:${v.cor2||v.cor};transition-delay:${i*80}ms" onclick="proSelectVertical('${v.id}')">
+      <div class="home-card-cover pro-vert-home-cover" style="background:linear-gradient(135deg,color-mix(in srgb,${v.cor} 50%, #000) 0%,#000 80%)">
+        <span class="home-card-badge">${v.ico} ${_proEsc(v.tag||v.nome.toUpperCase())}</span>
+        <span class="pro-vert-home-ico" aria-hidden="true">${v.ico}</span>
+      </div>
+      <div class="home-card-body">
+        <h3 class="home-card-title">${_proEsc(v.nome)}</h3>
+        <p class="home-card-sub">${_proEsc(v.subtitulo||'')}</p>
+        <span class="home-card-cta">Abrir catálogo <span class="home-card-cta-arrow">→</span></span>
+      </div>
+    </button>`;
+  }).join('');
+  root.innerHTML=`
+    <div class="pro-vert-wrap">
+      <div class="pro-vert-header">
+        <h2 class="pro-vert-titulo">Catálogo de Produtos</h2>
+        <p class="pro-vert-subtitulo">Escolha a vertical pra acessar o catálogo correspondente</p>
+      </div>
+      <div class="pro-vert-grid">${cardsHtml}</div>
+    </div>
+  `;
+  // Aplica tilt 3D + glow follow-cursor (mesmos handlers da home)
+  try{if(typeof _arosBindTilt==='function')_arosBindTilt();}catch(e){}
+  try{if(typeof _arosObserveReveal==='function')_arosObserveReveal();else document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));}catch(e){document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));}
+}
+
+window.proSelectVertical=(id)=>{
+  if(!VERTICAIS.find(v=>v.id===id))return;
+  S.verticalAtual=id;
+  try{localStorage.setItem('aros.catalogo.vertical',id);}catch(e){}
+  S.produtosView='list';
+  // Re-sintoniza listeners da vertical escolhida (jornada/editais/catalogoConfig/dexPrompt)
+  _proRebindVerticalListeners();
+  _proRender();
+};
+
+window.proVoltarVerticais=()=>{
+  S.verticalAtual=null;
+  try{localStorage.removeItem('aros.catalogo.vertical');}catch(e){}
+  S.produtosView='verticals';
+  _proRender();
+};
+
 function _proRenderList(root){
   const canEdit=_proCanEdit();
-  // Lista filtrada
-  let items=S.produtos.slice();
+  // Lista filtrada — primeiro filtra pela vertical atual
+  const vert=S.verticalAtual||'anestreview';
+  let items=S.produtos.slice().filter(p=>{
+    // Produto sem campo `vertical` é tratado como 'anestreview' (legado, antes da feature)
+    const pv=p.vertical||'anestreview';
+    return pv===vert;
+  });
   if(!canEdit)items=items.filter(p=>p.status!=='rascunho');
   const qRaw=(S.produtosBusca||'').trim();
   if(qRaw){
@@ -28850,14 +28967,22 @@ function _proRenderList(root){
 
   const dexBtnOn=S.dexAberto?' on':'';
   const btnCadastrar=canEdit?`<button class="btn btn-p pro-btn-cadastrar" onclick="proNovo()">＋ Cadastrar Produto</button>`:'';
+  const vertObj=_verticalById(vert);
+  const avatarNome=vertObj.avatar;
+  const avatarArtigo=vertObj.artigo||'ao';
   root.innerHTML=`
+    <div class="pro-vert-breadcrumb" style="--vert-cor-atual:${vertObj.cor}">
+      <button class="pro-vert-breadcrumb-btn" type="button" onclick="proVoltarVerticais()" title="Voltar pra seleção de vertical">← Verticais</button>
+      <span>/</span>
+      <span class="pro-vert-breadcrumb-atual">${vertObj.ico} ${_proEsc(vertObj.nome)}</span>
+    </div>
     <div class="pro-header">
-      <h3 class="pro-title">Catálogo de Produtos</h3>
+      <h3 class="pro-title">Catálogo de Produtos · ${_proEsc(vertObj.nome)}</h3>
     </div>
     <div class="pro-actions">
       ${btnCadastrar}
-      <button class="pro-dex-btn${dexBtnOn}" onclick="proDexToggle()" title="Pergunte ao Dex sobre o catálogo">
-        <span class="pro-dex-btn-ico">🤖</span> <span class="pro-dex-btn-label">Pergunte ao Dex</span>
+      <button class="pro-dex-btn${dexBtnOn}" onclick="proDexToggle()" title="Pergunte ${avatarArtigo} ${_proEscAttr(avatarNome)} sobre o catálogo">
+        <span class="pro-dex-btn-ico">🤖</span> <span class="pro-dex-btn-label">Pergunte ${avatarArtigo} ${_proEsc(avatarNome)}</span>
       </button>
     </div>
     <div class="pro-search-row">
@@ -29173,7 +29298,7 @@ window.proEditaisModalSalvar=async()=>{
       // novo
       novaLista.push({id:_proUid(),nomeProva:nome,ano,info,updatedAt:new Date().toISOString(),updatedBy:user});
     }
-    await setDoc(doc(db,'config','editais'),{lista:novaLista,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    await setDoc(doc(db,'config',_verticalDocId('editais')),{lista:novaLista,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
     if(typeof audit==='function')audit(e.id?'EDITAL_EDITADO':'EDITAL_CRIADO',{collection:'config',id:'editais'},{after:{nomeProva:nome,ano}});
     S._editaisModalOpen=false;
     S._editaisEditando=null;
@@ -29193,7 +29318,7 @@ window.proEditaisRemover=async(id)=>{
   try{
     const user=(S.currentUser&&S.currentUser.username)||'?';
     const novaLista=S.editais.lista.filter(x=>x.id!==id);
-    await setDoc(doc(db,'config','editais'),{lista:novaLista,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    await setDoc(doc(db,'config',_verticalDocId('editais')),{lista:novaLista,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
     if(typeof audit==='function')audit('EDITAL_REMOVIDO',{collection:'config',id:'editais'},{after:{nomeProva:lbl}});
     S._editalAbertos.delete(id);
     _proSaveFeedback('ok');
@@ -29204,9 +29329,15 @@ window.proEditaisRemover=async(id)=>{
 };
 
 window.proToggleJornada=()=>{
-  S._jornadaOpen=!S._jornadaOpen;
+  const eraAberto=!!S._jornadaOpen;
+  S._jornadaOpen=!eraAberto;
   const el=document.querySelector('#tab-produtos [data-jornada-disc]');
   if(el)el.classList.toggle('open',!!S._jornadaOpen);
+  // Auto-save ao fechar: se tinha mudanças não salvas, dispara o save em background
+  if(eraAberto&&S._jornadaDirty&&_proCanEdit()){
+    // Não bloqueia o toggle — save acontece em paralelo
+    _proJornadaSalvar();
+  }
 };
 
 window._proJornadaSetTexto=(html)=>{
@@ -29343,7 +29474,7 @@ window._proJornadaSalvar=async()=>{
       updatedAt:serverTimestamp(),
       updatedBy:user
     };
-    await setDoc(doc(db,'config','jornadaCliente'),payload,{merge:true});
+    await setDoc(doc(db,'config',_verticalDocId('jornadaCliente')),payload,{merge:true});
     if(typeof audit==='function')audit('JORNADA_CLIENTE_SALVA',{collection:'config',id:'jornadaCliente'},{after:{hasTexto:!!payload.texto,hasVideo:!!payload.videoUrl,hasImagem:!!payload.imagemUrl}});
     S._jornadaDirty=false;
     // Limpa rascunho local — agora está oficialmente salvo no servidor
@@ -29428,10 +29559,12 @@ function _proDexRender(){
     ?'Faça uma pergunta de continuação…'
     :'Ex: Qual produto serve pra TEA 2ª fase e inclui mentoria?';
 
+  const _vAvatar=_verticalAvatar(S.verticalAtual||'anestreview');
+  const _vNome=_verticalNome(S.verticalAtual||'anestreview');
   c.innerHTML=`
     <div class="pro-dex-panel">
       <div class="pro-dex-head">
-        <div class="pro-dex-title"><span class="pro-dex-title-ico">🤖</span> Dex · Assistente do Catálogo MedReview</div>
+        <div class="pro-dex-title"><span class="pro-dex-title-ico">🤖</span> ${_proEsc(_vAvatar)} · Assistente do Catálogo ${_proEsc(_vNome)}</div>
         <div class="pro-dex-head-actions">
           ${novaBtn}
           ${cfgBtn}
@@ -29697,7 +29830,7 @@ window._proDexConfigPdfUpload=async(perfil,fileInput)=>{
     };
     atuais.push(novo);
     // Escreve direto no Firestore (não usa draft — PDFs commitam imediatamente)
-    await setDoc(doc(db,'config','dexPrompt'),{[campo]:atuais,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    await setDoc(doc(db,'config',_verticalDocId('dexPrompt')),{[campo]:atuais,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
     if(typeof audit==='function')audit('DEX_PDF_ANEXADO',{collection:'config',id:'dexPrompt'},{after:{perfil,arquivo:file.name,sizeBytes:file.size}});
     _proSaveFeedback('ok');
   }catch(e){
@@ -29719,7 +29852,7 @@ window._proDexConfigPdfRemove=async(perfil,idx)=>{
   atuais.splice(idx,1);
   try{
     const user=S.currentUser?.username||'?';
-    await setDoc(doc(db,'config','dexPrompt'),{[campo]:atuais,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    await setDoc(doc(db,'config',_verticalDocId('dexPrompt')),{[campo]:atuais,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
     // Best-effort: apaga do Storage
     if(alvo.path){
       try{await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,alvo.path));}catch(e){console.warn('Falha ao remover do Storage:',e);}
@@ -29828,7 +29961,7 @@ window._proDexConfigSalvar=async()=>{
       updatedAt:serverTimestamp(),
       updatedBy:user
     };
-    await setDoc(doc(db,'config','dexPrompt'),payload,{merge:true});
+    await setDoc(doc(db,'config',_verticalDocId('dexPrompt')),payload,{merge:true});
     if(typeof audit==='function')audit('DEX_PROMPT_SALVO',{collection:'config',id:'dexPrompt'},{after:{modelo:payload.modelo,maxTokens:payload.maxTokens,custom:{geral:!!payload.templateGeral,suporte:!!payload.templateSuporte,vendas:!!payload.templateVendas,marketing:!!payload.templateMarketing}}});
     S._dexConfigDirty=false;
     S._dexConfigDraft=null;
@@ -29908,7 +30041,7 @@ window.proDexAsk=async()=>{
     const resp=await fetch(DEX_ENDPOINT,{
       method:'POST',
       headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
-      body:JSON.stringify({pergunta,perfil:S.dexPerfil||'geral',historico:historicoPraEnviar})
+      body:JSON.stringify({pergunta,perfil:S.dexPerfil||'geral',vertical:S.verticalAtual||'anestreview',historico:historicoPraEnviar})
     });
     let data={};
     try{ data=await resp.json(); }catch(e){ /* resposta não-JSON */ }
@@ -32787,7 +32920,7 @@ window._proMsRemoveOption=async(valor)=>{
   if(!ok)return;
   try{
     const allKey=tipo==='publicoAlvo'?'publicosAlvo':'provasAlvo';
-    const ref=doc(db,'config','catalogoConfig');
+    const ref=doc(db,'config',_verticalDocId('catalogoConfig'));
     await updateDoc(ref,{[allKey]:arrayRemove(v)});
     // Otimista: atualiza local imediatamente
     S.catalogoConfig[allKey]=(S.catalogoConfig[allKey]||[]).filter(x=>x!==v);
@@ -33369,6 +33502,9 @@ window._proSalvar=async()=>{
   const payload={
     nome:String(p.nome||'').trim(),
     breveDescricao,
+    // Vertical: força a vertical atualmente selecionada (ou preserva existente).
+    // Produtos legados sem vertical ficam como 'anestreview' por compat.
+    vertical:S.verticalAtual||p.vertical||'anestreview',
     publicoAlvo:publicoAlvoArr,
     capa:p.capa||null,
     provasAlvo:Array.isArray(p.provasAlvo)?_proDedupe(p.provasAlvo):[],
