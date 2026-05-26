@@ -1605,6 +1605,55 @@ Listener `_ensureSlackTimeListener()` carrega sob demanda (chamado por `initProd
 - Listagem em viewport 900-1200px: `pro-row-tags` max-width 160px + badge `flex-shrink:0`. Mobile <480px: tags somem.
 - Mentoria no detalhe: `border-top` + título roxo `#a855f7` pra separar de "O que está incluído".
 
+### Escala (Gerenciamento online) — Controle, dropdowns colapsáveis, filtros, PDF, stats bar (2026-05-26)
+
+Refinamento UX completo da aba Gerenciamento (visão coord do simulado **online**, função `renderCoSched`). Tudo entregue na mesma sessão. Pacote:
+
+- **Coluna CONTROLE nova** entre PRESENÇA e AÇÕES: header "CONTROLE" com 3 sub-labels (Triagem · Áudio · Vídeo) e 3 checkboxes por linha. Persistência em `simulados/{simId}/alunos/{studentId}.controle.{triagem|audio|video}` (boolean). Audit log `CONTROLE_TOGGLE`. Função `window.toggleCtrl(simId, studentId, key, checked)` perto de `togglePresBtn` (linha ~23791). `S.students` carrega via spread, então `a.controle` aparece naturalmente no objeto do aluno.
+- **Scroll horizontal com colunas fixas**: grid do `.pos-hdr`/`.pos-row` migrou de `32px 130px 1fr 100px 110px 160px` (4 cols+aluno flex) para `32px 130px 240px 160px 110px 220px 160px` (7 cols com larguras explícitas + CONTROLE). Wrapper novo `.pos-tbl{overflow-x:auto;overflow-y:visible}` envolve `.pos-hdr` e o `<div>` das rows. **#, PROF e ALUNO** são `position:sticky;left:0|32px|162px;z-index:2-3`. Headers ficam acima (`z-index:3`) das body cells fixas.
+- **Sobreposição resolvida via `linear-gradient + bg opaco`**: as cores de status `--gl/--yl/--rl` são `rgba(...,.12)` (translúcidas por design). Cells sticky usavam `background:var(--row-bg, var(--bg2))` direto e mostravam conteúdo passando por baixo. Fix: `background-color:var(--bg2); background-image:linear-gradient(var(--row-bg,transparent),var(--row-bg,transparent))` — `bg2` opaco como base + overlay translúcido do status por cima. Mesmo visual, sem vazamento.
+- **Status colors via CSS var**: a inline style das `.pos-row` migrou de `style="background:var(--gl)"` para `style="--row-bg:var(--gl)"`. Cells filhos herdam via cascade do custom property. Hover faz `--row-bg:var(--bg3)`. `.pos-row.drag-target` também usa `--row-bg`. CSS base: `.pos-row{background:var(--row-bg,transparent)}`.
+- **Overflow:hidden nas células sticky** (`.pos-prof`, `.pos-aluno-sticky`, `.pos-hdr>div`): nome de aluno longo trunca com `text-overflow:ellipsis` em vez de vazar pro lado.
+
+**Rodadas colapsáveis (dropdown):**
+- `.rc` ganha classe `collapsed` que esconde `.pos-tbl`/`.cb` via `.rc.collapsed .pos-tbl,.rc.collapsed .cb{display:none}`. Default: **todas colapsadas** ao render.
+- Chevron `▾` no header (`.rh-toggle`) gira -90° via `transform` quando collapsed.
+- `.rh` ganha `onclick` que chama `toggleRoundCard(this.parentElement)`. Guard `if(event.target.closest('button'))return;` permite que botões dentro do header (presencial: "🎯 Configurar Estações", "+ Aluno") continuem funcionando sem disparar o collapse.
+- **Estado persistido em `S.coRoundsExpanded` (Set)** para sobreviver a re-renders do `onSnapshot` (que dispara em qualquer mudança de aluno). Cards têm `id` (`rc-{dia}-{rn}` online, `rc-pres-{dia}` presencial); render checa se o id está no Set pra decidir se aplica `collapsed`.
+- Botão **⊞ Expandir todos / ⊟ Recolher todos** na barra de filtros (id `btn-toggle-all-rounds`). Texto muda dinamicamente via `updateAllRoundsBtn()` baseado em quantos cards estão colapsados.
+- **Auto-expand quando filtra**: `applyCoFilters` automaticamente desmarca `collapsed` (e adiciona ao Set) em qualquer card que tenha pelo menos uma row visível após o filtro.
+- **Header limpo**: removido o display antigo `7/7 ✅5 🔄0` e `2 confirmados · 1 pendente` (online + presencial respectivamente — pedido do user pra ficar mais elegante).
+
+**Filtros redesenhados:**
+- Layout vertical: **Linha 1** = campo de busca por nome (full width). **Linha 2** = dois `<select>` lado a lado + botões à direita.
+- **Status dropdown** (`#co-status-filter`): Todos / Confirmado / Pendente / Aguardando troca / Ausente. Substituiu os 5 botões pill que tinham `class="status-filter"`. Mudança no comportamento: o filtro antigo apenas **dimming** (classe `dimmed` com opacity:.22+grayscale) as linhas que não batiam — agora **esconde** (`style.display='none'`).
+- **Presença dropdown** (`#co-presenca-filter`) **novo**: Todos / Presente / Ausente / Não marcado. Filtra por `aluno.presenca` (valor 'presente'/'ausente'/null). Combina AND com status + busca.
+- Helpers novos: `S.coPresencaFilter='all'`, `window.setCoStatusFilterSel(value)`, `window.setCoPresencaFilter(value)`. `setCoStatusFilter(filter,btn)` mantido pra compat mas sincroniza o select.
+- **Combinação AND** entre os 3 filtros (busca + status + presença). Linhas vagas (sem aluno) escondem quando qualquer filtro está ativo. Cards sem matches escondem.
+- **Botões à direita** na mesma linha dos dropdowns: **📄 Baixar PDF** + **⊞ Expandir todos / ⊟ Recolher todos**. `margin-left:auto` no wrapper joga ambos pra borda direita. PDF saiu do toolbar superior (que tinha `+ Aluno`, `⏰ Configurar Rodadas`, `⬇️ CSV`).
+
+**Bug fix crítico de mapeamento posição→aluno no filtro:**
+- `applyCoFilters` antes fazia `S.students.filter(...).sort((x,y)=>x.nome.localeCompare(...))` para encontrar o aluno daquela `.pos-row`. Render usa `sortByStatusThenName` — ordenação diferente. Resultado: filtro mostrava aluno errado quando havia students sem `posicao` setada.
+- Fix: usar exatamente `[...S.students.filter(s=>s.dia===dia&&s.rodada===rn&&s.status!=='absent')].sort(sortByStatusThenName)` igual ao render. Aplicado nos 3 lugares: render, filtro, export PDF.
+
+**Export PDF (substitui CSV):**
+- Função nova `window.exportEscalaPDF()`. CSV legado (`exportCSV`) removido. Botão `⬇️ CSV` no toolbar removido.
+- Abre `window.open('','_blank')` com HTML formatado + `<script>window.onload=()=>setTimeout(()=>window.print(),250)</script>` (literal `</script>` splitado com `</scr`+`ipt>` por causa do parser HTML). User salva como PDF via diálogo do navegador.
+- Conteúdo: **apenas Professor, Aluno, Status** agrupados por dia (`📅 Sábado`/`📅 Domingo`) + rodada (`Rodada N · HH:MM`). Estilo limpo black-on-white com border-collapse table, fonte sistema, `page-break-inside:avoid` nas tables.
+- **Posições com prof mas sem aluno** mostram nome do prof + célula mesclada `colspan="2"` com texto "Livre — sem aluno" em itálico cinza. Posições sem prof e sem aluno são puladas.
+- Suporta **presencial** (sem rodadas — lista corrida por dia, ordenada alfabeticamente, ausentes omitidos).
+- Sanitização HTML via helper `esc()` (substitui `&<>"'`).
+
+**Bug fix — ausentes na escala:**
+- Alunos com `status:'absent'` mas com `dia`/`rodada`/`posicao` ainda setados (data legacy: registros antigos antes da lógica de limpeza em `subResp`/`subRespCoord`) apareciam **duplicados** no schedule e no painel "Ausentes" abaixo.
+- Fix: adicionado `&&s.status!=='absent'` em todos os 3 `S.students.filter(s=>s.dia===dia&&s.rodada===rn)` (linhas ~21525 renderCoSched, ~23554 applyCoFilters, ~24479 exportEscalaPDF). Ausentes agora aparecem só no painel "Ausentes" e a vaga deles na rodada vira "vago".
+
+**Stats bar discreta (topo da Escala):**
+- Antes: 4 cards grandes (`.sg`/`.sc`/`.s-icon`/`.s-val`/`.s-lbl`) com emoji 20px + valor Fraunces 30px + label cinza. Ocupava muita altura.
+- Agora: **uma única barra horizontal** `.stats-bar` com 4 stats inline + separadores verticais sutis. Cada stat: `.stat-dot` (8×8px, cor por contexto, halo `box-shadow:0 0 0 3px color-mix(...)`) + `.stat-lbl` (11px uppercase letter-spacing) + `.stat-val` (Space Grotesk 20px). Padding `10px 20px`. Em <640px wrap pra coluna.
+- IDs preservados (`s-t`, `s-c`, `s-a`, `s-s`) — toda lógica JS de update segue funcionando sem mudança.
+- CSS antigo `.sg/.sc/.s-icon/...` mantido (dead code) para evitar alterar outros lugares; só a markup foi trocada.
+
 ### Firebase Console / Project Settings (configurado 2026-05-21)
 
 - **Idioma do template**: Português (Brasil).
