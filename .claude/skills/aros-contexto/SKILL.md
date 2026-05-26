@@ -222,9 +222,49 @@ config/{cfgId}
   │   coloca tabs novas (TAB_GROUPS adicionadas no código) no grupo original ou no último.
   ├ simExtra                        — { linkPagoAluno, linkPagoExterno, linkGratuito,
   │                                      slackWebhook, listaVigenteId, alunosGratuitos[] }
-  └ catalogoConfig                  — listas mestre do Catálogo de Produtos (multi-select)
-                                       { publicosAlvo:[str], provasAlvo:[str] }
-                                       Seed automático na primeira abertura da aba (presets).
+  ├ catalogoConfig                  — listas mestre do Catálogo de Produtos (multi-select)
+  │                                    { publicosAlvo:[str], provasAlvo:[str] }
+  │                                    Seed automático na primeira abertura da aba (presets).
+  ├ datasImportantes[_{vertical}]   — Calendário de eventos da vertical (ver §"Datas Importantes")
+  │                                    { lista:[{id,tipo,titulo,modo,dataISO,horario,dataInicioISO,
+  │                                              dataFimISO,descricao,link,escopoId,updatedAt,updatedBy}],
+  │                                      escopos:[{id,nome,criadoEm,criadoPor}],
+  │                                      updatedAt, updatedBy }
+  │                                    AnestReview sem sufixo (legacy); demais com `_oftreview` etc.
+  └ datasImportantesTipos           — Tipos de evento das Datas Importantes (GLOBAL, sem sufixo vertical)
+                                       { lista:[{id,nome,icone,cor,system,criadoEm,criadoPor}],
+                                         deletedSystemIds:[str],
+                                         updatedAt, updatedBy }
+                                       4 tipos system (prova,revisao,liberacao,inscricao) editáveis
+                                       via override; deletáveis via deletedSystemIds tombstone.
+
+adminUids/{firebaseAuthUid}        — Lista de UIDs com privilégio admin (gate isAdmin nas rules).
+  { email, addedAt, addedBy }       Bootstrap hardcoded em rules pro 1º admin
+                                    (Tiarlles, UID `nF4lKfJXOyPyx6btGkV7Lj0DkQr1`).
+                                    Auto-criado no login Google se UID bate com bootstrap.
+
+alunosAprovados/{chaveAluno}        — Base de alunos comprados via Hotmart (migrada do MED-Review).
+  { chaveAluno (= cpf || email || nomeNorm),     ADMIN ONLY (PII: CPF, email, telefone).
+    nome, nomeNorm, cpf, email, telefone,        15.540 docs em prod.
+    produtos:[{produtoId, produtoNome, vertical, Usada por Cruzar Lista (Administração).
+               transacao, status, dataCompra}],
+    primeiraCompra, ultimaCompra,
+    criadoEm, atualizadoEm }
+
+provasAprovados/{provaId}           — Provas das bancas (TEA, TSA, R1, etc).
+  { vertical, modalidade, ativa,    Read isAuth (catálogo lê pra mostrar Aprovações);
+    criadoEm, atualizadoEm }        Write isAdmin (cadastro em Cruzar Lista).
+
+resultadosAprovados/{resultadoId}   — Resultado de aprovação de uma prova num ano específico.
+  { provaId, ano, totalLista,       Read isAuth; Write isAdmin.
+    totalNossos, percentual,        listaSnapshot só existe quando gravado via cruzamento
+    vertical, fonte, observacao,    (não nos legados da migração nem nos criados manualmente).
+    listaSnapshot?:{
+      aprovados:[{nomeLista,nomeAluno,score,vinculacaoManual,confirmadoManual}],
+      semCorrespondencia:[{nomeLista,score}],
+      totalLista, totalAprovadosEfetivo, capturadoEm
+    },
+    criadoEm, atualizadoEm }
 
 produtos/{produtoId}                — Catálogo Interno de Produtos (descritivo p/ marketing/vendas/suporte)
   {
@@ -1293,6 +1333,154 @@ Nova seção colapsável "📋 Editais" entre Jornada do Cliente e a lista de pr
 - `formatarEditais()` em `dex.js` exporta cada edital como `### {Nome} — Ano: {ano}\n{info strippado}`.
 - Bloco `=== EDITAIS CADASTRADOS (${verticalNome}) ===` injetado no system prompt, com **ano atual** (`new Date().getFullYear()`) explícito.
 - Regra de estilo no `ESTILO_UNIVERSAL`: se a resposta usar info de edital de ano anterior ao atual, começa avisando ("Com base no edital de XXXX...").
+
+### Catálogo de Produtos — Datas Importantes (2026-05-26)
+
+Nova seção colapsável "📆 Datas importantes" logo abaixo de Editais. Calendário de eventos da vertical (provas, revisões, liberações, prazos) com link/descrição. Dex/Íris/Thor/Lux lêem essas datas pra responder perguntas tipo "qual o link da revisão extrema TEA?", "quando é a próxima prova?".
+
+**UI:**
+- Caixa estilo `pro-jornada-disc` com toggle.
+- Toolbar: `＋ Cadastrar evento` · `📅 Ver calendário` · `⚙ Gerenciar tipos` (modais).
+- **Barra de filtro de escopo** acima dos cards: `[Todos] [TEA] [TSA] [MEs] [Outros] [Sem escopo] ⚙` — afeta lista E calendário ao mesmo tempo. Esconde a barra se não há escopos cadastrados (deixa só o ⚙).
+- Cards colapsáveis: header com ícone do tipo + título + data formatada + horário + badge do tipo + badge do escopo (roxo) + ações; body com descrição (pre-wrap) + link clicável.
+- Card sem descrição/link fica não-clicável (caret cinza desabilitado).
+- Eventos passados ocultos por padrão; botão "Ver passados (N)" no rodapé expande.
+- Calendário tela cheia (modal `pro-dimp-cal-*`): grid 7 colunas, navegação `←/→/Hoje`, chips dos eventos por dia (até 3 + "+N eventos" com popover). Período aparece SÓ no dia de início.
+- Popup do evento sobre o calendário (sem fechar o grid): backdrop translúcido + card com ícone/badge/data/horário/escopo/descrição/link + botões Editar/Remover/Fechar. Esc inteligente: fecha popup primeiro; se já fechado, fecha calendário.
+
+**Modal de cadastro/edição:**
+- Tipo (chips com ícone+cor) → botão "+ Novo tipo" (subform inline com input nome, grid compacta de ícones curados + **input livre de emoji personalizado**, paleta de 8 cores) → botão "⚙ Gerenciar tipos".
+- **Escopo** (chips single-select roxos, incluindo "Sem escopo") → botão "+ Novo" inline → "⚙ Gerenciar".
+- Título obrigatório.
+- Modo **pontual** (data + horário opcional) ou **período** (data início + fim, fim ≥ início).
+- Descrição (textarea, não rich-text, max no servidor).
+- Link (URL, validado pra começar com `http://` ou `https://`).
+
+**Tipos de evento (system + custom + override + tombstone):**
+- 4 system fixos hardcoded em `PRO_DIMP_TIPOS_SYSTEM`: `prova` 📅 #ef4444, `revisao` 📚 #2563eb, `liberacao` 🎁 #16a34a, `inscricao` 📝 #e46d0a.
+- Persiste em `config/datasImportantesTipos` (GLOBAL, sem sufixo de vertical) com shape `{lista:[{id,nome,icone,cor,system,criadoEm,criadoPor}], deletedSystemIds:[], updatedAt, updatedBy}`.
+- `_proDimpTiposAll()`: começa com defaults → remove `deletedSystemIds` → aplica overrides de `lista` (se id bate com system, substitui nome/icone/cor mantendo `system:true`) → appenda custom.
+- **TUDO renomeável/removível** (system inclusive). Renomear "prova": cria entry em `lista` com `id:'prova'` e novos campos. Remover "prova": adiciona `'prova'` em `deletedSystemIds`.
+- Eventos cujo tipo foi deletado: render mostra "❓ (tipo removido)" — não quebra.
+- Painel "Gerenciar tipos": lista TODOS (system + custom + overrides), botões ✏️ Editar (subform pré-preenchido) + 🗑 Remover (confirm com count de eventos afetados).
+- Ícone personalizado: input de emoji (max 8 chars — cobre compostos tipo 👨‍⚕️). Limpa highlight da grade ao usar campo livre. Grade reduzida pra 8 cols x 16px (`.pro-icon-grid-sm`).
+
+**Escopos (por vertical, 1 por evento):**
+- Persiste no MESMO doc `config/datasImportantes_{vertical}` campo `escopos:[{id,nome,criadoEm,criadoPor}]`.
+- Eventos têm `escopoId: string|null`. Vazio = "Sem escopo".
+- Painel "Gerenciar escopos": lista com count de eventos por escopo, renomear inline + remover (confirm com count). Remover zera `escopoId` em eventos afetados no MESMO write; se filtro vigente apontava pro removido, reseta pra "todos".
+- Filtro NÃO persiste entre sessões (reset em page load + `proSelectVertical` + `proVoltarVerticais`).
+- Cor visual dos escopos: roxo `#a855f7` (distinção do tipo que tem cor variável).
+- Nome duplicado (case-insensitive) bloqueado.
+
+**Persistência principal (eventos):**
+- `config/datasImportantes_{vertical}` via `_verticalDocId('datasImportantes')` (sem sufixo pra AnestReview, com sufixo pra outras).
+- Shape: `{lista:[{id,tipo,titulo,modo,dataISO?,horario?,dataInicioISO?,dataFimISO?,descricao,link,escopoId,updatedAt,updatedBy}], escopos:[...], updatedAt, updatedBy}`.
+- Listener `onSnapshot` em `_proRebindVerticalListeners` re-pinta lista e calendário (se abertos) respeitando filtro.
+- Estados de modal/filtro resetados em troca de vertical pra evitar contaminação cruzada.
+- Audit: `DATA_IMP_CRIADA/EDITADA/REMOVIDA`, `DATA_IMP_TIPO_CRIADO/EDITADO/REMOVIDO`, `DATA_IMP_ESCOPO_CRIADO/EDITADO/REMOVIDO`.
+
+**Contexto pro Dex (Cloud Function `dex.js`):**
+- Lê 3 docs novos por vertical no Promise.all junto com produtos/jornada/editais: `datasImportantes_{vertical}`, `datasImportantesTipos` (global), e dentro do primeiro vem `escopos`.
+- `formatarDatasImportantes(lista, tipos, deletedSystemIds, escopos)`:
+  - Aplica tombstones + overrides na resolução de tipo (mesma lógica do front).
+  - Separa eventos em **FUTUROS** e **JÁ PASSARAM** (comparação por string ISO `YYYY-MM-DD`).
+  - Cada evento: `### {ícone} {título} [{nome do tipo}]` + linhas `- **Data:** DD/MM/YYYY [a DD/MM/YYYY] [_(já passou)_]` · `- **Horário:** HH:MM` · `- **Escopo:** Nome` · `- **Descrição:** ...` · `- **Link:** ...`.
+- Bloco `=== DATAS IMPORTANTES ({verticalNome}) ===` injetado no system prompt com **hoje em pt-BR** explícito (`new Date().toLocaleDateString('pt-BR')`). Header instrui IA a citar link quando houver e diferenciar futuros vs passados.
+- Mantém otimização de prompt caching (instruções estáticas vêm primeiro).
+
+### Cruzar Lista — aba nova em Administração + Aprovações no Catálogo (2026-05-26)
+
+Aba **🎯 Cruzar Lista** (`tab-cruzarLista`, grupo Administração, `ADMIN_ONLY_TABS`). Substitui o projeto MED-Review externo (Python/FastAPI/Postgres no Render+Neon) que está sendo aposentado. Dados migrados: 15.540 alunos + 4 provas + 4 resultados Postgres→Firestore.
+
+**Auth model:** coleção `adminUids/{uid}` cadastra UIDs com privilégio admin. Rule `isAdmin()` = `isAuth() && exists(/adminUids/$(uid))`. Bootstrap único hardcoded em rules pro 1º admin (UID `nF4lKfJXOyPyx6btGkV7Lj0DkQr1` = Tiarlles). Listener `onAuthStateChanged` auto-cria o doc se UID bate e doc não existe.
+
+**Fluxo principal:**
+1. Cola lista de aprovados (texto OU upload PDF — pdf.js Mozilla lazy-loaded via CDN)
+2. Filtro só por vertical (não por produto — simplificado)
+3. Click "🎯 Cruzar (N nomes)"
+4. **Web Worker** roda fuzzy match em background (não trava UI):
+   - Normalização: NFD + remove diacrits + lowercase + replace `(XX)` → ` ` (sufixo de estado) + replace não-alfanumérico → ` ` + collapse spaces + remove stopwords `[de,da,do,dos,das,e,del]`
+   - `token_set_ratio` (rapidfuzz/fuzzywuzzy adaptado) com Levenshtein 2-row
+   - **CRÍTICO:** base recalcula `nomeNorm` em runtime via `_czNorm(a.nome)` em vez de usar o `nomeNorm` salvo. Por quê: a migração gravou nomeNorm sem remover stopwords (assimetria). Recalcular garante simetria de normalização entre lista e base.
+   - Score ≥92 = aprovado, 82-91 = duvidoso, <82 = sem correspondência
+5. Tela de resultado em 3 seções colapsáveis + métrica gigante de %:
+   - **% efetivo** = (aprovados não-descartados + duvidosos confirmados + sem-corresp confirmados/vinculados) / totalLista × 100
+
+**Ações por categoria de match:**
+- **Aprovados:** 🗑 Descartar / ↩ Restaurar / 🛍️ Produtos / 🔍 Diagnosticar
+- **Duvidosos:** ✓ Confirmar / 🗑 Descartar / 🛍️ Produtos / 🔍 Diagnosticar
+- **Sem correspondência:** ✅ Confirmar como aprovado / 🔍 Buscar aluno na base (vincula manual) / ❌ Descartar / 🔍 Diagnosticar
+
+**🔍 Modo Diagnóstico:** painel com nome original, normalização, tokens, top 10 candidatos com score + tokens + sets `inter`/`diffA`/`diffB` + botão "🔗 Vincular este". Essencial pra debugar.
+
+**🛍️ Produtos do aluno:** painel com nome/email/CPF (formatado XXX.XXX.XXX-XX) + lista de compras com badge da vertical, nome produto, data, status.
+
+**🔍 Consultar aluno (lupa global):** botão no topo da aba, abre busca livre (nome/email/CPF) — até 30 resultados, click abre painel de Produtos do aluno. Consulta passiva (sem audit).
+
+**Histórico de aprovações** (segunda view da aba, antes "Histórico de provas"):
+- Filtro por vertical
+- Provas agrupadas por vertical (na ordem de `VERTICAIS`)
+- Tabela `Ano | Nossos | Lista | % | ações` (campo `Edição` removido a pedido)
+- Último ano de cada prova destacado com badge "📌 Mais recente"
+- Botões ✏️ Editar prova/resultado + 🗑 Remover + 📋 Ver lista (só se `listaSnapshot` existir)
+- ➕ Nova prova (inline) e + Novo resultado
+
+**Snapshot da lista** (`resultadosAprovados.listaSnapshot`):
+- Gravado SEMPRE quando salva resultado via fluxo de cruzamento (em qualquer ano, coexistem).
+- NÃO existe nos resultados legados da migração (Postgres não tinha) nem nos criados manualmente via "+ Novo resultado".
+- Conteúdo: `{aprovados:[{nomeLista,nomeAluno,score,vinculacaoManual,confirmadoManual}], semCorrespondencia:[{nomeLista,score}], totalLista, totalAprovadosEfetivo, capturadoEm}`.
+- Modal "📋 Ver lista" no histórico mostra read-only.
+
+**Fix crítico de matching (caso "Arthur de Paula Melgaço (MG)"):**
+- Listas de bancas trazem sufixo de estado `(MG)`, `(ES)`. Sem o fix, vira token "mg" que reduz score (~91 em vez de 100).
+- Combinado com a assimetria nomeNorm (com vs sem stopwords) → falso "duvidoso" em match perfeito.
+- Solução: remover `(...)` antes da normalização + recalcular nomeNorm da base em runtime. Score volta a 100 em casos idênticos.
+
+**Audit actions:**
+- `CRUZAR_LISTA_EXECUTADO`, `CRUZAR_DESCARTOU_APROVADO`, `CRUZAR_CONFIRMOU_MANUAL`, `CRUZAR_VINCULOU_MANUAL`, `CRUZAR_LISTA_SNAPSHOT_GRAVADO`
+- `PROVA_APROVADOS_CRIADA/EDITADA/REMOVIDA`
+- `RESULTADO_APROVADOS_CRIADO/EDITADO/REMOVIDO`
+
+### Webhook Hotmart unificado — aposentadoria do MED-Review (2026-05-26)
+
+A Cloud Function `hotmartWebhook` (`cloud-function-hotmart/index.js`) agora processa **ambos** os fluxos no mesmo POST: o legado de `solicitacoesExtra` (xcod, Simulado Extra) E o novo de `alunosAprovados` (base completa pra Cruzar Lista). O projeto MED-Review externo (Python/FastAPI no Render + Postgres no Neon) foi **aposentado** — webhook do Render removido na Hotmart, serviço Render deletado, Neon mantido por ~30 dias como backup.
+
+**Módulo `cloud-function-hotmart/hotmart-alunos.js`:**
+- `extractAlunoData(body)` — extrai nome/email/CPF/telefone/produto/transação/data do payload Hotmart (cobre v1.x e v2.0.0, múltiplos fallbacks de path: `data.buyer`, `body.buyer`, `purchase.buyer.*`, etc).
+- `deriveVertical(produtoNome)` — keyword match: `medreview` (med-review-r1, `\br1\b`), `anestreview` (anest), `ortopreview` (ortop), `oftreview` (oft).
+- `calcChaveAluno({cpf,email,nome})` — precedência `cpf > email > nomeNorm`. Mesma chave usada na migração inicial.
+- `upsertAluno(body, eventName)` — `db.runTransaction` pra UPSERT atômico em `alunosAprovados/{chaveAluno}`:
+  - Doc inexistente → `tx.set` com produto novo no array
+  - Doc existente → identifica produto pelo `transacao` (preferencial) ou `produtoId+dataCompra`. Se já existe, **só atualiza o status do produto** (ex: REFUNDED chegando após APPROVED). Se inédito, **adiciona ao array**.
+  - Campos pessoais (nome, cpf, email, telefone) só preenchidos se estavam vazios — preserva o que já tinha.
+  - `ultimaCompra`/`primeiraCompra` atualizados por `Math.max`/`min` ISO string.
+- Mapa de status: `APPROVED/COMPLETE → 'Completo'`, `REFUNDED → 'reembolsado'`, `CHARGEBACK → 'chargeback'`, `CANCEL → 'cancelado'`.
+
+**Plug no handler `hotmartWebhook` (`index.js`):**
+- Bloco try/catch que chama `upsertAluno(body, event)` rodando em **paralelo** ao fluxo de xcod. Falhas no upsert NÃO bloqueiam o 200 OK pro Hotmart (evita perder webhooks).
+- Mantém intacta a lógica anterior de `solicitacoesExtra` (mesma function, mesma URL `https://hotmartwebhook-57xrhneaga-uc.a.run.app`).
+
+**Migração delta:** depois da migração inicial (15.540 alunos), rodou-se uma sincronização adicional dos últimos 7 dias do Postgres pra cobrir o gap entre snapshot inicial e configuração do webhook AROS. UPSERT idempotente (helper temporário removido após uso).
+
+**Pra retomar acesso ao Neon** caso precise: `DATABASE_URL` foi `postgresql://neondb_owner:***@ep-plain-king-am0nefe0-pooler.c-5.us-east-1.aws.neon.tech/neondb` — senha deve ser rotacionada se o usuário não tiver feito antes de apagar.
+
+### Catálogo de Produtos — Aprovações (2026-05-26)
+
+Nova seção colapsável **"🎯 Aprovações"** logo abaixo de Datas Importantes na aba Produtos. Read-only — cadastro fica em Administração > Cruzar Lista.
+
+- Listener `onSnapshot` filtra `provasAprovados` + `resultadosAprovados` por `vertical == S.verticalAtual` (em `_proRebindVerticalListeners`)
+- Render por prova: nome (modalidade) + lista de resultados ordenados por ano desc no formato `Prova — Ano — N%`
+- Último ano destacado igual ao Histórico de aprovações
+- Visível pra qualquer auth (coord/marketing/vendas) — não só admin
+- State: `S.aprovacoes={provas:[],resultados:[],loaded:false}` + `S._aprovacoesOpen`
+- Unsubs: `_proAprovacoesProvasUnsub` e `_proAprovacoesResultadosUnsub` (cancelados em rebind/voltar)
+
+**Cloud Function `perguntarDex` lê aprovações:**
+- No `Promise.all` (~linha 200 de `dex.js`): `db.collection('provasAprovados').where('vertical','==',vertical).get()` + loop chunked de 30 `provaId` em `db.collection('resultadosAprovados').where('provaId','in',chunk).get()`
+- `formatarAprovacoes(provas, resultados)` (~linha 483) monta markdown agrupado: `### {modalidade}\n- {ano}: {percentual}% ({totalNossos} dos nossos em {totalLista} aprovados)`
+- Bloco `=== HISTÓRICO DE APROVAÇÕES (${verticalNome}) ===` injetado no system prompt
+- IA pode responder "qual % de aprovação no TSA 2025?" diretamente
 
 ### Catálogo de Produtos — Concorrentes (2026-05-26)
 
