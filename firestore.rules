@@ -319,6 +319,13 @@ service cloud.firestore {
         allow create, update: if true;
         allow delete: if true;
       }
+      // Streaming em tempo real do traço em andamento (prof desenhando agora).
+      // Mesmas regras dos strokes finais — coleção temporária, doc apagado no pointerup.
+      match /currentStrokes/{strokeId} {
+        allow read: if true;
+        allow create, update: if true;
+        allow delete: if true;
+      }
     }
 
     // ────────────────────────────────────────────────────────────────────────

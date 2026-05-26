@@ -3809,29 +3809,27 @@ body.pro-rt-fs-on{overflow:hidden}
     <div id="tab-checklist" class="hidden">
       <!-- Sub-views -->
       <div id="ck-home">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
-          <div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:20px">
+          <div style="flex:1;min-width:280px">
             <h3 style="font-family:Fraunces,serif;font-size:17px;font-weight:700">📝 Checklist de Aplicação</h3>
-            <p style="font-size:13px;color:var(--t2)">Selecione o simulado e o aluno para preencher o checklist.</p>
+            <p style="font-size:13px;color:var(--t2);margin-bottom:14px">Selecione o simulado e o aluno para preencher o checklist.</p>
+            <!-- Sim selector -->
+            <div class="fg" style="margin-bottom:10px;max-width:400px">
+              <label class="fl">Simulado</label>
+              <select class="fc" id="ck-sim-sel" onchange="loadCkSim()">
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+            <!-- Hidden prof sel still used by disponibilidade -->
+            <select id="ck-prof-sel" style="display:none"></select>
+            <!-- Contribuir com Feedback Geral (visível quando simulado selecionado) -->
+            <button class="hidden" id="btn-feedback-geral" onclick="openFeedbackGeralModal()" style="white-space:nowrap;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;padding:9px 18px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(79,70,229,.3);transition:all .2s">💬 Contribuir com Feedback Geral</button>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
             <button onclick="openCkTemplateEditorAuth()" style="white-space:nowrap;background:var(--bg3);color:var(--text);border:1.5px solid var(--border);padding:9px 18px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:all .2s" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">⚙️ Configurar checklist do simulado</button>
-            <button class="hidden" id="btn-feedback-geral" onclick="openFeedbackGeralModal()" style="white-space:nowrap;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;padding:9px 18px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(79,70,229,.3);transition:all .2s">💬 Contribuir com Feedback Geral</button>
             <!-- Admin only: gerencia contribuições já enviadas pelos profs. Mostrado dinamicamente via JS quando S.currentUser.role==='admin'. -->
-            <button class="hidden" id="btn-fg-admin" onclick="openFeedbackGeralAdmin()" style="white-space:nowrap;background:var(--bg3);color:var(--text);border:1.5px solid var(--border);padding:9px 18px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:all .2s" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'" title="Veja e gerencie as contribuições enviadas pelos professores">💬 Feedback Geral dos Professores</button>
+            <button class="hidden" id="btn-fg-admin" onclick="openFeedbackGeralAdmin()" style="white-space:nowrap;background:var(--bg3);color:var(--text);border:1.5px solid var(--border);padding:9px 18px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:all .2s" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'" title="Configure o Feedback Geral dos professores deste simulado">⚙️ Configurar Feedback Geral</button>
           </div>
-        </div>
-
-        <!-- Sim selector -->
-        <div class="g2" style="margin-bottom:16px">
-          <div class="fg">
-            <label class="fl">Simulado</label>
-            <select class="fc" id="ck-sim-sel" onchange="loadCkSim()" style="max-width:400px">
-              <option value="">Selecione...</option>
-            </select>
-          </div>
-          <!-- Hidden prof sel still used by disponibilidade -->
-          <select id="ck-prof-sel" style="display:none"></select>
         </div>
 
         <!-- Student list -->
@@ -6889,15 +6887,19 @@ function _escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&l
 async function _limparStrokesProjLive(simId,alunoId){
   if(!simId||!alunoId)return;
   try{
-    const snap=await getDocs(collection(db,`projecaoLive/${simId}__${alunoId}/strokes`));
-    if(snap.empty)return;
-    const batches=[];let batch=writeBatch(db);let n=0;
-    snap.docs.forEach(d=>{
-      batch.delete(d.ref);n++;
-      if(n>=400){batches.push(batch);batch=writeBatch(db);n=0;}
-    });
-    if(n>0)batches.push(batch);
-    await Promise.all(batches.map(b=>b.commit()));
+    // Limpa strokes finalizados + em andamento (mesma lógica em batch)
+    const subs=['strokes','currentStrokes'];
+    for(const sub of subs){
+      const snap=await getDocs(collection(db,`projecaoLive/${simId}__${alunoId}/${sub}`));
+      if(snap.empty)continue;
+      const batches=[];let batch=writeBatch(db);let n=0;
+      snap.docs.forEach(d=>{
+        batch.delete(d.ref);n++;
+        if(n>=400){batches.push(batch);batch=writeBatch(db);n=0;}
+      });
+      if(n>0)batches.push(batch);
+      await Promise.all(batches.map(b=>b.commit()));
+    }
   }catch(e){console.warn('limparStrokesProjLive:',e);}
 }
 
@@ -6971,8 +6973,8 @@ async function _initProjecaoLive(simId,alunoId,role){
        o aspect ratio 16:9. pointer-events default OFF; só captura quando caneta
        ou borracha estão ativas. */
     #proj-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none;touch-action:none}
-    #proj-canvas.pen-ativa{pointer-events:auto;cursor:crosshair}
-    #proj-canvas.eraser-ativa{pointer-events:auto;cursor:cell}
+    #proj-canvas.pen-ativa{pointer-events:auto;cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M3 21l2-6L17 3l4 4L9 19l-6 2z" fill="white"/><path d="M14 6l4 4"/><path d="M3 21l2.5-2.5" stroke="black" stroke-width="2"/></svg>') 3 21, crosshair}
+    #proj-canvas.eraser-ativa{pointer-events:auto;cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="9" rx="1.6" fill="pink" stroke="black" stroke-width="1.5"/><rect x="3" y="9" width="6" height="9" rx="1.6" fill="white" stroke="black" stroke-width="1.5"/><line x1="9" y1="9" x2="9" y2="18" stroke="black" stroke-width="1.2"/></svg>') 12 13, cell}
     #draw-toolbar{position:fixed;bottom:18px;right:18px;z-index:20;display:flex;gap:8px;align-items:center;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);border:1px solid #333;border-radius:10px;padding:8px 10px;box-shadow:0 6px 24px rgba(0,0,0,.45);font-family:-apple-system,Segoe UI,Roboto,sans-serif}
     #draw-toolbar button{background:#1a1a1a;color:#fff;border:1px solid #333;border-radius:6px;padding:7px 13px;cursor:pointer;font-size:12.5px;font-weight:600;font-family:inherit;transition:background .15s,border-color .15s,box-shadow .15s}
     #draw-toolbar button:hover{background:#252525;border-color:#444}
@@ -7012,8 +7014,7 @@ async function _initProjecaoLive(simId,alunoId,role){
       <button class="color-btn" data-color="#000000" title="Preto" style="background:#000000"></button>
       <button class="color-btn" data-color="#ffffff" title="Branco" style="background:#ffffff"></button>
     </span>
-    <button id="btn-eraser" title="Borracha — apaga o traço inteiro ao passar por cima">🧽 Borracha</button>
-    <button id="btn-eraser" title="Borracha — apaga o traço inteiro ao passar por cima">🧽 Borracha</button>
+    <button id="btn-eraser" title="Borracha — apaga o traço inteiro ao passar por cima"><svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:-3px;margin-right:4px"><rect x="3" y="9" width="18" height="9" rx="1.6" fill="#fda4af" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="9" width="6" height="9" rx="1.6" fill="#fff" stroke="currentColor" stroke-width="1.5"/><line x1="9" y1="9" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/></svg>Borracha</button>
     <button id="btn-limpar" class="danger" title="Apaga todos os traços deste slide">🗑 Limpar</button>
   </div>`;
   // Refs cacheadas — sobrevivem a um eventual transplante do DOM pra janela PIP.
@@ -7253,6 +7254,14 @@ async function _initProjecaoLive(simId,alunoId,role){
   // Traço em andamento (sendo desenhado agora pelo usuário local — render imediato antes do sync)
   let strokeAtual=null;
   let drawingStrokesUnsub=null;
+  // Traços EM ANDAMENTO de outros usuários (stream tempo real). Mesmo shape de strokes.
+  let liveStrokes=[];
+  let liveStrokesUnsub=null;
+  // Throttle pra escrita do traço em andamento — ~12 writes/s por stroke
+  let _lastLiveStrokeWrite=0;
+  const LIVE_STROKE_THROTTLE_MS=80;
+  // Stale: ignora currentStrokes antigos (browser do desenhista travou/fechou)
+  const LIVE_STROKE_STALE_MS=10000;
   // Encaixa o frame em 16:9 dentro do wrap (sem transform — usa width/height
   // REAIS em px). Também ajusta o font-size do frame pra que unidades em
   // dentro do conteúdo escalem proporcionalmente com a altura do frame.
@@ -7290,9 +7299,11 @@ async function _initProjecaoLive(simId,alunoId,role){
   function renderCanvas(){
     ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);
     const W=canvas.clientWidth,H=canvas.clientHeight;
-    // Filtra só os traços do caso + slide atuais
+    // 1) Traços finalizados
+    const finalIds=new Set();
     const visiveis=strokes.filter(s=>s.casoId===casoIdAtual&&s.slideIdx===idx);
     for(const s of visiveis){
+      finalIds.add(s.id);
       if(!s.points||s.points.length<2)continue;
       ctx.strokeStyle=s.color||'#dc2626';
       ctx.lineWidth=s.thickness||espessura;
@@ -7303,7 +7314,26 @@ async function _initProjecaoLive(simId,alunoId,role){
       for(let i=1;i<s.points.length;i++)ctx.lineTo(s.points[i].x*W,s.points[i].y*H);
       ctx.stroke();
     }
-    // Traço em andamento (local, antes do flush pro Firestore)
+    // 2) Traços EM ANDAMENTO de outros usuários (stream em tempo real).
+    // Dedupa com final e com o local (strokeAtual). Filtra stale (>10s sem update).
+    const NOW=Date.now();
+    const localId=strokeAtual?.id;
+    for(const s of liveStrokes){
+      if(s.casoId!==casoIdAtual||s.slideIdx!==idx)continue;
+      if(finalIds.has(s.id))continue; // já tem versão final renderizada
+      if(s.id===localId)continue;     // local renderizado separado
+      if(s.ts&&(NOW-new Date(s.ts).getTime())>LIVE_STROKE_STALE_MS)continue;
+      if(!s.points||s.points.length<2)continue;
+      ctx.strokeStyle=s.color||'#dc2626';
+      ctx.lineWidth=s.thickness||espessura;
+      ctx.lineCap='round';
+      ctx.lineJoin='round';
+      ctx.beginPath();
+      ctx.moveTo(s.points[0].x*W,s.points[0].y*H);
+      for(let i=1;i<s.points.length;i++)ctx.lineTo(s.points[i].x*W,s.points[i].y*H);
+      ctx.stroke();
+    }
+    // 3) Traço em andamento (local, antes do flush pro Firestore)
     if(strokeAtual&&strokeAtual.points.length>=2){
       ctx.strokeStyle=strokeAtual.color;
       ctx.lineWidth=strokeAtual.thickness;
@@ -7352,12 +7382,16 @@ async function _initProjecaoLive(simId,alunoId,role){
     }
     if(!penAtiva)return; // defesa em profundidade — CSS já bloqueia, mas garante
     canvas.setPointerCapture(e.pointerId);
+    // ID gerado no início pra reuso no streaming + flush final
+    const strokeId='stk_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6);
     strokeAtual={
+      id:strokeId,
       points:[pontoEvento(e)],
       color:penCor,thickness:espessura,
       slideIdx:idx,casoId:casoIdAtual,
       by:isProf?'prof':'aluno'
     };
+    _lastLiveStrokeWrite=0; // reseta throttle pra esse stroke
     renderCanvas();
   });
   canvas.addEventListener('pointermove',e=>{
@@ -7368,18 +7402,36 @@ async function _initProjecaoLive(simId,alunoId,role){
     if(!strokeAtual)return;
     strokeAtual.points.push(pontoEvento(e));
     renderCanvas();
+    // Stream em tempo real (throttled): escreve o estado atual no currentStrokes/
+    const now=Date.now();
+    if(strokeAtual.points.length>=2&&now-_lastLiveStrokeWrite>=LIVE_STROKE_THROTTLE_MS){
+      _lastLiveStrokeWrite=now;
+      const s=strokeAtual;
+      setDoc(doc(db,`projecaoLive/${simId}__${alunoId}/currentStrokes/${s.id}`),{
+        id:s.id,points:s.points.slice(),color:s.color,thickness:s.thickness,
+        slideIdx:s.slideIdx,casoId:s.casoId,by:s.by,
+        ts:new Date().toISOString()
+      }).catch(err=>console.warn('liveStroke:',err));
+    }
   });
   async function flushStroke(){
     if(!strokeAtual)return;
     const s=strokeAtual;strokeAtual=null;
-    // Ignora "clicks" sem arrasto
-    if(s.points.length<2){renderCanvas();return;}
+    // Ignora "clicks" sem arrasto — limpa o currentStroke se existir
+    if(s.points.length<2){
+      deleteDoc(doc(db,`projecaoLive/${simId}__${alunoId}/currentStrokes/${s.id}`)).catch(()=>{});
+      renderCanvas();
+      return;
+    }
     try{
-      const strokeId='stk_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6);
-      await setDoc(doc(db,`projecaoLive/${simId}__${alunoId}/strokes/${strokeId}`),{
-        ...s,
+      // 1) Grava versão final em strokes/
+      await setDoc(doc(db,`projecaoLive/${simId}__${alunoId}/strokes/${s.id}`),{
+        id:s.id,points:s.points,color:s.color,thickness:s.thickness,
+        slideIdx:s.slideIdx,casoId:s.casoId,by:s.by,
         ts:new Date().toISOString()
       });
+      // 2) Remove do currentStrokes/ (fire-and-forget — não bloqueia UI)
+      deleteDoc(doc(db,`projecaoLive/${simId}__${alunoId}/currentStrokes/${s.id}`)).catch(()=>{});
     }catch(e){console.warn('flushStroke:',e);}
     renderCanvas();
   }
@@ -7395,18 +7447,28 @@ async function _initProjecaoLive(simId,alunoId,role){
     if(borrachaAtiva){borrachaArrastando=false;return;}
     if(strokeAtual)flushStroke();
   });
-  // Subscribe na subcoleção de traços
+  // Subscribe na subcoleção de traços finalizados
   drawingStrokesUnsub=onSnapshot(collection(db,`projecaoLive/${simId}__${alunoId}/strokes`),snap=>{
     strokes=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderCanvas();
   });
-  // Botão "Limpar" — apaga todos os traços do casoId + slideIdx atuais
+  // Subscribe na subcoleção de traços EM ANDAMENTO (stream em tempo real de outros usuários)
+  liveStrokesUnsub=onSnapshot(collection(db,`projecaoLive/${simId}__${alunoId}/currentStrokes`),snap=>{
+    liveStrokes=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderCanvas();
+  });
+  // Botão "Limpar" — apaga traços finalizados + em andamento do casoId + slideIdx atuais
   if(btnLimpar)btnLimpar.onclick=async()=>{
     const visiveis=strokes.filter(s=>s.casoId===casoIdAtual&&s.slideIdx===idx);
-    if(!visiveis.length){return;}
-    if(!confirm(`Apagar todos os ${visiveis.length} traço${visiveis.length>1?'s':''} deste slide?`))return;
+    const liveVisiveis=liveStrokes.filter(s=>s.casoId===casoIdAtual&&s.slideIdx===idx);
+    const total=visiveis.length+liveVisiveis.length;
+    if(!total)return;
+    if(!confirm(`Apagar todos os ${total} traço${total>1?'s':''} deste slide?`))return;
     try{
-      await Promise.all(visiveis.map(s=>deleteDoc(doc(db,`projecaoLive/${simId}__${alunoId}/strokes/${s.id}`))));
+      await Promise.all([
+        ...visiveis.map(s=>deleteDoc(doc(db,`projecaoLive/${simId}__${alunoId}/strokes/${s.id}`))),
+        ...liveVisiveis.map(s=>deleteDoc(doc(db,`projecaoLive/${simId}__${alunoId}/currentStrokes/${s.id}`)))
+      ]);
     }catch(e){console.warn('limpar strokes:',e);}
   };
   // Inicializa tamanho do canvas
@@ -25275,11 +25337,7 @@ window.resetarSimuladoAluno=async(studentId)=>{
   const student=_ckStudents.find(s=>s.id===studentId);
   if(!student){alert('Aluno não encontrado.');return;}
   const simNome=(S.sims.find(s=>s.id===_ckSimId)?.nome)||'(sem nome)';
-  // 1ª confirmação
-  if(!confirm(`Resetar TODA a avaliação de "${student.nome}" no simulado "${simNome}"?\n\nIsso apaga:\n• Respostas do checklist (Criar + Oral)\n• Feedbacks dos casos\n• Notas (Criar, Oral, Final)\n\nO template e a lista de alunos NÃO são afetados.`))return;
-  // 2ª confirmação por digitação (proteção contra clique acidental)
-  const conf=prompt('Esta ação NÃO pode ser desfeita.\n\nDigite RESETAR (em maiúsculas) para confirmar:');
-  if(conf!=='RESETAR'){alert('Operação cancelada.');return;}
+  if(!confirm(`Tem certeza que deseja resetar a avaliação de "${student.nome}" no simulado "${simNome}"?\n\nIsso apaga respostas, feedbacks e notas. Não pode ser desfeito.`))return;
   try{
     // Resolve a key usada no doc de notas (mesma lógica do salvamento do checklist)
     const lista=S.listas.find(l=>(l.alunos||[]).some(a=>(typeof a==='object'?a.nome:a).toLowerCase().trim()===student.nome.toLowerCase().trim()));
@@ -25545,40 +25603,52 @@ function renderCkCasos(resp){
     const card=document.createElement('div');
     card.style.marginBottom='10px';
     card.style.borderRadius='var(--r)';
-    card.style.overflow='hidden';
+    card.style.overflow='clip';
     card.style.border='2px solid '+statusColor(casoSt);
     card.style.transition='border-color .3s';
 
     const hdrBg=statusBg(casoSt);
     const profCaso=casoResp.prof||'';
-    let hdr=`<div onclick="toggleCkCaso(${ci})" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:${hdrBg};cursor:pointer;user-select:none;transition:background .2s"
+    const statusChip=casoSt==='green'
+      ? `<span id="ck-caso-status-${ci}" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--green);background:var(--gl);border:1px solid rgba(63,185,80,.35);padding:3px 9px;border-radius:999px;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap">✓ Finalizado</span>`
+      : casoSt==='yellow'
+      ? `<span id="ck-caso-status-${ci}" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--yellow);background:var(--yl);border:1px solid rgba(210,153,34,.35);padding:3px 9px;border-radius:999px;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap">⏳ Em andamento</span>`
+      : `<span id="ck-caso-status-${ci}" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--red);background:var(--rl);border:1px solid rgba(248,81,73,.35);padding:3px 9px;border-radius:999px;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap">● Pendente</span>`;
+    const statusIcon=casoSt==='green'?'✅':casoSt==='red'?'📋':'🟡';
+    // Projeção embutida no cabeçalho (só bloco Criar)
+    const showProj=_ckBloco==='criar';
+    const numSlides=showProj?(caso.slides||[]).length:0;
+
+    let hdrInner=`<div onclick="toggleCkCaso(${ci})" style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 18px;background:${hdrBg};cursor:pointer;user-select:none;transition:background .2s;flex-wrap:wrap"
       onmouseover="this.style.background='${casoSt==='green'?'rgba(63,185,80,.2)':'var(--bg4)'}'" onmouseout="this.style.background='${hdrBg}'">
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:18px">${casoSt==='green'?'✅':casoSt==='red'?'⬜':'🟡'}</span>
-        <div>
-          <p style="font-family:Fraunces,serif;font-size:15px;font-weight:700;color:${statusColor(casoSt)}">Caso ${ci+1}: ${caso.nome||'Caso Clínico'}</p>
-          <p style="font-size:13px;font-weight:800;color:var(--accent);margin-top:3px;letter-spacing:-.2px">Pontuação: <span id="ck-score-${ci}">${_calcCasoScore(casoResp,caso,ptsPorCaso).toFixed(1)}</span> / ${ptsPorCaso.toFixed(1)} pts</p>
-          <p style="font-size:12px;color:var(--t2);margin-top:1px">${totalItens} iten${totalItens!==1?'s':''} · <span id="ck-caso-status-${ci}">${casoSt==='green'?'<strong style="color:var(--green)">✅ Finalizado</strong>':casoSt==='yellow'?'<strong style="color:var(--yellow)">⏳ Em andamento</strong>':'<span style="color:var(--red)">● Pendente</span>'}</span></p>
-          ${profCaso?`<p class="caso-prof-label" style="font-size:11px;color:var(--t2);margin-top:2px">Prof. Examinador: <strong>${profCaso}</strong></p>`:''}
+      <div style="display:flex;align-items:flex-start;gap:12px;flex:1;min-width:0">
+        <span style="font-size:20px;line-height:1.2;flex-shrink:0">${statusIcon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">
+            <p style="font-family:Fraunces,serif;font-size:15px;font-weight:700;color:${statusColor(casoSt)};margin:0">Caso ${ci+1}: ${caso.nome||'Caso Clínico'}</p>
+            ${statusChip}
+          </div>
+          <p style="font-size:13px;font-weight:800;color:var(--accent);letter-spacing:-.2px;margin:0">Pontuação: <span id="ck-score-${ci}">${_calcCasoScore(casoResp,caso,ptsPorCaso).toFixed(1)}</span> / ${ptsPorCaso.toFixed(1)} pts</p>
+          <p style="font-size:12px;color:var(--t2);margin:2px 0 0">${totalItens} iten${totalItens!==1?'s':''}${profCaso?` · Prof. Examinador: <strong style="color:var(--text)">${profCaso}</strong>`:''}</p>
         </div>
       </div>
-      <span id="ck-arr-${ci}" style="font-size:14px;color:var(--t2);transition:transform .2s;display:inline-block;transform:${isOpen?'rotate(180deg)':'rotate(0)'}">▼</span>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+        ${showProj?`<div id="ck-proj-${ci}" onclick="event.stopPropagation()" style="flex-shrink:0">${renderProjPanel(ci,numSlides)}</div>`:''}
+        <span id="ck-arr-${ci}" style="font-size:14px;color:var(--t2);transition:transform .2s;display:inline-block;flex-shrink:0;transform:${isOpen?'rotate(180deg)':'rotate(0)'}">▼</span>
+      </div>
     </div>`;
 
-    // Body (collapsible)
-    let body=`<div id="ck-body-${ci}" style="display:${isOpen?'block':'none'};padding:16px 20px;background:var(--bg2)">`;
+    // Sticky wrapper só com cabeçalho (projeção já está embutida)
+    let hdr=`<div style="position:sticky;top:78px;z-index:5;background:var(--bg2)">${hdrInner}</div>`;
 
-    // Projeção (apenas bloco Criar)
-    if(_ckBloco==='criar'){
-      const numSlides=(caso.slides||[]).length;
-      body+=`<div id="ck-proj-${ci}" style="margin-bottom:14px">${renderProjPanel(ci,numSlides)}</div>`;
-    }
+    // Body (collapsible) — sem projeção
+    let body=`<div id="ck-body-${ci}" style="display:${isOpen?'block':'none'};padding:16px 20px;background:var(--bg2)">`;
 
     // Enunciado + imagens (se a revisão tiver exportado esses campos)
     if(caso.enunciado||(caso.enunciadoImagens||[]).length){
       body+=`<div style="margin-bottom:14px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs)">
         <div style="font-size:11px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">📝 Caso clínico</div>
-        ${caso.enunciado?`<div style="font-size:13px;line-height:1.5;white-space:pre-wrap;color:var(--text)">${(caso.enunciado||'').replace(/</g,'&lt;')}</div>`:''}
+        ${caso.enunciado?`<div style="font-size:13px;line-height:1.5;white-space:pre-wrap;color:var(--text);text-align:justify;hyphens:none;-webkit-hyphens:none">${(caso.enunciado||'').replace(/</g,'&lt;')}</div>`:''}
         ${(caso.enunciadoImagens||[]).length?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">${caso.enunciadoImagens.map(u=>`<img src="${u}" onclick="openImgLightbox('${u}')" style="max-width:240px;max-height:180px;border:1px solid var(--border);border-radius:8px;cursor:zoom-in"/>`).join('')}</div>`:''}
       </div>`;
     }
@@ -25593,17 +25663,18 @@ function renderCkCasos(resp){
       const pergStatusLabel=`<span id="perg-st-${ci}-${pi}" style="font-size:11px;font-weight:600;color:${statusColor(pergSt)}">`+
         (pergSt==='green'?'✓ Preenchido':pergSt==='yellow'?`⚠ Parcial (${itensMarcados}/${itens.length})`:'● Pendente')+'</span>';
       const pergBorder=pergCompleta?'var(--green)':pergParcial?'var(--yellow)':'var(--border)';
+      const pergIsOpen=window._openCkPerguntas?.has(pergId);
       body+=`<div style="margin-bottom:10px;border:1.5px solid ${pergBorder};border-radius:var(--rs);overflow:hidden;transition:border-color .3s">
-        <div onclick="toggleCkPerg('${pergId}')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);cursor:pointer;user-select:none"
+        <div onclick="toggleCkPerg('${pergId}')" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:var(--bg3);cursor:pointer;user-select:none"
           onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
-          <span style="font-size:13px;font-weight:700;color:var(--text)">Pergunta ${pi+1}${perg.titulo?': '+perg.titulo:''}</span>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="perg-status-lbl" style="font-size:11px;font-weight:600;color:${pergCompleta?'var(--green)':pergParcial?'var(--yellow)':'var(--red)'}">${pergCompleta?'✓ Preenchido':pergParcial?`⚠ Parcial (${itensMarcados}/${itens.length})`:'● Pendente'}</span>
-            <span id="arr-${pergId}" style="font-size:12px;color:var(--t2);transition:transform .2s;display:inline-block">▼</span>
+          <span style="font-size:13px;font-weight:700;color:var(--text);flex:1;min-width:0;text-align:justify;hyphens:none;-webkit-hyphens:none;display:block">Pergunta ${pi+1}${perg.titulo?': '+perg.titulo:''}</span>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;white-space:nowrap">
+            <span id="perg-st-${ci}-${pi}" class="perg-status-lbl" style="font-size:11px;font-weight:600;color:${pergCompleta?'var(--green)':pergParcial?'var(--yellow)':'var(--red)'};white-space:nowrap">${pergCompleta?'✓ Preenchido':pergParcial?`⚠ Parcial (${itensMarcados}/${itens.length})`:'● Pendente'}</span>
+            <span id="arr-${pergId}" style="font-size:12px;color:var(--t2);transition:transform .2s;display:inline-block;transform:${pergIsOpen?'rotate(180deg)':'rotate(0)'}">▼</span>
           </div>
         </div>
-        <div id="${pergId}" style="display:none">
-          <div style="display:flex;justify-content:flex-end;padding:6px 14px 0">
+        <div id="${pergId}" style="display:${pergIsOpen?'block':'none'}">
+          <div style="display:flex;justify-content:flex-start;padding:6px 14px 0">
             <button class="btn btn-d btn-sm" style="font-size:11px" onclick="resetCkPergunta(${ci},${pi})">🗑️ Resetar Pergunta ${pi+1}</button>
           </div>
           ${(perg.perguntaImagens||[]).length?`<div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 14px 4px">${perg.perguntaImagens.map(u=>`<img src="${u}" onclick="openImgLightbox('${u}')" style="max-width:200px;max-height:160px;border:1px solid var(--border);border-radius:8px;cursor:zoom-in"/>`).join('')}</div>`:''}`;
@@ -25668,16 +25739,17 @@ function renderCkCasos(resp){
       'Gestão de Tempo':'Como o aluno organizou o tempo disponível dentro de cada estação.'
     };
     const habColors=['','#e74c3c','#e67e22','#f1c40f','#2ecc71','#27ae60'];
+    const habIsOpen=window._openCkPerguntas?.has(habId);
     body+=`<div style="margin-top:10px;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden">
       <div onclick="toggleCkPerg('${habId}')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);cursor:pointer;user-select:none"
         onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
         <span style="font-size:13px;font-weight:700;color:var(--text)">📊 Avaliação de Habilidades (1–5)</span>
         <div style="display:flex;align-items:center;gap:8px">
           <span id="ck-hab-status-${ci}" style="font-size:11px;font-weight:600;color:${statusColor(getHabStatus(casoResp))}">${getHabStatus(casoResp)==='green'?'✓ Preenchido':getHabStatus(casoResp)==='yellow'?'⚠ Parcial':'● Pendente'}</span>
-          <span id="arr-${habId}" style="font-size:12px;color:var(--t2);transition:transform .2s;display:inline-block">▼</span>
+          <span id="arr-${habId}" style="font-size:12px;color:var(--t2);transition:transform .2s;display:inline-block;transform:${habIsOpen?'rotate(180deg)':'rotate(0)'}">▼</span>
         </div>
       </div>
-      <div id="${habId}" style="display:none;padding:12px 14px">
+      <div id="${habId}" style="display:${habIsOpen?'block':'none'};padding:12px 14px">
         <div style="display:flex;flex-direction:column;gap:8px">`;
     HABILIDADES.forEach((hab,hi)=>{
       const hval=casoResp.habilidades[hi]||0;
@@ -25710,16 +25782,17 @@ function renderCkCasos(resp){
     // Feedback (collapsible)
     const fbId=`ck-fb-wrap-${ci}`;
     const temFbSalvo=(casoResp.feedback||'').trim().length>0;
+    const fbIsOpen=window._openCkPerguntas?.has(fbId);
     body+=`<div style="margin-top:10px;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden">
       <div onclick="toggleCkPerg('${fbId}')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);cursor:pointer;user-select:none"
         onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
         <span style="font-size:13px;font-weight:700;color:var(--text)">💬 Feedback do Caso ${ci+1}</span>
         <div style="display:flex;align-items:center;gap:8px">
           <span id="fb-status-${ci}" style="font-size:11px;font-weight:600;color:${getFbStatus(casoResp)==='green'?'var(--green)':'var(--red)'}">${getFbStatus(casoResp)==='green'?'✓ Preenchido':'● Pendente'}</span>
-          <span id="arr-${fbId}" style="font-size:12px;color:var(--t2);transition:transform .2s;display:inline-block">▼</span>
+          <span id="arr-${fbId}" style="font-size:12px;color:var(--t2);transition:transform .2s;display:inline-block;transform:${fbIsOpen?'rotate(180deg)':'rotate(0)'}">▼</span>
         </div>
       </div>
-      <div id="${fbId}" style="display:none;padding:12px 14px">
+      <div id="${fbId}" style="display:${fbIsOpen?'block':'none'};padding:12px 14px">
         <textarea class="fc" id="ck-fb-caso-${ci}" style="min-height:100px" placeholder="Comentários sobre este caso clínico..."
           onfocus="requireProfForCaso(${ci},()=>{})"
           oninput="setCkFeedbackCaso(${ci},this.value)">${casoResp.feedback||''}</textarea>
@@ -25743,6 +25816,7 @@ function renderCkCasos(resp){
 
 window._openCkCasos=[];
 
+window._openCkPerguntas=window._openCkPerguntas||new Set();
 window.toggleCkPerg=(id)=>{
   const el=document.getElementById(id);
   const arr=document.getElementById('arr-'+id);
@@ -25750,6 +25824,8 @@ window.toggleCkPerg=(id)=>{
   const isOpen=el.style.display!=='none';
   el.style.display=isOpen?'none':'block';
   if(arr)arr.style.transform=isOpen?'rotate(0)':'rotate(180deg)';
+  if(isOpen)window._openCkPerguntas.delete(id);
+  else window._openCkPerguntas.add(id);
 };
 
 // ── Check/request professor identification before editing ─────────────────────
@@ -25794,12 +25870,10 @@ window.toggleCkCaso=(ci)=>{
   if(!body)return;
   const isOpen=body.style.display!=='none';
   if(isOpen){
-    // Close
     body.style.display='none';
     if(arr)arr.style.transform='rotate(0)';
     window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
   } else {
-    // Open directly in read-only — prof identifies only when editing
     body.style.display='block';
     if(arr)arr.style.transform='rotate(180deg)';
     if(!window._openCkCasos.includes(ci))window._openCkCasos.push(ci);
@@ -25993,10 +26067,12 @@ function updateCasoScoreDom(ci){
 
 function updatePergStatus(ci,pi){
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
-  const template=_ckTemplate;
+  const blocoKey=_ckBloco||'criar';
+  const blocoResp=resp[blocoKey];if(!blocoResp)return;
+  const template=window._ckTemplateCurrent||_ckTemplate?.[blocoKey]||_ckTemplate;
   const perg=template?.casos?.[ci]?.perguntas?.[pi];if(!perg)return;
   const itens=perg.itens||[];
-  const cr=resp.casos?.[ci]||{};
+  const cr=blocoResp.casos?.[ci]||{};
   const marcados=itens.filter((_,ii)=>cr.itens?.[`${pi}_${ii}`]).length;
   const total=itens.length;
   const completa=total>0&&marcados===total;
@@ -26513,11 +26589,19 @@ function renderProjPanel(ci,numSlides){
   const casoId=caso?.id||('caso_'+ci);
   const state=_projAtivo[ci];
   if(!numSlides){
-    return `<div style="padding:10px 14px;background:var(--bg);border:1px dashed var(--border);border-radius:var(--rs);font-size:12px;color:var(--t2)">🎬 Nenhum slide cadastrado para este caso. Configure no editor de template.</div>`;
+    return `<span style="font-size:11px;color:var(--t2);font-style:italic;padding:6px 10px;background:var(--bg);border:1px dashed var(--border);border-radius:8px;display:inline-block">🎬 Sem slides</span>`;
   }
   if(!state){
-    return `<button onclick="iniciarProjecao(${ci})" class="btn btn-p" style="width:100%;padding:14px;font-size:14px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--blue));color:#fff;border:none;border-radius:var(--rs);box-shadow:0 4px 14px -4px rgba(47,129,247,.55)">▶ Projetar caso (${numSlides} slide${numSlides!==1?'s':''})</button>`;
+    return `<button onclick="event.stopPropagation();iniciarProjecao(${ci})"
+      style="display:inline-flex;align-items:center;gap:10px;padding:11px 20px;font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.1px;color:#fff;background:linear-gradient(135deg,#5a9bff 0%,var(--accent) 55%,#0a4dbf 100%);border:1px solid rgba(255,255,255,.22);border-radius:12px;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.32) inset, 0 -1px 0 rgba(0,0,0,.24) inset, 0 8px 22px -6px rgba(47,129,247,.75), 0 2px 6px rgba(0,0,0,.22);transition:transform .15s, box-shadow .2s, filter .2s;white-space:nowrap;text-shadow:0 1px 1px rgba(0,0,0,.18)"
+      onmouseover="this.style.filter='brightness(1.1)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 1px 0 rgba(255,255,255,.38) inset, 0 -1px 0 rgba(0,0,0,.24) inset, 0 12px 28px -6px rgba(47,129,247,.95), 0 3px 8px rgba(0,0,0,.26)'"
+      onmouseout="this.style.filter='';this.style.transform='';this.style.boxShadow='0 1px 0 rgba(255,255,255,.32) inset, 0 -1px 0 rgba(0,0,0,.24) inset, 0 8px 22px -6px rgba(47,129,247,.75), 0 2px 6px rgba(0,0,0,.22)'">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.24);box-shadow:0 1px 0 rgba(255,255,255,.3) inset, 0 1px 3px rgba(0,0,0,.18);font-size:10px;padding-left:2px">▶</span>
+      <span>Projetar caso</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.4px;background:rgba(0,0,0,.28);padding:3px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.18)">${numSlides} slide${numSlides!==1?'s':''}</span>
+    </button>`;
   }
+  // Active: cronômetro compacto + controles essenciais
   const idx=state.idx||0;
   const total=state.total||numSlides;
   const ms=state.timerRunning?(Date.now()-state.timerStartLocal+state.timerMsBase):(state.timerMs||0);
@@ -26526,26 +26610,24 @@ function renderProjPanel(ci,numSlides){
   const limMs=((lm||0)*60+(ls||0))*1000;
   const over=ms>limMs;
   const tStr=_fmtTimer(ms);
-  return `<div style="border:2px solid var(--accent);border-radius:var(--r);overflow:hidden;background:var(--bg)">
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#000;color:#fff">
-      <span style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:#ccc">CRONÔMETRO</span>
-      <span id="proj-timer-${ci}" style="font-family:JetBrains Mono,monospace;font-size:22px;font-weight:700;letter-spacing:2px;color:${over?'#ff3b3b':'#fff'};margin-left:auto">${tStr}</span>
-      <button onclick="projecaoTimer(${ci},'${state.timerRunning?'pause':'play'}')" title="${state.timerRunning?'Pausar':'Iniciar'}" style="background:transparent;color:#fff;border:1px solid #444;border-radius:4px;width:32px;height:30px;cursor:pointer;font-size:13px">${state.timerRunning?'⏸':'▶'}</button>
-      <button onclick="projecaoTimer(${ci},'reset')" title="Zerar" style="background:transparent;color:#fff;border:1px solid #444;border-radius:4px;width:32px;height:30px;cursor:pointer;font-size:13px">⟲</button>
-    </div>
-    <div style="padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <button onclick="projecaoNav(${ci},'first')" ${idx===0?'disabled':''} class="btn btn-s btn-sm" title="Primeiro">⏮</button>
-      <button onclick="projecaoNav(${ci},'prev')" ${idx===0?'disabled':''} class="btn btn-s btn-sm">◀ Anterior</button>
-      <span style="flex:1;text-align:center;font-family:JetBrains Mono,monospace;font-size:13px;font-weight:700;color:var(--accent)">Slide ${idx+1} / ${total}</span>
-      <button onclick="projecaoNav(${ci},'next')" ${idx>=total-1?'disabled':''} class="btn btn-p btn-sm">Próximo ▶</button>
-      <button onclick="projecaoNav(${ci},'last')" ${idx>=total-1?'disabled':''} class="btn btn-s btn-sm" title="Último">⏭</button>
-    </div>
-    <div style="padding:0 14px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:10px">
-      <span style="font-size:11px;color:var(--t2)">Atalhos: ←/→/Espaço · Home/End · P (play/pause)</span>
-      <span style="flex:1"></span>
-      <button onclick="projecaoReabrirJanela(${ci})" class="btn btn-s btn-sm" title="Reabre a janela se foi fechada">🔄 Reabrir janela</button>
-      <button onclick="encerrarProjecao(${ci})" class="btn btn-d btn-sm">⛔ Encerrar</button>
-    </div>
+  const btnIcon='background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.14);border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:11px;display:inline-flex;align-items:center;justify-content:center;padding:0;transition:background .15s';
+  const btnLbl='background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.14);border-radius:7px;height:28px;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;display:inline-flex;align-items:center;gap:5px;justify-content:center;padding:0 10px;transition:background .15s;white-space:nowrap';
+  const btnHover="this.style.background='rgba(255,255,255,.18)'";
+  const btnOut="this.style.background='rgba(255,255,255,.08)'";
+  const disStyle='opacity:.35;cursor:not-allowed';
+  return `<div style="display:inline-flex;align-items:center;gap:6px;padding:5px 8px;background:linear-gradient(180deg,#1a1a1a,#0a0a0a);color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:11px;box-shadow:0 4px 14px -4px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.06) inset;flex-wrap:wrap">
+    <span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;color:#888;padding-left:4px">CRON</span>
+    <span id="proj-timer-${ci}" style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;letter-spacing:1px;color:${over?'#ff5c5c':'#fff'};min-width:58px;text-align:center">${tStr}</span>
+    <button onclick="event.stopPropagation();projecaoTimer(${ci},'reset')" title="Zerar cronômetro" style="${btnLbl}" onmouseover="${btnHover}" onmouseout="${btnOut}"><span>⟲</span><span>Zerar</span></button>
+    <button onclick="event.stopPropagation();projecaoTimer(${ci},'${state.timerRunning?'pause':'play'}')" title="${state.timerRunning?'Pausar':'Iniciar'}" style="${btnIcon}" onmouseover="${btnHover}" onmouseout="${btnOut}">${state.timerRunning?'⏸':'▶'}</button>
+    <span style="width:1px;height:18px;background:rgba(255,255,255,.18);margin:0 2px"></span>
+    <button onclick="event.stopPropagation();projecaoNav(${ci},'prev')" ${idx===0?'disabled':''} title="Slide anterior" style="${btnLbl}${idx===0?';'+disStyle:''}" ${idx===0?'':`onmouseover="${btnHover}" onmouseout="${btnOut}"`}><span>◀</span><span>Anterior</span></button>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);min-width:32px;text-align:center">${idx+1}/${total}</span>
+    <button onclick="event.stopPropagation();projecaoNav(${ci},'next')" ${idx>=total-1?'disabled':''} title="Próximo slide" style="${btnLbl}${idx>=total-1?';'+disStyle:''}" ${idx>=total-1?'':`onmouseover="${btnHover}" onmouseout="${btnOut}"`}><span>Próximo</span><span>▶</span></button>
+
+    <span style="width:1px;height:18px;background:rgba(255,255,255,.18);margin:0 2px"></span>
+    <button onclick="event.stopPropagation();projecaoReabrirJanela(${ci})" title="Reabrir janela de projeção" style="${btnLbl}" onmouseover="${btnHover}" onmouseout="${btnOut}"><span>🔄</span><span>Reabrir</span></button>
+    <button onclick="event.stopPropagation();encerrarProjecao(${ci})" title="Encerrar projeção" style="background:rgba(248,81,73,.16);color:#ff6b6b;border:1px solid rgba(248,81,73,.32);border-radius:7px;height:28px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;display:inline-flex;align-items:center;gap:5px;justify-content:center;padding:0 10px;transition:background .15s;white-space:nowrap" onmouseover="this.style.background='rgba(248,81,73,.28)'" onmouseout="this.style.background='rgba(248,81,73,.16)'"><span>⛔</span><span>Encerrar</span></button>
   </div>`;
 }
 
@@ -26755,21 +26837,36 @@ window.projecaoTimer=async(ci,acao)=>{
   let payload={updatedAt:new Date().toISOString()};
   if(acao==='play'){
     if(st.timerRunning)return;
+    const baseMs=st.timerMs||0;
     payload.timerStartedAt=new Date(now).toISOString();
-    payload.timerPausedMs=st.timerMs||0;
+    payload.timerPausedMs=baseMs;
     payload.timerRunning=true;
+    // Atualização otimista do state local
+    st.timerRunning=true;
+    st.timerStartLocal=now;
+    st.timerMsBase=baseMs;
   }else if(acao==='pause'){
     if(!st.timerRunning)return;
-    // Acumula o que rodou desde timerStartedAt
-    const acumulado=(st.timerMs||0);
+    // Calcula ms decorrido usando o mesmo formato do render
+    const acumulado=st.timerStartLocal?(now-st.timerStartLocal+(st.timerMsBase||0)):(st.timerMs||0);
     payload.timerStartedAt=null;
     payload.timerPausedMs=acumulado;
     payload.timerRunning=false;
+    // Atualização otimista
+    st.timerRunning=false;
+    st.timerMs=acumulado;
   }else if(acao==='reset'){
     payload.timerStartedAt=null;
     payload.timerPausedMs=0;
     payload.timerRunning=false;
+    // Atualização otimista — zera tudo
+    st.timerRunning=false;
+    st.timerMs=0;
+    st.timerStartLocal=0;
+    st.timerMsBase=0;
   }
+  // Re-renderiza imediatamente sem esperar o round-trip do Firestore
+  _atualizaPainelProj(ci);
   try{
     await setDoc(doc(db,'projecaoLive',st.liveId),payload,{merge:true});
   }catch(e){console.warn('projecaoTimer:',e);}
@@ -28391,9 +28488,7 @@ window.resetCkCaso=async(ci)=>{
   const caso=template?.casos?.[ci];
   const nomeAluno=_ckStudents.find(s=>s.id===_ckStudentId)?.nome||'este aluno';
   const nomeCaso=caso?.nome||('Caso '+(ci+1));
-  const confirmWord=prompt('Para confirmar o reset de "'+nomeCaso+'" de '+nomeAluno+', digite a palavra:\n\nRESETAR');
-  if(confirmWord===null)return;
-  if(confirmWord.trim().toUpperCase()!=='RESETAR'){alert('Palavra incorreta. Digite exatamente: RESETAR');return;}
+  if(!confirm('Tem certeza que deseja resetar "'+nomeCaso+'" de '+nomeAluno+'?'))return;
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
   const blocoKey2=_ckBloco||'criar';
   const blocoResp2=resp[blocoKey2];if(!blocoResp2)return;
@@ -28440,11 +28535,8 @@ window.hideHabTooltip=()=>{
 window.resetCkPergunta=async(ci,pi)=>{
   const template=_ckTemplate;
   const perg=template?.casos?.[ci]?.perguntas?.[pi];
-  const nomePerg=perg?.titulo||('Pergunta '+(pi+1));
-  const nomeAluno=_ckStudents.find(s=>s.id===_ckStudentId)?.nome||'este aluno';
-  const confirmWord=prompt('Para confirmar o reset de "'+nomePerg+'" de '+nomeAluno+', digite a palavra:\n\nRESETAR');
-  if(confirmWord===null)return;
-  if(confirmWord.trim().toUpperCase()!=='RESETAR'){alert('Palavra incorreta. Digite exatamente: RESETAR');return;}
+  const nomePerg=perg?.titulo?('Pergunta '+(pi+1)+': '+perg.titulo):('Pergunta '+(pi+1));
+  if(!confirm('Tem certeza que deseja resetar "'+nomePerg+'"?'))return;
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
   const blocoKey3=_ckBloco||'criar';
   const blocoResp3=resp[blocoKey3];if(!blocoResp3)return;
