@@ -2070,6 +2070,16 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 .pro-icon-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
 .pro-icon-grid button{background:var(--bg3);border:1px solid var(--border);border-radius:8px;width:100%;aspect-ratio:1;font-size:22px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
 .pro-icon-grid button:hover{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 10%, var(--bg3));transform:scale(1.06)}
+/* Modifier compacto: grade com células menores (usada no form de tipo de Data Importante) */
+.pro-icon-grid.pro-icon-grid-sm{grid-template-columns:repeat(8,1fr);gap:4px;margin-bottom:6px}
+.pro-icon-grid.pro-icon-grid-sm button{border-radius:6px;font-size:16px}
+@media (max-width:520px){.pro-icon-grid.pro-icon-grid-sm{grid-template-columns:repeat(6,1fr)}}
+/* Input de emoji personalizado */
+.pro-dimp-icon-custom{display:flex;align-items:center;gap:8px;margin-top:6px;padding:6px 8px;border:1px dashed var(--border);border-radius:6px;background:var(--bg)}
+.pro-dimp-icon-custom-label{font-size:11px;color:var(--t2);white-space:nowrap}
+.pro-dimp-icon-custom input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:16px;text-align:center;color:var(--text);min-width:0}
+.pro-dimp-icon-custom input:focus{outline:none;border-color:var(--accent)}
+.pro-dimp-icon-preview{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border:1px solid var(--border);font-size:18px;flex-shrink:0}
 .pro-icon-pop-foot{display:flex;gap:6px;align-items:center;padding-top:10px;border-top:1px solid var(--border)}
 .pro-icon-pop-foot input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:14px;outline:none}
 .pro-icon-pop-foot input:focus{border-color:var(--accent)}
@@ -2315,6 +2325,153 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
   .pro-editais-modal-backdrop{padding:0}
   .pro-editais-modal{max-width:none;height:100vh;max-height:100vh;border-radius:0;border:none}
 }
+
+/* Datas Importantes — cards colapsáveis (clone do padrão Editais, com cor/tipo por evento) */
+#tab-produtos .pro-dimp-card{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--c,#06b6d4);border-radius:10px;overflow:hidden;transition:border-color .15s,opacity .2s}
+#tab-produtos .pro-dimp-card.passou{opacity:.6}
+#tab-produtos .pro-dimp-card:hover{border-color:color-mix(in srgb,var(--c,#06b6d4) 36%,var(--border));border-left-color:var(--c,#06b6d4)}
+#tab-produtos .pro-dimp-card.open{border-color:color-mix(in srgb,var(--c,#06b6d4) 50%,var(--border))}
+#tab-produtos .pro-dimp-head{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;transition:background .15s}
+#tab-produtos .pro-dimp-head.no-body{cursor:default}
+#tab-produtos .pro-dimp-head:not(.no-body):hover{background:color-mix(in srgb,var(--c,#06b6d4) 5%,var(--bg2))}
+#tab-produtos .pro-dimp-ico{font-size:18px;line-height:1;flex-shrink:0}
+#tab-produtos .pro-dimp-title{font-weight:600;font-size:14px;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 auto}
+#tab-produtos .pro-dimp-data{font-family:'JetBrains Mono','SF Mono',monospace;font-size:12px;font-weight:600;color:var(--text);flex-shrink:0;white-space:nowrap}
+#tab-produtos .pro-dimp-hora{color:var(--t2);font-weight:500;margin-left:6px}
+#tab-produtos .pro-dimp-badge{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:2px 7px;border-radius:6px;color:var(--c,#06b6d4);background:color-mix(in srgb,var(--c,#06b6d4) 12%,transparent);border:1px solid color-mix(in srgb,var(--c,#06b6d4) 32%,var(--border));flex-shrink:0;line-height:1.3}
+#tab-produtos .pro-dimp-badge.passou{color:var(--t2);background:color-mix(in srgb,var(--t2) 12%,transparent);border-color:var(--border)}
+#tab-produtos .pro-dimp-actions{display:inline-flex;gap:2px;flex-shrink:0;margin-left:auto}
+#tab-produtos .pro-dimp-caret{font-size:12px;color:var(--t2);transition:transform .2s;flex-shrink:0;line-height:1}
+#tab-produtos .pro-dimp-caret.disabled{opacity:.35}
+#tab-produtos .pro-dimp-card.open .pro-dimp-caret{transform:rotate(180deg);color:var(--c,#06b6d4)}
+#tab-produtos .pro-dimp-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .35s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,padding .2s,border-top-color .2s;border-top:1px solid transparent;padding:0 16px}
+#tab-produtos .pro-dimp-card.open .pro-dimp-body{max-height:3000px;opacity:1;padding:12px 16px;border-top-color:var(--border)}
+#tab-produtos .pro-dimp-desc{font-size:13.5px;color:var(--text);line-height:1.6;white-space:pre-wrap;overflow-wrap:break-word;margin:0 0 8px}
+#tab-produtos .pro-dimp-desc:last-child{margin-bottom:0}
+#tab-produtos .pro-dimp-link{font-size:12.5px;color:#06b6d4;text-decoration:underline;word-break:break-all;display:inline-block}
+#tab-produtos .pro-dimp-ver-passados{background:transparent;border:1px dashed var(--border);color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding:8px 14px;border-radius:8px;cursor:pointer;width:100%;margin-top:10px;transition:all .15s}
+#tab-produtos .pro-dimp-ver-passados:hover{border-color:color-mix(in srgb,#06b6d4 36%,var(--border));color:var(--text);background:color-mix(in srgb,#06b6d4 5%,var(--bg2))}
+#tab-produtos .pro-dimp-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+#tab-produtos .pro-dimp-tipos-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+#tab-produtos .pro-dimp-tipos-chips{display:flex;gap:8px;flex-wrap:wrap;flex:1;min-width:0}
+#tab-produtos .pro-dimp-tipos-manage{background:transparent;border:1px dashed var(--border);color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.5px;padding:6px 10px;border-radius:8px;cursor:pointer;transition:all .15s;flex-shrink:0}
+#tab-produtos .pro-dimp-tipos-manage:hover{border-color:color-mix(in srgb,#06b6d4 36%,var(--border));color:var(--text);background:color-mix(in srgb,#06b6d4 5%,var(--bg2))}
+#tab-produtos .pro-dimp-tipo-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg2);color:var(--t2);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;user-select:none}
+#tab-produtos .pro-dimp-tipo-chip:hover{border-color:color-mix(in srgb,var(--c,#06b6d4) 36%,var(--border));color:var(--text)}
+#tab-produtos .pro-dimp-tipo-chip.on{border-color:var(--c,#06b6d4);background:color-mix(in srgb,var(--c,#06b6d4) 14%,var(--bg2));color:var(--c,#06b6d4)}
+#tab-produtos .pro-dimp-tipo-chip.add{border-style:dashed;color:var(--t2)}
+#tab-produtos .pro-dimp-tipo-chip.add:hover{color:#06b6d4;border-color:#06b6d4;background:color-mix(in srgb,#06b6d4 6%,var(--bg2))}
+/* Escopo (modal de evento) — chips single-select neutros (sem cor) */
+#tab-produtos .pro-dimp-escopo-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg2);color:var(--t2);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;user-select:none}
+#tab-produtos .pro-dimp-escopo-chip:hover{border-color:color-mix(in srgb,#a855f7 36%,var(--border));color:var(--text)}
+#tab-produtos .pro-dimp-escopo-chip.on{border-color:#a855f7;background:color-mix(in srgb,#a855f7 14%,var(--bg2));color:#a855f7}
+#tab-produtos .pro-dimp-escopo-chip.add{border-style:dashed;color:var(--t2)}
+#tab-produtos .pro-dimp-escopo-chip.add:hover{color:#a855f7;border-color:#a855f7;background:color-mix(in srgb,#a855f7 6%,var(--bg2))}
+/* Filtro de escopo (barra horizontal acima da lista de eventos) */
+#tab-produtos .pro-dimp-escopos-bar{display:flex;align-items:center;gap:10px;margin:10px 0 14px;padding:8px 4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
+#tab-produtos .pro-dimp-escopos-bar.empty{justify-content:flex-start}
+#tab-produtos .pro-dimp-escopos-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--t2);text-transform:uppercase;flex-shrink:0}
+#tab-produtos .pro-dimp-escopos-chips{display:flex;gap:8px;align-items:center;flex-wrap:nowrap}
+#tab-produtos .pro-dimp-escopo-filtro-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--bg2);color:var(--t2);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+#tab-produtos .pro-dimp-escopo-filtro-chip:hover{border-color:color-mix(in srgb,#a855f7 36%,var(--border));color:var(--text)}
+#tab-produtos .pro-dimp-escopo-filtro-chip.on{border-color:#a855f7;background:color-mix(in srgb,#a855f7 18%,var(--bg2));color:#a855f7}
+#tab-produtos .pro-dimp-escopos-manage-btn{background:transparent;border:1px dashed var(--border);color:var(--t2);font-size:14px;width:30px;height:30px;border-radius:8px;cursor:pointer;transition:all .15s;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center}
+#tab-produtos .pro-dimp-escopos-manage-btn:hover{border-color:color-mix(in srgb,#a855f7 36%,var(--border));color:#a855f7;background:color-mix(in srgb,#a855f7 5%,var(--bg2))}
+#tab-produtos .pro-dimp-escopos-manage-empty{background:transparent;border:1px dashed var(--border);color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.5px;padding:6px 10px;border-radius:8px;cursor:pointer;transition:all .15s}
+#tab-produtos .pro-dimp-escopos-manage-empty:hover{border-color:color-mix(in srgb,#a855f7 36%,var(--border));color:#a855f7;background:color-mix(in srgb,#a855f7 5%,var(--bg2))}
+/* Badge de escopo no card de evento (header) */
+#tab-produtos .pro-dimp-escopo-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;border:1px solid color-mix(in srgb,#a855f7 36%,var(--border));background:color-mix(in srgb,#a855f7 10%,var(--bg2));color:#a855f7;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
+#tab-produtos .pro-dimp-novo-tipo-form{background:color-mix(in srgb,#06b6d4 6%,var(--bg2));border:1px solid color-mix(in srgb,#06b6d4 32%,var(--border));border-radius:12px;padding:14px;margin-bottom:14px;display:flex;flex-direction:column;gap:12px}
+#tab-produtos .pro-dimp-novo-tipo-form .fl{margin-bottom:4px}
+#tab-produtos .pro-dimp-cor-grid{display:flex;gap:8px;flex-wrap:wrap}
+#tab-produtos .pro-dimp-cor-chip{width:32px;height:32px;border-radius:8px;border:2px solid var(--border);cursor:pointer;transition:all .15s;background:var(--c)}
+#tab-produtos .pro-dimp-cor-chip:hover{transform:scale(1.08)}
+#tab-produtos .pro-dimp-cor-chip.on{border-color:var(--text);box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 40%,transparent)}
+#tab-produtos .pro-dimp-novo-tipo-acts{display:flex;justify-content:flex-end;gap:8px}
+#tab-produtos .pro-dimp-modo-radios{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:0}
+#tab-produtos .pro-dimp-modo-radio{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--t2);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+#tab-produtos .pro-dimp-modo-radio.on{border-color:#06b6d4;background:color-mix(in srgb,#06b6d4 12%,var(--bg2));color:#06b6d4}
+/* Modal "Gerenciar tipos" — list inline simples reusando classes do modal de editais */
+.pro-dimp-tipos-list{display:flex;flex-direction:column;gap:8px}
+.pro-dimp-tipos-list-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--c,#06b6d4);border-radius:10px}
+.pro-dimp-tipos-list-item .ico{font-size:18px;line-height:1}
+.pro-dimp-tipos-list-item .nome{flex:1;min-width:0;font-weight:600;font-size:14px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pro-dimp-tipos-list-item .meta{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;color:var(--t2)}
+.pro-dimp-tipos-list-item .sysbadge{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.6px;color:var(--t2);background:color-mix(in srgb,var(--t2) 10%,transparent);border:1px solid var(--border);padding:2px 7px;border-radius:6px}
+/* Calendário modal */
+.pro-dimp-cal-backdrop{position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px 16px;animation:dexSlideIn .22s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
+.pro-dimp-cal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:95vw;height:90vh;max-width:1200px;max-height:900px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.45),0 0 0 1px color-mix(in srgb,#06b6d4 22%,transparent)}
+.pro-dimp-cal-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+.pro-dimp-cal-title{flex:1;font-size:16px;font-weight:700;color:var(--text);margin:0;font-family:'Plus Jakarta Sans',sans-serif}
+.pro-dimp-cal-close{background:transparent;border:none;color:var(--t2);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;line-height:1;transition:all .15s}
+.pro-dimp-cal-close:hover{color:#ef4444;background:color-mix(in srgb,#ef4444 12%,transparent)}
+.pro-dimp-cal-nav{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg)}
+.pro-dimp-cal-nav-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text);font-size:14px;font-weight:700;width:32px;height:32px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}
+.pro-dimp-cal-nav-btn:hover{border-color:#06b6d4;color:#06b6d4}
+.pro-dimp-cal-mes{flex:1;text-align:center;font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:700;color:var(--text);text-transform:capitalize}
+.pro-dimp-cal-hoje{background:transparent;border:1px solid var(--border);color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;padding:6px 12px;border-radius:8px;cursor:pointer;transition:all .15s}
+.pro-dimp-cal-hoje:hover{border-color:#06b6d4;color:#06b6d4}
+.pro-dimp-cal-grid-wrap{flex:1;min-height:0;overflow-y:auto;padding:14px 18px 18px}
+.pro-dimp-cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px}
+.pro-dimp-cal-wd{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--t2);text-align:center;padding:6px 0}
+.pro-dimp-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:minmax(110px,1fr);gap:6px}
+.pro-dimp-cal-cell{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:4px;overflow:hidden;min-height:0}
+.pro-dimp-cal-cell.outside{opacity:.35}
+.pro-dimp-cal-cell.today{border-color:#06b6d4;background:color-mix(in srgb,#06b6d4 7%,var(--bg));box-shadow:0 0 0 1px color-mix(in srgb,#06b6d4 30%,transparent) inset}
+.pro-dimp-cal-day{font-family:'JetBrains Mono','SF Mono',monospace;font-size:12px;font-weight:700;color:var(--text);line-height:1;align-self:flex-end;padding:2px 4px}
+.pro-dimp-cal-cell.today .pro-dimp-cal-day{color:#06b6d4}
+.pro-dimp-cal-chips{display:flex;flex-direction:column;gap:3px;flex:1;min-height:0;overflow:hidden}
+.pro-dimp-cal-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;background:color-mix(in srgb,var(--c,#06b6d4) 18%,transparent);color:var(--c,#06b6d4);border:1px solid color-mix(in srgb,var(--c,#06b6d4) 30%,transparent);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2;transition:all .15s}
+.pro-dimp-cal-chip:hover{background:color-mix(in srgb,var(--c,#06b6d4) 28%,transparent)}
+.pro-dimp-cal-chip .ico{flex-shrink:0;font-size:11px}
+.pro-dimp-cal-chip .titulo{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.pro-dimp-cal-chip .periodo{font-size:9px;opacity:.85;flex-shrink:0}
+.pro-dimp-cal-mais{display:inline-block;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;color:var(--t2);padding:2px 6px;border-radius:6px;cursor:pointer;background:color-mix(in srgb,var(--t2) 10%,transparent);border:1px solid var(--border);transition:all .15s}
+.pro-dimp-cal-mais:hover{color:#06b6d4;border-color:#06b6d4}
+.pro-dimp-cal-mais-pop{position:fixed;z-index:99999;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:8px;box-shadow:0 12px 36px rgba(0,0,0,.45);max-width:280px;display:flex;flex-direction:column;gap:4px}
+/* Popup de detalhe do evento sobre o calendário */
+.pro-dimp-cal-evpop-slot{position:absolute;inset:0;pointer-events:none}
+.pro-dimp-cal-evpop-slot:empty{display:none}
+.pro-dimp-cal-evpop-backdrop{position:absolute;inset:0;z-index:5;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:24px 16px;pointer-events:auto;animation:dexSlideIn .18s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
+.pro-dimp-cal-evpop{background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:100%;max-width:540px;max-height:calc(100% - 32px);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.55),0 0 0 1px color-mix(in srgb,#06b6d4 22%,transparent)}
+.pro-dimp-cal-evpop-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.pro-dimp-cal-evpop-ico-big{font-size:28px;line-height:1;flex-shrink:0;width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--c,#06b6d4) 18%,transparent);border:1px solid color-mix(in srgb,var(--c,#06b6d4) 30%,transparent)}
+.pro-dimp-cal-evpop-title{flex:1;min-width:0;font-size:17px;font-weight:700;color:var(--text);margin:0;font-family:'Plus Jakarta Sans',sans-serif;line-height:1.3;word-break:break-word}
+.pro-dimp-cal-evpop-close{background:transparent;border:none;color:var(--t2);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;line-height:1;transition:all .15s;flex-shrink:0}
+.pro-dimp-cal-evpop-close:hover{color:#ef4444;background:color-mix(in srgb,#ef4444 12%,transparent)}
+.pro-dimp-cal-evpop-body{flex:1;min-height:0;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+.pro-dimp-cal-evpop-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:600;background:color-mix(in srgb,var(--c,#06b6d4) 18%,transparent);color:var(--c,#06b6d4);border:1px solid color-mix(in srgb,var(--c,#06b6d4) 30%,transparent);align-self:flex-start;backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%)}
+.pro-dimp-cal-evpop-row{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif}
+.pro-dimp-cal-evpop-ico{flex-shrink:0;font-size:15px}
+.pro-dimp-cal-evpop-desc{font-size:14px;color:var(--text);line-height:1.55;white-space:pre-wrap;word-break:break-word;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:10px}
+.pro-dimp-cal-evpop-link{font-size:13px;word-break:break-all}
+.pro-dimp-cal-evpop-link a{color:#06b6d4;text-decoration:none}
+.pro-dimp-cal-evpop-link a:hover{text-decoration:underline}
+.pro-dimp-cal-evpop-foot{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg);flex-shrink:0;flex-wrap:wrap}
+.pro-dimp-cal{position:relative}
+@media (max-width:640px){
+  #tab-produtos .pro-dimp-head{padding:10px 12px;gap:8px}
+  #tab-produtos .pro-dimp-title{font-size:13.5px}
+  #tab-produtos .pro-dimp-data{font-size:11px}
+  .pro-dimp-cal-backdrop{padding:0}
+  .pro-dimp-cal{width:100vw;height:100vh;max-width:none;max-height:none;border-radius:0;border:none}
+  .pro-dimp-cal-grid{grid-auto-rows:minmax(56px,1fr);gap:3px}
+  .pro-dimp-cal-cell{padding:3px;border-radius:6px}
+  .pro-dimp-cal-day{font-size:11px;padding:1px 2px}
+  .pro-dimp-cal-chip{padding:2px 4px;font-size:10px;gap:2px}
+  .pro-dimp-cal-chip .titulo{display:none}
+  .pro-dimp-cal-weekdays{gap:3px;margin-bottom:4px}
+  .pro-dimp-cal-wd{font-size:10px;padding:4px 0}
+  .pro-dimp-cal-evpop-backdrop{padding:12px 10px}
+  .pro-dimp-cal-evpop{max-width:100%;border-radius:14px}
+  .pro-dimp-cal-evpop-head{padding:12px 14px;gap:10px}
+  .pro-dimp-cal-evpop-ico-big{width:38px;height:38px;font-size:22px;border-radius:10px}
+  .pro-dimp-cal-evpop-title{font-size:15px}
+  .pro-dimp-cal-evpop-body{padding:12px 14px;gap:10px}
+  .pro-dimp-cal-evpop-foot{padding:10px 14px;gap:6px}
+  .pro-dimp-cal-evpop-foot .btn{flex:1;min-width:0}
+}
+
 #tab-produtos .pro-jornada-hint{font-size:12.5px;color:var(--t2);line-height:1.5;margin:0 0 14px;font-style:italic}
 /* Banner de rascunho não-salvo (auto-save local sobrevivente de reload) */
 #tab-produtos .pro-jornada-draft-banner{display:flex;align-items:center;gap:14px;padding:14px 16px;margin:0 0 16px;background:color-mix(in srgb,#f59e0b 8%,var(--bg2));border:1px solid color-mix(in srgb,#f59e0b 42%,var(--border));border-radius:12px;box-shadow:0 4px 12px color-mix(in srgb,#f59e0b 12%,transparent)}
@@ -6143,6 +6300,9 @@ const AUDIT_ACTIONS=[
   'USUARIO_CRIADO','USUARIO_EDITADO','USUARIO_DESATIVADO',
   'COMUNICACAO_POST_CRIADO','COMUNICACAO_POST_EDITADO','COMUNICACAO_POST_DELETADO',
   'PRODUTO_CRIADO','PRODUTO_EDITADO','PRODUTO_EXCLUIDO','PRODUTO_STATUS_ALTERADO','CATALOGO_OPCAO_ADICIONADA',
+  'DATA_IMP_CRIADA','DATA_IMP_EDITADA','DATA_IMP_REMOVIDA',
+  'DATA_IMP_TIPO_CRIADO','DATA_IMP_TIPO_EDITADO','DATA_IMP_TIPO_REMOVIDO',
+  'DATA_IMP_ESCOPO_CRIADO','DATA_IMP_ESCOPO_EDITADO','DATA_IMP_ESCOPO_REMOVIDO',
   'CONFIG_ALTERADA'
 ];
 window.AUDIT_ACTIONS=AUDIT_ACTIONS;
@@ -28530,6 +28690,34 @@ S._editaisOpen=false; // box principal aberto/fechado
 S._editaisModalOpen=false; // modal de cadastro/edição aberto
 S._editaisEditando=null; // {id, nomeProva, ano, info} sendo editado (ou null pra novo)
 S._editalAbertos=new Set(); // ids dos editais expandidos na lista
+// Datas importantes — eventos de prova/revisão/liberação/inscrição por vertical
+S.datasImp={lista:[],escopos:[],loaded:false,updatedAt:null,updatedBy:''};
+S._datasImpOpen=false;
+S._datasImpModalOpen=false;
+S._datasImpEditando=null;
+S._datasImpVerPassados=false;
+S._datasImpAbertos=new Set(); // ids de eventos com card expandido (dropdown)
+// Sub-form inline no modal pra criar novo tipo
+S._datasImpNovoTipoForm=null; // {nome,icone,cor} ou null
+// Modal lateral "Gerenciar tipos"
+S._datasImpGerenciarTiposOpen=false;
+// Escopos (classificação por audiência/track — TEA, TSA, MEs, Outros, etc)
+// Single-select por evento; eventos sem escopo viram "Sem escopo".
+S._datasImpFiltroEscopo='todos'; // 'todos' | <escopoId> | 'sem-escopo'
+S._datasImpGerenciarEscoposOpen=false;
+S._datasImpNovoEscopoForm=null; // {nome:''} ou null
+S._datasImpEditandoEscopoId=null;
+// Modal de calendário
+S._datasImpCalOpen=false;
+S._datasImpCalMes=null; // 'YYYY-MM' (default = mês atual quando abre)
+// Popup de detalhe sobre o calendário (id do evento OU null)
+S._datasImpCalEventPopup=null;
+// Tipos de eventos — global entre verticais (config/datasImportantesTipos)
+// lista = customs + overrides de system (mesmo id sobrescreve nome/icone/cor do default)
+// deletedSystemIds = tombstones — ids de system "removidos" pelo usuário
+S.datasImpTipos={lista:[],deletedSystemIds:[],loaded:false,updatedAt:null,updatedBy:''};
+// id do tipo em edição no subform (system ou custom). null = criação.
+S._datasImpEditandoTipoId=null;
 // Configuração editável do Dex (prompts por perfil, modelo, max_tokens, PDFs)
 S.dexConfig={
   templateGeral:'',templateSuporte:'',templateVendas:'',templateMarketing:'',
@@ -28576,6 +28764,8 @@ function _ensureSlackTimeListener(){
 }
 let _proJornadaUnsub=null;
 let _proEditaisUnsub=null;
+let _proDatasImpUnsub=null;
+let _datasImpTiposUnsub=null;
 let _proUnsub=null;
 let _proCatUnsub=null;
 let _proDexCfgUnsub=null;
@@ -28839,11 +29029,13 @@ function _proRebindVerticalListeners(){
   if(_proCatUnsub){try{_proCatUnsub();}catch(e){}_proCatUnsub=null;}
   if(_proJornadaUnsub){try{_proJornadaUnsub();}catch(e){}_proJornadaUnsub=null;}
   if(_proEditaisUnsub){try{_proEditaisUnsub();}catch(e){}_proEditaisUnsub=null;}
+  if(_proDatasImpUnsub){try{_proDatasImpUnsub();}catch(e){}_proDatasImpUnsub=null;}
   if(_proDexCfgUnsub){try{_proDexCfgUnsub();}catch(e){}_proDexCfgUnsub=null;}
   // Reseta estado pra evitar mostrar dados de vertical anterior por um instante
   S.catalogoConfig.publicosAlvo=[];S.catalogoConfig.provasAlvo=[];S.catalogoConfig.loaded=false;
   S.jornadaCliente.texto='';S.jornadaCliente.videoUrl='';S.jornadaCliente.imagemUrl='';S.jornadaCliente.imagemPath='';S.jornadaCliente.updatedAt=null;S.jornadaCliente.updatedBy='';S.jornadaCliente.loaded=false;
   S.editais.lista=[];S.editais.updatedAt=null;S.editais.updatedBy='';S.editais.loaded=false;
+  S.datasImp.lista=[];S.datasImp.updatedAt=null;S.datasImp.updatedBy='';S.datasImp.loaded=false;
   S.dexConfig.templateGeral='';S.dexConfig.templateSuporte='';S.dexConfig.templateVendas='';S.dexConfig.templateMarketing='';
   S.dexConfig.pdfsGeral=[];S.dexConfig.pdfsSuporte=[];S.dexConfig.pdfsVendas=[];S.dexConfig.pdfsMarketing=[];
   S.dexConfig.modelo='haiku';S.dexConfig.maxTokens=1024;S.dexConfig.updatedAt=null;S.dexConfig.updatedBy='';S.dexConfig.loaded=false;
@@ -28886,6 +29078,18 @@ function _proRebindVerticalListeners(){
     S.editais.loaded=true;
     if(S.produtosLoaded&&S.produtosView==='list'&&!S._editaisModalOpen)_proEditaisRefresh();
   },err=>{console.warn('editais onSnapshot:',err);S.editais.loaded=true;});
+  // datasImportantesTipos (global — independe da vertical, mas garantimos que tá rodando aqui)
+  _ensureDatasImpTiposListener();
+  // datasImportantes
+  _proDatasImpUnsub=onSnapshot(doc(db,'config',_verticalDocId('datasImportantes')),snap=>{
+    const d=snap.exists()?(snap.data()||{}):{};
+    S.datasImp.lista=Array.isArray(d.lista)?d.lista.filter(e=>e&&e.id):[];
+    S.datasImp.escopos=Array.isArray(d.escopos)?d.escopos.filter(x=>x&&x.id):[];
+    S.datasImp.updatedAt=d.updatedAt||null;
+    S.datasImp.updatedBy=String(d.updatedBy||'');
+    S.datasImp.loaded=true;
+    if(S.produtosLoaded&&S.produtosView==='list'&&!S._datasImpModalOpen)_proDatasImpRefresh();
+  },err=>{console.warn('datasImportantes onSnapshot:',err);S.datasImp.loaded=true;});
   // dexPrompt
   _proDexCfgUnsub=onSnapshot(doc(db,'config',_verticalDocId('dexPrompt')),snap=>{
     const d=snap.exists()?(snap.data()||{}):{};
@@ -29009,6 +29213,21 @@ window.proSelectVertical=(id)=>{
   S.verticalAtual=id;
   try{localStorage.setItem('aros.catalogo.vertical',id);}catch(e){}
   S.produtosView='list';
+  S._datasImpModalOpen=false;
+  S._datasImpEditando=null;
+  S._datasImpOpen=false;
+  S._datasImpVerPassados=false;
+  S._datasImpAbertos=new Set();
+  S._datasImpNovoTipoForm=null;
+  S._datasImpEditandoTipoId=null;
+  S._datasImpGerenciarTiposOpen=false;
+  S._datasImpCalOpen=false;
+  S._datasImpCalMes=null;
+  S._datasImpCalEventPopup=null;
+  S._datasImpFiltroEscopo='todos';
+  S._datasImpGerenciarEscoposOpen=false;
+  S._datasImpNovoEscopoForm=null;
+  S._datasImpEditandoEscopoId=null;
   // Re-sintoniza listeners da vertical escolhida (jornada/editais/catalogoConfig/dexPrompt)
   _proRebindVerticalListeners();
   _proRender();
@@ -29018,6 +29237,21 @@ window.proVoltarVerticais=()=>{
   S.verticalAtual=null;
   try{localStorage.removeItem('aros.catalogo.vertical');}catch(e){}
   S.produtosView='verticals';
+  S._datasImpModalOpen=false;
+  S._datasImpEditando=null;
+  S._datasImpOpen=false;
+  S._datasImpVerPassados=false;
+  S._datasImpAbertos=new Set();
+  S._datasImpNovoTipoForm=null;
+  S._datasImpEditandoTipoId=null;
+  S._datasImpGerenciarTiposOpen=false;
+  S._datasImpCalOpen=false;
+  S._datasImpCalMes=null;
+  S._datasImpCalEventPopup=null;
+  S._datasImpFiltroEscopo='todos';
+  S._datasImpGerenciarEscoposOpen=false;
+  S._datasImpNovoEscopoForm=null;
+  S._datasImpEditandoEscopoId=null;
   _proRender();
 };
 
@@ -29086,6 +29320,7 @@ function _proRenderList(root){
     <div id="pro-dex-container"></div>
     <div id="pro-jornada-wrap">${_proJornadaHTML()}</div>
     <div id="pro-editais-wrap">${_proEditaisHTML()}</div>
+    <div id="pro-datas-imp-wrap">${_proDatasImpHTML()}</div>
     ${listHtml}
   `;
   _proDexRender();
@@ -29421,6 +29656,1203 @@ window.proEditaisRemover=async(id)=>{
   }catch(err){
     alert('Erro ao remover: '+(err.message||err));
   }
+};
+
+// ════════════════════════════════════════════════════════════════════════
+// DATAS IMPORTANTES — caixa colapsável abaixo de Editais
+// Cada item: {id, tipo, titulo, modo, dataISO|dataInicioISO+dataFimISO, horario, descricao, link, updatedAt, updatedBy}
+// Persistido em config/datasImportantes_{vertical} (anestreview = sem sufixo)
+// ════════════════════════════════════════════════════════════════════════
+// Tipos system (default, hardcoded, sempre presentes — não editáveis, não removíveis)
+const PRO_DIMP_TIPOS_SYSTEM=[
+  {id:'prova',nome:'Prova',icone:'📅',cor:'#ef4444',system:true},
+  {id:'revisao',nome:'Revisão',icone:'📚',cor:'#2563eb',system:true},
+  {id:'liberacao',nome:'Liberação',icone:'🎁',cor:'#16a34a',system:true},
+  {id:'inscricao',nome:'Inscrição',icone:'📝',cor:'#e46d0a',system:true},
+];
+// Compat com código que ainda referencia PRO_DIMP_TIPOS (apenas leitura — o uso real
+// passa por _proDimpTiposAll que mescla system + custom carregados do Firestore).
+const PRO_DIMP_TIPOS=PRO_DIMP_TIPOS_SYSTEM.map(t=>({id:t.id,label:t.nome,ico:t.icone,cor:t.cor}));
+// Paleta fixa de cores oferecidas no formulário de novo tipo
+const PRO_DIMP_CORES_PALETA=['#ef4444','#f97316','#eab308','#16a34a','#06b6d4','#2563eb','#a855f7','#ec4899'];
+
+// Retorna a lista combinada (system - tombstones, com overrides aplicados, + custom).
+// Overrides: entry em `lista` com mesmo id de um system substitui nome/icone/cor mas mantém system:true.
+function _proDimpTiposAll(){
+  const lista=Array.isArray(S.datasImpTipos&&S.datasImpTipos.lista)?S.datasImpTipos.lista.filter(t=>t&&t.id):[];
+  const tombstones=new Set(Array.isArray(S.datasImpTipos&&S.datasImpTipos.deletedSystemIds)?S.datasImpTipos.deletedSystemIds:[]);
+  const overrides=new Map();
+  const customs=[];
+  const systemIds=new Set(PRO_DIMP_TIPOS_SYSTEM.map(t=>t.id));
+  lista.forEach(t=>{
+    if(systemIds.has(t.id))overrides.set(t.id,t);
+    else customs.push(t);
+  });
+  const systemFinais=PRO_DIMP_TIPOS_SYSTEM
+    .filter(t=>!tombstones.has(t.id))
+    .map(t=>{
+      const ov=overrides.get(t.id);
+      if(!ov)return t;
+      return {id:t.id,nome:String(ov.nome||t.nome),icone:String(ov.icone||t.icone),cor:String(ov.cor||t.cor),system:true};
+    });
+  return [...systemFinais,...customs];
+}
+function _proDimpTipoMeta(tid){
+  const all=_proDimpTiposAll();
+  const hit=all.find(x=>x.id===tid);
+  if(hit)return hit;
+  // tipo removido — placeholder genérico
+  return {id:tid||'',nome:'(tipo removido)',icone:'❓',cor:'#71717a',system:false,_removido:true};
+}
+// Listener idempotente (pode ser chamado de vários lugares)
+function _ensureDatasImpTiposListener(){
+  if(_datasImpTiposUnsub)return;
+  _datasImpTiposUnsub=onSnapshot(doc(db,'config','datasImportantesTipos'),snap=>{
+    const d=snap.exists()?(snap.data()||{}):{};
+    const raw=Array.isArray(d.lista)?d.lista:[];
+    const systemIds=new Set(PRO_DIMP_TIPOS_SYSTEM.map(t=>t.id));
+    // Mantém TODAS as entries com id válido — sejam customs OU overrides de system.
+    // O flag .system reflete se o id bate com um system default (override) ou não (custom).
+    S.datasImpTipos.lista=raw.filter(t=>t&&t.id).map(t=>({
+      id:String(t.id),
+      nome:String(t.nome||t.label||'(sem nome)'),
+      icone:String(t.icone||t.ico||'📌'),
+      cor:String(t.cor||'#06b6d4'),
+      system:systemIds.has(String(t.id)),
+      criadoEm:t.criadoEm||null,
+      criadoPor:String(t.criadoPor||'')
+    }));
+    S.datasImpTipos.deletedSystemIds=Array.isArray(d.deletedSystemIds)?d.deletedSystemIds.filter(x=>typeof x==='string'&&systemIds.has(x)):[];
+    S.datasImpTipos.updatedAt=d.updatedAt||null;
+    S.datasImpTipos.updatedBy=String(d.updatedBy||'');
+    S.datasImpTipos.loaded=true;
+    // Re-render sempre que tipos mudarem (chips do modal de evento, modal de gerenciar tipos,
+    // ícones/cores dos cards na lista, e chips do calendário todos dependem disso)
+    if(S.produtosLoaded&&S.produtosView==='list')_proDatasImpRefresh();
+  },err=>{console.warn('datasImportantesTipos onSnapshot:',err);S.datasImpTipos.loaded=true;});
+}
+function _proDimpHoje(){return new Date().toISOString().slice(0,10);}
+function _proDimpPassou(e){
+  const hoje=_proDimpHoje();
+  if(e.modo==='periodo')return String(e.dataFimISO||'')<hoje;
+  return String(e.dataISO||'')<hoje;
+}
+function _proDimpFmtData(iso){
+  if(!iso||iso.length<10)return'';
+  const[y,m,d]=iso.split('-');
+  return`${d}/${m}/${y}`;
+}
+function _proDimpFmtDataCurta(iso){
+  if(!iso||iso.length<10)return'';
+  const[y,m,d]=iso.split('-');
+  return`${d}/${m}`;
+}
+function _proDimpOrdKey(e){
+  // chave de ordenação cronológica ascendente
+  if(e.modo==='periodo')return String(e.dataInicioISO||'9999-99-99');
+  return String(e.dataISO||'9999-99-99');
+}
+// Lookup de escopo por id (devolve null se id null/'' ou não bate em nada)
+function _proDimpEscopoMeta(eid){
+  const id=String(eid||'');
+  if(!id)return null;
+  const lista=Array.isArray(S.datasImp&&S.datasImp.escopos)?S.datasImp.escopos:[];
+  const hit=lista.find(x=>x&&x.id===id);
+  return hit||null;
+}
+// Aplica o filtro de escopo vigente (S._datasImpFiltroEscopo) a uma lista de eventos.
+function _proDimpAplicaFiltroEscopo(arr){
+  const f=String(S._datasImpFiltroEscopo||'todos');
+  if(f==='todos')return arr;
+  if(f==='sem-escopo')return arr.filter(e=>!e||!e.escopoId);
+  // filtro por id específico — se o escopo foi deletado, nada bate
+  return arr.filter(e=>e&&String(e.escopoId||'')===f);
+}
+
+function _proDatasImpHTML(){
+  const canEdit=_proCanEdit();
+  const open=!!S._datasImpOpen;
+  const loaded=!!S.datasImp.loaded;
+  const listaRaw=Array.isArray(S.datasImp.lista)?S.datasImp.lista:[];
+  const lista=_proDimpAplicaFiltroEscopo(listaRaw);
+  const ord=lista.slice().sort((a,b)=>_proDimpOrdKey(a).localeCompare(_proDimpOrdKey(b)));
+  const futuras=ord.filter(e=>!_proDimpPassou(e));
+  const passadas=ord.filter(e=>_proDimpPassou(e));
+  let bodyHtml;
+  if(!loaded){
+    bodyHtml=`<p style="color:var(--t2);font-style:italic;margin:0">Carregando…</p>`;
+  }else{
+    const cadastrarBtn=canEdit?`<button class="btn btn-p btn-sm" type="button" onclick="proDatasImpAbrirNovo()">＋ Cadastrar evento</button>`:'';
+    const calendarioBtn=`<button class="btn btn-s btn-sm" type="button" onclick="proDatasImpAbrirCalendario()" title="Ver eventos no calendário">📅 Ver calendário</button>`;
+    const toolbar=(canEdit||listaRaw.length)?`<div class="pro-dimp-toolbar">${cadastrarBtn}${calendarioBtn}</div>`:'';
+    const filtroBar=_proDatasImpFiltroEscopoHTML(canEdit);
+    let listaHtml='';
+    if(!listaRaw.length){
+      listaHtml=`<p style="color:var(--t2);font-style:italic;margin:0">Nenhum evento cadastrado ainda.${canEdit?' Clique em "Cadastrar evento" pra começar.':''}</p>`;
+    }else if(!futuras.length&&!passadas.length){
+      listaHtml=`<p style="color:var(--t2);font-style:italic;margin:0">Nenhum evento neste escopo. Troque o filtro pra ver outros.</p>`;
+    }else{
+      const futurasHtml=futuras.length?futuras.map(e=>_proDatasImpItemHTML(e,canEdit,false)).join(''):
+        `<p style="color:var(--t2);font-style:italic;margin:0">Nenhum evento futuro. ${passadas.length?'Veja os passados abaixo.':''}</p>`;
+      const verPassadosBtn=passadas.length?
+        `<button class="pro-dimp-ver-passados" type="button" onclick="proDatasImpToggleVerPassados()">${S._datasImpVerPassados?'▴ Ocultar passados':`▾ Ver passados (${passadas.length})`}</button>`:'';
+      const passadasHtml=(S._datasImpVerPassados&&passadas.length)?
+        `<div class="pro-editais-lista" style="margin-top:10px">${passadas.map(e=>_proDatasImpItemHTML(e,canEdit,true)).join('')}</div>`:'';
+      listaHtml=`<div class="pro-editais-lista">${futurasHtml}</div>${verPassadosBtn}${passadasHtml}`;
+    }
+    bodyHtml=`${toolbar}${filtroBar}${listaHtml}`;
+  }
+  const updMeta=(S.datasImp.updatedAt&&S.datasImp.updatedBy)?`<span class="pro-jornada-meta">Atualizado em ${_proEsc(_proFmtDate(S.datasImp.updatedAt))} por ${_proEsc(S.datasImp.updatedBy)}</span>`:'';
+  const modalHtml=S._datasImpModalOpen?_proDatasImpModalHTML():'';
+  const gerTiposHtml=S._datasImpGerenciarTiposOpen?_proDatasImpGerenciarTiposHTML():'';
+  const gerEscoposHtml=S._datasImpGerenciarEscoposOpen?_proDatasImpGerenciarEscoposHTML():'';
+  const calHtml=S._datasImpCalOpen?_proDatasImpCalendarioHTML():'';
+  return `<div class="pro-jornada-disc${open?' open':''}" data-datas-imp-disc>
+    <div class="pro-jornada-head" role="button" tabindex="0" onclick="proToggleDatasImp()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proToggleDatasImp()}" aria-expanded="${open}">
+      <span class="pro-jornada-title"><span class="pro-jornada-ico">📆</span> Datas importantes</span>
+      ${updMeta}
+      <span class="pro-jornada-caret">▾</span>
+    </div>
+    <div class="pro-jornada-body">${bodyHtml}</div>
+  </div>${modalHtml}${gerTiposHtml}${gerEscoposHtml}${calHtml}`;
+}
+
+// Barra horizontal de chips de escopo (filtro de visualização)
+function _proDatasImpFiltroEscopoHTML(canEdit){
+  const escopos=Array.isArray(S.datasImp&&S.datasImp.escopos)?S.datasImp.escopos:[];
+  const f=String(S._datasImpFiltroEscopo||'todos');
+  // Se NÃO há escopos cadastrados, mostra só o botão discreto (se canEdit)
+  if(!escopos.length){
+    return canEdit?`<div class="pro-dimp-escopos-bar empty"><button type="button" class="pro-dimp-escopos-manage-empty" onclick="proDatasImpAbrirGerenciarEscopos()" title="Criar escopos pra classificar eventos por público">⚙ Gerenciar escopos</button></div>`:'';
+  }
+  const chip=(id,label,active)=>`<button type="button" class="pro-dimp-escopo-filtro-chip${active?' on':''}" onclick="proDatasImpSetFiltroEscopo('${_proEscAttr(id)}')">${_proEsc(label)}</button>`;
+  const chips=[chip('todos','Todos',f==='todos')];
+  escopos.forEach(esc=>{chips.push(chip(esc.id,String(esc.nome||'(sem nome)'),f===esc.id));});
+  chips.push(chip('sem-escopo','Sem escopo',f==='sem-escopo'));
+  const manageBtn=canEdit?`<button type="button" class="pro-dimp-escopos-manage-btn" onclick="proDatasImpAbrirGerenciarEscopos()" title="Gerenciar escopos">⚙</button>`:'';
+  return `<div class="pro-dimp-escopos-bar">
+    <span class="pro-dimp-escopos-label">Escopos:</span>
+    <div class="pro-dimp-escopos-chips">${chips.join('')}</div>
+    ${manageBtn}
+  </div>`;
+}
+
+function _proDatasImpItemHTML(e,canEdit,passou){
+  const id=String(e.id||'');
+  const aberto=S._datasImpAbertos.has(id);
+  const meta=_proDimpTipoMeta(e.tipo);
+  const titulo=String(e.titulo||'').trim()||'(sem título)';
+  let dataTxt='';
+  if(e.modo==='periodo'){
+    dataTxt=`${_proDimpFmtDataCurta(e.dataInicioISO)} – ${_proDimpFmtData(e.dataFimISO)}`;
+  }else{
+    dataTxt=_proDimpFmtData(e.dataISO);
+  }
+  const hora=String(e.horario||'').trim();
+  const desc=String(e.descricao||'').trim();
+  const link=String(e.link||'').trim();
+  const hasBody=!!(desc||link);
+  const actions=canEdit?`<div class="pro-dimp-actions" onclick="event.stopPropagation()">
+    <button class="pro-icon-btn" type="button" onclick="event.stopPropagation();proDatasImpEditar('${_proEscAttr(id)}')" title="Editar evento">✏️</button>
+    <button class="pro-icon-btn" type="button" onclick="event.stopPropagation();proDatasImpRemover('${_proEscAttr(id)}')" title="Remover evento">🗑</button>
+  </div>`:'';
+  const linkHtml=link?`<a href="${_proEscAttr(link)}" target="_blank" rel="noopener" class="pro-dimp-link" onclick="event.stopPropagation()">${_proEsc(link)}</a>`:'';
+  const descHtml=desc?`<div class="pro-dimp-desc">${_proEsc(desc)}</div>`:'';
+  const horaHtml=(e.modo!=='periodo'&&hora)?`<span class="pro-dimp-hora">${_proEsc(hora)}</span>`:'';
+  const badgeCls=passou?'pro-dimp-badge passou':'pro-dimp-badge';
+  const badgeLabel=passou?'passou':String(meta.nome||'');
+  const escopo=_proDimpEscopoMeta(e.escopoId);
+  const escopoBadge=escopo?`<span class="pro-dimp-escopo-badge" title="Escopo: ${_proEscAttr(escopo.nome)}">${_proEsc(escopo.nome)}</span>`:'';
+  const cardCls=`pro-dimp-card${passou?' passou':''}${aberto&&hasBody?' open':''}`;
+  const headCls=`pro-dimp-head${hasBody?'':' no-body'}`;
+  const headOnclick=hasBody?` onclick="proDatasImpToggle('${_proEscAttr(id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proDatasImpToggle('${_proEscAttr(id)}')}" role="button" tabindex="0" aria-expanded="${aberto}"`:'';
+  const caretCls=hasBody?'pro-dimp-caret':'pro-dimp-caret disabled';
+  return `<div class="${cardCls}" style="--c:${meta.cor}" data-dimp-id="${_proEscAttr(id)}">
+    <div class="${headCls}"${headOnclick}>
+      <span class="pro-dimp-ico">${meta.icone}</span>
+      <span class="pro-dimp-title">${_proEsc(titulo)}</span>
+      <span class="pro-dimp-data">${_proEsc(dataTxt)}${horaHtml}</span>
+      ${escopoBadge}
+      <span class="${badgeCls}">${_proEsc(badgeLabel)}</span>
+      ${actions}
+      <span class="${caretCls}">▾</span>
+    </div>
+    ${hasBody?`<div class="pro-dimp-body">${descHtml}${linkHtml}</div>`:''}
+  </div>`;
+}
+
+function _proDatasImpModalHTML(){
+  const e=S._datasImpEditando||{tipo:'prova',titulo:'',modo:'pontual',dataISO:'',horario:'',dataInicioISO:'',dataFimISO:'',descricao:'',link:''};
+  const isEdit=!!e.id;
+  const titulo=isEdit?'Editar evento':'Cadastrar evento';
+  const canEdit=_proCanEdit();
+  const allTipos=_proDimpTiposAll();
+  const tiposChips=allTipos.length?allTipos.map(t=>{
+    const on=e.tipo===t.id;
+    return `<div class="pro-dimp-tipo-chip${on?' on':''}" style="--c:${t.cor}" onclick="_proDatasImpSetCampo('tipo','${_proEscAttr(t.id)}')"><span>${t.icone}</span><span>${_proEsc(t.nome)}</span></div>`;
+  }).join(''):`<span style="color:var(--t2);font-style:italic;font-size:13px">Nenhum tipo cadastrado. ${canEdit?'Crie um abaixo.':''}</span>`;
+  const novoTipoChip=canEdit?`<div class="pro-dimp-tipo-chip add" onclick="_proDatasImpToggleNovoTipoForm()" title="Criar novo tipo">＋ Novo tipo</div>`:'';
+  const manageBtn=canEdit?`<button type="button" class="pro-dimp-tipos-manage" onclick="proDatasImpAbrirGerenciarTipos()" title="Gerenciar tipos personalizados">⚙ Gerenciar tipos</button>`:'';
+  const novoTipoForm=S._datasImpNovoTipoForm?_proDatasImpNovoTipoFormHTML():'';
+  // Escopo (single-select): "Sem escopo" + escopos cadastrados + "+ Novo" (se canEdit)
+  const escopos=Array.isArray(S.datasImp&&S.datasImp.escopos)?S.datasImp.escopos:[];
+  const escopoAtual=String(e.escopoId||'');
+  const escopoChips=[
+    `<div class="pro-dimp-escopo-chip${!escopoAtual?' on':''}" onclick="_proDatasImpSetCampoEscopo('')">Sem escopo</div>`,
+    ...escopos.map(esc=>`<div class="pro-dimp-escopo-chip${escopoAtual===esc.id?' on':''}" onclick="_proDatasImpSetCampoEscopo('${_proEscAttr(esc.id)}')">${_proEsc(esc.nome||'(sem nome)')}</div>`)
+  ].join('');
+  const novoEscopoChip=(canEdit&&!S._datasImpNovoEscopoForm)?`<div class="pro-dimp-escopo-chip add" onclick="proDatasImpToggleNovoEscopoForm()" title="Criar novo escopo">＋ Novo</div>`:'';
+  const manageEscBtn=canEdit?`<button type="button" class="pro-dimp-tipos-manage" onclick="proDatasImpAbrirGerenciarEscopos()" title="Gerenciar escopos">⚙ Gerenciar</button>`:'';
+  const novoEscopoForm=S._datasImpNovoEscopoForm?_proDatasImpNovoEscopoFormHTML():'';
+  const modoPontualOn=e.modo!=='periodo';
+  const modoPeriodoOn=e.modo==='periodo';
+  const camposDataPontual=`<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+    <div class="fg" style="flex:1;min-width:160px;margin-bottom:0">
+      <label class="fl">Data</label>
+      <input type="date" class="fc" value="${_proEscAttr(e.dataISO||'')}" oninput="_proDatasImpSetCampo('dataISO',this.value)"/>
+    </div>
+    <div class="fg" style="flex:1;min-width:130px;margin-bottom:0">
+      <label class="fl">Horário (opcional)</label>
+      <input type="time" class="fc" value="${_proEscAttr(e.horario||'')}" oninput="_proDatasImpSetCampo('horario',this.value)"/>
+    </div>
+  </div>`;
+  const camposDataPeriodo=`<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+    <div class="fg" style="flex:1;min-width:160px;margin-bottom:0">
+      <label class="fl">Data de início</label>
+      <input type="date" class="fc" value="${_proEscAttr(e.dataInicioISO||'')}" oninput="_proDatasImpSetCampo('dataInicioISO',this.value)"/>
+    </div>
+    <div class="fg" style="flex:1;min-width:160px;margin-bottom:0">
+      <label class="fl">Data de fim</label>
+      <input type="date" class="fc" value="${_proEscAttr(e.dataFimISO||'')}" oninput="_proDatasImpSetCampo('dataFimISO',this.value)"/>
+    </div>
+  </div>`;
+  return `<div class="pro-editais-modal-backdrop">
+    <div class="pro-editais-modal" role="dialog" aria-modal="true">
+      <div class="pro-editais-modal-head">
+        <h3 class="pro-editais-modal-title">📆 ${titulo}</h3>
+        <button class="pro-editais-modal-close" type="button" onclick="proDatasImpModalFechar()" title="Fechar">✕</button>
+      </div>
+      <div class="pro-editais-modal-body">
+        <div class="fg" style="margin-bottom:14px">
+          <label class="fl">Tipo</label>
+          <div class="pro-dimp-tipos-row">
+            <div class="pro-dimp-tipos-chips">${tiposChips}${novoTipoChip}</div>
+            ${manageBtn}
+          </div>
+          ${novoTipoForm}
+        </div>
+        <div class="fg" style="margin-bottom:14px">
+          <label class="fl">Escopo</label>
+          <div class="pro-dimp-tipos-row">
+            <div class="pro-dimp-tipos-chips">${escopoChips}${novoEscopoChip}</div>
+            ${manageEscBtn}
+          </div>
+          ${novoEscopoForm}
+        </div>
+        <div class="fg" style="margin-bottom:14px">
+          <label class="fl">Título</label>
+          <input type="text" class="fc" placeholder="Ex: Prova TEA 2026 — 1ª Fase" value="${_proEscAttr(e.titulo||'')}" oninput="_proDatasImpSetCampo('titulo',this.value)"/>
+        </div>
+        <div class="fg" style="margin-bottom:14px">
+          <label class="fl">Modo</label>
+          <div class="pro-dimp-modo-radios">
+            <div class="pro-dimp-modo-radio${modoPontualOn?' on':''}" onclick="_proDatasImpSetCampo('modo','pontual')">📍 Data única</div>
+            <div class="pro-dimp-modo-radio${modoPeriodoOn?' on':''}" onclick="_proDatasImpSetCampo('modo','periodo')">📐 Período</div>
+          </div>
+        </div>
+        ${modoPeriodoOn?camposDataPeriodo:camposDataPontual}
+        <div class="fg" style="margin-bottom:14px">
+          <label class="fl">Descrição (opcional)</label>
+          <textarea class="fc" rows="3" placeholder="Detalhes do evento, observações, etc." oninput="_proDatasImpSetCampo('descricao',this.value)" style="resize:vertical;font-family:'Plus Jakarta Sans',sans-serif;line-height:1.5">${_proEsc(e.descricao||'')}</textarea>
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label class="fl">Link (opcional)</label>
+          <input type="url" class="fc" placeholder="https://..." value="${_proEscAttr(e.link||'')}" oninput="_proDatasImpSetCampo('link',this.value)"/>
+        </div>
+      </div>
+      <div class="pro-editais-modal-foot">
+        <button class="btn btn-s btn-sm" type="button" onclick="proDatasImpModalFechar()">Cancelar</button>
+        <button class="btn btn-p btn-sm" type="button" onclick="proDatasImpModalSalvar()">💾 Salvar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function _proDatasImpRefresh(){
+  const wrap=document.getElementById('pro-datas-imp-wrap');
+  if(!wrap)return;
+  // Preserva foco em inputs do modal (qual campo + posição do cursor pra inputs de texto)
+  const ae=document.activeElement;
+  let focusKey=null,selStart=null,selEnd=null;
+  if(ae&&wrap.contains(ae)){
+    // identifica por atributos onde estamos
+    const tag=ae.tagName;
+    const oninput=ae.getAttribute('oninput')||'';
+    focusKey=`${tag}|${oninput}`;
+    if(ae.setSelectionRange&&(tag==='INPUT'||tag==='TEXTAREA')){
+      try{selStart=ae.selectionStart;selEnd=ae.selectionEnd;}catch(e){}
+    }
+  }
+  wrap.innerHTML=_proDatasImpHTML();
+  if(focusKey){
+    const [tag,oninput]=focusKey.split('|');
+    const sel=`${tag.toLowerCase()}[oninput="${oninput.replace(/"/g,'\\"')}"]`;
+    const next=wrap.querySelector(sel);
+    if(next){
+      next.focus();
+      if(selStart!=null&&next.setSelectionRange){
+        try{next.setSelectionRange(selStart,selEnd);}catch(e){}
+      }
+    }
+  }
+}
+
+window.proToggleDatasImp=()=>{
+  S._datasImpOpen=!S._datasImpOpen;
+  const el=document.querySelector('#tab-produtos [data-datas-imp-disc]');
+  if(el)el.classList.toggle('open',!!S._datasImpOpen);
+};
+
+window.proDatasImpToggleVerPassados=()=>{
+  S._datasImpVerPassados=!S._datasImpVerPassados;
+  _proDatasImpRefresh();
+};
+
+window.proDatasImpAbrirNovo=()=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const all=_proDimpTiposAll();
+  const tipoDefault=all.find(t=>t.id==='prova')?'prova':(all[0]&&all[0].id)||'';
+  S._datasImpEditando={id:null,tipo:tipoDefault,titulo:'',modo:'pontual',dataISO:_proDimpHoje(),horario:'',dataInicioISO:_proDimpHoje(),dataFimISO:_proDimpHoje(),descricao:'',link:'',escopoId:''};
+  S._datasImpModalOpen=true;
+  _proDatasImpRefresh();
+};
+
+window.proDatasImpEditar=(id)=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const e=S.datasImp.lista.find(x=>x.id===id);
+  if(!e)return alert('Evento não encontrado.');
+  S._datasImpEditando={
+    id:e.id,
+    tipo:String(e.tipo||'prova'),
+    titulo:String(e.titulo||''),
+    modo:e.modo==='periodo'?'periodo':'pontual',
+    dataISO:String(e.dataISO||''),
+    horario:String(e.horario||''),
+    dataInicioISO:String(e.dataInicioISO||''),
+    dataFimISO:String(e.dataFimISO||''),
+    descricao:String(e.descricao||''),
+    link:String(e.link||''),
+    escopoId:String(e.escopoId||'')
+  };
+  S._datasImpModalOpen=true;
+  _proDatasImpRefresh();
+};
+
+window.proDatasImpModalFechar=()=>{
+  S._datasImpModalOpen=false;
+  S._datasImpEditando=null;
+  S._datasImpNovoTipoForm=null;
+  S._datasImpEditandoTipoId=null;
+  S._datasImpNovoEscopoForm=null;
+  S._datasImpEditandoEscopoId=null;
+  _proDatasImpRefresh();
+};
+
+window._proDatasImpSetCampo=(campo,valor)=>{
+  if(!S._datasImpEditando)return;
+  S._datasImpEditando[campo]=valor;
+  // Mudanças que afetam o layout do modal precisam re-render
+  if(campo==='tipo'||campo==='modo')_proDatasImpRefresh();
+};
+
+window.proDatasImpModalSalvar=async()=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const e=S._datasImpEditando;
+  if(!e)return;
+  const titulo=String(e.titulo||'').trim();
+  if(!titulo)return alert('Informe o título do evento.');
+  const allTipos=_proDimpTiposAll();
+  const tiposValidos=allTipos.map(t=>t.id);
+  if(!tiposValidos.length)return alert('Nenhum tipo cadastrado. Crie um tipo antes de salvar.');
+  const tipo=tiposValidos.includes(e.tipo)?e.tipo:tiposValidos[0];
+  const modo=e.modo==='periodo'?'periodo':'pontual';
+  let dataISO='',dataInicioISO='',dataFimISO='',horario='';
+  if(modo==='periodo'){
+    dataInicioISO=String(e.dataInicioISO||'').trim();
+    dataFimISO=String(e.dataFimISO||'').trim();
+    if(!dataInicioISO||!dataFimISO)return alert('Informe a data de início e fim do período.');
+    if(dataFimISO<dataInicioISO)return alert('A data de fim deve ser igual ou posterior à data de início.');
+  }else{
+    dataISO=String(e.dataISO||'').trim();
+    if(!dataISO)return alert('Informe a data do evento.');
+    horario=String(e.horario||'').trim();
+  }
+  const descricao=String(e.descricao||'').trim();
+  const link=String(e.link||'').trim();
+  if(link&&!/^https?:\/\//i.test(link))return alert('Link inválido — deve começar com http:// ou https://');
+  // Valida escopoId: se vazio = null (sem escopo); se setado, precisa bater com algum escopo existente.
+  const escopos=Array.isArray(S.datasImp&&S.datasImp.escopos)?S.datasImp.escopos:[];
+  const escopoIdRaw=String(e.escopoId||'').trim();
+  const escopoId=(escopoIdRaw&&escopos.some(x=>x.id===escopoIdRaw))?escopoIdRaw:null;
+  try{
+    const user=(S.currentUser&&S.currentUser.username)||'?';
+    const novaLista=S.datasImp.lista.slice();
+    const base={tipo,titulo,modo,descricao,link,escopoId,updatedAt:new Date().toISOString(),updatedBy:user};
+    if(modo==='periodo'){base.dataInicioISO=dataInicioISO;base.dataFimISO=dataFimISO;base.dataISO='';base.horario='';}
+    else{base.dataISO=dataISO;base.horario=horario;base.dataInicioISO='';base.dataFimISO='';}
+    if(e.id){
+      const idx=novaLista.findIndex(x=>x.id===e.id);
+      if(idx>=0)novaLista[idx]={...novaLista[idx],...base};
+    }else{
+      novaLista.push({id:_proUid(),...base});
+    }
+    await setDoc(doc(db,'config',_verticalDocId('datasImportantes')),{lista:novaLista,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    if(typeof audit==='function')audit(e.id?'DATA_IMP_EDITADA':'DATA_IMP_CRIADA',{collection:'config',id:'datasImportantes'},{after:{titulo,tipo,modo,escopoId}});
+    S._datasImpModalOpen=false;
+    S._datasImpEditando=null;
+    _proSaveFeedback('ok');
+    _proDatasImpRefresh();
+  }catch(err){
+    alert('Erro ao salvar: '+(err.message||err));
+  }
+};
+
+window.proDatasImpRemover=async(id)=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const e=S.datasImp.lista.find(x=>x.id===id);
+  if(!e)return;
+  const lbl=String(e.titulo||'').trim()||'(sem título)';
+  if(!confirm(`Remover o evento "${lbl}"? Esta ação não pode ser desfeita.`))return;
+  try{
+    const user=(S.currentUser&&S.currentUser.username)||'?';
+    const novaLista=S.datasImp.lista.filter(x=>x.id!==id);
+    await setDoc(doc(db,'config',_verticalDocId('datasImportantes')),{lista:novaLista,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    if(typeof audit==='function')audit('DATA_IMP_REMOVIDA',{collection:'config',id:'datasImportantes'},{after:{titulo:lbl}});
+    S._datasImpAbertos.delete(id);
+    _proSaveFeedback('ok');
+    _proDatasImpRefresh();
+  }catch(err){
+    alert('Erro ao remover: '+(err.message||err));
+  }
+};
+
+// ── Toggle dropdown do card de evento (clone de proEditalToggle)
+window.proDatasImpToggle=(id)=>{
+  if(S._datasImpAbertos.has(id))S._datasImpAbertos.delete(id);else S._datasImpAbertos.add(id);
+  const el=document.querySelector(`#tab-produtos .pro-dimp-card[data-dimp-id="${id}"]`);
+  if(el)el.classList.toggle('open',S._datasImpAbertos.has(id));
+};
+
+// ── Sub-form "Novo tipo" / "Editar tipo" inline (modal de evento OU gerenciar tipos)
+window._proDatasImpToggleNovoTipoForm=()=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  if(S._datasImpNovoTipoForm){
+    S._datasImpNovoTipoForm=null;
+    S._datasImpEditandoTipoId=null;
+  }else{
+    S._datasImpNovoTipoForm={nome:'',icone:PRO_ICONES_CURADOS[0],cor:PRO_DIMP_CORES_PALETA[0]};
+    S._datasImpEditandoTipoId=null;
+  }
+  _proDatasImpRefresh();
+};
+// Abre o subform pré-preenchido pra editar um tipo (system ou custom).
+window.proDatasImpEditarTipo=(tid)=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const all=_proDimpTiposAll();
+  const t=all.find(x=>x.id===tid);
+  if(!t)return alert('Tipo não encontrado.');
+  S._datasImpEditandoTipoId=tid;
+  S._datasImpNovoTipoForm={
+    nome:String(t.nome||''),
+    icone:String(t.icone||PRO_ICONES_CURADOS[0]),
+    cor:PRO_DIMP_CORES_PALETA.includes(t.cor)?t.cor:PRO_DIMP_CORES_PALETA[0]
+  };
+  _proDatasImpRefresh();
+};
+window._proDatasImpSetNovoTipo=(campo,valor)=>{
+  if(!S._datasImpNovoTipoForm)return;
+  S._datasImpNovoTipoForm[campo]=valor;
+  // Repintar pra refletir picker selecionado / nova cor; nome é só re-render no blur pra não roubar foco
+  if(campo!=='nome')_proDatasImpRefresh();
+};
+window._proDatasImpSetNovoTipoNome=(valor)=>{
+  if(!S._datasImpNovoTipoForm)return;
+  S._datasImpNovoTipoForm.nome=String(valor||'');
+};
+// Ícone personalizado: aceita qualquer emoji/caractere digitado/colado.
+// Não re-renderiza no oninput pra não roubar foco enquanto o usuário digita.
+// Atualiza só o preview ao vivo via DOM e força repaint no blur (não necessário aqui — o repaint vem com qualquer próximo click).
+window._proDatasImpSetIconeCustom=(valor)=>{
+  if(!S._datasImpNovoTipoForm)return;
+  const v=String(valor||'').trim().slice(0,8);
+  // Se vazio, mantém o ícone curado atualmente selecionado (não zera).
+  if(!v){
+    S._datasImpNovoTipoForm.icone=S._datasImpNovoTipoForm.icone||PRO_ICONES_CURADOS[0];
+  }else{
+    S._datasImpNovoTipoForm.icone=v;
+  }
+  // Atualiza preview e desmarca botões do grid sem perder foco do input
+  const preview=document.querySelector('.pro-dimp-icon-preview');
+  if(preview)preview.textContent=S._datasImpNovoTipoForm.icone;
+  // Limpa highlight de qualquer botão curado selecionado
+  document.querySelectorAll('.pro-icon-grid.pro-icon-grid-sm button').forEach(btn=>{
+    const ic=btn.textContent;
+    const on=ic===S._datasImpNovoTipoForm.icone;
+    btn.style.borderColor=on?'#06b6d4':'';
+    btn.style.background=on?'color-mix(in srgb,#06b6d4 14%,var(--bg3))':'';
+  });
+};
+window._proDatasImpCriarTipo=async()=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const f=S._datasImpNovoTipoForm;if(!f)return;
+  const nome=String(f.nome||'').trim().slice(0,30);
+  if(!nome)return alert('Informe o nome do tipo.');
+  const icone=String(f.icone||'📌').trim()||'📌';
+  const cor=PRO_DIMP_CORES_PALETA.includes(f.cor)?f.cor:PRO_DIMP_CORES_PALETA[0];
+  const user=(S.currentUser&&S.currentUser.username)||'?';
+  const editandoId=S._datasImpEditandoTipoId||null;
+  const systemIds=new Set(PRO_DIMP_TIPOS_SYSTEM.map(t=>t.id));
+  const atuais=Array.isArray(S.datasImpTipos.lista)?S.datasImpTipos.lista.slice():[];
+  let novaLista,idFinal,actionAudit;
+  if(editandoId){
+    // Edição: atualiza override OU custom existente. Se for system sem override, cria override.
+    idFinal=editandoId;
+    const idx=atuais.findIndex(t=>t.id===editandoId);
+    const isSystem=systemIds.has(editandoId);
+    const novo={
+      id:editandoId,nome,icone,cor,
+      system:isSystem,
+      criadoEm:(idx>=0&&atuais[idx].criadoEm)||new Date().toISOString(),
+      criadoPor:(idx>=0&&atuais[idx].criadoPor)||user
+    };
+    if(idx>=0)novaLista=atuais.map((t,i)=>i===idx?novo:t);
+    else novaLista=[...atuais,novo];
+    actionAudit='DATA_IMP_TIPO_EDITADO';
+  }else{
+    // Criação: gera id novo. Slug + sufixo pra evitar colisão (e não bater com system ids).
+    const slug=nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,20)||'tipo';
+    idFinal=`${slug}-${_proUid()}`;
+    const novo={id:idFinal,nome,icone,cor,system:false,criadoEm:new Date().toISOString(),criadoPor:user};
+    novaLista=[...atuais,novo];
+    actionAudit='DATA_IMP_TIPO_CRIADO';
+  }
+  try{
+    await setDoc(doc(db,'config','datasImportantesTipos'),{lista:novaLista,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    if(typeof audit==='function')audit(actionAudit,{collection:'config',id:'datasImportantesTipos'},{after:{id:idFinal,nome,cor}});
+    // Em criação dentro do modal de evento, seleciona o tipo novo automaticamente.
+    if(!editandoId&&S._datasImpEditando)S._datasImpEditando.tipo=idFinal;
+    S._datasImpNovoTipoForm=null;
+    S._datasImpEditandoTipoId=null;
+    _proSaveFeedback('ok');
+    _proDatasImpRefresh();
+  }catch(err){
+    alert('Erro ao salvar tipo: '+(err.message||err));
+  }
+};
+
+// ── Modal lateral "Gerenciar tipos"
+function _proDatasImpGerenciarTiposHTML(){
+  const canEdit=_proCanEdit();
+  const all=_proDimpTiposAll();
+  // Contagem de uso por tipo (consolida todos os eventos da vertical atual — não é global mas é o que dá pra mostrar)
+  const usoMap={};
+  (S.datasImp.lista||[]).forEach(e=>{if(e&&e.tipo){usoMap[e.tipo]=(usoMap[e.tipo]||0)+1;}});
+  const editandoId=S._datasImpEditandoTipoId||null;
+  const subform=(S._datasImpNovoTipoForm&&canEdit)?_proDatasImpNovoTipoFormHTML():'';
+  const itens=all.length?all.map(t=>{
+    const isEditing=editandoId===t.id;
+    const actions=canEdit?`<button class="pro-icon-btn" type="button" onclick="proDatasImpEditarTipo('${_proEscAttr(t.id)}')" title="Editar tipo"${isEditing?' disabled style="opacity:.5"':''}>✏️</button>
+      <button class="pro-icon-btn" type="button" onclick="proDatasImpRemoverTipo('${_proEscAttr(t.id)}')" title="Remover tipo">🗑</button>`:'';
+    return `<div class="pro-dimp-tipos-list-item${isEditing?' editing':''}" style="--c:${t.cor}">
+      <span class="ico">${t.icone}</span>
+      <span class="nome">${_proEsc(t.nome)}</span>
+      <span class="meta">${usoMap[t.id]||0} eventos</span>
+      ${actions}
+    </div>`;
+  }).join(''):`<p style="color:var(--t2);font-style:italic;margin:0">Nenhum tipo cadastrado. Crie um pelo botão abaixo.</p>`;
+  const novoTipoBtn=(canEdit&&!S._datasImpNovoTipoForm)?`<button type="button" class="btn btn-s btn-sm" style="margin-top:10px" onclick="_proDatasImpToggleNovoTipoForm()">＋ Novo tipo</button>`:'';
+  return `<div class="pro-editais-modal-backdrop" onclick="if(event.target===this)proDatasImpFecharGerenciarTipos()">
+    <div class="pro-editais-modal" role="dialog" aria-modal="true" style="max-width:560px">
+      <div class="pro-editais-modal-head">
+        <h3 class="pro-editais-modal-title">⚙ Gerenciar tipos</h3>
+        <button class="pro-editais-modal-close" type="button" onclick="proDatasImpFecharGerenciarTipos()" title="Fechar">✕</button>
+      </div>
+      <div class="pro-editais-modal-body">
+        <p style="color:var(--t2);font-size:12.5px;line-height:1.5;margin:0 0 12px">Tipos são globais — aparecem em todas as verticais. Renomear ou remover um tipo afeta todos os eventos que o usam.</p>
+        <div class="fg" style="margin-bottom:0">
+          <label class="fl">Todos os tipos</label>
+          <div class="pro-dimp-tipos-list">${itens}</div>
+          ${novoTipoBtn}
+          ${subform}
+        </div>
+      </div>
+      <div class="pro-editais-modal-foot">
+        <button class="btn btn-s btn-sm" type="button" onclick="proDatasImpFecharGerenciarTipos()">Fechar</button>
+      </div>
+    </div>
+  </div>`;
+}
+window.proDatasImpAbrirGerenciarTipos=()=>{
+  S._datasImpGerenciarTiposOpen=true;
+  _proDatasImpRefresh();
+};
+window.proDatasImpFecharGerenciarTipos=()=>{
+  S._datasImpGerenciarTiposOpen=false;
+  S._datasImpNovoTipoForm=null;
+  S._datasImpEditandoTipoId=null;
+  _proDatasImpRefresh();
+};
+window.proDatasImpRemoverTipo=async(tid)=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const systemIds=new Set(PRO_DIMP_TIPOS_SYSTEM.map(t=>t.id));
+  const isSystem=systemIds.has(tid);
+  const all=_proDimpTiposAll();
+  const tipo=all.find(t=>t.id===tid);
+  if(!tipo)return alert('Tipo não encontrado.');
+  const uso=(S.datasImp.lista||[]).filter(e=>e&&e.tipo===tid).length;
+  let reatribuirPara=null;
+  if(uso>0){
+    const opcoes=all.filter(t=>t.id!==tid).map((t,i)=>`${i+1}. ${t.icone} ${t.nome}`).join('\n');
+    const restantes=all.filter(t=>t.id!==tid);
+    const escolha=prompt(`O tipo "${tipo.nome}" está sendo usado em ${uso} evento(s) (nesta vertical).\n\nDigite o número do tipo pra REATRIBUIR a esses eventos, ou deixe em branco e clique OK pra deixar os eventos sem tipo (ficarão com "(tipo removido)"):\n\n${opcoes}`);
+    if(escolha===null)return; // cancelou
+    const n=parseInt(String(escolha).trim(),10);
+    if(!isNaN(n)&&n>=1&&n<=restantes.length){reatribuirPara=restantes[n-1].id;}
+  }else{
+    if(!confirm(`Remover o tipo "${tipo.nome}"?`))return;
+  }
+  try{
+    const user=(S.currentUser&&S.currentUser.username)||'?';
+    const listaAtual=Array.isArray(S.datasImpTipos.lista)?S.datasImpTipos.lista.slice():[];
+    const tombstonesAtual=Array.isArray(S.datasImpTipos.deletedSystemIds)?S.datasImpTipos.deletedSystemIds.slice():[];
+    // Remove qualquer entry com esse id (override de system OU custom puro).
+    const novaLista=listaAtual.filter(t=>t.id!==tid);
+    // Se for system, adiciona tombstone.
+    const novosTombstones=isSystem?Array.from(new Set([...tombstonesAtual,tid])):tombstonesAtual;
+    await setDoc(doc(db,'config','datasImportantesTipos'),{lista:novaLista,deletedSystemIds:novosTombstones,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    if(typeof audit==='function')audit('DATA_IMP_TIPO_REMOVIDO',{collection:'config',id:'datasImportantesTipos'},{after:{id:tid,nome:tipo.nome,uso,reatribuirPara:reatribuirPara||null,system:isSystem}});
+    // Se escolheu reatribuir, atualiza os eventos da vertical atual
+    if(reatribuirPara&&uso>0){
+      const eventos=(S.datasImp.lista||[]).map(e=>e&&e.tipo===tid?{...e,tipo:reatribuirPara}:e);
+      await setDoc(doc(db,'config',_verticalDocId('datasImportantes')),{lista:eventos,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    }
+    // Se o tipo removido era o que estava em edição, fecha o subform.
+    if(S._datasImpEditandoTipoId===tid){
+      S._datasImpEditandoTipoId=null;
+      S._datasImpNovoTipoForm=null;
+    }
+    _proSaveFeedback('ok');
+    _proDatasImpRefresh();
+  }catch(err){
+    alert('Erro ao remover tipo: '+(err.message||err));
+  }
+};
+
+// ── Sub-form HTML "Novo tipo" / "Editar tipo"
+function _proDatasImpNovoTipoFormHTML(){
+  const f=S._datasImpNovoTipoForm||{nome:'',icone:'📌',cor:PRO_DIMP_CORES_PALETA[0]};
+  const isEdit=!!S._datasImpEditandoTipoId;
+  const iconesGrid=PRO_ICONES_CURADOS.map(ic=>{
+    const on=f.icone===ic;
+    return `<button type="button" onclick="_proDatasImpSetNovoTipo('icone','${_proEscAttr(ic)}')" style="${on?'border-color:#06b6d4;background:color-mix(in srgb,#06b6d4 14%,var(--bg3));':''}">${ic}</button>`;
+  }).join('');
+  const coresChips=PRO_DIMP_CORES_PALETA.map(c=>{
+    const on=f.cor===c;
+    return `<div class="pro-dimp-cor-chip${on?' on':''}" style="--c:${c}" onclick="_proDatasImpSetNovoTipo('cor','${c}')" title="${c}"></div>`;
+  }).join('');
+  const labelNome=isEdit?'Nome do tipo (máx. 30)':'Nome do novo tipo (máx. 30)';
+  const btnSalvar=isEdit?'Salvar':'＋ Criar tipo';
+  return `<div class="pro-dimp-novo-tipo-form">
+    <div class="fg" style="margin-bottom:0">
+      <label class="fl">${labelNome}</label>
+      <input type="text" class="fc" maxlength="30" placeholder="Ex: Recesso, Live, Bônus..." value="${_proEscAttr(f.nome||'')}" oninput="_proDatasImpSetNovoTipoNome(this.value)"/>
+    </div>
+    <div class="fg" style="margin-bottom:0">
+      <label class="fl">Ícone</label>
+      <div class="pro-icon-grid pro-icon-grid-sm">${iconesGrid}</div>
+      <div class="pro-dimp-icon-custom">
+        <span class="pro-dimp-icon-custom-label">Ou cole/digite um emoji:</span>
+        <input type="text" maxlength="8" placeholder="🎉" value="${_proEscAttr(PRO_ICONES_CURADOS.includes(f.icone)?'':f.icone)}" oninput="_proDatasImpSetIconeCustom(this.value)"/>
+        <div class="pro-dimp-icon-preview" title="Pré-visualização">${_proEsc(f.icone||'')}</div>
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:0">
+      <label class="fl">Cor</label>
+      <div class="pro-dimp-cor-grid">${coresChips}</div>
+    </div>
+    <div class="pro-dimp-novo-tipo-acts">
+      <button class="btn btn-s btn-sm" type="button" onclick="_proDatasImpToggleNovoTipoForm()">Cancelar</button>
+      <button class="btn btn-p btn-sm" type="button" onclick="_proDatasImpCriarTipo()">${btnSalvar}</button>
+    </div>
+  </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// ESCOPOS — classificação por audiência/track (TEA, TSA, MEs, Outros)
+// 1 escopo por evento (escopoId:string|null). Por vertical (mesmo doc).
+// ════════════════════════════════════════════════════════════════════════
+window.proDatasImpSetFiltroEscopo=(valor)=>{
+  S._datasImpFiltroEscopo=String(valor||'todos');
+  _proDatasImpRefresh();
+};
+window._proDatasImpSetCampoEscopo=(escopoId)=>{
+  if(!S._datasImpEditando)return;
+  S._datasImpEditando.escopoId=String(escopoId||'');
+  _proDatasImpRefresh();
+};
+window.proDatasImpToggleNovoEscopoForm=()=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  if(S._datasImpNovoEscopoForm){
+    S._datasImpNovoEscopoForm=null;
+    S._datasImpEditandoEscopoId=null;
+  }else{
+    S._datasImpNovoEscopoForm={nome:''};
+    S._datasImpEditandoEscopoId=null;
+  }
+  _proDatasImpRefresh();
+};
+window._proDatasImpSetNovoEscopoNome=(valor)=>{
+  if(!S._datasImpNovoEscopoForm)return;
+  S._datasImpNovoEscopoForm.nome=String(valor||'').slice(0,30);
+};
+window.proDatasImpEditarEscopo=(eid)=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const lista=Array.isArray(S.datasImp.escopos)?S.datasImp.escopos:[];
+  const esc=lista.find(x=>x.id===eid);
+  if(!esc)return alert('Escopo não encontrado.');
+  S._datasImpEditandoEscopoId=eid;
+  S._datasImpNovoEscopoForm={nome:String(esc.nome||'')};
+  _proDatasImpRefresh();
+};
+window.proDatasImpCriarEscopo=async()=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const f=S._datasImpNovoEscopoForm;if(!f)return;
+  const nome=String(f.nome||'').trim().slice(0,30);
+  if(!nome)return alert('Informe o nome do escopo.');
+  const user=(S.currentUser&&S.currentUser.username)||'?';
+  const editandoId=S._datasImpEditandoEscopoId||null;
+  const atuais=Array.isArray(S.datasImp.escopos)?S.datasImp.escopos.slice():[];
+  // Bloqueia nome duplicado (case-insensitive)
+  const colide=atuais.some(x=>x.id!==editandoId&&String(x.nome||'').trim().toLowerCase()===nome.toLowerCase());
+  if(colide)return alert('Já existe um escopo com esse nome nesta vertical.');
+  let novaLista,idFinal,actionAudit;
+  if(editandoId){
+    idFinal=editandoId;
+    const idx=atuais.findIndex(x=>x.id===editandoId);
+    if(idx<0)return alert('Escopo não encontrado.');
+    novaLista=atuais.map((x,i)=>i===idx?{...x,nome}:x);
+    actionAudit='DATA_IMP_ESCOPO_EDITADO';
+  }else{
+    const slug=nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,20)||'escopo';
+    idFinal=`${slug}-${_proUid()}`;
+    novaLista=[...atuais,{id:idFinal,nome,criadoEm:new Date().toISOString(),criadoPor:user}];
+    actionAudit='DATA_IMP_ESCOPO_CRIADO';
+  }
+  try{
+    await setDoc(doc(db,'config',_verticalDocId('datasImportantes')),{escopos:novaLista,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    if(typeof audit==='function')audit(actionAudit,{collection:'config',id:'datasImportantes'},{after:{id:idFinal,nome}});
+    // Em criação dentro do modal de evento, seleciona o escopo novo automaticamente.
+    if(!editandoId&&S._datasImpEditando)S._datasImpEditando.escopoId=idFinal;
+    S._datasImpNovoEscopoForm=null;
+    S._datasImpEditandoEscopoId=null;
+    _proSaveFeedback('ok');
+    _proDatasImpRefresh();
+  }catch(err){
+    alert('Erro ao salvar escopo: '+(err.message||err));
+  }
+};
+window.proDatasImpRemoverEscopo=async(eid)=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const lista=Array.isArray(S.datasImp.escopos)?S.datasImp.escopos:[];
+  const esc=lista.find(x=>x.id===eid);
+  if(!esc)return alert('Escopo não encontrado.');
+  const uso=(S.datasImp.lista||[]).filter(e=>e&&String(e.escopoId||'')===eid).length;
+  const msg=uso>0
+    ?`${uso} evento(s) usam o escopo "${esc.nome}". Eles ficarão sem escopo. Confirmar remoção?`
+    :`Remover o escopo "${esc.nome}"?`;
+  if(!confirm(msg))return;
+  try{
+    const user=(S.currentUser&&S.currentUser.username)||'?';
+    const novosEscopos=lista.filter(x=>x.id!==eid);
+    // No mesmo write: zera escopoId nos eventos afetados.
+    const novaListaEventos=(S.datasImp.lista||[]).map(e=>(e&&String(e.escopoId||'')===eid)?{...e,escopoId:null}:e);
+    await setDoc(doc(db,'config',_verticalDocId('datasImportantes')),{escopos:novosEscopos,lista:novaListaEventos,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    if(typeof audit==='function')audit('DATA_IMP_ESCOPO_REMOVIDO',{collection:'config',id:'datasImportantes'},{after:{id:eid,nome:esc.nome,uso}});
+    // Se o filtro estava nesse escopo, volta pra "todos"
+    if(S._datasImpFiltroEscopo===eid)S._datasImpFiltroEscopo='todos';
+    if(S._datasImpEditandoEscopoId===eid){
+      S._datasImpEditandoEscopoId=null;
+      S._datasImpNovoEscopoForm=null;
+    }
+    _proSaveFeedback('ok');
+    _proDatasImpRefresh();
+  }catch(err){
+    alert('Erro ao remover escopo: '+(err.message||err));
+  }
+};
+window.proDatasImpAbrirGerenciarEscopos=()=>{
+  S._datasImpGerenciarEscoposOpen=true;
+  _proDatasImpRefresh();
+};
+window.proDatasImpFecharGerenciarEscopos=()=>{
+  S._datasImpGerenciarEscoposOpen=false;
+  S._datasImpNovoEscopoForm=null;
+  S._datasImpEditandoEscopoId=null;
+  _proDatasImpRefresh();
+};
+
+// Sub-form inline "Novo escopo" / "Editar escopo" (usado no modal de evento E no de gerenciar)
+function _proDatasImpNovoEscopoFormHTML(){
+  const f=S._datasImpNovoEscopoForm||{nome:''};
+  const isEdit=!!S._datasImpEditandoEscopoId;
+  const labelNome=isEdit?'Nome do escopo (máx. 30)':'Nome do novo escopo (máx. 30)';
+  const btnSalvar=isEdit?'Salvar':'＋ Criar escopo';
+  return `<div class="pro-dimp-novo-tipo-form">
+    <div class="fg" style="margin-bottom:0">
+      <label class="fl">${labelNome}</label>
+      <input type="text" class="fc" maxlength="30" placeholder="Ex: TEA, TSA, MEs, Outros..." value="${_proEscAttr(f.nome||'')}" oninput="_proDatasImpSetNovoEscopoNome(this.value)"/>
+    </div>
+    <div class="pro-dimp-novo-tipo-acts">
+      <button class="btn btn-s btn-sm" type="button" onclick="proDatasImpToggleNovoEscopoForm()">Cancelar</button>
+      <button class="btn btn-p btn-sm" type="button" onclick="proDatasImpCriarEscopo()">${btnSalvar}</button>
+    </div>
+  </div>`;
+}
+
+// Modal lateral "Gerenciar escopos"
+function _proDatasImpGerenciarEscoposHTML(){
+  const canEdit=_proCanEdit();
+  const escopos=Array.isArray(S.datasImp&&S.datasImp.escopos)?S.datasImp.escopos:[];
+  const usoMap={};
+  (S.datasImp.lista||[]).forEach(e=>{if(e&&e.escopoId){usoMap[e.escopoId]=(usoMap[e.escopoId]||0)+1;}});
+  const editandoId=S._datasImpEditandoEscopoId||null;
+  const subform=(S._datasImpNovoEscopoForm&&canEdit)?_proDatasImpNovoEscopoFormHTML():'';
+  const itens=escopos.length?escopos.map(esc=>{
+    const isEditing=editandoId===esc.id;
+    const actions=canEdit?`<button class="pro-icon-btn" type="button" onclick="proDatasImpEditarEscopo('${_proEscAttr(esc.id)}')" title="Renomear escopo"${isEditing?' disabled style="opacity:.5"':''}>✏️</button>
+      <button class="pro-icon-btn" type="button" onclick="proDatasImpRemoverEscopo('${_proEscAttr(esc.id)}')" title="Remover escopo">🗑</button>`:'';
+    return `<div class="pro-dimp-tipos-list-item${isEditing?' editing':''}">
+      <span class="nome">${_proEsc(esc.nome||'(sem nome)')}</span>
+      <span class="meta">${usoMap[esc.id]||0} eventos</span>
+      ${actions}
+    </div>`;
+  }).join(''):`<p style="color:var(--t2);font-style:italic;margin:0">Nenhum escopo cadastrado nesta vertical. Crie um pelo botão abaixo.</p>`;
+  const novoBtn=(canEdit&&!S._datasImpNovoEscopoForm)?`<button type="button" class="btn btn-s btn-sm" style="margin-top:10px" onclick="proDatasImpToggleNovoEscopoForm()">＋ Novo escopo</button>`:'';
+  return `<div class="pro-editais-modal-backdrop" onclick="if(event.target===this)proDatasImpFecharGerenciarEscopos()">
+    <div class="pro-editais-modal" role="dialog" aria-modal="true" style="max-width:560px">
+      <div class="pro-editais-modal-head">
+        <h3 class="pro-editais-modal-title">⚙ Gerenciar escopos</h3>
+        <button class="pro-editais-modal-close" type="button" onclick="proDatasImpFecharGerenciarEscopos()" title="Fechar">✕</button>
+      </div>
+      <div class="pro-editais-modal-body">
+        <p style="color:var(--t2);font-size:12.5px;line-height:1.5;margin:0 0 12px">Escopos classificam eventos por público-alvo ou track (ex: TEA, TSA, MEs, Outros). São específicos desta vertical. Cada evento pode ter 1 escopo (ou nenhum).</p>
+        <div class="fg" style="margin-bottom:0">
+          <label class="fl">Todos os escopos</label>
+          <div class="pro-dimp-tipos-list">${itens}</div>
+          ${novoBtn}
+          ${subform}
+        </div>
+      </div>
+      <div class="pro-editais-modal-foot">
+        <button class="btn btn-s btn-sm" type="button" onclick="proDatasImpFecharGerenciarEscopos()">Fechar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// CALENDÁRIO — modal tela cheia listando eventos da vertical no mês
+// ════════════════════════════════════════════════════════════════════════
+function _proDimpMesAtual(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function _proDimpAddMes(ym,delta){
+  const [y,m]=ym.split('-').map(Number);
+  const d=new Date(y,(m-1)+delta,1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function _proDimpEventosDoDia(isoDia){
+  // Retorna eventos que ocorrem em isoDia (YYYY-MM-DD). Para eventos de período,
+  // o chip aparece apenas no dia de início do range (não nos dias intermediários).
+  // Aplica também o filtro de escopo vigente.
+  const out=[];
+  const fonte=_proDimpAplicaFiltroEscopo(S.datasImp.lista||[]);
+  fonte.forEach(e=>{
+    if(!e)return;
+    if(e.modo==='periodo'){
+      const ini=String(e.dataInicioISO||'');
+      if(ini&&ini===isoDia)out.push(e);
+    }else{
+      if(String(e.dataISO||'')===isoDia)out.push(e);
+    }
+  });
+  // Ordena por horário (eventos com horário primeiro, depois sem)
+  out.sort((a,b)=>{
+    const ha=String(a.horario||'99:99');
+    const hb=String(b.horario||'99:99');
+    return ha.localeCompare(hb);
+  });
+  return out;
+}
+function _proDimpCalendarioRender(){
+  // Helper render-only: gera grid do mês corrente em S._datasImpCalMes
+  const ym=S._datasImpCalMes||_proDimpMesAtual();
+  const [y,m]=ym.split('-').map(Number);
+  const primeiroDia=new Date(y,m-1,1);
+  const ultimoDia=new Date(y,m,0);
+  const diaSemanaInicio=primeiroDia.getDay(); // 0=domingo
+  const totalDias=ultimoDia.getDate();
+  // Quantos dias precisamos pra completar 6 linhas (42 células)? Vamos pegar do dia anterior + posterior
+  const totalCelulas=42;
+  const hojeISO=_proDimpHoje();
+  let cellsHtml='';
+  for(let i=0;i<totalCelulas;i++){
+    const offset=i-diaSemanaInicio;
+    const data=new Date(y,m-1,1+offset);
+    const cellY=data.getFullYear();
+    const cellM=data.getMonth()+1;
+    const cellD=data.getDate();
+    const iso=`${cellY}-${String(cellM).padStart(2,'0')}-${String(cellD).padStart(2,'0')}`;
+    const outside=(cellY!==y||cellM!==m);
+    const isToday=iso===hojeISO;
+    const eventos=_proDimpEventosDoDia(iso);
+    const max=3;
+    const visiveis=eventos.slice(0,max);
+    const ocultos=eventos.length-visiveis.length;
+    const chipsHtml=visiveis.map(e=>{
+      const meta=_proDimpTipoMeta(e.tipo);
+      const tit=String(e.titulo||'').trim()||'(sem título)';
+      const isPeriodo=e.modo==='periodo';
+      const hora=(!isPeriodo&&e.horario)?`${String(e.horario).slice(0,5)} `:'';
+      const periodoBadge=isPeriodo?`<span class="periodo">📅</span>`:'';
+      return `<span class="pro-dimp-cal-chip" style="--c:${meta.cor}" onclick="event.stopPropagation();proDatasImpCalAbrirPopupEvento('${_proEscAttr(e.id)}')" title="${_proEscAttr(tit)}">
+        <span class="ico">${meta.icone}</span>
+        <span class="titulo">${_proEsc(hora+tit)}</span>
+        ${periodoBadge}
+      </span>`;
+    }).join('');
+    const maisHtml=ocultos>0?`<span class="pro-dimp-cal-mais" onclick="event.stopPropagation();proDatasImpCalMostrarMais(event,'${iso}')">+${ocultos} eventos</span>`:'';
+    cellsHtml+=`<div class="pro-dimp-cal-cell${outside?' outside':''}${isToday?' today':''}">
+      <span class="pro-dimp-cal-day">${cellD}</span>
+      <div class="pro-dimp-cal-chips">${chipsHtml}${maisHtml}</div>
+    </div>`;
+  }
+  return cellsHtml;
+}
+function _proDatasImpCalendarioHTML(){
+  const ym=S._datasImpCalMes||_proDimpMesAtual();
+  const [y,m]=ym.split('-').map(Number);
+  const data=new Date(y,m-1,1);
+  const mesNome=data.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const vert=_verticalById(S.verticalAtual||'anestreview');
+  const cellsHtml=_proDimpCalendarioRender();
+  const weekdays=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const wdHtml=weekdays.map(w=>`<div class="pro-dimp-cal-wd">${w}</div>`).join('');
+  const evpopHtml=_proDatasImpCalEventPopupHTML();
+  return `<div class="pro-dimp-cal-backdrop" onclick="if(event.target===this)proDatasImpFecharCalendario()">
+    <div class="pro-dimp-cal" role="dialog" aria-modal="true">
+      <div class="pro-dimp-cal-head">
+        <h3 class="pro-dimp-cal-title">📆 Calendário · ${_proEsc(vert.nome)}</h3>
+        <button class="pro-dimp-cal-close" type="button" onclick="proDatasImpFecharCalendario()" title="Fechar">✕</button>
+      </div>
+      <div class="pro-dimp-cal-nav">
+        <button class="pro-dimp-cal-nav-btn" type="button" onclick="proDatasImpCalNav(-1)" title="Mês anterior">←</button>
+        <div class="pro-dimp-cal-mes">${_proEsc(mesNome)}</div>
+        <button class="pro-dimp-cal-nav-btn" type="button" onclick="proDatasImpCalNav(1)" title="Próximo mês">→</button>
+        <button class="pro-dimp-cal-hoje" type="button" onclick="proDatasImpCalHoje()" title="Ir pro mês atual">Hoje</button>
+      </div>
+      <div class="pro-dimp-cal-grid-wrap">
+        <div class="pro-dimp-cal-weekdays">${wdHtml}</div>
+        <div class="pro-dimp-cal-grid">${cellsHtml}</div>
+      </div>
+      <div class="pro-dimp-cal-evpop-slot">${evpopHtml}</div>
+    </div>
+  </div>`;
+}
+let _proDimpCalEscHandler=null;
+function _proDimpCalBindEsc(){
+  if(_proDimpCalEscHandler)return;
+  _proDimpCalEscHandler=(ev)=>{
+    if(ev.key!=='Escape')return;
+    if(!S._datasImpCalOpen)return;
+    if(S._datasImpCalEventPopup){
+      ev.preventDefault();
+      proDatasImpCalFecharPopupEvento();
+    }else{
+      ev.preventDefault();
+      proDatasImpFecharCalendario();
+    }
+  };
+  document.addEventListener('keydown',_proDimpCalEscHandler);
+}
+function _proDimpCalUnbindEsc(){
+  if(!_proDimpCalEscHandler)return;
+  document.removeEventListener('keydown',_proDimpCalEscHandler);
+  _proDimpCalEscHandler=null;
+}
+window.proDatasImpAbrirCalendario=()=>{
+  S._datasImpCalOpen=true;
+  S._datasImpCalMes=S._datasImpCalMes||_proDimpMesAtual();
+  _proDimpCalBindEsc();
+  _proDatasImpRefresh();
+};
+window.proDatasImpFecharCalendario=()=>{
+  S._datasImpCalOpen=false;
+  S._datasImpCalEventPopup=null;
+  _proDimpCalUnbindEsc();
+  _proDatasImpRefresh();
+};
+function _proDatasImpCalRepaint(){
+  // Repinta só a grade + label de mês + slot do popup, sem refazer o backdrop (evita flicker do fade-in)
+  const cal=document.querySelector('.pro-dimp-cal');
+  if(!cal)return _proDatasImpRefresh();
+  const ym=S._datasImpCalMes||_proDimpMesAtual();
+  const [y,m]=ym.split('-').map(Number);
+  const data=new Date(y,m-1,1);
+  const mesNome=data.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const label=cal.querySelector('.pro-dimp-cal-mes');
+  if(label)label.textContent=mesNome;
+  const grid=cal.querySelector('.pro-dimp-cal-grid');
+  if(grid)grid.innerHTML=_proDimpCalendarioRender();
+  const slot=cal.querySelector('.pro-dimp-cal-evpop-slot');
+  if(slot)slot.innerHTML=_proDatasImpCalEventPopupHTML();
+}
+window.proDatasImpCalNav=(delta)=>{
+  S._datasImpCalMes=_proDimpAddMes(S._datasImpCalMes||_proDimpMesAtual(),delta);
+  _proDatasImpCalRepaint();
+};
+window.proDatasImpCalHoje=()=>{
+  S._datasImpCalMes=_proDimpMesAtual();
+  _proDatasImpCalRepaint();
+};
+// DEPRECATED: substituída por proDatasImpCalAbrirPopupEvento (abre popup sobre o calendário em vez de fechar).
+// Mantida só por compatibilidade — não é chamada de lugar nenhum atualmente.
+window.proDatasImpCalAbrirEvento=(id)=>{
+  // Fecha calendário, garante que a box principal esteja aberta, expande aquele card e dá scroll
+  S._datasImpCalOpen=false;
+  S._datasImpOpen=true;
+  S._datasImpAbertos.add(id);
+  // Garante que o evento "passado" também apareça se estiver oculto
+  const e=(S.datasImp.lista||[]).find(x=>x&&x.id===id);
+  if(e&&_proDimpPassou(e))S._datasImpVerPassados=true;
+  _proDatasImpRefresh();
+  // Scroll suave até o card
+  setTimeout(()=>{
+    const el=document.querySelector(`#tab-produtos .pro-dimp-card[data-dimp-id="${id}"]`);
+    if(el){
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+      el.classList.add('open');
+    }
+  },80);
+};
+
+// Abre popup de detalhe do evento SOBRE o calendário (calendário permanece aberto)
+window.proDatasImpCalAbrirPopupEvento=(id)=>{
+  // Limpa popover "+N eventos" se estiver aberto (o chip pode ter sido clicado de dentro dele)
+  document.querySelectorAll('.pro-dimp-cal-mais-pop').forEach(n=>n.remove());
+  S._datasImpCalEventPopup=String(id||'');
+  _proDatasImpCalRepaint();
+};
+window.proDatasImpCalFecharPopupEvento=()=>{
+  S._datasImpCalEventPopup=null;
+  _proDatasImpCalRepaint();
+};
+window.proDatasImpCalEditarDoPopup=(id)=>{
+  // Fecha popup + calendário, abre modal de edição
+  S._datasImpCalEventPopup=null;
+  S._datasImpCalOpen=false;
+  _proDimpCalUnbindEsc();
+  proDatasImpEditar(id);
+};
+window.proDatasImpCalRemoverDoPopup=async(id)=>{
+  // Reusa o fluxo padrão de remoção (com confirm). Após remover, fecha popup e repinta.
+  await proDatasImpRemover(id);
+  // Se o evento ainda existe (usuário cancelou), mantém popup aberto; senão fecha.
+  const aindaExiste=(S.datasImp.lista||[]).some(x=>x&&x.id===id);
+  if(!aindaExiste){
+    S._datasImpCalEventPopup=null;
+    _proDatasImpCalRepaint();
+  }
+};
+
+function _proDatasImpCalEventPopupHTML(){
+  const id=S._datasImpCalEventPopup;
+  if(!id)return'';
+  const e=(S.datasImp.lista||[]).find(x=>x&&x.id===id);
+  if(!e){
+    // Evento sumiu (foi removido em outra aba) — fecha popup silenciosamente
+    S._datasImpCalEventPopup=null;
+    return'';
+  }
+  const meta=_proDimpTipoMeta(e.tipo);
+  const tit=String(e.titulo||'').trim()||'(sem título)';
+  const isPeriodo=e.modo==='periodo';
+  const dataLinha=isPeriodo
+    ?`${_proDimpFmtData(e.dataInicioISO)} — ${_proDimpFmtData(e.dataFimISO)}`
+    :_proDimpFmtData(e.dataISO);
+  const horaLinha=(!isPeriodo&&e.horario)?String(e.horario).slice(0,5):'';
+  const desc=String(e.descricao||'').trim();
+  const link=String(e.link||'').trim();
+  const canEdit=_proCanEdit();
+  const idAttr=_proEscAttr(id);
+  const editarBtn=canEdit?`<button class="btn btn-s btn-sm" type="button" onclick="proDatasImpCalEditarDoPopup('${idAttr}')">✏️ Editar</button>`:'';
+  const removerBtn=canEdit?`<button class="btn btn-d btn-sm" type="button" onclick="proDatasImpCalRemoverDoPopup('${idAttr}')">🗑 Remover</button>`:'';
+  const descHtml=desc?`<div class="pro-dimp-cal-evpop-desc">${_proEsc(desc)}</div>`:'';
+  const linkHtml=link?`<div class="pro-dimp-cal-evpop-link"><a href="${_proEscAttr(link)}" target="_blank" rel="noopener noreferrer">🔗 ${_proEsc(link)}</a></div>`:'';
+  const horaHtml=horaLinha?`<div class="pro-dimp-cal-evpop-row"><span class="pro-dimp-cal-evpop-ico">🕐</span> ${_proEsc(horaLinha)}</div>`:'';
+  const escMeta=_proDimpEscopoMeta(e.escopoId);
+  const escHtml=escMeta?`<div class="pro-dimp-cal-evpop-row"><span class="pro-dimp-cal-evpop-ico">🏷️</span> Escopo: ${_proEsc(escMeta.nome)}</div>`:'';
+  return `<div class="pro-dimp-cal-evpop-backdrop" onclick="if(event.target===this)proDatasImpCalFecharPopupEvento()">
+    <div class="pro-dimp-cal-evpop" role="dialog" aria-modal="true" aria-label="Detalhes do evento">
+      <div class="pro-dimp-cal-evpop-head">
+        <span class="pro-dimp-cal-evpop-ico-big" style="--c:${meta.cor}">${meta.icone}</span>
+        <h3 class="pro-dimp-cal-evpop-title">${_proEsc(tit)}</h3>
+        <button class="pro-dimp-cal-evpop-close" type="button" onclick="proDatasImpCalFecharPopupEvento()" title="Fechar (Esc)">✕</button>
+      </div>
+      <div class="pro-dimp-cal-evpop-body">
+        <span class="pro-dimp-cal-evpop-badge" style="--c:${meta.cor}">
+          <span>${meta.icone}</span> <span>${_proEsc(meta.nome)}</span>
+        </span>
+        <div class="pro-dimp-cal-evpop-row"><span class="pro-dimp-cal-evpop-ico">📅</span> ${_proEsc(dataLinha)}</div>
+        ${horaHtml}
+        ${escHtml}
+        ${descHtml}
+        ${linkHtml}
+      </div>
+      <div class="pro-dimp-cal-evpop-foot">
+        ${editarBtn}
+        ${removerBtn}
+        <button class="btn btn-sm" type="button" onclick="proDatasImpCalFecharPopupEvento()">Fechar</button>
+      </div>
+    </div>
+  </div>`;
+}
+window.proDatasImpCalMostrarMais=(ev,isoDia)=>{
+  // Remove popover anterior se houver
+  document.querySelectorAll('.pro-dimp-cal-mais-pop').forEach(n=>n.remove());
+  const eventos=_proDimpEventosDoDia(isoDia);
+  if(!eventos.length)return;
+  const pop=document.createElement('div');
+  pop.className='pro-dimp-cal-mais-pop';
+  pop.innerHTML=eventos.map(e=>{
+    const meta=_proDimpTipoMeta(e.tipo);
+    const tit=String(e.titulo||'').trim()||'(sem título)';
+    const isPeriodo=e.modo==='periodo';
+    const hora=(!isPeriodo&&e.horario)?`${String(e.horario).slice(0,5)} `:'';
+    return `<span class="pro-dimp-cal-chip" style="--c:${meta.cor}" onclick="proDatasImpCalAbrirPopupEvento('${_proEscAttr(e.id)}')">
+      <span class="ico">${meta.icone}</span>
+      <span class="titulo" style="display:inline">${_proEsc(hora+tit)}</span>
+    </span>`;
+  }).join('');
+  document.body.appendChild(pop);
+  // Posiciona perto do botão clicado
+  const r=ev.target.getBoundingClientRect();
+  pop.style.left=Math.min(window.innerWidth-300,r.left)+'px';
+  pop.style.top=(r.bottom+6)+'px';
+  // Fecha clicando fora
+  const close=(e2)=>{if(!pop.contains(e2.target)){pop.remove();document.removeEventListener('click',close,true);}};
+  setTimeout(()=>document.addEventListener('click',close,true),0);
 };
 
 window.proToggleJornada=()=>{

@@ -196,12 +196,15 @@ exports.perguntarDex = onRequest(
 
     try {
       const db = admin.firestore();
-      // Lê produtos + jornada + dexPrompt + editais (todos da vertical correspondente)
-      const [snap, jornadaSnap, dexCfgSnap, editaisSnap] = await Promise.all([
+      // Lê produtos + jornada + dexPrompt + editais + datas importantes + tipos
+      // (verticais usam sufixo; datasImportantesTipos é GLOBAL — sem sufixo)
+      const [snap, jornadaSnap, dexCfgSnap, editaisSnap, datasImpSnap, datasImpTiposSnap] = await Promise.all([
         db.collection('produtos').get(),
         db.collection('config').doc(verticalDoc('jornadaCliente')).get(),
         db.collection('config').doc(verticalDoc('dexPrompt')).get(),
         db.collection('config').doc(verticalDoc('editais')).get(),
+        db.collection('config').doc(verticalDoc('datasImportantes')).get(),
+        db.collection('config').doc('datasImportantesTipos').get(),
       ]);
       // Filtra produtos pela vertical (produtos sem campo `vertical` são anestreview por compat)
       const produtos = [];
@@ -225,6 +228,13 @@ exports.perguntarDex = onRequest(
       // Editais cadastrados — formata com ano destacado pra IA distinguir atual vs anteriores
       const editaisLista = editaisSnap.exists ? (Array.isArray(editaisSnap.data()?.lista) ? editaisSnap.data().lista : []) : [];
       const editaisFmt = formatarEditais(editaisLista);
+      // Datas importantes (calendário) + tipos (globais entre verticais)
+      const datasImpLista = datasImpSnap.exists ? (Array.isArray(datasImpSnap.data()?.lista) ? datasImpSnap.data().lista : []) : [];
+      const datasImpEscopos = datasImpSnap.exists ? (Array.isArray(datasImpSnap.data()?.escopos) ? datasImpSnap.data().escopos : []) : [];
+      const datasImpTiposData = datasImpTiposSnap.exists ? (datasImpTiposSnap.data() || {}) : {};
+      const datasImpTipos = Array.isArray(datasImpTiposData.lista) ? datasImpTiposData.lista : [];
+      const datasImpDeleted = Array.isArray(datasImpTiposData.deletedSystemIds) ? datasImpTiposData.deletedSystemIds : [];
+      const datasImpFmt = formatarDatasImportantes(datasImpLista, datasImpTipos, datasImpDeleted, datasImpEscopos);
 
       // Lê config editável (templates por perfil, modelo, maxTokens, pdfs)
       const dexCfg = dexCfgSnap.exists ? (dexCfgSnap.data() || {}) : {};
@@ -235,8 +245,8 @@ exports.perguntarDex = onRequest(
         String(dexCfg[perfilField] || '').trim() ||
         String(dexCfg.template || '').trim() ||
         DEFAULT_INSTRUCTIONS[perfil];
-      // Jornada, Editais e Catálogo SEMPRE anexados automaticamente.
-      const systemPrompt = buildSystemPromptFromInstructions(customInstructions, catalogoFmt, jornadaTxt, editaisFmt, { avatarNome, verticalNome: verticalNomeFmt });
+      // Jornada, Editais, Datas Importantes e Catálogo SEMPRE anexados automaticamente.
+      const systemPrompt = buildSystemPromptFromInstructions(customInstructions, catalogoFmt, jornadaTxt, editaisFmt, datasImpFmt, { avatarNome, verticalNome: verticalNomeFmt });
 
       // PDFs anexados pra este perfil — viram blocos `document` no user message
       const pdfsField = 'pdfs' + perfil.charAt(0).toUpperCase() + perfil.slice(1);
@@ -366,18 +376,104 @@ const ESTILO_UNIVERSAL = `## REGRAS DE ESTILO (sempre aplicadas)
 // customizadas do usuário. Sempre coloca os blocos de dados no final pra otimizar
 // prompt caching: instruções (que mudam pouco) vêm primeiro, dados (que mudam mais)
 // depois. Como o cache é por prefixo, isso mantém o cache válido por mais tempo.
-function buildSystemPromptFromInstructions(instructions, catalogoFmt, jornadaTxt, editaisFmt, ctx) {
+function buildSystemPromptFromInstructions(instructions, catalogoFmt, jornadaTxt, editaisFmt, datasImpFmt, ctx) {
   const c = ctx || {};
   const avatarNome = c.avatarNome || 'Dex';
   const verticalNome = c.verticalNome || 'MedReview';
-  const headerVertical = `## IDENTIDADE\nVocê é ${avatarNome}, assistente do catálogo da vertical **${verticalNome}** do grupo MedReview. Só responda sobre produtos, jornada do cliente e editais desta vertical específica — não misture com outras verticais.\n\n`;
+  const hojeBR = new Date().toLocaleDateString('pt-BR');
+  const headerVertical = `## IDENTIDADE\nVocê é ${avatarNome}, assistente do catálogo da vertical **${verticalNome}** do grupo MedReview. Só responda sobre produtos, jornada do cliente, editais e datas importantes desta vertical específica — não misture com outras verticais.\n\n`;
   const jornadaSec = jornadaTxt
     ? `=== JORNADA DO CLIENTE (${verticalNome}) ===\n\nContexto sobre o perfil do cliente, dores, jornada de compra e gatilhos.\n\n${jornadaTxt}\n\n=== FIM DA JORNADA ===\n\n`
     : '';
   const editaisSec = editaisFmt
     ? `=== EDITAIS CADASTRADOS (${verticalNome}) ===\n\nInformações de editais de prova publicados. Cada edital traz o ano em que foi publicado. **Ano atual de referência: ${new Date().getFullYear()}.** Se for usar informação de um edital de ano ANTERIOR ao atual pra responder, comece a resposta deixando claro que o dado é do edital daquele ano (ex: "Segundo o edital de XXXX..."), porque pode haver mudanças no edital atual.\n\n${editaisFmt}\n\n=== FIM DOS EDITAIS ===\n\n`
     : '';
-  return `${headerVertical}${instructions}\n\n${ESTILO_UNIVERSAL}\n\n${jornadaSec}${editaisSec}=== CATÁLOGO DE PRODUTOS ${verticalNome.toUpperCase()} ===\n\n${catalogoFmt}\n\n=== FIM DO CATÁLOGO ===`;
+  const datasImpSec = datasImpFmt
+    ? `=== DATAS IMPORTANTES (${verticalNome}) ===\n\nCalendário de eventos cadastrados pela coordenação: provas, revisões/aulas ao vivo, liberações de conteúdo, prazos de inscrição e outros eventos. **Hoje é ${hojeBR}.** Eventos podem ser classificados por escopo (público-alvo / track — ex: TEA, TSA, MEs, Outros) — quando houver, a linha "Escopo" indica a quem o evento se destina. Use essas informações pra responder perguntas como "quando é a próxima X?", "tem revisão marcada?", "qual o link da revisão X?", "quando libera Y?". Sempre que houver link, cite o link na resposta. Diferencie eventos futuros dos que já passaram.\n\n${datasImpFmt}\n\n=== FIM DAS DATAS IMPORTANTES ===\n\n`
+    : '';
+  return `${headerVertical}${instructions}\n\n${ESTILO_UNIVERSAL}\n\n${jornadaSec}${editaisSec}${datasImpSec}=== CATÁLOGO DE PRODUTOS ${verticalNome.toUpperCase()} ===\n\n${catalogoFmt}\n\n=== FIM DO CATÁLOGO ===`;
+}
+
+// Formata a lista de DATAS IMPORTANTES (calendário) como texto pra IA.
+// Inclui tipo (com ícone), título, data/período, horário, descrição e link.
+// Separa eventos futuros dos que já passaram pra IA saber priorizar.
+function formatarDatasImportantes(lista, tipos, deletedSystemIds, escopos) {
+  if (!Array.isArray(lista) || !lista.length) return '';
+  // Mapa de tipos system (default) — applies tombstones (deletedSystemIds) e overrides (mesmo id em `tipos`)
+  const TIPOS_SYS = {
+    prova: { nome: 'Prova', icone: '📅' },
+    revisao: { nome: 'Revisão / Aula ao vivo', icone: '📚' },
+    liberacao: { nome: 'Liberação de conteúdo', icone: '🎁' },
+    inscricao: { nome: 'Inscrição / Prazo', icone: '📝' },
+  };
+  const tombstones = new Set(Array.isArray(deletedSystemIds) ? deletedSystemIds : []);
+  const tipoMap = {};
+  Object.keys(TIPOS_SYS).forEach(id => {
+    if (!tombstones.has(id)) tipoMap[id] = TIPOS_SYS[id];
+  });
+  if (Array.isArray(tipos)) {
+    tipos.forEach(t => {
+      if (!t || !t.id) return;
+      // Override de system não-tombstoned, ou tipo custom puro.
+      if (TIPOS_SYS[t.id] && tombstones.has(t.id)) return; // tipo deletado, ignora override órfão
+      tipoMap[t.id] = { nome: t.nome || t.id, icone: t.icone || '📌' };
+    });
+  }
+  // Mapa de escopos (classificação por audiência/track — TEA, TSA, MEs, etc)
+  const escopoMap = {};
+  if (Array.isArray(escopos)) {
+    escopos.forEach(esc => {
+      if (esc && esc.id) escopoMap[esc.id] = String(esc.nome || esc.id);
+    });
+  }
+  const hoje = new Date().toISOString().slice(0, 10);
+  const fmtBR = iso => {
+    if (!iso || typeof iso !== 'string') return '';
+    const [y, m, d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  };
+  const eventoFmt = e => {
+    const tipoMeta = tipoMap[e.tipo] || { nome: e.tipo || '?', icone: '📌' };
+    const titulo = String(e.titulo || '(sem título)').trim();
+    let dataLinha = '';
+    let passou = false;
+    if (e.modo === 'periodo') {
+      const ini = String(e.dataInicioISO || '');
+      const fim = String(e.dataFimISO || '');
+      dataLinha = `${fmtBR(ini)} a ${fmtBR(fim)}`;
+      passou = fim && fim < hoje;
+    } else {
+      const dt = String(e.dataISO || '');
+      dataLinha = fmtBR(dt);
+      passou = dt && dt < hoje;
+    }
+    const horario = String(e.horario || '').trim();
+    const desc = String(e.descricao || '').trim();
+    const link = String(e.link || '').trim();
+    const linhas = [];
+    linhas.push(`### ${tipoMeta.icone} ${titulo}  [${tipoMeta.nome}]`);
+    linhas.push(`- **Data:** ${dataLinha || '(não informada)'}${passou ? ' _(já passou)_' : ''}`);
+    if (horario) linhas.push(`- **Horário:** ${horario}`);
+    const escopoNome = e.escopoId && escopoMap[e.escopoId] ? escopoMap[e.escopoId] : '';
+    if (escopoNome) linhas.push(`- **Escopo:** ${escopoNome}`);
+    if (desc) linhas.push(`- **Descrição:** ${desc}`);
+    if (link) linhas.push(`- **Link:** ${link}`);
+    return linhas.join('\n');
+  };
+  // Ordena: futuros primeiro (asc por data), passados depois (desc)
+  const chaveData = e => e.modo === 'periodo' ? String(e.dataInicioISO || '') : String(e.dataISO || '');
+  const futuros = lista.filter(e => {
+    if (e.modo === 'periodo') return String(e.dataFimISO || '') >= hoje;
+    return String(e.dataISO || '') >= hoje;
+  }).sort((a, b) => chaveData(a).localeCompare(chaveData(b)));
+  const passados = lista.filter(e => {
+    if (e.modo === 'periodo') return String(e.dataFimISO || '') < hoje;
+    return String(e.dataISO || '') < hoje;
+  }).sort((a, b) => chaveData(b).localeCompare(chaveData(a)));
+  const partes = [];
+  if (futuros.length) partes.push(`**FUTUROS (${futuros.length}):**\n\n` + futuros.map(eventoFmt).join('\n\n'));
+  if (passados.length) partes.push(`**JÁ PASSARAM (${passados.length}):**\n\n` + passados.map(eventoFmt).join('\n\n'));
+  return partes.join('\n\n---\n\n');
 }
 
 // Formata a lista de editais como texto plano pra incluir no prompt da IA.
