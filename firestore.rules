@@ -14,6 +14,10 @@ service cloud.firestore {
     // • DELETES sensíveis continuam bloqueados (do console).
     // ════════════════════════════════════════════════════════════════════════
     function isAuth() { return request.auth != null && request.auth.uid != null; }
+    // ADMIN gate: usuário precisa estar cadastrado em adminUids/{uid}.
+    // O doc é criado manualmente via Firebase Console pra primeiro admin, e via
+    // UI da aba Usuários pros demais. Usado pra trancar PII em coleções sensíveis.
+    function isAdmin() { return isAuth() && exists(/databases/$(database)/documents/adminUids/$(request.auth.uid)); }
 
     // ────────────────────────────────────────────────────────────────────────
     // SIMULADOS — leitura pública. Escrita exige auth (coord/prof).
@@ -367,6 +371,34 @@ service cloud.firestore {
                     && request.resource.data.action.size() < 80;
       allow update, delete: if false;
     }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // ADMIN UIDS — lista de Firebase Auth UIDs com privilégio admin.
+    // Read: aberto pra próprio UID poder se checar via SDK (não vaza nada útil
+    // de PII porque o doc só tem email+timestamp).
+    // Write: apenas outro admin pode adicionar/remover.
+    // ────────────────────────────────────────────────────────────────────────
+    match /adminUids/{uid} {
+      allow read: if true;
+      // Bootstrap único do primeiro admin (dono do projeto). UID hardcoded
+      // pra evitar que qualquer Firebase Auth user vire admin sozinho.
+      // Após o primeiro doc existir, só admin existente pode adicionar outros.
+      allow create: if isAuth()
+                    && request.auth.uid == uid
+                    && uid == 'nF4lKfJXOyPyx6btGkV7Lj0DkQr1';
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // CRUZAR LISTA — base de alunos da Hotmart, provas e resultados de
+    // cruzamento. alunosAprovados contém PII (CPF, email, telefone) → ADMIN ONLY.
+    // provas + resultados (sem PII) liberam leitura pra qualquer auth — usado
+    // pela box "Aprovações" no catálogo (coord/marketing/vendas leem). Write
+    // continua restrito a admin.
+    // ────────────────────────────────────────────────────────────────────────
+    match /alunosAprovados/{c}     { allow read, write: if isAdmin(); }
+    match /provasAprovados/{p}     { allow read: if isAuth(); allow write: if isAdmin(); }
+    match /resultadosAprovados/{r} { allow read: if isAuth(); allow write: if isAdmin(); }
 
     // ────────────────────────────────────────────────────────────────────────
     // DEFAULT DENY — qualquer coleção/path não listada acima é bloqueada.

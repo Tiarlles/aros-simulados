@@ -1216,6 +1216,68 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
   #modal-audit-detail .ad-grid{grid-template-columns:1fr}
 }
 
+/* ═════════════ CRUZAR LISTA ═════════════ */
+.cz-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.cz-tab{background:var(--bg2);border:1px solid var(--border);color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:9px 16px;border-radius:999px;cursor:pointer;transition:color .2s,border-color .2s,background .2s,transform .2s var(--ease-out-soft)}
+.cz-tab:hover{color:var(--accent);border-color:color-mix(in srgb, var(--accent) 50%, var(--border));transform:translateY(-1px)}
+.cz-tab.on{color:#fff;border-color:var(--accent);background:var(--accent)}
+.cz-status{margin-left:auto;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--t2)}
+.cz-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
+.cz-card h4{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;letter-spacing:-.2px;margin:0 0 12px}
+.cz-row{display:flex;gap:12px;flex-wrap:wrap}
+.cz-row > .fg{flex:1;min-width:200px}
+.cz-textarea{min-height:220px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:12.5px;line-height:1.55;resize:vertical}
+.cz-counter{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--t2);margin-top:6px}
+.cz-metric{background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 30%, var(--bg2)) 0%, var(--bg2) 100%);border:1px solid color-mix(in srgb, var(--accent) 40%, var(--border));border-radius:18px;padding:24px;text-align:center;margin-bottom:18px}
+.cz-metric-pct{font-family:'Space Grotesk',sans-serif;font-size:64px;font-weight:800;letter-spacing:-2px;line-height:1;color:var(--accent);background:linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 60%, #fff) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.cz-metric-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t2);margin-top:8px}
+.cz-metric-detail{font-size:13.5px;color:var(--text);margin-top:6px;font-weight:600}
+.cz-chips{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+.cz-chip{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;padding:6px 12px;border-radius:999px;backdrop-filter:blur(14px) saturate(140%);border:1px solid var(--border)}
+.cz-chip.ok{color:#22c55e;background:color-mix(in srgb, #22c55e 14%, transparent);border-color:color-mix(in srgb, #22c55e 40%, transparent)}
+.cz-chip.warn{color:#f59e0b;background:color-mix(in srgb, #f59e0b 14%, transparent);border-color:color-mix(in srgb, #f59e0b 40%, transparent)}
+.cz-chip.nok{color:#94a3b8;background:color-mix(in srgb, #94a3b8 14%, transparent);border-color:color-mix(in srgb, #94a3b8 40%, transparent)}
+.cz-section{background:var(--bg2);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden}
+.cz-section-head{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none;transition:background .2s}
+.cz-section-head:hover{background:color-mix(in srgb, var(--accent) 6%, transparent)}
+.cz-section-head .cz-caret{margin-left:auto;transition:transform .25s var(--ease-out-soft);color:var(--t2);font-size:12px}
+.cz-section.open .cz-section-head .cz-caret{transform:rotate(90deg)}
+.cz-section-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.15px}
+.cz-section-count{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:800;letter-spacing:1.3px;color:var(--t2);background:var(--bg3);padding:3px 10px;border-radius:999px}
+.cz-section-body{padding:0 16px 14px;display:none}
+.cz-section.open .cz-section-body{display:block}
+.cz-match{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--border)}
+.cz-match:first-child{border-top:none}
+.cz-match-nome{font-size:13px;font-weight:600;color:var(--text)}
+.cz-match-orig{font-size:12px;color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace}
+.cz-match-score{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px}
+.cz-match-actions{display:flex;gap:6px;flex-wrap:wrap}
+.cz-match-btn{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:5px 10px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--t2);cursor:pointer;transition:all .2s}
+.cz-match-btn:hover{color:var(--accent);border-color:var(--accent)}
+.cz-match-btn.ok:hover{color:#22c55e;border-color:#22c55e}
+.cz-match-btn.nok:hover{color:#ef4444;border-color:#ef4444}
+.cz-progress-wrap{background:var(--bg3);border-radius:999px;height:8px;overflow:hidden;margin:10px 0}
+.cz-progress-bar{height:100%;background:linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #fff));transition:width .3s var(--ease-out-soft)}
+.cz-vert-pill{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;padding:4px 10px;border-radius:999px;backdrop-filter:blur(14px) saturate(140%)}
+.cz-hist-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
+.cz-hist-prova{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.cz-hist-prova-nome{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;letter-spacing:-.15px;flex:1}
+.cz-hist-table{width:100%;border-collapse:collapse;margin-top:8px}
+.cz-hist-table th,.cz-hist-table td{padding:9px 10px;text-align:left;font-size:12.5px;border-bottom:1px solid var(--border)}
+.cz-hist-table th{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2)}
+.cz-hist-table .cz-hist-pct{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:800;color:var(--accent)}
+.cz-hist-table tr.cz-hist-row-recent td{background:color-mix(in srgb,var(--accent) 10%,transparent);border-bottom-color:color-mix(in srgb,var(--accent) 35%,var(--border))}
+.cz-hist-table tr.cz-hist-row-recent td:first-child{border-left:3px solid var(--accent)}
+.cz-hist-table tr.cz-hist-row-recent .cz-hist-pct{font-size:17px}
+.cz-hist-recent-badge{display:inline-block;font-family:'JetBrains Mono','SF Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:2px 6px;border-radius:999px;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);margin-left:6px;vertical-align:middle}
+.cz-empty{padding:30px;text-align:center;color:var(--t2);font-size:13px;border:1px dashed var(--border);border-radius:12px;background:var(--bg2)}
+.cz-resumo-mini{background:var(--bg3);border-radius:10px;padding:12px;font-size:12.5px;line-height:1.6;margin-top:6px}
+.cz-resumo-mini b{color:var(--text)}
+@media (max-width: 720px){
+  .cz-match{grid-template-columns:1fr;gap:6px}
+  .cz-metric-pct{font-size:48px}
+}
+
 /* ═════════════ SENHAS E ACESSOS ═════════════ */
 .sa-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
 .sa-search-wrap{position:relative;flex:1;min-width:240px}
@@ -2290,6 +2352,19 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 
 /* Editais — cards colapsáveis dentro do box principal */
 #tab-produtos .pro-editais-lista{display:flex;flex-direction:column;gap:8px}
+#tab-produtos .pro-aprov-lista-provas{display:flex;flex-direction:column;gap:14px}
+#tab-produtos .pro-aprov-prova{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+#tab-produtos .pro-aprov-prova-nome{font-family:'Space Grotesk',sans-serif;font-size:14.5px;font-weight:700;letter-spacing:-.1px;margin-bottom:8px;color:var(--text)}
+#tab-produtos .pro-aprov-lista{display:flex;flex-direction:column;gap:6px}
+#tab-produtos .pro-aprov-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);padding:6px 10px;border-radius:8px;flex-wrap:wrap}
+#tab-produtos .pro-aprov-item.is-recent{background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 32%,transparent)}
+#tab-produtos .pro-aprov-ano{font-family:'JetBrains Mono','SF Mono',monospace;font-size:12px;font-weight:700;letter-spacing:1px;color:var(--t2);min-width:54px}
+#tab-produtos .pro-aprov-item.is-recent .pro-aprov-ano{color:var(--accent)}
+#tab-produtos .pro-aprov-sep{color:var(--t2);opacity:.6}
+#tab-produtos .pro-aprov-pct{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:800;color:var(--accent)}
+#tab-produtos .pro-aprov-item.is-recent .pro-aprov-pct{font-size:18px}
+#tab-produtos .pro-aprov-badge{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+#tab-produtos .pro-aprov-detail{color:var(--t2);font-size:12px;margin-left:auto}
 #tab-produtos .pro-edital-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .15s}
 #tab-produtos .pro-edital-card:hover{border-color:color-mix(in srgb,#06b6d4 36%,var(--border))}
 #tab-produtos .pro-edital-card.open{border-color:color-mix(in srgb,#06b6d4 46%,var(--border))}
@@ -2381,6 +2456,61 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-dimp-escopos-manage-empty:hover{border-color:color-mix(in srgb,#a855f7 36%,var(--border));color:#a855f7;background:color-mix(in srgb,#a855f7 5%,var(--bg2))}
 /* Badge de escopo no card de evento (header) */
 #tab-produtos .pro-dimp-escopo-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;border:1px solid color-mix(in srgb,#a855f7 36%,var(--border));background:color-mix(in srgb,#a855f7 10%,var(--bg2));color:#a855f7;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
+/* Barra de filtro de status (Confirmados vs Previstos) — separada da de escopo */
+#tab-produtos .pro-dimp-status-bar{display:flex;align-items:center;gap:10px;margin:6px 0 4px;padding:8px 4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
+#tab-produtos .pro-dimp-status-bar-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--t2);text-transform:uppercase;flex-shrink:0}
+#tab-produtos .pro-dimp-status-bar-chips{display:flex;gap:8px;align-items:center;flex-wrap:nowrap}
+#tab-produtos .pro-dimp-status-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--bg2);color:var(--t2);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+#tab-produtos .pro-dimp-status-chip:hover{border-color:color-mix(in srgb,var(--yellow) 36%,var(--border));color:var(--text)}
+#tab-produtos .pro-dimp-status-chip.on{border-color:var(--yellow);background:color-mix(in srgb,var(--yellow) 18%,var(--bg2));color:var(--yellow)}
+#tab-produtos .pro-dimp-tipo-bar{display:flex;align-items:center;gap:10px;margin:6px 0 4px;padding:8px 4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
+#tab-produtos .pro-dimp-tipo-select{padding:7px 30px 7px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;max-width:280px;min-width:180px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='gray' d='M6 9L1 3h10z'/></svg>");background-repeat:no-repeat;background-position:right 10px center}
+#tab-produtos .pro-dimp-tipo-select:focus{outline:none;border-color:var(--accent)}
+#tab-produtos .pro-dimp-tipo-select:hover{border-color:color-mix(in srgb,var(--accent) 36%,var(--border))}
+#tab-produtos .pro-dimp-tipo-bar-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--t2);text-transform:uppercase;flex-shrink:0}
+#tab-produtos .pro-dimp-tipo-bar-chips{display:flex;gap:8px;align-items:center;flex-wrap:nowrap}
+#tab-produtos .pro-dimp-tipo-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--bg2);color:var(--t2);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+#tab-produtos .pro-dimp-tipo-chip:hover{border-color:color-mix(in srgb,var(--accent) 36%,var(--border));color:var(--text)}
+#tab-produtos .pro-dimp-tipo-chip.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--bg2));color:var(--accent)}
+#tab-produtos .pro-dimp-tipo-chip-ico{font-size:13px;line-height:1}
+#tab-produtos .pro-dimp-filtros-clear-wrap{display:flex;justify-content:flex-end;margin:2px 0 10px;padding:0 4px}
+#tab-produtos .pro-dimp-filtros-clear{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px dashed var(--border);background:transparent;color:var(--t2);font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.4px}
+#tab-produtos .pro-dimp-filtros-clear:hover{border-color:var(--accent);color:var(--accent);border-style:solid}
+/* Dropdown colapsável "🔍 Filtrar" — junta as 3 barras de filtro num só botão quando fechado */
+#tab-produtos .pro-dimp-filtros-wrap{margin:6px 0 12px}
+#tab-produtos .pro-dimp-filtros-btn{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.4px}
+#tab-produtos .pro-dimp-filtros-btn:hover{border-color:color-mix(in srgb,var(--accent) 36%,var(--border));color:var(--accent)}
+#tab-produtos .pro-dimp-filtros-btn.on{border-color:color-mix(in srgb,var(--accent) 50%,var(--border));background:color-mix(in srgb,var(--accent) 8%,var(--bg3));color:var(--accent)}
+#tab-produtos .pro-dimp-filtros-btn .caret{font-size:10px;opacity:.7;margin-left:2px}
+#tab-produtos .pro-dimp-filtros-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 6px;border-radius:999px;background:color-mix(in srgb,var(--yellow) 22%,transparent);color:var(--yellow);border:1px solid color-mix(in srgb,var(--yellow) 50%,var(--border));font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.3px}
+#tab-produtos .pro-dimp-filtros-panel{margin-top:6px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:8px 10px}
+#tab-produtos .pro-dimp-filtros-panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+#tab-produtos .pro-dimp-filtros-panel-body{display:flex;flex-direction:column;gap:0}
+#tab-produtos .pro-dimp-filtros-panel-body .pro-dimp-status-bar,
+#tab-produtos .pro-dimp-filtros-panel-body .pro-dimp-tipo-bar,
+#tab-produtos .pro-dimp-filtros-panel-body .pro-dimp-escopos-bar{margin:4px 0}
+#tab-produtos .pro-dimp-filtros-panel .pro-dimp-filtros-clear-wrap{margin:0;padding:0}
+@media (max-width:560px){
+  #tab-produtos .pro-dimp-filtros-btn{width:100%;justify-content:center}
+  #tab-produtos .pro-dimp-filtros-panel-head{flex-direction:column;align-items:stretch;gap:6px}
+  #tab-produtos .pro-dimp-filtros-panel-head .pro-dimp-filtros-clear-wrap{justify-content:flex-end;display:flex}
+}
+/* Cards "Previsto" — borda esquerda tracejada amarela substitui a borda do tipo */
+#tab-produtos .pro-dimp-card.pro-dimp-previsto{border-left:3px dashed var(--yellow);background:color-mix(in srgb,var(--yellow) 18%,var(--bg2))}
+#tab-produtos .pro-dimp-card.pro-dimp-previsto:hover{border-color:color-mix(in srgb,var(--yellow) 50%,var(--border));border-left-color:var(--yellow);background:color-mix(in srgb,var(--yellow) 22%,var(--bg2))}
+#tab-produtos .pro-dimp-card.pro-dimp-previsto.open{border-color:color-mix(in srgb,var(--yellow) 58%,var(--border));background:color-mix(in srgb,var(--yellow) 20%,var(--bg2))}
+#tab-produtos .pro-dimp-card.pro-dimp-previsto .pro-dimp-head{background:transparent}
+/* Badge "⚠️ Previsto" no header do card */
+#tab-produtos .pro-dimp-badge-previsto{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;border:1px solid color-mix(in srgb,var(--yellow) 50%,var(--border));background:color-mix(in srgb,var(--yellow) 14%,transparent);color:var(--yellow);font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;flex-shrink:0;line-height:1.3;white-space:nowrap}
+/* Bloco no modal pra marcar "ainda não confirmado" */
+.pro-dimp-status-row{background:color-mix(in srgb,var(--yellow) 6%,var(--bg2));border:1px dashed color-mix(in srgb,var(--yellow) 40%,var(--border));border-radius:10px;padding:10px 12px;margin-top:6px}
+.pro-dimp-status-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;font-size:13.5px;font-weight:600;color:var(--text)}
+.pro-dimp-status-toggle input{width:16px;height:16px;accent-color:var(--yellow);cursor:pointer;flex-shrink:0}
+.pro-dimp-status-hint{margin:6px 0 0 24px;color:var(--t2);font-size:12px;line-height:1.45}
+/* Calendário — chip de evento previsto e alerta no popup */
+.pro-dimp-cal-chip.previsto{border:1px dashed var(--yellow) !important;background:color-mix(in srgb,var(--yellow) 12%,transparent) !important;color:var(--yellow) !important}
+.pro-dimp-cal-chip.previsto:hover{background:color-mix(in srgb,var(--yellow) 22%,transparent) !important}
+.pro-dimp-cal-evpop-previsto-alert{margin:10px 0 0;padding:10px 12px;border:1px solid color-mix(in srgb,var(--yellow) 50%,var(--border));background:color-mix(in srgb,var(--yellow) 10%,var(--bg2));color:var(--yellow);border-radius:8px;font-size:13px;line-height:1.45}
 #tab-produtos .pro-dimp-novo-tipo-form{background:color-mix(in srgb,#06b6d4 6%,var(--bg2));border:1px solid color-mix(in srgb,#06b6d4 32%,var(--border));border-radius:12px;padding:14px;margin-bottom:14px;display:flex;flex-direction:column;gap:12px}
 #tab-produtos .pro-dimp-novo-tipo-form .fl{margin-bottom:4px}
 #tab-produtos .pro-dimp-cor-grid{display:flex;gap:8px;flex-wrap:wrap}
@@ -4158,6 +4288,186 @@ body.pro-rt-fs-on{overflow:hidden}
       </div>
       <div id="orc-content"><p style="color:var(--t2);font-size:13px;padding:14px">Carregando...</p></div>
     </div>
+
+    <!-- TAB: Cruzar Lista (cruzamento alunos × lista de aprovados de prova) -->
+    <div id="tab-cruzarLista" class="hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-spacing:-.3px;line-height:1.15">Cruzar Lista</h3>
+          <p style="font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;color:var(--accent);font-size:10.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:4px">Aprovação dos nossos alunos × lista da banca</p>
+        </div>
+        <div>
+          <button class="btn btn-s" onclick="czAbrirConsulta()" title="Buscar aluno na base e ver produtos">🔍 Consultar aluno</button>
+        </div>
+      </div>
+      <div id="cruzar-lista-content">
+        <div class="cz-toolbar">
+          <button class="cz-tab on" data-cz-view="cruzar" onclick="czSwitchView('cruzar',this)">📋 Cruzar agora</button>
+          <button class="cz-tab" data-cz-view="historico" onclick="czSwitchView('historico',this)">📊 Histórico de aprovações</button>
+          <span id="cz-load-status" class="cz-status"></span>
+        </div>
+        <div id="cz-view-cruzar"></div>
+        <div id="cz-view-historico" class="hidden"></div>
+      </div>
+    </div>
+
+<!-- ══ MODAL: Cruzar Lista — Salvar resultado ══ -->
+<div class="mo hidden" id="modal-cz-save" data-no-backdrop-close>
+  <div class="md" style="max-width:520px">
+    <div class="mh">
+      <div><div class="m-title">Salvar resultado</div><div class="m-sub">Vincule a uma prova existente ou crie uma nova</div></div>
+      <button class="m-close" onclick="CM('modal-cz-save')">✕</button>
+    </div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">Prova</label>
+        <div style="display:flex;gap:6px;align-items:stretch">
+          <select class="fc" id="cz-save-prova" style="flex:1"></select>
+          <button type="button" class="btn btn-s" onclick="czToggleInlineNovaProva(true)" title="Cadastrar nova prova" style="white-space:nowrap">＋ Nova prova</button>
+        </div>
+      </div>
+      <div id="cz-save-inline-prova" class="hidden" style="border:1px dashed var(--border);border-radius:10px;padding:12px;margin:-4px 0 6px;background:var(--bg2)">
+        <div style="font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;color:var(--accent);font-size:10.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;margin-bottom:8px">＋ Nova prova</div>
+        <div class="fg"><label class="fl">Vertical</label>
+          <select class="fc" id="cz-save-inline-vert"></select>
+        </div>
+        <div class="fg"><label class="fl">Modalidade <span style="color:var(--t2);font-weight:400;font-size:11px">(ex: TEA, TSA, R1, R3...)</span></label><input class="fc" id="cz-save-inline-mod" autocomplete="off"/></div>
+        <div id="cz-save-inline-err" class="al al-e hidden" style="margin-top:6px"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+          <button type="button" class="btn btn-s" onclick="czToggleInlineNovaProva(false)">Cancelar</button>
+          <button type="button" class="btn btn-p btn-sm" onclick="czSalvarInlineNovaProva()">Salvar prova</button>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Ano</label><input class="fc" id="cz-save-ano" type="number" min="2000" max="2100" placeholder="2025" autocomplete="off"/></div>
+      <div class="fg"><label class="fl">Observação <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional)</span></label><textarea class="fc" id="cz-save-obs" style="min-height:60px"></textarea></div>
+      <div id="cz-save-resumo" class="cz-resumo-mini"></div>
+      <div id="cz-save-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-cz-save')">Cancelar</button>
+      <button class="btn btn-p" onclick="czSaveResultado()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Cruzar Lista — Prova (criar/editar) ══ -->
+<div class="mo hidden" id="modal-cz-prova" data-no-backdrop-close>
+  <div class="md" style="max-width:520px">
+    <div class="mh">
+      <div><div class="m-title" id="cz-prova-title">Nova prova</div><div class="m-sub">Banca/concurso pra agrupar resultados</div></div>
+      <button class="m-close" onclick="CM('modal-cz-prova')">✕</button>
+    </div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">Vertical</label>
+        <select class="fc" id="cz-prova-vertical"></select>
+      </div>
+      <div class="fg"><label class="fl">Modalidade <span style="color:var(--t2);font-weight:400;font-size:11px">(ex: TEA, TSA, R1, R3...)</span></label><input class="fc" id="cz-prova-modalidade" autocomplete="off"/></div>
+      <div id="cz-prova-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-cz-prova')">Cancelar</button>
+      <button class="btn btn-p" onclick="czSaveProva()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Cruzar Lista — Buscar aluno manual ══ -->
+<div class="mo hidden" id="modal-cz-busca" data-no-backdrop-close>
+  <div class="md" style="max-width:560px">
+    <div class="mh">
+      <div><div class="m-title">🔍 Buscar aluno na base</div><div class="m-sub" id="cz-busca-sub"></div></div>
+      <button class="m-close" onclick="CM('modal-cz-busca')">✕</button>
+    </div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">Nome (ou parte)</label><input class="fc" id="cz-busca-input" autocomplete="off" oninput="czBuscaOnInput()" placeholder="Digite parte do nome..."/></div>
+      <div id="cz-busca-results" style="max-height:380px;overflow:auto;border-top:1px solid var(--border);margin-top:8px"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-cz-busca')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Cruzar Lista — Consulta global (lupa) ══ -->
+<div class="mo hidden" id="modal-cz-consulta" data-no-backdrop-close>
+  <div class="md" style="max-width:560px">
+    <div class="mh">
+      <div><div class="m-title">🔍 Consultar aluno na base</div><div class="m-sub">Busca por nome, email ou CPF</div></div>
+      <button class="m-close" onclick="CM('modal-cz-consulta')">✕</button>
+    </div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">Digite parte do nome, email ou CPF</label><input class="fc" id="cz-consulta-input" autocomplete="off" oninput="czConsultaOnInput()" placeholder="Ex.: Estefane · estefane@... · 03346887"/></div>
+      <div id="cz-consulta-results" style="max-height:420px;overflow:auto;border-top:1px solid var(--border);margin-top:8px"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-cz-consulta')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Cruzar Lista — Produtos do aluno ══ -->
+<div class="mo hidden" id="modal-cz-produtos" data-no-backdrop-close>
+  <div class="md" style="max-width:600px">
+    <div class="mh">
+      <div><div class="m-title">🛍️ Produtos do aluno</div><div class="m-sub" id="cz-prod-sub"></div></div>
+      <button class="m-close" onclick="CM('modal-cz-produtos')">✕</button>
+    </div>
+    <div class="m-body" id="cz-prod-body" style="max-height:560px;overflow:auto"></div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-cz-produtos')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Cruzar Lista — Diagnóstico ══ -->
+<div class="mo hidden" id="modal-cz-diag" data-no-backdrop-close>
+  <div class="md" style="max-width:680px">
+    <div class="mh">
+      <div><div class="m-title">🔍 Diagnóstico de matching</div><div class="m-sub" id="cz-diag-sub"></div></div>
+      <button class="m-close" onclick="CM('modal-cz-diag')">✕</button>
+    </div>
+    <div class="m-body" id="cz-diag-body" style="max-height:520px;overflow:auto"></div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-cz-diag')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Cruzar Lista — Snapshot da lista (visualização read-only) ══ -->
+<div class="mo hidden" id="modal-cz-snapshot" data-no-backdrop-close>
+  <div class="md" style="max-width:720px">
+    <div class="mh">
+      <div><div class="m-title">📋 Lista de aprovados (snapshot)</div><div class="m-sub" id="cz-snap-sub"></div></div>
+      <button class="m-close" onclick="CM('modal-cz-snapshot')">✕</button>
+    </div>
+    <div class="m-body" id="cz-snap-body" style="max-height:560px;overflow:auto"></div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-cz-snapshot')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Cruzar Lista — Resultado (novo/editar) ══ -->
+<div class="mo hidden" id="modal-cz-resultado" data-no-backdrop-close>
+  <div class="md" style="max-width:520px">
+    <div class="mh">
+      <div><div class="m-title" id="cz-res-title">Editar resultado</div><div class="m-sub" id="cz-res-sub"></div></div>
+      <button class="m-close" onclick="CM('modal-cz-resultado')">✕</button>
+    </div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">Ano</label><input class="fc" id="cz-res-ano" type="number" min="2000" max="2100"/></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="fg" style="flex:1;min-width:120px"><label class="fl">Total da lista</label><input class="fc" id="cz-res-totl" type="number" min="0"/></div>
+        <div class="fg" style="flex:1;min-width:120px"><label class="fl">Nossos aprovados</label><input class="fc" id="cz-res-totn" type="number" min="0"/></div>
+      </div>
+      <div class="fg"><label class="fl">Observação</label><textarea class="fc" id="cz-res-obs" style="min-height:60px"></textarea></div>
+      <div id="cz-res-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-cz-resultado')">Cancelar</button>
+      <button class="btn btn-p" onclick="czSaveResultadoModal()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
 
     <!-- TAB: Comunicação (mural por categoria — TSA / TEA / MEs) -->
     <div id="tab-comunicacao" class="hidden">
@@ -6164,7 +6474,7 @@ Equipe AnestReview · AROS</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore,collection,doc,getDoc,getDocs,setDoc,updateDoc,onSnapshot,deleteDoc,writeBatch,addDoc,query,orderBy,serverTimestamp,limit as fbLimit,startAfter,deleteField,arrayUnion,arrayRemove,Timestamp,FieldPath }
+import { getFirestore,collection,doc,getDoc,getDocs,setDoc,updateDoc,onSnapshot,deleteDoc,writeBatch,addDoc,query,where,orderBy,serverTimestamp,limit as fbLimit,startAfter,deleteField,arrayUnion,arrayRemove,Timestamp,FieldPath }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage,ref as storageRef,uploadBytes,getDownloadURL,deleteObject }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
@@ -6303,6 +6613,11 @@ const AUDIT_ACTIONS=[
   'DATA_IMP_CRIADA','DATA_IMP_EDITADA','DATA_IMP_REMOVIDA',
   'DATA_IMP_TIPO_CRIADO','DATA_IMP_TIPO_EDITADO','DATA_IMP_TIPO_REMOVIDO',
   'DATA_IMP_ESCOPO_CRIADO','DATA_IMP_ESCOPO_EDITADO','DATA_IMP_ESCOPO_REMOVIDO',
+  'CRUZAR_LISTA_EXECUTADO',
+  'CRUZAR_LISTA_SNAPSHOT_GRAVADO',
+  'CRUZAR_DESCARTOU_APROVADO','CRUZAR_CONFIRMOU_MANUAL','CRUZAR_VINCULOU_MANUAL',
+  'PROVA_APROVADOS_CRIADA','PROVA_APROVADOS_EDITADA','PROVA_APROVADOS_REMOVIDA',
+  'RESULTADO_APROVADOS_CRIADO','RESULTADO_APROVADOS_EDITADO','RESULTADO_APROVADOS_REMOVIDO',
   'CONFIG_ALTERADA'
 ];
 window.AUDIT_ACTIONS=AUDIT_ACTIONS;
@@ -9114,6 +9429,7 @@ const TAB_GROUPS=[
     {id:'features',label:'📌 Features'},
     {id:'financeiro',label:'💰 Financeiro'},
     {id:'orcamento',label:'📊 Orçamento'},
+    {id:'cruzarLista',label:'🎯 Cruzar Lista'},
     {id:'comunicacao',label:'📢 Comunicação'},
     {id:'senhasAcessos',label:'🔐 Senhas e Acessos'},
     {id:'usuarios',label:'👤 Usuários'},
@@ -9124,7 +9440,7 @@ const TAB_GROUPS=[
 const ALL_TABS=TAB_GROUPS.flatMap(g=>g.tabs.map(t=>t.id));
 // Abas historicamente reservadas a administradores. Hoje serve só como fallback —
 // o badge "ADM" no menu é decidido dinamicamente por isAdmExclusiveTab (ver abaixo).
-const ADMIN_ONLY_TABS=new Set(['usuarios','config','financeiro','orcamento','features','recProvas','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos','auditoria']);
+const ADMIN_ONLY_TABS=new Set(['usuarios','config','financeiro','orcamento','features','recProvas','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos','auditoria','cruzarLista']);
 // Retorna true se a aba é EXCLUSIVA do tipo 'adm' — ou seja, nenhum outro tipo (prof/coord/suporte/financeiro/custom)
 // tem essa aba no seu preset. STRICT_ADMIN_TABS (ex: auditoria) sempre conta como exclusiva.
 function isAdmExclusiveTab(tabId){
@@ -19318,6 +19634,24 @@ onAuthStateChanged(auth,async(user)=>{
     audit(action,{email:user.email||null,provider});
     window._freshFirebaseLogin=false;
   }
+  // Auto-bootstrap do primeiro admin (UID hardcoded também na firestore.rules).
+  // Roda em background a cada login do dono do projeto. Idempotente: se o doc
+  // já existir, getDoc retorna existe→true e a função sai sem escrever.
+  const BOOTSTRAP_ADMIN_UID='nF4lKfJXOyPyx6btGkV7Lj0DkQr1';
+  if(user.uid===BOOTSTRAP_ADMIN_UID){
+    try{
+      const adminRef=doc(db,'adminUids',user.uid);
+      const adminSnap=await getDoc(adminRef);
+      if(!adminSnap.exists()){
+        await setDoc(adminRef,{
+          email:user.email||null,
+          addedAt:new Date().toISOString(),
+          addedBy:'auto-bootstrap'
+        });
+        console.log('[AROS] Bootstrap: primeiro admin cadastrado em adminUids/'+user.uid);
+      }
+    }catch(e){console.warn('Bootstrap admin falhou (ok se as rules ainda não foram deployadas):',e?.code||e?.message);}
+  }
 });
 
 // Restaura sessão do localStorage (chamado no boot, após loadUsuarios)
@@ -20360,7 +20694,7 @@ window.deleteUser=async()=>{
 
 // co tabs
 window.switchCoTab=(tab,btn)=>{
-  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','orcamento','mentorias','features','recProvas','recGestao','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos','senhasPublicas','auditoria','produtos'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
+  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','orcamento','mentorias','features','recProvas','recGestao','recFontes','recConfig','recMetricas','comunicacao','senhasAcessos','senhasPublicas','auditoria','produtos','cruzarLista'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
   document.querySelectorAll('.co-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   // Show "Novo Simulado" only on simulados tab
@@ -20370,6 +20704,7 @@ window.switchCoTab=(tab,btn)=>{
   if(tab==='auditoria'&&typeof renderAuditoria==='function')renderAuditoria();
   if(tab==='orcamento'&&typeof renderOrcamento==='function')renderOrcamento();
   if(tab==='produtos'&&typeof initProdutos==='function')initProdutos();
+  if(tab==='cruzarLista'&&typeof initCruzar==='function')initCruzar();
 };
 
 // sim cards (aluno view)
@@ -28704,6 +29039,9 @@ S._datasImpGerenciarTiposOpen=false;
 // Escopos (classificação por audiência/track — TEA, TSA, MEs, Outros, etc)
 // Single-select por evento; eventos sem escopo viram "Sem escopo".
 S._datasImpFiltroEscopo='todos'; // 'todos' | <escopoId> | 'sem-escopo'
+S._datasImpFiltroStatus='todos'; // 'todos' | 'confirmados' | 'previstos'
+S._datasImpFiltroTipo='todos'; // 'todos' | <tipoId>
+S._datasImpFiltrosOpen=false; // dropdown "🔍 Filtrar" começa colapsado
 S._datasImpGerenciarEscoposOpen=false;
 S._datasImpNovoEscopoForm=null; // {nome:''} ou null
 S._datasImpEditandoEscopoId=null;
@@ -28712,6 +29050,9 @@ S._datasImpCalOpen=false;
 S._datasImpCalMes=null; // 'YYYY-MM' (default = mês atual quando abre)
 // Popup de detalhe sobre o calendário (id do evento OU null)
 S._datasImpCalEventPopup=null;
+// Aprovações — provas + resultados da vertical atual (read-only no catálogo)
+S.aprovacoes={provas:[],resultados:[],loaded:false};
+S._aprovacoesOpen=false;
 // Tipos de eventos — global entre verticais (config/datasImportantesTipos)
 // lista = customs + overrides de system (mesmo id sobrescreve nome/icone/cor do default)
 // deletedSystemIds = tombstones — ids de system "removidos" pelo usuário
@@ -28769,6 +29110,8 @@ let _datasImpTiposUnsub=null;
 let _proUnsub=null;
 let _proCatUnsub=null;
 let _proDexCfgUnsub=null;
+let _proAprovacoesProvasUnsub=null;
+let _proAprovacoesResultadosUnsub=null;
 let _proDirty=false;
 let _proCatSeeded=false;
 
@@ -29031,6 +29374,8 @@ function _proRebindVerticalListeners(){
   if(_proEditaisUnsub){try{_proEditaisUnsub();}catch(e){}_proEditaisUnsub=null;}
   if(_proDatasImpUnsub){try{_proDatasImpUnsub();}catch(e){}_proDatasImpUnsub=null;}
   if(_proDexCfgUnsub){try{_proDexCfgUnsub();}catch(e){}_proDexCfgUnsub=null;}
+  if(_proAprovacoesProvasUnsub){try{_proAprovacoesProvasUnsub();}catch(e){}_proAprovacoesProvasUnsub=null;}
+  if(_proAprovacoesResultadosUnsub){try{_proAprovacoesResultadosUnsub();}catch(e){}_proAprovacoesResultadosUnsub=null;}
   // Reseta estado pra evitar mostrar dados de vertical anterior por um instante
   S.catalogoConfig.publicosAlvo=[];S.catalogoConfig.provasAlvo=[];S.catalogoConfig.loaded=false;
   S.jornadaCliente.texto='';S.jornadaCliente.videoUrl='';S.jornadaCliente.imagemUrl='';S.jornadaCliente.imagemPath='';S.jornadaCliente.updatedAt=null;S.jornadaCliente.updatedBy='';S.jornadaCliente.loaded=false;
@@ -29039,6 +29384,7 @@ function _proRebindVerticalListeners(){
   S.dexConfig.templateGeral='';S.dexConfig.templateSuporte='';S.dexConfig.templateVendas='';S.dexConfig.templateMarketing='';
   S.dexConfig.pdfsGeral=[];S.dexConfig.pdfsSuporte=[];S.dexConfig.pdfsVendas=[];S.dexConfig.pdfsMarketing=[];
   S.dexConfig.modelo='haiku';S.dexConfig.maxTokens=1024;S.dexConfig.updatedAt=null;S.dexConfig.updatedBy='';S.dexConfig.loaded=false;
+  S.aprovacoes.provas=[];S.aprovacoes.resultados=[];S.aprovacoes.loaded=false;
   // catalogoConfig
   _proCatUnsub=onSnapshot(doc(db,'config',_verticalDocId('catalogoConfig')),snap=>{
     if(snap.exists()){
@@ -29111,6 +29457,16 @@ function _proRebindVerticalListeners(){
     S.dexConfig.loaded=true;
     if(S.dexAberto&&S._dexConfigOpen)_proDexRender();
   },err=>{console.warn('dexPrompt onSnapshot:',err);S.dexConfig.loaded=true;});
+  // aprovações — provas + resultados filtrados pela vertical
+  _proAprovacoesProvasUnsub=onSnapshot(query(collection(db,'provasAprovados'),where('vertical','==',v)),snap=>{
+    S.aprovacoes.provas=snap.docs.map(d=>({id:d.id,...d.data()}));
+    S.aprovacoes.loaded=true;
+    if(S.produtosLoaded&&S.produtosView==='list')_proAprovacoesRefresh();
+  },err=>{console.warn('aprovacoes provas onSnapshot:',err);S.aprovacoes.loaded=true;});
+  _proAprovacoesResultadosUnsub=onSnapshot(query(collection(db,'resultadosAprovados'),where('vertical','==',v)),snap=>{
+    S.aprovacoes.resultados=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(S.produtosLoaded&&S.produtosView==='list')_proAprovacoesRefresh();
+  },err=>{console.warn('aprovacoes resultados onSnapshot:',err);});
 }
 
 window.initProdutos=function(){
@@ -29225,6 +29581,9 @@ window.proSelectVertical=(id)=>{
   S._datasImpCalMes=null;
   S._datasImpCalEventPopup=null;
   S._datasImpFiltroEscopo='todos';
+  S._datasImpFiltroStatus='todos';
+  S._datasImpFiltroTipo='todos';
+  S._datasImpFiltrosOpen=false;
   S._datasImpGerenciarEscoposOpen=false;
   S._datasImpNovoEscopoForm=null;
   S._datasImpEditandoEscopoId=null;
@@ -29249,6 +29608,9 @@ window.proVoltarVerticais=()=>{
   S._datasImpCalMes=null;
   S._datasImpCalEventPopup=null;
   S._datasImpFiltroEscopo='todos';
+  S._datasImpFiltroStatus='todos';
+  S._datasImpFiltroTipo='todos';
+  S._datasImpFiltrosOpen=false;
   S._datasImpGerenciarEscoposOpen=false;
   S._datasImpNovoEscopoForm=null;
   S._datasImpEditandoEscopoId=null;
@@ -29321,6 +29683,7 @@ function _proRenderList(root){
     <div id="pro-jornada-wrap">${_proJornadaHTML()}</div>
     <div id="pro-editais-wrap">${_proEditaisHTML()}</div>
     <div id="pro-datas-imp-wrap">${_proDatasImpHTML()}</div>
+    <div id="pro-aprovacoes-wrap">${_proAprovacoesHTML()}</div>
     ${listHtml}
   `;
   _proDexRender();
@@ -29760,21 +30123,35 @@ function _proDimpEscopoMeta(eid){
   const hit=lista.find(x=>x&&x.id===id);
   return hit||null;
 }
-// Aplica o filtro de escopo vigente (S._datasImpFiltroEscopo) a uma lista de eventos.
-function _proDimpAplicaFiltroEscopo(arr){
-  const f=String(S._datasImpFiltroEscopo||'todos');
-  if(f==='todos')return arr;
-  if(f==='sem-escopo')return arr.filter(e=>!e||!e.escopoId);
-  // filtro por id específico — se o escopo foi deletado, nada bate
-  return arr.filter(e=>e&&String(e.escopoId||'')===f);
+// Aplica os filtros vigentes (escopo + status + tipo) a uma lista de eventos.
+// Eventos antigos sem `confirmado` são tratados como confirmados (default true).
+function _proDimpAplicaFiltros(arr){
+  const fe=String(S._datasImpFiltroEscopo||'todos');
+  const fs=String(S._datasImpFiltroStatus||'todos');
+  const ft=String(S._datasImpFiltroTipo||'todos');
+  let out=arr;
+  if(fe!=='todos'){
+    if(fe==='sem-escopo')out=out.filter(e=>!e||!e.escopoId);
+    else out=out.filter(e=>e&&String(e.escopoId||'')===fe);
+  }
+  if(fs!=='todos'){
+    if(fs==='previstos')out=out.filter(e=>e&&e.confirmado===false);
+    else if(fs==='confirmados')out=out.filter(e=>!e||e.confirmado!==false);
+  }
+  if(ft!=='todos'){
+    out=out.filter(e=>e&&String(e.tipo||'')===ft);
+  }
+  return out;
 }
+// Alias retrocompatível — não usar em código novo.
+function _proDimpAplicaFiltroEscopo(arr){return _proDimpAplicaFiltros(arr);}
 
 function _proDatasImpHTML(){
   const canEdit=_proCanEdit();
   const open=!!S._datasImpOpen;
   const loaded=!!S.datasImp.loaded;
   const listaRaw=Array.isArray(S.datasImp.lista)?S.datasImp.lista:[];
-  const lista=_proDimpAplicaFiltroEscopo(listaRaw);
+  const lista=_proDimpAplicaFiltros(listaRaw);
   const ord=lista.slice().sort((a,b)=>_proDimpOrdKey(a).localeCompare(_proDimpOrdKey(b)));
   const futuras=ord.filter(e=>!_proDimpPassou(e));
   const passadas=ord.filter(e=>_proDimpPassou(e));
@@ -29785,12 +30162,12 @@ function _proDatasImpHTML(){
     const cadastrarBtn=canEdit?`<button class="btn btn-p btn-sm" type="button" onclick="proDatasImpAbrirNovo()">＋ Cadastrar evento</button>`:'';
     const calendarioBtn=`<button class="btn btn-s btn-sm" type="button" onclick="proDatasImpAbrirCalendario()" title="Ver eventos no calendário">📅 Ver calendário</button>`;
     const toolbar=(canEdit||listaRaw.length)?`<div class="pro-dimp-toolbar">${cadastrarBtn}${calendarioBtn}</div>`:'';
-    const filtroBar=_proDatasImpFiltroEscopoHTML(canEdit);
+    const filtrosWrap=_proDatasImpFiltrosWrapHTML(canEdit);
     let listaHtml='';
     if(!listaRaw.length){
       listaHtml=`<p style="color:var(--t2);font-style:italic;margin:0">Nenhum evento cadastrado ainda.${canEdit?' Clique em "Cadastrar evento" pra começar.':''}</p>`;
     }else if(!futuras.length&&!passadas.length){
-      listaHtml=`<p style="color:var(--t2);font-style:italic;margin:0">Nenhum evento neste escopo. Troque o filtro pra ver outros.</p>`;
+      listaHtml=`<p style="color:var(--t2);font-style:italic;margin:0">Nenhum evento corresponde aos filtros atuais (status/tipo/escopo). Troque algum filtro pra ver outros.</p>`;
     }else{
       const futurasHtml=futuras.length?futuras.map(e=>_proDatasImpItemHTML(e,canEdit,false)).join(''):
         `<p style="color:var(--t2);font-style:italic;margin:0">Nenhum evento futuro. ${passadas.length?'Veja os passados abaixo.':''}</p>`;
@@ -29800,7 +30177,7 @@ function _proDatasImpHTML(){
         `<div class="pro-editais-lista" style="margin-top:10px">${passadas.map(e=>_proDatasImpItemHTML(e,canEdit,true)).join('')}</div>`:'';
       listaHtml=`<div class="pro-editais-lista">${futurasHtml}</div>${verPassadosBtn}${passadasHtml}`;
     }
-    bodyHtml=`${toolbar}${filtroBar}${listaHtml}`;
+    bodyHtml=`${toolbar}${filtrosWrap}${listaHtml}`;
   }
   const updMeta=(S.datasImp.updatedAt&&S.datasImp.updatedBy)?`<span class="pro-jornada-meta">Atualizado em ${_proEsc(_proFmtDate(S.datasImp.updatedAt))} por ${_proEsc(S.datasImp.updatedBy)}</span>`:'';
   const modalHtml=S._datasImpModalOpen?_proDatasImpModalHTML():'';
@@ -29817,22 +30194,119 @@ function _proDatasImpHTML(){
   </div>${modalHtml}${gerTiposHtml}${gerEscoposHtml}${calHtml}`;
 }
 
+// Barra horizontal de chips de status (confirmado vs previsto). Sempre visível.
+function _proDatasImpFiltroStatusHTML(){
+  const f=String(S._datasImpFiltroStatus||'todos');
+  const opt=(v,lbl)=>`<option value="${v}"${f===v?' selected':''}>${_proEsc(lbl)}</option>`;
+  const opts=[opt('todos','Todos'),opt('confirmados','Confirmados'),opt('previstos','⚠️ Previstos')];
+  return `<div class="pro-dimp-tipo-bar">
+    <span class="pro-dimp-tipo-bar-label">Status:</span>
+    <select class="pro-dimp-tipo-select" onchange="proDatasImpSetFiltroStatus(this.value)">${opts.join('')}</select>
+  </div>`;
+}
+window.proDatasImpSetFiltroStatus=(valor)=>{
+  const v=String(valor||'todos');
+  S._datasImpFiltroStatus=(v==='confirmados'||v==='previstos')?v:'todos';
+  _proDatasImpRefresh();
+  if(S._datasImpCalOpen&&typeof _proDatasImpCalRepaint==='function')_proDatasImpCalRepaint();
+};
+
+// Barra horizontal de chips por tipo de evento. Sempre visível (system tipos
+// existem por padrão). Chip ativo herda a cor do próprio tipo.
+function _proDatasImpFiltroTipoHTML(){
+  const tipos=_proDimpTiposAll();
+  const f=String(S._datasImpFiltroTipo||'todos');
+  const opts=[`<option value="todos"${f==='todos'?' selected':''}>Todos os tipos</option>`];
+  tipos.forEach(t=>{
+    const sel=f===t.id?' selected':'';
+    const nome=String(t.nome||'(sem nome)');
+    const ico=String(t.icone||'📌');
+    opts.push(`<option value="${_proEscAttr(t.id)}"${sel}>${_proEsc(ico)}  ${_proEsc(nome)}</option>`);
+  });
+  return `<div class="pro-dimp-tipo-bar">
+    <span class="pro-dimp-tipo-bar-label">Tipo:</span>
+    <select class="pro-dimp-tipo-select" onchange="proDatasImpSetFiltroTipo(this.value)">${opts.join('')}</select>
+  </div>`;
+}
+window.proDatasImpSetFiltroTipo=(valor)=>{
+  S._datasImpFiltroTipo=String(valor||'todos');
+  _proDatasImpRefresh();
+  if(S._datasImpCalOpen&&typeof _proDatasImpCalRepaint==='function')_proDatasImpCalRepaint();
+};
+
+// Botão pequeno "Limpar filtros" — aparece se algum dos 3 filtros está ativo.
+function _proDatasImpFiltrosClearHTML(){
+  const fe=String(S._datasImpFiltroEscopo||'todos');
+  const fs=String(S._datasImpFiltroStatus||'todos');
+  const ft=String(S._datasImpFiltroTipo||'todos');
+  if(fe==='todos'&&fs==='todos'&&ft==='todos')return '';
+  return `<div class="pro-dimp-filtros-clear-wrap"><button type="button" class="pro-dimp-filtros-clear" onclick="proDatasImpLimparFiltros()" title="Limpar todos os filtros">✕ Limpar filtros</button></div>`;
+}
+window.proDatasImpLimparFiltros=()=>{
+  S._datasImpFiltroEscopo='todos';
+  S._datasImpFiltroStatus='todos';
+  S._datasImpFiltroTipo='todos';
+  _proDatasImpRefresh();
+  if(S._datasImpCalOpen&&typeof _proDatasImpCalRepaint==='function')_proDatasImpCalRepaint();
+};
+
+// Conta quantos dos 3 filtros estão diferentes de 'todos'
+function _proDimpFiltrosAtivosCount(){
+  let n=0;
+  if(S._datasImpFiltroStatus&&S._datasImpFiltroStatus!=='todos')n++;
+  if(S._datasImpFiltroTipo&&S._datasImpFiltroTipo!=='todos')n++;
+  if(S._datasImpFiltroEscopo&&S._datasImpFiltroEscopo!=='todos')n++;
+  return n;
+}
+
+// Render do wrapper colapsável de filtros — botão "🔍 Filtrar" + painel quando aberto
+function _proDatasImpFiltrosWrapHTML(canEdit){
+  const open=!!S._datasImpFiltrosOpen;
+  const n=_proDimpFiltrosAtivosCount();
+  const badge=n>0?`<span class="pro-dimp-filtros-badge">${n}</span>`:'';
+  const caret=open?'▴':'▾';
+  const btn=`<button type="button" class="pro-dimp-filtros-btn${n>0?' on':''}" onclick="proDatasImpToggleFiltros()" aria-expanded="${open}">🔍 Filtrar${badge}<span class="caret">${caret}</span></button>`;
+  if(!open)return `<div class="pro-dimp-filtros-wrap">${btn}</div>`;
+  const statusBar=_proDatasImpFiltroStatusHTML();
+  const tipoBar=_proDatasImpFiltroTipoHTML();
+  const escopoBar=_proDatasImpFiltroEscopoHTML(canEdit);
+  const clearBar=_proDatasImpFiltrosClearHTML();
+  return `<div class="pro-dimp-filtros-wrap">
+    <div class="pro-dimp-filtros-panel">
+      <div class="pro-dimp-filtros-panel-head">
+        ${btn}
+        ${clearBar}
+      </div>
+      <div class="pro-dimp-filtros-panel-body">
+        ${statusBar}
+        ${escopoBar}
+        ${tipoBar}
+      </div>
+    </div>
+  </div>`;
+}
+
+window.proDatasImpToggleFiltros=()=>{
+  S._datasImpFiltrosOpen=!S._datasImpFiltrosOpen;
+  _proDatasImpRefresh();
+};
+
 // Barra horizontal de chips de escopo (filtro de visualização)
 function _proDatasImpFiltroEscopoHTML(canEdit){
   const escopos=Array.isArray(S.datasImp&&S.datasImp.escopos)?S.datasImp.escopos:[];
   const f=String(S._datasImpFiltroEscopo||'todos');
+  const manageBtn=canEdit?`<button type="button" class="pro-dimp-escopos-manage-btn" onclick="proDatasImpAbrirGerenciarEscopos()" title="Gerenciar escopos">⚙</button>`:'';
   // Se NÃO há escopos cadastrados, mostra só o botão discreto (se canEdit)
   if(!escopos.length){
-    return canEdit?`<div class="pro-dimp-escopos-bar empty"><button type="button" class="pro-dimp-escopos-manage-empty" onclick="proDatasImpAbrirGerenciarEscopos()" title="Criar escopos pra classificar eventos por público">⚙ Gerenciar escopos</button></div>`:'';
+    return canEdit?`<div class="pro-dimp-tipo-bar"><span class="pro-dimp-tipo-bar-label">Escopo:</span><button type="button" class="pro-dimp-escopos-manage-empty" onclick="proDatasImpAbrirGerenciarEscopos()" title="Criar escopos pra classificar eventos por público">⚙ Gerenciar escopos</button></div>`:'';
   }
-  const chip=(id,label,active)=>`<button type="button" class="pro-dimp-escopo-filtro-chip${active?' on':''}" onclick="proDatasImpSetFiltroEscopo('${_proEscAttr(id)}')">${_proEsc(label)}</button>`;
-  const chips=[chip('todos','Todos',f==='todos')];
-  escopos.forEach(esc=>{chips.push(chip(esc.id,String(esc.nome||'(sem nome)'),f===esc.id));});
-  chips.push(chip('sem-escopo','Sem escopo',f==='sem-escopo'));
-  const manageBtn=canEdit?`<button type="button" class="pro-dimp-escopos-manage-btn" onclick="proDatasImpAbrirGerenciarEscopos()" title="Gerenciar escopos">⚙</button>`:'';
-  return `<div class="pro-dimp-escopos-bar">
-    <span class="pro-dimp-escopos-label">Escopos:</span>
-    <div class="pro-dimp-escopos-chips">${chips.join('')}</div>
+  const opt=(v,lbl)=>`<option value="${_proEscAttr(v)}"${f===v?' selected':''}>${_proEsc(lbl)}</option>`;
+  const opts=[opt('todos','Todos')];
+  escopos.forEach(esc=>{opts.push(opt(esc.id,String(esc.nome||'(sem nome)')));});
+  opts.push(opt('sem-escopo','Sem escopo'));
+  return `<div class="pro-dimp-tipo-bar">
+    <span class="pro-dimp-tipo-bar-label">Escopo:</span>
+    <select class="pro-dimp-tipo-select" onchange="proDatasImpSetFiltroEscopo(this.value)">${opts.join('')}</select>
     ${manageBtn}
   </div>`;
 }
@@ -29863,7 +30337,9 @@ function _proDatasImpItemHTML(e,canEdit,passou){
   const badgeLabel=passou?'passou':String(meta.nome||'');
   const escopo=_proDimpEscopoMeta(e.escopoId);
   const escopoBadge=escopo?`<span class="pro-dimp-escopo-badge" title="Escopo: ${_proEscAttr(escopo.nome)}">${_proEsc(escopo.nome)}</span>`:'';
-  const cardCls=`pro-dimp-card${passou?' passou':''}${aberto&&hasBody?' open':''}`;
+  const isPrevisto=(e.confirmado===false);
+  const previstoBadge=isPrevisto?`<span class="pro-dimp-badge-previsto" title="Evento ainda não confirmado pela coordenação">⚠️ Previsto</span>`:'';
+  const cardCls=`pro-dimp-card${passou?' passou':''}${aberto&&hasBody?' open':''}${isPrevisto?' pro-dimp-previsto':''}`;
   const headCls=`pro-dimp-head${hasBody?'':' no-body'}`;
   const headOnclick=hasBody?` onclick="proDatasImpToggle('${_proEscAttr(id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proDatasImpToggle('${_proEscAttr(id)}')}" role="button" tabindex="0" aria-expanded="${aberto}"`:'';
   const caretCls=hasBody?'pro-dimp-caret':'pro-dimp-caret disabled';
@@ -29873,6 +30349,7 @@ function _proDatasImpItemHTML(e,canEdit,passou){
       <span class="pro-dimp-title">${_proEsc(titulo)}</span>
       <span class="pro-dimp-data">${_proEsc(dataTxt)}${horaHtml}</span>
       ${escopoBadge}
+      ${previstoBadge}
       <span class="${badgeCls}">${_proEsc(badgeLabel)}</span>
       ${actions}
       <span class="${caretCls}">▾</span>
@@ -29969,6 +30446,13 @@ function _proDatasImpModalHTML(){
           <label class="fl">Link (opcional)</label>
           <input type="url" class="fc" placeholder="https://..." value="${_proEscAttr(e.link||'')}" oninput="_proDatasImpSetCampo('link',this.value)"/>
         </div>
+        <div class="pro-dimp-status-row">
+          <label class="pro-dimp-status-toggle">
+            <input type="checkbox" ${e.confirmado===false?'checked':''} onchange="_proDatasImpSetCampo('confirmado',this.checked?false:true)"/>
+            <span>⚠️ Evento ainda não confirmado (previsto)</span>
+          </label>
+          <p class="pro-dimp-status-hint">Eventos previstos ficam destacados em amarelo. O Dex/IA avisa que ainda não está confirmado quando mencionar.</p>
+        </div>
       </div>
       <div class="pro-editais-modal-foot">
         <button class="btn btn-s btn-sm" type="button" onclick="proDatasImpModalFechar()">Cancelar</button>
@@ -30013,6 +30497,64 @@ window.proToggleDatasImp=()=>{
   if(el)el.classList.toggle('open',!!S._datasImpOpen);
 };
 
+// ───── Aprovações (read-only no catálogo) ─────────────────────────────
+function _proAprovacoesHTML(){
+  const open=!!S._aprovacoesOpen;
+  const provas=Array.isArray(S.aprovacoes.provas)?S.aprovacoes.provas:[];
+  const resultados=Array.isArray(S.aprovacoes.resultados)?S.aprovacoes.resultados:[];
+  let bodyHtml;
+  if(!S.aprovacoes.loaded){
+    bodyHtml='<p style="color:var(--t2);font-style:italic;margin:0">Carregando aprovações...</p>';
+  }else if(!provas.length){
+    bodyHtml='<p style="color:var(--t2);font-style:italic;margin:0">Nenhuma prova cadastrada pra esta vertical ainda.</p>';
+  }else{
+    const provasOrd=provas.slice().sort((a,b)=>(a.modalidade||a.descricao||'').localeCompare(b.modalidade||b.descricao||'','pt-BR'));
+    const linhas=[];
+    for(const p of provasOrd){
+      const nome=p.modalidade||p.descricao||p.id;
+      const rs=resultados.filter(r=>r.provaId===p.id).sort((a,b)=>(b.ano||0)-(a.ano||0));
+      if(!rs.length)continue;
+      const maxAno=Math.max(...rs.map(r=>r.ano||0));
+      linhas.push(`<div class="pro-aprov-prova">
+        <div class="pro-aprov-prova-nome">${_proEsc(nome)}${p.descricao&&p.modalidade?` <span style="color:var(--t2);font-size:12px;font-weight:500">· ${_proEsc(p.descricao)}</span>`:''}</div>
+        <div class="pro-aprov-lista">
+          ${rs.map(r=>{
+            const isRecent=(r.ano||0)===maxAno&&maxAno>0;
+            const pct=(r.percentual!=null?r.percentual:0).toFixed(1).replace('.',',');
+            return `<div class="pro-aprov-item${isRecent?' is-recent':''}">
+              <span class="pro-aprov-ano">${r.ano||'?'}</span>
+              <span class="pro-aprov-sep">—</span>
+              <span class="pro-aprov-pct">${pct}%</span>
+              ${isRecent?'<span class="pro-aprov-badge">📌 Mais recente</span>':''}
+              <span class="pro-aprov-detail">(${r.totalNossos||0} de ${r.totalLista||0} aprovados)</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`);
+    }
+    bodyHtml=linhas.length
+      ?`<div class="pro-aprov-lista-provas">${linhas.join('')}</div>`
+      :'<p style="color:var(--t2);font-style:italic;margin:0">Provas cadastradas, mas sem resultados ainda.</p>';
+  }
+  return `<div class="pro-jornada-disc${open?' open':''}" data-aprovacoes-disc>
+    <div class="pro-jornada-head" role="button" tabindex="0" onclick="proToggleAprovacoes()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proToggleAprovacoes()}" aria-expanded="${open}">
+      <span class="pro-jornada-title"><span class="pro-jornada-ico">🎯</span> Aprovações</span>
+      <span class="pro-jornada-caret">▾</span>
+    </div>
+    <div class="pro-jornada-body">${bodyHtml}</div>
+  </div>`;
+}
+function _proAprovacoesRefresh(){
+  const wrap=document.getElementById('pro-aprovacoes-wrap');
+  if(!wrap)return;
+  wrap.innerHTML=_proAprovacoesHTML();
+}
+window.proToggleAprovacoes=()=>{
+  S._aprovacoesOpen=!S._aprovacoesOpen;
+  const el=document.querySelector('#tab-produtos [data-aprovacoes-disc]');
+  if(el)el.classList.toggle('open',!!S._aprovacoesOpen);
+};
+
 window.proDatasImpToggleVerPassados=()=>{
   S._datasImpVerPassados=!S._datasImpVerPassados;
   _proDatasImpRefresh();
@@ -30022,7 +30564,7 @@ window.proDatasImpAbrirNovo=()=>{
   if(!_proCanEdit())return alert('Sem permissão.');
   const all=_proDimpTiposAll();
   const tipoDefault=all.find(t=>t.id==='prova')?'prova':(all[0]&&all[0].id)||'';
-  S._datasImpEditando={id:null,tipo:tipoDefault,titulo:'',modo:'pontual',dataISO:_proDimpHoje(),horario:'',dataInicioISO:_proDimpHoje(),dataFimISO:_proDimpHoje(),descricao:'',link:'',escopoId:''};
+  S._datasImpEditando={id:null,tipo:tipoDefault,titulo:'',modo:'pontual',dataISO:_proDimpHoje(),horario:'',dataInicioISO:_proDimpHoje(),dataFimISO:_proDimpHoje(),descricao:'',link:'',escopoId:'',confirmado:true};
   S._datasImpModalOpen=true;
   _proDatasImpRefresh();
 };
@@ -30042,7 +30584,8 @@ window.proDatasImpEditar=(id)=>{
     dataFimISO:String(e.dataFimISO||''),
     descricao:String(e.descricao||''),
     link:String(e.link||''),
-    escopoId:String(e.escopoId||'')
+    escopoId:String(e.escopoId||''),
+    confirmado:e.confirmado===false?false:true
   };
   S._datasImpModalOpen=true;
   _proDatasImpRefresh();
@@ -30097,7 +30640,8 @@ window.proDatasImpModalSalvar=async()=>{
   try{
     const user=(S.currentUser&&S.currentUser.username)||'?';
     const novaLista=S.datasImp.lista.slice();
-    const base={tipo,titulo,modo,descricao,link,escopoId,updatedAt:new Date().toISOString(),updatedBy:user};
+    const confirmado=e.confirmado===false?false:true;
+    const base={tipo,titulo,modo,descricao,link,escopoId,confirmado,updatedAt:new Date().toISOString(),updatedBy:user};
     if(modo==='periodo'){base.dataInicioISO=dataInicioISO;base.dataFimISO=dataFimISO;base.dataISO='';base.horario='';}
     else{base.dataISO=dataISO;base.horario=horario;base.dataInicioISO='';base.dataFimISO='';}
     if(e.id){
@@ -30107,7 +30651,7 @@ window.proDatasImpModalSalvar=async()=>{
       novaLista.push({id:_proUid(),...base});
     }
     await setDoc(doc(db,'config',_verticalDocId('datasImportantes')),{lista:novaLista,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
-    if(typeof audit==='function')audit(e.id?'DATA_IMP_EDITADA':'DATA_IMP_CRIADA',{collection:'config',id:'datasImportantes'},{after:{titulo,tipo,modo,escopoId}});
+    if(typeof audit==='function')audit(e.id?'DATA_IMP_EDITADA':'DATA_IMP_CRIADA',{collection:'config',id:'datasImportantes'},{after:{titulo,tipo,modo,escopoId,confirmado}});
     S._datasImpModalOpen=false;
     S._datasImpEditando=null;
     _proSaveFeedback('ok');
@@ -30394,6 +30938,7 @@ function _proDatasImpNovoTipoFormHTML(){
 window.proDatasImpSetFiltroEscopo=(valor)=>{
   S._datasImpFiltroEscopo=String(valor||'todos');
   _proDatasImpRefresh();
+  if(S._datasImpCalOpen&&typeof _proDatasImpCalRepaint==='function')_proDatasImpCalRepaint();
 };
 window._proDatasImpSetCampoEscopo=(escopoId)=>{
   if(!S._datasImpEditando)return;
@@ -30577,7 +31122,7 @@ function _proDimpEventosDoDia(isoDia){
   // o chip aparece apenas no dia de início do range (não nos dias intermediários).
   // Aplica também o filtro de escopo vigente.
   const out=[];
-  const fonte=_proDimpAplicaFiltroEscopo(S.datasImp.lista||[]);
+  const fonte=_proDimpAplicaFiltros(S.datasImp.lista||[]);
   fonte.forEach(e=>{
     if(!e)return;
     if(e.modo==='periodo'){
@@ -30626,8 +31171,12 @@ function _proDimpCalendarioRender(){
       const isPeriodo=e.modo==='periodo';
       const hora=(!isPeriodo&&e.horario)?`${String(e.horario).slice(0,5)} `:'';
       const periodoBadge=isPeriodo?`<span class="periodo">📅</span>`:'';
-      return `<span class="pro-dimp-cal-chip" style="--c:${meta.cor}" onclick="event.stopPropagation();proDatasImpCalAbrirPopupEvento('${_proEscAttr(e.id)}')" title="${_proEscAttr(tit)}">
-        <span class="ico">${meta.icone}</span>
+      const isPrevisto=(e.confirmado===false);
+      const previstoCls=isPrevisto?' previsto':'';
+      const previstoIco=isPrevisto?'<span class="ico">⚠️</span>':'';
+      const previstoTitle=isPrevisto?` — previsto (não confirmado)`:'';
+      return `<span class="pro-dimp-cal-chip${previstoCls}" style="--c:${meta.cor}" onclick="event.stopPropagation();proDatasImpCalAbrirPopupEvento('${_proEscAttr(e.id)}')" title="${_proEscAttr(tit+previstoTitle)}">
+        ${previstoIco}<span class="ico">${meta.icone}</span>
         <span class="titulo">${_proEsc(hora+tit)}</span>
         ${periodoBadge}
       </span>`;
@@ -30803,6 +31352,9 @@ function _proDatasImpCalEventPopupHTML(){
   const horaHtml=horaLinha?`<div class="pro-dimp-cal-evpop-row"><span class="pro-dimp-cal-evpop-ico">🕐</span> ${_proEsc(horaLinha)}</div>`:'';
   const escMeta=_proDimpEscopoMeta(e.escopoId);
   const escHtml=escMeta?`<div class="pro-dimp-cal-evpop-row"><span class="pro-dimp-cal-evpop-ico">🏷️</span> Escopo: ${_proEsc(escMeta.nome)}</div>`:'';
+  const isPrevisto=(e.confirmado===false);
+  const previstoBadge=isPrevisto?`<span class="pro-dimp-cal-evpop-badge" style="--c:var(--yellow)"><span>⚠️</span> <span>Previsto</span></span>`:'';
+  const previstoAlert=isPrevisto?`<div class="pro-dimp-cal-evpop-previsto-alert">⚠️ Este evento ainda não foi confirmado pela coordenação. A data pode mudar.</div>`:'';
   return `<div class="pro-dimp-cal-evpop-backdrop" onclick="if(event.target===this)proDatasImpCalFecharPopupEvento()">
     <div class="pro-dimp-cal-evpop" role="dialog" aria-modal="true" aria-label="Detalhes do evento">
       <div class="pro-dimp-cal-evpop-head">
@@ -30814,9 +31366,11 @@ function _proDatasImpCalEventPopupHTML(){
         <span class="pro-dimp-cal-evpop-badge" style="--c:${meta.cor}">
           <span>${meta.icone}</span> <span>${_proEsc(meta.nome)}</span>
         </span>
+        ${previstoBadge}
         <div class="pro-dimp-cal-evpop-row"><span class="pro-dimp-cal-evpop-ico">📅</span> ${_proEsc(dataLinha)}</div>
         ${horaHtml}
         ${escHtml}
+        ${previstoAlert}
         ${descHtml}
         ${linkHtml}
       </div>
@@ -30840,8 +31394,11 @@ window.proDatasImpCalMostrarMais=(ev,isoDia)=>{
     const tit=String(e.titulo||'').trim()||'(sem título)';
     const isPeriodo=e.modo==='periodo';
     const hora=(!isPeriodo&&e.horario)?`${String(e.horario).slice(0,5)} `:'';
-    return `<span class="pro-dimp-cal-chip" style="--c:${meta.cor}" onclick="proDatasImpCalAbrirPopupEvento('${_proEscAttr(e.id)}')">
-      <span class="ico">${meta.icone}</span>
+    const isPrevisto=(e.confirmado===false);
+    const previstoCls=isPrevisto?' previsto':'';
+    const previstoIco=isPrevisto?'<span class="ico">⚠️</span>':'';
+    return `<span class="pro-dimp-cal-chip${previstoCls}" style="--c:${meta.cor}" onclick="proDatasImpCalAbrirPopupEvento('${_proEscAttr(e.id)}')">
+      ${previstoIco}<span class="ico">${meta.icone}</span>
       <span class="titulo" style="display:inline">${_proEsc(hora+tit)}</span>
     </span>`;
   }).join('');
@@ -35168,6 +35725,1383 @@ function _proSaveFeedback(kind,msg){
 window.addEventListener('beforeunload',e=>{
   if(_proDirty||S._jornadaDirty){e.preventDefault();e.returnValue='';}
 });
+
+// ════════════════════════════════════════════════════════════════════════
+// CRUZAR LISTA — cruzamento alunos × lista de aprovados (MVP)
+// ════════════════════════════════════════════════════════════════════════
+S.cruzar={
+  view:'cruzar',
+  alunosCarregados:false,
+  alunos:[],
+  provas:[],
+  resultados:[],
+  filtroVertical:'todas',
+  histFiltroVertical:'todas',
+  textoLista:'',
+  ultimo:null,
+  rodando:false,
+  pdfCarregando:false,
+  semCorrespExpandido:false
+};
+let _czUnsubAlunos=null, _czUnsubProvas=null, _czUnsubResultados=null;
+let _czWorker=null;
+
+function _czEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function _czNorm(s){
+  if(!s)return '';
+  let t=String(s).replace(/\([^)]*\)/g,' ');
+  t=t.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+  t=t.replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+  const stop=new Set(['de','da','do','dos','das','e','del']);
+  return t.split(' ').filter(w=>w&&!stop.has(w)).join(' ');
+}
+
+function _czVertCor(v){const o=(typeof VERTICAIS!=='undefined')?VERTICAIS.find(x=>x.id===v):null;return o?o.cor:'#64748b';}
+function _czVertNome(v){const o=(typeof VERTICAIS!=='undefined')?VERTICAIS.find(x=>x.id===v):null;return o?o.nome:(v||'?');}
+function _czVertIco(v){const o=(typeof VERTICAIS!=='undefined')?VERTICAIS.find(x=>x.id===v):null;return o?o.ico:'📋';}
+
+window.initCruzar=function(){
+  if(!_isAdminEm('cruzarLista')){
+    const root=document.getElementById('cruzar-lista-content');
+    if(root)root.innerHTML='<div class="cz-empty">🔒 Apenas administradores.</div>';
+    return;
+  }
+  // Sintoniza provas+resultados imediatamente (docs pequenos)
+  if(!_czUnsubProvas){
+    _czUnsubProvas=onSnapshot(collection(db,'provasAprovados'),snap=>{
+      S.cruzar.provas=snap.docs.map(d=>({id:d.id,...d.data()}));
+      _czRender();
+    },err=>console.error('provasAprovados:',err));
+  }
+  if(!_czUnsubResultados){
+    _czUnsubResultados=onSnapshot(collection(db,'resultadosAprovados'),snap=>{
+      S.cruzar.resultados=snap.docs.map(d=>({id:d.id,...d.data()}));
+      _czRender();
+    },err=>console.error('resultadosAprovados:',err));
+  }
+  // Lazy load alunos (15k docs — só carrega na 1ª entrada)
+  if(!S.cruzar.alunosCarregados&&!_czUnsubAlunos){
+    _czLoadAlunos();
+  }
+  _czRender();
+};
+
+async function _czLoadAlunos(){
+  const status=document.getElementById('cz-load-status');
+  if(status)status.textContent='⏳ Carregando base de alunos...';
+  try{
+    const snap=await getDocs(collection(db,'alunosAprovados'));
+    S.cruzar.alunos=snap.docs.map(d=>{const x=d.data();return {
+      id:d.id,
+      nome:x.nome||'',
+      nomeNorm:x.nomeNorm||_czNorm(x.nome||''),
+      cpf:x.cpf||null,
+      email:x.email||null,
+      produtos:Array.isArray(x.produtos)?x.produtos:[]
+    };});
+    S.cruzar.alunosCarregados=true;
+    if(status)status.textContent=`✅ ${S.cruzar.alunos.length.toLocaleString('pt-BR')} alunos carregados`;
+    _czRender();
+  }catch(e){
+    console.error('alunosAprovados load:',e);
+    if(status)status.textContent='❌ Erro ao carregar alunos';
+  }
+}
+
+window.czSwitchView=function(view,btn){
+  S.cruzar.view=view;
+  if(view==='historico')S.cruzar.histFiltroVertical='todas';
+  document.querySelectorAll('#cruzar-lista-content .cz-tab').forEach(b=>b.classList.toggle('on',b===btn));
+  document.getElementById('cz-view-cruzar').classList.toggle('hidden',view!=='cruzar');
+  document.getElementById('cz-view-historico').classList.toggle('hidden',view!=='historico');
+  _czRender();
+};
+window.czHistOnFiltroChange=function(){
+  const sel=document.getElementById('cz-hist-f-vert');
+  if(!sel)return;
+  S.cruzar.histFiltroVertical=sel.value;
+  _czRenderHistorico();
+};
+
+function _czRender(){
+  if(S.cruzar.view==='cruzar')_czRenderCruzar();
+  else _czRenderHistorico();
+}
+
+function _czRenderCruzar(){
+  const root=document.getElementById('cz-view-cruzar');
+  if(!root)return;
+  const c=S.cruzar;
+  const totalNomes=_czParseNomes(c.textoLista).length;
+
+  let html=`
+    <div class="cz-card">
+      <h4>1. Filtrar base</h4>
+      <div class="cz-row">
+        <div class="fg">
+          <label class="fl">Vertical</label>
+          <select class="fc" id="cz-f-vert" onchange="czOnFiltroChange()">
+            <option value="todas">Todas as verticais</option>
+            ${(typeof VERTICAIS!=='undefined'?VERTICAIS:[]).map(v=>`<option value="${_czEsc(v.id)}" ${c.filtroVertical===v.id?'selected':''}>${v.ico} ${_czEsc(v.nome)}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="cz-counter">Base filtrada: <b>${_czContarBase().toLocaleString('pt-BR')}</b> alunos</div>
+    </div>
+
+    <div class="cz-card">
+      <h4>2. Cole a lista de aprovados <span style="color:var(--t2);font-weight:400;font-size:12px">(ou carregue um PDF)</span></h4>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;align-items:center">
+        <label class="btn btn-s" style="cursor:pointer;margin:0" ${c.pdfCarregando?'aria-disabled="true" style="cursor:not-allowed;opacity:.6"':''}>
+          📄 Carregar PDF
+          <input type="file" accept="application/pdf,.pdf" id="cz-pdf-input" onchange="czPdfPick(event)" style="display:none" ${c.pdfCarregando?'disabled':''}/>
+        </label>
+        <span id="cz-pdf-status" class="cz-counter" style="margin:0">${c.pdfCarregando?'⏳ Lendo PDF...':''}</span>
+      </div>
+      <textarea class="fc cz-textarea" id="cz-texto" placeholder="1 - JOÃO DA SILVA&#10;2 - MARIA SOUZA&#10;3) PEDRO ALVES&#10;...">${_czEsc(c.textoLista)}</textarea>
+      <div class="cz-counter" id="cz-counter">Nomes detectados: <b>${totalNomes}</b></div>
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-p" id="cz-btn-run" onclick="czRun()" ${(!c.alunosCarregados||c.rodando||totalNomes===0)?'disabled':''}>
+          🎯 Cruzar ${totalNomes?`(${totalNomes} nomes)`:''}
+        </button>
+        ${c.rodando?`<div style="flex:1;min-width:200px"><div class="cz-progress-wrap"><div class="cz-progress-bar" id="cz-pbar" style="width:0%"></div></div><div class="cz-counter" id="cz-pmsg">Processando...</div></div>`:''}
+      </div>
+    </div>
+
+    <div id="cz-resultado-wrap">${c.ultimo?_czRenderResultado(c.ultimo):''}</div>
+  `;
+  root.innerHTML=html;
+  // re-bind textarea (preserve cursor)
+  const ta=document.getElementById('cz-texto');
+  if(ta){
+    ta.addEventListener('input',e=>{
+      S.cruzar.textoLista=e.target.value;
+      const n=_czParseNomes(e.target.value).length;
+      const el=document.getElementById('cz-counter');
+      if(el)el.innerHTML=`Nomes detectados: <b>${n}</b>`;
+      const btn=document.getElementById('cz-btn-run');
+      if(btn){
+        btn.disabled=!S.cruzar.alunosCarregados||S.cruzar.rodando||n===0;
+        btn.innerHTML=`🎯 Cruzar ${n?`(${n} nomes)`:''}`;
+      }
+    });
+  }
+}
+
+window.czOnFiltroChange=function(){
+  S.cruzar.filtroVertical=document.getElementById('cz-f-vert').value;
+  _czRenderCruzar();
+};
+
+function _czContarBase(){
+  const c=S.cruzar;
+  if(c.filtroVertical==='todas')return c.alunos.length;
+  return c.alunos.filter(a=>_czAlunoMatchFiltro(a)).length;
+}
+function _czAlunoMatchFiltro(a){
+  const c=S.cruzar;
+  if(c.filtroVertical==='todas')return true;
+  for(const p of (a.produtos||[])){
+    if(p.vertical===c.filtroVertical)return true;
+  }
+  return false;
+}
+
+function _czParseNomes(texto){
+  if(!texto)return [];
+  return texto.split(/\r?\n/).map(l=>{
+    return l.replace(/^\s*\d+\s*[-.\s)]\s*/,'').trim();
+  }).filter(l=>{
+    const letras=(l.match(/[a-zA-ZÀ-ÿ]/g)||[]).length;
+    return letras>=5;
+  });
+}
+
+// ───── PDF upload ────────────────────────────────────────────────────────
+async function _czLoadPdfJs(){
+  if(window.pdfjsLib)return window.pdfjsLib;
+  await new Promise((res,rej)=>{
+    const s=document.createElement('scr'+'ipt');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js';
+    s.onload=res; s.onerror=()=>rej(new Error('Falha ao carregar pdf.js'));
+    document.head.appendChild(s);
+  });
+  if(!window.pdfjsLib)throw new Error('pdf.js não inicializou');
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+  return window.pdfjsLib;
+}
+
+window.czPdfPick=async function(ev){
+  const input=ev.target;
+  const file=input&&input.files&&input.files[0];
+  if(!file)return;
+  input.value=''; // permite re-selecionar o mesmo arquivo depois
+  if(file.size>20*1024*1024){
+    alert('PDF muito grande (limite 20 MB). Tente dividir o arquivo.');
+    return;
+  }
+  const setStatus=(txt)=>{const el=document.getElementById('cz-pdf-status'); if(el)el.textContent=txt;};
+  S.cruzar.pdfCarregando=true;
+  setStatus('⏳ Carregando leitor de PDF...');
+  try{
+    const lib=await _czLoadPdfJs();
+    setStatus('⏳ Lendo PDF...');
+    const buf=await file.arrayBuffer();
+    const pdf=await lib.getDocument({data:buf}).promise;
+    let texto='';
+    for(let i=1;i<=pdf.numPages;i++){
+      setStatus(`⏳ Lendo PDF... página ${i} de ${pdf.numPages}`);
+      const page=await pdf.getPage(i);
+      const content=await page.getTextContent();
+      texto+=content.items.map(it=>it.str).join('\n')+'\n';
+      page.cleanup&&page.cleanup();
+    }
+    const nomesDetectados=_czParseNomes(texto).length;
+    if(!texto.trim()||nomesDetectados===0){
+      S.cruzar.pdfCarregando=false;
+      _czRenderCruzar();
+      alert('Não consegui extrair nomes desse PDF. Pode ser um PDF escaneado (imagem), protegido ou em layout não suportado. Tente copiar e colar o texto manualmente.');
+      return;
+    }
+    S.cruzar.textoLista=texto;
+    S.cruzar.pdfCarregando=false;
+    _czRenderCruzar();
+    const st=document.getElementById('cz-pdf-status');
+    if(st)st.textContent=`✅ ${pdf.numPages} página(s) · ${nomesDetectados} nome(s)`;
+  }catch(e){
+    console.error('PDF read:',e);
+    S.cruzar.pdfCarregando=false;
+    _czRenderCruzar();
+    alert('Erro ao ler PDF: '+(e.message||e)+'\n\nSe o PDF for protegido por senha ou só com imagens escaneadas, não dá pra extrair texto.');
+  }
+};
+
+// ───── Web Worker (inline) ──────────────────────────────────────────────
+function _czBuildWorker(){
+  if(_czWorker)return _czWorker;
+  const src=`
+    function _ratio(a,b){
+      if(!a&&!b)return 100;
+      if(!a||!b)return 0;
+      const la=a.length, lb=b.length;
+      if(la===0&&lb===0)return 100;
+      // Levenshtein (2-row)
+      let prev=new Array(lb+1), cur=new Array(lb+1);
+      for(let j=0;j<=lb;j++)prev[j]=j;
+      for(let i=1;i<=la;i++){
+        cur[0]=i;
+        for(let j=1;j<=lb;j++){
+          const cost=a.charCodeAt(i-1)===b.charCodeAt(j-1)?0:1;
+          cur[j]=Math.min(cur[j-1]+1, prev[j]+1, prev[j-1]+cost);
+        }
+        const tmp=prev; prev=cur; cur=tmp;
+      }
+      const d=prev[lb];
+      return Math.round((1-d/Math.max(la,lb))*100);
+    }
+    function tokenSetRatio(a,b){
+      const ta=new Set(a.split(/\\s+/).filter(Boolean));
+      const tb=new Set(b.split(/\\s+/).filter(Boolean));
+      const inter=[...ta].filter(x=>tb.has(x)).sort();
+      const diffA=[...ta].filter(x=>!tb.has(x)).sort();
+      const diffB=[...tb].filter(x=>!ta.has(x)).sort();
+      const s1=inter.join(' ');
+      const s2=(inter.concat(diffA)).join(' ');
+      const s3=(inter.concat(diffB)).join(' ');
+      return Math.max(_ratio(s1,s2),_ratio(s1,s3),_ratio(s2,s3));
+    }
+    self.onmessage=function(ev){
+      const {alunos, nomesLista}=ev.data;
+      const aprovados=[], duvidosos=[], semCorrespondencia=[];
+      const total=nomesLista.length;
+      let lastReport=0;
+      const stop=new Set(['de','da','do','dos','das','e','del']);
+      function _norm(s){
+        if(!s)return '';
+        let t=String(s).replace(/\\([^)]*\\)/g,' ');
+        t=t.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9\\s]/g,' ').replace(/\\s+/g,' ').trim();
+        return t.split(' ').filter(w=>w&&!stop.has(w)).join(' ');
+      }
+      for(let i=0;i<total;i++){
+        const orig=nomesLista[i];
+        const candNorm=_norm(orig);
+        let best=null, bestScore=0;
+        for(let k=0;k<alunos.length;k++){
+          const a=alunos[k];
+          const s=tokenSetRatio(candNorm, a.nomeNorm);
+          if(s>bestScore){bestScore=s; best=a; if(s>=100)break;}
+        }
+        const reg={listaIdx:i+1, listaNome:orig, score:bestScore, aluno:best};
+        if(bestScore>=92)aprovados.push(reg);
+        else if(bestScore>=82)duvidosos.push(reg);
+        else semCorrespondencia.push({listaIdx:i+1, listaNome:orig, score:bestScore});
+        const now=Date.now();
+        if(now-lastReport>200||i===total-1){
+          lastReport=now;
+          self.postMessage({type:'progress', done:i+1, total});
+        }
+      }
+      self.postMessage({type:'done', aprovados, duvidosos, semCorrespondencia, total});
+    };
+  `;
+  const blob=new Blob([src],{type:'application/javascript'});
+  _czWorker=new Worker(URL.createObjectURL(blob));
+  return _czWorker;
+}
+
+window.czRun=async function(){
+  const c=S.cruzar;
+  if(!c.alunosCarregados){alert('Base ainda carregando...');return;}
+  if(c.rodando)return;
+  const nomes=_czParseNomes(c.textoLista);
+  if(!nomes.length){alert('Cole pelo menos uma lista de aprovados.');return;}
+  const base=c.alunos.filter(_czAlunoMatchFiltro).map(a=>({
+    id:a.id,
+    nome:a.nome,
+    nomeNorm:_czNorm(a.nome||''),
+    cpf:a.cpf||null,
+    email:a.email||null,
+    produtos:Array.isArray(a.produtos)?a.produtos:[]
+  }));
+  if(!base.length){alert('Base filtrada está vazia. Ajuste o filtro.');return;}
+  c.rodando=true; c.ultimo=null;
+  _czRenderCruzar();
+  const w=_czBuildWorker();
+  w.onmessage=async(ev)=>{
+    const d=ev.data;
+    if(d.type==='progress'){
+      const pct=Math.round(d.done/d.total*100);
+      const bar=document.getElementById('cz-pbar');
+      const msg=document.getElementById('cz-pmsg');
+      if(bar)bar.style.width=pct+'%';
+      if(msg)msg.textContent=`Processando ${d.done.toLocaleString('pt-BR')} / ${d.total.toLocaleString('pt-BR')}...`;
+    }else if(d.type==='done'){
+      c.rodando=false;
+      c.ultimo={
+        aprovados:d.aprovados,
+        duvidosos:d.duvidosos,
+        confirmados:[],  // ids dos duvidosos confirmados manualmente
+        descartados:[],
+        semCorrespondencia:d.semCorrespondencia||[],
+        totalLista:d.total,
+        vertical:c.filtroVertical,
+        secOpen:{aprov:true,duv:true,sem:false}
+      };
+      c.semCorrespExpandido=false;
+      try{await audit('CRUZAR_LISTA_EXECUTADO',{collection:'alunosAprovados'},{meta:{vertical:c.filtroVertical,totalLista:d.total,aprovados:d.aprovados.length,duvidosos:d.duvidosos.length,semCorrespondencia:(d.semCorrespondencia||[]).length,baseFiltrada:base.length}});}catch(e){}
+      _czRenderCruzar();
+    }
+  };
+  w.postMessage({alunos:base, nomesLista:nomes});
+};
+
+function _czPctCalc(u){
+  // Aprovados automáticos (não descartados) + duvidosos confirmados + sem-correspondência marcados (confirmadoManual ou vinculacaoManual)
+  const aprovAuto=(u.aprovados||[]).filter(r=>!r.descartado).length;
+  const duvConf=(u.confirmados||[]).length;
+  const sem=u.semCorrespondencia||[];
+  const semConfirmados=sem.filter(r=>r.confirmadoManual).length;
+  const semVinculados=sem.filter(r=>r.vinculacaoManual).length;
+  const aprov=aprovAuto+duvConf+semConfirmados+semVinculados;
+  const pct=u.totalLista>0?(aprov/u.totalLista*100):0;
+  return {aprov,pct,aprovAuto,duvConf,semConfirmados,semVinculados,
+          aprovDesc:(u.aprovados||[]).filter(r=>r.descartado).length,
+          semDescartados:sem.filter(r=>r.descartadoManual).length};
+}
+
+// Levenshtein + tokenSetRatio replicados pro main thread (diagnóstico/busca manual)
+function _czLev(a,b){
+  if(!a&&!b)return 100;
+  if(!a||!b)return 0;
+  const la=a.length, lb=b.length;
+  if(la===0&&lb===0)return 100;
+  let prev=new Array(lb+1), cur=new Array(lb+1);
+  for(let j=0;j<=lb;j++)prev[j]=j;
+  for(let i=1;i<=la;i++){
+    cur[0]=i;
+    for(let j=1;j<=lb;j++){
+      const cost=a.charCodeAt(i-1)===b.charCodeAt(j-1)?0:1;
+      cur[j]=Math.min(cur[j-1]+1, prev[j]+1, prev[j-1]+cost);
+    }
+    const tmp=prev; prev=cur; cur=tmp;
+  }
+  const d=prev[lb];
+  return Math.round((1-d/Math.max(la,lb))*100);
+}
+function _czTokenSetRatio(a,b){
+  const ta=new Set(a.split(/\s+/).filter(Boolean));
+  const tb=new Set(b.split(/\s+/).filter(Boolean));
+  const inter=[...ta].filter(x=>tb.has(x)).sort();
+  const diffA=[...ta].filter(x=>!tb.has(x)).sort();
+  const diffB=[...tb].filter(x=>!ta.has(x)).sort();
+  const s1=inter.join(' ');
+  const s2=(inter.concat(diffA)).join(' ');
+  const s3=(inter.concat(diffB)).join(' ');
+  return {score:Math.max(_czLev(s1,s2),_czLev(s1,s3),_czLev(s2,s3)), inter, diffA, diffB};
+}
+
+// Top-N candidatos pra um nome contra a base filtrada
+function _czTopCandidatos(nomeOriginal,n){
+  n=n||10;
+  const c=S.cruzar;
+  const candNorm=_czNorm(nomeOriginal||'');
+  const candTokens=candNorm.split(' ').filter(Boolean);
+  const base=c.alunos.filter(_czAlunoMatchFiltro);
+  const out=[];
+  for(const a of base){
+    const aNorm=_czNorm(a.nome||'');
+    const r=_czTokenSetRatio(candNorm,aNorm);
+    out.push({aluno:a, aNorm, score:r.score, inter:r.inter, diffA:r.diffA, diffB:r.diffB});
+  }
+  out.sort((x,y)=>y.score-x.score);
+  return {candNorm, candTokens, top:out.slice(0,n)};
+}
+
+function _czRenderResultado(u){
+  const calc=_czPctCalc(u);
+  const {aprov,pct,aprovAuto,aprovDesc,duvConf,semConfirmados,semVinculados,semDescartados}=calc;
+  const vertNome=u.vertical==='todas'?'Todas as verticais':_czVertNome(u.vertical);
+  const duvPend=u.duvidosos.filter(d=>!u.confirmados.includes(d.listaIdx)&&!u.descartados.includes(d.listaIdx));
+  const sem=u.semCorrespondencia||[];
+  const LIMITE_VISIVEL=500;
+  const expandido=!!S.cruzar.semCorrespExpandido;
+  const semVisiveis=(expandido||sem.length<=LIMITE_VISIVEL)?sem:sem.slice(0,LIMITE_VISIVEL);
+  const detalhamento=[];
+  detalhamento.push(`<b>${aprovAuto}</b> aprovado(s) automático(s)`+(aprovDesc?` <span style="color:#ef4444">(− ${aprovDesc} descartado(s))</span>`:''));
+  if(duvConf)detalhamento.push(`<b>${duvConf}</b> duvidoso(s) confirmado(s)`);
+  if(semConfirmados)detalhamento.push(`<b>${semConfirmados}</b> confirmado(s) manualmente`);
+  if(semVinculados)detalhamento.push(`<b>${semVinculados}</b> vinculado(s) manualmente`);
+  if(semDescartados)detalhamento.push(`<b>${semDescartados}</b> descartado(s) sem-corresp.`);
+  return `
+    <div class="cz-metric">
+      <div class="cz-metric-pct">${pct.toFixed(1).replace('.',',')}%</div>
+      <div class="cz-metric-label">Taxa de aprovação</div>
+      <div class="cz-metric-detail"><b>${aprov}</b> dos nossos alunos entre <b>${u.totalLista}</b> aprovados na lista</div>
+      <div class="cz-metric-detail" style="font-size:12px;margin-top:6px;color:var(--t2)">${detalhamento.join(' · ')}</div>
+      <div class="cz-chips">
+        <span class="cz-chip ok">✅ ${u.aprovados.length} aprovados (≥92)</span>
+        <span class="cz-chip warn">⚠️ ${duvPend.length} duvidosos pendentes</span>
+        <span class="cz-chip nok">📋 ${sem.length} sem correspondência</span>
+        <span class="cz-vert-pill" style="color:${_czVertCor(u.vertical)};background:color-mix(in srgb, ${_czVertCor(u.vertical)} 14%, transparent);border:1px solid color-mix(in srgb, ${_czVertCor(u.vertical)} 40%, transparent)">${_czVertIco(u.vertical)} ${_czEsc(vertNome)}</span>
+      </div>
+      <div style="margin-top:18px"><button class="btn btn-p" onclick="czAbrirSalvar()">💾 Salvar resultado</button></div>
+    </div>
+
+    <div class="cz-section ${u.secOpen.aprov?'open':''}">
+      <div class="cz-section-head" onclick="czToggleSec('aprov')">
+        <span class="cz-section-title">✅ Aprovados</span>
+        <span class="cz-section-count">${aprovAuto} / ${u.aprovados.length}</span>
+        <span class="cz-caret">▶</span>
+      </div>
+      <div class="cz-section-body">
+        ${u.aprovados.length?u.aprovados.map(m=>_czMatchRow(m,'ok')).join(''):'<div style="padding:14px;color:var(--t2);font-size:13px">Ninguém com score ≥92.</div>'}
+      </div>
+    </div>
+
+    <div class="cz-section ${u.secOpen.duv?'open':''}">
+      <div class="cz-section-head" onclick="czToggleSec('duv')">
+        <span class="cz-section-title">⚠️ Duvidosos</span>
+        <span class="cz-section-count">${duvPend.length} / ${u.duvidosos.length}</span>
+        <span class="cz-caret">▶</span>
+      </div>
+      <div class="cz-section-body">
+        ${u.duvidosos.length?u.duvidosos.map(m=>_czMatchRow(m,'duv')).join(''):'<div style="padding:14px;color:var(--t2);font-size:13px">Ninguém entre 82-91.</div>'}
+      </div>
+    </div>
+
+    <div class="cz-section ${u.secOpen.sem?'open':''}">
+      <div class="cz-section-head" onclick="czToggleSec('sem')">
+        <span class="cz-section-title">📋 Sem correspondência na nossa base</span>
+        <span class="cz-section-count">${sem.length}</span>
+        <span class="cz-caret">▶</span>
+      </div>
+      <div class="cz-section-body">
+        ${sem.length?`
+          ${semVisiveis.map(m=>_czSemRow(m)).join('')}
+          ${sem.length>LIMITE_VISIVEL&&!expandido?`<div style="padding:14px 0;text-align:center"><button class="cz-match-btn" onclick="czToggleSemCorresp()">Ver todos os ${sem.length}</button></div>`:''}
+          ${sem.length>LIMITE_VISIVEL&&expandido?`<div style="padding:14px 0;text-align:center"><button class="cz-match-btn" onclick="czToggleSemCorresp()">Mostrar só os primeiros ${LIMITE_VISIVEL}</button></div>`:''}
+        `:'<div style="padding:14px;color:var(--t2);font-size:13px">Todos os nomes da lista bateram com algum aluno da nossa base.</div>'}
+      </div>
+    </div>
+  `;
+}
+
+window.czToggleSemCorresp=function(){
+  S.cruzar.semCorrespExpandido=!S.cruzar.semCorrespExpandido;
+  const wrap=document.getElementById('cz-resultado-wrap');
+  if(wrap&&S.cruzar.ultimo)wrap.innerHTML=_czRenderResultado(S.cruzar.ultimo);
+};
+
+function _czMatchRow(m,kind){
+  const u=S.cruzar.ultimo;
+  const isConf=u&&u.confirmados.includes(m.listaIdx);
+  const isDesc=u&&u.descartados.includes(m.listaIdx);
+  const scoreCor=m.score>=92?'#22c55e':(m.score>=82?'#f59e0b':'#94a3b8');
+  const scoreBg=`color-mix(in srgb, ${scoreCor} 18%, transparent)`;
+  const alunoId=m.aluno&&m.aluno.id?m.aluno.id:null;
+  const btnProdutos=alunoId?`<button class="cz-match-btn" onclick="czVerProdutos('${_czEsc(alunoId)}')" title="Ver produtos do aluno">🛍️</button>`:'';
+  let acoes='';
+  if(kind==='duv'){
+    if(isConf)acoes=`<button class="cz-match-btn ok on" onclick="czDuvAcao(${m.listaIdx},'reset')" style="color:#22c55e;border-color:#22c55e">✓ Confirmado</button>`;
+    else if(isDesc)acoes=`<button class="cz-match-btn nok on" onclick="czDuvAcao(${m.listaIdx},'reset')" style="color:#ef4444;border-color:#ef4444">✗ Descartado</button>`;
+    else acoes=`<button class="cz-match-btn ok" onclick="czDuvAcao(${m.listaIdx},'conf')">✓ Confirmar</button><button class="cz-match-btn nok" onclick="czDuvAcao(${m.listaIdx},'desc')">✗ Descartar</button>`;
+    acoes+=btnProdutos;
+    acoes+=`<button class="cz-match-btn" onclick="czDiagnosticar(${m.listaIdx},'duv')" title="Diagnóstico">🔍</button>`;
+  }else if(kind==='ok'){
+    if(m.descartado){
+      acoes=`<button class="cz-match-btn ok" onclick="czAprovAcao(${m.listaIdx},'restore')">↩ Restaurar</button>`;
+    }else{
+      acoes=`<button class="cz-match-btn nok" onclick="czAprovAcao(${m.listaIdx},'desc')" style="color:#ef4444;border-color:#ef4444">🗑 Descartar</button>`;
+    }
+    acoes+=btnProdutos;
+    acoes+=`<button class="cz-match-btn" onclick="czDiagnosticar(${m.listaIdx},'ok')" title="Diagnóstico">🔍</button>`;
+  }
+  const alunoNome=m.aluno?m.aluno.nome:'(sem match)';
+  const rowStyle=(kind==='ok'&&m.descartado)?'opacity:.5;text-decoration:line-through':'';
+  return `<div class="cz-match" style="${rowStyle}">
+    <div>
+      <div class="cz-match-orig">#${m.listaIdx} · ${_czEsc(m.listaNome)}</div>
+      <div class="cz-match-nome">→ ${_czEsc(alunoNome)}${(kind==='ok'&&m.vinculacaoManual)?' <span style="color:#6366f1;font-size:11px">🔗 vinculação manual</span>':''}</div>
+    </div>
+    <div><span class="cz-match-score" style="color:${scoreCor};background:${scoreBg}">${m.score}</span></div>
+    <div class="cz-match-actions">${acoes}</div>
+  </div>`;
+}
+
+function _czSemRow(m){
+  const isConf=!!m.confirmadoManual;
+  const isDesc=!!m.descartadoManual;
+  let badge='';
+  if(isConf)badge=`<div class="cz-match-nome" style="color:#22c55e">✅ Confirmado manualmente</div>`;
+  else if(isDesc)badge=`<div class="cz-match-nome" style="color:#ef4444">🗑 Descartado</div>`;
+  let acoes='';
+  if(isConf||isDesc){
+    acoes=`<button class="cz-match-btn" onclick="czSemAcao(${m.listaIdx},'reset')">↩ Desfazer</button>`;
+  }else{
+    acoes=`<button class="cz-match-btn ok" onclick="czSemAcao(${m.listaIdx},'conf')">✅ Confirmar</button>`+
+          `<button class="cz-match-btn" onclick="czBuscarManual(${m.listaIdx})">🔍 Buscar</button>`+
+          `<button class="cz-match-btn nok" onclick="czSemAcao(${m.listaIdx},'desc')">❌ Descartar</button>`;
+  }
+  acoes+=`<button class="cz-match-btn" onclick="czDiagnosticar(${m.listaIdx},'sem')" title="Diagnóstico">🔍 Diag</button>`;
+  const rowStyle=isDesc?'opacity:.5;text-decoration:line-through':'';
+  return `<div class="cz-match" style="${rowStyle}">
+    <div>
+      <div class="cz-match-orig">#${m.listaIdx} · ${_czEsc(m.listaNome)}</div>
+      ${badge}
+    </div>
+    <div></div>
+    <div class="cz-match-actions">${acoes}</div>
+  </div>`;
+}
+
+window.czToggleSec=function(k){
+  if(!S.cruzar.ultimo)return;
+  S.cruzar.ultimo.secOpen[k]=!S.cruzar.ultimo.secOpen[k];
+  const wrap=document.getElementById('cz-resultado-wrap');
+  if(wrap)wrap.innerHTML=_czRenderResultado(S.cruzar.ultimo);
+};
+
+window.czDuvAcao=function(idx,acao){
+  const u=S.cruzar.ultimo; if(!u)return;
+  u.confirmados=u.confirmados.filter(i=>i!==idx);
+  u.descartados=u.descartados.filter(i=>i!==idx);
+  if(acao==='conf')u.confirmados.push(idx);
+  else if(acao==='desc')u.descartados.push(idx);
+  const wrap=document.getElementById('cz-resultado-wrap');
+  if(wrap)wrap.innerHTML=_czRenderResultado(u);
+};
+
+// Aprovados: descartar / restaurar
+window.czAprovAcao=async function(idx,acao){
+  const u=S.cruzar.ultimo; if(!u)return;
+  const reg=u.aprovados.find(r=>r.listaIdx===idx); if(!reg)return;
+  if(acao==='desc'){
+    reg.descartado=true;
+    try{await audit('CRUZAR_DESCARTOU_APROVADO',{collection:'alunosAprovados',id:reg.aluno?.id||null},{meta:{listaIdx:idx,listaNome:reg.listaNome,alunoNome:reg.aluno?.nome,score:reg.score}});}catch(e){}
+  }else if(acao==='restore'){
+    reg.descartado=false;
+  }
+  const wrap=document.getElementById('cz-resultado-wrap');
+  if(wrap)wrap.innerHTML=_czRenderResultado(u);
+};
+
+// Sem correspondência: confirmar / descartar / reset
+window.czSemAcao=async function(idx,acao){
+  const u=S.cruzar.ultimo; if(!u)return;
+  const reg=(u.semCorrespondencia||[]).find(r=>r.listaIdx===idx); if(!reg)return;
+  if(acao==='conf'){
+    reg.confirmadoManual=true;
+    reg.descartadoManual=false;
+    try{await audit('CRUZAR_CONFIRMOU_MANUAL',{collection:'alunosAprovados'},{meta:{listaIdx:idx,listaNome:reg.listaNome}});}catch(e){}
+  }else if(acao==='desc'){
+    reg.descartadoManual=true;
+    reg.confirmadoManual=false;
+  }else if(acao==='reset'){
+    reg.confirmadoManual=false;
+    reg.descartadoManual=false;
+  }
+  const wrap=document.getElementById('cz-resultado-wrap');
+  if(wrap)wrap.innerHTML=_czRenderResultado(u);
+};
+
+// Mover de sem-correspondência para aprovados via vinculação manual
+async function _czVincularManual(listaIdx, alunoId){
+  const u=S.cruzar.ultimo; if(!u)return;
+  const aluno=S.cruzar.alunos.find(a=>a.id===alunoId);
+  if(!aluno){alert('Aluno não encontrado.');return;}
+  const sem=u.semCorrespondencia||[];
+  const idxSem=sem.findIndex(r=>r.listaIdx===listaIdx);
+  let reg;
+  if(idxSem>=0){
+    reg=sem[idxSem];
+    sem.splice(idxSem,1);
+  }else{
+    // Pode estar nos duvidosos
+    const idxDuv=u.duvidosos.findIndex(r=>r.listaIdx===listaIdx);
+    if(idxDuv>=0){reg=u.duvidosos[idxDuv]; u.duvidosos.splice(idxDuv,1);}
+    else{
+      // ou nos aprovados (re-vínculo)
+      const idxOk=u.aprovados.findIndex(r=>r.listaIdx===listaIdx);
+      if(idxOk>=0){reg=u.aprovados[idxOk]; u.aprovados.splice(idxOk,1);}
+    }
+  }
+  if(!reg){alert('Registro não encontrado.');return;}
+  const novo={
+    listaIdx:reg.listaIdx,
+    listaNome:reg.listaNome,
+    score:100,
+    aluno:{id:aluno.id, nome:aluno.nome},
+    vinculacaoManual:true,
+    descartado:false
+  };
+  u.aprovados.push(novo);
+  u.aprovados.sort((a,b)=>a.listaIdx-b.listaIdx);
+  try{await audit('CRUZAR_VINCULOU_MANUAL',{collection:'alunosAprovados',id:aluno.id},{meta:{listaIdx,listaNome:reg.listaNome,alunoNome:aluno.nome}});}catch(e){}
+  const wrap=document.getElementById('cz-resultado-wrap');
+  if(wrap)wrap.innerHTML=_czRenderResultado(u);
+}
+
+// ───── Busca manual (modal) ──────────────────────────────────────────────
+let _czBuscaIdx=null;
+window.czBuscarManual=function(listaIdx){
+  _czBuscaIdx=listaIdx;
+  const u=S.cruzar.ultimo; if(!u)return;
+  const reg=(u.semCorrespondencia||[]).find(r=>r.listaIdx===listaIdx)
+         || u.duvidosos.find(r=>r.listaIdx===listaIdx)
+         || u.aprovados.find(r=>r.listaIdx===listaIdx);
+  if(!reg)return;
+  const modal=document.getElementById('modal-cz-busca');
+  document.getElementById('cz-busca-sub').textContent=`#${reg.listaIdx} · ${reg.listaNome}`;
+  const inp=document.getElementById('cz-busca-input');
+  inp.value='';
+  _czRenderBuscaResultados('');
+  modal.classList.remove('hidden');
+  setTimeout(()=>inp.focus(),50);
+};
+
+window.czBuscaOnInput=function(){
+  const inp=document.getElementById('cz-busca-input');
+  _czRenderBuscaResultados(inp.value||'');
+};
+
+function _czRenderBuscaResultados(termo){
+  const box=document.getElementById('cz-busca-results');
+  if(!box)return;
+  const t=_czNorm(termo);
+  if(!t||t.length<2){
+    box.innerHTML='<div style="padding:14px;color:var(--t2);font-size:13px">Digite ao menos 2 letras pra buscar.</div>';
+    return;
+  }
+  const tokens=t.split(' ').filter(Boolean);
+  const base=S.cruzar.alunos.filter(_czAlunoMatchFiltro);
+  const matches=[];
+  for(const a of base){
+    const aNorm=_czNorm(a.nome||'');
+    const aTokens=new Set(aNorm.split(' ').filter(Boolean));
+    let hits=0;
+    for(const tk of tokens){
+      if(aTokens.has(tk))hits+=2;
+      else if(aNorm.includes(tk))hits+=1;
+    }
+    if(hits>0)matches.push({a, hits, aNorm});
+  }
+  matches.sort((x,y)=>y.hits-x.hits||x.a.nome.localeCompare(y.a.nome,'pt-BR'));
+  const top=matches.slice(0,30);
+  if(!top.length){
+    box.innerHTML='<div style="padding:14px;color:var(--t2);font-size:13px">Nenhum aluno encontrado com esse termo.</div>';
+    return;
+  }
+  box.innerHTML=top.map(m=>{
+    const a=m.a;
+    const extra=[a.cpf?'CPF '+_czEsc(a.cpf):'', a.email?_czEsc(a.email):''].filter(Boolean).join(' · ');
+    return `<div class="cz-match" style="padding:10px 0">
+      <div>
+        <div class="cz-match-orig">${_czEsc(a.nome)}</div>
+        ${extra?`<div class="cz-match-nome" style="font-size:11px">${extra}</div>`:''}
+      </div>
+      <div></div>
+      <div class="cz-match-actions">
+        <button class="cz-match-btn ok" onclick="czBuscaVincular('${_czEsc(a.id)}')">🔗 Vincular</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.czBuscaVincular=async function(alunoId){
+  const idx=_czBuscaIdx; if(idx==null)return;
+  document.getElementById('modal-cz-busca').classList.add('hidden');
+  _czBuscaIdx=null;
+  await _czVincularManual(idx, alunoId);
+};
+
+// ───── Produtos do aluno + Consulta global ───────────────────────────────
+function _czFmtCpf(cpf){
+  if(!cpf)return '—';
+  const d=String(cpf).replace(/\D/g,'');
+  if(d.length!==11)return _czEsc(cpf);
+  return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}`;
+}
+function _czFmtDataProd(v){
+  if(!v)return '—';
+  try{
+    let d;
+    if(v && typeof v==='object' && typeof v.toDate==='function')d=v.toDate();
+    else if(v && typeof v==='object' && typeof v.seconds==='number')d=new Date(v.seconds*1000);
+    else if(typeof v==='number')d=new Date(v);
+    else d=new Date(v);
+    if(isNaN(d.getTime()))return _czEsc(String(v));
+    return d.toLocaleDateString('pt-BR');
+  }catch(e){return _czEsc(String(v));}
+}
+function _czProdNome(p){
+  return p.produtoNome||p.nome||p.nomeProduto||p.produto||p.titulo||p.title||p.produtoId||'(sem nome)';
+}
+function _czProdData(p){
+  return p.dataCompra||p.data||p.createdAt||p.criadoEm||p.dt||p.purchaseDate||p.timestamp||null;
+}
+function _czProdStatus(p){
+  return p.status||p.statusCompra||p.situacao||null;
+}
+
+window.czVerProdutos=function(alunoId){
+  const aluno=S.cruzar.alunos.find(a=>a.id===alunoId);
+  if(!aluno){alert('Aluno não encontrado.');return;}
+  _czRenderProdutosModal(aluno);
+};
+
+function _czRenderProdutosModal(aluno){
+  document.getElementById('cz-prod-sub').textContent=aluno.nome||'(sem nome)';
+  const body=document.getElementById('cz-prod-body');
+  const produtos=(Array.isArray(aluno.produtos)?aluno.produtos.slice():[]);
+  produtos.sort((a,b)=>{
+    const da=_czProdData(a), db=_czProdData(b);
+    const ta=da?(new Date(da.toDate?da.toDate():(da.seconds?da.seconds*1000:da))).getTime():0;
+    const tb=db?(new Date(db.toDate?db.toDate():(db.seconds?db.seconds*1000:db))).getTime():0;
+    return tb-ta;
+  });
+  const cabecalho=`
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;line-height:1.7">
+      <div><span style="color:var(--t2);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;margin-right:6px">Nome</span> ${_czEsc(aluno.nome||'—')}</div>
+      <div><span style="color:var(--t2);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;margin-right:6px">Email</span> ${aluno.email?_czEsc(aluno.email):'—'}</div>
+      <div><span style="color:var(--t2);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;margin-right:6px">CPF</span> ${_czFmtCpf(aluno.cpf)}</div>
+    </div>
+  `;
+  let listaHtml='';
+  if(!produtos.length){
+    listaHtml=`<div style="padding:18px;text-align:center;color:var(--t2);font-size:13px;border:1px dashed var(--border);border-radius:10px">Esse aluno não tem produtos cadastrados.</div>`;
+  }else{
+    const itens=produtos.map(p=>{
+      const vId=p.vertical||'';
+      const cor=_czVertCor(vId);
+      const ico=_czVertIco(vId);
+      const vNome=_czVertNome(vId);
+      const nome=_czProdNome(p);
+      const data=_czFmtDataProd(_czProdData(p));
+      const status=_czProdStatus(p);
+      const pill=`<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;color:${cor};background:color-mix(in srgb, ${cor} 14%, transparent);border:1px solid color-mix(in srgb, ${cor} 40%, transparent);backdrop-filter:blur(14px) saturate(140%)">${ico} ${_czEsc(vNome)}</span>`;
+      return `
+        <div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;background:var(--bg2)">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">${pill}</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.35;margin-bottom:6px">${_czEsc(nome)}</div>
+          <div style="font-size:12px;color:var(--t2);font-family:'JetBrains Mono',monospace">📅 ${_czEsc(data)}${status?` · Status: ${_czEsc(status)}`:''}</div>
+        </div>
+      `;
+    }).join('');
+    listaHtml=`
+      <div style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:10.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">━━━ Compras (${produtos.length}) ━━━</div>
+      ${itens}
+    `;
+  }
+  body.innerHTML=cabecalho+listaHtml;
+  document.getElementById('modal-cz-produtos').classList.remove('hidden');
+}
+
+// Consulta global (lupa do topo)
+window.czAbrirConsulta=function(){
+  if(!S.cruzar.alunosCarregados){
+    alert('Base de alunos ainda carregando. Aguarde alguns segundos.');
+    return;
+  }
+  const modal=document.getElementById('modal-cz-consulta');
+  const inp=document.getElementById('cz-consulta-input');
+  inp.value='';
+  _czRenderConsultaResultados('');
+  modal.classList.remove('hidden');
+  setTimeout(()=>inp.focus(),50);
+};
+
+window.czConsultaOnInput=function(){
+  const inp=document.getElementById('cz-consulta-input');
+  _czRenderConsultaResultados(inp.value||'');
+};
+
+function _czRenderConsultaResultados(termo){
+  const box=document.getElementById('cz-consulta-results');
+  if(!box)return;
+  const raw=String(termo||'').trim();
+  if(raw.length<2){
+    box.innerHTML='<div style="padding:14px;color:var(--t2);font-size:13px">Digite ao menos 2 letras/dígitos pra buscar.</div>';
+    return;
+  }
+  const digitos=raw.replace(/\D/g,'');
+  const buscaCpf=digitos.length>=3;
+  const t=_czNorm(raw);
+  const tokens=t.split(' ').filter(Boolean);
+  const lowerRaw=raw.toLowerCase();
+  const matches=[];
+  for(const a of S.cruzar.alunos){
+    const aNorm=_czNorm(a.nome||'');
+    const aTokens=new Set(aNorm.split(' ').filter(Boolean));
+    let hits=0;
+    for(const tk of tokens){
+      if(!tk)continue;
+      if(aTokens.has(tk))hits+=2;
+      else if(aNorm.includes(tk))hits+=1;
+    }
+    if(a.email && a.email.toLowerCase().includes(lowerRaw))hits+=3;
+    if(buscaCpf && a.cpf){
+      const cpfDig=String(a.cpf).replace(/\D/g,'');
+      if(cpfDig.includes(digitos))hits+=4;
+    }
+    if(hits>0)matches.push({a, hits});
+  }
+  matches.sort((x,y)=>y.hits-x.hits||x.a.nome.localeCompare(y.a.nome,'pt-BR'));
+  const top=matches.slice(0,30);
+  if(!top.length){
+    box.innerHTML='<div style="padding:14px;color:var(--t2);font-size:13px">Nenhum aluno encontrado com esse termo.</div>';
+    return;
+  }
+  box.innerHTML=top.map(m=>{
+    const a=m.a;
+    const qtdProd=Array.isArray(a.produtos)?a.produtos.length:0;
+    const extras=[];
+    if(a.email)extras.push(_czEsc(a.email));
+    if(a.cpf)extras.push('CPF '+_czFmtCpf(a.cpf));
+    return `<div class="cz-match" style="padding:10px 0;cursor:pointer" onclick="czConsultaAbrirAluno('${_czEsc(a.id)}')">
+      <div>
+        <div class="cz-match-orig">${_czEsc(a.nome)}</div>
+        ${extras.length?`<div class="cz-match-nome" style="font-size:11px">${extras.join(' · ')}</div>`:''}
+      </div>
+      <div></div>
+      <div class="cz-match-actions">
+        <span class="cz-match-btn" style="pointer-events:none">🛍️ ${qtdProd} produto${qtdProd===1?'':'s'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.czConsultaAbrirAluno=function(alunoId){
+  const aluno=S.cruzar.alunos.find(a=>a.id===alunoId);
+  if(!aluno)return;
+  _czRenderProdutosModal(aluno);
+};
+
+// ───── Diagnóstico ────────────────────────────────────────────────────────
+window.czDiagnosticar=function(listaIdx, kind){
+  const u=S.cruzar.ultimo; if(!u)return;
+  let reg=null;
+  if(kind==='ok')reg=u.aprovados.find(r=>r.listaIdx===listaIdx);
+  else if(kind==='duv')reg=u.duvidosos.find(r=>r.listaIdx===listaIdx);
+  else reg=(u.semCorrespondencia||[]).find(r=>r.listaIdx===listaIdx);
+  if(!reg)return;
+  _czBuscaIdx=listaIdx; // pra "Vincular este" reusar fluxo
+  const {candNorm, candTokens, top}=_czTopCandidatos(reg.listaNome,10);
+  document.getElementById('cz-diag-sub').textContent=`#${reg.listaIdx} · ${reg.listaNome}`;
+  const body=document.getElementById('cz-diag-body');
+  body.innerHTML=`
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:14px;font-size:12.5px">
+      <div><b>Nome original:</b> ${_czEsc(reg.listaNome)}</div>
+      <div style="margin-top:4px"><b>Normalizado:</b> <code>"${_czEsc(candNorm)}"</code></div>
+      <div style="margin-top:4px"><b>Tokens:</b> [${candTokens.map(t=>_czEsc(t)).join(', ')}]</div>
+    </div>
+    <div style="font-weight:600;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--t2);margin-bottom:8px">Top 10 candidatos na base</div>
+    ${top.length?top.map((c,i)=>{
+      const a=c.aluno;
+      const aTokens=c.aNorm.split(' ').filter(Boolean);
+      const scoreCor=c.score>=92?'#22c55e':(c.score>=82?'#f59e0b':'#94a3b8');
+      return `<div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;background:var(--bg)">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-weight:700;color:${scoreCor};min-width:38px;font-size:15px">${c.score}</span>
+          <span style="font-weight:600">${i+1}.</span>
+          <span>${_czEsc(a.nome)}</span>
+          <button class="cz-match-btn ok" style="margin-left:auto" onclick="czDiagVincular('${_czEsc(a.id)}')">🔗 Vincular este</button>
+        </div>
+        <div style="font-size:11.5px;color:var(--t2);margin-top:6px;line-height:1.5">
+          <div>Tokens: [${aTokens.map(t=>_czEsc(t)).join(', ')}]</div>
+          <div>Inter: [${c.inter.map(t=>_czEsc(t)).join(', ')}] · DiffA: [${c.diffA.map(t=>_czEsc(t)).join(', ')}] · DiffB: [${c.diffB.map(t=>_czEsc(t)).join(', ')}]</div>
+        </div>
+      </div>`;
+    }).join(''):'<div style="padding:14px;color:var(--t2);font-size:13px">Base filtrada vazia.</div>'}
+  `;
+  document.getElementById('modal-cz-diag').classList.remove('hidden');
+};
+
+window.czDiagVincular=async function(alunoId){
+  const idx=_czBuscaIdx; if(idx==null)return;
+  document.getElementById('modal-cz-diag').classList.add('hidden');
+  _czBuscaIdx=null;
+  await _czVincularManual(idx, alunoId);
+};
+
+// ───── Salvar resultado ─────────────────────────────────────────────────
+window.czAbrirSalvar=function(){
+  const u=S.cruzar.ultimo; if(!u){alert('Rode o cruzamento antes.');return;}
+  const {aprov,pct}=_czPctCalc(u);
+  _czPopularSelectProvas(null);
+  document.getElementById('cz-save-ano').value=new Date().getFullYear();
+  document.getElementById('cz-save-obs').value='';
+  document.getElementById('cz-save-err').classList.add('hidden');
+  document.getElementById('cz-save-resumo').innerHTML=`<b>${aprov}</b> dos nossos × <b>${u.totalLista}</b> lista · <b>${pct.toFixed(1).replace('.',',')}%</b>`;
+  czToggleInlineNovaProva(false);
+  document.getElementById('modal-cz-save').classList.remove('hidden');
+};
+
+function _czPopularSelectProvas(preselectId){
+  const sel=document.getElementById('cz-save-prova');
+  if(!sel)return;
+  const provas=S.cruzar.provas.slice().sort((a,b)=>(a.descricao||a.modalidade||'').localeCompare(b.descricao||b.modalidade||''));
+  sel.innerHTML=provas.map(p=>{
+    const vIco=_czVertIco(p.vertical);
+    return `<option value="${_czEsc(p.id)}">${vIco} ${_czEsc(p.descricao||p.modalidade||p.id)}</option>`;
+  }).join('');
+  if(preselectId)sel.value=preselectId;
+}
+
+window.czToggleInlineNovaProva=function(open){
+  const wrap=document.getElementById('cz-save-inline-prova');
+  if(!wrap)return;
+  if(open){
+    const selV=document.getElementById('cz-save-inline-vert');
+    selV.innerHTML=(typeof VERTICAIS!=='undefined'?VERTICAIS:[]).map(v=>`<option value="${_czEsc(v.id)}">${v.ico} ${_czEsc(v.nome)}</option>`).join('');
+    document.getElementById('cz-save-inline-mod').value='';
+    document.getElementById('cz-save-inline-err').classList.add('hidden');
+    wrap.classList.remove('hidden');
+  }else{
+    wrap.classList.add('hidden');
+  }
+};
+
+window.czSalvarInlineNovaProva=async function(){
+  const err=document.getElementById('cz-save-inline-err');
+  err.classList.add('hidden');
+  const vertical=document.getElementById('cz-save-inline-vert').value;
+  const modalidade=document.getElementById('cz-save-inline-mod').value.trim();
+  if(!modalidade){err.textContent='Modalidade é obrigatória.';err.classList.remove('hidden');return;}
+  try{
+    const payload={vertical,modalidade,ativa:true,criadoEm:serverTimestamp(),atualizadoEm:serverTimestamp()};
+    const r=await addDoc(collection(db,'provasAprovados'),payload);
+    try{await audit('PROVA_APROVADOS_CRIADA',{collection:'provasAprovados',id:r.id},{after:{modalidade,vertical}});}catch(e){}
+    // Atualiza estado local imediatamente (não espera onSnapshot pra evitar flicker do select)
+    if(!S.cruzar.provas.find(p=>p.id===r.id)){
+      S.cruzar.provas.push({id:r.id,vertical,modalidade,ativa:true});
+    }
+    _czPopularSelectProvas(r.id);
+    czToggleInlineNovaProva(false);
+  }catch(e){
+    err.textContent='Erro ao salvar: '+(e.message||e);
+    err.classList.remove('hidden');
+  }
+};
+
+window.czSaveResultado=async function(){
+  const u=S.cruzar.ultimo; if(!u)return;
+  const err=document.getElementById('cz-save-err');
+  err.classList.add('hidden');
+  const provaId=document.getElementById('cz-save-prova').value;
+  const ano=parseInt(document.getElementById('cz-save-ano').value,10);
+  const obs=document.getElementById('cz-save-obs').value.trim();
+  if(!provaId){err.textContent='Selecione (ou crie) uma prova.';err.classList.remove('hidden');return;}
+  if(!ano||ano<2000||ano>2100){err.textContent='Ano inválido.';err.classList.remove('hidden');return;}
+  await _czPersistResultado(provaId,ano,obs);
+};
+
+function _czBuildSnapshot(u){
+  const calc=_czPctCalc(u);
+  const aprovados=[];
+  // Aprovados automáticos não descartados
+  for(const m of (u.aprovados||[])){
+    if(m.descartado)continue;
+    aprovados.push({
+      nomeLista:m.listaNome||'',
+      nomeAluno:m.aluno?(m.aluno.nome||''):'',
+      score:m.score||0,
+      vinculacaoManual:!!m.vinculacaoManual,
+      confirmadoManual:false
+    });
+  }
+  // Duvidosos confirmados manualmente
+  for(const m of (u.duvidosos||[])){
+    if(!u.confirmados.includes(m.listaIdx))continue;
+    aprovados.push({
+      nomeLista:m.listaNome||'',
+      nomeAluno:m.aluno?(m.aluno.nome||''):'',
+      score:m.score||0,
+      vinculacaoManual:false,
+      confirmadoManual:true
+    });
+  }
+  // Sem-correspondência confirmados ou vinculados manualmente
+  for(const m of (u.semCorrespondencia||[])){
+    if(m.vinculacaoManual){
+      aprovados.push({
+        nomeLista:m.listaNome||'',
+        nomeAluno:m.aluno?(m.aluno.nome||''):'',
+        score:m.score||0,
+        vinculacaoManual:true,
+        confirmadoManual:false
+      });
+    }else if(m.confirmadoManual){
+      aprovados.push({
+        nomeLista:m.listaNome||'',
+        nomeAluno:'',
+        score:m.score||0,
+        vinculacaoManual:false,
+        confirmadoManual:true
+      });
+    }
+  }
+  // Sem correspondência (não confirmados nem descartados — só os "puros")
+  const semCorrespondencia=[];
+  for(const m of (u.semCorrespondencia||[])){
+    if(m.confirmadoManual||m.vinculacaoManual||m.descartadoManual)continue;
+    semCorrespondencia.push({nomeLista:m.listaNome||'',score:m.score||0});
+  }
+  return {
+    aprovados,
+    semCorrespondencia,
+    totalLista:u.totalLista||0,
+    totalAprovadosEfetivo:calc.aprov,
+    capturadoEm:new Date().toISOString()
+  };
+}
+
+async function _czPersistResultado(provaId,ano,obs){
+  const u=S.cruzar.ultimo; if(!u)return;
+  const {aprov,pct}=_czPctCalc(u);
+  try{
+    const snapshot=_czBuildSnapshot(u);
+    const payload={
+      provaId, ano, observacao:obs||null,
+      totalLista:u.totalLista, totalNossos:aprov, percentual:Math.round(pct*100)/100,
+      fonte:'cruzamento-ui',
+      vertical:u.vertical||null,
+      listaSnapshot:snapshot,
+      criadoEm:serverTimestamp(),
+      atualizadoEm:serverTimestamp()
+    };
+    const r=await addDoc(collection(db,'resultadosAprovados'),payload);
+    try{await audit('RESULTADO_APROVADOS_CRIADO',{collection:'resultadosAprovados',id:r.id},{after:{provaId,ano,percentual:payload.percentual,totalLista:u.totalLista,totalNossos:aprov}});}catch(e){}
+    try{await audit('CRUZAR_LISTA_SNAPSHOT_GRAVADO',{collection:'resultadosAprovados',id:r.id},{meta:{provaId,ano,totalLista:snapshot.totalLista,totalAprovadosEfetivo:snapshot.totalAprovadosEfetivo}});}catch(e){}
+
+    CM('modal-cz-save');
+    alert('Resultado salvo.');
+  }catch(e){
+    console.error('save resultado:',e);
+    const err=document.getElementById('cz-save-err');
+    err.textContent='Erro ao salvar: '+(e.message||e);
+    err.classList.remove('hidden');
+  }
+}
+
+// ───── Provas CRUD ──────────────────────────────────────────────────────
+let _czProvaEditId=null;
+let _czProvaCallback=null;
+function _czAbrirNovaProva(cb){
+  _czProvaEditId=null; _czProvaCallback=cb||null;
+  document.getElementById('cz-prova-title').textContent='Nova prova';
+  const sel=document.getElementById('cz-prova-vertical');
+  sel.innerHTML=(typeof VERTICAIS!=='undefined'?VERTICAIS:[]).map(v=>`<option value="${_czEsc(v.id)}">${v.ico} ${_czEsc(v.nome)}</option>`).join('');
+  document.getElementById('cz-prova-modalidade').value='';
+  document.getElementById('cz-prova-err').classList.add('hidden');
+  document.getElementById('modal-cz-prova').classList.remove('hidden');
+}
+window.czNovaProva=function(){_czAbrirNovaProva(null);};
+window.czEditProva=function(id){
+  const p=S.cruzar.provas.find(x=>x.id===id); if(!p)return;
+  _czProvaEditId=id; _czProvaCallback=null;
+  document.getElementById('cz-prova-title').textContent='Editar prova';
+  const sel=document.getElementById('cz-prova-vertical');
+  sel.innerHTML=(typeof VERTICAIS!=='undefined'?VERTICAIS:[]).map(v=>`<option value="${_czEsc(v.id)}"${(p.vertical||'')===v.id?' selected':''}>${v.ico} ${_czEsc(v.nome)}</option>`).join('');
+  document.getElementById('cz-prova-modalidade').value=p.modalidade||'';
+  document.getElementById('cz-prova-err').classList.add('hidden');
+  document.getElementById('modal-cz-prova').classList.remove('hidden');
+};
+window.czRemoveProva=async function(id){
+  const p=S.cruzar.provas.find(x=>x.id===id); if(!p)return;
+  const qtdRes=S.cruzar.resultados.filter(r=>r.provaId===id).length;
+  if(qtdRes>0&&!confirm(`Essa prova tem ${qtdRes} resultado(s) vinculado(s). Remover assim mesmo?`))return;
+  if(!confirm(`Remover prova "${p.descricao||p.modalidade||id}"?`))return;
+  try{
+    await deleteDoc(doc(db,'provasAprovados',id));
+    try{await audit('PROVA_APROVADOS_REMOVIDA',{collection:'provasAprovados',id},{before:{descricao:p.descricao,vertical:p.vertical}});}catch(e){}
+  }catch(e){alert('Erro ao remover: '+(e.message||e));}
+};
+
+window.czSaveProva=async function(){
+  const err=document.getElementById('cz-prova-err');
+  err.classList.add('hidden');
+  const vertical=document.getElementById('cz-prova-vertical').value;
+  const modalidade=document.getElementById('cz-prova-modalidade').value.trim();
+  if(!modalidade){err.textContent='Modalidade é obrigatória.';err.classList.remove('hidden');return;}
+  const payload={vertical,modalidade,ativa:true,atualizadoEm:serverTimestamp()};
+  try{
+    let id=_czProvaEditId;
+    if(id){
+      const before=S.cruzar.provas.find(x=>x.id===id);
+      await updateDoc(doc(db,'provasAprovados',id),payload);
+      try{await audit('PROVA_APROVADOS_EDITADA',{collection:'provasAprovados',id},{before:{modalidade:before?.modalidade,vertical:before?.vertical},after:{modalidade,vertical}});}catch(e){}
+    }else{
+      payload.criadoEm=serverTimestamp();
+      const r=await addDoc(collection(db,'provasAprovados'),payload);
+      id=r.id;
+      try{await audit('PROVA_APROVADOS_CRIADA',{collection:'provasAprovados',id},{after:{modalidade,vertical}});}catch(e){}
+    }
+    CM('modal-cz-prova');
+    if(typeof _czProvaCallback==='function'){const cb=_czProvaCallback; _czProvaCallback=null; cb(id);}
+  }catch(e){
+    err.textContent='Erro ao salvar: '+(e.message||e);
+    err.classList.remove('hidden');
+  }
+};
+
+// ───── Resultado novo/edit/remove ───────────────────────────────────────
+let _czResEditId=null;
+let _czResProvaId=null; // setado no modo "novo" pra saber a qual prova vincular
+window.czEditResultado=function(id){
+  const r=S.cruzar.resultados.find(x=>x.id===id); if(!r)return;
+  const p=S.cruzar.provas.find(x=>x.id===r.provaId);
+  _czResEditId=id;
+  _czResProvaId=r.provaId||null;
+  document.getElementById('cz-res-title').textContent='Editar resultado';
+  document.getElementById('cz-res-sub').textContent=p?(p.descricao||p.modalidade||p.id):'';
+  document.getElementById('cz-res-ano').value=r.ano||'';
+  document.getElementById('cz-res-totl').value=r.totalLista!=null?r.totalLista:'';
+  document.getElementById('cz-res-totn').value=r.totalNossos!=null?r.totalNossos:'';
+  document.getElementById('cz-res-obs').value=r.observacao||'';
+  document.getElementById('cz-res-err').classList.add('hidden');
+  document.getElementById('modal-cz-resultado').classList.remove('hidden');
+};
+window.czNovoResultado=function(provaId){
+  const p=S.cruzar.provas.find(x=>x.id===provaId); if(!p)return;
+  _czResEditId=null;
+  _czResProvaId=provaId;
+  document.getElementById('cz-res-title').textContent='Novo resultado';
+  document.getElementById('cz-res-sub').textContent=p.descricao||p.modalidade||p.id;
+  document.getElementById('cz-res-ano').value=new Date().getFullYear();
+  document.getElementById('cz-res-totl').value='';
+  document.getElementById('cz-res-totn').value='';
+  document.getElementById('cz-res-obs').value='';
+  document.getElementById('cz-res-err').classList.add('hidden');
+  document.getElementById('modal-cz-resultado').classList.remove('hidden');
+};
+window.czSaveResultadoModal=async function(){
+  const err=document.getElementById('cz-res-err');
+  err.classList.add('hidden');
+  const ano=parseInt(document.getElementById('cz-res-ano').value,10);
+  const totL=parseInt(document.getElementById('cz-res-totl').value,10);
+  const totN=parseInt(document.getElementById('cz-res-totn').value,10);
+  const obs=document.getElementById('cz-res-obs').value.trim();
+  if(!ano||ano<2000||ano>2100){err.textContent='Ano inválido.';err.classList.remove('hidden');return;}
+  if(!Number.isFinite(totL)||totL<=0){err.textContent='Total da lista da banca é obrigatório (>0).';err.classList.remove('hidden');return;}
+  if(!Number.isFinite(totN)||totN<0){err.textContent='Total dos nossos aprovados é obrigatório (>=0).';err.classList.remove('hidden');return;}
+  const pct=totL>0?Math.round(totN/totL*100*100)/100:0;
+  try{
+    if(_czResEditId){
+      const before=S.cruzar.resultados.find(x=>x.id===_czResEditId);
+      const payload={
+        ano,observacao:obs||null,
+        totalLista:totL,totalNossos:totN,percentual:pct,
+        atualizadoEm:serverTimestamp()
+      };
+      await updateDoc(doc(db,'resultadosAprovados',_czResEditId),payload);
+      try{await audit('RESULTADO_APROVADOS_EDITADO',{collection:'resultadosAprovados',id:_czResEditId},{before:{ano:before?.ano,percentual:before?.percentual,totalLista:before?.totalLista,totalNossos:before?.totalNossos},after:{ano,percentual:pct,totalLista:totL,totalNossos:totN}});}catch(e){}
+      CM('modal-cz-resultado');
+      _czResEditId=null;
+      return;
+    }
+    const provaId=_czResProvaId; if(!provaId){err.textContent='Prova não definida.';err.classList.remove('hidden');return;}
+    const prova=S.cruzar.provas.find(x=>x.id===provaId);
+    const payload={
+      provaId,ano,observacao:obs||null,
+      totalLista:totL,totalNossos:totN,percentual:pct,
+      fonte:'manual-historico',
+      vertical:prova?.vertical||null,
+      criadoEm:serverTimestamp(),
+      atualizadoEm:serverTimestamp()
+    };
+    const r=await addDoc(collection(db,'resultadosAprovados'),payload);
+    try{await audit('RESULTADO_APROVADOS_CRIADO',{collection:'resultadosAprovados',id:r.id},{after:{provaId,ano,percentual:pct,totalLista:totL,totalNossos:totN,fonte:'manual-historico'}});}catch(e){}
+    CM('modal-cz-resultado');
+  }catch(e){
+    err.textContent='Erro ao salvar: '+(e.message||e);
+    err.classList.remove('hidden');
+  }
+};
+window.czRemoveResultado=async function(id){
+  const r=S.cruzar.resultados.find(x=>x.id===id); if(!r)return;
+  if(!confirm(`Remover resultado de ${r.ano}?`))return;
+  try{
+    await deleteDoc(doc(db,'resultadosAprovados',id));
+    try{await audit('RESULTADO_APROVADOS_REMOVIDO',{collection:'resultadosAprovados',id},{before:{ano:r.ano,percentual:r.percentual}});}catch(e){}
+  }catch(e){alert('Erro ao remover: '+(e.message||e));}
+};
+
+// ───── Histórico de aprovações ──────────────────────────────────────────
+function _czRenderHistorico(){
+  const root=document.getElementById('cz-view-historico');
+  if(!root)return;
+  const c=S.cruzar;
+  const filtroV=c.histFiltroVertical||'todas';
+  const provasFiltradas=c.provas.filter(p=>{
+    if(filtroV==='todas')return true;
+    return (p.vertical||'_outros')===filtroV;
+  });
+  // Agrupa provas por vertical (já filtradas)
+  const byVert=new Map();
+  for(const p of provasFiltradas){
+    const v=p.vertical||'_outros';
+    if(!byVert.has(v))byVert.set(v,[]);
+    byVert.get(v).push(p);
+  }
+  const verticaisList=(typeof VERTICAIS!=='undefined'?VERTICAIS:[]);
+  let html=`
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-p btn-sm" onclick="czNovaProva()">➕ Nova prova</button>
+      <div class="fg" style="margin:0;min-width:200px">
+        <select class="fc" id="cz-hist-f-vert" onchange="czHistOnFiltroChange()" style="padding:8px 12px;font-size:13px">
+          <option value="todas"${filtroV==='todas'?' selected':''}>Todas as verticais</option>
+          ${verticaisList.map(v=>`<option value="${_czEsc(v.id)}"${filtroV===v.id?' selected':''}>${v.ico} ${_czEsc(v.nome)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+  `;
+  if(!c.provas.length){
+    html+='<div class="cz-empty">Nenhuma prova cadastrada. Comece criando uma prova e depois rode um cruzamento.</div>';
+    root.innerHTML=html;
+    return;
+  }
+  if(!provasFiltradas.length){
+    html+='<div class="cz-empty">Nenhuma prova nesta vertical. Troque o filtro acima.</div>';
+    root.innerHTML=html;
+    return;
+  }
+  const vertsOrder=verticaisList.map(v=>v.id).concat(['_outros']);
+  for(const vId of vertsOrder){
+    const provas=byVert.get(vId); if(!provas||!provas.length)continue;
+    const vNome=vId==='_outros'?'Outras':_czVertNome(vId);
+    const vIco=vId==='_outros'?'📋':_czVertIco(vId);
+    const vCor=vId==='_outros'?'#64748b':_czVertCor(vId);
+    html+=`<div style="margin:18px 0 10px;display:flex;align-items:center;gap:10px">
+      <span class="cz-vert-pill" style="color:${vCor};background:color-mix(in srgb, ${vCor} 14%, transparent);border:1px solid color-mix(in srgb, ${vCor} 40%, transparent)">${vIco} ${_czEsc(vNome)}</span>
+      <span style="color:var(--t2);font-size:12px">${provas.length} prova(s)</span>
+    </div>`;
+    for(const p of provas.sort((a,b)=>(a.modalidade||a.descricao||'').localeCompare(b.modalidade||b.descricao||''))){
+      const resultados=c.resultados.filter(r=>r.provaId===p.id).sort((a,b)=>(b.ano||0)-(a.ano||0));
+      const maxAno=resultados.length?Math.max(...resultados.map(r=>r.ano||0)):0;
+      const nomeProva=p.modalidade||p.descricao||p.id;
+      html+=`<div class="cz-hist-card">
+        <div class="cz-hist-prova">
+          <div class="cz-hist-prova-nome">${_czEsc(nomeProva)}${p.modalidade&&p.descricao?` <span style="color:var(--t2);font-size:12px;font-weight:500">· ${_czEsc(p.descricao)}</span>`:''}</div>
+          <button class="cz-match-btn ok" onclick="czNovoResultado('${_czEsc(p.id)}')">＋ Novo resultado</button>
+          <button class="cz-match-btn" onclick="czEditProva('${_czEsc(p.id)}')" title="Editar prova">✏️ Editar</button>
+          <button class="cz-match-btn nok" onclick="czRemoveProva('${_czEsc(p.id)}')">🗑 Remover</button>
+        </div>
+        ${resultados.length?`
+          <table class="cz-hist-table">
+            <thead><tr><th>Ano</th><th>Nossos</th><th>Lista</th><th>%</th><th></th></tr></thead>
+            <tbody>${resultados.map(r=>{
+              const isRecent=(r.ano||0)===maxAno&&maxAno>0;
+              return `
+              <tr class="${isRecent?'cz-hist-row-recent':''}">
+                <td><b>${r.ano||'?'}</b>${isRecent?'<span class="cz-hist-recent-badge" title="Resultado mais recente">📌 Mais recente</span>':''}</td>
+                <td>${r.totalNossos||0}</td>
+                <td>${r.totalLista||0}</td>
+                <td class="cz-hist-pct">${(r.percentual!=null?r.percentual:0).toFixed(1).replace('.',',')}%</td>
+                <td style="text-align:right">
+                  ${r.listaSnapshot?`<button class="cz-match-btn" onclick="czVerSnapshot('${_czEsc(r.id)}')" title="Ver lista de aprovados">📋 Ver lista</button>`:''}
+                  <button class="cz-match-btn" onclick="czEditResultado('${_czEsc(r.id)}')" title="Editar resultado">✏️</button>
+                  <button class="cz-match-btn nok" onclick="czRemoveResultado('${_czEsc(r.id)}')">🗑</button>
+                </td>
+              </tr>
+            `;}).join('')}</tbody>
+          </table>
+        `:'<div style="color:var(--t2);font-size:12.5px;padding:8px 0">Sem resultados ainda.</div>'}
+      </div>`;
+    }
+  }
+  root.innerHTML=html;
+}
+
+// ───── Visualizar snapshot da lista (read-only) ─────────────────────────
+window.czVerSnapshot=function(resId){
+  const r=(S.cruzar.resultados||[]).find(x=>x.id===resId); if(!r)return;
+  const snap=r.listaSnapshot; if(!snap){alert('Esse resultado não tem snapshot da lista.');return;}
+  const p=(S.cruzar.provas||[]).find(x=>x.id===r.provaId);
+  const nomeProva=p?(p.modalidade||p.descricao||p.id):'(prova removida)';
+  const aprovados=Array.isArray(snap.aprovados)?snap.aprovados.slice():[];
+  const semCorresp=Array.isArray(snap.semCorrespondencia)?snap.semCorrespondencia.slice():[];
+  aprovados.sort((a,b)=>(a.nomeLista||'').localeCompare(b.nomeLista||''));
+  semCorresp.sort((a,b)=>(a.nomeLista||'').localeCompare(b.nomeLista||''));
+  document.getElementById('cz-snap-sub').textContent=`${nomeProva} · ${r.ano||'?'}`;
+  const body=document.getElementById('cz-snap-body');
+  const totalLista=snap.totalLista||0;
+  const totalEfetivo=snap.totalAprovadosEfetivo||0;
+  const pct=totalLista>0?(totalEfetivo/totalLista*100):0;
+  body.innerHTML=`
+    <div class="cz-resumo-mini" style="margin-bottom:14px">
+      <b>${totalEfetivo}</b> dos nossos × <b>${totalLista}</b> da lista · <b>${pct.toFixed(1).replace('.',',')}%</b>
+      ${snap.capturadoEm?`<div style="font-size:11px;color:var(--t2);margin-top:4px">Capturado em ${new Date(snap.capturadoEm).toLocaleString('pt-BR')}</div>`:''}
+    </div>
+    <div class="cz-section open">
+      <div class="cz-section-head"><span class="cz-section-title">✅ Aprovados nossos</span><span class="cz-section-count">${aprovados.length}</span></div>
+      <div class="cz-section-body">
+        ${aprovados.length?aprovados.map(a=>{
+          const scoreCor=(a.score||0)>=92?'#22c55e':((a.score||0)>=82?'#f59e0b':'#94a3b8');
+          const tag=a.vinculacaoManual?' <span style="color:#6366f1;font-size:11px">🔗 vinculação manual</span>':(a.confirmadoManual?' <span style="color:#22c55e;font-size:11px">✅ confirmado manual</span>':'');
+          return `<div class="cz-match">
+            <div>
+              <div class="cz-match-orig">${_czEsc(a.nomeLista||'')}</div>
+              <div class="cz-match-nome">→ ${_czEsc(a.nomeAluno||'(sem nome)')}${tag}</div>
+            </div>
+            <div><span class="cz-match-score" style="color:${scoreCor};background:color-mix(in srgb, ${scoreCor} 18%, transparent)">${a.score||0}</span></div>
+            <div></div>
+          </div>`;
+        }).join(''):'<div style="padding:14px;color:var(--t2);font-size:13px">Sem aprovados no snapshot.</div>'}
+      </div>
+    </div>
+    <div class="cz-section open" style="margin-top:14px">
+      <div class="cz-section-head"><span class="cz-section-title">📋 Sem correspondência na nossa base</span><span class="cz-section-count">${semCorresp.length}</span></div>
+      <div class="cz-section-body">
+        ${semCorresp.length?semCorresp.map(s=>`<div class="cz-match">
+          <div><div class="cz-match-orig">${_czEsc(s.nomeLista||'')}</div></div>
+          <div><span class="cz-match-score" style="color:#94a3b8;background:color-mix(in srgb, #94a3b8 18%, transparent)">${s.score||0}</span></div>
+          <div></div>
+        </div>`).join(''):'<div style="padding:14px;color:var(--t2);font-size:13px">Todos bateram com algum aluno da base.</div>'}
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-cz-snapshot').classList.remove('hidden');
+};
 
 // MODAL HELPERS
 window.CM=id=>document.getElementById(id).classList.add('hidden');

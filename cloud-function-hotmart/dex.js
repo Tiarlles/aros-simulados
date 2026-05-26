@@ -198,14 +198,29 @@ exports.perguntarDex = onRequest(
       const db = admin.firestore();
       // Lê produtos + jornada + dexPrompt + editais + datas importantes + tipos
       // (verticais usam sufixo; datasImportantesTipos é GLOBAL — sem sufixo)
-      const [snap, jornadaSnap, dexCfgSnap, editaisSnap, datasImpSnap, datasImpTiposSnap] = await Promise.all([
+      const [snap, jornadaSnap, dexCfgSnap, editaisSnap, datasImpSnap, datasImpTiposSnap, provasAprovSnap] = await Promise.all([
         db.collection('produtos').get(),
         db.collection('config').doc(verticalDoc('jornadaCliente')).get(),
         db.collection('config').doc(verticalDoc('dexPrompt')).get(),
         db.collection('config').doc(verticalDoc('editais')).get(),
         db.collection('config').doc(verticalDoc('datasImportantes')).get(),
         db.collection('config').doc('datasImportantesTipos').get(),
+        db.collection('provasAprovados').where('vertical', '==', vertical).get(),
       ]);
+      // Aprovações (provas + resultados) da vertical. Resultados são chunkeados
+      // em `in` queries de no máximo 30 IDs.
+      const provasAprov = [];
+      provasAprovSnap.forEach(d => provasAprov.push({ id: d.id, ...d.data() }));
+      const provaIdsAprov = provasAprov.map(p => p.id);
+      let resultadosAprov = [];
+      if (provaIdsAprov.length) {
+        for (let i = 0; i < provaIdsAprov.length; i += 30) {
+          const chunk = provaIdsAprov.slice(i, i + 30);
+          const rsnap = await db.collection('resultadosAprovados').where('provaId', 'in', chunk).get();
+          rsnap.forEach(d => resultadosAprov.push({ id: d.id, ...d.data() }));
+        }
+      }
+      const aprovacoesFmt = formatarAprovacoes(provasAprov, resultadosAprov);
       // Filtra produtos pela vertical (produtos sem campo `vertical` são anestreview por compat)
       const produtos = [];
       snap.forEach(d => {
@@ -245,8 +260,8 @@ exports.perguntarDex = onRequest(
         String(dexCfg[perfilField] || '').trim() ||
         String(dexCfg.template || '').trim() ||
         DEFAULT_INSTRUCTIONS[perfil];
-      // Jornada, Editais, Datas Importantes e Catálogo SEMPRE anexados automaticamente.
-      const systemPrompt = buildSystemPromptFromInstructions(customInstructions, catalogoFmt, jornadaTxt, editaisFmt, datasImpFmt, { avatarNome, verticalNome: verticalNomeFmt });
+      // Jornada, Editais, Datas Importantes, Aprovações e Catálogo SEMPRE anexados automaticamente.
+      const systemPrompt = buildSystemPromptFromInstructions(customInstructions, catalogoFmt, jornadaTxt, editaisFmt, datasImpFmt, aprovacoesFmt, { avatarNome, verticalNome: verticalNomeFmt });
 
       // PDFs anexados pra este perfil — viram blocos `document` no user message
       const pdfsField = 'pdfs' + perfil.charAt(0).toUpperCase() + perfil.slice(1);
@@ -376,7 +391,7 @@ const ESTILO_UNIVERSAL = `## REGRAS DE ESTILO (sempre aplicadas)
 // customizadas do usuário. Sempre coloca os blocos de dados no final pra otimizar
 // prompt caching: instruções (que mudam pouco) vêm primeiro, dados (que mudam mais)
 // depois. Como o cache é por prefixo, isso mantém o cache válido por mais tempo.
-function buildSystemPromptFromInstructions(instructions, catalogoFmt, jornadaTxt, editaisFmt, datasImpFmt, ctx) {
+function buildSystemPromptFromInstructions(instructions, catalogoFmt, jornadaTxt, editaisFmt, datasImpFmt, aprovacoesFmt, ctx) {
   const c = ctx || {};
   const avatarNome = c.avatarNome || 'Dex';
   const verticalNome = c.verticalNome || 'MedReview';
@@ -389,9 +404,12 @@ function buildSystemPromptFromInstructions(instructions, catalogoFmt, jornadaTxt
     ? `=== EDITAIS CADASTRADOS (${verticalNome}) ===\n\nInformações de editais de prova publicados. Cada edital traz o ano em que foi publicado. **Ano atual de referência: ${new Date().getFullYear()}.** Se for usar informação de um edital de ano ANTERIOR ao atual pra responder, comece a resposta deixando claro que o dado é do edital daquele ano (ex: "Segundo o edital de XXXX..."), porque pode haver mudanças no edital atual.\n\n${editaisFmt}\n\n=== FIM DOS EDITAIS ===\n\n`
     : '';
   const datasImpSec = datasImpFmt
-    ? `=== DATAS IMPORTANTES (${verticalNome}) ===\n\nCalendário de eventos cadastrados pela coordenação: provas, revisões/aulas ao vivo, liberações de conteúdo, prazos de inscrição e outros eventos. **Hoje é ${hojeBR}.** Eventos podem ser classificados por escopo (público-alvo / track — ex: TEA, TSA, MEs, Outros) — quando houver, a linha "Escopo" indica a quem o evento se destina. Use essas informações pra responder perguntas como "quando é a próxima X?", "tem revisão marcada?", "qual o link da revisão X?", "quando libera Y?". Sempre que houver link, cite o link na resposta. Diferencie eventos futuros dos que já passaram.\n\n${datasImpFmt}\n\n=== FIM DAS DATAS IMPORTANTES ===\n\n`
+    ? `=== DATAS IMPORTANTES (${verticalNome}) ===\n\nCalendário de eventos cadastrados pela coordenação: provas, revisões/aulas ao vivo, liberações de conteúdo, prazos de inscrição e outros eventos. **Hoje é ${hojeBR}.** Eventos podem ser classificados por escopo (público-alvo / track — ex: TEA, TSA, MEs, Outros) — quando houver, a linha "Escopo" indica a quem o evento se destina. Use essas informações pra responder perguntas como "quando é a próxima X?", "tem revisão marcada?", "qual o link da revisão X?", "quando libera Y?". Sempre que houver link, cite o link na resposta. Diferencie eventos futuros dos que já passaram.\n\n**ATENÇÃO — eventos PREVISTOS:** Eventos marcados como ⚠️ PREVISTO ainda não foram confirmados pela coordenação. SEMPRE avise o usuário quando responder sobre um evento previsto, deixando claro que a data não está confirmada e pode mudar (ex: "previsto para DD/MM, ainda não confirmado pela coordenação"). Nunca trate datas previstas como definitivas.\n\n${datasImpFmt}\n\n=== FIM DAS DATAS IMPORTANTES ===\n\n`
     : '';
-  return `${headerVertical}${instructions}\n\n${ESTILO_UNIVERSAL}\n\n${jornadaSec}${editaisSec}${datasImpSec}=== CATÁLOGO DE PRODUTOS ${verticalNome.toUpperCase()} ===\n\n${catalogoFmt}\n\n=== FIM DO CATÁLOGO ===`;
+  const aprovacoesSec = aprovacoesFmt
+    ? `=== HISTÓRICO DE APROVAÇÕES (${verticalNome}) ===\n\nPercentual de aprovação dos NOSSOS alunos em provas da vertical. Use quando perguntarem sobre desempenho histórico, taxa de aprovação, ou efetividade dos produtos.\n\n${aprovacoesFmt}\n\n=== FIM DAS APROVAÇÕES ===\n\n`
+    : '';
+  return `${headerVertical}${instructions}\n\n${ESTILO_UNIVERSAL}\n\n${jornadaSec}${editaisSec}${datasImpSec}${aprovacoesSec}=== CATÁLOGO DE PRODUTOS ${verticalNome.toUpperCase()} ===\n\n${catalogoFmt}\n\n=== FIM DO CATÁLOGO ===`;
 }
 
 // Formata a lista de DATAS IMPORTANTES (calendário) como texto pra IA.
@@ -450,8 +468,10 @@ function formatarDatasImportantes(lista, tipos, deletedSystemIds, escopos) {
     const horario = String(e.horario || '').trim();
     const desc = String(e.descricao || '').trim();
     const link = String(e.link || '').trim();
+    const isPrevisto = e.confirmado === false;
     const linhas = [];
     linhas.push(`### ${tipoMeta.icone} ${titulo}  [${tipoMeta.nome}]`);
+    if (isPrevisto) linhas.push(`- **Status:** ⚠️ PREVISTO (ainda NÃO confirmado pela coordenação — data pode mudar)`);
     linhas.push(`- **Data:** ${dataLinha || '(não informada)'}${passou ? ' _(já passou)_' : ''}`);
     if (horario) linhas.push(`- **Horário:** ${horario}`);
     const escopoNome = e.escopoId && escopoMap[e.escopoId] ? escopoMap[e.escopoId] : '';
@@ -474,6 +494,32 @@ function formatarDatasImportantes(lista, tipos, deletedSystemIds, escopos) {
   if (futuros.length) partes.push(`**FUTUROS (${futuros.length}):**\n\n` + futuros.map(eventoFmt).join('\n\n'));
   if (passados.length) partes.push(`**JÁ PASSARAM (${passados.length}):**\n\n` + passados.map(eventoFmt).join('\n\n'));
   return partes.join('\n\n---\n\n');
+}
+
+// Formata o histórico de aprovações (provas + resultados) pra IA.
+// Agrupa por prova (modalidade) e lista resultados em ordem cronológica reversa.
+function formatarAprovacoes(provas, resultados) {
+  if (!Array.isArray(provas) || !provas.length) return '';
+  const blocos = [];
+  const provasOrd = provas.slice().sort((a, b) =>
+    String(a.modalidade || a.descricao || '').localeCompare(String(b.modalidade || b.descricao || ''), 'pt-BR')
+  );
+  for (const p of provasOrd) {
+    const nome = String(p.modalidade || p.descricao || p.id);
+    const rs = (Array.isArray(resultados) ? resultados : [])
+      .filter(r => r.provaId === p.id)
+      .sort((a, b) => (b.ano || 0) - (a.ano || 0));
+    if (!rs.length) continue;
+    const linhas = rs.map(r => {
+      const ano = r.ano || '?';
+      const pct = (r.percentual != null ? r.percentual : 0).toFixed(1).replace('.', ',');
+      const nossos = r.totalNossos || 0;
+      const lista = r.totalLista || 0;
+      return `- ${ano}: ${pct}% (${nossos} dos nossos em ${lista} aprovados na lista da banca)`;
+    });
+    blocos.push(`### ${nome}\n${linhas.join('\n')}`);
+  }
+  return blocos.join('\n\n');
 }
 
 // Formata a lista de editais como texto plano pra incluir no prompt da IA.
