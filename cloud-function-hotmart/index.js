@@ -10,6 +10,9 @@ const db = admin.firestore();
 // Re-exporta a function do Dex (pergunta IA sobre catálogo de produtos)
 exports.perguntarDex = require('./dex').perguntarDex;
 
+// Helper que faz UPSERT em alunosAprovados (Cruzar Lista) a partir do webhook Hotmart
+const { upsertAluno } = require('./hotmart-alunos');
+
 // Tokens lidos de variáveis de ambiente (definidas em .env ou via firebase functions:secrets:set)
 const HOTMART_TOKEN = process.env.HOTMART_TOKEN || '';
 const SLACK_WEBHOOK = process.env.SLACK_WEBHOOK || '';
@@ -42,6 +45,19 @@ exports.hotmartWebhook = onRequest(
 
     const event = body.event || body.id || '';
     const purchase = body.data?.purchase || body;
+
+    // ════════════════════════════════════════════════════════════════════
+    // ALUNOS APROVADOS (Cruzar Lista) — UPSERT na base de alunos.
+    // Roda em paralelo ao fluxo de solicitacoesExtra. Falhas aqui NÃO
+    // bloqueiam a resposta 200 pro Hotmart, pra não perder webhooks por
+    // erro num dos dois caminhos. Logamos pra debug posterior.
+    // ════════════════════════════════════════════════════════════════════
+    try {
+      const r = await upsertAluno(body, event);
+      console.log('alunosAprovados:', r.action, r.chaveAluno || r.motivo || '');
+    } catch (e) {
+      console.error('alunosAprovados upsert falhou (não bloqueante):', e?.message || e);
+    }
 
     // Tenta extrair xcod (id da solicitação) de vários campos possíveis
     const xcod =
