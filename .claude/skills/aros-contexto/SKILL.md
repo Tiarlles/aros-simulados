@@ -1654,6 +1654,81 @@ Refinamento UX completo da aba Gerenciamento (visão coord do simulado **online*
 - IDs preservados (`s-t`, `s-c`, `s-a`, `s-s`) — toda lógica JS de update segue funcionando sem mudança.
 - CSS antigo `.sg/.sc/.s-icon/...` mantido (dead code) para evitar alterar outros lugares; só a markup foi trocada.
 
+### Checklist de Aplicação — refinos UX + cronômetro embutido + projeção em tempo real (2026-05-26)
+
+Sessão completa de refinos no Checklist de Aplicação (`tab-checklist`, função `renderCkCasos` e adjacências). Tudo entregue no mesmo dia, deploy completo (commits `c638edb` + rules deployadas).
+
+**Layout home da aba:**
+- Seletor de simulado + botão "💬 Contribuir com Feedback Geral" movidos pra dentro da coluna esquerda do cabeçalho (estavam separados, criando vácuo vertical porque a coluna direita tinha 2 botões empilhados). Agora sobem pra encostar no título.
+- Botão `btn-fg-admin` renomeado de "💬 Feedback Geral dos Professores" pra "⚙️ Configurar Feedback Geral" (mantém id, lógica show/hide igual).
+
+**Cabeçalho do card do caso refeito:**
+- Antes: ícone (`⬜`/`🟡`/`✅` em 18px) `align-items:center` no flex parent — ficava no meio do bloco de 3 linhas, parecia "quebrado".
+- Agora: ícone (`📋`/`🟡`/`✅` em 20px) `align-items:flex-start` — fica topo-alinhado com o título.
+- Status virou **badge pill** (chip arredondado com bg tintado + border + uppercase) inline com o título à direita, em vez de texto solto na 3ª linha.
+- "26 itens" e "Prof. Examinador" fundidos numa única linha auxiliar.
+- Chevron `▼` topo-alinhado, sem margin awkward.
+
+**Sticky no topo (cabeçalho + controle de projeção):**
+- O `.rc` do caso ganha um wrapper sticky envolvendo `hdrInner` + (antes) o `ck-proj-wrap`. **Mudou pra cabeçalho contendo o controle de projeção direto** (próximo item).
+- Posição: `position:sticky;top:78px` (mesma altura do header global `<header>` da página, que é `position:sticky;top:0;z-index:100`). Sem o offset, o cabeçalho do caso ficava escondido atrás do nav.
+- **Gotcha CRÍTICO**: `overflow:hidden` no `.card` (que tem o border-radius) quebra `position:sticky` dos descendentes — torna o card o "scroll container" do sticky. Solução: mudar pra `overflow:clip` (clipa igual, mas não cria scroll context). Suportado em Chrome 90+, Safari 16+, Firefox 81+.
+- **Gotcha #2**: `statusBg` (`--gl/--yl/--rl`) são `rgba(...,.12)` translúcidos por design pro hover de tabela. No sticky o conteúdo rolava por baixo aparecendo. Fix: `background:var(--bg2)` opaco no wrapper sticky — overlay translúcido fica em cima.
+
+**Controle de projeção embutido no cabeçalho:**
+- Antes: painel grande de projeção (`renderProjPanel`) ocupava `width:100%` num wrapper separado abaixo do cabeçalho.
+- Agora: botão compacto "▶ Projetar caso · 4 slides" inline no header (entre info do caso e chevron), em estilo Apple (gradiente 3 paradas, ícone em círculo glass, chip do contador em JetBrains Mono, hover eleva translateY -1px + brightness 1.1).
+- Quando projeção está ativa, vira **cronômetro condensado**: pill horizontal escura com `CRON 03:24 | ⟲ Zerar | ⏸ | ◀ Anterior | 2/4 | Próximo ▶ | 🔄 Reabrir | ⛔ Encerrar`. Todos os botões 28px de altura. Buttons com labels (zerar/reabrir/encerrar) usam `btnLbl` style, ícones puros (play/pause/prev/next) usam `btnIcon`.
+- `event.stopPropagation()` em todos os controles pra clique não togglar o caso (header inteiro é clicável via `toggleCkCaso`).
+- A ordem dos botões (zerar antes do play, anterior/próximo com labels) foi definida iterativamente com o user.
+
+**Bug fix no cronômetro:**
+- `pause` lia `st.timerMs` que só era atualizado quando o snapshot do Firestore chegava. Resultado: pausar sempre escrevia `timerPausedMs=0` (zerava o cronômetro).
+- Fix: calcular ms decorrido com a mesma fórmula do render: `acumulado = st.timerStartLocal ? (Date.now() - st.timerStartLocal + (st.timerMsBase||0)) : (st.timerMs||0)`.
+- Adicionado **update otimista do state local** em todas as 3 ações (play/pause/reset) + `_atualizaPainelProj(ci)` síncrono — UI responde no clique sem esperar round-trip do Firestore.
+
+**Filtros e justificação de texto:**
+- Caso clínico (caso.enunciado) e títulos das perguntas ganharam `text-align:justify; hyphens:none; -webkit-hyphens:none`. Sem hifenização automática — só justifica espaços entre palavras.
+- Pergunta title precisou também de `display:block` pro `text-align` valer dentro do flex parent.
+
+**Dropdowns que sobreviem re-render:**
+- `_openCkPerguntas` (Set) novo, espelhando `_openCkCasos`. Acompanha quais perguntas/habilidades/feedbacks estão expandidos.
+- `toggleCkPerg` adiciona/remove o id do Set.
+- Render das 3 dropdowns (pergunta `ck-perg-${ci}-${pi}`, habilidade `ck-hab-${ci}`, feedback `ck-fb-wrap-${ci}`) consulta o Set pra definir `display` + rotação do chevron iniciais.
+- **Por que era necessário**: `setCkItem` → `requireProfForCaso` → `confirmarProfCaso` (auto-confirma se prof logado) → `renderCkCasos` full re-render → fechava a dropdown que o user estava preenchendo. Só `_openCkCasos` era restaurado.
+
+**Bug fix no status da pergunta:**
+- `updatePergStatus` lia `resp.casos?.[ci]` direto (sem passar pelo bloco), mas o shape real é `_ckRespostas[student][bloco].casos[ci]`. Resultado: `marcados=0` sempre, status ficava em "Pendente" mesmo com item marcado.
+- Fix: `const blocoResp=resp[blocoKey]; const cr=blocoResp.casos?.[ci]||{};`.
+- Adicionado também `id="perg-st-${ci}-${pi}"` no span renderizado (a função procurava esse id, mas o span renderizado só tinha class `perg-status-lbl` — variável `pergStatusLabel` com id existia mas nunca era usada, vestígio de refactor).
+
+**Confirmações simplificadas:**
+- `resetCkPergunta`, `resetCkCaso`, `resetarSimuladoAluno`: trocados os `prompt('Digite RESETAR para confirmar')` por `confirm('Tem certeza...')` simples (OK/Cancelar nativos).
+- Botão "🗑️ Resetar Pergunta N" alinhado à esquerda (`justify-content:flex-start`) em vez da direita.
+
+**Barra de desenho na projeção:**
+- Removida `<button id="btn-eraser">` duplicada (linhas 7013-7014 tinham markup idêntico copiado e colado).
+- Cursor da caneta (`#proj-canvas.pen-ativa`) trocado de `crosshair` (X) por SVG inline de caneta, corpo branco com contorno preto, hotspot em `(3, 21)` na ponta.
+- Cursor da borracha (`#proj-canvas.eraser-ativa`) trocado de `cell` por SVG inline de borracha (corpo rosa + ponta branca), hotspot em `(12, 13)` no centro.
+- Ícone do botão Borracha trocado de `🧽` (esponja) por SVG inline 16×16 com `currentColor` no contorno (acompanha tema).
+
+**Projeção em tempo real (feature nova — antes só aparecia no `pointerup`):**
+- **Subcoleção nova**: `projecaoLive/{simId}__{alunoId}/currentStrokes/{strokeId}` pra traços em andamento.
+- **Pointerdown** gera `strokeId` no início (era criado no flush): `stk_${Date.now().toString(36)}_${rand}`. Reuso pro stream + flush final.
+- **Pointermove**: cada ~80ms (throttle via `_lastLiveStrokeWrite`), faz `setDoc` em `currentStrokes/{id}` com os pontos acumulados. Fire-and-forget — não bloqueia o desenho local. Constante `LIVE_STROKE_THROTTLE_MS=80`.
+- **PointerUp / flushStroke**: 1º grava em `strokes/{id}` (aguarda), 2º deleta `currentStrokes/{id}` (fire-and-forget). Ordem garante que o aluno nunca vê o traço sumir.
+- **Subscribe novo** `liveStrokesUnsub` em `currentStrokes/` → state `liveStrokes[]`. `renderCanvas` renderiza em **3 camadas**: (1) finais via `strokes`, (2) em andamento de outros usuários via `liveStrokes` com dedup contra `strokes` + dedup contra `strokeAtual.id` local + filtro stale (`LIVE_STROKE_STALE_MS=10000` — ignora docs >10s sem update pra cobrir crash do browser), (3) `strokeAtual` local (igual antes).
+- **Botão Limpar** agora apaga `strokes/` + `currentStrokes/` do slide atual. `_limparStrokesProjLive` (chamado ao encerrar projeção) limpa ambas as subcoleções em batches paralelos.
+- **firestore.rules**: nova regra `match /currentStrokes/{strokeId}` espelhando `strokes/` (read/write/delete `if true` — mesma lógica permissiva da subcoleção pai). Rules deployadas em `simulados-confirmacao`.
+- **Custo estimado**: ~30 writes por traço (média 1-2s de desenho). 5 profs aplicando 1h simultâneo = ~12.500 writes + 12.500 reads — folgadíssimo no free tier (20k writes/dia, 50k reads/dia).
+
+**Custos Firebase observados (2026-05-26):**
+- Plano Blaze (obrigatório pelas Cloud Functions). Mês corrente: R$ 5,29 (R$ 5,25 Firestore + R$ 0,04 Functions).
+- Maior consumo: **leituras Firestore** (pico de 273k/dia, free é 50k). Provavelmente snapshot listeners em coleções de alunos abrindo várias páginas.
+- Crédito promocional Google Cloud: R$ 1.697,25 válido até 3/ago/2026. Não sai do cartão até lá.
+- Alerta de orçamento configurado em R$ 100/mês.
+- Pós-crédito, estimativa: R$ 5-15/mês no ritmo atual.
+
 ### Firebase Console / Project Settings (configurado 2026-05-21)
 
 - **Idioma do template**: Português (Brasil).
