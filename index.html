@@ -6007,11 +6007,11 @@ Equipe AnestReview · AROS</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore,collection,doc,getDoc,getDocs,setDoc,updateDoc,onSnapshot,deleteDoc,writeBatch,addDoc,query,orderBy,serverTimestamp,limit as fbLimit,startAfter,deleteField,arrayUnion,arrayRemove,Timestamp }
+import { getFirestore,collection,doc,getDoc,getDocs,setDoc,updateDoc,onSnapshot,deleteDoc,writeBatch,addDoc,query,orderBy,serverTimestamp,limit as fbLimit,startAfter,deleteField,arrayUnion,arrayRemove,Timestamp,FieldPath }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage,ref as storageRef,uploadBytes,getDownloadURL,deleteObject }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-import { getAuth,GoogleAuthProvider,signInWithPopup,signInWithEmailAndPassword,sendPasswordResetEmail,signOut,onAuthStateChanged }
+import { getAuth,GoogleAuthProvider,signInWithPopup,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,signOut,onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const _fbApp=initializeApp({apiKey:"AIzaSyDEljxGEKhl6taJEcbQHoAb8QsjWT7fx08",authDomain:"simulados-confirmacao.firebaseapp.com",projectId:"simulados-confirmacao",storageBucket:"simulados-confirmacao.firebasestorage.app",messagingSenderId:"399694193508",appId:"1:399694193508:web:70d7a65d51798045ef1071"});
@@ -6133,7 +6133,7 @@ async function audit(action,target,payload){
 window._audit=audit;
 // Lista canônica de ações — também usada como popular do filtro na aba Auditoria.
 const AUDIT_ACTIONS=[
-  'LOGIN_CUSTOM','LOGIN_FIREBASE','LOGIN_GOOGLE','LOGOUT',
+  'LOGIN_CUSTOM','LOGIN_FIREBASE','LOGIN_GOOGLE','LOGOUT','USUARIO_MIGRADO_AUTH',
   'SIMULADO_CRIADO','SIMULADO_EDITADO',
   'NOTA_LANCADA','NOTA_RESETADA',
   'ALUNO_ADICIONADO','ALUNO_REMOVIDO','ALUNO_STATUS_ALTERADO','ALUNO_MOVIDO','ALUNO_SWAP',
@@ -16771,6 +16771,44 @@ async function saveFinanceiroDoc(){
   await setDoc(doc(db,'config','financeiro'),S.financeiro,{merge:true});
 }
 
+// Listener em tempo real do doc config/financeiro. Mantém S.financeiro sempre
+// fresco entre sessões — sem isso, qualquer save de um usuário com estado velho
+// sobrescrevia silenciosamente alterações de outro (ex: financeiro mudando
+// status de controle de NF enquanto admin tinha a aba aberta).
+let _finUnsub=null;
+let _finApplyingRemote=false;
+function _ensureFinanceiroListener(){
+  if(_finUnsub)return;
+  _finUnsub=onSnapshot(doc(db,'config','financeiro'),snap=>{
+    if(!snap.exists())return;
+    const d=snap.data();
+    let tipos=d.tipos&&d.tipos.length?d.tipos:FIN_DEFAULT_TIPOS;
+    ['sys-rodada','sys-simextra'].forEach(sid=>{
+      const def=FIN_DEFAULT_TIPOS.find(t=>t.id===sid);
+      if(!tipos.find(t=>t.id===sid)){
+        if(def)tipos=[def,...tipos];
+      }else{
+        tipos=tipos.map(t=>t.id===sid?{...t,nome:def?def.nome:t.nome,system:true}:t);
+      }
+    });
+    S.financeiro={
+      profsFin:d.profsFin||{},
+      tipos,
+      meses:d.meses||{},
+      notaFiscalCfg:d.notaFiscalCfg||{},
+    };
+    // Re-render só se a aba financeiro está visível E o usuário não está
+    // mexendo num input/select naquele momento (pra não roubar foco).
+    const tabFin=document.getElementById('tab-financeiro');
+    if(!tabFin||tabFin.classList.contains('hidden'))return;
+    const ae=document.activeElement;
+    if(ae&&tabFin.contains(ae)&&['INPUT','SELECT','TEXTAREA'].includes(ae.tagName))return;
+    _finApplyingRemote=true;
+    try{if(typeof renderFinanceiro==='function')renderFinanceiro();}
+    finally{_finApplyingRemote=false;}
+  },err=>{console.warn('financeiro onSnapshot:',err);});
+}
+
 // === Helpers de pendências (rollover de NF não emitida) ===
 // "Pendência" = valor que ficou pra trás num mês porque o prof não emitiu NF a tempo.
 // Quando o admin marca 'nf-nao-emitida' no controle, o sistema oferece mover o valor
@@ -17231,7 +17269,12 @@ window._finSetControlePendencia=async(destMes,pendId,status)=>{
   if(pend.controleStatus===status)return;
   pend.controleStatus=status;
   try{
-    await saveFinanceiroDoc();
+    // Escrita atômica do array de pendências do mês destino. Limita o escopo do
+    // write pra evitar stomp por estado velho de outras seções (profsFin, tipos,
+    // notaFiscalCfg, outros meses).
+    await updateDoc(doc(db,'config','financeiro'),{
+      [`meses.${destMes}.pendencias`]:mes.pendencias
+    });
     if(typeof _revShowToast==='function'){
       const labels={'aguardando-fechamento':'Aguardando fechamento','nf-solicitada':'NF solicitada','rpa-solicitada':'RPA solicitada','nf-emitida':'NF emitida','nf-nao-emitida':'NF não emitida'};
       _revShowToast(`✓ Pendência ${pend.profNome}: ${labels[status]}`,'var(--green)');
@@ -17376,15 +17419,30 @@ window._finSetControle=async(profNome,anoMes,status,source)=>{
 
   mes.controleStatus[profNome]=status;
   try{
-    await saveFinanceiroDoc();
+    // Escrita ATÔMICA do campo específico (em vez de mandar o doc inteiro via
+    // saveFinanceiroDoc). Isso impede que estado velho de outra sessão sobrescreva
+    // alterações concorrentes do controle de NF feitas por outros usuários.
+    // Se houve rollover (criação/remoção de pendência), aí precisa do save completo.
+    const houveRollover=(status==='nf-nao-emitida'&&mes.rolloverPara&&mes.rolloverPara[profNome])
+                     ||(anterior==='nf-nao-emitida'&&!(mes.rolloverPara&&mes.rolloverPara[profNome]));
+    if(houveRollover){
+      await saveFinanceiroDoc();
+    }else{
+      // Usa FieldPath construtor (em vez de dot-notation em string) porque o
+      // profNome pode conter "." (ex: "Dr. Silva") — o que quebraria o caminho
+      // em segmentos errados se passado como string "meses.X.controleStatus.Dr. Silva".
+      await updateDoc(doc(db,'config','financeiro'),
+        new FieldPath('meses',anoMes,'controleStatus',profNome),status);
+    }
     if(source!=='auto'&&typeof _revShowToast==='function'){
-      const labels={'aguardando-fechamento':'Aguardando fechamento','nf-solicitada':'NF solicitada','nf-emitida':'NF emitida','nf-nao-emitida':'NF não emitida'};
+      const labels={'aguardando-fechamento':'Aguardando fechamento','nf-solicitada':'NF solicitada','rpa-solicitada':'RPA solicitada','nf-emitida':'NF emitida','nf-nao-emitida':'NF não emitida'};
       _revShowToast(`✓ ${profNome}: ${labels[status]}`,'var(--green)');
     }
     renderFinanceiro();
   }catch(e){
     console.error('_finSetControle:',e);
-    if(typeof _revShowToast==='function')_revShowToast('❌ Falha ao salvar status','var(--red)');
+    const detalhe=(e&&(e.code||e.message))?` (${e.code||e.message})`:'';
+    if(typeof _revShowToast==='function')_revShowToast('❌ Falha ao salvar status'+detalhe,'var(--red)');
   }
 };
 
@@ -19019,6 +19077,43 @@ window.checkPass=async()=>{
   });
   if(!u){errEl.textContent='Usuário ou senha incorretos.';errEl.classList.remove('hidden');return;}
   errEl.classList.add('hidden');
+
+  // ────────────────────────────────────────────────────────────────────────
+  // MIGRAÇÃO TRANSPARENTE PRO FIREBASE AUTH
+  // Se o usuário tem email cadastrado, tenta logar/criar conta no Firebase Auth
+  // com a mesma senha. Próximas vezes ele entra direto pelo Firebase (ganhando
+  // permissão real pra escrever em coleções coord/prof). Falhas são silenciosas
+  // — cai pro _applyLocalSession antigo e o user entra normal.
+  // ────────────────────────────────────────────────────────────────────────
+  if(u.email&&senha&&senha.length>=6){
+    try{
+      window._freshFirebaseLogin=true;
+      await signInWithEmailAndPassword(auth,u.email,senha);
+      // onAuthStateChanged faz _applyLocalSession + audit — terminamos aqui.
+      return;
+    }catch(e){
+      const code=e?.code||'';
+      if(code==='auth/user-not-found'||code==='auth/invalid-credential'){
+        // Provável: conta Auth ainda não existe. Tenta criar com a mesma senha.
+        try{
+          await createUserWithEmailAndPassword(auth,u.email,senha);
+          audit('USUARIO_MIGRADO_AUTH',{username:u.username||u.id,email:u.email});
+          // onAuthStateChanged faz _applyLocalSession + audit do LOGIN
+          return;
+        }catch(e2){
+          // email-already-in-use significa que existe Auth account com senha
+          // diferente da legacy — não dá pra migrar transparente. Cai pro custom.
+          console.warn('migração Auth (create):',e2?.code||e2?.message||e2);
+          window._freshFirebaseLogin=false;
+        }
+      }else{
+        // wrong-password / outros: cai pro custom
+        console.warn('migração Auth (signin):',code);
+        window._freshFirebaseLogin=false;
+      }
+    }
+  }
+
   _applyLocalSession(u);
   audit('LOGIN_CUSTOM',{username:u.username||u.id});
 };
@@ -23136,7 +23231,7 @@ window.switchCoTab = (tab, btn) => {
   if(tab==='professores') window._initProfTab();
   if(tab==='extra'){renderSimExtraCfg();applySeCollapsedState();}
   if(tab==='simExtras') renderSimuladosExtras();
-  if(tab==='financeiro') renderFinanceiro();
+  if(tab==='financeiro'){_ensureFinanceiroListener();renderFinanceiro();}
   if(tab==='mentorias') renderMentorias();
   if(tab==='revisao') renderRevisaoTab();
   if(tab==='features') renderFeatures();
