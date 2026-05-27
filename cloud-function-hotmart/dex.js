@@ -540,12 +540,39 @@ function formatarEditais(lista) {
   }).join('\n\n---\n\n');
 }
 
+// Schema novo: features de mentoria/bônus vivem em p.features com flags
+// isMentoria / isBonus. Schema legado: arrays separados mentoriaFeatures /
+// bonusFeatures. Helper devolve apenas as features novas com a flag pedida.
+function _flagged(features, flag) {
+  return (Array.isArray(features) ? features : []).filter(f => f && f[flag] === true);
+}
+// Schema novo de produtos vinculados: featuresProdutoIds = [{id, isBonus}].
+// Schema legado: featuresProdutoIds = string[] (todos normais) +
+// bonusProdutoIds = string[] (separado). Helper unifica e devolve
+// {normal:[id...], bonus:[id...]}.
+function _normLinkedProds(p) {
+  const out = { normal: [], bonus: [] };
+  const arr = Array.isArray(p.featuresProdutoIds) ? p.featuresProdutoIds : [];
+  arr.forEach(it => {
+    if (typeof it === 'string') {
+      if (it) out.normal.push(it);
+    } else if (it && typeof it === 'object' && it.id) {
+      (it.isBonus ? out.bonus : out.normal).push(it.id);
+    }
+  });
+  (Array.isArray(p.bonusProdutoIds) ? p.bonusProdutoIds : []).forEach(id => {
+    if (id && !out.bonus.includes(id)) out.bonus.push(id);
+  });
+  return out;
+}
+
 function formatarProduto(p, todosProdutos) {
   const linhas = [];
   linhas.push(`### ${p.nome || '(sem nome)'} (ID: ${p.id})`);
   if (p.status) linhas.push(`**Status:** ${p.status}`);
 
-  const breve = p.breveDescricao || p.pitchCurto || '';
+  // Breve descrição agora pode ser HTML rich — converte pra texto puro pro prompt
+  const breve = stripHtml(p.breveDescricao || p.pitchCurto || '').trim();
   if (breve) linhas.push(`**Descrição breve:** ${breve}`);
 
   const publicos = arr(p.publicoAlvo);
@@ -584,10 +611,17 @@ function formatarProduto(p, todosProdutos) {
     linhas.push(`**🎫 Vagas limitadas:** ${vagasDesc || 'sim (sem detalhes)'}`);
   }
 
-  if (Array.isArray(p.features) && p.features.length) {
+  // Features "principais" do produto. No schema novo, p.features inclui também
+  // bônus (isBonus:true) e mentoria (isMentoria:true) — filtra fora aqui pra não
+  // duplicar nas seções de mentoria/bônus abaixo. Em docs legados, p.features
+  // já é só "normais" (flags ausentes/false).
+  const featsPrincipais = Array.isArray(p.features)
+    ? p.features.filter(f => f && !f.isBonus && !f.isMentoria)
+    : [];
+  if (featsPrincipais.length) {
     linhas.push('');
     linhas.push('**O que está incluído:**');
-    p.features.forEach(f => linhas.push(formatarFeature(f)));
+    featsPrincipais.forEach(f => linhas.push(formatarFeature(f)));
   }
 
   // Mentoria pode ser 'sim' (incluída), 'opcional' (compra à parte) ou 'nao'.
@@ -610,16 +644,26 @@ function formatarProduto(p, todosProdutos) {
       const mentSazDesc = String(p.mentoriaSazonalidadeDescricao || '').trim();
       linhas.push(`Mentoria sazonal: ${mentSazDesc || 'sim (sem detalhes)'}`);
     }
-    if (Array.isArray(p.mentoriaFeatures) && p.mentoriaFeatures.length) {
-      p.mentoriaFeatures.forEach(f => linhas.push(formatarFeature(f)));
+    // Compat: lê tanto p.mentoriaFeatures (legado) quanto p.features filtrado
+    // por isMentoria:true (novo). Em produtos já migrados, só o segundo está
+    // populado; em legados, só o primeiro. Concatena pra cobrir os dois.
+    const mentFeatsLegado = Array.isArray(p.mentoriaFeatures) ? p.mentoriaFeatures : [];
+    const mentFeatsNovo = _flagged(p.features, 'isMentoria');
+    const mentFeatsAll = [...mentFeatsLegado, ...mentFeatsNovo];
+    if (mentFeatsAll.length) {
+      mentFeatsAll.forEach(f => linhas.push(formatarFeature(f)));
     } else if (!mentDesc && !mentResps.length) {
       linhas.push(`(${mentStatus === 'opcional' ? 'opcional (compra à parte)' : 'sim'})`);
     }
   }
 
-  // Bônus: produtos vinculados (cita pelo nome) + features bônus livres
-  const bonusIds = Array.isArray(p.bonusProdutoIds) ? p.bonusProdutoIds : [];
-  const bonusFeats = Array.isArray(p.bonusFeatures) ? p.bonusFeatures : [];
+  // Bônus: produtos vinculados (cita pelo nome) + features bônus livres.
+  // Compat: lê schema legado (bonusProdutoIds + bonusFeatures) e novo
+  // (featuresProdutoIds:[{id,isBonus}] + features com isBonus:true).
+  const { bonus: bonusIds } = _normLinkedProds(p);
+  const bonusFeatsLegado = Array.isArray(p.bonusFeatures) ? p.bonusFeatures : [];
+  const bonusFeatsNovo = _flagged(p.features, 'isBonus');
+  const bonusFeats = [...bonusFeatsLegado, ...bonusFeatsNovo];
   if (bonusIds.length || bonusFeats.length) {
     linhas.push('');
     linhas.push('**Bônus inclusos:**');
@@ -644,15 +688,25 @@ function formatarProduto(p, todosProdutos) {
     p.argumentosVenda.forEach(a => linhas.push(`- ${a}`));
   }
 
-  // Concorrentes: nome + features deles + nosso diferencial em cada feature
-  if (Array.isArray(p.concorrentes) && p.concorrentes.length) {
+  // Concorrentes: texto introdutório + nome + features deles + nosso diferencial em cada feature
+  const concIntro = stripHtml(p.concorrentesIntro || '').trim();
+  const temConcs = Array.isArray(p.concorrentes) && p.concorrentes.length;
+  if (concIntro || temConcs) {
     linhas.push('');
     linhas.push('**Concorrentes diretos:**');
+    if (concIntro) linhas.push(concIntro);
+  }
+  if (temConcs) {
     p.concorrentes.forEach(c => {
       const nome = String(c.nome || '').trim() || '(sem nome)';
       linhas.push(`- Concorrente: ${nome}`);
-      const feats = Array.isArray(c.features) ? c.features : [];
-      if (feats.length) {
+      // Modelo novo: c.comentario (texto livre rich)
+      const coment = stripHtml(c.comentario || '').trim();
+      if (coment) {
+        linhas.push(`  Comentário: ${coment}`);
+      } else {
+        // Compat com docs legados que ainda têm c.features[]
+        const feats = Array.isArray(c.features) ? c.features : [];
         feats.forEach(f => {
           const titulo = String(f.titulo || '').trim() || '(sem título)';
           const dif = stripHtml(f.nossoDiferencial || '').trim();

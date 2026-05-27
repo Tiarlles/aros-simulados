@@ -1955,6 +1955,16 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-detail-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
 #tab-produtos .pro-detail-nome{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;letter-spacing:-.5px;line-height:1.1;margin:0 0 6px}
 #tab-produtos .pro-detail-pitch{font-size:15px;color:var(--t2);line-height:1.45;max-width:760px;text-align:justify}
+#tab-produtos .pro-detail-pitch p{margin:0 0 8px;text-align:justify}
+#tab-produtos .pro-detail-pitch p:last-child{margin-bottom:0}
+#tab-produtos .pro-detail-pitch ul,#tab-produtos .pro-detail-pitch ol{margin:6px 0 8px 22px;padding:0}
+#tab-produtos .pro-detail-pitch li{margin-bottom:3px}
+#tab-produtos .pro-detail-pitch a{color:var(--accent);text-decoration:underline}
+#tab-produtos .pro-detail-pitch-wrap{max-width:760px;margin:0 0 8px}
+#tab-produtos .pro-detail-pitch.clamped{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;position:relative;mask-image:linear-gradient(180deg,#000 70%,transparent 100%);-webkit-mask-image:linear-gradient(180deg,#000 70%,transparent 100%)}
+#tab-produtos .pro-detail-pitch.clamped.expanded{display:block;-webkit-line-clamp:unset;overflow:visible;mask-image:none;-webkit-mask-image:none}
+#tab-produtos .pro-detail-pitch-more{display:inline-flex;align-items:center;gap:5px;margin-top:6px;background:transparent;border:none;color:var(--accent);font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:700;letter-spacing:.2px;cursor:pointer;padding:4px 0;transition:transform .15s,color .15s}
+#tab-produtos .pro-detail-pitch-more:hover{color:color-mix(in srgb,var(--accent) 80%,#fff);transform:translateX(2px)}
 #tab-produtos .pro-detail-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
 #tab-produtos .pro-detail-actions{display:flex;gap:8px}
 #tab-produtos .pro-section{margin:28px 0}
@@ -2019,6 +2029,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-feat-status{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#22c55e;flex-shrink:0}
 #tab-produtos .pro-feat-status.no{color:#ef4444}
 #tab-produtos .pro-feat-status.wip{color:#f59e0b}
+#tab-produtos .pro-feat-status.dep{color:#06b6d4}
 #tab-produtos .pro-feat-status .pro-feat-dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor;opacity:.85}
 #tab-produtos .pro-feat-chev{background:transparent;border:1px solid transparent;font-family:'JetBrains Mono','SF Mono',monospace;color:var(--t2);font-size:12px;line-height:1;padding:6px 8px;border-radius:6px;cursor:pointer;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),color .15s,background .15s,border-color .15s;flex-shrink:0}
 #tab-produtos .pro-feat-chev:hover{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 30%,var(--border))}
@@ -2145,6 +2156,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-feat-edit-head-pill.ok{background:color-mix(in srgb,#22c55e 12%,transparent);border-color:color-mix(in srgb,#22c55e 36%,var(--border));color:#22c55e}
 #tab-produtos .pro-feat-edit-head-pill.no{background:color-mix(in srgb,#ef4444 12%,transparent);border-color:color-mix(in srgb,#ef4444 36%,var(--border));color:#ef4444}
 #tab-produtos .pro-feat-edit-head-pill.wip{background:color-mix(in srgb,#f59e0b 14%,transparent);border-color:color-mix(in srgb,#f59e0b 40%,var(--border));color:#f59e0b}
+#tab-produtos .pro-feat-edit-head-pill.dep{background:color-mix(in srgb,#06b6d4 12%,transparent);border-color:color-mix(in srgb,#06b6d4 40%,var(--border));color:#06b6d4}
 #tab-produtos .pro-feat-edit-head-pill.qty{background:color-mix(in srgb,var(--accent) 10%,transparent);border-color:color-mix(in srgb,var(--accent) 30%,var(--border));color:var(--accent)}
 #tab-produtos .pro-feat-edit-icon{width:48px;height:48px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;transition:all .15s;flex-shrink:0}
 #tab-produtos .pro-feat-edit-icon:hover{border-color:var(--accent)}
@@ -2198,6 +2210,8 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-ms-chip button:hover{color:var(--red)}
 #tab-produtos .pro-ms-empty{font-size:12px;color:var(--t2);font-style:italic;padding:4px 6px}
 #tab-produtos .pro-ms-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#tab-produtos .pro-ms-input{flex:1;min-width:140px;background:transparent;border:none;outline:none;color:var(--text);padding:4px 6px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif}
+#tab-produtos .pro-ms-input::placeholder{color:var(--t2);opacity:.7}
 #tab-produtos .pro-ms-pickbtn{background:var(--bg3);border:1px dashed var(--border);border-radius:10px;padding:7px 11px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.6px;text-transform:uppercase;transition:all .15s}
 #tab-produtos .pro-ms-pickbtn:hover{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb, var(--accent) 6%, var(--bg3))}
 
@@ -2222,6 +2236,42 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-bonus-prod-chip{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;transition:border-color .15s}
 #tab-produtos .pro-bonus-prod-chip:hover{border-color:color-mix(in srgb,#fbbf24 30%,var(--border))}
 #tab-produtos .pro-bonus-prod-chip.orphan{border-style:dashed;color:var(--t2)}
+#tab-produtos .pro-bonus-prod-chip.is-bonus{background:color-mix(in srgb,#fbbf24 7%,var(--bg3));border-color:color-mix(in srgb,#fbbf24 30%,var(--border))}
+
+/* Sub-blocos dentro do accordion Features unificado */
+#tab-produtos .pro-subblock{border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px;background:var(--bg2)}
+#tab-produtos .pro-subblock:last-child{margin-bottom:0}
+#tab-produtos .pro-subblock-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed color-mix(in srgb,var(--border) 80%,transparent)}
+#tab-produtos .pro-subblock-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;letter-spacing:.3px;color:var(--text)}
+#tab-produtos .pro-subblock-count{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;color:var(--t2);background:var(--bg3);padding:2px 8px;border-radius:999px;border:1px solid var(--border)}
+#tab-produtos .pro-sub-bonus{background:color-mix(in srgb,#fbbf24 6%,var(--bg2));border-color:color-mix(in srgb,#fbbf24 25%,var(--border))}
+#tab-produtos .pro-sub-bonus .pro-subblock-title{color:#fbbf24}
+#tab-produtos .pro-sub-mentoria{background:color-mix(in srgb,var(--accent) 6%,var(--bg2));border-color:color-mix(in srgb,var(--accent) 25%,var(--border))}
+#tab-produtos .pro-sub-mentoria .pro-subblock-title{color:var(--accent)}
+/* Variante "solta" pro sub-bloco Features no detalhe: sem fundo/border/padding
+   pra ficar visualmente como antes (cards diretos sob o título da seção) */
+#tab-produtos .pro-subblock.pro-sub-plain{background:transparent;border:none;padding:0;margin-bottom:14px}
+#tab-produtos .pro-subblock.pro-sub-plain .pro-subblock-head{border-bottom:none;padding-bottom:0;margin-bottom:10px}
+/* Tag de status da mentoria no head do sub-bloco — ocupa espaço entre título e count */
+#tab-produtos .pro-subblock-head .pro-ment-tag{margin-left:2px}
+#tab-produtos .pro-subblock-head .pro-subblock-count{margin-left:auto}
+
+/* Toggles de classificação Bônus/Mentoria dentro do card de feature */
+#tab-produtos .pro-feat-flag-toggles{display:flex;gap:6px;flex-wrap:wrap}
+#tab-produtos .pro-feat-flag-toggle{background:var(--bg3);border:1px solid var(--border);color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;padding:6px 11px;border-radius:999px;cursor:pointer;transition:all .15s;text-transform:uppercase}
+#tab-produtos .pro-feat-flag-toggle:hover{border-color:var(--accent-dim);color:var(--text)}
+#tab-produtos .pro-feat-flag-toggle.on.bonus{background:color-mix(in srgb,#fbbf24 18%,var(--bg3));border-color:#fbbf24;color:#fbbf24}
+#tab-produtos .pro-feat-flag-toggle.on.ment{background:color-mix(in srgb,var(--accent) 16%,var(--bg3));border-color:var(--accent);color:var(--accent)}
+#tab-produtos .pro-feat-flag-toggle.small{padding:4px 8px;font-size:10px}
+
+/* Toggle Sim/Não no estado "pending" — destaca o card pendente */
+#tab-produtos .pro-toggle.pending{box-shadow:0 0 0 2px color-mix(in srgb,#f59e0b 30%,transparent);animation:proFeatPendPulse 1.6s ease-in-out infinite}
+@keyframes proFeatPendPulse{0%,100%{box-shadow:0 0 0 2px color-mix(in srgb,#f59e0b 30%,transparent)}50%{box-shadow:0 0 0 4px color-mix(in srgb,#f59e0b 18%,transparent)}}
+
+/* Pílulas extras no head do card de feature */
+#tab-produtos .pro-feat-edit-head-pill.pending{background:color-mix(in srgb,#f59e0b 14%,transparent);border-color:color-mix(in srgb,#f59e0b 50%,var(--border));color:#f59e0b}
+#tab-produtos .pro-feat-edit-head-pill.bonus{background:color-mix(in srgb,#fbbf24 12%,transparent);border-color:color-mix(in srgb,#fbbf24 40%,var(--border));color:#fbbf24}
+#tab-produtos .pro-feat-edit-head-pill.ment{background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:color-mix(in srgb,var(--accent) 40%,var(--border));color:var(--accent)}
 #tab-produtos .pro-bonus-prod-capa{width:36px;height:36px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--t2);font-size:18px}
 #tab-produtos .pro-bonus-prod-info{flex:1;min-width:0}
 #tab-produtos .pro-bonus-prod-name{font-weight:600;font-size:13.5px;line-height:1.2;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -2248,7 +2298,10 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-toggle button{background:transparent;border:none;color:var(--t2);padding:6px 14px;cursor:pointer;transition:all .15s}
 #tab-produtos .pro-toggle button.on{background:var(--accent);color:#fff}
 #tab-produtos .pro-toggle button.on.wip{background:#f59e0b;color:#fff}
+#tab-produtos .pro-toggle button.on.dep{background:#06b6d4;color:#fff}
 #tab-produtos .pro-toggle-3 button{padding:6px 11px;font-size:10.5px;letter-spacing:.6px}
+#tab-produtos .pro-toggle-4{flex-wrap:wrap;border-radius:12px}
+#tab-produtos .pro-toggle-4 button{padding:6px 10px;font-size:10.5px;letter-spacing:.5px;flex:1 1 auto;min-width:0}
 #tab-produtos .pro-toggle-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 
 /* Feature edit cards — variantes por tipo */
@@ -2741,6 +2794,12 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-conc-detail-feat-dif{margin-top:6px;padding-top:8px;border-top:1px dashed var(--border)}
 #tab-produtos .pro-conc-detail-feat-dif-label{display:inline-block;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#22c55e;background:color-mix(in srgb,#22c55e 10%,transparent);border:1px solid color-mix(in srgb,#22c55e 32%,var(--border));padding:2px 8px;border-radius:6px;margin-bottom:6px}
 #tab-produtos .pro-conc-detail-feat-dif-body{font-size:13.5px;line-height:1.55;color:var(--text);text-align:justify;hyphens:none;-webkit-hyphens:none;overflow-wrap:break-word;word-break:normal}
+#tab-produtos .pro-conc-intro{margin:0 0 14px;padding:12px 14px;background:color-mix(in srgb,var(--accent) 4%,var(--bg2));border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;font-size:14px;line-height:1.6;color:var(--text);text-align:justify;hyphens:none;-webkit-hyphens:none;overflow-wrap:break-word;word-break:normal}
+#tab-produtos .pro-conc-intro p{margin:0 0 8px;text-align:justify;hyphens:none;-webkit-hyphens:none}
+#tab-produtos .pro-conc-intro p:last-child{margin-bottom:0}
+#tab-produtos .pro-conc-intro ul,#tab-produtos .pro-conc-intro ol{margin:6px 0 8px 22px;padding:0}
+#tab-produtos .pro-conc-intro li{margin-bottom:3px}
+#tab-produtos .pro-conc-intro a{color:var(--accent);text-decoration:underline}
 #tab-produtos .pro-conc-detail-feat-dif-body p{margin:0 0 6px;text-align:justify;hyphens:none;-webkit-hyphens:none;overflow-wrap:break-word;word-break:normal}
 #tab-produtos .pro-conc-detail-feat-dif-body p:last-child{margin-bottom:0}
 #tab-produtos .pro-conc-detail-feat-dif-body ul,#tab-produtos .pro-conc-detail-feat-dif-body ol{margin:4px 0 6px 22px;padding:0}
@@ -2770,6 +2829,28 @@ body.pro-rt-fs-on{overflow:hidden}
 .pro-rt.fullscreen .pro-rt-ed{flex:1;min-height:0;max-height:none;padding:28px 36px;font-size:15.5px;line-height:1.7;overflow-y:auto}
 .pro-rt.fullscreen .pro-rt-tb-expand{color:#ef4444;background:color-mix(in srgb,#ef4444 12%,transparent);border-color:color-mix(in srgb,#ef4444 35%,var(--border))}
 .pro-rt.fullscreen .pro-rt-tb-expand:hover{background:color-mix(in srgb,#ef4444 22%,transparent);color:#ef4444;border-color:#ef4444}
+/* Fallback de estilos pra fullscreen — o elemento é portado pra document.body,
+   saindo do escopo #tab-produtos, então duplicamos as regras essenciais sem prefixo */
+.pro-rt.fullscreen{background:var(--bg2);border:1px solid var(--border);border-radius:16px}
+.pro-rt.fullscreen .pro-rt-tb{display:flex;gap:2px;flex-wrap:wrap;align-items:center;padding:6px 8px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.pro-rt.fullscreen .pro-rt-tb button{background:transparent;border:1px solid transparent;color:var(--t2);width:30px;height:28px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;padding:0;line-height:1;font-family:inherit}
+.pro-rt.fullscreen .pro-rt-tb button:hover{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--text);border-color:var(--accent-dim)}
+.pro-rt.fullscreen .pro-rt-tb button.italic{font-style:italic}
+.pro-rt.fullscreen .pro-rt-tb button.underline{text-decoration:underline}
+.pro-rt.fullscreen .pro-rt-tb-sep{width:1px;height:18px;background:var(--border);margin:0 4px}
+.pro-rt.fullscreen .pro-rt-tb-expand{margin-left:auto;font-size:14px;width:auto;min-width:30px;padding:0 8px}
+.pro-rt.fullscreen .pro-rt-ed{color:var(--text);outline:none;font-family:'Plus Jakarta Sans',sans-serif}
+.pro-rt.fullscreen .pro-rt-ed.justify{text-align:justify}
+.pro-rt.fullscreen .pro-rt-ed p{margin:0 0 10px}
+.pro-rt.fullscreen .pro-rt-ed p:last-child{margin-bottom:0}
+.pro-rt.fullscreen .pro-rt-ed ul,.pro-rt.fullscreen .pro-rt-ed ol{margin:8px 0;padding-left:24px}
+.pro-rt.fullscreen .pro-rt-ed li{margin-bottom:4px}
+.pro-rt.fullscreen .pro-rt-ed a{color:var(--accent);text-decoration:underline}
+.pro-rt.fullscreen .pro-rt-ed[data-empty="1"]::before{content:attr(data-placeholder);color:var(--t2);opacity:.6;pointer-events:none;font-style:italic}
+.pro-rt.fullscreen .pro-rt-tb-colors{display:inline-flex;align-items:center;gap:3px;padding:0 2px}
+.pro-rt.fullscreen .pro-rt-tb-lbl{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;color:var(--t2);font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-right:3px}
+.pro-rt.fullscreen .pro-rt-tb-c{width:16px;height:16px;border-radius:50%;border:1px solid var(--border);padding:0;cursor:pointer;display:inline-block;transition:transform .12s,box-shadow .12s;flex-shrink:0}
+.pro-rt.fullscreen .pro-rt-tb-c:hover{transform:scale(1.18);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 25%,transparent)}
 @media (max-width:700px){.pro-rt-fs-backdrop{padding:0}.pro-rt.fullscreen{max-width:none;height:100vh;max-height:100vh;border-radius:0;border:none}}
 
 /* Bloco colapsável dentro do texto rico (<details>) */
@@ -6678,7 +6759,7 @@ const AUDIT_ACTIONS=[
   'SOLICITACAO_EXTRA_EFETIVADA','SOLICITACAO_EXTRA_EDITADA',
   'USUARIO_CRIADO','USUARIO_EDITADO','USUARIO_DESATIVADO',
   'COMUNICACAO_POST_CRIADO','COMUNICACAO_POST_EDITADO','COMUNICACAO_POST_DELETADO',
-  'PRODUTO_CRIADO','PRODUTO_EDITADO','PRODUTO_EXCLUIDO','PRODUTO_STATUS_ALTERADO','CATALOGO_OPCAO_ADICIONADA',
+  'PRODUTO_CRIADO','PRODUTO_EDITADO','PRODUTO_EXCLUIDO','PRODUTO_STATUS_ALTERADO','CATALOGO_OPCAO_ADICIONADA','FEATURE_PACK_EDITADO',
   'DATA_IMP_CRIADA','DATA_IMP_EDITADA','DATA_IMP_REMOVIDA',
   'DATA_IMP_TIPO_CRIADO','DATA_IMP_TIPO_EDITADO','DATA_IMP_TIPO_REMOVIDO',
   'DATA_IMP_ESCOPO_CRIADO','DATA_IMP_ESCOPO_EDITADO','DATA_IMP_ESCOPO_REMOVIDO',
@@ -29388,6 +29469,11 @@ S._datasImpCalEventPopup=null;
 // Aprovações — provas + resultados da vertical atual (read-only no catálogo)
 S.aprovacoes={provas:[],resultados:[],loaded:false};
 S._aprovacoesOpen=false;
+// Pack de features — lista pré-pronta que é injetada em todo produto novo da vertical
+S.featurePack={features:[],loaded:false,updatedAt:null,updatedBy:''};
+S._featPackModalOpen=false;
+S._featPackDraft=null; // array de features sendo editado (clone) — null quando modal fechado
+S._featPackDirty=false;
 // Tipos de eventos — global entre verticais (config/datasImportantesTipos)
 // lista = customs + overrides de system (mesmo id sobrescreve nome/icone/cor do default)
 // deletedSystemIds = tombstones — ids de system "removidos" pelo usuário
@@ -29447,8 +29533,13 @@ let _proCatUnsub=null;
 let _proDexCfgUnsub=null;
 let _proAprovacoesProvasUnsub=null;
 let _proAprovacoesResultadosUnsub=null;
+let _proFeatPackUnsub=null;
 let _proDirty=false;
 let _proCatSeeded=false;
+
+// Pack default global — usado quando uma vertical não tem doc próprio.
+// Lista inicial vazia; admin edita e o primeiro save cria o doc da vertical.
+const PRO_FEAT_PACK_DEFAULT=[];
 
 const PRO_ICONES_CURADOS=['🎥','📚','🗂️','📝','🎯','🏆','💬','📊','🧠','🎓','⏱️','🔬','💊','🩺','📖','📋','🎙️','🧪','🎬','📺','🔖','🗓️','👥','💡','📈'];
 const PRO_STATUS_LABEL={ativo:'Ativo','aguardando-descricao':'Ativo · aguardando descrição','em-breve':'Em breve',rascunho:'Rascunho',descontinuado:'Descontinuado'};
@@ -29499,8 +29590,13 @@ function _proBuscaHaystack(p){
   if(Array.isArray(p.provasAlvo))parts.push(...p.provasAlvo);
   if(Array.isArray(p.responsaveis))parts.push(...p.responsaveis);
   else if(p.responsavel)parts.push(p.responsavel);
-  // Features
-  (p.features||[]).forEach(f=>{
+  // Features — schema novo unifica features/bônus/mentoria em p.features com flags
+  // isBonus / isMentoria. Schema legado mantém arrays separados (mentoriaFeatures,
+  // bonusFeatures). Aqui lemos tudo de p.features e enriquecemos por flag depois.
+  const feats=Array.isArray(p.features)?p.features:[];
+  const featsMentoriaNovo=feats.filter(f=>f&&f.isMentoria===true);
+  const featsBonusNovo=feats.filter(f=>f&&f.isBonus===true);
+  feats.forEach(f=>{
     parts.push(f.titulo,f.descricao,f.numeroChave,f.linkLabel,f.pdfLabel);
     parts.push(_proBuscaStripHtml(f.diferenciais));
   });
@@ -29509,19 +29605,30 @@ function _proBuscaHaystack(p){
     parts.push('mentoria'); // termo explícito — facilita encontrar produtos com mentoria
     if(p.temMentoria==='opcional')parts.push('mentoria opcional');
     parts.push(_proBuscaStripHtml(p.mentoriaDescricao));
+    // Legado: docs ainda não migrados têm mentoriaFeatures populado
     (p.mentoriaFeatures||[]).forEach(f=>{
       parts.push(f.titulo,f.descricao,f.numeroChave,f.linkLabel,f.pdfLabel);
       parts.push(_proBuscaStripHtml(f.diferenciais));
     });
+    // (features de mentoria do schema novo já foram somadas no loop de feats acima)
   }
-  // Bônus
+  // Bônus — features (legado + novo) e produtos vinculados (legado + novo)
   (p.bonusFeatures||[]).forEach(f=>{
     parts.push(f.titulo,f.descricao,f.numeroChave,f.linkLabel,f.pdfLabel);
     parts.push(_proBuscaStripHtml(f.diferenciais));
   });
-  if(Array.isArray(p.bonusProdutoIds)&&p.bonusProdutoIds.length){
+  // featuresProdutoIds aceita string[] legado OU [{id,isBonus}] novo
+  const fpi=Array.isArray(p.featuresProdutoIds)?p.featuresProdutoIds:[];
+  const bonusProdIdsNovo=[];
+  fpi.forEach(it=>{
+    if(it&&typeof it==='object'&&it.id&&it.isBonus===true)bonusProdIdsNovo.push(it.id);
+  });
+  const bonusIdsLegado=Array.isArray(p.bonusProdutoIds)?p.bonusProdutoIds:[];
+  const temBonus=featsBonusNovo.length||bonusProdIdsNovo.length||(p.bonusFeatures||[]).length||bonusIdsLegado.length;
+  if(temBonus){
     parts.push('bonus','bônus');
-    p.bonusProdutoIds.forEach(bid=>{
+    const bonusIdsAll=[...bonusIdsLegado,...bonusProdIdsNovo];
+    bonusIdsAll.forEach(bid=>{
       const bp=(S.produtos||[]).find(x=>x.id===bid);
       if(bp)parts.push(bp.nome);
     });
@@ -29530,10 +29637,13 @@ function _proBuscaHaystack(p){
   if(Array.isArray(p.argumentosVenda))parts.push(...p.argumentosVenda);
   (p.objecoes||[]).forEach(o=>{parts.push(o.pergunta);parts.push(_proBuscaStripHtml(o.resposta));});
   (p.duvidas||[]).forEach(d=>{parts.push(d.pergunta);parts.push(_proBuscaStripHtml(d.resposta));});
-  // Concorrentes (nome + features + diferenciais)
+  // Concorrentes (nome + comentário + texto intro + features legadas pra compat)
+  if(p.concorrentesIntro){parts.push(_proBuscaStripHtml(p.concorrentesIntro));parts.push('concorrente');}
   (p.concorrentes||[]).forEach(c=>{
     parts.push(c.nome);
     parts.push('concorrente'); // termo explícito ajuda achar "concorrente X" ou "concorrentes"
+    if(c.comentario)parts.push(_proBuscaStripHtml(c.comentario));
+    // Compat com docs legados ainda não migrados
     (c.features||[]).forEach(f=>{parts.push(f.titulo);parts.push(_proBuscaStripHtml(f.nossoDiferencial));});
   });
   // Links
@@ -29601,19 +29711,26 @@ function _slackChipAttrs(nome){
   if(!url)return {tag:'span',attrs:''};
   return {tag:'a',attrs:` href="${_proEscAttr(url)}" target="_blank" rel="noopener" title="Falar com ${_proEscAttr(nome)} no Slack"`};
 }
-// Normaliza o status de disponibilidade pra 'sim' | 'nao' | 'construcao'.
-// Compat: boolean true/false ainda é aceito (true→sim, false→nao).
+// Normaliza o status de disponibilidade pra 'sim' | 'nao' | 'construcao' | 'depende' | ''.
+// Compat: boolean true/false ainda é aceito (true→sim, false→nao). undefined→'sim' (compat
+// com docs legados que não tinham o campo). String vazia explícita ('') é preservada —
+// significa "ainda não marcado" e bloqueia o save até o usuário escolher.
 function _proFeatDisp(f){
-  if(!f)return 'sim';
+  if(!f)return '';
   const v=f.disponivel;
+  if(v==='sim'||v===true)return 'sim';
   if(v==='nao'||v===false)return 'nao';
   if(v==='construcao')return 'construcao';
+  if(v==='depende')return 'depende';
+  if(v==='')return '';
+  // undefined/null em docs legados: assume 'sim' por compat
   return 'sim';
 }
 const PRO_FEAT_DISP_META={
   sim:{label:'Incluído',short:'Incluído',color:'#22c55e',icon:'✓'},
   nao:{label:'Não incluído',short:'Não incluído',color:'#ef4444',icon:'✗'},
-  construcao:{label:'Em construção',short:'Em construção',color:'#f59e0b',icon:'🛠'}
+  construcao:{label:'Em construção',short:'Em construção',color:'#f59e0b',icon:'🛠'},
+  depende:{label:'Depende da oferta',short:'Depende da oferta',color:'#06b6d4',icon:'◐'}
 };
 // Status da mentoria: 'sim' (incluída), 'opcional' (compra à parte), 'nao' (não há).
 // Compat: boolean true→sim, false→nao; string vazia ou outros valores→nao.
@@ -29628,6 +29745,8 @@ function _proNormFeature(f){
   // Modelo único: título + ícone + disponível + quantidade (numeroChave) + diferenciais + link.
   // Compat: docs antigos podem ter `tipo`, `quantidade`, `descricao`, `temVideoComentario`,
   // `bonusProdutoId` — ignorados silenciosamente.
+  // isBonus / isMentoria: flags mutuamente exclusivas que classificam a feature no editor
+  // unificado (sub-blocos Features / Bônus / Mentoria).
   if(!f||typeof f!=='object')return null;
   return {
     id:f.id||_proUid(),
@@ -29643,7 +29762,21 @@ function _proNormFeature(f){
     pdfPath:f.pdfPath||'',
     pdfSize:typeof f.pdfSize==='number'?f.pdfSize:0,
     pdfName:f.pdfName||'',
+    isBonus:!!f.isBonus,
+    isMentoria:!!f.isMentoria,
     updatedAt:f.updatedAt||null
+  };
+}
+// Normaliza item do pack — guarda APENAS {id, icone, titulo}. Todo o resto
+// (numeroChave, diferenciais, link, pdf, flags) é preenchido por produto na
+// hora de editar. Pack é só "esqueleto" reutilizável.
+// Compat: docs antigos com campos extras simplesmente os ignoram aqui.
+function _proNormFeaturePack(f){
+  if(!f||typeof f!=='object')return null;
+  return {
+    id:f.id||_proUid(),
+    icone:f.icone||PRO_FEAT_ICONE_DEFAULT,
+    titulo:f.titulo||''
   };
 }
 function _proFeatTitulo(f){return (f&&f.titulo)||'';}
@@ -29657,6 +29790,9 @@ function _proFeatEqual(a,b){
     const vb=(b[k]===undefined?null:b[k]);
     if(va!==vb)return false;
   }
+  // Flags booleanas: compara normalizado pra não falhar em true vs undefined
+  if((!!a.isBonus)!==(!!b.isBonus))return false;
+  if((!!a.isMentoria)!==(!!b.isMentoria))return false;
   return true;
 }
 function _proFmtDateShort(ts){
@@ -29711,6 +29847,7 @@ function _proRebindVerticalListeners(){
   if(_proDexCfgUnsub){try{_proDexCfgUnsub();}catch(e){}_proDexCfgUnsub=null;}
   if(_proAprovacoesProvasUnsub){try{_proAprovacoesProvasUnsub();}catch(e){}_proAprovacoesProvasUnsub=null;}
   if(_proAprovacoesResultadosUnsub){try{_proAprovacoesResultadosUnsub();}catch(e){}_proAprovacoesResultadosUnsub=null;}
+  if(_proFeatPackUnsub){try{_proFeatPackUnsub();}catch(e){}_proFeatPackUnsub=null;}
   // Reseta estado pra evitar mostrar dados de vertical anterior por um instante
   S.catalogoConfig.publicosAlvo=[];S.catalogoConfig.provasAlvo=[];S.catalogoConfig.loaded=false;
   S.jornadaCliente.texto='';S.jornadaCliente.videoUrl='';S.jornadaCliente.imagemUrl='';S.jornadaCliente.imagemPath='';S.jornadaCliente.updatedAt=null;S.jornadaCliente.updatedBy='';S.jornadaCliente.loaded=false;
@@ -29720,6 +29857,7 @@ function _proRebindVerticalListeners(){
   S.dexConfig.pdfsGeral=[];S.dexConfig.pdfsSuporte=[];S.dexConfig.pdfsVendas=[];S.dexConfig.pdfsMarketing=[];
   S.dexConfig.modelo='haiku';S.dexConfig.maxTokens=1024;S.dexConfig.updatedAt=null;S.dexConfig.updatedBy='';S.dexConfig.loaded=false;
   S.aprovacoes.provas=[];S.aprovacoes.resultados=[];S.aprovacoes.loaded=false;
+  S.featurePack.features=[];S.featurePack.loaded=false;S.featurePack.updatedAt=null;S.featurePack.updatedBy='';
   // catalogoConfig
   _proCatUnsub=onSnapshot(doc(db,'config',_verticalDocId('catalogoConfig')),snap=>{
     if(snap.exists()){
@@ -29802,6 +29940,21 @@ function _proRebindVerticalListeners(){
     S.aprovacoes.resultados=snap.docs.map(d=>({id:d.id,...d.data()}));
     if(S.produtosLoaded&&S.produtosView==='list')_proAprovacoesRefresh();
   },err=>{console.warn('aprovacoes resultados onSnapshot:',err);});
+  // featurePack — pack de features pré-pronto por vertical (config/featurePack_{vertical})
+  _proFeatPackUnsub=onSnapshot(doc(db,'config',_verticalDocId('featurePack')),snap=>{
+    if(snap.exists()){
+      const d=snap.data()||{};
+      const arr=Array.isArray(d.features)?d.features.map(_proNormFeaturePack).filter(Boolean):[];
+      S.featurePack.features=arr;
+      S.featurePack.updatedAt=d.updatedAt||null;
+      S.featurePack.updatedBy=String(d.updatedBy||'');
+    }else{
+      S.featurePack.features=PRO_FEAT_PACK_DEFAULT.map(_proNormFeaturePack).filter(Boolean);
+      S.featurePack.updatedAt=null;
+      S.featurePack.updatedBy='';
+    }
+    S.featurePack.loaded=true;
+  },err=>{console.warn('featurePack onSnapshot:',err);S.featurePack.loaded=true;});
 }
 
 window.initProdutos=function(){
@@ -29922,6 +30075,10 @@ window.proSelectVertical=(id)=>{
   S._datasImpGerenciarEscoposOpen=false;
   S._datasImpNovoEscopoForm=null;
   S._datasImpEditandoEscopoId=null;
+  // Pack de features é por vertical — fecha o modal pra não vazar pra outra
+  S._featPackModalOpen=false;
+  S._featPackDraft=null;
+  S._featPackDirty=false;
   // Re-sintoniza listeners da vertical escolhida (jornada/editais/catalogoConfig/dexPrompt)
   _proRebindVerticalListeners();
   _proRender();
@@ -29939,6 +30096,9 @@ window.proVoltarVerticais=()=>{
   S._datasImpNovoTipoForm=null;
   S._datasImpEditandoTipoId=null;
   S._datasImpGerenciarTiposOpen=false;
+  S._featPackModalOpen=false;
+  S._featPackDraft=null;
+  S._featPackDirty=false;
   S._datasImpCalOpen=false;
   S._datasImpCalMes=null;
   S._datasImpCalEventPopup=null;
@@ -30010,7 +30170,9 @@ function _proRenderList(root){
       <button class="pro-dex-btn${dexBtnOn}" onclick="proDexToggle()" title="Pergunte ${avatarArtigo} ${_proEscAttr(avatarNome)} sobre o catálogo">
         <span class="pro-dex-btn-ico">🤖</span> <span class="pro-dex-btn-label">Pergunte ${avatarArtigo} ${_proEsc(avatarNome)}</span>
       </button>
+      ${canEdit?`<button class="btn btn-s btn-sm" type="button" onclick="proAbrirFeatPackModal()" title="Features pré-prontas que aparecem em todo produto novo desta vertical">📦 Gerenciar pack</button>`:''}
     </div>
+    <div id="pro-featpack-modal-wrap">${S._featPackModalOpen?_proFeatPackModalHTML():''}</div>
     <div class="pro-search-row">
       <input class="pro-search" id="pro-search" type="text" placeholder="🔍 Buscar por nome, pitch, público, features..." value="${_proEscAttr(S.produtosBusca)}" oninput="proSearchInput(this.value)"/>
     </div>
@@ -30353,6 +30515,191 @@ window.proEditaisRemover=async(id)=>{
     _proEditaisRefresh();
   }catch(err){
     alert('Erro ao remover: '+(err.message||err));
+  }
+};
+
+// ════════════════════════════════════════════════════════════════════════
+// FEATURE PACK — lista pré-pronta de features injetada em todo produto novo
+// Persistido em config/featurePack_{vertical} (anestreview = sem sufixo).
+// Shape: { features:[{id,icone,titulo,numeroChave,diferenciais,linkUrl,linkLabel,pdfUrl,pdfLabel,pdfPath,pdfSize,pdfName}], updatedAt, updatedBy }
+// ════════════════════════════════════════════════════════════════════════
+
+function _proFeatPackModalHTML(){
+  const vert=S.verticalAtual||'anestreview';
+  const vertObj=_verticalById(vert);
+  const draft=Array.isArray(S._featPackDraft)?S._featPackDraft:[];
+  const dirty=!!S._featPackDirty;
+  const updMeta=(S.featurePack.updatedAt&&S.featurePack.updatedBy)
+    ?`<span class="pro-jornada-meta" style="margin-left:auto">Atualizado em ${_proEsc(_proFmtDate(S.featurePack.updatedAt))} por ${_proEsc(S.featurePack.updatedBy)}</span>`:'';
+  const itemsHtml=draft.length
+    ?draft.map((f,i)=>_proFeatPackEditHTML(f,i,draft.length)).join('')
+    :`<p style="color:var(--t2);font-style:italic;margin:0;padding:24px 0;text-align:center">Pack vazio. Clique em "+ Adicionar feature ao pack" pra começar.</p>`;
+  return `<div class="pro-editais-modal-backdrop" onclick="_proFeatPackBackdrop(event)">
+    <div class="pro-editais-modal" role="dialog" aria-modal="true" style="max-width:900px" onclick="event.stopPropagation()">
+      <div class="pro-editais-modal-head">
+        <div style="flex:1;min-width:0">
+          <h3 class="pro-editais-modal-title">📦 Pack de features · ${_proEsc(vertObj.nome)}${dirty?' <span style="color:#f59e0b;font-size:12px;font-weight:600;margin-left:6px">• modificado</span>':''}</h3>
+          <p style="margin:4px 0 0;color:var(--t2);font-size:12px">Estas features aparecem em todo produto novo. Reordene com ↑/↓.</p>
+        </div>
+        ${updMeta}
+        <button class="pro-editais-modal-close" type="button" onclick="proFecharFeatPackModal()" title="Fechar">✕</button>
+      </div>
+      <div class="pro-editais-modal-body">
+        <div id="pro-featpack-list">${itemsHtml}</div>
+        <div style="margin-top:14px;text-align:center">
+          <button class="btn btn-s btn-sm" type="button" onclick="_proFeatPackAdd()">＋ Adicionar feature ao pack</button>
+        </div>
+      </div>
+      <div class="pro-editais-modal-foot" style="justify-content:space-between">
+        <button class="btn btn-s btn-sm" type="button" onclick="proRestaurarPackDefault()" title="Substitui o pack pela lista default global">↺ Restaurar default</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-s btn-sm" type="button" onclick="proFecharFeatPackModal()">Cancelar</button>
+          <button class="btn btn-p btn-sm" type="button" onclick="proSalvarFeatPack()">💾 Salvar pack</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function _proFeatPackEditHTML(f,i,total){
+  const icone=f.icone||PRO_FEAT_ICONE_DEFAULT;
+  const featId=f.id||'';
+  const upDis=i===0?'disabled':'';
+  const dnDis=i===total-1?'disabled':'';
+  // Card plano — pack só guarda {id,icone,titulo}. Demais campos (quantidade,
+  // diferenciais, link, PDF, disponível, bônus, mentoria) são preenchidos por produto.
+  return `<div class="pro-feat-edit" data-featpack-i="${i}" data-featpack-id="${_proEscAttr(featId)}" style="margin-bottom:8px">
+    <div class="pro-feat-edit-head" style="cursor:default">
+      <span class="pro-feat-handle" title="Use ↑/↓ pra reordenar" style="cursor:default;opacity:.4">⠿</span>
+      <div class="pro-feat-edit-icon" onclick="_proFeatPackOpenIconPop(event,${i})" title="Trocar ícone">${_proEsc(icone)}</div>
+      <input class="fc" placeholder="Título da feature" value="${_proEscAttr(f.titulo)}" oninput="_proFeatPackSetField(${i},'titulo',this.value)" style="flex:1;min-width:0"/>
+      <div class="pro-item-actions">
+        <button class="pro-icon-btn" ${upDis} onclick="_proFeatPackMove(${i},-1)" title="Mover pra cima">↑</button>
+        <button class="pro-icon-btn" ${dnDis} onclick="_proFeatPackMove(${i},1)" title="Mover pra baixo">↓</button>
+        <button class="pro-icon-btn" onclick="_proFeatPackRm(${i})" title="Remover do pack">🗑</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function _proFeatPackRefresh(){
+  const wrap=document.getElementById('pro-featpack-modal-wrap');
+  if(!wrap)return;
+  wrap.innerHTML=S._featPackModalOpen?_proFeatPackModalHTML():'';
+}
+
+window.proAbrirFeatPackModal=()=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  if(!S.verticalAtual)return alert('Escolha uma vertical primeiro.');
+  const base=Array.isArray(S.featurePack.features)?S.featurePack.features:[];
+  // Clona pra draft (deep clone simples — só primitives)
+  S._featPackDraft=base.map(f=>({..._proNormFeaturePack(f)}));
+  S._featPackDirty=false;
+  S._featPackModalOpen=true;
+  _proFeatPackRefresh();
+};
+
+window.proFecharFeatPackModal=(forceClose)=>{
+  if(!forceClose&&S._featPackDirty){
+    if(!confirm('Você tem alterações não salvas. Descartar?'))return;
+  }
+  S._featPackModalOpen=false;
+  S._featPackDraft=null;
+  S._featPackDirty=false;
+  _proFeatPackRefresh();
+};
+
+window._proFeatPackBackdrop=(ev)=>{
+  // Click no backdrop fecha (mesmo padrão dos outros modais do produto).
+  // O modal interno usa event.stopPropagation pra não disparar isso.
+  if(ev.target===ev.currentTarget)proFecharFeatPackModal();
+};
+
+window._proFeatPackAdd=()=>{
+  if(!Array.isArray(S._featPackDraft))S._featPackDraft=[];
+  const f={id:_proUid(),icone:PRO_FEAT_ICONE_DEFAULT,titulo:''};
+  S._featPackDraft.push(f);
+  S._featPackDirty=true;
+  _proFeatPackRefresh();
+};
+
+window._proFeatPackRm=(i)=>{
+  if(!Array.isArray(S._featPackDraft))return;
+  if(i<0||i>=S._featPackDraft.length)return;
+  const f=S._featPackDraft[i];
+  const lbl=(f&&f.titulo)?`"${f.titulo}"`:'esta feature';
+  if(!confirm(`Remover ${lbl} do pack?`))return;
+  S._featPackDraft.splice(i,1);
+  S._featPackDirty=true;
+  _proFeatPackRefresh();
+};
+
+window._proFeatPackMove=(i,dir)=>{
+  if(!Array.isArray(S._featPackDraft))return;
+  const arr=S._featPackDraft;
+  const j=i+dir;
+  if(i<0||i>=arr.length||j<0||j>=arr.length)return;
+  const [m]=arr.splice(i,1);
+  arr.splice(j,0,m);
+  S._featPackDirty=true;
+  _proFeatPackRefresh();
+};
+
+window._proFeatPackSetField=(i,key,val)=>{
+  if(!Array.isArray(S._featPackDraft))return;
+  if(!S._featPackDraft[i])return;
+  if(key!=='icone'&&key!=='titulo'){
+    console.warn('_proFeatPackSetField: pack só guarda icone/titulo; ignorando key:',key);
+    return;
+  }
+  S._featPackDraft[i][key]=val;
+  S._featPackDirty=true;
+  // Pra inputs digitando rápido, não re-renderiza (preserva foco). Só marca dirty.
+};
+
+window._proFeatPackOpenIconPop=(ev,i)=>{
+  ev.stopPropagation();
+  const cur=(S._featPackDraft&&S._featPackDraft[i]&&S._featPackDraft[i].icone)||PRO_FEAT_ICONE_DEFAULT;
+  const custom=prompt('Escolha um ícone (cole um emoji):\n\nSugestões: '+PRO_ICONES_CURADOS.join(' '),cur);
+  if(custom==null)return;
+  const g=[...custom];
+  const ico=g.slice(0,2).join('').trim()||PRO_FEAT_ICONE_DEFAULT;
+  S._featPackDraft[i].icone=ico;
+  S._featPackDirty=true;
+  _proFeatPackRefresh();
+};
+
+window.proRestaurarPackDefault=()=>{
+  if(!confirm('Substituir o pack atual pela lista default global? Suas edições no draft serão perdidas (só efetiva ao Salvar).'))return;
+  S._featPackDraft=PRO_FEAT_PACK_DEFAULT.map(f=>({..._proNormFeaturePack(f),id:_proUid()}));
+  S._featPackDirty=true;
+  _proFeatPackRefresh();
+};
+
+window.proSalvarFeatPack=async()=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  if(!Array.isArray(S._featPackDraft))return;
+  // Valida: títulos vazios? Permite mas avisa
+  const semTitulo=S._featPackDraft.filter(f=>!String(f.titulo||'').trim()).length;
+  if(semTitulo){
+    if(!confirm(`${semTitulo} feature(s) sem título. Salvar mesmo assim?`))return;
+  }
+  try{
+    const user=(S.currentUser&&(S.currentUser.nome||S.currentUser.username||S.currentUser.email))||'?';
+    const features=S._featPackDraft.map(f=>_proNormFeaturePack(f)).filter(Boolean);
+    await setDoc(doc(db,'config',_verticalDocId('featurePack')),{
+      features,
+      updatedAt:serverTimestamp(),
+      updatedBy:user
+    },{merge:false});
+    if(typeof audit==='function')audit('FEATURE_PACK_EDITADO',{collection:'config',id:_verticalDocId('featurePack')},{after:{count:features.length,vertical:S.verticalAtual}});
+    S._featPackModalOpen=false;
+    S._featPackDraft=null;
+    S._featPackDirty=false;
+    if(typeof _proSaveFeedback==='function')_proSaveFeedback('ok');
+    _proFeatPackRefresh();
+  }catch(err){
+    alert('Erro ao salvar pack: '+(err.message||err));
   }
 };
 
@@ -32694,13 +33041,56 @@ window.proAbrir=id=>{
   }
   const copy=JSON.parse(JSON.stringify(p));
   // Normaliza compat: features sem tipo viram livre; publicoAlvo string vira array
-  copy.features=Array.isArray(copy.features)?copy.features.map(_proNormFeature).filter(Boolean):[];
-  copy.mentoriaFeatures=Array.isArray(copy.mentoriaFeatures)?copy.mentoriaFeatures.map(_proNormFeature).filter(Boolean):[];
+  const baseFeats=Array.isArray(copy.features)?copy.features.map(_proNormFeature).filter(Boolean):[];
+  // Migração lazy: bonusFeatures[] e mentoriaFeatures[] viram features[] com flags.
+  // Persistência consolidada acontece no primeiro save.
+  const legBonus=Array.isArray(copy.bonusFeatures)?copy.bonusFeatures.map(_proNormFeature).filter(Boolean).map(f=>({...f,isBonus:true,isMentoria:false})):[];
+  const legMent=Array.isArray(copy.mentoriaFeatures)?copy.mentoriaFeatures.map(_proNormFeature).filter(Boolean).map(f=>({...f,isMentoria:true,isBonus:false})):[];
+  copy.features=baseFeats.concat(legBonus).concat(legMent);
+  copy.mentoriaFeatures=[]; // zerado no objeto trabalho — não persiste mais separado
+  copy.bonusFeatures=[];    // idem
   copy.mentoriaDescricao=String(copy.mentoriaDescricao||'');
-  copy.bonusFeatures=Array.isArray(copy.bonusFeatures)?copy.bonusFeatures.map(_proNormFeature).filter(Boolean):[];
-  copy.bonusProdutoIds=Array.isArray(copy.bonusProdutoIds)?copy.bonusProdutoIds.filter(x=>typeof x==='string'&&x):[];
-  copy.featuresProdutoIds=Array.isArray(copy.featuresProdutoIds)?copy.featuresProdutoIds.filter(x=>typeof x==='string'&&x):[];
+  // featuresProdutoIds: consolidado como [{id,isBonus}]. Migração lazy aceita
+  // formato antigo (string[]) e funde bonusProdutoIds[] com flag isBonus:true.
+  const rawFeatIds=Array.isArray(copy.featuresProdutoIds)?copy.featuresProdutoIds:[];
+  const rawBonusIds=Array.isArray(copy.bonusProdutoIds)?copy.bonusProdutoIds:[];
+  const mergedProdIds=[];
+  const seenIds=new Set();
+  rawFeatIds.forEach(item=>{
+    if(typeof item==='string'&&item){if(!seenIds.has(item)){seenIds.add(item);mergedProdIds.push({id:item,isBonus:false});}}
+    else if(item&&typeof item==='object'&&typeof item.id==='string'&&item.id){if(!seenIds.has(item.id)){seenIds.add(item.id);mergedProdIds.push({id:item.id,isBonus:!!item.isBonus});}}
+  });
+  rawBonusIds.forEach(id=>{
+    if(typeof id!=='string'||!id)return;
+    if(seenIds.has(id)){
+      // Já existia como featuresProdutoIds — promove pra bônus
+      const ex=mergedProdIds.find(x=>x.id===id);if(ex)ex.isBonus=true;
+    }else{
+      seenIds.add(id);mergedProdIds.push({id,isBonus:true});
+    }
+  });
+  copy.featuresProdutoIds=mergedProdIds;
+  copy.bonusProdutoIds=[]; // zerado no objeto trabalho
   copy.duvidas=Array.isArray(copy.duvidas)?copy.duvidas.filter(d=>d&&(d.pergunta||d.resposta)).map(d=>({id:d.id||_proUid(),pergunta:String(d.pergunta||''),resposta:String(d.resposta||'')})):[];
+  // Migração lazy de concorrentes: legado {nome, features:[{titulo, nossoDiferencial}]} →
+  // novo {nome, comentario:HTML}. Se já tem comentario, mantém. Se só tem features,
+  // concatena em HTML como parágrafos (título em negrito + diferencial). Drop features no save.
+  copy.concorrentes=Array.isArray(copy.concorrentes)?copy.concorrentes.map(c=>{
+    if(!c||typeof c!=='object')return null;
+    const out={id:c.id||_proUid(),nome:String(c.nome||''),comentario:String(c.comentario||'')};
+    if(!out.comentario.trim()&&Array.isArray(c.features)&&c.features.length){
+      // Build comentario a partir do legado
+      const partes=c.features.filter(f=>f&&(String(f.titulo||'').trim()||String(f.nossoDiferencial||'').trim())).map(f=>{
+        const tit=String(f.titulo||'').trim();
+        const dif=String(f.nossoDiferencial||'').trim();
+        const titBlock=tit?`<p><strong>${_proEsc(tit)}</strong></p>`:'';
+        // dif já é HTML rich — preserva
+        return titBlock+(dif||'');
+      });
+      out.comentario=partes.join('');
+    }
+    return out;
+  }).filter(Boolean):[];
   copy.publicoAlvo=_proGetPublicoAlvo(copy);
   copy.breveDescricao=_proGetBreveDescricao(copy);
   copy.responsaveis=_proGetResponsaveis(copy);
@@ -32744,9 +33134,34 @@ window.proVoltarLista=async()=>{
 };
 window.proNovo=()=>{
   if(!_proCanEdit())return alert('Você não tem permissão para criar produtos.');
+  // Injeta features do pack: pack só guarda {id,icone,titulo}. Todo o resto
+  // (numeroChave, diferenciais, link, PDF, flags) é preenchido pelo admin na
+  // hora de editar — nasce vazio aqui. Regenera id pra cada feature.
+  // Se pack ainda não carregou, cria sem features e avisa (não bloqueia o fluxo).
+  let packFeats=[];
+  if(S.featurePack&&S.featurePack.loaded){
+    const base=Array.isArray(S.featurePack.features)?S.featurePack.features:[];
+    packFeats=base.map(f=>{
+      const norm=_proNormFeaturePack(f)||{};
+      return {
+        id:_proUid(),
+        icone:norm.icone||PRO_FEAT_ICONE_DEFAULT,
+        titulo:norm.titulo||'',
+        disponivel:'',
+        isBonus:false,
+        isMentoria:false,
+        numeroChave:'',
+        diferenciais:'',
+        linkUrl:'',linkLabel:'',
+        pdfUrl:'',pdfLabel:'',pdfPath:'',pdfSize:0,pdfName:''
+      };
+    });
+  }else{
+    console.warn('proNovo: featurePack ainda não carregou — criando produto sem pack.');
+  }
   S.produtoAtual={
     id:null,nome:'',breveDescricao:'',publicoAlvo:[],capa:null,
-    provasAlvo:[],temposAcesso:[],temposAcessoObs:'',tempoTesteRecomendado:'',status:'rascunho',responsaveis:[],features:[],featuresProdutoIds:[],
+    provasAlvo:[],temposAcesso:[],temposAcessoObs:'',tempoTesteRecomendado:'',status:'rascunho',responsaveis:[],features:packFeats,featuresProdutoIds:[],
     sazonal:false,sazonalidadeDescricao:'',janelaVendasInicio:'',janelaVendasFim:'',
     vagasLimitadas:false,vagasLimitacaoDescricao:'',
     mentoriaResponsaveis:[],
@@ -32754,6 +33169,9 @@ window.proNovo=()=>{
     mentoriaVagasLimitadas:false,mentoriaVagasLimitacaoDescricao:'',
     temMentoria:'nao',mentoriaDescricao:'',mentoriaFeatures:[],
     bonusProdutoIds:[],bonusFeatures:[],
+    // Modelo novo: featuresProdutoIds vira [{id,isBonus}] no objeto trabalho.
+    // bonusProdutoIds / bonusFeatures / mentoriaFeatures mantidos vazios pra compat
+    // mas não são persistidos mais (limpos no save).
     argumentosVenda:[],concorrentes:[],objecoes:[],duvidas:[],links:[],anexos:[],
     ordem:Date.now()
   };
@@ -32859,9 +33277,38 @@ function _proRenderDetail(root){
     </div>
   </div>`:'';
 
-  const feats=(Array.isArray(p.features)?p.features:[]).map(_proNormFeature).filter(Boolean);
-  // Produtos vinculados ao box Features (renderiza como cards antes das features livres)
-  const featProdIds=Array.isArray(p.featuresProdutoIds)?p.featuresProdutoIds:[];
+  // Modelo unificado: features[] inclui Features + Bônus + Mentoria (separadas por flag).
+  // Migração lazy: produtos legados ainda têm bonusFeatures/mentoriaFeatures separados —
+  // mescla com flags antes de filtrar.
+  const allFeatsRaw=(Array.isArray(p.features)?p.features:[]).map(_proNormFeature).filter(Boolean);
+  const legBonusFeats=(Array.isArray(p.bonusFeatures)?p.bonusFeatures:[]).map(_proNormFeature).filter(Boolean).map(f=>({...f,isBonus:true,isMentoria:false}));
+  const legMentFeats=(Array.isArray(p.mentoriaFeatures)?p.mentoriaFeatures:[]).map(_proNormFeature).filter(Boolean).map(f=>({...f,isMentoria:true,isBonus:false}));
+  const allFeats=allFeatsRaw.concat(legBonusFeats).concat(legMentFeats);
+  // Filtra features marcadas como "Não" do detalhe público — elas continuam no editor
+  // pra alimentar o conhecimento da IA, mas não aparecem no catálogo pro leitor.
+  const allFeatsVisiveis=allFeats.filter(f=>_proFeatDisp(f)!=='nao');
+  const feats=allFeatsVisiveis.filter(f=>!f.isBonus&&!f.isMentoria);
+  const bonusFeats=allFeatsVisiveis.filter(f=>!!f.isBonus&&!f.isMentoria);
+  const mentFeats=allFeatsVisiveis.filter(f=>!!f.isMentoria);
+
+  // Produtos vinculados — aceita formato novo [{id,isBonus}] ou legado string[].
+  // Adicionalmente mescla bonusProdutoIds legado como entradas isBonus:true.
+  const rawFeatProdIds=Array.isArray(p.featuresProdutoIds)?p.featuresProdutoIds:[];
+  const rawBonusProdIds=Array.isArray(p.bonusProdutoIds)?p.bonusProdutoIds:[];
+  const prodIdsAll=[];
+  const seenProdIds=new Set();
+  rawFeatProdIds.forEach(it=>{
+    if(typeof it==='string'&&it){if(!seenProdIds.has(it)){seenProdIds.add(it);prodIdsAll.push({id:it,isBonus:false});}}
+    else if(it&&typeof it==='object'&&typeof it.id==='string'&&it.id){if(!seenProdIds.has(it.id)){seenProdIds.add(it.id);prodIdsAll.push({id:it.id,isBonus:!!it.isBonus});}}
+  });
+  rawBonusProdIds.forEach(id=>{
+    if(typeof id!=='string'||!id)return;
+    if(seenProdIds.has(id)){const ex=prodIdsAll.find(x=>x.id===id);if(ex)ex.isBonus=true;}
+    else{seenProdIds.add(id);prodIdsAll.push({id,isBonus:true});}
+  });
+  const featProdIds=prodIdsAll.filter(x=>!x.isBonus).map(x=>x.id);
+  const bonusProdIds=prodIdsAll.filter(x=>x.isBonus).map(x=>x.id);
+
   const featProdsCardsHtml=featProdIds.length?featProdIds.map(id=>{
     const bp=(S.produtos||[]).find(x=>x.id===id);
     if(!bp)return `<div class="pro-link-card orphan"><span>⚠️ Produto removido</span></div>`;
@@ -32876,7 +33323,6 @@ function _proRenderDetail(root){
     : '<p class="pro-text-block" style="color:var(--t2);font-style:italic">Nenhuma feature cadastrada ainda.</p>';
   const featsHtml=featsBody;
 
-  const mentFeats=(Array.isArray(p.mentoriaFeatures)?p.mentoriaFeatures:[]).map(_proNormFeature).filter(Boolean);
   const mentStatus=_proMentStatus(p);
   // Tag de status: 'sim' = incluída, 'opcional' = compra à parte
   const mentTagHtml=mentStatus==='opcional'
@@ -32895,14 +33341,15 @@ function _proRenderDetail(root){
   const mentSazonalBtn=_proMentSazonalDetailHTML(p);
   const mentVagasBtn=_proMentVagasDetailHTML(p);
   const mentFlagsHtml=(mentSazonalBtn||mentVagasBtn)?`<div class="pro-ment-flags">${mentSazonalBtn}${mentVagasBtn}</div>`:'';
-  // Mentoria como bloco colapsável (fechado por default).
-  // Conta = total de features (ou 0). Título dinâmico baseado no mentStatus.
-  const mentBodyHtml=`${mentDescHtml}${mentRespsHtml}${mentFlagsHtml}${mentFeats.length?`<div class="pro-feat-grid">${mentFeats.map(f=>_proFeatDetailHTML(f,p.updatedAt)).join('')}</div>`:(mentDesc?'':`<p class="pro-text-block" style="color:var(--t2);font-style:italic">${mentEmpty}</p>`)}`;
-  const mentBlock=(mentStatus!=='nao')?_proSecDiscHTML('mentoria',mentTitle,mentFeats.length||'',mentBodyHtml,'🎓','mentoria','pro-sec-mentoria',true):'';
+  // Header da mentoria só renderiza se temMentoria!=='nao' — se o produto não declara
+  // mentoria mas tem features marcadas, renderiza só as features (sem desc/resp/flags).
+  const mentHeaderHtml=(mentStatus!=='nao')?`${mentDescHtml}${mentRespsHtml}${mentFlagsHtml}`:'';
+  const mentFeatsHtml=mentFeats.length
+    ?`<div class="pro-feat-grid">${mentFeats.map(f=>_proFeatDetailHTML(f,p.updatedAt)).join('')}</div>`
+    :((mentStatus!=='nao'&&!mentDesc)?`<p class="pro-text-block" style="color:var(--t2);font-style:italic">${mentEmpty}</p>`:'');
+  const mentBodyHtml=`${mentHeaderHtml}${mentFeatsHtml}`;
 
-  // ── Bônus: produtos vinculados + features bônus livres ──
-  const bonusProdIds=Array.isArray(p.bonusProdutoIds)?p.bonusProdutoIds:[];
-  const bonusFeats=(Array.isArray(p.bonusFeatures)?p.bonusFeatures:[]).map(_proNormFeature).filter(Boolean);
+  // ── Bônus: produtos vinculados (filtrados acima) + features bônus livres ──
   const bonusProdsHtml=bonusProdIds.length?bonusProdIds.map(id=>{
     const bp=(S.produtos||[]).find(x=>x.id===id);
     if(!bp)return `<div class="pro-bonus-card orphan"><span>⚠️ Produto removido</span></div>`;
@@ -32913,17 +33360,56 @@ function _proRenderDetail(root){
       ${capa}
       <div class="pro-bonus-card-info">
         <div class="pro-bonus-card-name">${_proEsc(bp.nome||'(sem nome)')}</div>
-        <div class="pro-bonus-card-pitch">${_proEsc(_proGetBreveDescricao(bp)||'')}</div>
+        <div class="pro-bonus-card-pitch">${_proEsc(_proBuscaStripHtml(_proGetBreveDescricao(bp)||''))}</div>
         <div class="pro-bonus-card-meta"><span class="pro-badge s-${st}">${_proEsc(stLabel)}</span></div>
       </div>
       <span class="pro-bonus-card-arrow">›</span>
     </div>`;
   }).join(''):'';
   const bonusFeatsHtml=bonusFeats.length?`<div class="pro-feat-grid" style="margin-top:${bonusProdsHtml?'14px':'0'}">${bonusFeats.map(f=>_proFeatDetailHTML(f,p.updatedAt)).join('')}</div>`:'';
-  // Bônus como bloco colapsável (fechado por default).
   const bonusBodyHtml=`${bonusProdsHtml?`<div class="pro-bonus-cards">${bonusProdsHtml}</div>`:''}${bonusFeatsHtml}`;
-  const bonusCount=(bonusProdIds.length+bonusFeats.length)||'';
-  const bonusBlock=(bonusProdsHtml||bonusFeatsHtml)?_proSecDiscHTML('bonus','Bônus',bonusCount,bonusBodyHtml,'🎁','','pro-sec-bonus'):'';
+
+  // ── Sub-blocos do "O que está incluído" (Features / Bônus / Mentoria) ──
+  // Reutiliza classes .pro-subblock / .pro-sub-bonus / .pro-sub-mentoria do editor.
+  // Features é "solto" (sem fundo/border) via .pro-sub-plain.
+  const hasFeatures=!!(feats.length||featProdsBlock);
+  const hasBonus=!!(bonusProdIds.length||bonusFeats.length);
+  const hasMentoria=(mentStatus!=='nao')||mentFeats.length>0;
+
+  const featCount=feats.length+featProdIds.length;
+  const featuresSub=hasFeatures?`<div class="pro-subblock pro-sub-plain">
+    <div class="pro-subblock-head">
+      <span>✨</span>
+      <span class="pro-subblock-title">Features</span>
+      <span class="pro-subblock-count">${featCount}</span>
+    </div>
+    ${featsHtml}
+  </div>`:'';
+
+  const bonusCount=bonusProdIds.length+bonusFeats.length;
+  const bonusSub=hasBonus?`<div class="pro-subblock pro-sub-bonus">
+    <div class="pro-subblock-head">
+      <span>🎁</span>
+      <span class="pro-subblock-title">Bônus</span>
+      <span class="pro-subblock-count">${bonusCount}</span>
+    </div>
+    ${bonusBodyHtml}
+  </div>`:'';
+
+  const mentCount=mentFeats.length;
+  const mentSub=hasMentoria?`<div class="pro-subblock pro-sub-mentoria">
+    <div class="pro-subblock-head">
+      <span>🎓</span>
+      <span class="pro-subblock-title">Mentoria</span>
+      ${(mentStatus!=='nao')?mentTagHtml:''}
+      <span class="pro-subblock-count">${mentCount}</span>
+    </div>
+    ${mentBodyHtml}
+  </div>`:'';
+
+  const incluidoEmpty=(!hasFeatures&&!hasBonus&&!hasMentoria)
+    ?'<p class="pro-text-block" style="color:var(--t2);font-style:italic">Nenhuma feature cadastrada ainda.</p>'
+    :'';
 
   const argumentos=Array.isArray(p.argumentosVenda)?p.argumentosVenda.filter(Boolean):[];
   const argHtml=argumentos.length?`<ul class="pro-bullets">${argumentos.map(a=>`<li class="pro-bullet">${_proEsc(a)}</li>`).join('')}</ul>`:'';
@@ -32952,23 +33438,33 @@ function _proRenderDetail(root){
     </div>
   </div>`).join(''):'';
 
-  // Concorrentes — cada um colapsável, com lista de features deles + nosso diferencial em rich text
-  const concs=Array.isArray(p.concorrentes)?p.concorrentes.filter(c=>c&&(String(c.nome||'').trim()||(Array.isArray(c.features)&&c.features.length))):[];
-  const concsHtml=concs.length?concs.map((c,ci)=>{
-    const nome=String(c.nome||'').trim()||'(sem nome)';
+  // Concorrentes — cada um colapsável, com comentário livre (rich text) no body.
+  // Texto introdutório (rich) aparece acima da lista — mesmo se não houver concorrentes cadastrados.
+  // Migração lazy: produtos legados ainda têm c.features[] — converte em comentário on the fly.
+  const concsIntroRaw=String(p.concorrentesIntro||'').trim();
+  const concsIntroHtml=concsIntroRaw?`<div class="pro-conc-intro">${_proRespRender(concsIntroRaw)}</div>`:'';
+  const _concMigrateComent=(c)=>{
+    const direto=String(c.comentario||'').trim();
+    if(direto)return direto;
     const feats=Array.isArray(c.features)?c.features.filter(f=>f&&(String(f.titulo||'').trim()||String(f.nossoDiferencial||'').trim())):[];
-    const featsBody=feats.length
-      ?feats.map(f=>`<div class="pro-conc-detail-feat">
-          <div class="pro-conc-detail-feat-titulo">${_proEsc(f.titulo||'(sem título)')}</div>
-          <div class="pro-conc-detail-feat-dif">
-            <span class="pro-conc-detail-feat-dif-label">Nosso diferencial</span>
-            <div class="pro-conc-detail-feat-dif-body">${_proRespRender(f.nossoDiferencial||'')}</div>
-          </div>
-        </div>`).join('')
-      :`<p style="color:var(--t2);font-style:italic;margin:0;font-size:13px">Sem features mapeadas ainda.</p>`;
+    if(!feats.length)return '';
+    return feats.map(f=>{
+      const tit=String(f.titulo||'').trim();
+      const dif=String(f.nossoDiferencial||'').trim();
+      return (tit?`<p><strong>${_proEsc(tit)}</strong></p>`:'')+(dif||'');
+    }).join('');
+  };
+  const concs=Array.isArray(p.concorrentes)?p.concorrentes
+    .map(c=>(c?{...c,_coment:_concMigrateComent(c)}:null))
+    .filter(c=>c&&(String(c.nome||'').trim()||c._coment)):[];
+  const concsHtml=concs.length?concs.map((c)=>{
+    const nome=String(c.nome||'').trim()||'(sem nome)';
+    const body=c._coment
+      ?`<div class="pro-conc-intro" style="margin:0">${_proRespRender(c._coment)}</div>`
+      :`<p style="color:var(--t2);font-style:italic;margin:0;font-size:13px">Sem comentário cadastrado.</p>`;
     return `<details class="pro-conc-detail-card">
-      <summary><span class="pro-conc-detail-nome">🥊 ${_proEsc(nome)}</span><span class="pro-conc-detail-count">${feats.length} feature${feats.length===1?'':'s'}</span></summary>
-      <div class="pro-conc-detail-body">${featsBody}</div>
+      <summary><span class="pro-conc-detail-nome">🥊 ${_proEsc(nome)}</span></summary>
+      <div class="pro-conc-detail-body">${body}</div>
     </details>`;
   }).join(''):'';
 
@@ -32999,7 +33495,16 @@ function _proRenderDetail(root){
     <div class="pro-detail-header">
       <div style="flex:1;min-width:0">
         <h2 class="pro-detail-nome">${_proEsc(p.nome||'Sem nome')}</h2>
-        ${breve?`<p class="pro-detail-pitch">${_proEsc(breve)}</p>`:''}
+        ${breve?(()=>{
+          // Breve descrição é HTML rich. Texto legado puro é envolvido em <p>.
+          const breveHtml=_proRtInitialHTML(breve);
+          const plainLen=_proBuscaStripHtml(breve).length;
+          // Só clampa se o texto puro for "longo" (heurística: >180 chars cobre ~3 linhas em desktop)
+          const clamp=plainLen>180;
+          if(!clamp)return `<div class="pro-detail-pitch">${_comSanitizePostHTML(breveHtml)}</div>`;
+          const pid='pitch-'+(p.id||Math.random().toString(36).slice(2,8));
+          return `<div class="pro-detail-pitch-wrap"><div class="pro-detail-pitch clamped" id="${pid}">${_comSanitizePostHTML(breveHtml)}</div><button type="button" class="pro-detail-pitch-more" onclick="proTogglePitch('${pid}',this)">saiba mais ↓</button></div>`;
+        })():''}
         <div class="pro-detail-chips">
           <span class="pro-badge s-${st}">${_proEsc(PRO_STATUS_LABEL[st]||st)}</span>
           ${respChips}
@@ -33013,13 +33518,14 @@ function _proRenderDetail(root){
 
     <div class="pro-section">
       ${_proSecTitleHTML('O que está incluído','features')}
-      ${featsHtml}
+      ${featuresSub}
+      ${bonusSub}
+      ${mentSub}
+      ${incluidoEmpty}
     </div>
 
-    ${mentBlock}
-    ${bonusBlock}
     ${argumentos.length?_proSecDiscHTML('argumentos','Argumentos de venda',argumentos.length,argHtml,'','argumentos'):''}
-    ${concs.length?_proSecDiscHTML('concorrentes','Concorrentes — quem são?',concs.length,concsHtml,'🥊','concorrentes'):''}
+    ${(concs.length||concsIntroHtml)?_proSecDiscHTML('concorrentes','Concorrentes — quem são?',concs.length,concsIntroHtml+concsHtml,'🥊','concorrentes'):''}
     ${objs.length?_proSecDiscHTML('objecoes','Objeções frequentes',objs.length,objHtml,'','objecoes'):''}
     ${duvs.length?_proSecDiscHTML('duvidas','Dúvidas frequentes',duvs.length,duvHtml,'❓','duvidas'):''}
     ${linksHtml?`<div class="pro-section">${_proSecTitleHTML('Links úteis','links')}${linksHtml}</div>`:''}
@@ -33037,9 +33543,10 @@ function _proFeatDetailHTML(f,productUpdatedAt){
   const titulo=nf.titulo;
   const icone=nf.icone;
   const numero=nf.numeroChave;
-  const dispKey=_proFeatDisp(nf);          // 'sim' | 'nao' | 'construcao'
+  const dispKey=_proFeatDisp(nf);          // 'sim' | 'nao' | 'construcao' | 'depende'
   const isDisp=dispKey==='sim';
   const isWip=dispKey==='construcao';
+  const isDep=dispKey==='depende';
   const dispMeta=PRO_FEAT_DISP_META[dispKey]||PRO_FEAT_DISP_META.sim;
   const featId=nf.id||'';
 
@@ -33066,9 +33573,9 @@ function _proFeatDetailHTML(f,productUpdatedAt){
   if(!S._proFeatDetOpen)S._proFeatDetOpen={};
   const isOpen=hasDetail&&!!S._proFeatDetOpen[featId];
 
-  const dispCls=dispKey==='nao'?'unavailable':(isWip?'wip':'');
+  const dispCls=dispKey==='nao'?'unavailable':(isWip?'wip':(isDep?'dep':''));
   const cls=['pro-feat-card',dispCls,hasDetail?'has-detail':'',isOpen?'open':''].filter(Boolean).join(' ');
-  const statusCls=isDisp?'':(isWip?'wip':'no');
+  const statusCls=isDisp?'':(isWip?'wip':(isDep?'dep':'no'));
   const statusHtml=`<span class="pro-feat-status ${statusCls}" title="${_proEscAttr(dispMeta.label)}"><span class="pro-feat-dot"></span>${_proEsc(dispMeta.short)}</span>`;
   const chev=hasDetail?`<button type="button" class="pro-feat-chev" onclick="event.stopPropagation();proToggleFeatDet('${_proEscAttr(featId)}')" aria-label="${isOpen?'Recolher':'Expandir'} feature" title="${isOpen?'Recolher':'Expandir'}">▾</button>`:'';
   const onclickHead=hasDetail?` onclick="proToggleFeatDet('${_proEscAttr(featId)}')" role="button" aria-expanded="${isOpen}" aria-controls="pro-feat-det-${_proEscAttr(featId)}"`:'';
@@ -33127,11 +33634,27 @@ window.proDuplicar=async()=>{
   copia.publicoAlvo=_proGetPublicoAlvo(src);
   copia.responsaveis=_proGetResponsaveis(src);
   delete copia.responsavel;
-  copia.features=(Array.isArray(src.features)?src.features:[]).map(_proNormFeature).filter(Boolean);
-  copia.mentoriaFeatures=(Array.isArray(src.mentoriaFeatures)?src.mentoriaFeatures:[]).map(_proNormFeature).filter(Boolean);
+  // Modelo unificado: features[] já inclui Bônus+Mentoria com flags isBonus/isMentoria.
+  // Reaplica migração lazy aqui (caso src venha do listener sem passar por proAbrir).
+  const _legB=(Array.isArray(src.bonusFeatures)?src.bonusFeatures:[]).map(_proNormFeature).filter(Boolean).map(f=>({...f,isBonus:true,isMentoria:false}));
+  const _legM=(Array.isArray(src.mentoriaFeatures)?src.mentoriaFeatures:[]).map(_proNormFeature).filter(Boolean).map(f=>({...f,isMentoria:true,isBonus:false}));
+  copia.features=((Array.isArray(src.features)?src.features:[]).map(_proNormFeature).filter(Boolean)).concat(_legB).concat(_legM);
+  copia.mentoriaFeatures=[]; // não persiste mais
+  copia.bonusFeatures=[];
   copia.mentoriaDescricao=String(src.mentoriaDescricao||'');
-  copia.bonusFeatures=(Array.isArray(src.bonusFeatures)?src.bonusFeatures:[]).map(_proNormFeature).filter(Boolean);
-  copia.bonusProdutoIds=(Array.isArray(src.bonusProdutoIds)?src.bonusProdutoIds:[]).filter(x=>typeof x==='string'&&x);
+  // Consolida featuresProdutoIds + bonusProdutoIds em [{id,isBonus}]
+  const _seenC=new Set();const _mergedC=[];
+  (Array.isArray(src.featuresProdutoIds)?src.featuresProdutoIds:[]).forEach(it=>{
+    if(typeof it==='string'&&it){if(!_seenC.has(it)){_seenC.add(it);_mergedC.push({id:it,isBonus:false});}}
+    else if(it&&typeof it==='object'&&typeof it.id==='string'&&it.id){if(!_seenC.has(it.id)){_seenC.add(it.id);_mergedC.push({id:it.id,isBonus:!!it.isBonus});}}
+  });
+  (Array.isArray(src.bonusProdutoIds)?src.bonusProdutoIds:[]).forEach(id=>{
+    if(typeof id!=='string'||!id)return;
+    if(_seenC.has(id)){const ex=_mergedC.find(x=>x.id===id);if(ex)ex.isBonus=true;}
+    else{_seenC.add(id);_mergedC.push({id,isBonus:true});}
+  });
+  copia.featuresProdutoIds=_mergedC;
+  copia.bonusProdutoIds=[]; // não persiste mais
   copia.duvidas=(Array.isArray(src.duvidas)?src.duvidas:[]).filter(d=>d&&(d.pergunta||d.resposta)).map(d=>({id:_proUid(),pergunta:String(d.pergunta||''),resposta:String(d.resposta||'')}));
   copia.temMentoria=_proMentStatus(copia);
   copia.nome=src.nome+' (cópia)';copia.status='rascunho';copia.ordem=Date.now();
@@ -33175,8 +33698,6 @@ function _proRenderEdit(root){
   if(typeof p.temposAcessoObs!=='string')p.temposAcessoObs='';
   if(typeof p.tempoTesteRecomendado!=='string')p.tempoTesteRecomendado='';
   if(!Array.isArray(p.featuresProdutoIds))p.featuresProdutoIds=[];
-  const featsCount=(p.features||[]).length;
-  const mentFeatsCount=(p.mentoriaFeatures||[]).length;
 
   root.innerHTML=`
     <button class="pro-back" onclick="proVoltarLista()">← Voltar</button>
@@ -33198,8 +33719,8 @@ function _proRenderEdit(root){
             </select>
           </div>
 
-          <div class="fg"><label class="fl">Breve descrição</label>
-            <textarea class="fc" id="pro-f-breve" rows="2" placeholder="Frase ou parágrafo curto que resume o produto" oninput="_proSetBreve(this)" style="resize:vertical;min-height:60px">${_proEsc(breve)}</textarea>
+          <div class="fg"><label class="fl">Breve descrição <span style="font-weight:400;color:var(--t2);font-size:11px">— aparece no topo do produto. Resumo curto; o detalhe completo expande quando o leitor clicar em "saiba mais".</span></label>
+            ${_proRtHTML('breve-desc',breve,'Frase ou parágrafo que resume o produto…',"_proSetBreve(_proRtGet('breve-desc'))",{colors:true,justify:true,tall:false,expandable:true})}
           </div>
 
           ${_proSazonalEditHTML(p)}
@@ -33230,70 +33751,10 @@ function _proRenderEdit(root){
 
       <div class="pro-edit-accordion" data-acc="features">
         <div class="pro-edit-acc-head" onclick="_proToggleAcc('features')">
-          <span class="pro-edit-acc-title">Features · ${featsCount+((p.featuresProdutoIds||[]).length)}</span><span class="pro-edit-acc-caret">▾</span>
+          <span class="pro-edit-acc-title">Features · ${(p.features||[]).length+((p.featuresProdutoIds||[]).length)}</span><span class="pro-edit-acc-caret">▾</span>
         </div>
         <div class="pro-edit-acc-body">
-          <div class="pro-bonus-block">
-            <label class="fl" style="margin:0 0 8px;display:flex;align-items:center;gap:8px"><span>📦 Produtos vinculados</span><span class="pro-edit-acc-caret" style="font-size:10px;color:var(--t2);font-family:'JetBrains Mono',monospace">${(p.featuresProdutoIds||[]).length}</span></label>
-            <div id="pro-f-feat-prods">${_proFeatuProdutosEditHTML(p.featuresProdutoIds||[])}</div>
-            <button class="btn btn-s btn-sm" onclick="_proFeatuOpenProdPicker(event)" style="margin-top:8px">＋ Vincular produto do catálogo</button>
-          </div>
-          <div class="pro-bonus-block" style="margin-top:18px">
-            <label class="fl" style="margin:0 0 8px;display:block">✨ Features livres</label>
-            <div id="pro-f-features">${(p.features||[]).map((f,i)=>_proFeatEditHTML(f,i,'features')).join('')}</div>
-            <button class="btn btn-s btn-sm" onclick="_proFeatAdd('features')" style="margin-top:8px">＋ Adicionar feature</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="pro-edit-accordion" data-acc="mentoria">
-        <div class="pro-edit-acc-head" onclick="_proToggleAcc('mentoria')">
-          <span class="pro-edit-acc-title">Mentoria${p.temMentoria?(' · '+mentFeatsCount):''}</span><span class="pro-edit-acc-caret">▾</span>
-        </div>
-        <div class="pro-edit-acc-body">
-          <div class="pro-toggle-wrap" style="margin-bottom:14px">
-            <label class="fl" style="margin:0">Tem mentoria?</label>
-            <div class="pro-toggle pro-toggle-3">
-              <button type="button" class="${_proMentStatus(p)==='sim'?'on':''}" onclick="_proSetMentoria('sim')">Sim</button>
-              <button type="button" class="${_proMentStatus(p)==='opcional'?'on wip':''}" onclick="_proSetMentoria('opcional')">Opcional</button>
-              <button type="button" class="${_proMentStatus(p)==='nao'?'on':''}" onclick="_proSetMentoria('nao')">Não</button>
-            </div>
-          </div>
-          <div id="pro-mentoria-body" style="${_proMentStatus(p)==='nao'?'display:none':''}">
-            <div class="fg" style="margin-bottom:14px">
-              <label class="fl">Descrição da mentoria</label>
-              <textarea class="fc" rows="3" placeholder="Descreva brevemente o que está incluído na mentoria (aparece no catálogo abaixo do título Mentoria)" oninput="S.produtoAtual.mentoriaDescricao=this.value;_proMark()">${_proEsc(p.mentoriaDescricao||'')}</textarea>
-            </div>
-            <div class="fg" style="margin-bottom:14px">
-              <label class="fl">${(Array.isArray(p.mentoriaResponsaveis)&&p.mentoriaResponsaveis.length===1)?'Coordenador da mentoria':'Coordenadores da mentoria'}</label>
-              ${_proMentRespInputHTML(p.mentoriaResponsaveis)}
-            </div>
-            ${_proMentSazonalEditHTML(p)}
-            ${_proMentVagasEditHTML(p)}
-            <div id="pro-f-mentfeatures" style="margin-top:14px">${(p.mentoriaFeatures||[]).map((f,i)=>_proFeatEditHTML(f,i,'mentoriaFeatures')).join('')}</div>
-            <button class="btn btn-s btn-sm" onclick="_proFeatAdd('mentoriaFeatures')" style="margin-top:8px">＋ Adicionar feature de mentoria</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="pro-edit-accordion" data-acc="bonus">
-        <div class="pro-edit-acc-head" onclick="_proToggleAcc('bonus')">
-          <span class="pro-edit-acc-title">🎁 Bônus${(((p.bonusProdutoIds||[]).length+(p.bonusFeatures||[]).length)>0)?(' · '+((p.bonusProdutoIds||[]).length+(p.bonusFeatures||[]).length)):''}</span><span class="pro-edit-acc-caret">▾</span>
-        </div>
-        <div class="pro-edit-acc-body">
-          <p style="font-size:12px;color:var(--t2);margin:0 0 14px;line-height:1.5">Vincule produtos do catálogo que vão como bônus deste produto, e adicione features bônus livres (cursos, materiais, brindes etc).</p>
-
-          <div class="pro-bonus-block">
-            <label class="fl" style="margin:0 0 8px;display:flex;align-items:center;gap:8px"><span>📦 Produtos vinculados</span><span class="pro-edit-acc-caret" style="font-size:10px;color:var(--t2);font-family:'JetBrains Mono',monospace">${(p.bonusProdutoIds||[]).length}</span></label>
-            <div id="pro-f-bonus-prods">${_proBonusProdutosEditHTML(p.bonusProdutoIds||[])}</div>
-            <button class="btn btn-s btn-sm" onclick="_proBonusOpenProdPicker(event)" style="margin-top:8px">＋ Vincular produto do catálogo</button>
-          </div>
-
-          <div class="pro-bonus-block" style="margin-top:18px">
-            <label class="fl" style="margin:0 0 8px;display:block">✨ Features bônus livres</label>
-            <div id="pro-f-bonusfeatures">${(p.bonusFeatures||[]).map((f,i)=>_proFeatEditHTML(f,i,'bonusFeatures')).join('')}</div>
-            <button class="btn btn-s btn-sm" onclick="_proFeatAdd('bonusFeatures')" style="margin-top:8px">＋ Adicionar feature bônus</button>
-          </div>
+          <div id="pro-f-feats-unified">${_proFeatsUnifiedEditHTML(p)}</div>
         </div>
       </div>
 
@@ -33313,6 +33774,10 @@ function _proRenderEdit(root){
         </div>
         <div class="pro-edit-acc-body">
           <p style="font-size:12px;color:var(--t2);margin:0 0 10px;line-height:1.5">Mapeie cada concorrente que disputa o mesmo cliente. Pra cada um, liste as features deles que concorrem com as nossas e descreva o nosso diferencial em relação a cada feature.</p>
+          <div class="fg" style="margin-bottom:14px">
+            <label class="fl">Texto introdutório <span style="font-weight:400;color:var(--t2);font-size:11px">— aparece acima da lista de concorrentes no catálogo (mesmo sem concorrentes cadastrados)</span></label>
+            ${_proRtHTML('conc-intro',p.concorrentesIntro||'','Ex: A maior diferença pra concorrência é…',"_proSetConcIntro(_proRtGet('conc-intro'))",{colors:true,justify:true,tall:false,expandable:true})}
+          </div>
           <div id="pro-f-concs">${(p.concorrentes||[]).map((c,i)=>_proConcEditHTML(c,i)).join('')}</div>
           <button class="btn btn-s btn-sm" onclick="_proConcAdd()" style="margin-top:8px">＋ Adicionar concorrente</button>
         </div>
@@ -33387,14 +33852,17 @@ function _proRenderEdit(root){
   }
 }
 
-// Breve descrição: salva em `breveDescricao` + autosize textarea
-window._proSetBreve=(el)=>{
-  S.produtoAtual.breveDescricao=el.value;
+// Breve descrição: salva em `breveDescricao` como HTML (rich text)
+window._proSetBreve=(html)=>{
+  S.produtoAtual.breveDescricao=String(html||'');
   delete S.produtoAtual.pitchCurto; // cleanup local
-  // Auto-grow
-  el.style.height='auto';
-  el.style.height=Math.min(el.scrollHeight,400)+'px';
   _proMark();
+};
+// Detalhe: toggle do "saiba mais" — expande/recolhe a breve descrição clampada
+window.proTogglePitch=(pitchId,btn)=>{
+  const el=document.getElementById(pitchId);if(!el)return;
+  const expanded=el.classList.toggle('expanded');
+  if(btn)btn.innerHTML=expanded?'recolher ↑':'saiba mais ↓';
 };
 
 // Sazonalidade — bloco no editor (head clicável: abre/fecha o body sem desmarcar Sim)
@@ -33716,25 +34184,27 @@ function _proRefreshMs(tipo){
 }
 
 // Responsáveis: input livre de tags (Enter ou vírgula adiciona, × remove)
+// Input fica inline com os chips dentro da mesma "caixa" (sem linha dedicada).
 function _proRespInputHTML(valores){
   const vals=Array.isArray(valores)?valores:[];
-  const chipsHtml=vals.length
-    ?vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proRespRm(${i})" title="Remover">×</button></span>`).join('')
-    :`<span class="pro-ms-empty">Nenhum responsável</span>`;
+  const chipsHtml=vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proRespRm(${i})" title="Remover">×</button></span>`).join('');
+  const placeholder=vals.length?'Adicionar… (Enter ou vírgula)':'Digite e tecle Enter ou vírgula';
   return `<div class="pro-ms" data-ms="responsaveis">
-    <div class="pro-ms-chips" id="pro-ms-chips-responsaveis">${chipsHtml}</div>
-    <div class="pro-ms-actions" style="flex:1;min-width:160px">
-      <input type="text" class="fc" id="pro-f-resp-input" placeholder="Digite e tecle Enter ou vírgula" style="flex:1;min-width:160px" onkeydown="_proRespKey(event)" onblur="_proRespFlush(this)"/>
-    </div>
+    <div class="pro-ms-chips" id="pro-ms-chips-responsaveis">${chipsHtml}<input type="text" class="pro-ms-input" id="pro-f-resp-input" placeholder="${placeholder}" onkeydown="_proRespKey(event)" onblur="_proRespFlush(this)"/></div>
   </div>`;
 }
 function _proRefreshResp(){
   const wrap=document.querySelector('#tab-produtos .pro-ms[data-ms="responsaveis"] .pro-ms-chips');
   if(!wrap)return;
+  const oldInput=wrap.querySelector('input');
+  const wasFocused=oldInput&&document.activeElement===oldInput;
+  const savedVal=oldInput?oldInput.value:'';
   const vals=Array.isArray(S.produtoAtual.responsaveis)?S.produtoAtual.responsaveis:[];
-  wrap.innerHTML=vals.length
-    ?vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proRespRm(${i})" title="Remover">×</button></span>`).join('')
-    :`<span class="pro-ms-empty">Nenhum responsável</span>`;
+  const chipsHtml=vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proRespRm(${i})" title="Remover">×</button></span>`).join('');
+  const placeholder=vals.length?'Adicionar… (Enter ou vírgula)':'Digite e tecle Enter ou vírgula';
+  wrap.innerHTML=chipsHtml+`<input type="text" class="pro-ms-input" id="pro-f-resp-input" placeholder="${placeholder}" onkeydown="_proRespKey(event)" onblur="_proRespFlush(this)"/>`;
+  const newInput=wrap.querySelector('input');
+  if(newInput){newInput.value=savedVal;if(wasFocused)newInput.focus();}
   // Atualiza label singular/plural
   const lbl=wrap.closest('.fg')?.querySelector('.fl');
   if(lbl)lbl.textContent=vals.length===1?'Responsável':'Responsáveis';
@@ -33790,23 +34260,24 @@ function _proTempoAcessoNorm(raw){
 }
 function _proTempoAcessoInputHTML(valores){
   const vals=Array.isArray(valores)?valores:[];
-  const chipsHtml=vals.length
-    ?vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proTempoAcessoRm(${i})" title="Remover" type="button">×</button></span>`).join('')
-    :`<span class="pro-ms-empty">Nenhum tempo de acesso definido</span>`;
+  const chipsHtml=vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proTempoAcessoRm(${i})" title="Remover" type="button">×</button></span>`).join('');
+  const placeholder=vals.length?'Adicionar… (Ex: 6, 12 meses)':'Ex: 6, 12 meses, 18 — Enter ou vírgula';
   return `<div class="pro-ms" data-ms="temposAcesso">
-    <div class="pro-ms-chips" id="pro-ms-chips-temposAcesso">${chipsHtml}</div>
-    <div class="pro-ms-actions" style="flex:1;min-width:200px">
-      <input type="text" class="fc" id="pro-f-tempo-input" placeholder="Ex: 6, 12 meses, 18 meses, 24 — tecle Enter ou vírgula" style="flex:1;min-width:200px" onkeydown="_proTempoAcessoKey(event)" onblur="_proTempoAcessoFlush(this)"/>
-    </div>
+    <div class="pro-ms-chips" id="pro-ms-chips-temposAcesso">${chipsHtml}<input type="text" class="pro-ms-input" id="pro-f-tempo-input" placeholder="${placeholder}" onkeydown="_proTempoAcessoKey(event)" onblur="_proTempoAcessoFlush(this)"/></div>
   </div>`;
 }
 function _proRefreshTempoAcesso(){
   const wrap=document.querySelector('#tab-produtos .pro-ms[data-ms="temposAcesso"] .pro-ms-chips');
   if(!wrap)return;
+  const oldInput=wrap.querySelector('input');
+  const wasFocused=oldInput&&document.activeElement===oldInput;
+  const savedVal=oldInput?oldInput.value:'';
   const vals=Array.isArray(S.produtoAtual.temposAcesso)?S.produtoAtual.temposAcesso:[];
-  wrap.innerHTML=vals.length
-    ?vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proTempoAcessoRm(${i})" title="Remover" type="button">×</button></span>`).join('')
-    :`<span class="pro-ms-empty">Nenhum tempo de acesso definido</span>`;
+  const chipsHtml=vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proTempoAcessoRm(${i})" title="Remover" type="button">×</button></span>`).join('');
+  const placeholder=vals.length?'Adicionar… (Ex: 6, 12 meses)':'Ex: 6, 12 meses, 18 — Enter ou vírgula';
+  wrap.innerHTML=chipsHtml+`<input type="text" class="pro-ms-input" id="pro-f-tempo-input" placeholder="${placeholder}" onkeydown="_proTempoAcessoKey(event)" onblur="_proTempoAcessoFlush(this)"/>`;
+  const newInput=wrap.querySelector('input');
+  if(newInput){newInput.value=savedVal;if(wasFocused)newInput.focus();}
 }
 window._proTempoAcessoAdd=(raw)=>{
   const txt=String(raw||'').trim();
@@ -33850,23 +34321,24 @@ window._proTempoAcessoFlush=(inp)=>{
 // Coordenação da mentoria — mesmo padrão de responsáveis, isolado em mentoriaResponsaveis
 function _proMentRespInputHTML(valores){
   const vals=Array.isArray(valores)?valores:[];
-  const chipsHtml=vals.length
-    ?vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proMentRespRm(${i})" title="Remover">×</button></span>`).join('')
-    :`<span class="pro-ms-empty">Nenhum coordenador da mentoria</span>`;
+  const chipsHtml=vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proMentRespRm(${i})" title="Remover">×</button></span>`).join('');
+  const placeholder=vals.length?'Adicionar… (Enter ou vírgula)':'Digite e tecle Enter ou vírgula';
   return `<div class="pro-ms" data-ms="mentoriaResponsaveis">
-    <div class="pro-ms-chips" id="pro-ms-chips-mentoriaResponsaveis">${chipsHtml}</div>
-    <div class="pro-ms-actions" style="flex:1;min-width:160px">
-      <input type="text" class="fc" id="pro-f-mentresp-input" placeholder="Digite e tecle Enter ou vírgula" style="flex:1;min-width:160px" onkeydown="_proMentRespKey(event)" onblur="_proMentRespFlush(this)"/>
-    </div>
+    <div class="pro-ms-chips" id="pro-ms-chips-mentoriaResponsaveis">${chipsHtml}<input type="text" class="pro-ms-input" id="pro-f-mentresp-input" placeholder="${placeholder}" onkeydown="_proMentRespKey(event)" onblur="_proMentRespFlush(this)"/></div>
   </div>`;
 }
 function _proRefreshMentResp(){
   const wrap=document.querySelector('#tab-produtos .pro-ms[data-ms="mentoriaResponsaveis"] .pro-ms-chips');
   if(!wrap)return;
+  const oldInput=wrap.querySelector('input');
+  const wasFocused=oldInput&&document.activeElement===oldInput;
+  const savedVal=oldInput?oldInput.value:'';
   const vals=Array.isArray(S.produtoAtual.mentoriaResponsaveis)?S.produtoAtual.mentoriaResponsaveis:[];
-  wrap.innerHTML=vals.length
-    ?vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proMentRespRm(${i})" title="Remover">×</button></span>`).join('')
-    :`<span class="pro-ms-empty">Nenhum coordenador da mentoria</span>`;
+  const chipsHtml=vals.map((v,i)=>`<span class="pro-ms-chip">${_proEsc(v)}<button onclick="_proMentRespRm(${i})" title="Remover">×</button></span>`).join('');
+  const placeholder=vals.length?'Adicionar… (Enter ou vírgula)':'Digite e tecle Enter ou vírgula';
+  wrap.innerHTML=chipsHtml+`<input type="text" class="pro-ms-input" id="pro-f-mentresp-input" placeholder="${placeholder}" onkeydown="_proMentRespKey(event)" onblur="_proMentRespFlush(this)"/>`;
+  const newInput=wrap.querySelector('input');
+  if(newInput){newInput.value=savedVal;if(wasFocused)newInput.focus();}
   const lbl=wrap.closest('.fg')?.querySelector('.fl');
   if(lbl)lbl.textContent=vals.length===1?'Coordenador da mentoria':'Coordenadores da mentoria';
 }
@@ -33909,33 +34381,115 @@ window._proMentRespFlush=(inp)=>{
   }
 };
 
-// Toggle mentoria — atualiza só o bloco da mentoria (preserva accordions abertos)
+// Toggle mentoria — re-render do sub-bloco mentoria dentro do accordion Features.
 // Aceita 'sim' | 'opcional' | 'nao'. Compat: bool antigo true→'sim', false→'nao'.
 window._proSetMentoria=(v)=>{
   const status=(v==='sim'||v===true)?'sim':(v==='opcional'?'opcional':'nao');
   S.produtoAtual.temMentoria=status;
-  const showFeats=(status!=='nao');
-  if(showFeats&&!Array.isArray(S.produtoAtual.mentoriaFeatures))S.produtoAtual.mentoriaFeatures=[];
   _proMark();
-  // Atualiza toggle visual (3 botões: Sim / Opcional / Não)
-  const accHead=document.querySelector('#tab-produtos .pro-edit-accordion[data-acc="mentoria"] .pro-toggle-wrap');
-  if(accHead){
-    const btns=accHead.querySelectorAll('.pro-toggle button');
-    if(btns[0]){btns[0].classList.toggle('on',status==='sim');btns[0].classList.remove('wip');}
-    if(btns[1]){btns[1].classList.toggle('on',status==='opcional');btns[1].classList.toggle('wip',status==='opcional');}
-    if(btns[2]){btns[2].classList.toggle('on',status==='nao');btns[2].classList.remove('wip');}
-  }
-  // Show/hide body interno (mostra pra sim/opcional, esconde só pra 'nao')
-  const body=document.getElementById('pro-mentoria-body');
-  if(body)body.style.display=showFeats?'':'none';
-  // Atualiza título do accordion
-  const accTitle=document.querySelector('#tab-produtos .pro-edit-accordion[data-acc="mentoria"] .pro-edit-acc-title');
-  if(accTitle){
-    const count=(S.produtoAtual.mentoriaFeatures||[]).length;
-    const tag=status==='opcional'?' · opcional':'';
-    accTitle.textContent='Mentoria'+(showFeats?(' · '+count+tag):'');
-  }
+  // Re-render do accordion Features inteiro pra refletir o novo estado do sub-bloco
+  // Mentoria (toggle + header + lista de features filtradas por isMentoria).
+  _proRefreshFeats();
 };
+
+// Render unificado do accordion Features: 3 sub-blocos (Features / Bônus / Mentoria).
+// Todos operam sobre o array master S.produtoAtual.features filtrado por flags.
+// Produtos vinculados ficam dentro do sub-bloco apropriado (Features ou Bônus)
+// conforme o flag .isBonus no item de featuresProdutoIds.
+function _proFeatsUnifiedEditHTML(p){
+  if(!p)return '';
+  const allFeats=Array.isArray(p.features)?p.features:[];
+  const allProdIds=Array.isArray(p.featuresProdutoIds)?p.featuresProdutoIds:[];
+  // Filtros — usa índice master (i) pra ações funcionarem direto
+  const feats=[];const bonusFeats=[];const mentFeats=[];
+  allFeats.forEach((f,i)=>{
+    const ent={f,i};
+    if(f&&f.isMentoria)mentFeats.push(ent);
+    else if(f&&f.isBonus)bonusFeats.push(ent);
+    else feats.push(ent);
+  });
+  const prodIdsNorm=allProdIds.map((it,i)=>{
+    if(typeof it==='string')return {id:it,isBonus:false,i};
+    if(it&&typeof it==='object'&&typeof it.id==='string')return {id:it.id,isBonus:!!it.isBonus,i};
+    return null;
+  }).filter(Boolean);
+  const featProds=prodIdsNorm.filter(x=>!x.isBonus);
+  const bonusProds=prodIdsNorm.filter(x=>x.isBonus);
+
+  const mentStatus=_proMentStatus(p);
+  const hasMent=mentStatus!=='nao';
+
+  // ─── Sub-bloco Features (neutro) ───
+  const blocoFeatures=`<div class="pro-subblock pro-sub-features">
+    <div class="pro-subblock-head"><span class="pro-subblock-title">Features</span><span class="pro-subblock-count">${feats.length+featProds.length}</span></div>
+    <div class="pro-subblock-body">
+      <div class="pro-bonus-block">
+        <label class="fl" style="margin:0 0 8px;display:flex;align-items:center;gap:8px"><span>📦 Produtos vinculados</span><span class="pro-edit-acc-caret" style="font-size:10px;color:var(--t2);font-family:'JetBrains Mono',monospace">${featProds.length}</span></label>
+        <div id="pro-f-feat-prods">${_proFeatuProdutosEditHTML(featProds)}</div>
+        <button class="btn btn-s btn-sm" onclick="_proFeatuOpenProdPicker(event)" style="margin-top:8px">＋ Vincular produto do catálogo</button>
+      </div>
+      <div class="pro-bonus-block" style="margin-top:18px">
+        <label class="fl" style="margin:0 0 8px;display:block">✨ Features livres</label>
+        <div id="pro-f-features">${feats.map(ent=>_proFeatEditHTML(ent.f,ent.i,'features')).join('')}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn btn-s btn-sm" onclick="_proFeatAdd('features')">＋ Adicionar feature</button>
+          <button class="btn btn-s btn-sm" onclick="proAplicarPackNoEditor()" title="Adiciona as features do pack que ainda não estão neste produto">📦 Aplicar pack</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  // ─── Sub-bloco Bônus (fundo amarelado) ───
+  const blocoBonus=`<div class="pro-subblock pro-sub-bonus">
+    <div class="pro-subblock-head"><span class="pro-subblock-title">🎁 Bônus</span><span class="pro-subblock-count">${bonusFeats.length+bonusProds.length}</span></div>
+    <div class="pro-subblock-body">
+      <p style="font-size:12px;color:var(--t2);margin:0 0 14px;line-height:1.5">Produtos do catálogo e features adicionais que vão como bônus deste produto.</p>
+      <div class="pro-bonus-block">
+        <label class="fl" style="margin:0 0 8px;display:flex;align-items:center;gap:8px"><span>📦 Produtos vinculados</span><span class="pro-edit-acc-caret" style="font-size:10px;color:var(--t2);font-family:'JetBrains Mono',monospace">${bonusProds.length}</span></label>
+        <div id="pro-f-bonus-prods">${_proFeatuProdutosEditHTML(bonusProds)}</div>
+        <button class="btn btn-s btn-sm" onclick="_proBonusOpenProdPicker(event)" style="margin-top:8px">＋ Vincular produto do catálogo como bônus</button>
+      </div>
+      <div class="pro-bonus-block" style="margin-top:18px">
+        <label class="fl" style="margin:0 0 8px;display:block">✨ Features bônus livres</label>
+        <div id="pro-f-bonusfeatures">${bonusFeats.map(ent=>_proFeatEditHTML(ent.f,ent.i,'bonusFeatures')).join('')}</div>
+        <button class="btn btn-s btn-sm" onclick="_proFeatAdd('bonusFeatures')" style="margin-top:8px">＋ Adicionar feature bônus</button>
+      </div>
+    </div>
+  </div>`;
+
+  // ─── Sub-bloco Mentoria ───
+  const mentHeaderHtml=hasMent?`
+    <div class="fg" style="margin-bottom:14px">
+      <label class="fl">Descrição da mentoria</label>
+      <textarea class="fc" rows="3" placeholder="Descreva brevemente o que está incluído na mentoria (aparece no catálogo abaixo do título Mentoria)" oninput="S.produtoAtual.mentoriaDescricao=this.value;_proMark()">${_proEsc(p.mentoriaDescricao||'')}</textarea>
+    </div>
+    <div class="fg" style="margin-bottom:14px">
+      <label class="fl">${(Array.isArray(p.mentoriaResponsaveis)&&p.mentoriaResponsaveis.length===1)?'Coordenador da mentoria':'Coordenadores da mentoria'}</label>
+      ${_proMentRespInputHTML(p.mentoriaResponsaveis)}
+    </div>
+    ${_proMentSazonalEditHTML(p)}
+    ${_proMentVagasEditHTML(p)}
+    <div id="pro-f-mentfeatures" style="margin-top:14px">${mentFeats.map(ent=>_proFeatEditHTML(ent.f,ent.i,'mentoriaFeatures')).join('')}</div>
+    <button class="btn btn-s btn-sm" onclick="_proFeatAdd('mentoriaFeatures')" style="margin-top:8px">＋ Adicionar feature de mentoria</button>
+  `:'';
+
+  const blocoMentoria=`<div class="pro-subblock pro-sub-mentoria">
+    <div class="pro-subblock-head"><span class="pro-subblock-title">🎓 Mentoria</span>${hasMent?`<span class="pro-subblock-count">${mentFeats.length}</span>`:''}</div>
+    <div class="pro-subblock-body">
+      <div class="pro-toggle-wrap" style="margin-bottom:14px">
+        <label class="fl" style="margin:0">Tem mentoria?</label>
+        <div class="pro-toggle pro-toggle-3" data-ment-toggle>
+          <button type="button" class="${mentStatus==='sim'?'on':''}" onclick="_proSetMentoria('sim')">Sim</button>
+          <button type="button" class="${mentStatus==='opcional'?'on wip':''}" onclick="_proSetMentoria('opcional')">Opcional</button>
+          <button type="button" class="${mentStatus==='nao'?'on':''}" onclick="_proSetMentoria('nao')">Não</button>
+        </div>
+      </div>
+      <div id="pro-mentoria-body" style="${hasMent?'':'display:none'}">${mentHeaderHtml}</div>
+    </div>
+  </div>`;
+
+  return blocoFeatures+blocoBonus+blocoMentoria;
+}
 
 function _proFeatEditHTML(f,i,source){
   source=source||'features';
@@ -33947,10 +34501,19 @@ function _proFeatEditHTML(f,i,source){
   const isOpen=!!S._proFeatOpen[featId];
   const qty=(f.numeroChave||'').trim();
   // Micro-resumo no head pra dar contexto quando fechado
-  const dispMeta=PRO_FEAT_DISP_META[disp]||PRO_FEAT_DISP_META.sim;
-  const dispPillCls=disp==='sim'?'ok':(disp==='construcao'?'wip':'no');
+  // disp pode ser '' (não marcado) — mostra pílula neutra alertando
+  const dispMeta=disp?(PRO_FEAT_DISP_META[disp]||PRO_FEAT_DISP_META.sim):null;
+  const dispPillCls=disp==='sim'?'ok':(disp==='construcao'?'wip':(disp==='nao'?'no':(disp==='depende'?'dep':'pending')));
+  const dispPillHtml=dispMeta
+    ?`<span class="pro-feat-edit-head-pill ${dispPillCls}">${dispMeta.icon} ${_proEsc(dispMeta.short)}</span>`
+    :`<span class="pro-feat-edit-head-pill pending" title="Falta marcar disponibilidade">⚠ falta marcar</span>`;
+  const flagPills=[
+    f.isMentoria?'<span class="pro-feat-edit-head-pill ment">🎓 Mentoria</span>':'',
+    f.isBonus?'<span class="pro-feat-edit-head-pill bonus">🎁 Bônus</span>':''
+  ].filter(Boolean).join('');
   const headPills=[
-    `<span class="pro-feat-edit-head-pill ${dispPillCls}">${dispMeta.icon} ${_proEsc(dispMeta.short)}</span>`,
+    dispPillHtml,
+    flagPills,
     qty?`<span class="pro-feat-edit-head-pill qty">${_proEsc(qty)}</span>`:''
   ].filter(Boolean).join('');
   return `<div class="pro-feat-edit${isOpen?' open':''}" data-feat-i="${i}" data-feat-source="${source}" data-feat-id="${_proEscAttr(featId)}" ondragover="_proFeatDragOver(event)" ondragleave="_proFeatDragLeave(event)" ondrop="_proFeatDrop(event)">
@@ -33969,11 +34532,19 @@ function _proFeatEditHTML(f,i,source){
     <div class="pro-feat-edit-body" id="pro-feat-body-${_proEscAttr(featId)}">
       <div class="pro-feat-edit-fields">
         <div class="pro-feat-edit-row">
-          <label class="fl" style="min-width:140px">Disponível?</label>
-          <div class="pro-toggle pro-toggle-3">
+          <label class="fl" style="min-width:140px">Disponível?${disp?'':' <span style="color:#f59e0b;font-weight:700">*</span>'}</label>
+          <div class="pro-toggle pro-toggle-4${disp?'':' pending'}">
             <button type="button" class="${disp==='sim'?'on':''}" onclick="_proFeatSet(${i},'disponivel','sim','${source}')">Sim</button>
-            <button type="button" class="${disp==='construcao'?'on wip':''}" onclick="_proFeatSet(${i},'disponivel','construcao','${source}')">🛠 Em construção</button>
             <button type="button" class="${disp==='nao'?'on':''}" onclick="_proFeatSet(${i},'disponivel','nao','${source}')">Não</button>
+            <button type="button" class="${disp==='construcao'?'on wip':''}" onclick="_proFeatSet(${i},'disponivel','construcao','${source}')">🛠 Em construção</button>
+            <button type="button" class="${disp==='depende'?'on dep':''}" onclick="_proFeatSet(${i},'disponivel','depende','${source}')">◐ Depende da oferta</button>
+          </div>
+        </div>
+        <div class="pro-feat-edit-row">
+          <label class="fl" style="min-width:140px">Classificação</label>
+          <div class="pro-feat-flag-toggles">
+            <button type="button" class="pro-feat-flag-toggle ${f.isBonus?'on bonus':''}" onclick="_proFeatToggleFlag(${i},'isBonus')" title="Marcar como bônus">${f.isBonus?'✓ 🎁 Bônus':'🎁 Bônus'}</button>
+            <button type="button" class="pro-feat-flag-toggle ${f.isMentoria?'on ment':''}" onclick="_proFeatToggleFlag(${i},'isMentoria')" title="Marcar como mentoria">${f.isMentoria?'✓ 🎓 Mentoria':'🎓 Mentoria'}</button>
           </div>
         </div>
         <div class="pro-feat-edit-row">
@@ -34321,12 +34892,13 @@ function _proArgEditHTML(a,i){
 function _proObjEditHTML(o,i){return _proQaEditHTML(o,i,'obj');}
 function _proDuvEditHTML(d,i){return _proQaEditHTML(d,i,'duv');}
 
-// ─── Concorrentes (cada um tem nome + lista de features deles vs nossas) ───
+// ─── Concorrentes (cada um tem nome + comentário livre em rich text) ───
 function _proConcEditHTML(c,i){
   const id=c.id||(c.id=_proUid());
   const openSet=(S._proConcOpen=S._proConcOpen||new Set());
   const open=openSet.has(id);
-  const feats=Array.isArray(c.features)?c.features:[];
+  const comentRtUid=`conc-${id}-coment`;
+  const comentHtml=String(c.comentario||'');
   return `<div class="pro-qa-edit pro-conc-edit${open?' open':''}" data-conc-id="${id}" data-conc-i="${i}">
     <div class="pro-qa-head" onclick="_proConcToggle('${id}')">
       <span class="pro-qa-handle" title="Reordenar (use ↑↓)" onclick="event.stopPropagation()">⠿</span>
@@ -34339,10 +34911,9 @@ function _proConcEditHTML(c,i){
       <span class="pro-qa-caret" title="Expandir/recolher" aria-hidden="true">▾</span>
     </div>
     <div class="pro-qa-body">
-      <div class="fg" style="margin-bottom:6px"><label class="fl">Features do concorrente · ${feats.length}</label>
-        <p style="font-size:11.5px;color:var(--t2);margin:0 0 10px;line-height:1.5">Pra cada feature do concorrente que disputa com a sua, descreva o seu diferencial. O diferencial aceita formatação rica (negrito, listas, links).</p>
-        <div id="pro-conc-feats-${id}">${feats.map((f,fi)=>_proConcFeatEditHTML(c,f,i,fi)).join('')}</div>
-        <button class="btn btn-s btn-sm" type="button" onclick="_proConcFeatAdd(${i})" style="margin-top:6px">＋ Adicionar feature do concorrente</button>
+      <div class="fg" style="margin-bottom:0">
+        <label class="fl">Comentário sobre o concorrente <span style="font-weight:400;color:var(--t2);font-size:11px">— texto livre, aparece no catálogo dentro do dropdown deste concorrente</span></label>
+        ${_proRtHTML(comentRtUid,comentHtml,'Descreva esse concorrente — pontos fortes deles, nossos diferenciais, observações de venda…',`_proConcSet(${i},'comentario',_proRtGet('${comentRtUid}'))`,{colors:true,justify:true,tall:false,expandable:true})}
       </div>
     </div>
   </div>`;
@@ -34375,8 +34946,16 @@ window._proConcToggle=(id)=>{
 };
 window._proConcAdd=()=>{
   if(!Array.isArray(S.produtoAtual.concorrentes))S.produtoAtual.concorrentes=[];
-  S.produtoAtual.concorrentes.push({id:_proUid(),nome:'',features:[]});
+  const id=_proUid();
+  S.produtoAtual.concorrentes.push({id,nome:'',comentario:''});
+  // Já abre o card recém-criado pra o usuário começar a digitar
+  (S._proConcOpen=S._proConcOpen||new Set()).add(id);
   _proMark();_proRefreshConcs();
+};
+window._proSetConcIntro=(html)=>{
+  if(!S.produtoAtual)return;
+  S.produtoAtual.concorrentesIntro=String(html||'');
+  _proMark();
 };
 window._proConcSet=(i,k,v)=>{
   if(!S.produtoAtual.concorrentes||!S.produtoAtual.concorrentes[i])return;
@@ -35193,12 +35772,16 @@ window._proToggleAcc=key=>{
 window._proSetField=(k,v)=>{S.produtoAtual[k]=v;_proMark();};
 
 // Features (suporta features OU mentoriaFeatures via param `source`)
+// Modelo unificado: features, bonusFeatures e mentoriaFeatures todas operam no
+// array master `S.produtoAtual.features`. Sources 'bonusFeatures' / 'mentoriaFeatures'
+// viram aliases — usados só pra renderização/foco e pra _proFeatAdd setar a flag.
 function _proFeatArr(source){
-  source=source||'features';
-  if(!Array.isArray(S.produtoAtual[source]))S.produtoAtual[source]=[];
-  return S.produtoAtual[source];
+  if(!Array.isArray(S.produtoAtual.features))S.produtoAtual.features=[];
+  return S.produtoAtual.features;
 }
 function _proFeatWrapId(source){
+  // Mantido por compat com chamadas antigas; refresh agora vai re-renderizar o
+  // accordion unificado inteiro (ver _proRefreshFeats).
   if(source==='mentoriaFeatures')return 'pro-f-mentfeatures';
   if(source==='bonusFeatures')return 'pro-f-bonusfeatures';
   return 'pro-f-features';
@@ -35211,7 +35794,7 @@ window._proFeatAdd=(source)=>{
     id:_proUid(),
     icone:PRO_FEAT_ICONE_DEFAULT,
     titulo:'',
-    disponivel:'sim',
+    disponivel:'',
     numeroChave:'',
     diferenciais:'',
     linkUrl:'',
@@ -35220,27 +35803,78 @@ window._proFeatAdd=(source)=>{
     pdfLabel:'',
     pdfPath:'',
     pdfSize:0,
-    pdfName:''
+    pdfName:'',
+    isBonus:source==='bonusFeatures',
+    isMentoria:source==='mentoriaFeatures'
   };
   arr.push(base);
   if(!S._proFeatOpen)S._proFeatOpen={};
   S._proFeatOpen[base.id]=true; // nova feature já abre expandida
   _proMark();_proRefreshFeats(source);
-  // Autofocus no título da feature recém-adicionada
+  // Autofocus no título da feature recém-adicionada (procura pelo featId)
   setTimeout(()=>{
-    const el=document.getElementById(`pro-feat-titulo-${source}-${arr.length-1}`);
+    const card=document.querySelector(`#tab-produtos .pro-feat-edit[data-feat-id="${base.id}"]`);
+    const el=card&&card.querySelector('input.fc[id^="pro-feat-titulo-"]');
     if(el)el.focus();
-  },20);
+  },30);
+};
+window.proAplicarPackNoEditor=()=>{
+  if(!S.produtoAtual)return;
+  if(!S.featurePack||S.featurePack.loaded===false||!Array.isArray(S.featurePack.features)||S.featurePack.features.length===0){
+    alert("O pack desta vertical está vazio. Configure em '📦 Gerenciar pack' no catálogo.");
+    return;
+  }
+  if(!Array.isArray(S.produtoAtual.features))S.produtoAtual.features=[];
+  const norm=t=>String(t||'').trim().toLowerCase();
+  const existentes=new Set(S.produtoAtual.features.map(f=>norm(f&&f.titulo)));
+  let adicionadas=0;
+  S.featurePack.features.forEach(pf=>{
+    if(!pf)return;
+    const key=norm(pf.titulo);
+    if(!key)return;
+    if(existentes.has(key))return;
+    S.produtoAtual.features.push({
+      id:_proUid(),
+      icone:pf.icone||PRO_FEAT_ICONE_DEFAULT,
+      titulo:pf.titulo||'',
+      disponivel:'',
+      isBonus:false,
+      isMentoria:false,
+      numeroChave:'',
+      diferenciais:'',
+      linkUrl:'',linkLabel:'',
+      pdfUrl:'',pdfLabel:'',pdfPath:'',pdfSize:0,pdfName:''
+    });
+    existentes.add(key);
+    adicionadas++;
+  });
+  if(adicionadas===0){
+    alert('O pack já está aplicado — nada a adicionar.');
+    return;
+  }
+  _proDirty=true;
+  if(typeof _proUpdateDirtyPill==='function')_proUpdateDirtyPill();
+  _proRefreshFeats('features');
+  alert(`${adicionadas} feature(s) do pack adicionada(s). Marque tem/não/em construção em cada uma.`);
 };
 window._proFeatSet=(i,k,v,source)=>{
-  source=source||'features';
   const arr=_proFeatArr(source);if(!arr[i])return;
   arr[i][k]=v;_proMark();
   // Re-render parcial pra refletir toggle visual (Sim/Não)
   if(k==='disponivel')_proRefreshFeats(source);
 };
+// Toggle exclusivo: marcar Bônus desmarca Mentoria e vice-versa.
+// Re-render do accordion inteiro pra mover a feature pro sub-bloco correto.
+window._proFeatToggleFlag=(i,flag)=>{
+  const arr=_proFeatArr();if(!arr[i])return;
+  const f=arr[i];
+  const current=!!f[flag];
+  const newVal=!current;
+  if(flag==='isBonus'){f.isBonus=newVal;if(newVal)f.isMentoria=false;}
+  else if(flag==='isMentoria'){f.isMentoria=newVal;if(newVal)f.isBonus=false;}
+  _proMark();_proRefreshFeats();
+};
 window._proFeatRm=(i,source)=>{
-  source=source||'features';
   const arr=_proFeatArr(source);
   const f=arr[i];if(!f)return;
   const nome=(f.titulo||'').trim()||'(sem título)';
@@ -35248,12 +35882,15 @@ window._proFeatRm=(i,source)=>{
   arr.splice(i,1);
   _proMark();_proRefreshFeats(source);
 };
-window._proFeatUp=(i,source)=>{source=source||'features';const arr=_proFeatArr(source);if(i<=0)return;[arr[i-1],arr[i]]=[arr[i],arr[i-1]];_proMark();_proRefreshFeats(source);};
-window._proFeatDown=(i,source)=>{source=source||'features';const arr=_proFeatArr(source);if(i>=arr.length-1)return;[arr[i],arr[i+1]]=[arr[i+1],arr[i]];_proMark();_proRefreshFeats(source);};
+window._proFeatUp=(i,source)=>{const arr=_proFeatArr(source);if(i<=0)return;[arr[i-1],arr[i]]=[arr[i],arr[i-1]];_proMark();_proRefreshFeats(source);};
+window._proFeatDown=(i,source)=>{const arr=_proFeatArr(source);if(i>=arr.length-1)return;[arr[i],arr[i+1]]=[arr[i+1],arr[i]];_proMark();_proRefreshFeats(source);};
+// Re-render do accordion unificado inteiro — fonte única de verdade pros 3 sub-blocos.
+// Atualiza também o título do accordion-pai (contador). Preserva accordions abertos
+// via featId (S._proFeatOpen).
 function _proRefreshFeats(source){
-  source=source||'features';
-  const wrap=document.getElementById(_proFeatWrapId(source));if(!wrap)return;
-  wrap.innerHTML=(_proFeatArr(source)).map((f,i)=>_proFeatEditHTML(f,i,source)).join('');
+  const root=document.getElementById('pro-f-feats-unified');
+  if(root)root.innerHTML=_proFeatsUnifiedEditHTML(S.produtoAtual);
+  _proRefreshFeatuAccTitle();
 }
 
 // Picker multi-select (público / provas)
@@ -35618,69 +36255,21 @@ window._proAnexRm=(i)=>{
   S.produtoAtual.anexos.splice(i,1);_proMark();_proRender();
 };
 
-// ─── Bônus: produtos vinculados ────────────────────────────────────────
-// Renderiza chips dos produtos vinculados (cada chip = nome + status + X remover)
-function _proBonusProdutosEditHTML(ids){
-  if(!Array.isArray(ids)||!ids.length){
+// ─── Produtos vinculados (Features + Bônus consolidados) ─────────────────
+// Modelo novo: featuresProdutoIds é [{id,isBonus}]. Os dois sub-blocos no editor
+// (Features e Bônus) usam essa mesma lista, filtrada pela flag.
+// Cada chip tem um toggle pra alternar entre Feature ↔ Bônus, movendo o produto
+// de sub-bloco sem precisar desvincular e re-vincular.
+//
+// Param `items`: array de {id,isBonus,i} onde `i` é o índice no master featuresProdutoIds.
+function _proFeatuProdutosEditHTML(items){
+  if(!Array.isArray(items)||!items.length){
     return '<p class="pro-text-block" style="color:var(--t2);font-style:italic;font-size:12.5px;margin:0">Nenhum produto vinculado ainda.</p>';
   }
-  const rows=ids.map((id,i)=>{
-    const p=(S.produtos||[]).find(x=>x.id===id);
-    if(!p){
-      // Produto deletado/órfão — mostra placeholder cinza
-      return `<div class="pro-bonus-prod-chip orphan"><span class="pro-bonus-prod-name">⚠️ Produto removido (id: ${_proEsc(id.slice(0,8))}…)</span><button class="pro-icon-btn" onclick="_proBonusProdRm(${i})" title="Remover">🗑</button></div>`;
-    }
-    const st=p.status||'rascunho';
-    const stLabel=PRO_STATUS_LABEL[st]||st;
-    const capa=p.capa?`<div class="pro-bonus-prod-capa" style="background-image:url('${_proEscAttr(p.capa)}')"></div>`:`<div class="pro-bonus-prod-capa"><span>📦</span></div>`;
-    return `<div class="pro-bonus-prod-chip">
-      ${capa}
-      <div class="pro-bonus-prod-info">
-        <div class="pro-bonus-prod-name">${_proEsc(p.nome||'(sem nome)')}</div>
-        <div class="pro-bonus-prod-meta"><span class="pro-badge s-${st}" style="font-size:8.5px">${_proEsc(stLabel)}</span></div>
-      </div>
-      <button class="pro-icon-btn" onclick="_proBonusProdRm(${i})" title="Desvincular">🗑</button>
-    </div>`;
-  }).join('');
-  return rows;
-}
-
-window._proBonusProdAdd=(id)=>{
-  if(!id||!S.produtoAtual)return;
-  if(!Array.isArray(S.produtoAtual.bonusProdutoIds))S.produtoAtual.bonusProdutoIds=[];
-  // evita duplicata e auto-referência
-  if(id===S.produtoAtual.id)return alert('Não dá pra vincular o produto a ele mesmo.');
-  if(S.produtoAtual.bonusProdutoIds.includes(id))return;
-  S.produtoAtual.bonusProdutoIds.push(id);
-  _proMark();_proRefreshBonusProds();_proRefreshBonusAccTitle();
-};
-window._proBonusProdRm=(i)=>{
-  if(!Array.isArray(S.produtoAtual.bonusProdutoIds))return;
-  const id=S.produtoAtual.bonusProdutoIds[i];
-  const bp=(S.produtos||[]).find(x=>x.id===id);
-  const nome=(bp&&String(bp.nome||'').trim())||'este bônus';
-  if(!confirm(`Desvincular "${nome}" como bônus?`))return;
-  S.produtoAtual.bonusProdutoIds.splice(i,1);
-  _proMark();_proRefreshBonusProds();_proRefreshBonusAccTitle();
-};
-function _proRefreshBonusProds(){
-  const wrap=document.getElementById('pro-f-bonus-prods');
-  if(wrap)wrap.innerHTML=_proBonusProdutosEditHTML(S.produtoAtual.bonusProdutoIds||[]);
-}
-function _proRefreshBonusAccTitle(){
-  const el=document.querySelector('#tab-produtos .pro-edit-accordion[data-acc="bonus"] .pro-edit-acc-title');
-  if(!el)return;
-  const p=S.produtoAtual;
-  const cnt=(p.bonusProdutoIds||[]).length+(p.bonusFeatures||[]).length;
-  el.textContent='🎁 Bônus'+(cnt>0?(' · '+cnt):'');
-}
-
-// ── Produtos vinculados no BOX FEATURES (igual ao bônus, mas dentro de Features) ──
-function _proFeatuProdutosEditHTML(ids){
-  if(!Array.isArray(ids)||!ids.length){
-    return '<p class="pro-text-block" style="color:var(--t2);font-style:italic;font-size:12.5px;margin:0">Nenhum produto vinculado ainda.</p>';
-  }
-  return ids.map((id,i)=>{
+  return items.map(it=>{
+    const i=it.i;
+    const id=it.id;
+    const isBonus=!!it.isBonus;
     const p=(S.produtos||[]).find(x=>x.id===id);
     if(!p){
       return `<div class="pro-bonus-prod-chip orphan"><span class="pro-bonus-prod-name">⚠️ Produto removido (id: ${_proEsc(id.slice(0,8))}…)</span><button class="pro-icon-btn" type="button" onclick="_proFeatuProdRm(${i})" title="Remover">🗑</button></div>`;
@@ -35688,37 +36277,51 @@ function _proFeatuProdutosEditHTML(ids){
     const st=p.status||'rascunho';
     const stLabel=PRO_STATUS_LABEL[st]||st;
     const capa=p.capa?`<div class="pro-bonus-prod-capa" style="background-image:url('${_proEscAttr(p.capa)}')"></div>`:`<div class="pro-bonus-prod-capa"><span>📦</span></div>`;
-    return `<div class="pro-bonus-prod-chip">
+    const bonusBtn=`<button type="button" class="pro-feat-flag-toggle small ${isBonus?'on bonus':''}" onclick="_proFeatuProdToggleBonus(${i})" title="${isBonus?'Mover pra Features':'Marcar como bônus'}">${isBonus?'✓ 🎁':'🎁'}</button>`;
+    return `<div class="pro-bonus-prod-chip${isBonus?' is-bonus':''}">
       ${capa}
       <div class="pro-bonus-prod-info">
         <div class="pro-bonus-prod-name">${_proEsc(p.nome||'(sem nome)')}</div>
         <div class="pro-bonus-prod-meta"><span class="pro-badge s-${st}" style="font-size:8.5px">${_proEsc(stLabel)}</span></div>
       </div>
+      ${bonusBtn}
       <button class="pro-icon-btn" type="button" onclick="_proFeatuProdRm(${i})" title="Desvincular">🗑</button>
     </div>`;
   }).join('');
 }
-window._proFeatuProdAdd=(id)=>{
-  if(!id||!S.produtoAtual)return;
+// Helper: garante que featuresProdutoIds é sempre [{id,isBonus}] (auto-migra string→obj).
+function _proFeatuProdEnsureArr(){
   if(!Array.isArray(S.produtoAtual.featuresProdutoIds))S.produtoAtual.featuresProdutoIds=[];
+  S.produtoAtual.featuresProdutoIds=S.produtoAtual.featuresProdutoIds.map(it=>{
+    if(typeof it==='string')return {id:it,isBonus:false};
+    if(it&&typeof it==='object'&&typeof it.id==='string')return {id:it.id,isBonus:!!it.isBonus};
+    return null;
+  }).filter(Boolean);
+  return S.produtoAtual.featuresProdutoIds;
+}
+window._proFeatuProdAdd=(id,asBonus)=>{
+  if(!id||!S.produtoAtual)return;
+  const arr=_proFeatuProdEnsureArr();
   if(id===S.produtoAtual.id)return alert('Não dá pra vincular o produto a ele mesmo.');
-  if(S.produtoAtual.featuresProdutoIds.includes(id))return;
-  S.produtoAtual.featuresProdutoIds.push(id);
-  _proMark();_proRefreshFeatuProds();_proRefreshFeatuAccTitle();
+  if(arr.some(x=>x.id===id))return;
+  arr.push({id,isBonus:!!asBonus});
+  _proMark();_proRefreshFeats();
 };
 window._proFeatuProdRm=(i)=>{
-  if(!Array.isArray(S.produtoAtual.featuresProdutoIds))return;
-  const id=S.produtoAtual.featuresProdutoIds[i];
-  const bp=(S.produtos||[]).find(x=>x.id===id);
+  const arr=_proFeatuProdEnsureArr();
+  const it=arr[i];if(!it)return;
+  const bp=(S.produtos||[]).find(x=>x.id===it.id);
   const nome=(bp&&String(bp.nome||'').trim())||'este produto';
-  if(!confirm(`Desvincular "${nome}" das features?`))return;
-  S.produtoAtual.featuresProdutoIds.splice(i,1);
-  _proMark();_proRefreshFeatuProds();_proRefreshFeatuAccTitle();
+  if(!confirm(`Desvincular "${nome}"?`))return;
+  arr.splice(i,1);
+  _proMark();_proRefreshFeats();
 };
-function _proRefreshFeatuProds(){
-  const wrap=document.getElementById('pro-f-feat-prods');
-  if(wrap)wrap.innerHTML=_proFeatuProdutosEditHTML(S.produtoAtual.featuresProdutoIds||[]);
-}
+window._proFeatuProdToggleBonus=(i)=>{
+  const arr=_proFeatuProdEnsureArr();
+  const it=arr[i];if(!it)return;
+  it.isBonus=!it.isBonus;
+  _proMark();_proRefreshFeats();
+};
 function _proRefreshFeatuAccTitle(){
   const el=document.querySelector('#tab-produtos .pro-edit-accordion[data-acc="features"] .pro-edit-acc-title');
   if(!el)return;
@@ -35727,10 +36330,20 @@ function _proRefreshFeatuAccTitle(){
   el.textContent='Features · '+cnt;
 }
 window._proFeatuOpenProdPicker=(ev)=>{
+  const arr=_proFeatuProdEnsureArr();
   _proOpenProdMultiPicker(ev,{
     title:'Vincular produtos às Features',
-    alreadyLinked:S.produtoAtual.featuresProdutoIds||[],
-    onConfirm:(ids)=>{ids.forEach(id=>_proFeatuProdAdd(id));}
+    alreadyLinked:arr.map(x=>x.id),
+    onConfirm:(ids)=>{ids.forEach(id=>_proFeatuProdAdd(id,false));}
+  });
+};
+// Picker pra adicionar diretamente como bônus (botão dentro do sub-bloco Bônus)
+window._proBonusOpenProdPicker=(ev)=>{
+  const arr=_proFeatuProdEnsureArr();
+  _proOpenProdMultiPicker(ev,{
+    title:'Vincular produtos como bônus',
+    alreadyLinked:arr.map(x=>x.id),
+    onConfirm:(ids)=>{ids.forEach(id=>_proFeatuProdAdd(id,true));}
   });
 };
 
@@ -35786,15 +36399,6 @@ window._proMultiPickConfirm=()=>{
   _proMultiPickSel=new Set();
   _proMultiPickConfirmFn=null;
   _proCloseOpenPopovers();
-};
-
-// Picker: lista produtos do catálogo (exceto o atual e os já vinculados)
-window._proBonusOpenProdPicker=(ev)=>{
-  _proOpenProdMultiPicker(ev,{
-    title:'Vincular produtos como bônus',
-    alreadyLinked:S.produtoAtual.bonusProdutoIds||[],
-    onConfirm:(ids)=>{ids.forEach(id=>_proBonusProdAdd(id));}
-  });
 };
 
 // ── PDF anexo por feature ──────────────────────────────────────────────
@@ -35881,7 +36485,10 @@ function _proPrepareFeatures(arr,beforeArr){
       pdfLabel:String(f.pdfLabel||'').trim().slice(0,60),
       pdfPath:String(f.pdfPath||''),
       pdfSize:typeof f.pdfSize==='number'?f.pdfSize:0,
-      pdfName:String(f.pdfName||'')
+      pdfName:String(f.pdfName||''),
+      // Classificação (mutuamente exclusiva)
+      isBonus:!!f.isBonus,
+      isMentoria:!!f.isMentoria
     };
 
     // updatedAt: se mudou (ou é nova), gera Timestamp client-side; senão preserva.
@@ -35910,11 +36517,30 @@ window._proSalvar=async()=>{
   if(!_proCanEdit())return alert('Sem permissão.');
   const p=S.produtoAtual;
   if(!p.nome||!p.nome.trim())return alert('Informe o nome do produto.');
+  // Validação: toda feature precisa ter `disponivel` marcado (Sim/Não/Em construção).
+  // Bloqueia o save (inclusive o save silencioso do botão Voltar).
+  const featsArr=Array.isArray(p.features)?p.features:[];
+  const featsSemDisp=featsArr.filter(f=>{
+    const d=_proFeatDisp(f);
+    return !d; // string vazia ou null
+  });
+  if(featsSemDisp.length){
+    const titulos=featsSemDisp.map(f=>String(f.titulo||'').trim()||'(sem título)').slice(0,8);
+    const extra=featsSemDisp.length>titulos.length?` (+${featsSemDisp.length-titulos.length} mais)`:'';
+    alert(`Faltou marcar a disponibilidade em ${featsSemDisp.length} feature${featsSemDisp.length===1?'':'s'}:\n\n• ${titulos.join('\n• ')}${extra}\n\nMarque tudo antes de salvar.`);
+    // Garante que o accordion Features esteja aberto pro usuário ver o que falta
+    const acc=document.querySelector('#tab-produtos .pro-edit-accordion[data-acc="features"]');
+    if(acc&&!acc.classList.contains('open'))_proAnimOpen(acc,'.pro-edit-acc-body');
+    // Re-render pra destacar visualmente os cards pendentes
+    _proRefreshFeats();
+    return;
+  }
   const isNew=S.produtosView==='new';
   const user=S.currentUser?.username||'?';
   const before=isNew?null:S.produtos.find(x=>x.id===p.id);
 
-  const breveDescricao=String(_proGetBreveDescricao(p)||'').trim();
+  // Breve descrição agora é rich HTML — sanitiza com o mesmo helper de outros campos rich
+  const breveDescricao=_proSanitizeResp(_proGetBreveDescricao(p)||'');
   const publicoAlvoArr=_proGetPublicoAlvo(p).map(x=>String(x).trim()).filter(Boolean);
   const responsaveisArr=_proGetResponsaveis(p);
 
@@ -35947,22 +36573,34 @@ window._proSalvar=async()=>{
     mentoriaJanelaFim:(_proMentStatus(p)!=='nao'&&p.mentoriaSazonal)?String(p.mentoriaJanelaFim||'').trim():'',
     mentoriaVagasLimitadas:(_proMentStatus(p)!=='nao')?!!p.mentoriaVagasLimitadas:false,
     mentoriaVagasLimitacaoDescricao:(_proMentStatus(p)!=='nao'&&p.mentoriaVagasLimitadas)?String(p.mentoriaVagasLimitacaoDescricao||'').trim():'',
-    features:_proPrepareFeatures(p.features,before&&before.features),
-    featuresProdutoIds:Array.isArray(p.featuresProdutoIds)?_proDedupe(p.featuresProdutoIds.filter(x=>typeof x==='string'&&x)):[],
-    mentoriaFeatures:(_proMentStatus(p)!=='nao')?_proPrepareFeatures(p.mentoriaFeatures,before&&before.mentoriaFeatures):[],
-    bonusFeatures:_proPrepareFeatures(p.bonusFeatures,before&&before.bonusFeatures),
-    bonusProdutoIds:Array.isArray(p.bonusProdutoIds)?p.bonusProdutoIds.filter(x=>typeof x==='string'&&x):[],
+    // Modelo unificado: tudo em `features[]` com flags isBonus/isMentoria.
+    // Reconstrói `beforeArr` no mesmo formato (concat com flags) pra _proPrepareFeatures
+    // preservar updatedAt corretamente entre saves.
+    features:_proPrepareFeatures(p.features,(()=>{
+      if(!before)return null;
+      const base=Array.isArray(before.features)?before.features.map(_proNormFeature).filter(Boolean):[];
+      const bn=Array.isArray(before.bonusFeatures)?before.bonusFeatures.map(_proNormFeature).filter(Boolean).map(f=>({...f,isBonus:true})):[];
+      const mn=Array.isArray(before.mentoriaFeatures)?before.mentoriaFeatures.map(_proNormFeature).filter(Boolean).map(f=>({...f,isMentoria:true})):[];
+      return base.concat(bn).concat(mn);
+    })()),
+    // featuresProdutoIds: [{id,isBonus}]. Dedup por id (último vence em caso de conflito).
+    featuresProdutoIds:(()=>{
+      const arr=Array.isArray(p.featuresProdutoIds)?p.featuresProdutoIds:[];
+      const seen=new Map();
+      arr.forEach(it=>{
+        if(typeof it==='string'&&it)seen.set(it,{id:it,isBonus:false});
+        else if(it&&typeof it==='object'&&typeof it.id==='string'&&it.id)seen.set(it.id,{id:it.id,isBonus:!!it.isBonus});
+      });
+      return [...seen.values()];
+    })(),
     argumentosVenda:Array.isArray(p.argumentosVenda)?p.argumentosVenda.filter(a=>String(a||'').trim()):[],
+    concorrentesIntro:_proSanitizeResp(p.concorrentesIntro||''),
     objecoes:Array.isArray(p.objecoes)?p.objecoes.filter(o=>o&&(o.pergunta||o.resposta)).map(o=>({id:o.id||_proUid(),pergunta:String(o.pergunta||'').trim(),resposta:_proSanitizeResp(o.resposta)})):[],
     duvidas:Array.isArray(p.duvidas)?p.duvidas.filter(d=>d&&(d.pergunta||d.resposta)).map(d=>({id:d.id||_proUid(),pergunta:String(d.pergunta||'').trim(),resposta:_proSanitizeResp(d.resposta)})):[],
-    concorrentes:Array.isArray(p.concorrentes)?p.concorrentes.filter(c=>c&&(String(c.nome||'').trim()||(Array.isArray(c.features)&&c.features.length))).map(c=>({
+    concorrentes:Array.isArray(p.concorrentes)?p.concorrentes.filter(c=>c&&(String(c.nome||'').trim()||String(c.comentario||'').trim())).map(c=>({
       id:c.id||_proUid(),
       nome:String(c.nome||'').trim(),
-      features:Array.isArray(c.features)?c.features.filter(f=>f&&(String(f.titulo||'').trim()||String(f.nossoDiferencial||'').trim())).map(f=>({
-        id:f.id||_proUid(),
-        titulo:String(f.titulo||'').trim(),
-        nossoDiferencial:_proSanitizeResp(f.nossoDiferencial)
-      })):[]
+      comentario:_proSanitizeResp(c.comentario||'')
     })):[],
     links:Array.isArray(p.links)?p.links.filter(l=>l&&l.url):[],
     anexos:Array.isArray(p.anexos)?p.anexos:[],
@@ -35970,8 +36608,20 @@ window._proSalvar=async()=>{
     updatedAt:serverTimestamp(),
     updatedBy:user
   };
-  // Cleanup: remove pitchCurto e responsavel singular antigos do doc (se for update)
-  const updatePayload=isNew?payload:{...payload,pitchCurto:deleteField(),responsavel:deleteField()};
+  // Cleanup: remove campos legados do doc (se for update). Modelo novo consolida
+  // tudo em features[] + featuresProdutoIds — bonusFeatures, mentoriaFeatures e
+  // bonusProdutoIds não são mais persistidos.
+  const updatePayload=isNew?payload:{
+    ...payload,
+    pitchCurto:deleteField(),
+    responsavel:deleteField(),
+    bonusFeatures:deleteField(),
+    mentoriaFeatures:deleteField(),
+    bonusProdutoIds:deleteField()
+    // Nota: c.features (array dentro de cada concorrente) some sozinho porque
+    // _proSalvar reescreve concorrentes[] inteiro sem o campo features. Não precisa
+    // deleteField — é sub-doc, não top-level.
+  };
 
   try{
     if(isNew){
