@@ -1654,6 +1654,45 @@ Refinamento UX completo da aba Gerenciamento (visão coord do simulado **online*
 - IDs preservados (`s-t`, `s-c`, `s-a`, `s-s`) — toda lógica JS de update segue funcionando sem mudança.
 - CSS antigo `.sg/.sc/.s-icon/...` mantido (dead code) para evitar alterar outros lugares; só a markup foi trocada.
 
+### Auto-swap engine — auditoria + 12 bugs corrigidos (2026-05-28)
+
+Auditoria sistemática do motor de trocas/auto-match motivada por caso real (João Gabriel Peixoto Lopes apareceu em "aguardando troca" em 2 lugares e sumiu no painel de Solicitações). Investigação revelou que ele tinha `status:'swap'` + `swapResolved:true` simultâneo — estado "zumbi" não previsto.
+
+**Helpers novos (linha ~22760) que centralizam a lógica de robustez:**
+- `_isAfterDeadline()` — true se `S.curSim.deadline` venceu. Usado pra travar operações automáticas.
+- `_hasVacancyFresh(simId,dia,rodada,ignoreId)` — re-conta ocupantes via `getDocs(query(where('dia','==',dia),where('rodada','==',rodada)))`. Substitui `hasVacancy` (que lê state local stale) nos writes críticos. Fallback pra `hasVacancy` em caso de erro.
+- `_olderInQueueWants(dia,rodada,student)` — checa se há aluno em `status='swap'&&!swapResolved` com `respondedAt` mais antigo que `student` apontando pra esse slot. Implementa FIFO global.
+- `_preserveOrig(s,fallbackDia,fallbackRodada)` — retorna `{originalDia, originalRodada}` preservando valores existentes ou gravando fallback. Substitui escrita direta de `originalDia:oldDia||null` que sobrescrevia histórico.
+- `_sendEmailLogged(args, contexto)` — wrapper `emailjs.send` que loga falha em `auditLog` action `EMAIL_FALHOU` com `{contexto, to, assunto, erro}`. Retorna `boolean`.
+
+**Bugs corrigidos (numeração na auditoria original):**
+
+| # | Bug | Fix | Onde |
+|---|---|---|---|
+| 1 | Race condition em capacidade (snapshot local stale → estoura `getLim()`) | `_hasVacancyFresh` antes do write | `tryAutoSwap`, `tryAutoMatchedSwap`, `processWaitingQueue`, `doMatchedSwap` |
+| 2 | `tryAutoSwap` fura fila (solicitante novo pula B esperando há dias) | `_olderInQueueWants` skip do slot | `tryAutoSwap` |
+| 3 | `processWaitingQueue` não rodava quando coord movia ou marcava ausente | Chamada explícita após updateDoc | `dDrop`, `dDropPos`, `doMover`, `coChangeStatus(absent)` |
+| 4 | Cascata infinita de realocação → inundação de email | Parâmetro `depth=0`, abort se `>=3` | `processWaitingQueue` |
+| 5 | `tryAutoMatchedSwap` ignora preferência do solicitante | Sort por `mySlots.findIndex` ASC, tiebreak por `respondedAt` | `tryAutoMatchedSwap` |
+| 6 | `trocasDiretas` aceita após auto-match já ter movido | `aceitarTrocaDireta` faz `getDoc` dos 2 alunos, valida `dia/rodada` originais, marca `propostaRef.status='invalidada'` se mudou | `aceitarTrocaDireta` |
+| 7 | `originalDia/Rodada` sobrescritos a cada troca | Helper `_preserveOrig` em todas funções | `tryAutoSwap`, `tryAutoMatchedSwap`, `processWaitingQueue`, `doMatchedSwap`, `aceitarTrocaDireta` |
+| 8 | Auto-swap roda depois do prazo (link velho, dropdown) | `_isAfterDeadline()` early return | `tryAutoSwap`, `tryAutoMatchedSwap`, `processWaitingQueue` |
+| 9 | `autoEffective:true` stale após movimento manual | `_moverUpdData` seta `autoEffective:false` | `_moverUpdData` |
+| 11 | `recusarTrocaDireta` deixa `swapResolved:true` zumbi no solicitante | `updateDoc({swapResolved:false})` no solicitante | `recusarTrocaDireta` |
+| 12 | `emailjs.send` falha silenciosa em `.catch(()=>{})` | Wrapper `_sendEmailLogged` registra `EMAIL_FALHOU` | `sendSwapDoneEmail`, `doMatchedSwap`, `aceitarTrocaDireta`, `recusarTrocaDireta` |
+| 13 | `swapTargetDia` só preenchido em presencial — perde intenção em online | `subResp` infere se todos `swapSlots` são do dia oposto | `subResp` |
+
+**Bug 10 (auto-match em presencial) era falso positivo** — `subRespPres` linha 21385-21404 já tem auto-match inline (casa por `dia===targetDia && swapTargetDia===s.dia`, FIFO por `respondedAt`).
+
+**Mudança semântica de produção:**
+- **Bug 2** muda comportamento visível: solicitação nova que entrava direto num slot vago agora **espera** se há fila mais antiga. Coord pode notar "antes era instantâneo". Comportamento desejado mas vale comunicar.
+- **Bug 8**: link velho de email após o prazo não dispara mais auto-match — fica como `status:'swap'` esperando ação da coord. Sem regressão silenciosa de escala fechada.
+- **Bug 4**: cap em 3 saltos. Em fila muito longa, alguns alunos esperam o próximo gatilho. Trade-off: evita 8-10 emails seguidos em cascata. Ajustável (constante hardcoded no `if(depth>=3)return`).
+
+**Caso piloto (João Gabriel Peixoto Lopes):** dados zumbi corrigidos manualmente pelo usuário antes do deploy. Causa: troca auto-efetivada em 2026-05-25 17:17 setou `swapResolved:true` + `status:'confirmed'`; depois o aluno respondeu nova solicitação via `subResp`, que **não** resetava `swapResolved` (bug corrigido em commit `ff0282a` antes desta auditoria mais ampla).
+
+**Commits:** `cde4399` (auditoria principal, 12 bugs).
+
 ### Escala — status editável pela coord + auto-ausentes pós-prazo + PDF "Versão alunos" (2026-05-28)
 
 Três features pequenas e independentes na aba Escala (visão coord do simulado), entregues juntas.
