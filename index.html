@@ -329,6 +329,41 @@ main{max-width:1300px;margin:0 auto;padding:24px}
 .ftb:active{transform:translateY(1px)}
 .ftb-c{width:18px;height:18px;border-radius:50%;border:1px solid var(--border);cursor:pointer;padding:0;transition:transform .12s}
 .ftb-c:hover{transform:scale(1.18);border-color:var(--accent)}
+/* Parecer visível pro aluno — sempre justificado, sem hifenização (back e front) */
+.parecer-aluno-txt, .parecer-aluno-txt *{text-align:justify !important;text-justify:inter-word;hyphens:none !important;-webkit-hyphens:none !important;-moz-hyphens:none !important;word-break:keep-all;overflow-wrap:break-word}
+.parecer-aluno-txt p,.parecer-aluno-txt div,.parecer-aluno-txt li{text-align:justify !important}
+#mpr-argumento, #mpr-argumento *{text-align:justify !important;hyphens:none !important;-webkit-hyphens:none !important;word-break:keep-all;overflow-wrap:break-word}
+/* Imagem padronizada da questão (no enunciado e em pareceres) */
+img.questao-img, .enunciado-aluno-txt img, .enunciado-editor img, .parecer-aluno-txt img{display:block;max-width:100%;max-height:400px;width:auto;height:auto;object-fit:contain;border-radius:8px;border:1px solid var(--border);margin:10px auto;background:var(--bg)}
+/* Enunciado justificado tanto no editor (back) quanto no render (front) */
+.enunciado-aluno-txt, .enunciado-aluno-txt p, .enunciado-aluno-txt div, .enunciado-aluno-txt li{text-align:justify !important;hyphens:none !important;-webkit-hyphens:none !important;word-break:keep-all;overflow-wrap:break-word}
+.enunciado-editor, .enunciado-editor *{text-align:justify !important;hyphens:none !important;-webkit-hyphens:none !important;word-break:keep-all;overflow-wrap:break-word}
+.enunciado-editor:empty:before{content:attr(data-placeholder);color:var(--t2);font-style:italic;text-align:left !important}
+/* Status de importação (PDF de prova/gabarito) — feedback visual rico com ampulheta animada */
+.import-status{display:flex;flex-direction:column;gap:8px;width:100%;min-width:240px;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg);transition:all .25s ease}
+.import-status.import-loading{background:var(--bl);border-color:rgba(47,129,247,.5);animation:imp-pulse 1.4s ease-in-out infinite}
+.import-status.import-success{background:var(--gl);border-color:rgba(63,185,80,.5)}
+.import-status.import-err{background:var(--rl);border-color:rgba(248,81,73,.5)}
+.import-status .imp-row{display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;font-size:12px;line-height:1.4}
+.import-status.import-loading .imp-row{color:var(--accent);font-weight:600}
+.import-status.import-success .imp-row{color:var(--green);font-weight:600}
+.import-status.import-err .imp-row{color:var(--red);font-weight:600}
+/* Ampulheta girando — bem visível */
+.import-status .imp-hourglass{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;flex-shrink:0;font-size:18px;line-height:1;animation:imp-flip 1.8s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(47,129,247,.6))}
+/* Spinner circular (alternativa/extra) */
+.import-status .imp-spinner{width:22px;height:22px;border-radius:50%;border:2.5px solid currentColor;border-top-color:transparent;animation:imp-spin .8s linear infinite;flex-shrink:0;box-shadow:0 0 12px rgba(47,129,247,.35)}
+.import-status .imp-bar{height:6px;background:rgba(0,0,0,.18);border-radius:999px;overflow:hidden;position:relative}
+.import-status .imp-bar-fill{position:absolute;inset:0;background:linear-gradient(90deg,var(--accent),var(--blue,#58a6ff));border-radius:999px;width:0%;transition:width .25s ease;box-shadow:0 0 8px rgba(47,129,247,.6)}
+/* Listras animadas na barra de progresso pra reforçar movimento */
+.import-status.import-loading .imp-bar-fill::after{content:'';position:absolute;inset:0;background-image:linear-gradient(45deg,rgba(255,255,255,.18) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.18) 50%,rgba(255,255,255,.18) 75%,transparent 75%,transparent);background-size:14px 14px;animation:imp-stripes .6s linear infinite}
+.import-status.import-loading .imp-bar{display:block}
+.import-status:not(.import-loading) .imp-bar{display:none}
+.import-status .imp-msg{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.import-status .imp-detail{font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;font-size:10.5px;color:var(--t2);letter-spacing:.4px;background:rgba(0,0,0,.15);padding:2px 8px;border-radius:999px;font-weight:500}
+@keyframes imp-spin{to{transform:rotate(360deg)}}
+@keyframes imp-flip{0%,100%{transform:rotate(0deg)}50%{transform:rotate(180deg)}}
+@keyframes imp-stripes{from{background-position:0 0}to{background-position:14px 0}}
+@keyframes imp-pulse{0%,100%{box-shadow:0 0 0 0 rgba(47,129,247,.4)}50%{box-shadow:0 0 0 8px rgba(47,129,247,0)}}
 .ftb-sep{width:1px;background:var(--border);margin:2px 4px;align-self:stretch}
 [contenteditable]:empty:before{content:attr(data-placeholder);color:var(--t2);font-style:italic;pointer-events:none}
 [contenteditable]:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--accent-dim)}
@@ -5659,27 +5694,17 @@ body.pro-rt-fs-on{overflow:hidden}
   </div>
 </div>
 
-<!-- ══ MODAL: Importar questões via PDF (dual: prova + gabarito) ══ -->
+<!-- ══ MODAL: Importar questões via PDF ══ -->
 <div class="mo hidden" id="modal-import-pdf" data-no-backdrop-close>
   <div class="md" style="max-width:980px">
-    <div class="mh"><div><div class="m-title">📄 Importar PDF</div><div class="m-sub" id="mip-modo-sub">Detecta automaticamente formato TEA/TSA (4 alts, 1 correta) ou ME (5 alts, V/F)</div></div><button class="m-close" onclick="CM('modal-import-pdf')">✕</button></div>
+    <div class="mh"><div><div class="m-title">📄 Importar PDF</div><div class="m-sub" id="mip-modo-sub">Importa as questões do PDF. Pra cadastrar o gabarito, use o botão separado "🎯 Importar gabarito" depois.</div></div><button class="m-close" onclick="CM('modal-import-pdf')">✕</button></div>
     <div class="m-body">
-      <div class="g2">
-        <div class="fg" style="margin:0">
-          <label class="fl">PDF da prova <span style="color:var(--red)">*</span></label>
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <input type="file" id="mip-arquivo" accept="application/pdf" style="display:none" onchange="mipExtrairPdf(event)"/>
-            <button type="button" class="btn btn-s btn-sm" onclick="document.getElementById('mip-arquivo').click()">📄 Escolher</button>
-            <span id="mip-status" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--t2);flex:1;min-width:100px">Nenhum.</span>
-          </div>
-        </div>
-        <div class="fg" style="margin:0" id="mip-gab-wrap">
-          <label class="fl">PDF do gabarito (opcional, só TEA/TSA)</label>
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <input type="file" id="mip-gab-arquivo" accept="application/pdf" style="display:none" onchange="mipExtrairGabarito(event)"/>
-            <button type="button" class="btn btn-s btn-sm" onclick="document.getElementById('mip-gab-arquivo').click()">📄 Escolher</button>
-            <span id="mip-gab-status" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--t2);flex:1;min-width:100px">Nenhum.</span>
-          </div>
+      <div class="fg" style="margin:0">
+        <label class="fl">PDF da prova <span style="color:var(--red)">*</span></label>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <input type="file" id="mip-arquivo" accept="application/pdf" style="display:none" onchange="mipExtrairPdf(event)"/>
+          <button type="button" class="btn btn-s btn-sm" onclick="document.getElementById('mip-arquivo').click()">📄 Escolher</button>
+          <div id="mip-status" class="import-status" style="flex:1;min-width:100px"><div class="imp-row"><span class="imp-msg">Nenhum.</span></div><div class="imp-bar"><div class="imp-bar-fill"></div></div></div>
         </div>
       </div>
       <div id="mip-formato-detectado" class="hidden" style="margin-top:10px;padding:8px 12px;background:var(--bg);border-radius:6px;border:1px solid var(--accent);font-size:12px"></div>
@@ -5693,9 +5718,36 @@ body.pro-rt-fs-on{overflow:hidden}
       <div id="mip-err" class="al al-e hidden" style="margin-top:10px"></div>
     </div>
     <div class="m-foot">
-      <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);margin-right:auto;cursor:pointer"><input type="checkbox" id="mip-substituir" style="cursor:pointer"/> Substituir questões existentes</label>
-      <button class="btn btn-s" onclick="CM('modal-import-pdf')">Cancelar</button>
+      <button class="btn btn-s" onclick="CM('modal-import-pdf')" style="margin-right:auto">Cancelar</button>
       <button class="btn btn-p" id="mip-save-btn" onclick="confirmarImportPdf()" disabled>✓ Importar todas</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Importar gabarito standalone ══ -->
+<div class="mo hidden" id="modal-import-gabarito" data-no-backdrop-close>
+  <div class="md" style="max-width:720px">
+    <div class="mh"><div><div class="m-title">🎯 Importar gabarito</div><div class="m-sub">Atualiza o gabarito oficial das questões existentes. Não cria questões nem mexe no enunciado.</div></div><button class="m-close" onclick="CM('modal-import-gabarito')">✕</button></div>
+    <div class="m-body">
+      <div class="fg">
+        <label class="fl">PDF do gabarito</label>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <input type="file" id="mig-arquivo" accept="application/pdf" style="display:none" onchange="migExtrair(event)"/>
+          <button type="button" class="btn btn-s btn-sm" onclick="document.getElementById('mig-arquivo').click()">📄 Escolher PDF</button>
+          <div id="mig-status" class="import-status" style="flex:1;min-width:160px"><div class="imp-row"><span class="imp-msg">Nenhum.</span></div><div class="imp-bar"><div class="imp-bar-fill"></div></div></div>
+        </div>
+        <p style="font-size:11.5px;color:var(--t2);margin-top:6px;line-height:1.5">Aceita formatos: <code>1-A</code>, <code>1) A</code>, <code>Questão 1: A</code>, etc. Letras válidas: A-E.</p>
+      </div>
+      <div class="fg" style="margin-top:6px">
+        <label class="fl">Ou cole o gabarito direto (uma linha por questão)</label>
+        <textarea id="mig-texto" oninput="migPreviewFromText()" style="width:100%;min-height:120px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;font-size:12px;line-height:1.5;outline:none;resize:vertical" placeholder="Ex:&#10;1 - A&#10;2 - C&#10;3 - B&#10;..."></textarea>
+      </div>
+      <div id="mig-preview" style="margin-top:12px"></div>
+      <div id="mig-err" class="al al-e hidden" style="margin-top:10px"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-import-gabarito')" style="margin-right:auto">Cancelar</button>
+      <button class="btn btn-p" id="mig-save-btn" onclick="migAplicar()" disabled>🎯 Aplicar gabarito</button>
     </div>
   </div>
 </div>
@@ -5703,7 +5755,7 @@ body.pro-rt-fs-on{overflow:hidden}
 <!-- ══ MODAL: Importar questões em bloco (texto) ══ -->
 <div class="mo hidden" id="modal-import-bloco" data-no-backdrop-close>
   <div class="md" style="max-width:920px">
-    <div class="mh"><div><div class="m-title">📋 Importar questões em bloco</div><div class="m-sub">Cole o texto da prova (uma questão por bloco)</div></div><button class="m-close" onclick="CM('modal-import-bloco')">✕</button></div>
+    <div class="mh"><div><div class="m-title">📋 Importar questões colando o texto</div><div class="m-sub">Cole o texto da prova abaixo — uma questão por bloco</div></div><button class="m-close" onclick="CM('modal-import-bloco')">✕</button></div>
     <div class="m-body">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div>
@@ -5720,14 +5772,19 @@ body.pro-rt-fs-on{overflow:hidden}
           <div id="mib-preview" style="width:100%;min-height:420px;padding:12px;background:var(--bg2);border:1px dashed var(--border);border-radius:8px;font-size:12px;line-height:1.5;overflow-y:auto;max-height:480px"></div>
         </div>
       </div>
-      <div style="margin-top:12px;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:11.5px;color:var(--t2);line-height:1.6">
-        <strong>📌 Regras de detecção:</strong> cada questão começa com um número seguido de ponto ou parêntese (ex: <code>1.</code>, <code>15)</code>). Alternativas começam com letra A-E + parêntese ou ponto (ex: <code>A)</code>, <code>B.</code>). O gabarito é detectado automaticamente em linhas como <code>Gabarito: B</code>, <code>Resposta: C</code>, ou <code>Gab: A</code>. Linhas em branco entre questões são ignoradas.
+      <div style="margin-top:12px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:11.5px;color:var(--t2);line-height:1.6">
+        <strong style="display:block;margin-bottom:6px;color:var(--text)">📌 Regras de detecção</strong>
+        <ul style="margin:0;padding-left:18px;list-style:disc">
+          <li style="margin-bottom:4px">Cada questão começa com um número seguido de ponto ou parêntese (ex.: <code>1.</code>, <code>15)</code>).</li>
+          <li style="margin-bottom:4px">Alternativas começam com letra <strong>A–D</strong> + parêntese ou ponto (ex.: <code>A)</code>, <code>B.</code>).</li>
+          <li style="margin-bottom:4px">O gabarito é detectado em linhas como <code>Gabarito: B</code>, <code>Resposta: C</code> ou <code>Gab: A</code>.</li>
+          <li>Linhas em branco entre questões são ignoradas.</li>
+        </ul>
       </div>
       <div id="mib-err" class="al al-e hidden" style="margin-top:10px"></div>
     </div>
     <div class="m-foot">
-      <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);margin-right:auto;cursor:pointer"><input type="checkbox" id="mib-substituir" style="cursor:pointer"/> Substituir questões existentes (apaga as atuais antes)</label>
-      <button class="btn btn-s" onclick="CM('modal-import-bloco')">Cancelar</button>
+      <button class="btn btn-s" onclick="CM('modal-import-bloco')" style="margin-right:auto">Cancelar</button>
       <button class="btn btn-p" id="mib-save-btn" onclick="confirmarImportBloco()">✓ Importar todas</button>
     </div>
   </div>
@@ -5754,7 +5811,7 @@ body.pro-rt-fs-on{overflow:hidden}
           </select>
         </div>
         <div class="fg">
-          <label class="fl">Argumento (visível pro aluno)</label>
+          <label class="fl">Parecer para o aluno (texto justificado, sem hifenização)</label>
           <div id="mpr-toolbar" style="display:flex;flex-wrap:wrap;gap:4px;padding:6px;background:var(--bg3);border:1px solid var(--border);border-bottom:none;border-radius:var(--rs) var(--rs) 0 0">
             <button type="button" onclick="mprExec('bold')" title="Negrito (Ctrl+B)" class="ftb"><strong>B</strong></button>
             <button type="button" onclick="mprExec('italic')" title="Itálico (Ctrl+I)" class="ftb"><em>I</em></button>
@@ -5791,7 +5848,7 @@ body.pro-rt-fs-on{overflow:hidden}
             <span class="ftb-sep"></span>
             <button type="button" onclick="mprExec('removeFormat');mprExec('unlink')" title="Limpar formatação" class="ftb">⌫ Limpar</button>
           </div>
-          <div id="mpr-argumento" contenteditable="true" data-placeholder="Justificativa técnica do parecer (cite literatura, diretrizes, etc.)" style="min-height:200px;max-height:420px;overflow-y:auto;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:0 0 var(--rs) var(--rs);font-size:14px;line-height:1.6;outline:none"></div>
+          <div id="mpr-argumento" contenteditable="true" data-placeholder="Justificativa técnica do parecer (cite literatura, diretrizes, etc.)" style="min-height:200px;max-height:420px;overflow-y:auto;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:0 0 var(--rs) var(--rs);font-size:14px;line-height:1.6;outline:none;text-align:justify;text-justify:inter-word;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none;word-break:keep-all;overflow-wrap:break-word"></div>
         </div>
         <div class="fg"><label class="fl">Imagem do parecer (opcional · até 15MB)</label>
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -5916,10 +5973,6 @@ body.pro-rt-fs-on{overflow:hidden}
             <input type="radio" name="mqs-modo" value="bloco" id="mqs-modo-bloco" onchange="mqsToggleModo()" style="cursor:pointer"/>
             <div><div style="font-size:13.5px;font-weight:700">Bloco único</div><div style="font-size:11px;color:var(--t2)">Texto único com tudo</div></div>
           </label>
-          <label style="flex:1;min-width:180px;display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--rs);cursor:pointer;background:var(--bg2)" id="mqs-modo-vf-wrap">
-            <input type="radio" name="mqs-modo" value="vf" id="mqs-modo-vf" onchange="mqsToggleModo()" style="cursor:pointer"/>
-            <div><div style="font-size:13.5px;font-weight:700">V/F por alternativa</div><div style="font-size:11px;color:var(--t2)">Cada alt. é V ou F (modo ME)</div></div>
-          </label>
         </div>
       </div>
       <div class="fg" id="mqs-estruturado-fields">
@@ -5930,11 +5983,6 @@ body.pro-rt-fs-on{overflow:hidden}
       <div class="fg hidden" id="mqs-bloco-fields">
         <label class="fl">Texto único da questão</label>
         <textarea class="fc" id="mqs-blocoTexto" style="min-height:240px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;line-height:1.55;resize:vertical" placeholder="Texto inteiro da questão (enunciado + alternativas em sequência)..."></textarea>
-      </div>
-      <div class="fg hidden" id="mqs-vf-fields">
-        <label class="fl">Enunciado</label>
-        <textarea class="fc" id="mqs-enunciadoVF" style="min-height:100px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;line-height:1.55;resize:vertical" placeholder="Texto do enunciado..."></textarea>
-        <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px" id="mqs-vf-list"></div>
       </div>
       <div class="fg">
         <label class="fl">Imagem (opcional · até 15MB)</label>
@@ -11020,20 +11068,37 @@ async function renderAlunoProva(){
   const prova=(S.recursos.provas||[]).find(p=>p.id===provaId);
   if(!prova){return renderRecAluno();}
   const el=document.getElementById('rec-aluno-content');
-  el.innerHTML='<div style="text-align:center;padding:40px;color:var(--t2);font-size:13px"><div style="font-size:28px;margin-bottom:10px">⏳</div>Carregando questões...</div>';
-  // Carrega questões + contestações próprias do aluno
+  el.innerHTML='<div style="text-align:center;padding:40px;color:var(--t2);font-size:13px"><div style="font-size:28px;margin-bottom:10px;animation:imp-spin 1.2s linear infinite;display:inline-block">⏳</div><div>Carregando questões...</div></div>';
+  // 1) Carrega questões (1 round-trip — rápido)
   const questoes=await loadRecQuestoes(provaId);
   S.recursos.alunoState.questoes=questoes;
-  // Carrega contestações do aluno por questão
   S.recursos.alunoState.contestacoes={};
-  for(const q of questoes){
-    try{
-      const csnap=await getDocs(collection(db,`provas/${provaId}/questoes/${q.id}/contestacoes`));
-      const minhas=csnap.docs.map(d=>({id:d.id,...d.data()})).filter(c=>(c.emailAluno||'').toLowerCase()===S.recursos.alunoState.email);
-      if(minhas.length)S.recursos.alunoState.contestacoes[q.id]=minhas;
-    }catch(e){console.warn('load contestações:',e);}
-  }
+  // 2) Renderiza UI IMEDIATAMENTE com as questões (aluno já consegue ler/navegar)
   _renderAlunoProvaUI(prova,questoes);
+  // 3) Em background, carrega contestações próprias do aluno em paralelo
+  // (Promise.all paraleliza os 160+ getDocs — cai de minutos pra segundos.
+  // Como o UI já está renderizado, o aluno vê o conteúdo enquanto isso roda.)
+  const emailNorm=(S.recursos.alunoState.email||'').toLowerCase();
+  if(!emailNorm)return;
+  const ind=document.createElement('div');
+  ind.id='rec-aluno-cont-loading';
+  ind.style.cssText='position:fixed;bottom:20px;right:20px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;font-family:JetBrains Mono,monospace;font-size:11px;color:var(--t2);display:flex;align-items:center;gap:8px;z-index:999;box-shadow:0 6px 18px -6px rgba(0,0,0,.3)';
+  ind.innerHTML='<span style="display:inline-block;animation:imp-spin 1s linear infinite">⏳</span><span>Verificando suas contestações...</span>';
+  document.body.appendChild(ind);
+  try{
+    const results=await Promise.all(questoes.map(async q=>{
+      try{
+        const csnap=await getDocs(collection(db,`provas/${provaId}/questoes/${q.id}/contestacoes`));
+        const minhas=csnap.docs.map(d=>({id:d.id,...d.data()})).filter(c=>(c.emailAluno||'').toLowerCase()===emailNorm);
+        return{qId:q.id,minhas};
+      }catch(e){console.warn('load contestações:',q.id,e);return{qId:q.id,minhas:[]};}
+    }));
+    results.forEach(({qId,minhas})=>{if(minhas.length)S.recursos.alunoState.contestacoes[qId]=minhas;});
+    // Re-renderiza pra exibir as contestações do aluno (com state preservado de expansão)
+    const provaAtual=(S.recursos.provas||[]).find(p=>p.id===provaId);
+    if(provaAtual)_renderAlunoProvaUI(provaAtual,questoes);
+  }catch(e){console.error('load contestacoes paralelo falhou:',e);}
+  finally{document.getElementById('rec-aluno-cont-loading')?.remove();}
 }
 
 function _renderAlunoProvaUI(prova,questoes){
@@ -11204,63 +11269,14 @@ function _alunoQuestaoBox(q,prova){
 }
 
 function _alunoQuestaoConteudo(q,prova,minhasContest){
-  const modo=q.modo||'estruturado';
-  const isVF=modo==='vf';
-  const enun=(modo==='bloco'?(q.blocoTexto||''):(q.enunciado||'')).replace(/</g,'&lt;').replace(/\n/g,'<br>');
-  const img=q.imagemUrl?`<div style="margin:12px 0;text-align:center"><img src="${q.imagemUrl}" style="max-width:100%;max-height:380px;border-radius:8px;border:1px solid var(--border)"/></div>`:'';
-
-  if(isVF){
-    // Modo V/F: cada alternativa tem seu próprio gabarito + status + botão contestar
-    const alts=Array.isArray(q.alternativas)?q.alternativas:[];
-    const altsHtml=`<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
-      ${alts.map(a=>{
-        const minhasAlt=minhasContest.filter(c=>c.alternativaLetra===a.letra);
-        const statusAlt=_recStatusAlternativaAluno(q,a.letra,minhasAlt);
-        const parPorAlt=(q.pareceresPorAlt||{})[a.letra]||{};
-        const isV=a.gabaritoVF==='V';
-        const corGab=isV?'#3fb950':'#f85149';
-        const bgGab=isV?'rgba(63,185,80,.1)':'rgba(248,81,73,.1)';
-        const bdGab=isV?'rgba(63,185,80,.35)':'rgba(248,81,73,.35)';
-        const labelGab=isV?'VERDADEIRO':'FALSO';
-        // Só mostra parecer se FINALIZADO (não exibe rascunho da coord)
-        const argRaw=parPorAlt.finalizado?(parPorAlt.argumento||''):'';
-        const argHtml=argRaw?(/<[a-z][^>]*>/i.test(argRaw)?_featSanitize(argRaw):argRaw.replace(/</g,'&lt;').replace(/\n/g,'<br>')):'';
-        const argParecer=argHtml?`<div style="margin-top:8px;padding:10px 12px;background:${statusAlt.bg};border:1px solid ${statusAlt.bd};border-radius:6px;font-size:12.5px;line-height:1.5">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:${statusAlt.cor};letter-spacing:.5px;margin-bottom:4px">${statusAlt.icon||'●'} PARECER ANESTREVIEW · ${statusAlt.label}</div>
-          ${argHtml}
-          ${parPorAlt.imagemUrl?`<div style="margin-top:6px"><img src="${parPorAlt.imagemUrl}" style="max-width:100%;max-height:180px;border-radius:6px;border:1px solid var(--border)"/></div>`:''}
-          ${parPorAlt.profNome?`<div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--t2);margin-top:6px">— ${parPorAlt.profNome}${parPorAlt.respondidoEm?' em '+fDT(parPorAlt.respondidoEm):''}</div>`:''}
-        </div>`:'';
-        const jaContestou=minhasAlt.length>0;
-        const sobAnalise=_emAnaliseAlt(q,a.letra);
-        const btnContestar=sobAnalise
-          ?`<div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#a371f7;padding:5px 10px;background:rgba(163,113,247,.08);border:1px dashed rgba(163,113,247,.4);border-radius:6px;line-height:1.4;max-width:240px">🛠️ Sob análise da equipe AnestReview. Novas contestações ficam liberadas após o parecer.</div>`
-          :`<button class="btn btn-${jaContestou?'s':'p'} btn-sm" onclick="alunoAbrirContestar('${q.id}','${a.letra}')" style="font-size:11px;padding:5px 10px">📨 Contestar${jaContestou?' de novo':''}</button>`;
-        return`<div style="padding:10px 14px;background:var(--bg);border:1px solid ${statusAlt.bd};border-left:3px solid ${statusAlt.cor};border-radius:8px">
-          <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
-            <div style="flex:1;min-width:200px">
-              <div style="font-size:13.5px;line-height:1.5">
-                <strong style="color:var(--accent);font-family:'JetBrains Mono',monospace">${a.letra})</strong> ${(a.texto||'').replace(/</g,'&lt;')}
-              </div>
-              <div style="margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:${bgGab};color:${corGab};border:1px solid ${bdGab}">📌 GABARITO: ${labelGab}</span>
-                <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:999px;background:${statusAlt.bg};color:${statusAlt.cor};border:1px solid ${statusAlt.bd}">${statusAlt.icon||'●'} ${statusAlt.label}</span>
-                ${jaContestou?'<span style="font-family:\'JetBrains Mono\',monospace;font-size:9.5px;color:var(--accent);font-weight:700">📨 VOCÊ CONTESTOU</span>':''}
-              </div>
-            </div>
-            ${btnContestar}
-          </div>
-          ${argParecer}
-        </div>`;
-      }).join('')}
-    </div>`;
-    const minhasBox=minhasContest.length?_alunoMinhasContestacoes(minhasContest):'';
-    return`<div style="font-size:14px;line-height:1.55">${enun}</div>${img}${altsHtml}${minhasBox}`;
-  }
-
-  // Modo estruturado/bloco (TEA/TSA): 1 gabarito único + 1 botão contestar
+  // Enunciado pode ser HTML rico (novo) ou texto puro (legado)
+  const enunRaw=q.enunciado||q.blocoTexto||'';
+  const enun=/<[a-z][^>]*>/i.test(enunRaw)?_gabSanitize(enunRaw):enunRaw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+  // Legado: q.imagemUrl é renderizada como anexo SE não estiver já dentro do enunciado
+  const img=(q.imagemUrl&&!enunRaw.includes(q.imagemUrl))?`<div style="margin:12px 0;text-align:center"><img src="${q.imagemUrl}" class="questao-img" alt="imagem da questão"/></div>`:'';
+  // Gabarito + alternativas
   const gab=q.gabaritoOficial||'—';
-  const alts=(modo==='estruturado'&&Array.isArray(q.alternativas))?q.alternativas:[];
+  const alts=Array.isArray(q.alternativas)?q.alternativas:[];
   const altsHtml=alts.length?`<div style="margin-top:10px;display:flex;flex-direction:column;gap:5px">
     ${alts.map(a=>{
       const isGab=a.letra===gab;
@@ -11277,43 +11293,50 @@ function _alunoQuestaoConteudo(q,prova,minhasContest){
       </div>`
     :`<div style="margin-top:14px;display:flex;justify-content:center"><button class="btn btn-p btn-sm" onclick="alunoAbrirContestar('${q.id}')">📨 Contestar Gabarito</button></div>`;
   const minhasBox=minhasContest.length?_alunoMinhasContestacoes(minhasContest):'';
-  return`<div style="font-size:14px;line-height:1.55">${enun}</div>${img}${altsHtml}${gabBox}${parecerBox}${contestacaoBtn}${minhasBox}`;
+  return`<div class="enunciado-aluno-txt" style="font-size:14px;line-height:1.6;text-align:justify;text-justify:inter-word;hyphens:none;-webkit-hyphens:none;word-break:keep-all;overflow-wrap:break-word">${enun}</div>${img}${altsHtml}${gabBox}${parecerBox}${contestacaoBtn}${minhasBox}`;
 }
 
-// Status por alternativa (modo VF) — só conta parecer FINALIZADO
-function _recStatusAlternativaAluno(q,letra,minhasAlt){
-  const parPorAlt=(q.pareceresPorAlt||{})[letra]||{};
-  const p=parPorAlt.finalizado?(parPorAlt.parecer||'em-analise'):'em-analise';
-  if(p==='cabe-recurso')return{key:'cabe',label:'CABE RECURSO',icon:'⚠️',cor:'#fb8f44',bg:'rgba(251,143,68,.12)',bd:'rgba(251,143,68,.35)'};
-  if(p==='nao-cabe-recurso')return{key:'nao-cabe',label:'NÃO CABE',cor:'#3fb950',bg:'rgba(63,185,80,.1)',bd:'rgba(63,185,80,.3)'};
-  if(_emAnaliseAlt(q,letra))return{key:'contest-analise',label:'CONTESTAÇÃO EM ANÁLISE',icon:'🛠️',cor:'#a371f7',bg:'rgba(163,113,247,.12)',bd:'rgba(163,113,247,.35)'};
-  if((minhasAlt||[]).some(c=>c.status!=='respondida'))return{key:'em-analise',label:'CONTESTAÇÃO RECEBIDA',cor:'#d29922',bg:'rgba(210,153,34,.12)',bd:'rgba(210,153,34,.35)'};
-  return{key:'em-analise-time',label:'EM ANÁLISE PELO TIME',cor:'#8b949e',bg:'rgba(139,148,158,.1)',bd:'rgba(139,148,158,.3)'};
-}
-
+// Lista TODAS as sugestões ATIVAS (não excluídas) da questão como pareceres independentes
+// visíveis pro aluno. Excluídas ficam só no back (visíveis pra coord).
+// Ordem: mais recente primeiro.
 function _alunoParecerBox(q){
-  // Só mostra se o parecer foi FINALIZADO (não exibe rascunho)
-  if(!q.parecerFinalizado)return'';
-  const p=q.parecer||'em-analise';
-  if(p==='em-analise'&&!q.parecerArgumento)return'';
-  const cores={'cabe-recurso':{c:'#fb8f44',bg:'rgba(251,143,68,.08)',bd:'rgba(251,143,68,.3)',label:'⚠️ CABE RECURSO'},
+  const sugestoes=Array.isArray(q.sugestoes)?q.sugestoes:[];
+  let ativas=sugestoes.filter(s=>!s.excluida).sort((a,b)=>(b.criadoEm||'').localeCompare(a.criadoEm||''));
+  // Compat: questão antiga (sem sugestoes[]) que tinha parecer salvo no padrão antigo
+  if(!ativas.length&&q.parecerFinalizado&&q.parecer&&q.parecerArgumento){
+    ativas=[{
+      id:'legacy_'+q.id,
+      parecer:q.parecer,
+      argumento:q.parecerArgumento,
+      imagemUrl:q.parecerImagemUrl||'',
+      profNome:q.parecerPor||'',
+      criadoEm:q.parecerEm||''
+    }];
+  }
+  if(!ativas.length)return'';
+  const cores={
+    'cabe-recurso':{c:'#fb8f44',bg:'rgba(251,143,68,.08)',bd:'rgba(251,143,68,.3)',label:'⚠️ CABE RECURSO'},
     'nao-cabe-recurso':{c:'#3fb950',bg:'rgba(63,185,80,.08)',bd:'rgba(63,185,80,.3)',label:'✓ NÃO CABE RECURSO'},
-    'em-analise':{c:'var(--t2)',bg:'var(--bg3)',bd:'var(--border)',label:'EM ANÁLISE'}};
-  const sty=cores[p]||cores['em-analise'];
-  // Argumento agora é HTML rico — sanitiza e renderiza como tal. Compat: se for texto puro antigo, escapa.
-  const argRaw=q.parecerArgumento||'';
-  const arg=/<[a-z][^>]*>/i.test(argRaw)?_featSanitize(argRaw):argRaw.replace(/</g,'&lt;').replace(/\n/g,'<br>');
-  const profInfo=q.parecerPor?`<div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);margin-top:6px">— Parecer dado por ${q.parecerPor}${q.parecerEm?' em '+fDT(q.parecerEm):''}</div>`:'';
-  const imgPar=q.parecerImagemUrl?`<div style="margin-top:8px"><img src="${q.parecerImagemUrl}" style="max-width:100%;max-height:240px;border-radius:8px;border:1px solid var(--border)"/></div>`:'';
-  const instrucoesBtn=p==='cabe-recurso'?`<button class="btn btn-s btn-sm" onclick="alunoVerInstrucoes()" style="margin-top:8px">📖 Como enviar o recurso oficial</button>`:'';
-  return`<div style="margin-top:14px;padding:14px 16px;background:${sty.bg};border:1px solid ${sty.bd};border-radius:10px">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <strong style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${sty.c};letter-spacing:.5px">${sty.label}</strong>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)">— Parecer AnestReview</span>
-    </div>
-    ${arg?`<div style="font-size:13px;line-height:1.55">${arg}</div>`:'<div style="font-size:12px;color:var(--t2);font-style:italic">(sem argumento adicionado)</div>'}
-    ${imgPar}${profInfo}${instrucoesBtn}
-  </div>`;
+    'em-analise':{c:'var(--t2)',bg:'var(--bg3)',bd:'var(--border)',label:'EM ANÁLISE'}
+  };
+  return ativas.map((s,i)=>{
+    const p=s.parecer||'em-analise';
+    const sty=cores[p]||cores['em-analise'];
+    const arg=s.argumento||'';
+    const argHtml=/<[a-z][^>]*>/i.test(arg)?_featSanitize(arg):arg.replace(/</g,'&lt;').replace(/\n/g,'<br>');
+    const imgPar=s.imagemUrl?`<div style="margin-top:8px"><img src="${s.imagemUrl}" style="max-width:100%;max-height:240px;border-radius:8px;border:1px solid var(--border)"/></div>`:'';
+    const instrucoesBtn=p==='cabe-recurso'?`<button class="btn btn-s btn-sm" onclick="alunoVerInstrucoes()" style="margin-top:8px">📖 Como enviar o recurso oficial</button>`:'';
+    const headerExtra=ativas.length>1?`<span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--t2);font-weight:500">Parecer ${i+1} de ${ativas.length}</span>`:'';
+    return`<div style="margin-top:14px;padding:14px 16px;background:${sty.bg};border:1px solid ${sty.bd};border-radius:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <strong style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${sty.c};letter-spacing:.5px">${sty.label}</strong>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)">— Parecer AnestReview</span>
+        ${headerExtra}
+      </div>
+      ${argHtml?`<div class="parecer-aluno-txt" style="font-size:13px;line-height:1.55;text-align:justify;text-justify:inter-word;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none;word-break:keep-all;overflow-wrap:break-word">${argHtml}</div>`:'<div style="font-size:12px;color:var(--t2);font-style:italic">(sem parecer adicionado)</div>'}
+      ${imgPar}${instrucoesBtn}
+    </div>`;
+  }).join('');
 }
 
 function _alunoMinhasContestacoes(lista){
@@ -11330,44 +11353,27 @@ function _alunoMinhasContestacoes(lista){
   </div>`;
 }
 
-// Helper: só considera o parecer "publicado" se foi finalizado (não conta rascunhos)
-function _parecerPublicadoVF(q,letra){
-  const p=(q.pareceresPorAlt||{})[letra]||{};
-  return p.finalizado?(p.parecer||'em-analise'):'em-analise';
-}
 function _parecerPublicadoGeral(q){
   return q.parecerFinalizado?(q.parecer||'em-analise'):'em-analise';
 }
 
-// Helper: questão (ou alternativa em VF) está sob análise ativa? (assumida por prof, ainda não finalizada)
+// Helper: questão está sob análise ativa? (assumida por prof, ainda não finalizada)
 // Quando true, o aluno NÃO pode enviar nova contestação até o parecer ser publicado.
 function _emAnaliseGeral(q){
   return !!(q&&q.parecerAtribuidoA&&!q.parecerFinalizado);
 }
-function _emAnaliseAlt(q,letra){
-  const p=(q&&q.pareceresPorAlt||{})[letra]||{};
-  return !!(p.atribuidoA&&!p.finalizado);
-}
 
-// Status visual da questão (visão aluno)
-// Estado "CONTESTAÇÃO EM ANÁLISE" (roxo, com prof responsável) tem prioridade sobre o "EM ANÁLISE" genérico (amarelo).
+// Status visual da questão (visão aluno) — agregado das sugestões ativas
+// • Se ALGUMA sugestão ativa diz "cabe recurso" → status = CABE RECURSO (prioritário)
+// • Se TODAS ativas dizem "não cabe recurso" → status = NÃO CABE RECURSO
+// • Senão cai nos estados de análise/contestação/validação
 function _recStatusQuestaoAluno(q,minhasContest){
-  // Modo VF: agrega status das alternativas. Pior parecer vence. Considera só pareceres FINALIZADOS.
-  if(q.modo==='vf'){
-    const alts=Array.isArray(q.alternativas)?q.alternativas:[];
-    const pareceres=alts.map(a=>_parecerPublicadoVF(q,a.letra));
-    const algumaEmAnalise=alts.some(a=>_emAnaliseAlt(q,a.letra));
-    if(pareceres.includes('cabe-recurso'))return{key:'cabe',label:'CABE RECURSO EM ALGUMA ALT',icon:'⚠️',cor:'#fb8f44',bg:'rgba(251,143,68,.14)',bd:'rgba(251,143,68,.4)',bgSubtle:'rgba(251,143,68,.05)',bgHover:'rgba(251,143,68,.1)'};
-    if(algumaEmAnalise)return{key:'contest-analise',label:'CONTESTAÇÃO EM ANÁLISE',icon:'🛠️',cor:'#a371f7',bg:'rgba(163,113,247,.14)',bd:'rgba(163,113,247,.4)',bgSubtle:'rgba(163,113,247,.05)',bgHover:'rgba(163,113,247,.1)'};
-    if(minhasContest.some(c=>c.status!=='respondida'))return{key:'em-analise',label:'CONTESTAÇÃO RECEBIDA',cor:'#d29922',bg:'rgba(210,153,34,.14)',bd:'rgba(210,153,34,.4)',bgSubtle:'rgba(210,153,34,.05)',bgHover:'rgba(210,153,34,.1)'};
-    if(pareceres.every(p=>p==='nao-cabe-recurso'))return{key:'nao-cabe',label:'NÃO CABE EM NENHUMA',cor:'#3fb950',bg:'rgba(63,185,80,.12)',bd:'rgba(63,185,80,.35)',bgSubtle:'rgba(63,185,80,.04)',bgHover:'rgba(63,185,80,.08)'};
-    if(q.validada)return{key:'validada',label:'GABARITO VALIDADO',cor:'#3fb950',bg:'rgba(63,185,80,.1)',bd:'rgba(63,185,80,.3)',bgSubtle:'rgba(63,185,80,.03)',bgHover:'rgba(63,185,80,.07)'};
-    return{key:'em-analise-time',label:'EM ANÁLISE PELO TIME ANESTREVIEW',cor:'#8b949e',bg:'rgba(139,148,158,.12)',bd:'rgba(139,148,158,.3)',bgSubtle:'transparent',bgHover:'var(--bg3)'};
-  }
-  // Modo TEA/TSA tradicional — só considera parecer FINALIZADO
-  const parecer=_parecerPublicadoGeral(q);
-  if(parecer==='cabe-recurso')return{key:'cabe',label:'CABE RECURSO',icon:'⚠️',cor:'#fb8f44',bg:'rgba(251,143,68,.14)',bd:'rgba(251,143,68,.4)',bgSubtle:'rgba(251,143,68,.05)',bgHover:'rgba(251,143,68,.1)'};
-  if(parecer==='nao-cabe-recurso')return{key:'nao-cabe',label:'NÃO CABE RECURSO',cor:'#3fb950',bg:'rgba(63,185,80,.12)',bd:'rgba(63,185,80,.35)',bgSubtle:'rgba(63,185,80,.04)',bgHover:'rgba(63,185,80,.08)'};
+  const sugestoesAtivas=Array.isArray(q.sugestoes)?q.sugestoes.filter(s=>!s.excluida):[];
+  let pareceres=sugestoesAtivas.map(s=>s.parecer);
+  // Compat com questão antiga sem sugestoes[] mas com parecerFinalizado
+  if(!pareceres.length&&q.parecerFinalizado&&q.parecer)pareceres=[q.parecer];
+  if(pareceres.includes('cabe-recurso'))return{key:'cabe',label:'CABE RECURSO',icon:'⚠️',cor:'#fb8f44',bg:'rgba(251,143,68,.14)',bd:'rgba(251,143,68,.4)',bgSubtle:'rgba(251,143,68,.05)',bgHover:'rgba(251,143,68,.1)'};
+  if(pareceres.length&&pareceres.every(p=>p==='nao-cabe-recurso'))return{key:'nao-cabe',label:'NÃO CABE RECURSO',cor:'#3fb950',bg:'rgba(63,185,80,.12)',bd:'rgba(63,185,80,.35)',bgSubtle:'rgba(63,185,80,.04)',bgHover:'rgba(63,185,80,.08)'};
   if(_emAnaliseGeral(q))return{key:'contest-analise',label:'CONTESTAÇÃO EM ANÁLISE',icon:'🛠️',cor:'#a371f7',bg:'rgba(163,113,247,.14)',bd:'rgba(163,113,247,.4)',bgSubtle:'rgba(163,113,247,.05)',bgHover:'rgba(163,113,247,.1)'};
   if(minhasContest.some(c=>c.status!=='respondida'))return{key:'em-analise',label:'CONTESTAÇÃO RECEBIDA',cor:'#d29922',bg:'rgba(210,153,34,.14)',bd:'rgba(210,153,34,.4)',bgSubtle:'rgba(210,153,34,.05)',bgHover:'rgba(210,153,34,.1)'};
   if(q.validada)return{key:'validada',label:'CONCORDAMOS COM O GABARITO',cor:'#3fb950',bg:'rgba(63,185,80,.1)',bd:'rgba(63,185,80,.3)',bgSubtle:'rgba(63,185,80,.03)',bgHover:'rgba(63,185,80,.07)'};
@@ -11387,25 +11393,14 @@ window.alunoAbrirContestar=async(qId,alternativaLetra)=>{
   const provaId=S.recursos.alunoState.provaId;
   const q=(S.recursos.alunoState.questoes||[]).find(x=>x.id===qId);
   if(!q){alert('Questão não encontrada.');return;}
-  // Bloqueio: questão (ou alt em VF) sob análise por prof não aceita nova contestação
-  if(q.modo==='vf'&&alternativaLetra&&_emAnaliseAlt(q,alternativaLetra)){
-    alert(`⚠️ A alternativa ${alternativaLetra} desta questão está sendo analisada pela equipe AnestReview.\n\nNovas contestações ficam liberadas após o parecer ser publicado.`);
-    return;
-  }
-  if(q.modo!=='vf'&&_emAnaliseGeral(q)){
+  // Bloqueio: questão sob análise por prof não aceita nova contestação
+  if(_emAnaliseGeral(q)){
     alert('⚠️ Esta questão está sendo analisada pela equipe AnestReview.\n\nNovas contestações ficam liberadas após o parecer ser publicado.');
     return;
   }
   // Carrega fontes se ainda não carregou
   if(!(S.recursos.fontes||[]).length)await loadRecFontes();
-  const isVF=q.modo==='vf';
-  if(isVF){
-    const a=(q.alternativas||[]).find(x=>x.letra===alternativaLetra);
-    const gabVF=a?.gabaritoVF==='V'?'VERDADEIRO':a?.gabaritoVF==='F'?'FALSO':'—';
-    document.getElementById('mct-sub').innerHTML=`Questão ${q.numero||'?'} · Alternativa <strong style="color:var(--accent)">${alternativaLetra}</strong> · Gabarito oficial: <strong style="color:${a?.gabaritoVF==='V'?'#3fb950':'#f85149'}">${gabVF}</strong>`;
-  }else{
-    document.getElementById('mct-sub').textContent=`Questão ${q.numero||'?'} · Gabarito oficial: ${q.gabaritoOficial||'—'}`;
-  }
+  document.getElementById('mct-sub').textContent=`Questão ${q.numero||'?'} · Gabarito oficial: ${q.gabaritoOficial||'—'}`;
   // Popula select de bibliografia (filtra por prova vinculada; fontes "geral" sem provasIds aparecem em todas)
   const sel=document.getElementById('mct-fonte');
   const bibliografias=_bibliografiasParaProva(provaId);
@@ -11423,23 +11418,16 @@ window.alunoAbrirContestar=async(qId,alternativaLetra)=>{
   document.getElementById('modal-contestar').dataset.questaoId=qId;
   document.getElementById('modal-contestar').dataset.provaId=provaId;
   document.getElementById('modal-contestar').dataset.imagemUrl='';
-  document.getElementById('modal-contestar').dataset.alternativaLetra=alternativaLetra||'';
+  document.getElementById('modal-contestar').dataset.alternativaLetra='';
   // Alerta de re-contestação se já há parecer ≠ em-análise
   const alerta=document.getElementById('mct-alerta-parecer');
   const alertaTxt=document.getElementById('mct-alerta-texto');
-  // Em modo VF: olha o parecer da alternativa específica; senão, parecer geral
-  let parecerCheck=q.parecer||'em-analise';
-  let argumentoCheck=q.parecerArgumento||'';
-  if(isVF&&alternativaLetra){
-    const par=(q.pareceresPorAlt||{})[alternativaLetra]||{};
-    parecerCheck=par.parecer||'em-analise';
-    argumentoCheck=par.argumento||'';
-  }
+  const parecerCheck=q.parecer||'em-analise';
+  const argumentoCheck=q.parecerArgumento||'';
   if(parecerCheck&&parecerCheck!=='em-analise'){
     const labels={'cabe-recurso':'⚠️ <strong>CABE RECURSO</strong>','nao-cabe-recurso':'✓ <strong>NÃO CABE RECURSO</strong>'};
-    const arg=argumentoCheck?argumentoCheck.replace(/</g,'&lt;').replace(/\n/g,'<br>'):'<em>(sem argumento)</em>';
-    const escopo=isVF&&alternativaLetra?`esta alternativa (${alternativaLetra})`:'esta questão';
-    alertaTxt.innerHTML=`A AnestReview já avaliou ${escopo} com o parecer ${labels[parecerCheck]||parecerCheck}.<br><br><div style="padding:10px 12px;background:var(--bg);border-radius:6px;font-style:italic">${arg}</div><br><strong>Você leu o parecer? Deseja seguir com a contestação mesmo assim?</strong>`;
+    const arg=argumentoCheck?argumentoCheck.replace(/</g,'&lt;').replace(/\n/g,'<br>'):'<em>(sem parecer)</em>';
+    alertaTxt.innerHTML=`A AnestReview já avaliou esta questão com o parecer ${labels[parecerCheck]||parecerCheck}.<br><br><div style="padding:10px 12px;background:var(--bg);border-radius:6px;font-style:italic">${arg}</div><br><strong>Você leu o parecer? Deseja seguir com a contestação mesmo assim?</strong>`;
     alerta.classList.remove('hidden');
   }else{
     alerta.classList.add('hidden');
@@ -11555,8 +11543,32 @@ async function _renderRecQuestoesView(){
   const prova=(S.recursos.provas||[]).find(p=>p.id===provaId);
   if(!prova){S.recursos.viewMode='provas';return renderRecProvas();}
   if(acts)acts.innerHTML=`
-    <button class="btn btn-s btn-sm" onclick="openImportBlocoModal()">📋 Importar em bloco</button>
-    <button class="btn btn-s btn-sm" onclick="openImportPdfModal()">📄 Importar PDF</button>
+    <div style="position:relative;display:inline-block" id="rec-import-q-wrap">
+      <button class="btn btn-s btn-sm" onclick="recToggleImportMenu(event)" style="display:inline-flex;align-items:center;gap:6px">📥 Importar questões <span style="font-size:9px;opacity:.7">▾</span></button>
+      <div id="rec-import-q-menu" class="hidden" style="position:absolute;top:calc(100% + 6px);left:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);box-shadow:0 8px 24px -8px rgba(0,0,0,.35);min-width:260px;z-index:50;padding:6px;animation:fi .15s var(--ease-out-soft)">
+        <button onclick="recImportMenuPick('bloco')" style="display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:none;color:var(--text);font-family:inherit;font-size:13px;cursor:pointer;border-radius:8px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='none'">
+          <div style="font-weight:700">📋 Colando conteúdo (Ctrl+V)</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:2px">Copie o texto das questões e cole na caixa</div>
+        </button>
+        <button onclick="recImportMenuPick('pdf')" style="display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:none;color:var(--text);font-family:inherit;font-size:13px;cursor:pointer;border-radius:8px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='none'">
+          <div style="font-weight:700">📄 Importar PDF</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:2px">Extrai questões automaticamente de um PDF</div>
+        </button>
+      </div>
+    </div>
+    <div style="position:relative;display:inline-block" id="rec-import-g-wrap">
+      <button class="btn btn-s btn-sm" onclick="recToggleImportGabMenu(event)" title="Atualiza o gabarito oficial das questões existentes (não cria questões)" style="display:inline-flex;align-items:center;gap:6px">🎯 Importar gabarito <span style="font-size:9px;opacity:.7">▾</span></button>
+      <div id="rec-import-g-menu" class="hidden" style="position:absolute;top:calc(100% + 6px);left:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);box-shadow:0 8px 24px -8px rgba(0,0,0,.35);min-width:260px;z-index:50;padding:6px;animation:fi .15s var(--ease-out-soft)">
+        <button onclick="recImportGabMenuPick('bloco')" style="display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:none;color:var(--text);font-family:inherit;font-size:13px;cursor:pointer;border-radius:8px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='none'">
+          <div style="font-weight:700">📋 Colando conteúdo (Ctrl+V)</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:2px">Cole o gabarito direto (uma linha por questão)</div>
+        </button>
+        <button onclick="recImportGabMenuPick('pdf')" style="display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:none;color:var(--text);font-family:inherit;font-size:13px;cursor:pointer;border-radius:8px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='none'">
+          <div style="font-weight:700">📄 Importar PDF</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:2px">Extrai o gabarito automaticamente de um PDF</div>
+        </button>
+      </div>
+    </div>
     <button class="btn btn-p btn-sm" onclick="openQuestaoModal()">+ Nova questão</button>
   `;
   el.innerHTML='<div style="text-align:center;padding:30px;color:var(--t2);font-size:13px">⏳ Carregando questões...</div>';
@@ -11579,24 +11591,33 @@ async function _renderRecQuestoesView(){
     el.innerHTML=header+`<div style="text-align:center;padding:60px 20px;background:var(--bg2);border:1px dashed var(--border);border-radius:14px">
       <div style="font-size:42px;margin-bottom:12px;opacity:.5">📝</div>
       <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px">Nenhuma questão cadastrada</div>
-      <p style="font-size:13.5px;color:var(--t2);max-width:380px;margin:0 auto;line-height:1.55">Use <strong>+ Nova questão</strong> pra cadastrar manualmente, ou <strong>📋 Importar em bloco</strong> / <strong>📄 Importar PDF</strong>.</p>
+      <p style="font-size:13.5px;color:var(--t2);max-width:380px;margin:0 auto;line-height:1.55">Use <strong>+ Nova questão</strong> pra cadastrar manualmente, ou <strong>📥 Importar questões</strong> pra trazer várias de uma vez (colando texto ou via PDF).</p>
     </div>`;
     return;
   }
   // Barra de filtros
   const filtroAtual=S.recursos.questoesFilter||'todas';
-  const nPend=questoes.filter(q=>q.imagemPendente&&!q.imagemUrl).length;
+  const nImgPend=questoes.filter(q=>q.imagemPendente&&!q.imagemUrl).length;
+  const nGabPend=questoes.filter(q=>!q.gabaritoOficial).length;
+  // Helper: lab+contagem opcional. corAtivo é a tonalidade quando o filtro está ON.
   const btnFiltro=(k,lab,n,corAtivo)=>{
     const ativo=filtroAtual===k;
-    return`<button onclick="recSetQFilter('${k}')" style="cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.5px;padding:6px 12px;border-radius:999px;background:${ativo?(corAtivo||'rgba(47,129,247,.15)'):'var(--bg2)'};color:${ativo?(corAtivo?'#fb8f44':'var(--accent)'):'var(--t2)'};border:1px solid ${ativo?(corAtivo?'rgba(251,143,68,.45)':'rgba(47,129,247,.4)'):'var(--border)'}">${lab}${n!==undefined?` <span style="opacity:.7">(${n})</span>`:''}</button>`;
+    const corBg=corAtivo&&corAtivo.bg?corAtivo.bg:'rgba(47,129,247,.15)';
+    const corFg=corAtivo&&corAtivo.fg?corAtivo.fg:'var(--accent)';
+    const corBd=corAtivo&&corAtivo.bd?corAtivo.bd:'rgba(47,129,247,.4)';
+    return`<button onclick="recSetQFilter('${k}')" style="cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.5px;padding:6px 12px;border-radius:999px;background:${ativo?corBg:'var(--bg2)'};color:${ativo?corFg:'var(--t2)'};border:1px solid ${ativo?corBd:'var(--border)'}">${lab}${n!==undefined?` <span style="opacity:.7">(${n})</span>`:''}</button>`;
   };
+  const corImgPend={bg:'rgba(251,143,68,.15)',fg:'#fb8f44',bd:'rgba(251,143,68,.45)'};
+  const corGabPend={bg:'rgba(210,153,34,.15)',fg:'#d29922',bd:'rgba(210,153,34,.45)'};
   const barraFiltros=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
     ${btnFiltro('todas','TODAS',questoes.length)}
-    ${nPend?btnFiltro('img-pend','📷 IMG PENDENTE',nPend,'rgba(251,143,68,.15)'):''}
+    ${nImgPend?btnFiltro('img-pend','📷 IMG PENDENTE',nImgPend,corImgPend):''}
+    ${nGabPend?btnFiltro('gab-pend','🎯 GABARITO PENDENTE',nGabPend,corGabPend):''}
   </div>`;
   // Aplica filtro
   let questoesFiltradas=questoes;
   if(filtroAtual==='img-pend')questoesFiltradas=questoes.filter(q=>q.imagemPendente&&!q.imagemUrl);
+  else if(filtroAtual==='gab-pend')questoesFiltradas=questoes.filter(q=>!q.gabaritoOficial);
   el.innerHTML=header+barraFiltros+(questoesFiltradas.length?`<div style="display:grid;gap:8px">
     ${questoesFiltradas.map(q=>_recQuestaoCard(q,prova)).join('')}
   </div>`:`<div style="text-align:center;padding:40px 20px;background:var(--bg2);border:1px dashed var(--border);border-radius:14px;color:var(--t2);font-size:13px">Nenhuma questão bate com esse filtro.</div>`);
@@ -11607,44 +11628,355 @@ window.recSetQFilter=(k)=>{
   renderRecProvas();
 };
 
+// Conjunto de questões expandidas (persiste entre re-renders)
+S.recursos._questaoExpanded=S.recursos._questaoExpanded||new Set();
+
 function _recQuestaoCard(q,prova){
   const numero=q.numero||'?';
-  const modo=q.modo||'estruturado';
-  const enun=modo==='bloco'?(q.blocoTexto||''):(q.enunciado||'');
-  const snippet=enun.replace(/\s+/g,' ').slice(0,140).replace(/</g,'&lt;');
   const validada=!!q.validada;
-  const parecer=q.parecer||'em-analise';
   const status=_recStatusQuestao(q);
-  // Resumo do gabarito conforme o modo
-  let gabResumo='';
-  if(modo==='vf'){
-    const alts=(q.alternativas||[]);
-    gabResumo=alts.length?alts.map(a=>`${a.letra}=<strong style="color:${a.gabaritoVF==='V'?'#3fb950':'#f85149'}">${a.gabaritoVF||'?'}</strong>`).join(' · '):'<span style="color:var(--yellow)">⚠ sem gabarito</span>';
-  }else{
-    gabResumo=`<strong>${q.gabaritoOficial||'—'}</strong>`;
-  }
-  const modoLabel={estruturado:'Estruturado',bloco:'Bloco',vf:'V/F'}[modo]||modo;
-  const imgPendBadge=(q.imagemPendente&&!q.imagemUrl)?`<span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:999px;background:rgba(251,143,68,.14);color:#fb8f44;border:1px solid rgba(251,143,68,.4)" title="O PDF importado tinha imagem nessa questão. Edite a questão pra fazer upload da imagem.">📷 IMG PENDENTE</span>`:'';
-  return`<div style="padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${status.cor};border-radius:10px;display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">
-    <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;color:var(--accent);min-width:42px;text-align:center;padding-top:4px">${numero}</div>
-    <div style="flex:1;min-width:240px">
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+  const gabResumo=`<strong>${q.gabaritoOficial||'—'}</strong>`;
+  const imgPendBadge=(q.imagemPendente&&!q.imagemUrl)?`<span style="display:inline-flex;align-items:center;gap:2px;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.5px;padding:2px 4px 2px 7px;border-radius:999px;background:rgba(251,143,68,.14);color:#fb8f44;border:1px solid rgba(251,143,68,.4)" title="O PDF importado tinha imagem nessa questão. Expanda pra anexar a imagem — ou clique no ✕ se for falso positivo">📷 IMG PENDENTE<button onclick="event.stopPropagation();iqDescartarImgPendente('${q.id}')" title="Não tem imagem nessa questão — desmarcar" style="background:none;border:none;cursor:pointer;color:inherit;font-size:11px;padding:0 4px;margin-left:1px;opacity:.65;line-height:1;border-radius:50%" onmouseover="this.style.opacity='1';this.style.background='rgba(248,81,73,.25)'" onmouseout="this.style.opacity='.65';this.style.background='none'">✕</button></span>`:'';
+  const sugBadge=''; // badge de sugestões removido — status já reflete o parecer atual
+  const expanded=S.recursos._questaoExpanded.has(q.id);
+  return`<div class="rec-q-card" draggable="true" data-qid="${q.id}" data-numero="${numero}" ondragstart="iqDragStart(event,'${q.id}')" ondragend="iqDragEnd(event)" ondragover="iqDragOver(event,'${q.id}')" ondragleave="iqDragLeave(event)" ondrop="iqDrop(event,'${q.id}')" style="background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${status.cor};border-radius:10px;overflow:hidden;transition:transform .15s,box-shadow .15s">
+    <div onclick="recToggleQuestao('${q.id}')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none;flex-wrap:wrap">
+      <span title="Arraste para reordenar" style="cursor:grab;color:var(--t2);font-size:16px;line-height:1;padding:4px 2px;user-select:none" onmousedown="event.stopPropagation()">⠿</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;color:var(--accent);min-width:42px;text-align:center">${numero}</span>
+      <div style="flex:1;min-width:200px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
         <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:999px;background:${status.bg};color:${status.cor};border:1px solid ${status.bd}">● ${status.label}</span>
+        ${sugBadge}
         ${imgPendBadge}
         <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--t2)">Gabarito: ${gabResumo}</span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--t2)">${modoLabel}</span>
       </div>
-      ${snippet?`<div style="font-size:12.5px;color:var(--t2);line-height:1.4">${snippet}</div>`:'<div style="font-size:12px;color:var(--t3);font-style:italic">(sem texto)</div>'}
+      <div onclick="event.stopPropagation()" style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+        ${!validada&&!_hasParecerFinalizado(q)?`<button class="btn btn-s btn-sm" onclick="validarGabarito('${q.id}')" title="Marcar como concordo com o gabarito oficial" style="background:var(--gl);color:var(--green);border-color:rgba(63,185,80,.3);font-size:11px;padding:4px 10px;font-weight:600">✓ Validar gabarito</button>`:''}
+        <button class="btn btn-s btn-sm" onclick="abrirSugerirRecurso('${q.id}')" title="Cadastrar parecer proativo sem precisar de contestação do aluno" style="background:rgba(251,143,68,.12);color:#fb8f44;border-color:rgba(251,143,68,.35);font-size:11px;padding:4px 10px;font-weight:600">💡 Sugerir recurso</button>
+        <button class="btn btn-d btn-sm" onclick="deleteQuestaoDireto('${q.id}')" title="Apagar questão" style="font-size:11px;padding:4px 8px">🗑️</button>
+      </div>
+      <span id="recq-chev-${q.id}" style="font-size:13px;color:var(--t2);transition:transform .2s;display:inline-block;transform:rotate(${expanded?'90deg':'0deg'})">▶</span>
     </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-      <button class="btn btn-s btn-sm" onclick="event.stopPropagation();openVisualizarQuestao('${q.id}')" title="Visualizar a questão como o aluno vê" style="background:rgba(47,129,247,.12);color:var(--accent);border-color:rgba(47,129,247,.35)">👁 Visualizar</button>
-      <button class="btn btn-s btn-sm" onclick="event.stopPropagation();abrirSugerirRecurso('${q.id}')" title="Cadastrar parecer proativo sem precisar de contestação do aluno" style="background:rgba(251,143,68,.12);color:#fb8f44;border-color:rgba(251,143,68,.35)">💡 Sugerir recurso</button>
-      ${!validada&&!_hasParecerFinalizado(q)?`<button class="btn btn-s btn-sm" onclick="event.stopPropagation();validarGabarito('${q.id}')" title="${modo==='vf'?'Concordar com TODOS os V/F do gabarito':'Marcar concordo com gabarito oficial'}" style="background:var(--gl);color:var(--green);border-color:rgba(63,185,80,.3)">✓ Validar</button>`:''}
-      <button class="btn btn-s btn-sm" onclick="openQuestaoModal('${q.id}')">✏️</button>
-      <button class="btn btn-d btn-sm" onclick="event.stopPropagation();deleteQuestaoDireto('${q.id}')" title="Apagar">🗑️</button>
+    <div id="recq-body-${q.id}" class="${expanded?'':'hidden'}" style="padding:16px 18px;border-top:1px solid var(--border);background:var(--bg)">
+      ${_recQuestaoInlineForm(q,prova)}
     </div>
   </div>`;
 }
+
+function _recQuestaoInlineForm(q,prova){
+  const letras=_letrasPorTipo(prova?.tipo);
+  const alts=Array.isArray(q.alternativas)?q.alternativas:[];
+  const findAlt=L=>(alts.find(a=>a.letra===L)?.texto||'').replace(/"/g,'&quot;');
+  // Enunciado pode ser HTML rico (novo) ou texto puro (legado). Detecta e renderiza certo.
+  const enunRaw=q.enunciado||q.blocoTexto||'';
+  const enunHtml=/<[a-z][^>]*>/i.test(enunRaw)?_gabSanitize(enunRaw):enunRaw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  // Legado: q.imagemUrl ainda funciona — anexa no fim do enunciado pra editar
+  const enunComImgLegado=q.imagemUrl&&!enunRaw.includes(q.imagemUrl)?enunHtml+`<p><img src="${q.imagemUrl}" class="questao-img" alt="imagem da questão"/></p>`:enunHtml;
+  return`
+    <!-- Número derivado do drag-and-drop — input mantido oculto pra iqSalvar ler q.numero atual -->
+    <input type="hidden" id="iq-num-${q.id}" value="${q.numero||''}"/>
+    <div class="fg" style="margin-bottom:12px">
+      <label class="fl">Enunciado <span style="font-size:10.5px;font-weight:500;color:var(--t2)">— pode anexar imagem direto aqui pelo botão 📷</span></label>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;padding:6px;background:var(--bg3);border:1px solid var(--border);border-bottom:none;border-radius:var(--rs) var(--rs) 0 0">
+        <button type="button" onclick="iqEnunExec('${q.id}','bold')" title="Negrito" class="ftb"><strong>B</strong></button>
+        <button type="button" onclick="iqEnunExec('${q.id}','italic')" title="Itálico" class="ftb"><em>I</em></button>
+        <button type="button" onclick="iqEnunExec('${q.id}','underline')" title="Sublinhado" class="ftb"><u>U</u></button>
+        <span class="ftb-sep"></span>
+        <button type="button" onclick="iqEnunExec('${q.id}','insertUnorderedList')" title="Lista" class="ftb">• Lista</button>
+        <button type="button" onclick="iqEnunExec('${q.id}','insertOrderedList')" title="Lista numerada" class="ftb">1. Lista</button>
+        <span class="ftb-sep"></span>
+        <input type="file" id="iq-enun-img-${q.id}" accept="image/*" style="display:none" onchange="iqEnunInsertImg('${q.id}',event)"/>
+        <button type="button" onclick="document.getElementById('iq-enun-img-${q.id}').click()" title="Anexar imagem ao enunciado (cursor define posição)" class="ftb" style="background:rgba(47,129,247,.12);color:var(--accent);font-weight:700">📷 Imagem</button>
+        <span class="ftb-sep"></span>
+        <button type="button" onclick="iqEnunExec('${q.id}','removeFormat');iqEnunExec('${q.id}','unlink')" title="Limpar formatação" class="ftb">⌫ Limpar</button>
+        <span id="iq-enun-imgstatus-${q.id}" style="margin-left:auto;align-self:center;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--t2)"></span>
+      </div>
+      <div id="iq-enun-${q.id}" contenteditable="true" class="enunciado-editor" data-placeholder="Digite o enunciado da questão... use 📷 pra anexar imagem"
+        style="min-height:120px;max-height:480px;overflow-y:auto;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:0 0 var(--rs) var(--rs);font-size:13.5px;line-height:1.6;outline:none;text-align:justify;text-justify:inter-word;hyphens:none;-webkit-hyphens:none;word-break:keep-all;overflow-wrap:break-word">${enunComImgLegado}</div>
+    </div>
+    <div class="fg" style="margin-bottom:12px">
+      <label class="fl" style="display:block;margin-bottom:8px">Alternativas <span style="font-size:10.5px;font-weight:500;color:var(--t2)">— clique na letra à esquerda pra marcar como gabarito oficial</span></label>
+      <input type="hidden" id="iq-gab-${q.id}" value="${q.gabaritoOficial||''}"/>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${letras.map(L=>{
+          const isGab=q.gabaritoOficial===L;
+          return`<div style="display:flex;align-items:center;gap:8px">
+            <button type="button" onclick="iqMarcarGabarito('${q.id}','${L}')" id="iq-letra-${q.id}-${L}" title="Marcar ${L} como gabarito oficial"
+              style="width:42px;min-width:42px;height:42px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;cursor:pointer;transition:all .15s;flex-shrink:0;
+              background:${isGab?'rgba(63,185,80,.18)':'var(--bg2)'};
+              color:${isGab?'#3fb950':'var(--accent)'};
+              border:2px solid ${isGab?'rgba(63,185,80,.6)':'var(--border)'};
+              box-shadow:${isGab?'0 0 0 3px rgba(63,185,80,.15)':'none'}">
+              ${L}${isGab?' <span style="font-size:9px;display:block;margin-top:-2px">✓</span>':''}
+            </button>
+            <input class="fc" data-letra="${L}" id="iq-alt-${q.id}-${L}" value="${findAlt(L)}" placeholder="Alternativa ${L}" style="flex:1"/>
+          </div>`;
+        }).join('')}
+      </div>
+      <p style="font-size:11px;color:var(--t2);margin-top:8px" id="iq-gab-info-${q.id}">${q.gabaritoOficial?`📌 Gabarito oficial: <strong style="color:var(--green)">${q.gabaritoOficial}</strong> · <button type="button" onclick="iqMarcarGabarito('${q.id}','')" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:11px;text-decoration:underline;padding:0">remover</button>`:'<em>Nenhuma alternativa marcada como gabarito.</em>'}</p>
+    </div>
+    <div id="iq-err-${q.id}" class="al al-e hidden" style="margin-bottom:8px"></div>
+    <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
+      <span id="iq-saved-${q.id}" style="margin-right:auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--green);opacity:0;transition:opacity .3s"></span>
+      <button class="btn btn-p btn-sm" onclick="iqSalvar('${q.id}')">💾 Salvar alterações</button>
+    </div>
+    ${_renderSugestoesBoxHTML(q)}
+  `;
+}
+
+window.recToggleQuestao=(qId)=>{
+  const body=document.getElementById('recq-body-'+qId);
+  const chev=document.getElementById('recq-chev-'+qId);
+  if(!body)return;
+  const isHidden=body.classList.contains('hidden');
+  body.classList.toggle('hidden');
+  if(chev)chev.style.transform=isHidden?'rotate(90deg)':'rotate(0deg)';
+  if(isHidden)S.recursos._questaoExpanded.add(qId);
+  else S.recursos._questaoExpanded.delete(qId);
+};
+
+// Renderiza bloco de sugestões (ativas em lista + box colapsado de excluídas).
+// Usado no modal Visualizar E no body expandido do card da questão.
+function _renderSugestoesBoxHTML(q){
+  const sugestoes=Array.isArray(q.sugestoes)?q.sugestoes:[];
+  const ativas=sugestoes.filter(s=>!s.excluida).sort((a,b)=>(b.criadoEm||'').localeCompare(a.criadoEm||''));
+  const excluidas=sugestoes.filter(s=>!!s.excluida).sort((a,b)=>(b.excluidaEm||'').localeCompare(a.excluidaEm||''));
+  if(!ativas.length&&!excluidas.length)return'';
+  const item=(s,extra={})=>{
+    const cor=s.parecer==='cabe-recurso'?'#fb8f44':s.parecer==='nao-cabe-recurso'?'#3fb950':'var(--t2)';
+    const lab=s.parecer==='cabe-recurso'?'⚠️ Cabe recurso':s.parecer==='nao-cabe-recurso'?'✓ Não cabe':'em análise';
+    const arg=s.argumento||'';
+    const argHtml=/<[a-z][^>]*>/i.test(arg)?_featSanitize(arg):arg.replace(/</g,'&lt;').replace(/\n/g,'<br>');
+    const marca=extra.atual?'<span style="font-family:\'JetBrains Mono\',monospace;font-size:9px;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--accent-dim);color:var(--accent)">ATUAL</span>':'';
+    const excluidaInfo=extra.excluida?`<div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#f85149;margin-top:4px">✕ Excluída por ${s.excluidaPor||'?'} · ${s.excluidaEm?fDT(s.excluidaEm):''}</div>`:'';
+    const acao=extra.excluida
+      ?`<button class="btn btn-s btn-sm" onclick="restaurarSugestao('${q.id}','${s.id}')" style="font-size:10.5px;padding:3px 8px;background:rgba(63,185,80,.12);color:var(--green);border-color:rgba(63,185,80,.4)">↩️ Restaurar</button>`
+      :`<button class="btn btn-d btn-sm" onclick="excluirSugestao('${q.id}','${s.id}')" title="Excluir sugestão (dá pra restaurar depois)" style="font-size:10.5px;padding:3px 8px">🗑️</button>`;
+    const bgCard=extra.excluida?'var(--bg)':'var(--bg2)';
+    const opacity=extra.excluida?'.65':'1';
+    return`<div style="padding:10px 12px;background:${bgCard};border:1px solid var(--border);border-left:3px solid ${cor};border-radius:6px;opacity:${opacity}">
+      <div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+        <div style="flex:1;min-width:200px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:${cor}">${lab}</span>
+          ${marca}
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--t2)">${s.profNome||'?'} · ${s.criadoEm?fDT(s.criadoEm):''}</span>
+        </div>
+        ${acao}
+      </div>
+      ${argHtml?`<div style="font-size:12px;line-height:1.5;color:var(--text)">${argHtml}</div>`:'<div style="font-size:11px;color:var(--t2);font-style:italic">(sem texto)</div>'}
+      ${s.imagemUrl?`<div style="margin-top:6px"><img src="${s.imagemUrl}" style="max-width:100%;max-height:160px;border-radius:6px;border:1px solid var(--border)"/></div>`:''}
+      ${excluidaInfo}
+    </div>`;
+  };
+  let html='';
+  if(ativas.length>=1){
+    html+=`<div style="margin-top:14px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        💡 SUGESTÕES DE RECURSO (${ativas.length})
+        <span style="font-size:10px;color:var(--t2);font-weight:500">— a mais recente vale como parecer oficial</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${ativas.map((s,i)=>item(s,{atual:i===0})).join('')}
+      </div>
+    </div>`;
+  }
+  if(excluidas.length>=1){
+    html+=`<details style="margin-top:14px;border:1px solid rgba(248,81,73,.3);border-radius:8px;background:var(--bg)">
+      <summary style="padding:10px 14px;cursor:pointer;user-select:none;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#f85149;letter-spacing:.5px;display:flex;align-items:center;gap:8px">
+        🗑️ PARECERES EXCLUÍDOS (${excluidas.length})
+        <span style="font-size:10px;color:var(--t2);font-weight:500">— clique pra ver e restaurar</span>
+      </summary>
+      <div style="padding:6px 12px 12px 12px;display:flex;flex-direction:column;gap:6px">
+        ${excluidas.map(s=>item(s,{excluida:true})).join('')}
+      </div>
+    </details>`;
+  }
+  return html;
+}
+
+// Marca uma letra como gabarito oficial. Letra vazia = remove.
+window.iqMarcarGabarito=(qId,letra)=>{
+  const inp=document.getElementById('iq-gab-'+qId);
+  if(inp)inp.value=letra||'';
+  // Atualiza visual dos chips (A/B/C/D)
+  ['A','B','C','D','E'].forEach(L=>{
+    const b=document.getElementById(`iq-letra-${qId}-${L}`);
+    if(!b)return;
+    const isGab=L===letra;
+    b.style.background=isGab?'rgba(63,185,80,.18)':'var(--bg2)';
+    b.style.color=isGab?'#3fb950':'var(--accent)';
+    b.style.border='2px solid '+(isGab?'rgba(63,185,80,.6)':'var(--border)');
+    b.style.boxShadow=isGab?'0 0 0 3px rgba(63,185,80,.15)':'none';
+    b.innerHTML=L+(isGab?' <span style="font-size:9px;display:block;margin-top:-2px">✓</span>':'');
+  });
+  const info=document.getElementById('iq-gab-info-'+qId);
+  if(info){
+    info.innerHTML=letra?`📌 Gabarito oficial: <strong style="color:var(--green)">${letra}</strong> · <button type="button" onclick="iqMarcarGabarito('${qId}','')" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:11px;text-decoration:underline;padding:0">remover</button>`:'<em>Nenhuma alternativa marcada como gabarito.</em>';
+  }
+};
+
+// ── Drag-and-drop pra reordenar questões (renumera tudo sequencialmente) ──
+S.recursos._dragQId=null;
+
+window.iqDragStart=(e,qId)=>{
+  S.recursos._dragQId=qId;
+  try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',qId);}catch(_){}
+  e.currentTarget.style.opacity='.45';
+};
+window.iqDragEnd=(e)=>{
+  S.recursos._dragQId=null;
+  e.currentTarget.style.opacity='1';
+  document.querySelectorAll('.rec-q-card').forEach(c=>{c.style.boxShadow='';c.style.transform='';});
+};
+window.iqDragOver=(e,qId)=>{
+  if(!S.recursos._dragQId||S.recursos._dragQId===qId)return;
+  e.preventDefault();
+  try{e.dataTransfer.dropEffect='move';}catch(_){}
+  const card=e.currentTarget;
+  card.style.boxShadow='0 0 0 2px var(--accent)';
+  card.style.transform='translateY(-1px)';
+};
+window.iqDragLeave=(e)=>{
+  e.currentTarget.style.boxShadow='';
+  e.currentTarget.style.transform='';
+};
+window.iqDrop=async(e,targetQId)=>{
+  e.preventDefault();
+  const draggedId=S.recursos._dragQId;
+  document.querySelectorAll('.rec-q-card').forEach(c=>{c.style.boxShadow='';c.style.transform='';});
+  if(!draggedId||draggedId===targetQId)return;
+  const provaId=S.recursos.curProvaId;
+  if(!provaId)return;
+  const questoes=S.recursos.questoesCache[provaId]||[];
+  const sorted=[...questoes].sort((a,b)=>(Number(a.numero)||0)-(Number(b.numero)||0));
+  const fromIdx=sorted.findIndex(q=>q.id===draggedId);
+  const toIdx=sorted.findIndex(q=>q.id===targetQId);
+  if(fromIdx===-1||toIdx===-1)return;
+  // Remove e insere na posição alvo
+  const[moved]=sorted.splice(fromIdx,1);
+  sorted.splice(toIdx,0,moved);
+  // Renumera 1, 2, 3...
+  const now=new Date().toISOString();
+  const updates=[];
+  sorted.forEach((q,idx)=>{
+    const novo=idx+1;
+    if(Number(q.numero)!==novo)updates.push({id:q.id,novo,antigo:q.numero});
+  });
+  if(!updates.length)return;
+  try{
+    // Firestore batch (max 500 ops)
+    for(let i=0;i<updates.length;i+=400){
+      const batch=writeBatch(db);
+      updates.slice(i,i+400).forEach(u=>batch.update(doc(db,`provas/${provaId}/questoes/${u.id}`),{numero:u.novo,updatedAt:now}));
+      await batch.commit();
+    }
+    arosToast(`✓ ${updates.length} questões reordenadas`,'success',1800);
+    if(S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
+    await renderRecProvas();
+  }catch(err){
+    console.error('iqDrop:',err);
+    await arosAlert({title:'Erro ao reordenar',message:err.message||String(err),icon:'❌'});
+  }
+};
+
+// Desmarca o flag IMG PENDENTE quando o PDF importou marcação errada (não tinha imagem mesmo)
+window.iqDescartarImgPendente=async(qId)=>{
+  const provaId=S.recursos.curProvaId;
+  if(!provaId)return;
+  try{
+    await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{imagemPendente:false,updatedAt:new Date().toISOString()},{merge:true});
+    arosToast('Marca de IMG PENDENTE removida','success',1800);
+    if(S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
+    await renderRecProvas();
+  }catch(e){
+    console.error('iqDescartarImgPendente:',e);
+    await arosAlert({title:'Erro',message:e.message||String(e),icon:'❌'});
+  }
+};
+
+// Toolbar do editor de enunciado
+window.iqEnunExec=(qId,cmd)=>{
+  const ed=document.getElementById('iq-enun-'+qId);if(!ed)return;
+  ed.focus();
+  try{document.execCommand('styleWithCSS',false,true);}catch(e){}
+  document.execCommand(cmd,false,null);
+};
+
+// Upload e inserção de imagem inline no editor do enunciado
+window.iqEnunInsertImg=async(qId,ev)=>{
+  const f=ev.target.files&&ev.target.files[0];if(!f)return;
+  const provaId=S.recursos.curProvaId;
+  if(!provaId){await arosAlert({title:'Atenção',message:'Prova não identificada.',icon:'⚠️'});return;}
+  const status=document.getElementById('iq-enun-imgstatus-'+qId);
+  if(status)status.textContent='⏳ enviando...';
+  try{
+    const path=`provas/${provaId}/questoes/${qId}/enun_${Date.now()}_${f.name.replace(/[^\w.\-]/g,'_')}`;
+    const r=window._fbStorage.ref(window._fbStorage.storage,path);
+    await window._fbStorage.uploadBytes(r,f);
+    const url=await window._fbStorage.getDownloadURL(r);
+    const ed=document.getElementById('iq-enun-'+qId);
+    if(ed){
+      ed.focus();
+      // Insere <img> com class .questao-img (padronização de tamanho via CSS)
+      document.execCommand('insertHTML',false,`<p><img src="${url}" alt="imagem" class="questao-img"/></p>`);
+    }
+    if(status)status.textContent='✅ imagem inserida — não esqueça de Salvar';
+    setTimeout(()=>{if(status)status.textContent='';},3500);
+  }catch(e){
+    console.error('iqEnunInsertImg:',e);
+    if(status)status.textContent='❌ '+(e.code||e.message);
+  }
+  ev.target.value='';
+};
+
+window.iqSalvar=async(qId)=>{
+  const provaId=S.recursos.curProvaId;
+  if(!provaId)return;
+  const err=document.getElementById('iq-err-'+qId);
+  const numero=parseInt(document.getElementById('iq-num-'+qId).value)||0;
+  const gabaritoOficial=document.getElementById('iq-gab-'+qId).value;
+  // Enunciado agora é HTML (rich text) — sanitiza preservando <img>, formatação básica, listas
+  const enunHtml=document.getElementById('iq-enun-'+qId).innerHTML;
+  const enunSan=_gabSanitize(enunHtml);
+  const enunText=(document.getElementById('iq-enun-'+qId).textContent||'').trim();
+  const hasImg=/<img\b/i.test(enunSan);
+  const alternativas=[...document.querySelectorAll(`#iq-enun-${qId}~* input[data-letra], [id^="iq-alt-${qId}-"]`)]
+    .map(i=>({letra:i.dataset.letra,texto:i.value.trim()})).filter(a=>a.texto);
+  // Validação
+  if(!numero||numero<1){err.textContent='Número inválido.';err.classList.remove('hidden');return;}
+  if(!enunText&&!hasImg){err.textContent='Enunciado vazio (digite texto ou anexe imagem).';err.classList.remove('hidden');return;}
+  // Bug #5: número único na prova
+  const dup=(S.recursos.questoesCache[provaId]||[]).find(x=>x.id!==qId&&Number(x.numero)===numero);
+  if(dup){err.innerHTML=`⚠️ Já existe outra questão com número <strong>${numero}</strong> nesta prova.`;err.classList.remove('hidden');return;}
+  err.classList.add('hidden');
+  const data={
+    numero,
+    modo:'estruturado',
+    gabaritoOficial,
+    enunciado:enunSan,
+    alternativas,
+    blocoTexto:'',
+    imagemUrl:'', // legacy field zerado — imagem agora vive dentro do enunciado
+    updatedAt:new Date().toISOString(),
+  };
+  if(hasImg)data.imagemPendente=false;
+  try{
+    await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),data,{merge:true});
+  }catch(e){
+    console.error('iqSalvar:',e);
+    err.innerHTML=`❌ Erro ao salvar: <strong>${e.code||e.message}</strong>`;
+    err.classList.remove('hidden');return;
+  }
+  const saved=document.getElementById('iq-saved-'+qId);
+  if(saved){
+    const hh=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    saved.textContent=`✅ salvo às ${hh}`;saved.style.opacity='1';
+    clearTimeout(window['_iqSavedTimer_'+qId]);
+    window['_iqSavedTimer_'+qId]=setTimeout(()=>{saved.style.opacity='.55';},2200);
+  }
+  // Garante que o card siga expandido depois do re-render
+  S.recursos._questaoExpanded.add(qId);
+  await renderRecProvas();
+};
 
 // Visualização read-only da questão (com botão Sugerir recurso embutido)
 window.openVisualizarQuestao=async(qId,provaIdOverride)=>{
@@ -11658,71 +11990,37 @@ window.openVisualizarQuestao=async(qId,provaIdOverride)=>{
   }
   if(!q){alert('Questão não encontrada.');return;}
   document.getElementById('mvq-sub').textContent=`${prova?.nome||''} · Questão ${q.numero||'?'}`;
-  const modo=q.modo||'estruturado';
-  const isVF=modo==='vf';
-  const enun=(modo==='bloco'?(q.blocoTexto||''):(q.enunciado||'')).replace(/</g,'&lt;').replace(/\n/g,'<br>');
-  const img=q.imagemUrl?`<div style="margin:14px 0;text-align:center"><img src="${q.imagemUrl}" style="max-width:100%;max-height:340px;border-radius:8px;border:1px solid var(--border)"/></div>`:'';
-  let altsHtml='';
-  if(isVF){
-    const alts=Array.isArray(q.alternativas)?q.alternativas:[];
-    altsHtml=alts.length?`<div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
-      ${alts.map(a=>{
-        const isV=a.gabaritoVF==='V';
-        const cor=isV?'#3fb950':'#f85149';
-        const bg=isV?'rgba(63,185,80,.08)':'rgba(248,81,73,.08)';
-        const bd=isV?'rgba(63,185,80,.3)':'rgba(248,81,73,.3)';
-        const lab=isV?'VERDADEIRO':'FALSO';
-        return`<div style="padding:8px 12px;background:${bg};border:1px solid ${bd};border-radius:8px;font-size:13.5px;line-height:1.5;display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap">
-          <div style="flex:1;min-width:200px"><strong style="color:var(--accent);font-family:'JetBrains Mono',monospace">${a.letra})</strong> ${(a.texto||'').replace(/</g,'&lt;')}</div>
-          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:${bg};color:${cor};border:1px solid ${bd}">📌 ${lab}</span>
-        </div>`;
-      }).join('')}
-    </div>`:'';
-  }else{
-    const alts=(modo==='estruturado'&&Array.isArray(q.alternativas))?q.alternativas:[];
-    const gab=q.gabaritoOficial||'';
-    altsHtml=alts.length?`<div style="margin-top:12px;display:flex;flex-direction:column;gap:5px">
-      ${alts.map(a=>{
-        const isGab=a.letra===gab;
-        return`<div style="padding:8px 12px;background:${isGab?'rgba(63,185,80,.08)':'var(--bg)'};border:1px solid ${isGab?'rgba(63,185,80,.3)':'var(--border)'};border-radius:8px;font-size:13.5px;line-height:1.5"><strong style="color:${isGab?'var(--green)':'var(--accent)'}">${a.letra})</strong> ${(a.texto||'').replace(/</g,'&lt;')}${isGab?' <span style="font-family:\'JetBrains Mono\',monospace;font-size:9.5px;color:var(--green);font-weight:700;margin-left:4px">✓ GABARITO</span>':''}</div>`;
-      }).join('')}
-    </div>`:'';
-  }
-  const gabBox=isVF?'':`<div style="margin-top:14px;padding:10px 14px;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.3);border-radius:8px"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green);font-weight:700">📌 Gabarito Oficial: <strong style="font-size:14px">${q.gabaritoOficial||'—'}</strong></span></div>`;
+  // Enunciado pode ser HTML rico (com <img> inline) ou texto puro legado
+  const enunRaw=q.enunciado||q.blocoTexto||'';
+  const enun=/<[a-z][^>]*>/i.test(enunRaw)?_gabSanitize(enunRaw):enunRaw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+  // Legado: q.imagemUrl renderiza apenas se não estiver já no enunciado
+  const img=(q.imagemUrl&&!enunRaw.includes(q.imagemUrl))?`<div style="margin:14px 0;text-align:center"><img src="${q.imagemUrl}" class="questao-img" alt="imagem da questão"/></div>`:'';
+  const alts=(modo==='estruturado'&&Array.isArray(q.alternativas))?q.alternativas:[];
+  const gab=q.gabaritoOficial||'';
+  const altsHtml=alts.length?`<div style="margin-top:12px;display:flex;flex-direction:column;gap:5px">
+    ${alts.map(a=>{
+      const isGab=a.letra===gab;
+      return`<div style="padding:8px 12px;background:${isGab?'rgba(63,185,80,.08)':'var(--bg)'};border:1px solid ${isGab?'rgba(63,185,80,.3)':'var(--border)'};border-radius:8px;font-size:13.5px;line-height:1.5"><strong style="color:${isGab?'var(--green)':'var(--accent)'}">${a.letra})</strong> ${(a.texto||'').replace(/</g,'&lt;')}${isGab?' <span style="font-family:\'JetBrains Mono\',monospace;font-size:9.5px;color:var(--green);font-weight:700;margin-left:4px">✓ GABARITO</span>':''}</div>`;
+    }).join('')}
+  </div>`:'';
+  const gabBox=`<div style="margin-top:14px;padding:10px 14px;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.3);border-radius:8px"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green);font-weight:700">📌 Gabarito Oficial: <strong style="font-size:14px">${q.gabaritoOficial||'—'}</strong></span></div>`;
   // Parecer finalizado (se houver)
   let parecerBox='';
-  if(isVF){
-    const alts=Array.isArray(q.alternativas)?q.alternativas:[];
-    const fins=alts.map(a=>({l:a.letra,p:(q.pareceresPorAlt||{})[a.letra]})).filter(x=>x.p&&x.p.finalizado);
-    if(fins.length){
-      parecerBox=`<div style="margin-top:14px;display:flex;flex-direction:column;gap:6px">
-        ${fins.map(({l,p})=>{
-          const cor=p.parecer==='cabe-recurso'?'#fb8f44':p.parecer==='nao-cabe-recurso'?'#3fb950':'var(--t2)';
-          const lab=p.parecer==='cabe-recurso'?'⚠️ CABE RECURSO':p.parecer==='nao-cabe-recurso'?'✓ NÃO CABE RECURSO':'EM ANÁLISE';
-          const arg=p.argumento||'';
-          const argHtml=/<[a-z][^>]*>/i.test(arg)?_featSanitize(arg):arg.replace(/</g,'&lt;').replace(/\n/g,'<br>');
-          return`<div style="padding:10px 12px;background:rgba(251,143,68,.04);border-left:3px solid ${cor};border-radius:8px">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#a371f7">ALT ${l}</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${cor}">${lab}</span></div>
-            <div style="font-size:12.5px;line-height:1.5">${argHtml||'<em style="color:var(--t2)">(sem argumento)</em>'}</div>
-            ${p.profNome?`<div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);margin-top:4px">— ${p.profNome}${p.respondidoEm?' em '+fDT(p.respondidoEm):''}</div>`:''}
-          </div>`;
-        }).join('')}
-      </div>`;
-    }
-  }else if(q.parecerFinalizado){
+  if(q.parecerFinalizado){
     const cor=q.parecer==='cabe-recurso'?'#fb8f44':q.parecer==='nao-cabe-recurso'?'#3fb950':'var(--t2)';
     const lab=q.parecer==='cabe-recurso'?'⚠️ CABE RECURSO':q.parecer==='nao-cabe-recurso'?'✓ NÃO CABE RECURSO':'EM ANÁLISE';
     const argHtml=/<[a-z][^>]*>/i.test(q.parecerArgumento||'')?_featSanitize(q.parecerArgumento):(q.parecerArgumento||'').replace(/</g,'&lt;').replace(/\n/g,'<br>');
     parecerBox=`<div style="margin-top:14px;padding:12px 14px;background:rgba(251,143,68,.04);border-left:3px solid ${cor};border-radius:8px">
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${cor};letter-spacing:.5px;margin-bottom:6px">${lab} · Parecer AnestReview</div>
-      <div style="font-size:13px;line-height:1.55">${argHtml||'<em style="color:var(--t2)">(sem argumento)</em>'}</div>
+      <div class="parecer-aluno-txt" style="font-size:13px;line-height:1.55;text-align:justify;text-justify:inter-word;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none;word-break:keep-all;overflow-wrap:break-word">${argHtml||'<em style="color:var(--t2)">(sem parecer)</em>'}</div>
       ${q.parecerPor?`<div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);margin-top:6px">— ${q.parecerPor}${q.parecerEm?' em '+fDT(q.parecerEm):''}</div>`:''}
     </div>`;
   }
+  const sugestoesBox=_renderSugestoesBoxHTML(q);
   document.getElementById('mvq-content').innerHTML=`
-    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:700;letter-spacing:.5px;margin-bottom:8px">QUESTÃO ${q.numero||'?'}${isVF?' · MODO V/F':''}</div>
-    <div style="font-size:14.5px;line-height:1.6">${enun}</div>
-    ${img}${altsHtml}${gabBox}${parecerBox}
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:700;letter-spacing:.5px;margin-bottom:8px">QUESTÃO ${q.numero||'?'}</div>
+    <div class="enunciado-aluno-txt" style="font-size:14.5px;line-height:1.6">${enun}</div>
+    ${img}${altsHtml}${gabBox}${parecerBox}${sugestoesBox}
   `;
   document.getElementById('modal-visualizar-q').dataset.questaoId=qId;
   document.getElementById('modal-visualizar-q').dataset.provaId=provaId;
@@ -11739,7 +12037,6 @@ window.mvqSugerir=()=>{
 };
 
 // Abre o modal de parecer SEM contestação prévia (fluxo "Sugerir recurso").
-// Em modo VF, pergunta qual alternativa antes de abrir o modal de parecer.
 // Sempre pede identificação do prof antes de prosseguir.
 window.abrirSugerirRecurso=async(qId,provaIdOverride)=>{
   const provaId=provaIdOverride||S.recursos.curProvaId;
@@ -11750,27 +12047,9 @@ window.abrirSugerirRecurso=async(qId,provaIdOverride)=>{
     try{const qd=await getDoc(doc(db,`provas/${provaId}/questoes/${qId}`));q=qd.exists()?{id:qd.id,...qd.data()}:null;}catch(e){}
   }
   if(!q){alert('Questão não encontrada.');return;}
-  let altLetra='';
-  if(q.modo==='vf'){
-    const alts=(q.alternativas||[]).map(a=>a.letra);
-    if(!alts.length){alert('Esta questão não tem alternativas cadastradas.');return;}
-    const escolha=prompt(`Sugerir recurso em qual alternativa? (${alts.join(', ')})`,alts[0]);
-    if(!escolha)return;
-    const norm=(escolha||'').trim().toUpperCase();
-    if(!alts.includes(norm)){alert('Alternativa inválida.');return;}
-    altLetra=norm;
-  }
-  // Pede identificação do prof antes de abrir o modal de parecer
-  pedirIdentidadeProf({
-    titulo:'💡 Sugerir recurso',
-    sub:'Identifique-se antes de cadastrar a sugestão',
-    explicacao:'Como o login da coordenação é único, escolha o seu nome na lista. Sua contribuição será registrada nas métricas.',
-    btnLabel:'💡 Continuar',
-    onConfirm:async(profNome)=>{
-      CM('modal-assumir');
-      await abrirParecer(provaId,qId,'',{sugerir:true,altLetra,profNome});
-    },
-  });
+  // Identidade direto do login (sem modal de seleção) — cada coord/prof já está autenticado
+  const profNome=S.currentUser?.nome||S.currentUser?.username||S.currentUser?.email||'Professor';
+  await abrirParecer(provaId,qId,'',{sugerir:true,altLetra:'',profNome});
 };
 
 function _recParecerVisual(p){
@@ -11782,26 +12061,23 @@ function _recParecerVisual(p){
   return map[p]||map['em-analise'];
 }
 
-// Helper: a questão já tem algum parecer finalizado? (TEA/TSA: parecerFinalizado | VF: alguma alt finalizada)
+// Helper: a questão já tem parecer finalizado?
 function _hasParecerFinalizado(q){
   if(!q)return false;
-  if(q.modo==='vf')return Object.values(q.pareceresPorAlt||{}).some(p=>p&&p.finalizado);
   return !!q.parecerFinalizado;
 }
 
-// Status derivado da questão pro card da coord (só parecer FINALIZADO conta como cabe/não cabe)
+// Status derivado da questão pro card da coord — agregado das sugestões ATIVAS
+// (qualquer "cabe recurso" → CABE; todas "não cabe" → NÃO CABE; senão volta a estado de análise)
 function _recStatusQuestao(q){
   if(!q)return{key:'sem',label:'?',cor:'var(--t2)',bg:'var(--bg3)',bd:'var(--border)'};
-  // Modo VF: olha pareceres finalizados por alt
-  if(q.modo==='vf'){
-    const alts=Array.isArray(q.alternativas)?q.alternativas:[];
-    const fins=alts.map(a=>(q.pareceresPorAlt||{})[a.letra]).filter(p=>p&&p.finalizado);
-    if(fins.some(p=>p.parecer==='cabe-recurso'))return{key:'cabe',label:'CABE RECURSO',cor:'#fb8f44',bg:'rgba(251,143,68,.12)',bd:'rgba(251,143,68,.35)'};
-    if(fins.length===alts.length&&fins.every(p=>p.parecer==='nao-cabe-recurso'))return{key:'nao-cabe',label:'NÃO CABE',cor:'#3fb950',bg:'rgba(63,185,80,.12)',bd:'rgba(63,185,80,.35)'};
-    if(q.validada)return{key:'validada',label:'GABARITO VALIDADO',cor:'#3fb950',bg:'rgba(63,185,80,.08)',bd:'rgba(63,185,80,.25)'};
-    return{key:'em-analise-time',label:'EM ANÁLISE PELO TIME',cor:'#8b949e',bg:'rgba(139,148,158,.1)',bd:'rgba(139,148,158,.3)'};
-  }
-  // Modo TEA/TSA: só conta parecer finalizado
+  const sugestoesAtivas=Array.isArray(q.sugestoes)?q.sugestoes.filter(s=>!s.excluida):[];
+  let pareceres=sugestoesAtivas.map(s=>s.parecer);
+  // Compat: questão antiga sem sugestoes[]
+  if(!pareceres.length&&q.parecerFinalizado&&q.parecer)pareceres=[q.parecer];
+  if(pareceres.includes('cabe-recurso'))return{key:'cabe',label:'CABE RECURSO',cor:'#fb8f44',bg:'rgba(251,143,68,.12)',bd:'rgba(251,143,68,.35)'};
+  if(pareceres.length&&pareceres.every(p=>p==='nao-cabe-recurso'))return{key:'nao-cabe',label:'NÃO CABE',cor:'#3fb950',bg:'rgba(63,185,80,.12)',bd:'rgba(63,185,80,.35)'};
+  // Os blocos abaixo são fallbacks legados (sem mais matches porque os primeiros 2 cobrem); mantidos por segurança.
   if(q.parecerFinalizado&&q.parecer==='cabe-recurso')return{key:'cabe',label:'CABE RECURSO',cor:'#fb8f44',bg:'rgba(251,143,68,.12)',bd:'rgba(251,143,68,.35)'};
   if(q.parecerFinalizado&&q.parecer==='nao-cabe-recurso')return{key:'nao-cabe',label:'NÃO CABE',cor:'#3fb950',bg:'rgba(63,185,80,.12)',bd:'rgba(63,185,80,.35)'};
   if(q.validada)return{key:'validada',label:'GABARITO VALIDADO',cor:'#3fb950',bg:'rgba(63,185,80,.08)',bd:'rgba(63,185,80,.25)'};
@@ -11812,25 +12088,20 @@ window.openQuestaoModal=(id)=>{
   const provaId=S.recursos.curProvaId;
   if(!provaId){alert('Selecione uma prova primeiro.');return;}
   const prova=(S.recursos.provas||[]).find(p=>p.id===provaId);
-  const isVF=_isProvaVF(prova);
   const letras=_letrasPorTipo(prova?.tipo);
   const lista=S.recursos.questoesCache[provaId]||[];
   const q=id?lista.find(x=>x.id===id):null;
   document.getElementById('mqs-title').textContent=id?'Editar questão':'Nova questão';
-  document.getElementById('mqs-sub').textContent=(id?`Editando questão ${q?.numero||''}`:'Cadastro manual')+(isVF?' · formato V/F (ME)':` · formato ${(prova?.tipo||'').toUpperCase()}`);
+  document.getElementById('mqs-sub').textContent=(id?`Editando questão ${q?.numero||''}`:'Cadastro manual')+` · formato ${(prova?.tipo||'').toUpperCase()}`;
   // Sugere próximo número
   const proxNum=q?.numero||(lista.length?Math.max(...lista.map(x=>Number(x.numero)||0))+1:1);
   document.getElementById('mqs-numero').value=proxNum;
-  // Modo padrão pela prova
-  const modo=q?.modo||_modoDefaultPorTipo(prova?.tipo);
+  // Modo padrão pela prova (TEA/TSA → estruturado; ME → bloco)
+  let modo=q?.modo||_modoDefaultPorTipo(prova?.tipo);
+  // Migra legado: questões antigas em 'vf' agora exibem como 'bloco' (apenas pra edição visual; save volta como bloco)
+  if(modo==='vf')modo='bloco';
   document.getElementById('mqs-modo-estruturado').checked=modo==='estruturado';
   document.getElementById('mqs-modo-bloco').checked=modo==='bloco';
-  document.getElementById('mqs-modo-vf').checked=modo==='vf';
-  // Em prova ME, esconde modos não-VF; em TEA/TSA, esconde modo VF
-  document.getElementById('mqs-modo-estruturado-wrap').style.display=isVF?'none':'';
-  document.getElementById('mqs-modo-bloco-wrap').style.display=isVF?'none':'';
-  document.getElementById('mqs-modo-vf-wrap').style.display=isVF?'':'none';
-  document.getElementById('mqs-gabarito-wrap').style.display=isVF?'none':'';
   // Limita opções do gabarito ao número de letras possíveis
   const selGab=document.getElementById('mqs-gabarito');
   selGab.innerHTML='<option value="">— escolha —</option>'+letras.map(L=>`<option value="${L}">${L}</option>`).join('');
@@ -11841,26 +12112,7 @@ window.openQuestaoModal=(id)=>{
   const findAlt=L=>alts.find(a=>a.letra===L)?.texto||'';
   grid.innerHTML=letras.map((L,i)=>`<div${i===letras.length-1&&letras.length%2===1?' style="grid-column:1/-1"':''}><label style="font-size:11px;font-weight:700;color:var(--t2);display:block;margin-bottom:4px">${L})</label><input class="fc fc-alt" data-letra="${L}" id="mqs-alt${L}" value="${(findAlt(L)||'').replace(/"/g,'&quot;')}" placeholder="Alternativa ${L}"/></div>`).join('');
   document.getElementById('mqs-enunciado').value=q?.enunciado||'';
-  document.getElementById('mqs-enunciadoVF').value=q?.enunciado||'';
   document.getElementById('mqs-blocoTexto').value=q?.blocoTexto||'';
-  // Renderiza lista VF (5 alternativas A-E, cada uma com input + toggle V/F)
-  const vfList=document.getElementById('mqs-vf-list');
-  vfList.innerHTML=['A','B','C','D','E'].map(L=>{
-    const a=alts.find(x=>x.letra===L);
-    const gvf=a?.gabaritoVF||'';
-    return`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:8px">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:800;color:var(--accent);min-width:24px">${L})</span>
-      <input class="fc fc-alt-vf" data-letra="${L}" value="${(a?.texto||'').replace(/"/g,'&quot;')}" placeholder="Texto da alternativa ${L}" style="flex:1;min-width:180px"/>
-      <div style="display:flex;gap:4px;background:var(--bg3);border-radius:6px;padding:2px">
-        <label style="padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.5px;background:${gvf==='V'?'rgba(63,185,80,.18)':'transparent'};color:${gvf==='V'?'#3fb950':'var(--t2)'};border:1px solid ${gvf==='V'?'rgba(63,185,80,.4)':'transparent'}">
-          <input type="radio" name="mqs-vf-${L}" value="V" ${gvf==='V'?'checked':''} style="display:none" onchange="mqsTogglesVF('${L}','V')"/>V
-        </label>
-        <label style="padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.5px;background:${gvf==='F'?'rgba(248,81,73,.18)':'transparent'};color:${gvf==='F'?'#f85149':'var(--t2)'};border:1px solid ${gvf==='F'?'rgba(248,81,73,.4)':'transparent'}">
-          <input type="radio" name="mqs-vf-${L}" value="F" ${gvf==='F'?'checked':''} style="display:none" onchange="mqsTogglesVF('${L}','F')"/>F
-        </label>
-      </div>
-    </div>`;
-  }).join('');
   // Imagem
   document.getElementById('mqs-imagem-input').value='';
   document.getElementById('mqs-imagem-status').textContent=q?.imagemUrl?'imagem cadastrada':'';
@@ -11878,29 +12130,13 @@ window.openQuestaoModal=(id)=>{
 window.mqsToggleModo=()=>{
   const isEstr=document.getElementById('mqs-modo-estruturado').checked;
   const isBloco=document.getElementById('mqs-modo-bloco').checked;
-  const isVF=document.getElementById('mqs-modo-vf').checked;
   document.getElementById('mqs-estruturado-fields').classList.toggle('hidden',!isEstr);
   document.getElementById('mqs-bloco-fields').classList.toggle('hidden',!isBloco);
-  document.getElementById('mqs-vf-fields').classList.toggle('hidden',!isVF);
-  // VF não tem gabarito único — esconde o select
-  document.getElementById('mqs-gabarito-wrap').style.display=isVF?'none':'';
+  // Bloco não tem gabarito único — esconde o select
+  document.getElementById('mqs-gabarito-wrap').style.display=isBloco?'none':'';
   // Visual highlight
   document.getElementById('mqs-modo-estruturado-wrap').style.borderColor=isEstr?'var(--accent)':'var(--border)';
   document.getElementById('mqs-modo-bloco-wrap').style.borderColor=isBloco?'var(--accent)':'var(--border)';
-  document.getElementById('mqs-modo-vf-wrap').style.borderColor=isVF?'var(--accent)':'var(--border)';
-};
-
-window.mqsTogglesVF=(letra,valor)=>{
-  // Re-renderiza visual: encontra o container do label e atualiza estilos
-  const labels=document.querySelectorAll(`input[name="mqs-vf-${letra}"]`);
-  labels.forEach(inp=>{
-    const lb=inp.closest('label');
-    const isV=inp.value==='V';
-    const checked=inp.checked;
-    lb.style.background=checked?(isV?'rgba(63,185,80,.18)':'rgba(248,81,73,.18)'):'transparent';
-    lb.style.color=checked?(isV?'#3fb950':'#f85149'):'var(--t2)';
-    lb.style.border='1px solid '+(checked?(isV?'rgba(63,185,80,.4)':'rgba(248,81,73,.4)'):'transparent');
-  });
 };
 
 window.mqsUploadImagem=async(ev)=>{
@@ -11935,39 +12171,26 @@ window.saveQuestao=async()=>{
   const editId=document.getElementById('modal-questao').dataset.editId;
   const id=editId||('q_'+Date.now()+'_'+Math.random().toString(36).slice(2,5));
   const numero=parseInt(document.getElementById('mqs-numero').value)||0;
-  const modo=document.getElementById('mqs-modo-vf').checked?'vf':(document.getElementById('mqs-modo-bloco').checked?'bloco':'estruturado');
-  const gabaritoOficial=modo==='vf'?'':document.getElementById('mqs-gabarito').value;
-  const enunciado=modo==='vf'?document.getElementById('mqs-enunciadoVF').value.trim():document.getElementById('mqs-enunciado').value.trim();
-  let alternativas=[];
-  if(modo==='estruturado'){
-    alternativas=[...document.querySelectorAll('#mqs-alts-grid .fc-alt')].map(i=>({letra:i.dataset.letra,texto:i.value.trim()})).filter(a=>a.texto);
-  }else if(modo==='vf'){
-    alternativas=['A','B','C','D','E'].map(L=>{
-      const inp=document.querySelector(`.fc-alt-vf[data-letra="${L}"]`);
-      const radio=document.querySelector(`input[name="mqs-vf-${L}"]:checked`);
-      return{letra:L,texto:(inp?.value||'').trim(),gabaritoVF:radio?.value||''};
-    }).filter(a=>a.texto);
-  }
-  const blocoTexto=document.getElementById('mqs-blocoTexto').value.trim();
+  const gabaritoOficial=document.getElementById('mqs-gabarito').value;
+  const enunciado=document.getElementById('mqs-enunciado').value.trim();
+  const alternativas=[...document.querySelectorAll('#mqs-alts-grid .fc-alt')].map(i=>({letra:i.dataset.letra,texto:i.value.trim()})).filter(a=>a.texto);
   const imagemUrl=document.getElementById('modal-questao').dataset.imagemUrl||'';
   const err=document.getElementById('mqs-err');
   if(!numero||numero<1){err.textContent='Informe o número da questão.';err.classList.remove('hidden');return;}
-  if(modo==='estruturado'&&!enunciado){err.textContent='Enunciado obrigatório no modo estruturado.';err.classList.remove('hidden');return;}
-  if(modo==='bloco'&&!blocoTexto){err.textContent='Texto do bloco obrigatório no modo bloco.';err.classList.remove('hidden');return;}
-  if(modo==='vf'){
-    if(!enunciado){err.textContent='Enunciado obrigatório no modo V/F.';err.classList.remove('hidden');return;}
-    if(alternativas.length<2){err.textContent='Pelo menos 2 alternativas no modo V/F.';err.classList.remove('hidden');return;}
-    const semGab=alternativas.find(a=>!a.gabaritoVF);
-    if(semGab){err.textContent=`Marque V ou F na alternativa ${semGab.letra}.`;err.classList.remove('hidden');return;}
-  }
+  if(!enunciado){err.textContent='Enunciado obrigatório.';err.classList.remove('hidden');return;}
+  // Bug #5: número único na prova (modal de nova questão)
+  const dup=(S.recursos.questoesCache[provaId]||[]).find(x=>x.id!==id&&Number(x.numero)===numero);
+  if(dup){err.innerHTML=`⚠️ Já existe outra questão com número <strong>${numero}</strong> nesta prova.`;err.classList.remove('hidden');return;}
   err.classList.add('hidden');
+  const modo='estruturado';
+  const blocoTexto='';
   const btn=document.getElementById('mqs-save-btn');
   if(btn){btn.disabled=true;btn.textContent='⏳ Salvando...';}
   try{
     const data={
       numero,modo,gabaritoOficial,imagemUrl,
-      enunciado:(modo==='estruturado'||modo==='vf')?enunciado:'',
-      alternativas:(modo==='estruturado'||modo==='vf')?alternativas:[],
+      enunciado:modo==='estruturado'?enunciado:'',
+      alternativas:modo==='estruturado'?alternativas:[],
       blocoTexto:modo==='bloco'?blocoTexto:'',
       updatedAt:new Date().toISOString(),
     };
@@ -11979,7 +12202,6 @@ window.saveQuestao=async()=>{
       data.criadoEm=new Date().toISOString();
       data.validada=false;
       data.parecer='em-analise';
-      if(modo==='vf')data.pareceresPorAlt={}; // {A:{parecer,argumento,...}, B:{...}, ...}
     }
     await setDoc(doc(db,`provas/${provaId}/questoes/${id}`),data,{merge:true});
   }catch(e){
@@ -12028,6 +12250,72 @@ async function _deleteQuestaoCascade(provaId,qId){
   try{await deleteDoc(doc(db,`provas/${provaId}/questoes/${qId}`));}catch(e){console.error('delete questao:',e);alert('Erro: '+(e.code||e.message));}
 }
 
+// ── Soft-delete + restaurar de sugestões de recurso ──
+// Helper compartilhado: marca uma sugestão como excluída/restaurada e recalcula o parecer oficial
+// (= sugestão ativa mais recente). Se não houver ativas, limpa o parecer.
+async function _toggleExcluirSugestao(qId,sugId,marcarExcluida){
+  const provaId=S.recursos.curProvaId;
+  if(!provaId)return;
+  const profNome=S.currentUser?.nome||S.currentUser?.username||S.currentUser?.email||'Coord';
+  const now=new Date().toISOString();
+  try{
+    const snap=await getDoc(doc(db,`provas/${provaId}/questoes/${qId}`));
+    if(!snap.exists()){await arosAlert({title:'Erro',message:'Questão não encontrada.',icon:'❌'});return false;}
+    const data=snap.data()||{};
+    const sugs=Array.isArray(data.sugestoes)?data.sugestoes:[];
+    const found=sugs.find(s=>s.id===sugId);
+    if(!found){await arosAlert({title:'Erro',message:'Sugestão não encontrada.',icon:'❌'});return false;}
+    const updated=sugs.map(s=>{
+      if(s.id!==sugId)return s;
+      if(marcarExcluida)return{...s,excluida:true,excluidaEm:now,excluidaPor:profNome};
+      // Restaurar — remove campos de exclusão
+      const{excluida,excluidaEm,excluidaPor,...rest}=s;
+      return rest;
+    });
+    // Recalcula parecer oficial = sugestão ativa mais recente (se houver)
+    const ativas=updated.filter(s=>!s.excluida).sort((a,b)=>(b.criadoEm||'').localeCompare(a.criadoEm||''));
+    let officialUpd;
+    if(ativas.length){
+      const top=ativas[0];
+      officialUpd={parecer:top.parecer,parecerArgumento:top.argumento,parecerImagemUrl:top.imagemUrl||'',parecerPor:top.profNome,parecerEm:top.criadoEm,parecerFinalizado:true};
+    }else{
+      // Sem nenhuma ativa — limpa o parecer (aluno não vê nada)
+      officialUpd={parecer:'em-analise',parecerArgumento:'',parecerImagemUrl:'',parecerPor:'',parecerEm:'',parecerFinalizado:false};
+    }
+    await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{...officialUpd,sugestoes:updated,updatedAt:now},{merge:true});
+    return true;
+  }catch(e){
+    console.error('[_toggleExcluirSugestao]',e);
+    await arosAlert({title:'Erro',message:e.message||String(e),icon:'❌'});
+    return false;
+  }
+}
+
+window.excluirSugestao=async(qId,sugId)=>{
+  const ok=await arosConfirm({title:'Excluir sugestão?',danger:true,icon:'🗑️',message:'A sugestão será marcada como excluída e não aparece mais para o aluno.\n\nVai pro box "Pareceres excluídos" — dá pra restaurar quando quiser.',confirmLabel:'🗑️ Excluir'});
+  if(!ok)return;
+  const provaId=S.recursos.curProvaId;
+  const success=await _toggleExcluirSugestao(qId,sugId,true);
+  if(!success)return;
+  if(S.recursos.questoesCache?.[provaId])delete S.recursos.questoesCache[provaId];
+  arosToast('🗑️ Sugestão excluída','success',2200);
+  // Recarrega o modal Visualizar (se aberto) + a view de questões atrás
+  CM('modal-visualizar-q');
+  await openVisualizarQuestao(qId,provaId);
+  if(typeof renderRecProvas==='function')renderRecProvas();
+};
+
+window.restaurarSugestao=async(qId,sugId)=>{
+  const provaId=S.recursos.curProvaId;
+  const success=await _toggleExcluirSugestao(qId,sugId,false);
+  if(!success)return;
+  if(S.recursos.questoesCache?.[provaId])delete S.recursos.questoesCache[provaId];
+  arosToast('↩️ Sugestão restaurada','success',2200);
+  CM('modal-visualizar-q');
+  await openVisualizarQuestao(qId,provaId);
+  if(typeof renderRecProvas==='function')renderRecProvas();
+};
+
 // Stub do botão validar (será implementado de fato na subtarefa 9)
 window.validarGabarito=async(qId)=>{
   const provaId=S.recursos.curProvaId;if(!provaId)return;
@@ -12045,11 +12333,10 @@ window.validarGabarito=async(qId)=>{
 // === Importação em bloco (subtarefa 24) ===
 window.openImportBlocoModal=()=>{
   const provaId=S.recursos.curProvaId;
-  if(!provaId){alert('Selecione uma prova primeiro.');return;}
+  if(!provaId){arosAlert({title:'Atenção',message:'Selecione uma prova primeiro.',icon:'⚠️'});return;}
   document.getElementById('mib-texto').value='';
   document.getElementById('mib-preview').innerHTML='<p style="color:var(--t2);font-style:italic;text-align:center;padding:20px">Cole o texto pra ver a pré-visualização aqui...</p>';
   document.getElementById('mib-count').textContent='0 questões detectadas';
-  document.getElementById('mib-substituir').checked=false;
   document.getElementById('mib-err').classList.add('hidden');
   document.getElementById('modal-import-bloco').classList.remove('hidden');
   setTimeout(()=>document.getElementById('mib-texto').focus(),50);
@@ -12136,6 +12423,64 @@ window.mibPreview=()=>{
   }).join('')+(questoes.length>20?`<div style="text-align:center;color:var(--t2);font-size:11px;padding:8px">+${questoes.length-20} questões adicionais...</div>`:'');
 };
 
+// Helper interno: importa um array de questões aplicando o modo escolhido.
+// • adicionar:   renumera as importadas como continuação (max+1, +2, +3...). Existentes intactas.
+// • substituir:  substitui o conteúdo de cada questão existente cujo número aparece na importação.
+//                Os demais números (que não existem ainda) viram questões NOVAS com aquele número.
+//                Questões existentes cujo número NÃO aparece na importação ficam intactas.
+async function _importarQuestoes(provaId,questoes,modo,onProgress){
+  const existentes=S.recursos.questoesCache[provaId]||await loadRecQuestoes(provaId);
+  const existentesByNum=new Map(existentes.map(q=>[Number(q.numero)||0,q]));
+  if(modo==='adicionar'){
+    const maxAtual=existentes.reduce((mx,q)=>Math.max(mx,Number(q.numero)||0),0);
+    questoes=questoes.map((q,i)=>({...q,numero:maxAtual+i+1}));
+  }
+  const nowIso=new Date().toISOString();
+  let i=0,reps=0,novas=0;
+  for(const q of questoes){
+    i++;
+    if(onProgress&&i%5===0)onProgress(`Cadastrando ${i}/${questoes.length}...`);
+    const num=Number(q.numero)||0;
+    const existente=modo==='substituir'?existentesByNum.get(num):null;
+    const payload={
+      numero:num,
+      modo:'estruturado',
+      enunciado:q.enunciado||'',
+      alternativas:q.alternativas||[],
+      blocoTexto:q.blocoTexto||'',
+      gabaritoOficial:q.gabaritoOficial||'',
+      imagemUrl:'',
+      imagemPendente:!!q.imagemPendente,
+      updatedAt:nowIso,
+    };
+    if(existente){
+      // Substitui o conteúdo + reseta análise (pareceres antigos não se aplicam ao novo conteúdo)
+      payload.validada=false;
+      payload.parecer='em-analise';
+      payload.parecerFinalizado=false;
+      payload.parecerArgumento='';
+      payload.parecerPor='';
+      payload.parecerEm='';
+      payload.parecerImagemUrl='';
+      payload.parecerRascunho=null;
+      payload.parecerAtribuidoA='';
+      payload.parecerAtribuidoEm='';
+      payload.sugestoes=[];
+      // Mantém o ID existente — preserva contestações vinculadas (a coord pode revisar manualmente)
+      await setDoc(doc(db,`provas/${provaId}/questoes/${existente.id}`),payload,{merge:true});
+      reps++;
+    }else{
+      const id='q_'+Date.now()+'_'+Math.random().toString(36).slice(2,5)+'_'+num;
+      payload.validada=false;
+      payload.parecer='em-analise';
+      payload.criadoEm=nowIso;
+      await setDoc(doc(db,`provas/${provaId}/questoes/${id}`),payload);
+      novas++;
+    }
+  }
+  return{reps,novas};
+}
+
 window.confirmarImportBloco=async()=>{
   const provaId=S.recursos.curProvaId;
   if(!provaId)return;
@@ -12143,68 +12488,273 @@ window.confirmarImportBloco=async()=>{
   const questoes=_parseImportBloco(texto);
   const err=document.getElementById('mib-err');
   if(!questoes.length){err.textContent='Nenhuma questão detectada.';err.classList.remove('hidden');return;}
-  const semGab=questoes.filter(q=>!q.gabaritoOficial).length;
-  const semAlt=questoes.filter(q=>q.alternativas.length<2).length;
-  let confirma=`Importar ${questoes.length} questões pra esta prova?`;
-  if(semGab)confirma+=`\n\n⚠️ ${semGab} questões sem gabarito detectado (você pode adicionar manualmente depois).`;
-  if(semAlt)confirma+=`\n⚠️ ${semAlt} questões com menos de 2 alternativas.`;
-  if(document.getElementById('mib-substituir').checked)confirma+='\n\n🚨 ATENÇÃO: as questões EXISTENTES da prova serão APAGADAS antes da importação (com suas contestações).';
-  if(!confirm(confirma))return;
+  err.classList.add('hidden');
+  // Modal de escolha: Adicionar vs Substituir
+  const escolha=await arosImportarChoice({total:questoes.length,label:'questões'});
+  if(!escolha)return;
+  // Substituir: identifica quais números casam e mostra confirmação detalhada
+  if(escolha==='substituir'){
+    const existentes=S.recursos.questoesCache[provaId]||await loadRecQuestoes(provaId);
+    const existentesByNum=new Map(existentes.map(q=>[Number(q.numero)||0,q]));
+    const importNums=questoes.map(q=>Number(q.numero)||0);
+    const matchNums=importNums.filter(n=>existentesByNum.has(n));
+    const novosNums=importNums.filter(n=>!existentesByNum.has(n));
+    let msg='';
+    if(matchNums.length){
+      msg+=`Vai SUBSTITUIR o conteúdo de ${matchNums.length} questão${matchNums.length>1?'ões':''} (número${matchNums.length>1?'s':''}: ${matchNums.sort((a,b)=>a-b).join(', ')}).\n\n⚠️ Pareceres, sugestões e validação dessas questões serão reiniciados.`;
+    }
+    if(novosNums.length){
+      if(msg)msg+='\n\n';
+      msg+=`Vai criar ${novosNums.length} questão${novosNums.length>1?'ões':''} nova${novosNums.length>1?'s':''} (número${novosNums.length>1?'s':''}: ${novosNums.sort((a,b)=>a-b).join(', ')}).`;
+    }
+    msg+=`\n\nAs demais ${existentes.length-matchNums.length} questões da prova ficarão intactas.`;
+    const ok=await arosConfirm({
+      title:matchNums.length?'Confirmar substituição':'Confirmar importação',
+      icon:matchNums.length?'⚠️':'📥',
+      danger:!!matchNums.length,
+      message:msg,
+      confirmLabel:matchNums.length?'⚠️ Sim, substituir':'📥 Importar',
+      cancelLabel:'Cancelar'
+    });
+    if(!ok)return;
+  }
   const btn=document.getElementById('mib-save-btn');
   if(btn){btn.disabled=true;btn.textContent='⏳ Importando...';}
-  err.classList.add('hidden');
+  let resultado={reps:0,novas:questoes.length};
   try{
-    // Apaga existentes se solicitado
-    if(document.getElementById('mib-substituir').checked){
-      const lista=S.recursos.questoesCache[provaId]||await loadRecQuestoes(provaId);
-      for(const q of lista)await _deleteQuestaoCascade(provaId,q.id);
-    }
-    // Insere novas
-    const nowIso=new Date().toISOString();
-    for(const q of questoes){
-      const id='q_'+Date.now()+'_'+Math.random().toString(36).slice(2,5)+'_'+q.numero;
-      await setDoc(doc(db,`provas/${provaId}/questoes/${id}`),{
-        numero:q.numero,
-        modo:'estruturado',
-        enunciado:q.enunciado,
-        alternativas:q.alternativas,
-        blocoTexto:'',
-        gabaritoOficial:q.gabaritoOficial||'',
-        imagemUrl:'',
-        validada:false,
-        parecer:'em-analise',
-        criadoEm:nowIso,updatedAt:nowIso,
-      });
-    }
+    resultado=await _importarQuestoes(provaId,questoes,escolha,t=>{if(btn)btn.textContent='⏳ '+t;});
   }catch(e){
     console.error('importBloco:',e);
     if(btn){btn.disabled=false;btn.textContent='✓ Importar todas';}
     err.innerHTML=`❌ Erro: <strong>${e.code||e.message}</strong>`;err.classList.remove('hidden');return;
   }
   CM('modal-import-bloco');
-  alert(`✅ ${questoes.length} questões importadas!`);
+  if(S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
+  const parts=[];
+  if(resultado.reps)parts.push(`${resultado.reps} substituída${resultado.reps>1?'s':''}`);
+  if(resultado.novas)parts.push(`${resultado.novas} nova${resultado.novas>1?'s':''}`);
+  arosToast(`✅ Importação concluída: ${parts.join(' + ')}`,'success',3500);
+  await renderRecProvas();
+};
+
+// Dropdown unificado "Importar questões" (bloco ou PDF)
+window.recToggleImportMenu=(ev)=>{
+  ev&&ev.stopPropagation();
+  const m=document.getElementById('rec-import-q-menu');if(!m)return;
+  const wasOpen=!m.classList.contains('hidden');
+  m.classList.toggle('hidden');
+  if(!wasOpen){
+    setTimeout(()=>{
+      const close=(e)=>{
+        if(!document.getElementById('rec-import-q-wrap')?.contains(e.target)){
+          m.classList.add('hidden');
+          document.removeEventListener('click',close);
+        }
+      };
+      document.addEventListener('click',close);
+    },0);
+  }
+};
+window.recImportMenuPick=(kind)=>{
+  const m=document.getElementById('rec-import-q-menu');if(m)m.classList.add('hidden');
+  if(kind==='bloco')openImportBlocoModal();
+  else if(kind==='pdf')openImportPdfModal();
+};
+
+// Dropdown unificado "Importar gabarito" (colar ou PDF)
+window.recToggleImportGabMenu=(ev)=>{
+  ev&&ev.stopPropagation();
+  const m=document.getElementById('rec-import-g-menu');if(!m)return;
+  const wasOpen=!m.classList.contains('hidden');
+  m.classList.toggle('hidden');
+  if(!wasOpen){
+    setTimeout(()=>{
+      const close=(e)=>{
+        if(!document.getElementById('rec-import-g-wrap')?.contains(e.target)){
+          m.classList.add('hidden');
+          document.removeEventListener('click',close);
+        }
+      };
+      document.addEventListener('click',close);
+    },0);
+  }
+};
+window.recImportGabMenuPick=async(kind)=>{
+  const m=document.getElementById('rec-import-g-menu');if(m)m.classList.add('hidden');
+  // Abre o modal de gabarito e foca no campo correspondente
+  await openImportGabaritoModal();
+  if(kind==='bloco'){
+    setTimeout(()=>document.getElementById('mig-texto')?.focus(),100);
+  }else if(kind==='pdf'){
+    setTimeout(()=>document.getElementById('mig-arquivo')?.click(),100);
+  }
+};
+
+// === Importação STANDALONE de gabarito (independe da importação de questões) ===
+S.recursos._gabaritoMap={}; // map atual carregado no modal de gabarito {numero: 'A'..'E'}
+
+window.openImportGabaritoModal=async()=>{
+  const provaId=S.recursos.curProvaId;
+  if(!provaId){await arosAlert({title:'Atenção',message:'Selecione uma prova primeiro.',icon:'⚠️'});return;}
+  if(!window.pdfjsLib){await arosAlert({title:'PDF.js indisponível',message:'A biblioteca de PDF não carregou. Recarregue a página.',icon:'⚠️'});return;}
+  document.getElementById('mig-arquivo').value='';
+  document.getElementById('mig-texto').value='';
+  _setImpStatus('mig-status','idle','Nenhum.',0);
+  document.getElementById('mig-preview').innerHTML='';
+  document.getElementById('mig-err').classList.add('hidden');
+  document.getElementById('mig-save-btn').disabled=true;
+  S.recursos._gabaritoMap={};
+  document.getElementById('modal-import-gabarito').classList.remove('hidden');
+};
+
+// Extrai texto de uma página com Y-bucket (tolerância 4px) + X-sort.
+// Mais robusto pra PDFs com leve variação vertical entre caracteres (ex: tabelas).
+async function _extrairTextoPaginaPdf(page){
+  const t=await page.getTextContent();
+  const items=t.items.filter(it=>it.str&&it.str.trim());
+  if(!items.length)return'';
+  // Bucket por Y com tolerância (junta itens com Y dentro de ±3.5 do anchor)
+  const buckets=[];
+  for(const it of items){
+    const y=it.transform[5],x=it.transform[4];
+    let b=buckets.find(bk=>Math.abs(bk.y-y)<=3.5);
+    if(b){b.items.push({x,str:it.str});}
+    else{buckets.push({y,items:[{x,str:it.str}]});}
+  }
+  // Ordena buckets de cima pra baixo (Y maior primeiro em PDF coords)
+  buckets.sort((a,b)=>b.y-a.y);
+  // Dentro de cada bucket, ordena por X (esquerda → direita)
+  return buckets.map(b=>b.items.sort((a,b)=>a.x-b.x).map(i=>i.str).join(' ').replace(/\s+/g,' ').trim()).filter(Boolean).join('\n');
+}
+
+window.migExtrair=async(ev)=>{
+  const f=ev.target.files&&ev.target.files[0];if(!f)return;
+  _setImpStatus('mig-status','loading',`Lendo "${f.name}"...`,5);
+  try{
+    const buf=await f.arrayBuffer();
+    _setImpStatus('mig-status','loading',`Abrindo PDF "${f.name}"...`,15);
+    const pdf=await window.pdfjsLib.getDocument({data:buf}).promise;
+    _setImpStatus('mig-status','loading',`Extraindo texto · 0/${pdf.numPages}`,22,`${pdf.numPages} pág`);
+    let textoCompleto='';
+    for(let i=1;i<=pdf.numPages;i++){
+      const pct=22+Math.round(65*((i-1)/pdf.numPages));
+      _setImpStatus('mig-status','loading',`Extraindo página ${i}/${pdf.numPages}`,pct,`${i}/${pdf.numPages} pág`);
+      // Yield pra DOM atualizar antes do trabalho pesado da próxima página
+      await _yieldUI();
+      const page=await pdf.getPage(i);
+      textoCompleto+=await _extrairTextoPaginaPdf(page)+'\n';
+    }
+    _setImpStatus('mig-status','loading','Detectando gabaritos no texto...',95);
+    console.log('[migExtrair] texto extraído (primeiros 500 chars):',textoCompleto.slice(0,500));
+    document.getElementById('mig-texto').value=textoCompleto;
+    migPreviewFromText();
+    const totalDet=Object.keys(S.recursos._gabaritoMap||{}).length;
+    if(totalDet>0){
+      _setImpStatus('mig-status','success',`"${f.name}" pronto`,100,`${totalDet} gabarito${totalDet>1?'s':''} detectado${totalDet>1?'s':''}`);
+    }else{
+      _setImpStatus('mig-status','err',`"${f.name}" lido, mas nenhum gabarito detectado`,0,'edite o texto abaixo manualmente');
+    }
+  }catch(e){
+    console.error('migExtrair:',e);
+    _setImpStatus('mig-status','err',e.message||String(e),0);
+  }
+};
+
+window.migPreviewFromText=()=>{
+  const texto=document.getElementById('mig-texto').value||'';
+  const map=_parseGabaritoPdf(texto);
+  S.recursos._gabaritoMap=map;
+  const total=Object.keys(map).length;
+  const provaId=S.recursos.curProvaId;
+  const qs=S.recursos.questoesCache[provaId]||[];
+  const numerosQ=new Set(qs.map(q=>q.numero));
+  const correspondem=Object.keys(map).filter(n=>numerosQ.has(parseInt(n))).length;
+  const semQuestao=Object.keys(map).filter(n=>!numerosQ.has(parseInt(n))).length;
+  const semGabarito=qs.filter(q=>!map[q.numero]).length;
+  const preview=document.getElementById('mig-preview');
+  if(!total){preview.innerHTML='<div style="color:var(--t2);font-size:12px;font-style:italic">Nenhum gabarito detectado.</div>';document.getElementById('mig-save-btn').disabled=true;return;}
+  document.getElementById('mig-save-btn').disabled=false;
+  const itens=Object.entries(map).sort((a,b)=>Number(a[0])-Number(b[0])).map(([n,l])=>{
+    const existe=numerosQ.has(parseInt(n));
+    return`<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:11px;background:${existe?'var(--gl)':'rgba(251,143,68,.12)'};color:${existe?'var(--green)':'#fb8f44'};border:1px solid ${existe?'rgba(63,185,80,.35)':'rgba(251,143,68,.4)'}">${n}→${l}${existe?'':' ⚠'}</span>`;
+  }).join('');
+  preview.innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:10px">
+      <div style="padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px"><div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;color:var(--t2);letter-spacing:.4px">DETECTADOS</div><div style="font-size:18px;font-weight:800;color:var(--accent)">${total}</div></div>
+      <div style="padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px"><div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;color:var(--t2);letter-spacing:.4px">CASAM COM QUESTÕES</div><div style="font-size:18px;font-weight:800;color:var(--green)">${correspondem}</div></div>
+      ${semQuestao?`<div style="padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px"><div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;color:var(--t2);letter-spacing:.4px">SEM QUESTÃO</div><div style="font-size:18px;font-weight:800;color:#fb8f44">${semQuestao}</div></div>`:''}
+      ${semGabarito?`<div style="padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px"><div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;color:var(--t2);letter-spacing:.4px">QUESTÕES SEM MATCH</div><div style="font-size:18px;font-weight:800;color:var(--t2)">${semGabarito}</div></div>`:''}
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;max-height:180px;overflow-y:auto;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px">${itens}</div>
+    ${semQuestao?'<p style="font-size:11px;color:#fb8f44;margin-top:6px">⚠ Itens em laranja não têm questão cadastrada — serão ignorados.</p>':''}
+  `;
+};
+
+window.migAplicar=async()=>{
+  const provaId=S.recursos.curProvaId;
+  if(!provaId)return;
+  const map=S.recursos._gabaritoMap||{};
+  const total=Object.keys(map).length;
+  if(!total){await arosAlert({title:'Vazio',message:'Nenhum gabarito pra aplicar.',icon:'ℹ️'});return;}
+  const qs=S.recursos.questoesCache[provaId]||await loadRecQuestoes(provaId);
+  // Mapeia questões cujo gabarito do PDF é diferente do atual
+  const possiveis=qs.filter(q=>map[q.numero]&&q.gabaritoOficial!==map[q.numero]);
+  if(!possiveis.length){await arosAlert({title:'Nada a fazer',message:'Todos os gabaritos detectados já casam com os atuais.',icon:'ℹ️'});return;}
+  const jaPreenchidos=possiveis.filter(q=>!!q.gabaritoOficial).length;
+  const vazios=possiveis.length-jaPreenchidos;
+  // Modal de escolha pra gabarito (semântica diferente: Adicionar=preserva, Substituir=sobrescreve)
+  const escolha=await arosImportarChoice({
+    total:possiveis.length,
+    label:'gabaritos',
+    addLabel:'➕ Preencher só os vazios',
+    replaceLabel:'⚠️ Substituir todos (mesmo os preenchidos)',
+    descricao:`Foram detectados <strong>${total} gabaritos no arquivo</strong>, dos quais ${possiveis.length} podem ser aplicados.<br><br>Atualmente, <strong>${jaPreenchidos}</strong> questão${jaPreenchidos!==1?'ões':''} já tem gabarito preenchido e <strong>${vazios}</strong> está${vazios!==1?'o vazias':' vazia'}.`
+  });
+  if(!escolha)return;
+  if(escolha==='substituir'&&jaPreenchidos>0){
+    const ok=await arosConfirm({
+      title:'Tem certeza?',
+      icon:'⚠️',
+      danger:true,
+      message:`Vai SOBRESCREVER o gabarito de ${jaPreenchidos} questão${jaPreenchidos!==1?'ões':''} que já está${jaPreenchidos!==1?'vam':'va'} preenchid${jaPreenchidos!==1?'as':'a'}.\n\nIsso NÃO pode ser desfeito.`,
+      confirmLabel:'⚠️ Sim, sobrescrever',
+      cancelLabel:'Cancelar'
+    });
+    if(!ok)return;
+  }
+  // Define o alvo final baseado na escolha
+  const alvo=escolha==='substituir'?possiveis:possiveis.filter(q=>!q.gabaritoOficial);
+  if(!alvo.length){await arosAlert({title:'Nada a fazer',message:'Todas as questões com gabarito detectado já estão preenchidas. Escolha "Substituir todos" pra sobrescrever.',icon:'ℹ️'});return;}
+  const btn=document.getElementById('mig-save-btn');
+  btn.disabled=true;btn.textContent='⏳ Aplicando...';
+  let okCount=0,errCount=0;
+  const nowIso=new Date().toISOString();
+  for(let i=0;i<alvo.length;i+=400){
+    const slice=alvo.slice(i,i+400);
+    const batch=writeBatch(db);
+    slice.forEach(q=>batch.update(doc(db,`provas/${provaId}/questoes/${q.id}`),{gabaritoOficial:map[q.numero],updatedAt:nowIso}));
+    try{await batch.commit();okCount+=slice.length;}
+    catch(e){console.error('migAplicar batch:',e);errCount+=slice.length;}
+  }
+  btn.disabled=false;btn.textContent='🎯 Aplicar gabarito';
+  CM('modal-import-gabarito');
+  if(S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
+  if(errCount){await arosAlert({title:'Parcial',icon:'⚠️',message:`${okCount} atualizadas, ${errCount} falharam. Confira o console.`});}
+  else{arosToast(`✅ ${okCount} gabarito${okCount!==1?'s':''} aplicado${okCount!==1?'s':''}`,'success',3500);}
   await renderRecProvas();
 };
 
 // === Importação por PDF (subtarefa 25) — dual: prova + gabarito ===
 S.recursos._pdfGabaritoMap={}; // {numero: 'A'|'B'|'C'|'D'} extraído do PDF de gabarito
 
-window.openImportPdfModal=()=>{
+window.openImportPdfModal=async()=>{
   const provaId=S.recursos.curProvaId;
-  if(!provaId){alert('Selecione uma prova primeiro.');return;}
-  if(!window.pdfjsLib){alert('PDF.js não carregou. Verifique sua conexão e recarregue a página.');return;}
-  const prova=(S.recursos.provas||[]).find(p=>p.id===provaId);
-  const isVF=_isProvaVF(prova);
-  // Em modo ME, o gabarito já vem no PDF da prova, então esconde o campo de gabarito separado
-  document.getElementById('mip-gab-wrap').style.display=isVF?'none':'';
-  document.getElementById('mip-modo-sub').textContent=isVF?'Prova ME — alternativas A-E com V/F (gabarito embutido)':'Prova TEA/TSA — alternativas A-D, gabarito em PDF separado';
+  if(!provaId){await arosAlert({title:'Atenção',message:'Selecione uma prova primeiro.',icon:'⚠️'});return;}
+  if(!window.pdfjsLib){await arosAlert({title:'PDF.js indisponível',message:'A biblioteca de PDF não carregou. Verifique sua conexão e recarregue a página.',icon:'⚠️'});return;}
   document.getElementById('mip-arquivo').value='';
-  document.getElementById('mip-gab-arquivo').value='';
-  document.getElementById('mip-status').textContent='Nenhum.';
-  document.getElementById('mip-gab-status').textContent='Nenhum.';
+  _setImpStatus('mip-status','idle','Nenhum.',0);
   document.getElementById('mip-texto').value='';
   document.getElementById('mip-count').textContent='0 questões detectadas';
-  document.getElementById('mip-substituir').checked=false;
   document.getElementById('mip-err').classList.add('hidden');
   document.getElementById('mip-save-btn').disabled=true;
   S.recursos._pdfGabaritoMap={};
@@ -12233,6 +12783,8 @@ async function _extrairTextoPdf(pdf,statusCb){
   const todasImagens=[]; // [{page, x, y, w, h, opName}]
   for(let i=1;i<=pdf.numPages;i++){
     if(statusCb)statusCb(i,pdf.numPages);
+    // Yield ao event loop pra DOM atualizar o spinner/barra (senão JS bloqueia repaint)
+    await _yieldUI();
     const page=await pdf.getPage(i);
     const txt=await page.getTextContent();
     // 1. Agrupa por Y com tolerância 2px
@@ -12422,32 +12974,58 @@ function _limparBoilerplatePdf(texto){
   }).join('\n');
 }
 
+// Helper: atualiza status de importação com visual rico (ampulheta + barra listrada + cores).
+// kind: 'idle' | 'loading' | 'success' | 'err'
+// progress: número 0-100 (opcional, só usado quando loading)
+window._setImpStatus=(elId,kind,message,progress,detail)=>{
+  const el=document.getElementById(elId);if(!el)return;
+  el.className='import-status import-'+(kind||'idle');
+  let iconHtml='';
+  if(kind==='loading')iconHtml='<span class="imp-hourglass">⏳</span>';
+  else if(kind==='success')iconHtml='<span style="font-size:18px">✅</span>';
+  else if(kind==='err')iconHtml='<span style="font-size:18px">❌</span>';
+  el.innerHTML=`
+    <div class="imp-row">
+      ${iconHtml}
+      <span class="imp-msg" title="${(message||'').replace(/"/g,'&quot;')}">${message||''}</span>
+      ${detail?`<span class="imp-detail">${detail}</span>`:''}
+    </div>
+    <div class="imp-bar"><div class="imp-bar-fill" style="width:${Math.max(0,Math.min(100,progress||0))}%"></div></div>
+  `;
+};
+
+// Yield ao event loop pra DOM atualizar (especialmente entre páginas pesadas do PDF).
+// Sem isso, o JS bloqueia o repaint e o usuário acha que travou.
+window._yieldUI=()=>new Promise(r=>requestAnimationFrame(()=>setTimeout(r,0)));
+
 window.mipExtrairPdf=async(ev)=>{
   const f=ev.target.files&&ev.target.files[0];if(!f)return;
-  const status=document.getElementById('mip-status');
-  status.textContent=`⏳ Lendo "${f.name}"...`;
+  _setImpStatus('mip-status','loading',`Lendo "${f.name}"...`,5);
   document.getElementById('mip-err').classList.add('hidden');
   try{
     const buf=await f.arrayBuffer();
+    _setImpStatus('mip-status','loading',`Abrindo PDF "${f.name}"...`,12);
     const pdf=await window.pdfjsLib.getDocument({data:buf}).promise;
-    const{texto,imagensPorQuestao}=await _extrairTextoPdf(pdf,(i,n)=>{status.textContent=`⏳ Extraindo página ${i}/${n}...`;});
+    _setImpStatus('mip-status','loading',`Extraindo texto · 0/${pdf.numPages} páginas`,18,`${pdf.numPages} pág`);
+    const{texto,imagensPorQuestao}=await _extrairTextoPdf(pdf,(i,n)=>{
+      const pct=18+Math.round(70*(i/n));
+      _setImpStatus('mip-status','loading',`Extraindo página ${i}/${n}`,pct,`${i}/${n} pág`);
+    });
     S.recursos._pdfImagensSet=imagensPorQuestao||new Set();
+    _setImpStatus('mip-status','loading','Detectando questões...',92);
     const limpo=_removerOrfaosSubSup(_limparBoilerplatePdf(texto));
-    // Detecta formato e parseia já, pra mostrar texto canônico reorganizado na textarea
-    const prova=(S.recursos.provas||[]).find(p=>p.id===S.recursos.curProvaId);
-    const usaME=_isProvaVF(prova)||_detectarFormatoPdf(limpo)==='me';
-    let questoes=usaME?_parseImportPdfME(limpo):_parseImportBloco(limpo);
-    if(!usaME&&Object.keys(S.recursos._pdfGabaritoMap||{}).length){
+    let questoes=_parseImportBloco(limpo);
+    if(Object.keys(S.recursos._pdfGabaritoMap||{}).length){
       questoes=questoes.map(q=>({...q,gabaritoOficial:q.gabaritoOficial||S.recursos._pdfGabaritoMap[q.numero]||''}));
     }
     document.getElementById('mip-texto').value=questoes.length?_reemitirQuestoes(questoes):_formatarSeparacaoQuestoes(limpo);
     const nImg=S.recursos._pdfImagensSet?.size||0;
-    status.textContent=`✅ "${f.name}" · ${pdf.numPages} página${pdf.numPages>1?'s':''}${nImg?` · 📷 ${nImg} ${nImg===1?'questão com imagem detectada':'questões com imagem detectadas'}`:''}`;
+    _setImpStatus('mip-status','success',`"${f.name}" pronto`,100,`${pdf.numPages} pág${nImg?` · 📷 ${nImg}`:''}`);
     document.getElementById('mip-save-btn').disabled=false;
     mipPreview();
   }catch(e){
     console.error('mipExtrairPdf:',e);
-    status.textContent='❌ Erro: '+(e.message||e);
+    _setImpStatus('mip-status','err',e.message||String(e),0);
     if(/scanner|imagem|image/i.test(e.message||'')){
       const err=document.getElementById('mip-err');
       err.innerHTML='⚠️ Esse PDF parece ser de scanner (imagem). PDF.js não consegue extrair texto de imagens.';
@@ -12534,62 +13112,50 @@ function _detectarFormatoPdf(texto){
   return'tsa-tea';
 }
 
-// Parser do PDF de gabarito separado (TEA/TSA).
-// Aceita formatos: "1-A", "1) A", "1 A", "Questão 1: A", uma por linha ou várias na mesma.
+// Parser robusto do PDF de gabarito (qualquer tipo de prova — A-E).
+// Aceita formatos comuns:
+//  - "1 A", "1-A", "1) A", "1. A", "1: A", "01 - A"
+//  - "Questão 1: A", "Q1 A"
+//  - Tabular: número numa linha, letra na linha seguinte
+//  - Múltiplos por linha: "1 A 2 B 3 C" ou "1-A | 21-C"
 function _parseGabaritoPdf(texto){
   const map={};
-  // Padrão amplo: número (1-4 dígitos) + separador opcional + letra A-D
-  const re=/(\d{1,3})\s*[-.):\s]+\s*([A-D])/gi;
-  let m;
-  while((m=re.exec(texto))!==null){
-    const num=parseInt(m[1]);
-    const letra=m[2].toUpperCase();
-    if(num>=1&&num<=999&&['A','B','C','D'].includes(letra)&&!map[num])map[num]=letra;
+  if(!texto||!texto.trim())return map;
+  // Normaliza: remove zero-width, hyphens unicode, normaliza whitespace
+  const norm=texto
+    .replace(/[​-‍﻿]/g,'')  // zero-width
+    .replace(/[‐-―−]/g,'-')  // hyphens variantes
+    .replace(/[ ]/g,' ');              // NBSP
+  // Tenta multi-padrão na ordem de especificidade
+  const padroes=[
+    // "Questão 1: A" / "Q1 A" / "01-A" — número com prefixo opcional + separador explícito + letra
+    /(?:quest(?:[aã]o|\.?)?\s*)?\b(\d{1,3})\s*[-=:.)]+\s*([A-Da-d])(?![A-Za-z])/g,
+    // "1 A" — número + espaço(s) + letra isolada (mais permissivo)
+    /\b(\d{1,3})\s+([A-Da-d])(?![A-Za-z])/g,
+  ];
+  for(const re of padroes){
+    let m;
+    while((m=re.exec(norm))!==null){
+      const num=parseInt(m[1]);
+      const letra=m[2].toUpperCase();
+      if(num>=1&&num<=999&&'ABCD'.includes(letra)&&!map[num])map[num]=letra;
+    }
+  }
+  // Fallback tabular: linhas alternando "número" / "letra" (sem separador na mesma linha)
+  // Ex: "1\nA\n2\nB\n3\nC"
+  const linhas=norm.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  for(let i=0;i<linhas.length-1;i++){
+    const ln=linhas[i],prox=linhas[i+1];
+    if(/^\d{1,3}$/.test(ln)&&/^[A-Da-d]$/.test(prox)){
+      const num=parseInt(ln);
+      const letra=prox.toUpperCase();
+      if(!map[num])map[num]=letra;
+    }
   }
   return map;
 }
 
-window.mipExtrairGabarito=async(ev)=>{
-  const f=ev.target.files&&ev.target.files[0];if(!f)return;
-  const status=document.getElementById('mip-gab-status');
-  status.textContent=`⏳ Lendo "${f.name}"...`;
-  try{
-    const buf=await f.arrayBuffer();
-    const pdf=await window.pdfjsLib.getDocument({data:buf}).promise;
-    let textoCompleto='';
-    for(let i=1;i<=pdf.numPages;i++){
-      const page=await pdf.getPage(i);
-      const t=await page.getTextContent();
-      const linhas={};
-      for(const it of t.items){
-        const y=Math.round(it.transform[5]);
-        if(!linhas[y])linhas[y]=[];
-        linhas[y].push(it.str);
-      }
-      const ys=Object.keys(linhas).map(Number).sort((a,b)=>b-a);
-      textoCompleto+=ys.map(y=>linhas[y].join(' ').trim()).filter(Boolean).join('\n')+'\n';
-    }
-    const map=_parseGabaritoPdf(textoCompleto);
-    const total=Object.keys(map).length;
-    S.recursos._pdfGabaritoMap=map;
-    status.textContent=`✅ "${f.name}" · ${total} gabaritos lidos`;
-    // Re-emite o texto da textarea aplicando os gabaritos recém-detectados
-    const taEl=document.getElementById('mip-texto');
-    const textoAtual=_removerOrfaosSubSup(_limparBoilerplatePdf(taEl.value||''));
-    if(textoAtual.trim()){
-      let questoes=_parseImportBloco(textoAtual);
-      if(questoes.length){
-        questoes=questoes.map(q=>({...q,gabaritoOficial:q.gabaritoOficial||map[q.numero]||''}));
-        taEl.value=_reemitirQuestoes(questoes);
-      }
-    }
-    mipPreview();
-  }catch(e){
-    console.error('mipExtrairGabarito:',e);
-    status.textContent='❌ Erro: '+(e.message||e);
-  }
-  ev.target.value='';
-};
+// mipExtrairGabarito removida — gabarito agora vem pelo modal "Importar gabarito" standalone (migExtrair).
 
 window.mipPreview=()=>{
   const texto=document.getElementById('mip-texto').value;
@@ -12599,13 +13165,10 @@ window.mipPreview=()=>{
     return;
   }
   const provaId=S.recursos.curProvaId;
-  const prova=(S.recursos.provas||[]).find(p=>p.id===provaId);
-  const isProvaVF=_isProvaVF(prova);
-  const formatoDetectado=_detectarFormatoPdf(texto);
-  const usaME=isProvaVF||formatoDetectado==='me';
-  const questoes=usaME?_parseImportPdfME(texto):_parseImportBloco(texto);
-  // Guarda no dataset pra confirmação reusar
-  document.getElementById('modal-import-pdf').dataset.modoImport=usaME?'vf':'estruturado';
+  // Parser único — independe do tipo da prova. Cada questão sai como estruturado
+  // (numero + enunciado + alternativas). Gabarito vem via importação separada (PDF de gabarito).
+  const questoes=_parseImportBloco(texto);
+  document.getElementById('modal-import-pdf').dataset.modoImport='estruturado';
   document.getElementById('mip-count').textContent=`${questoes.length} ${questoes.length===1?'questão detectada':'questões detectadas'}`;
   document.getElementById('mip-save-btn').disabled=!questoes.length;
 };
@@ -12613,62 +13176,61 @@ window.mipPreview=()=>{
 window.confirmarImportPdf=async()=>{
   const provaId=S.recursos.curProvaId;
   if(!provaId)return;
-  const prova=(S.recursos.provas||[]).find(p=>p.id===provaId);
-  const isProvaVF=_isProvaVF(prova);
   const texto=document.getElementById('mip-texto').value;
-  const modoImport=document.getElementById('modal-import-pdf').dataset.modoImport||(isProvaVF?'vf':'estruturado');
-  const usaME=modoImport==='vf';
-  let questoes=usaME?_parseImportPdfME(texto):_parseImportBloco(texto);
-  if(!usaME&&Object.keys(S.recursos._pdfGabaritoMap).length){
+  let questoes=_parseImportBloco(texto);
+  if(Object.keys(S.recursos._pdfGabaritoMap||{}).length){
     questoes=questoes.map(q=>({...q,gabaritoOficial:q.gabaritoOficial||S.recursos._pdfGabaritoMap[q.numero]||''}));
   }
+  // Anexa flag de imagem pendente por questão (detectado durante parse do PDF)
+  const imgSet=S.recursos._pdfImagensSet||new Set();
+  questoes=questoes.map(q=>({...q,imagemPendente:imgSet.has(q.numero)}));
   const err=document.getElementById('mip-err');
   if(!questoes.length){err.textContent='Nenhuma questão detectada no texto.';err.classList.remove('hidden');return;}
-  let confirma=`Importar ${questoes.length} questões pra esta prova?\n\nFormato: ${usaME?'V/F (ME) — 5 alts cada uma com V ou F':'TEA/TSA — 4 alts A-D, 1 correta'}.`;
-  if(usaME){
-    const semVF=questoes.filter(q=>q.alternativas.some(a=>!a.gabaritoVF)).length;
-    if(semVF)confirma+=`\n\n⚠️ ${semVF} questões com alguma alt sem V/F detectado.`;
-  }else{
-    const semGab=questoes.filter(q=>!q.gabaritoOficial).length;
-    if(semGab)confirma+=`\n\n⚠️ ${semGab} questões sem gabarito (você pode adicionar manualmente depois).`;
+  err.classList.add('hidden');
+  // Modal de escolha
+  const escolha=await arosImportarChoice({total:questoes.length,label:'questões'});
+  if(!escolha)return;
+  if(escolha==='substituir'){
+    const existentes=S.recursos.questoesCache[provaId]||await loadRecQuestoes(provaId);
+    const existentesByNum=new Map(existentes.map(q=>[Number(q.numero)||0,q]));
+    const importNums=questoes.map(q=>Number(q.numero)||0);
+    const matchNums=importNums.filter(n=>existentesByNum.has(n));
+    const novosNums=importNums.filter(n=>!existentesByNum.has(n));
+    let msg='';
+    if(matchNums.length){
+      msg+=`Vai SUBSTITUIR o conteúdo de ${matchNums.length} questão${matchNums.length>1?'ões':''} (número${matchNums.length>1?'s':''}: ${matchNums.sort((a,b)=>a-b).join(', ')}).\n\n⚠️ Pareceres, sugestões e validação dessas questões serão reiniciados.`;
+    }
+    if(novosNums.length){
+      if(msg)msg+='\n\n';
+      msg+=`Vai criar ${novosNums.length} questão${novosNums.length>1?'ões':''} nova${novosNums.length>1?'s':''} (número${novosNums.length>1?'s':''}: ${novosNums.sort((a,b)=>a-b).join(', ')}).`;
+    }
+    msg+=`\n\nAs demais ${existentes.length-matchNums.length} questões da prova ficarão intactas.`;
+    const ok=await arosConfirm({
+      title:matchNums.length?'Confirmar substituição':'Confirmar importação',
+      icon:matchNums.length?'⚠️':'📥',
+      danger:!!matchNums.length,
+      message:msg,
+      confirmLabel:matchNums.length?'⚠️ Sim, substituir':'📥 Importar',
+      cancelLabel:'Cancelar'
+    });
+    if(!ok)return;
   }
-  if(document.getElementById('mip-substituir').checked)confirma+='\n\n🚨 ATENÇÃO: as questões EXISTENTES serão APAGADAS antes da importação.';
-  if(!confirm(confirma))return;
   const btn=document.getElementById('mip-save-btn');
   if(btn){btn.disabled=true;btn.textContent='⏳ Importando...';}
-  err.classList.add('hidden');
+  let resultado={reps:0,novas:questoes.length};
   try{
-    if(document.getElementById('mip-substituir').checked){
-      const lista=S.recursos.questoesCache[provaId]||await loadRecQuestoes(provaId);
-      for(const q of lista)await _deleteQuestaoCascade(provaId,q.id);
-    }
-    const nowIso=new Date().toISOString();
-    const imgSet=S.recursos._pdfImagensSet||new Set();
-    for(const q of questoes){
-      const id='q_'+Date.now()+'_'+Math.random().toString(36).slice(2,5)+'_'+q.numero;
-      const dataDoc={
-        numero:q.numero,
-        modo:usaME?'vf':'estruturado',
-        enunciado:q.enunciado,
-        alternativas:q.alternativas,
-        blocoTexto:'',
-        gabaritoOficial:usaME?'':(q.gabaritoOficial||''),
-        imagemUrl:'',
-        imagemPendente:imgSet.has(q.numero),
-        validada:false,
-        parecer:'em-analise',
-        criadoEm:nowIso,updatedAt:nowIso,
-      };
-      if(usaME)dataDoc.pareceresPorAlt={};
-      await setDoc(doc(db,`provas/${provaId}/questoes/${id}`),dataDoc);
-    }
+    resultado=await _importarQuestoes(provaId,questoes,escolha,t=>{if(btn)btn.textContent='⏳ '+t;});
   }catch(e){
     console.error('importPdf:',e);
     if(btn){btn.disabled=false;btn.textContent='✓ Importar todas';}
     err.innerHTML=`❌ Erro: <strong>${e.code||e.message}</strong>`;err.classList.remove('hidden');return;
   }
   CM('modal-import-pdf');
-  alert(`✅ ${questoes.length} questões importadas do PDF!`);
+  if(S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
+  const parts=[];
+  if(resultado.reps)parts.push(`${resultado.reps} substituída${resultado.reps>1?'s':''}`);
+  if(resultado.novas)parts.push(`${resultado.novas} nova${resultado.novas>1?'s':''}`);
+  arosToast(`✅ Importação concluída: ${parts.join(' + ')}`,'success',3500);
   await renderRecProvas();
 };
 
@@ -12681,29 +13243,68 @@ function _recProvaCard(p){
   const limite=p.dataLimite?fDT(p.dataLimite):'';
   const ano=p.ano||'';
   const nome=(p.nome||'(sem nome)').replace(/</g,'&lt;');
-  return`<div style="padding:14px 18px;background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${tipoCor.fg};border-radius:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+  return`<div onclick="recAbrirQuestoes('${p.id}')" style="padding:14px 18px;background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${tipoCor.fg};border-radius:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;cursor:pointer;transition:background .15s,border-color .15s" onmouseover="this.style.background='var(--bg3)';this.style.borderColor='var(--accent)'" onmouseout="this.style.background='var(--bg2)';this.style.borderColor='var(--border)'">
     <div style="flex:1;min-width:240px">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px">
         <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.6px;padding:2px 8px;border-radius:999px;background:${tipoCor.bg};color:${tipoCor.fg};border:1px solid ${tipoCor.bd}">${(p.tipo||'').toUpperCase()}${ano?' · '+ano:''}</span>
         <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.6px;padding:2px 8px;border-radius:999px;background:${statusBg};color:${statusCor};border:1px solid ${ativo?'rgba(63,185,80,.3)':'var(--border)'}">● ${statusLabel}</span>
       </div>
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;letter-spacing:-.2px">${nome}</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;letter-spacing:-.2px">${nome}</span>
+        <button onclick="event.stopPropagation();openProvaModal('${p.id}')" title="Editar prova" style="background:none;border:none;cursor:pointer;font-size:14px;padding:4px 6px;border-radius:6px;line-height:1;opacity:.55;transition:opacity .15s,background .15s" onmouseover="this.style.opacity='1';this.style.background='var(--bg3)'" onmouseout="this.style.opacity='.55';this.style.background='none'">✏️</button>
+      </div>
       ${limite?`<div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--t2);margin-top:4px">⏱ Recursos até ${limite}</div>`:''}
     </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button class="btn btn-s btn-sm" onclick="recAbrirQuestoes('${p.id}')">📝 Questões</button>
-      <button class="btn btn-s btn-sm" onclick="openProvaModal('${p.id}')">✏️ Editar</button>
-      <button class="btn btn-d btn-sm" onclick="event.stopPropagation();deleteProvaDireto('${p.id}')" title="Apagar prova">🗑️</button>
+    <div onclick="event.stopPropagation()" style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-d btn-sm" onclick="deleteProvaDireto('${p.id}')" title="Apagar prova">🗑️</button>
     </div>
   </div>`;
 }
 
 window.deleteProvaDireto=async(provaId)=>{
-  const p=(S.recursos.provas||[]).find(x=>x.id===provaId);if(!p)return;
-  const conf=prompt('Se você continuar, apagará toda a prova cadastrada.\nDigite EXCLUIR para prosseguir:');
-  if(conf!=='EXCLUIR')return;
-  try{await _deleteProvaCascade(provaId);}catch(e){console.error('deleteProva:',e);alert('Erro ao apagar: '+(e.code||e.message));return;}
-  await renderRecProvas();
+  console.log('[deleteProvaDireto] iniciado pra:',provaId);
+  if(!provaId){arosToast('ID da prova vazio — recarregue a página.','err');return;}
+  const p=(S.recursos.provas||[]).find(x=>x.id===provaId);
+  const nome=p?.nome||'(esta prova)';
+  // Confirmação via arosPrompt (padrão AROS — substitui prompt/confirm nativos)
+  const conf=await arosPrompt({
+    title:'Apagar prova',
+    icon:'🗑️',
+    danger:true,
+    message:`Você está prestes a apagar a prova "${nome}", incluindo todas as questões e contestações vinculadas. Essa ação não pode ser desfeita.`,
+    placeholder:'EXCLUIR',
+    requireMatch:'EXCLUIR',
+    confirmLabel:'🗑️ Apagar definitivo',
+    cancelLabel:'Cancelar'
+  });
+  if(conf===null)return;
+  // Modal de progresso enquanto a cascata roda
+  const prog=_arosBuildModal({
+    title:'Apagando prova...',
+    icon:'⏳',
+    bodyHtml:`<div id="aros-prog-msg" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--t2);line-height:1.6;min-height:48px">Iniciando...</div>`,
+    footHtml:''
+  });
+  const msgEl=prog.cont.querySelector('#aros-prog-msg');
+  try{
+    console.log('[deleteProvaDireto] cascading delete:',provaId);
+    const r=await _deleteProvaCascade(provaId,(t)=>{if(msgEl)msgEl.textContent=t;});
+    console.log('[deleteProvaDireto] OK:',r);
+    try{audit('PROVA_REMOVIDA',{collection:'provas',provaId},{before:{nome,tipo:p?.tipo,ano:p?.ano}});}catch(_){}
+    prog.close();
+    arosToast(`✅ Prova apagada. ${r.questoes} questões e ${r.contestacoes} contestações removidas.`,'success',4000);
+    await renderRecProvas();
+  }catch(e){
+    console.error('[deleteProvaDireto] falhou:',e);
+    prog.close();
+    const codigo=e?.code||'';
+    const msg=e?.message||String(e);
+    let detalhe=`${codigo?codigo+': ':''}${msg}`;
+    if(codigo==='permission-denied'||/permission/i.test(msg)){
+      detalhe+='\n\n💡 Provável causa: a regra do Firestore exige login Firebase Auth. Saia e entre de novo via Google (ou email/senha) — login antigo (só "aros2025") não autoriza deletes.';
+    }
+    await arosAlert({title:'Erro ao apagar a prova',icon:'❌',message:detalhe});
+  }
 };
 
 window.openProvaModal=(id)=>{
@@ -12753,46 +13354,56 @@ window.saveProva=async()=>{
   document.getElementById('modal-prova').dataset.editId=id;
   document.getElementById('mpv-del').style.display='';
   if(btn){btn.disabled=false;btn.textContent='💾 Salvar';}
-  const saved=document.getElementById('mpv-saved');
-  if(saved){
-    const hh=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    saved.textContent=`✅ salvo às ${hh}`;saved.style.opacity='1';
-    clearTimeout(window._mpvSavedTimer);window._mpvSavedTimer=setTimeout(()=>{saved.style.opacity='.55';},2200);
-  }
+  // Fecha o modal automaticamente + toast de confirmação
+  CM('modal-prova');
+  arosToast(editId?'✅ Prova atualizada':'✅ Prova cadastrada','success');
   await renderRecProvas();
 };
 
 // Apaga a prova + todas as questões + todas as contestações (cascata).
-async function _deleteProvaCascade(provaId){
-  // 1. Lista questões
+// Otimizado: contestacoes lookup em paralelo + batches de 500 (cap do Firestore).
+async function _deleteProvaCascade(provaId,progressCb){
+  const setMsg=(t)=>{try{progressCb&&progressCb(t);}catch(_){}};
+  setMsg('Listando questões...');
   const qsnap=await getDocs(collection(db,`provas/${provaId}/questoes`));
-  // 2. Pra cada questão, apaga contestações em batch
-  for(const qd of qsnap.docs){
-    const csnap=await getDocs(collection(db,`provas/${provaId}/questoes/${qd.id}/contestacoes`));
-    if(csnap.docs.length){
+  setMsg(`Encontradas ${qsnap.docs.length} questões. Buscando contestações em paralelo...`);
+  // 1) Busca contestações de TODAS as questões em paralelo
+  const contRefs=[];
+  await Promise.all(qsnap.docs.map(async qd=>{
+    try{
+      const csnap=await getDocs(collection(db,`provas/${provaId}/questoes/${qd.id}/contestacoes`));
+      csnap.docs.forEach(cd=>contRefs.push(cd.ref));
+    }catch(e){console.warn('contestacoes lookup',qd.id,e);}
+  }));
+  // 2) Apaga contestações em batches de 500
+  if(contRefs.length){
+    setMsg(`Apagando ${contRefs.length} contestações em ${Math.ceil(contRefs.length/500)} lote(s)...`);
+    for(let i=0;i<contRefs.length;i+=500){
       const batch=writeBatch(db);
-      csnap.docs.forEach(cd=>batch.delete(cd.ref));
+      contRefs.slice(i,i+500).forEach(r=>batch.delete(r));
       await batch.commit();
     }
   }
-  // 3. Apaga questões em batch
+  // 3) Apaga questões em batches de 500
   if(qsnap.docs.length){
-    const batch=writeBatch(db);
-    qsnap.docs.forEach(qd=>batch.delete(qd.ref));
-    await batch.commit();
+    setMsg(`Apagando ${qsnap.docs.length} questões em ${Math.ceil(qsnap.docs.length/500)} lote(s)...`);
+    for(let i=0;i<qsnap.docs.length;i+=500){
+      const batch=writeBatch(db);
+      qsnap.docs.slice(i,i+500).forEach(qd=>batch.delete(qd.ref));
+      await batch.commit();
+    }
   }
-  // 4. Apaga a prova
+  // 4) Apaga a prova
+  setMsg('Apagando o cabeçalho da prova...');
   await deleteDoc(doc(db,'provas',provaId));
-  return{questoes:qsnap.docs.length};
+  return{questoes:qsnap.docs.length,contestacoes:contRefs.length};
 }
 
 window.deleteProva=async()=>{
-  const id=document.getElementById('modal-prova').dataset.editId;if(!id)return;
-  const conf=prompt('Se você continuar, apagará toda a prova cadastrada.\nDigite EXCLUIR para prosseguir:');
-  if(conf!=='EXCLUIR')return;
-  try{await _deleteProvaCascade(id);}catch(e){console.error('deleteProva:',e);alert('Erro ao apagar: '+(e.code||e.message));return;}
+  const id=document.getElementById('modal-prova').dataset.editId;
+  if(!id){alert('Esta prova ainda não foi salva.');return;}
   CM('modal-prova');
-  await renderRecProvas();
+  return deleteProvaDireto(id);
 };
 
 // === Questões: navegação (provas ↔ questões) + CRUD ===
@@ -12806,9 +13417,12 @@ function _formatoPorTipoProva(tipo){
   if(tipo==='ME1'||tipo==='ME2'||tipo==='ME3')return'me';
   return'tsa-tea';
 }
-function _isProvaVF(prova){return _formatoPorTipoProva(prova?.tipo)==='me';}
-function _modoDefaultPorTipo(tipo){return _formatoPorTipoProva(tipo)==='me'?'vf':'estruturado';}
-function _letrasPorTipo(tipo){return _formatoPorTipoProva(tipo)==='me'?['A','B','C','D','E']:['A','B','C','D'];}
+// V/F descontinuado em 2026-05-28: ME passa a usar modo 'bloco' por padrão.
+// _isProvaVF mantido como stub (sempre false) pra não quebrar chamadores legados ainda no código.
+function _isProvaVF(prova){return false;}
+function _modoDefaultPorTipo(tipo){return _formatoPorTipoProva(tipo)==='me'?'bloco':'estruturado';}
+// V/F descontinuado → ME passa a usar 4 alternativas (A-D), igual TEA/TSA. Padronização total.
+function _letrasPorTipo(tipo){return['A','B','C','D'];}
 
 async function loadRecQuestoes(provaId){
   if(!provaId)return[];
@@ -12854,13 +13468,9 @@ async function loadAllContestacoes(){
   return all;
 }
 
-// Helper: identifica quem está atribuído (modo VF lê por alt, senão geral)
+// Helper: identifica quem está atribuído à análise da questão
 function _atribuicaoDaContest(c){
   const q=c.questao||{};
-  if(q.modo==='vf'&&c.alternativaLetra){
-    const par=(q.pareceresPorAlt||{})[c.alternativaLetra]||{};
-    return{nome:par.atribuidoA||'',em:par.atribuidoEm||''};
-  }
   return{nome:q.parecerAtribuidoA||'',em:q.parecerAtribuidoEm||''};
 }
 
@@ -12961,35 +13571,26 @@ window.abrirParecer=async(provaId,qId,cId,opts)=>{
     contestacoes=csnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.criadoEm||'').localeCompare(b.criadoEm||''));}
   catch(e){console.error(e);}
   const cAtual=cId?contestacoes.find(x=>x.id===cId):null;
-  // Detecta modo
-  const modo=questao.modo||'estruturado';
-  const isVF=modo==='vf';
-  const alvoAltLetra=cAtual?.alternativaLetra||altOverride||'';
+  // Detecta modo (V/F descontinuado: trata como bloco se topar com legado)
+  let modo=questao.modo||'estruturado';
+  if(modo==='vf')modo='bloco';
   // Sub
   const prefixoSugerir=isSugerir?'💡 SUGERIR RECURSO · ':'';
-  if(isVF&&alvoAltLetra){
-    const a=(questao.alternativas||[]).find(x=>x.letra===alvoAltLetra);
-    const gabVF=a?.gabaritoVF==='V'?'V':a?.gabaritoVF==='F'?'F':'?';
-    document.getElementById('mpr-sub').innerHTML=`${prefixoSugerir}${prova?.nome||''} · Questão ${questao.numero||'?'} · <strong style="color:#a371f7">Alternativa ${alvoAltLetra}</strong> · Gabarito: <strong style="color:${a?.gabaritoVF==='V'?'#3fb950':'#f85149'}">${gabVF}</strong>`;
-  }else{
-    document.getElementById('mpr-sub').innerHTML=`${prefixoSugerir}${prova?.nome||''} · Questão ${questao.numero||'?'} · Gabarito: ${questao.gabaritoOficial||'—'}`;
-  }
-  // Box da questão
-  const enun=(modo==='bloco'?(questao.blocoTexto||''):(questao.enunciado||'')).replace(/</g,'&lt;').replace(/\n/g,'<br>');
-  const altsArr=((modo==='estruturado'||modo==='vf')&&Array.isArray(questao.alternativas))?questao.alternativas:[];
+  document.getElementById('mpr-sub').innerHTML=`${prefixoSugerir}${prova?.nome||''} · Questão ${questao.numero||'?'} · Gabarito: ${questao.gabaritoOficial||'—'}`;
+  // Box da questão — enunciado pode ser HTML rico
+  const enunRawP=questao.enunciado||questao.blocoTexto||'';
+  const enun=/<[a-z][^>]*>/i.test(enunRawP)?_gabSanitize(enunRawP):enunRawP.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+  const altsArr=(modo==='estruturado'&&Array.isArray(questao.alternativas))?questao.alternativas:[];
   const altsHtml=altsArr.length?'<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px">'+altsArr.map(a=>{
-    const isGab=isVF?false:a.letra===questao.gabaritoOficial;
-    const isAlvo=isVF&&a.letra===alvoAltLetra;
-    const vfBadge=isVF?` <span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:1px 6px;border-radius:999px;background:${a.gabaritoVF==='V'?'rgba(63,185,80,.14)':'rgba(248,81,73,.14)'};color:${a.gabaritoVF==='V'?'#3fb950':'#f85149'}">${a.gabaritoVF==='V'?'VERDADEIRO':'FALSO'}</span>`:'';
-    return`<div style="padding:6px 10px;background:${isAlvo?'rgba(163,113,247,.08)':'transparent'};border-left:${isAlvo?'2px solid #a371f7':'2px solid transparent'};font-size:12.5px"><strong style="color:${isGab?'var(--green)':isAlvo?'#a371f7':'var(--accent)'}">${a.letra})</strong> ${(a.texto||'').replace(/</g,'&lt;')}${isGab?' <span style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:var(--green);font-weight:700">✓</span>':''}${vfBadge}${isAlvo?' <span style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:#a371f7;font-weight:700">← ALVO</span>':''}</div>`;
+    const isGab=a.letra===questao.gabaritoOficial;
+    return`<div style="padding:6px 10px;background:transparent;border-left:2px solid transparent;font-size:12.5px"><strong style="color:${isGab?'var(--green)':'var(--accent)'}">${a.letra})</strong> ${(a.texto||'').replace(/</g,'&lt;')}${isGab?' <span style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:var(--green);font-weight:700">✓</span>':''}</div>`;
   }).join('')+'</div>':'';
   const imgQ=questao.imagemUrl?`<div style="margin:10px 0;text-align:center"><img src="${questao.imagemUrl}" style="max-width:100%;max-height:200px;border-radius:6px;border:1px solid var(--border)"/></div>`:'';
   document.getElementById('mpr-questao-box').innerHTML=`
     <strong style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.5px">QUESTÃO ${questao.numero||'?'}</strong>
     <div style="margin-top:6px;font-size:13px;line-height:1.5">${enun}</div>${imgQ}${altsHtml}
   `;
-  // Em modo VF, filtra contestações pela mesma alternativa; senão mostra todas
-  const contestacoesShow=isVF&&alvoAltLetra?contestacoes.filter(ct=>ct.alternativaLetra===alvoAltLetra):contestacoes;
+  const contestacoesShow=contestacoes;
   // Contestações desta questão (com a atual destacada)
   const contestHtml=contestacoesShow.map(ct=>{
     const isCurr=ct.id===cId;
@@ -13010,13 +13611,8 @@ window.abrirParecer=async(provaId,qId,cId,opts)=>{
     </div>`;
   }).join('');
   // === Header de atribuição (assumir/desvincular) ===
-  let atribuido='',atribuidoEm='';
-  if(isVF&&alvoAltLetra){
-    const par=(questao.pareceresPorAlt||{})[alvoAltLetra]||{};
-    atribuido=par.atribuidoA||'';atribuidoEm=par.atribuidoEm||'';
-  }else{
-    atribuido=questao.parecerAtribuidoA||'';atribuidoEm=questao.parecerAtribuidoEm||'';
-  }
+  const atribuido=questao.parecerAtribuidoA||'';
+  const atribuidoEm=questao.parecerAtribuidoEm||'';
   const assumiu=!!atribuido;
   const atribuicaoBox=document.getElementById('mpr-atribuicao-box');
   if(isSugerir){
@@ -13044,22 +13640,13 @@ window.abrirParecer=async(provaId,qId,cId,opts)=>{
   if(isSugerir&&!contestacoesShow.length){
     document.getElementById('mpr-contestacoes-box').innerHTML='';
   }else{
-    document.getElementById('mpr-contestacoes-box').innerHTML=`<strong style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.5px;display:block;margin-bottom:8px">📨 CONTESTAÇÕES${isVF&&alvoAltLetra?' DA ALT '+alvoAltLetra:''} (${contestacoesShow.length})</strong>${contestHtml}`;
+    document.getElementById('mpr-contestacoes-box').innerHTML=`<strong style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.5px;display:block;margin-bottom:8px">📨 CONTESTAÇÕES (${contestacoesShow.length})</strong>${contestHtml}`;
   }
   // Pré-popula com parecer atual / rascunho / cabe-recurso (sugerir)
-  let parAtual,argAtual,imgAtual;
-  if(isVF&&alvoAltLetra){
-    const par=(questao.pareceresPorAlt||{})[alvoAltLetra]||{};
-    const ras=par.rascunho||{};
-    parAtual=par.parecer||ras.parecer||'em-analise';
-    argAtual=par.argumento||ras.argumento||'';
-    imgAtual=par.imagemUrl||ras.imagemUrl||'';
-  }else{
-    const ras=questao.parecerRascunho||{};
-    parAtual=questao.parecer||ras.parecer||'em-analise';
-    argAtual=questao.parecerArgumento||ras.argumento||'';
-    imgAtual=questao.parecerImagemUrl||ras.imagemUrl||'';
-  }
+  const ras=questao.parecerRascunho||{};
+  let parAtual=questao.parecer||ras.parecer||'em-analise';
+  let argAtual=questao.parecerArgumento||ras.argumento||'';
+  let imgAtual=questao.parecerImagemUrl||ras.imagemUrl||'';
   // No fluxo "Sugerir recurso", força "cabe-recurso" no dropdown (a intenção do botão é sugerir um recurso)
   if(isSugerir&&parAtual==='em-analise')parAtual='cabe-recurso';
   // Mostra/esconde campos editáveis baseado em atribuição (sugerir = sempre editável)
@@ -13088,7 +13675,7 @@ window.abrirParecer=async(provaId,qId,cId,opts)=>{
   document.getElementById('modal-parecer').dataset.provaId=provaId;
   document.getElementById('modal-parecer').dataset.questaoId=qId;
   document.getElementById('modal-parecer').dataset.contestacaoId=cId||'';
-  document.getElementById('modal-parecer').dataset.alternativaLetra=alvoAltLetra;
+  document.getElementById('modal-parecer').dataset.alternativaLetra='';
   document.getElementById('modal-parecer').dataset.imagemUrl=imgAtual;
   document.getElementById('modal-parecer').dataset.isSugerir=isSugerir?'1':'';
   document.getElementById('modal-parecer').dataset.sugerirProfNome=(opts&&opts.profNome)||'';
@@ -13192,28 +13779,19 @@ async function _confirmarAssumirAnalise(profNome){
   const err=document.getElementById('masm-err');
   const provaId=document.getElementById('modal-parecer').dataset.provaId;
   const qId=document.getElementById('modal-parecer').dataset.questaoId;
-  const altLetra=document.getElementById('modal-parecer').dataset.alternativaLetra||'';
   const cId=document.getElementById('modal-parecer').dataset.contestacaoId||'';
   const nowIso=new Date().toISOString();
   try{
     // Re-checa atribuição corrente pra evitar race condition
     const qd=await getDoc(doc(db,`provas/${provaId}/questoes/${qId}`));
     const q=qd.exists()?qd.data():{};
-    const atualNome=q.modo==='vf'&&altLetra?(q.pareceresPorAlt||{})[altLetra]?.atribuidoA:q.parecerAtribuidoA;
-    if(atualNome&&atualNome!==profNome){
-      err.innerHTML=`Esta questão já está em análise por <strong>${atualNome.replace(/</g,'&lt;')}</strong>. Recarregue e tente novamente.`;
+    if(q.parecerAtribuidoA&&q.parecerAtribuidoA!==profNome){
+      err.innerHTML=`Esta questão já está em análise por <strong>${q.parecerAtribuidoA.replace(/</g,'&lt;')}</strong>. Recarregue e tente novamente.`;
       err.classList.remove('hidden');return;
     }
-    if(q.modo==='vf'&&altLetra){
-      const pareceresPorAlt={...(q.pareceresPorAlt||{})};
-      pareceresPorAlt[altLetra]={...(pareceresPorAlt[altLetra]||{}),atribuidoA:profNome,atribuidoEm:nowIso};
-      await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{pareceresPorAlt,updatedAt:nowIso},{merge:true});
-    }else{
-      await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{parecerAtribuidoA:profNome,parecerAtribuidoEm:nowIso,updatedAt:nowIso},{merge:true});
-    }
+    await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{parecerAtribuidoA:profNome,parecerAtribuidoEm:nowIso,updatedAt:nowIso},{merge:true});
   }catch(e){console.error('_confirmarAssumirAnalise:',e);err.innerHTML=`Erro: <strong>${e.code||e.message}</strong>`;err.classList.remove('hidden');return;}
   CM('modal-assumir');
-  // Re-renderiza lista FIFO atrás (move o card pra "Em análise") e reabre modal de parecer
   if(typeof renderRecGestao==='function')renderRecGestao();
   await abrirParecer(provaId,qId,cId);
 }
@@ -13222,20 +13800,10 @@ window.desvincularAnalise=async()=>{
   if(!confirm('Liberar esta análise pra outro prof assumir?\n\nO rascunho do parecer atual é preservado.'))return;
   const provaId=document.getElementById('modal-parecer').dataset.provaId;
   const qId=document.getElementById('modal-parecer').dataset.questaoId;
-  const altLetra=document.getElementById('modal-parecer').dataset.alternativaLetra||'';
   const cId=document.getElementById('modal-parecer').dataset.contestacaoId||'';
   const nowIso=new Date().toISOString();
   try{
-    const qd=await getDoc(doc(db,`provas/${provaId}/questoes/${qId}`));
-    const q=qd.exists()?qd.data():{};
-    if(q.modo==='vf'&&altLetra){
-      const pareceresPorAlt={...(q.pareceresPorAlt||{})};
-      const cur=pareceresPorAlt[altLetra]||{};
-      pareceresPorAlt[altLetra]={...cur,atribuidoA:'',atribuidoEm:''};
-      await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{pareceresPorAlt,updatedAt:nowIso},{merge:true});
-    }else{
-      await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{parecerAtribuidoA:'',parecerAtribuidoEm:'',updatedAt:nowIso},{merge:true});
-    }
+    await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{parecerAtribuidoA:'',parecerAtribuidoEm:'',updatedAt:nowIso},{merge:true});
   }catch(e){console.error('desvincularAnalise:',e);alert('Erro: '+(e.code||e.message));return;}
   if(typeof renderRecGestao==='function')renderRecGestao();
   await abrirParecer(provaId,qId,cId);
@@ -13245,7 +13813,6 @@ window.desvincularAnalise=async()=>{
 window.salvarRascunhoParecer=async()=>{
   const provaId=document.getElementById('modal-parecer').dataset.provaId;
   const qId=document.getElementById('modal-parecer').dataset.questaoId;
-  const altLetra=document.getElementById('modal-parecer').dataset.alternativaLetra||'';
   const parecer=document.getElementById('mpr-parecer').value;
   const argumento=_featSanitize(document.getElementById('mpr-argumento').innerHTML||'');
   const imagemUrl=document.getElementById('modal-parecer').dataset.imagemUrl||'';
@@ -13253,16 +13820,7 @@ window.salvarRascunhoParecer=async()=>{
   const btn=document.getElementById('mpr-rascunho-btn');
   if(btn){btn.disabled=true;btn.textContent='⏳ Salvando...';}
   try{
-    const qd=await getDoc(doc(db,`provas/${provaId}/questoes/${qId}`));
-    const q=qd.exists()?qd.data():{};
-    if(q.modo==='vf'&&altLetra){
-      const pareceresPorAlt={...(q.pareceresPorAlt||{})};
-      const cur=pareceresPorAlt[altLetra]||{};
-      pareceresPorAlt[altLetra]={...cur,rascunho:{parecer,argumento,imagemUrl,salvoEm:nowIso}};
-      await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{pareceresPorAlt,updatedAt:nowIso},{merge:true});
-    }else{
-      await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{parecerRascunho:{parecer,argumento,imagemUrl,salvoEm:nowIso},updatedAt:nowIso},{merge:true});
-    }
+    await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{parecerRascunho:{parecer,argumento,imagemUrl,salvoEm:nowIso},updatedAt:nowIso},{merge:true});
   }catch(e){console.error('salvarRascunho:',e);if(btn){btn.disabled=false;btn.textContent='💾 Salvar rascunho';}alert('Erro: '+(e.code||e.message));return;}
   if(btn){btn.disabled=false;btn.textContent='💾 Salvar rascunho';}
   const saved=document.getElementById('mpr-saved');
@@ -13272,7 +13830,6 @@ window.salvarRascunhoParecer=async()=>{
 window.salvarParecer=async()=>{
   const provaId=document.getElementById('modal-parecer').dataset.provaId;
   const qId=document.getElementById('modal-parecer').dataset.questaoId;
-  const altLetra=document.getElementById('modal-parecer').dataset.alternativaLetra||'';
   const parecer=document.getElementById('mpr-parecer').value;
   const argumento=_featSanitize(document.getElementById('mpr-argumento').innerHTML||'');
   const argumentoText=(document.getElementById('mpr-argumento').textContent||'').trim();
@@ -13284,8 +13841,9 @@ window.salvarParecer=async()=>{
     document.getElementById('mpr-parecer').focus();
     return;
   }
-  if(!argumentoText){err.textContent='Adicione um argumento ao parecer.';err.classList.remove('hidden');return;}
-  if(!confirm('Finalizar parecer?\n\nO parecer será gravado, ficará visível pro aluno e as contestações pendentes desta questão serão marcadas como respondidas. O aluno receberá o email automaticamente.'))return;
+  if(!argumentoText){err.textContent='Escreva o parecer para o aluno antes de finalizar.';err.classList.remove('hidden');return;}
+  const okFinal=await arosConfirm({title:'Finalizar parecer?',icon:'✓',message:'O parecer será gravado, ficará visível pro aluno e as contestações pendentes desta questão serão marcadas como respondidas. O aluno receberá o email automaticamente.',confirmLabel:'✓ Finalizar parecer'});
+  if(!okFinal)return;
   err.classList.add('hidden');
   // Identidade do prof: prioridade — sugestão (escolhida no modal) > atribuição da questão > currentUser
   let profNome=S.currentUser?.nome||S.currentUser?.username||'Professor';
@@ -13293,47 +13851,38 @@ window.salvarParecer=async()=>{
   try{
     const qdPre=await getDoc(doc(db,`provas/${provaId}/questoes/${qId}`));
     const qPre=qdPre.exists()?qdPre.data():{};
-    const atrib=qPre.modo==='vf'&&altLetra?(qPre.pareceresPorAlt||{})[altLetra]?.atribuidoA:qPre.parecerAtribuidoA;
-    if(atrib)profNome=atrib;
+    if(qPre.parecerAtribuidoA)profNome=qPre.parecerAtribuidoA;
   }catch(e){}
   if(sugerirProfNome)profNome=sugerirProfNome;
   const nowIso=new Date().toISOString();
   const btn=document.getElementById('mpr-save-btn');
   if(btn){btn.disabled=true;btn.textContent='⏳ Salvando...';}
-  // Carrega o doc atual pra fazer merge correto de pareceresPorAlt em modo VF
-  let qAtual={};
-  try{const qd=await getDoc(doc(db,`provas/${provaId}/questoes/${qId}`));qAtual=qd.exists()?qd.data():{};}catch(e){}
-  const isVF=qAtual.modo==='vf';
+  const isSugerir=!!document.getElementById('modal-parecer').dataset.isSugerir;
+  const novaSugestao={
+    id:'sug_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    parecer,argumento,imagemUrl,profNome,criadoEm:nowIso
+  };
+  console.log('[salvarParecer] gravando',{provaId,qId,isSugerir,parecer,profNome,novaSugestao});
   try{
-    if(isVF&&altLetra){
-      // Modo VF: parecer por alternativa. Preserva atribuição como histórico, limpa rascunho, marca finalizado.
-      const pareceresPorAlt={...(qAtual.pareceresPorAlt||{})};
-      const cur=pareceresPorAlt[altLetra]||{};
-      pareceresPorAlt[altLetra]={parecer,argumento,imagemUrl,profNome,respondidoEm:nowIso,finalizado:true,atribuidoA:cur.atribuidoA||profNome,atribuidoEm:cur.atribuidoEm||nowIso,rascunho:null};
-      await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{
-        pareceresPorAlt,updatedAt:nowIso,
-      },{merge:true});
-    }else{
-      // Modo TEA/TSA: parecer geral. Limpa rascunho ao finalizar.
-      await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{
-        parecer,parecerArgumento:argumento,parecerImagemUrl:imagemUrl,
-        parecerPor:profNome,parecerEm:nowIso,
-        parecerFinalizado:true,parecerRascunho:null,
-        updatedAt:nowIso,
-      },{merge:true});
-    }
-    // Marca contestações da mesma alternativa (ou todas em modo TEA/TSA) como respondidas
+    // arrayUnion garante atomicamente que a sugestão NOVA é ADICIONADA ao array existente
+    // (sem precisar ler antes — evita race condition + cache stale).
+    await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{
+      parecer,parecerArgumento:argumento,parecerImagemUrl:imagemUrl,
+      parecerPor:profNome,parecerEm:nowIso,
+      parecerFinalizado:true,parecerRascunho:null,
+      sugestoes:arrayUnion(novaSugestao),
+      updatedAt:nowIso,
+    },{merge:true});
+    console.log('[salvarParecer] setDoc OK');
+    // Marca TODAS as contestações pendentes desta questão como respondidas
     const csnap=await getDocs(collection(db,`provas/${provaId}/questoes/${qId}/contestacoes`));
-    const respostaSnapshot={parecer,argumento,imagemUrl,profNome,respondidoEm:nowIso,alternativaLetra:altLetra};
+    const respostaSnapshot={parecer,argumento,imagemUrl,profNome,respondidoEm:nowIso};
     for(const cd of csnap.docs){
       const cdata=cd.data();
-      // Em modo VF, só responde contestações da MESMA alternativa
-      if(isVF&&cdata.alternativaLetra!==altLetra)continue;
       if(cdata.status!=='respondida'){
         await setDoc(cd.ref,{
           emailAluno:cdata.emailAluno,
           motivo:cdata.motivo,
-          alternativaLetra:cdata.alternativaLetra||'',
           status:'respondida',respondidoEm:nowIso,respostaSnapshot,
         },{merge:true});
         try{await sendParecerEmail(cdata.emailAluno,prova_questao_email_ctx(provaId,qId),parecer,argumento);}
@@ -13346,9 +13895,16 @@ window.salvarParecer=async()=>{
     err.innerHTML=`❌ Erro: <strong>${e.code||e.message}</strong>`;err.classList.remove('hidden');return;
   }
   CM('modal-parecer');
-  // Re-renderiza ambas as views relevantes (Gestão de Recursos e a aba Provas com a lista de questões)
-  await renderRecGestao();
+  // Invalida cache da prova pra forçar reload — garante que status novo aparece imediatamente
+  if(S.recursos.questoesCache&&S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
+  arosToast('✓ Parecer salvo — status atualizado','success',2500);
+  // renderRecGestao roda em BACKGROUND (não bloqueia) — é pesado e estava travando a re-render da view de Provas
+  if(typeof renderRecGestao==='function'){
+    renderRecGestao().catch(e=>console.warn('renderRecGestao falhou:',e));
+  }
+  // renderRecProvas é o que atualiza o status na tela atual — corre primeiro
   if(typeof renderRecProvas==='function')await renderRecProvas();
+  console.log('[salvarParecer] re-render concluído');
 };
 
 function prova_questao_email_ctx(provaId,qId){
@@ -13364,7 +13920,7 @@ async function sendParecerEmail(emailAluno,ctx,parecer,argumento){
   if(!emailAluno||!emailjs)return;
   const labels={'cabe-recurso':'Cabe Recurso','nao-cabe-recurso':'Não Cabe Recurso','em-analise':'Em análise'};
   const subject=`📋 Parecer AnestReview · Questão ${ctx.questaoNumero} (${labels[parecer]||parecer})`;
-  const mensagem=`Olá,\n\nA AnestReview avaliou sua contestação da questão ${ctx.questaoNumero} (${ctx.provaNome}).\n\nParecer: ${labels[parecer]||parecer}\n\nArgumento:\n${argumento||'(sem argumento adicional)'}\n\nAcesse o sistema pra ver o parecer completo e mais detalhes:\nhttps://aros.anestreview.com.br/recursos`;
+  const mensagem=`Olá,\n\nA AnestReview avaliou sua contestação da questão ${ctx.questaoNumero} (${ctx.provaNome}).\n\nParecer: ${labels[parecer]||parecer}\n\nParecer para o aluno:\n${argumento||'(sem parecer adicional)'}\n\nAcesse o sistema pra ver o parecer completo e mais detalhes:\nhttps://aros.anestreview.com.br/recursos`;
   return emailjs.send('service_exyoa4r','template_r0vjejs',{
     to_email:emailAluno,nome:emailAluno,
     assunto:subject,mensagem,
@@ -13592,19 +14148,7 @@ window.renderRecMetricas=async()=>{
     const qsnap=await getDocs(collection(db,`provas/${p.id}/questoes`));
     for(const qd of qsnap.docs){
       const q=qd.data();
-      if(q.modo==='vf'){
-        const alts=Array.isArray(q.alternativas)?q.alternativas:[];
-        for(const a of alts){
-          const par=(q.pareceresPorAlt||{})[a.letra];
-          if(par&&par.finalizado){
-            totalPareceresDados++;
-            const pname=par.profNome||'Desconhecido';
-            profCount[pname]=(profCount[pname]||0)+1;
-            const pkey=par.parecer||'em-analise';
-            porParecer[pkey]=(porParecer[pkey]||0)+1;
-          }
-        }
-      }else if(q.parecerFinalizado){
+      if(q.parecerFinalizado){
         totalPareceresDados++;
         const pname=q.parecerPor||'Desconhecido';
         profCount[pname]=(profCount[pname]||0)+1;
@@ -38438,6 +38982,159 @@ window.czVerSnapshot=function(resId){
 // MODAL HELPERS
 window.CM=id=>document.getElementById(id).classList.add('hidden');
 document.querySelectorAll('.mo').forEach(el=>el.addEventListener('click',e=>{if(e.target===el&&!el.hasAttribute('data-no-backdrop-close'))el.classList.add('hidden');}));
+
+// ════════════════════════════════════════════════════════════════════════════
+// MODAIS PADRÃO AROS — substituem confirm()/prompt()/alert() nativos.
+// SEMPRE usar esses 3 em vez dos dialogs nativos (eles podem ser bloqueados
+// pelo browser, têm UX inconsistente, não respeitam o tema do app).
+// ════════════════════════════════════════════════════════════════════════════
+function _arosBuildModal({title,sub,bodyHtml,footHtml,danger,icon,maxWidth}){
+  const id='aros-modal-'+Math.random().toString(36).slice(2,8);
+  const cont=document.createElement('div');
+  cont.className='mo';
+  cont.id=id;
+  cont.style.zIndex='99999';
+  const headerIcon=icon?`<div style="font-size:30px;line-height:1;margin-bottom:8px">${icon}</div>`:'';
+  const titleColor=danger?'#f85149':'var(--text)';
+  cont.innerHTML=`<div class="md" style="max-width:${maxWidth||480}px">
+    <div class="mh">
+      <div style="flex:1">
+        ${headerIcon}
+        <div class="m-title" style="color:${titleColor}">${title||''}</div>
+        ${sub?`<div class="m-sub">${sub}</div>`:''}
+      </div>
+      <button class="m-close" data-aros-close>✕</button>
+    </div>
+    <div class="m-body">${bodyHtml||''}</div>
+    <div class="m-foot">${footHtml||''}</div>
+  </div>`;
+  document.body.appendChild(cont);
+  return{id,cont,close:()=>cont.remove()};
+}
+
+// arosAlert({title, message, icon}) — substitui alert(). Retorna Promise que resolve no OK.
+window.arosAlert=({title='Aviso',message='',icon='ℹ️',okLabel='OK'}={})=>{
+  return new Promise(resolve=>{
+    const safeMsg=String(message).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+    const{cont,close}=_arosBuildModal({
+      title,icon,
+      bodyHtml:`<div style="font-size:13.5px;line-height:1.55;color:var(--text)">${safeMsg}</div>`,
+      footHtml:`<button class="btn btn-p" data-aros-ok>${okLabel}</button>`
+    });
+    const fin=()=>{close();resolve();};
+    cont.querySelector('[data-aros-ok]').onclick=fin;
+    cont.querySelector('[data-aros-close]').onclick=fin;
+    cont.onclick=(e)=>{if(e.target===cont)fin();};
+    document.addEventListener('keydown',function esc(e){if(e.key==='Escape'){fin();document.removeEventListener('keydown',esc);}});
+    setTimeout(()=>cont.querySelector('[data-aros-ok]')?.focus(),50);
+  });
+};
+
+// arosConfirm({title, message, danger, confirmLabel, cancelLabel, icon}) — substitui confirm(). Retorna Promise<bool>.
+window.arosConfirm=({title='Confirmar?',message='',danger=false,confirmLabel='Confirmar',cancelLabel='Cancelar',icon}={})=>{
+  return new Promise(resolve=>{
+    const safeMsg=String(message).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+    const ic=icon||(danger?'⚠️':'❓');
+    const btnCls=danger?'btn-d':'btn-p';
+    const{cont,close}=_arosBuildModal({
+      title,icon:ic,danger,
+      bodyHtml:`<div style="font-size:13.5px;line-height:1.55;color:var(--text)">${safeMsg}</div>`,
+      footHtml:`<button class="btn btn-s" data-aros-cancel>${cancelLabel}</button><button class="btn ${btnCls}" data-aros-ok>${confirmLabel}</button>`
+    });
+    const finish=(v)=>{close();resolve(v);};
+    cont.querySelector('[data-aros-ok]').onclick=()=>finish(true);
+    cont.querySelector('[data-aros-cancel]').onclick=()=>finish(false);
+    cont.querySelector('[data-aros-close]').onclick=()=>finish(false);
+    cont.onclick=(e)=>{if(e.target===cont)finish(false);};
+    document.addEventListener('keydown',function esc(e){if(e.key==='Escape'){finish(false);document.removeEventListener('keydown',esc);}if(e.key==='Enter'){finish(true);document.removeEventListener('keydown',esc);}});
+    setTimeout(()=>cont.querySelector('[data-aros-ok]')?.focus(),50);
+  });
+};
+
+// arosPrompt({title, message, placeholder, default, requireMatch, danger}) — substitui prompt(). Retorna Promise<string|null>.
+// requireMatch: se setado, exige que o input bata exatamente (ex: 'EXCLUIR') pra liberar o botão.
+window.arosPrompt=({title='Confirmar',message='',placeholder='',default:def='',requireMatch=null,confirmLabel='Confirmar',cancelLabel='Cancelar',danger=false,icon}={})=>{
+  return new Promise(resolve=>{
+    const safeMsg=String(message).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+    const ic=icon||(danger?'⚠️':'✏️');
+    const btnCls=danger?'btn-d':'btn-p';
+    const hint=requireMatch?`<div style="font-size:11px;color:var(--t2);margin-top:6px;font-family:'JetBrains Mono',monospace;letter-spacing:.5px">Digite exatamente: <strong style="color:var(--text)">${requireMatch}</strong></div>`:'';
+    const{cont,close}=_arosBuildModal({
+      title,icon:ic,danger,
+      bodyHtml:`${safeMsg?`<div style="font-size:13.5px;line-height:1.55;color:var(--text);margin-bottom:12px">${safeMsg}</div>`:''}
+        <input class="fc" id="aros-prompt-input" placeholder="${(placeholder||'').replace(/"/g,'&quot;')}" value="${(def||'').replace(/"/g,'&quot;')}" autocomplete="off" style="text-align:${requireMatch?'center':'left'};${requireMatch?"font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:1px":''}"/>
+        ${hint}
+        <div id="aros-prompt-err" class="al al-e hidden" style="margin-top:8px"></div>`,
+      footHtml:`<button class="btn btn-s" data-aros-cancel>${cancelLabel}</button><button class="btn ${btnCls}" data-aros-ok>${confirmLabel}</button>`
+    });
+    const input=cont.querySelector('#aros-prompt-input');
+    const err=cont.querySelector('#aros-prompt-err');
+    const finish=(v)=>{close();resolve(v);};
+    const submit=()=>{
+      const v=(input.value||'').trim();
+      if(requireMatch&&v.toUpperCase()!==String(requireMatch).toUpperCase()){
+        err.textContent=`Digite exatamente "${requireMatch}".`;
+        err.classList.remove('hidden');
+        input.focus();return;
+      }
+      finish(v);
+    };
+    cont.querySelector('[data-aros-ok]').onclick=submit;
+    cont.querySelector('[data-aros-cancel]').onclick=()=>finish(null);
+    cont.querySelector('[data-aros-close]').onclick=()=>finish(null);
+    cont.onclick=(e)=>{if(e.target===cont)finish(null);};
+    input.addEventListener('keydown',(e)=>{if(e.key==='Enter'){e.preventDefault();submit();}if(e.key==='Escape')finish(null);});
+    setTimeout(()=>{input.focus();input.select();},50);
+  });
+};
+
+// arosImportarChoice — modal de 3 opções (Cancelar / Adicionar / Substituir) pra fluxo de importação.
+// Resolve com 'adicionar' | 'substituir' | null (cancelado).
+window.arosImportarChoice=({total,label='questões',addLabel,replaceLabel,addDescricao,replaceDescricao,titulo,descricao}={})=>{
+  const padraoAdd=`<strong style="color:var(--green)">➕ Adicionar como novas</strong> — mantém todas as ${label} existentes e cadastra as importadas no fim, com nova numeração (a próxima sequencial após a última atual). <em>Os números do texto importado são ignorados.</em>`;
+  const padraoSub=`<strong style="color:var(--red)">⚠️ Substituir as de mesmo número</strong> — para cada ${label.replace(/s$/,'')} importada, procura uma existente com o mesmo número:<br>• se existir → substitui o conteúdo (pareceres/sugestões/validação são reiniciados)<br>• se NÃO existir → cria nova com aquele número<br><br><em>As ${label} existentes cujos números não aparecem na importação ficam intactas.</em>`;
+  return new Promise(resolve=>{
+    const desc=descricao||`Você está prestes a importar <strong>${total} ${label}</strong>.<br><br>O que deseja fazer?`;
+    const{cont,close}=_arosBuildModal({
+      title:titulo||'Como importar?',
+      icon:'📥',
+      maxWidth:560,
+      bodyHtml:`<div style="font-size:13.5px;line-height:1.6;color:var(--text)">${desc}</div>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+          <div data-aros-add role="button" tabindex="0" title="Clique pra confirmar esta opção" style="padding:12px 14px;background:var(--gl);border:1.5px solid rgba(63,185,80,.4);border-radius:10px;font-size:12.5px;line-height:1.55;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='rgba(63,185,80,.7)';this.style.background='rgba(63,185,80,.18)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px -4px rgba(63,185,80,.35)'" onmouseout="this.style.borderColor='rgba(63,185,80,.4)';this.style.background='var(--gl)';this.style.transform='';this.style.boxShadow=''">${addDescricao||padraoAdd}</div>
+          <div data-aros-replace role="button" tabindex="0" title="Clique pra confirmar esta opção" style="padding:12px 14px;background:var(--rl);border:1.5px solid rgba(248,81,73,.4);border-radius:10px;font-size:12.5px;line-height:1.55;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='rgba(248,81,73,.7)';this.style.background='rgba(248,81,73,.18)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px -4px rgba(248,81,73,.35)'" onmouseout="this.style.borderColor='rgba(248,81,73,.4)';this.style.background='var(--rl)';this.style.transform='';this.style.boxShadow=''">${replaceDescricao||padraoSub}</div>
+        </div>`,
+      footHtml:`
+        <button class="btn btn-s" data-aros-cancel style="margin-right:auto">Cancelar</button>
+      `
+    });
+    const fin=(v)=>{close();resolve(v);};
+    cont.querySelector('[data-aros-cancel]').onclick=()=>fin(null);
+    cont.querySelectorAll('[data-aros-add]').forEach(el=>{
+      el.onclick=()=>fin('adicionar');
+      el.onkeydown=(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fin('adicionar');}};
+    });
+    cont.querySelectorAll('[data-aros-replace]').forEach(el=>{
+      el.onclick=()=>fin('substituir');
+      el.onkeydown=(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fin('substituir');}};
+    });
+    cont.querySelector('[data-aros-close]').onclick=()=>fin(null);
+    cont.onclick=(e)=>{if(e.target===cont)fin(null);};
+    document.addEventListener('keydown',function esc(e){if(e.key==='Escape'){fin(null);document.removeEventListener('keydown',esc);}});
+  });
+};
+
+// arosToast(message, kind='info', durationMs=3000) — notificação efêmera no topo. Pra feedback rápido sem bloquear.
+window.arosToast=(message,kind='info',durationMs=3000)=>{
+  const colors={info:{bg:'var(--bl)',fg:'var(--accent)',bd:'rgba(47,129,247,.4)'},success:{bg:'var(--gl)',fg:'var(--green)',bd:'rgba(63,185,80,.4)'},warn:{bg:'rgba(210,153,34,.14)',fg:'#d29922',bd:'rgba(210,153,34,.4)'},err:{bg:'var(--rl)',fg:'var(--red)',bd:'rgba(248,81,73,.4)'}};
+  const c=colors[kind]||colors.info;
+  const el=document.createElement('div');
+  el.style.cssText=`position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-12px);padding:11px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 8px 24px -4px rgba(0,0,0,.4);background:${c.bg};color:${c.fg};border:1px solid ${c.bd};opacity:0;transition:opacity .2s,transform .2s`;
+  el.textContent=message;
+  document.body.appendChild(el);
+  requestAnimationFrame(()=>{el.style.opacity='1';el.style.transform='translateX(-50%) translateY(0)';});
+  setTimeout(()=>{el.style.opacity='0';el.style.transform='translateX(-50%) translateY(-12px)';setTimeout(()=>el.remove(),250);},durationMs);
+};
 </script>
 </body>
 </html>

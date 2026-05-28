@@ -1654,91 +1654,6 @@ Refinamento UX completo da aba Gerenciamento (visão coord do simulado **online*
 - IDs preservados (`s-t`, `s-c`, `s-a`, `s-s`) — toda lógica JS de update segue funcionando sem mudança.
 - CSS antigo `.sg/.sc/.s-icon/...` mantido (dead code) para evitar alterar outros lugares; só a markup foi trocada.
 
-### Auto-swap engine — auditoria + 12 bugs corrigidos (2026-05-28)
-
-Auditoria sistemática do motor de trocas/auto-match motivada por caso real (João Gabriel Peixoto Lopes apareceu em "aguardando troca" em 2 lugares e sumiu no painel de Solicitações). Investigação revelou que ele tinha `status:'swap'` + `swapResolved:true` simultâneo — estado "zumbi" não previsto.
-
-**Helpers novos (linha ~22760) que centralizam a lógica de robustez:**
-- `_isAfterDeadline()` — true se `S.curSim.deadline` venceu. Usado pra travar operações automáticas.
-- `_hasVacancyFresh(simId,dia,rodada,ignoreId)` — re-conta ocupantes via `getDocs(query(where('dia','==',dia),where('rodada','==',rodada)))`. Substitui `hasVacancy` (que lê state local stale) nos writes críticos. Fallback pra `hasVacancy` em caso de erro.
-- `_olderInQueueWants(dia,rodada,student)` — checa se há aluno em `status='swap'&&!swapResolved` com `respondedAt` mais antigo que `student` apontando pra esse slot. Implementa FIFO global.
-- `_preserveOrig(s,fallbackDia,fallbackRodada)` — retorna `{originalDia, originalRodada}` preservando valores existentes ou gravando fallback. Substitui escrita direta de `originalDia:oldDia||null` que sobrescrevia histórico.
-- `_sendEmailLogged(args, contexto)` — wrapper `emailjs.send` que loga falha em `auditLog` action `EMAIL_FALHOU` com `{contexto, to, assunto, erro}`. Retorna `boolean`.
-
-**Bugs corrigidos (numeração na auditoria original):**
-
-| # | Bug | Fix | Onde |
-|---|---|---|---|
-| 1 | Race condition em capacidade (snapshot local stale → estoura `getLim()`) | `_hasVacancyFresh` antes do write | `tryAutoSwap`, `tryAutoMatchedSwap`, `processWaitingQueue`, `doMatchedSwap` |
-| 2 | `tryAutoSwap` fura fila (solicitante novo pula B esperando há dias) | `_olderInQueueWants` skip do slot | `tryAutoSwap` |
-| 3 | `processWaitingQueue` não rodava quando coord movia ou marcava ausente | Chamada explícita após updateDoc | `dDrop`, `dDropPos`, `doMover`, `coChangeStatus(absent)` |
-| 4 | Cascata infinita de realocação → inundação de email | Parâmetro `depth=0`, abort se `>=3` | `processWaitingQueue` |
-| 5 | `tryAutoMatchedSwap` ignora preferência do solicitante | Sort por `mySlots.findIndex` ASC, tiebreak por `respondedAt` | `tryAutoMatchedSwap` |
-| 6 | `trocasDiretas` aceita após auto-match já ter movido | `aceitarTrocaDireta` faz `getDoc` dos 2 alunos, valida `dia/rodada` originais, marca `propostaRef.status='invalidada'` se mudou | `aceitarTrocaDireta` |
-| 7 | `originalDia/Rodada` sobrescritos a cada troca | Helper `_preserveOrig` em todas funções | `tryAutoSwap`, `tryAutoMatchedSwap`, `processWaitingQueue`, `doMatchedSwap`, `aceitarTrocaDireta` |
-| 8 | Auto-swap roda depois do prazo (link velho, dropdown) | `_isAfterDeadline()` early return | `tryAutoSwap`, `tryAutoMatchedSwap`, `processWaitingQueue` |
-| 9 | `autoEffective:true` stale após movimento manual | `_moverUpdData` seta `autoEffective:false` | `_moverUpdData` |
-| 11 | `recusarTrocaDireta` deixa `swapResolved:true` zumbi no solicitante | `updateDoc({swapResolved:false})` no solicitante | `recusarTrocaDireta` |
-| 12 | `emailjs.send` falha silenciosa em `.catch(()=>{})` | Wrapper `_sendEmailLogged` registra `EMAIL_FALHOU` | `sendSwapDoneEmail`, `doMatchedSwap`, `aceitarTrocaDireta`, `recusarTrocaDireta` |
-| 13 | `swapTargetDia` só preenchido em presencial — perde intenção em online | `subResp` infere se todos `swapSlots` são do dia oposto | `subResp` |
-
-**Bug 10 (auto-match em presencial) era falso positivo** — `subRespPres` linha 21385-21404 já tem auto-match inline (casa por `dia===targetDia && swapTargetDia===s.dia`, FIFO por `respondedAt`).
-
-**Mudança semântica de produção:**
-- **Bug 2** muda comportamento visível: solicitação nova que entrava direto num slot vago agora **espera** se há fila mais antiga. Coord pode notar "antes era instantâneo". Comportamento desejado mas vale comunicar.
-- **Bug 8**: link velho de email após o prazo não dispara mais auto-match — fica como `status:'swap'` esperando ação da coord. Sem regressão silenciosa de escala fechada.
-- **Bug 4**: cap em 3 saltos. Em fila muito longa, alguns alunos esperam o próximo gatilho. Trade-off: evita 8-10 emails seguidos em cascata. Ajustável (constante hardcoded no `if(depth>=3)return`).
-
-**Caso piloto (João Gabriel Peixoto Lopes):** dados zumbi corrigidos manualmente pelo usuário antes do deploy. Causa: troca auto-efetivada em 2026-05-25 17:17 setou `swapResolved:true` + `status:'confirmed'`; depois o aluno respondeu nova solicitação via `subResp`, que **não** resetava `swapResolved` (bug corrigido em commit `ff0282a` antes desta auditoria mais ampla).
-
-**Commits:** `cde4399` (auditoria principal, 12 bugs).
-
-### Escala — status editável pela coord + auto-ausentes pós-prazo + PDF "Versão alunos" (2026-05-28)
-
-Três features pequenas e independentes na aba Escala (visão coord do simulado), entregues juntas.
-
-**1. Coluna STATUS virou dropdown editável (substitui badge readonly):**
-- Antes: `sbadge(a.status)` mostrava badge só-leitura. Pra mudar o status do aluno, coord precisava abrir o modal de resposta como se fosse o aluno (com email validation).
-- Agora: `<select>` inline na coluna STATUS com 4 opções — ✔ Confirmado, ⏳ Pendente, 🔄 Aguardando troca, ✗ Ausente — colorido por status (vide `_coStatusSel(a)` helper, perto da declaração de `renderCoSched`). Mesmas cores das pills (`--gl/--bg3/--yl/--rl`).
-- Aplicado em **rodadas** (`renderCoSched`, linha ~21772) e **presencial** (`renderCoSchedPres`, linha ~21843).
-- Handler: `window.coChangeStatus(alunoId, newStatus)` perto de `resetSt` (linha ~22225). Lógica por destino:
-  - `absent`: confirm() → salva `originalDia/originalRodada` + limpa `dia/rodada/posicao` (libera vaga; aluno vai pro painel "Ausentes").
-  - `pending`: reset completo (`email:null, respondedAt:null, swapSlots:[], obs:''`). Se vinha de `absent`, repõe na rodada original.
-  - `confirmed`: salva status + respondedAt + limpa swapSlots/obs. Se vinha de `absent`, repõe na rodada original.
-  - `swap`: mantém swapSlots/obs se já existiam (admin pode definir slots depois via outro fluxo).
-- Audit log `STATUS_ALTERADO` em `auditLog` com before/after status + meta `{nome, via:'coord-escala'}`.
-- Em caso de cancelamento do confirm (absent) ou erro de write → `renderCoSched()` re-renderiza pra resetar o select pro valor anterior (não fica em estado fantasma).
-
-**2. Auto-marcação de pendentes como ausentes ao abrir escala com prazo vencido:**
-- Função `_autoAbsentPostDeadline()` (linha ~22260) chamada no início de `renderCoSched` e `renderCoSchedPres` via `try{_autoAbsentPostDeadline()}catch(_){}`.
-- Trigger: `S.curSim.deadline && new Date() > new Date(deadline)` + há pelo menos 1 student com `status:'pending'`.
-- Bulk update via `Promise.all` em todos os pendentes: `{status:'absent', respondedAt:now, autoAbsent:true, autoAbsentAt:now, originalDia, originalRodada, dia:null, rodada:null, posicao:null}`.
-- Flag por sessão: `window._autoAbsentDoneSimIds` (Set) garante que roda uma vez por simulado por carregamento de página — protege contra loop (cada `updateDoc` dispara `onSnapshot` → `renderCoSched` → poderia re-triggerar).
-- Em caso de erro, libera o flag (`Set.delete(simId)`) pra retentar no próximo render.
-- Audit log `AUTO_AUSENTES_POS_PRAZO` com `meta:{qtd, alunos:[nomes], deadline}`.
-- **Banner verde** notifica: `_showCoBanner(msg)` cria/atualiza `#co-auto-banner` acima de `#co-sched` (insertBefore). Texto: "✓ N alunos pendentes foram marcados como ausente — prazo de confirmação encerrado." Botão ✕ pra fechar.
-- **Decisão UX**: ação é silenciosa (sem alert/confirm) — o user disse "automaticamente" e o banner persistente é avisação suficiente. Flag `autoAbsent:true` no doc fica como trilha de auditoria caso precise reverter.
-- **NÃO toca** em `status:'swap'` — alunos aguardando troca permanecem pendentes da troca, não viram ausentes automaticamente.
-- Limitação: só roda quando coord abre o simulado. Não há cron — se ninguém abrir o sim depois do deadline, ninguém vira ausente automaticamente. Aceitável (coord sempre revisa antes do simulado).
-
-**3. PDF da escala — dropdown com 2 modos (Versão completa + Versão alunos):**
-- Botão "📄 Baixar PDF" virou dropdown `📄 Baixar PDF ▾` (linha 3646, dentro do toolbar da Escala). Estrutura: `#pdf-dd-wrap` (relative) com `<button>` + `#pdf-dd-menu` (absolute, right-aligned, hidden por default).
-- 2 opções no menu: **Versão completa** (com professores e status — para a coordenação) e **Versão alunos** (só nomes, por rodada — para divulgação).
-- Handler de abrir/fechar: `window.togglePdfDD(ev)` (linha ~24773). `stopPropagation` no botão + listener global de click pra fechar quando clica fora (auto-removido após uso).
-- Função `window.exportEscalaPDF(modo)` refatorada (linha ~24793). Aceita `'completo'` (default) ou `'alunos'`. Estrutura única, branching interno por `isAlunos`.
-- **Versão alunos** — diferenças:
-  - Filtra `s.status==='confirmed' || s.status==='swap'` (omite pendentes e ausentes).
-  - Ordenação `ordAlunos`: confirmados primeiro (alfabético), depois aguardando troca (alfabético).
-  - Tabela `class="t-alunos"` com colunas `#` (numeração, 36px centralizada cinza) e `Aluno` (sem Professor, sem Status).
-  - Alunos em troca ganham chip `<span class="tag-swap">🔄 troca</span>` discreto à direita do nome.
-  - Header de cada rodada: `Rodada N · HH:MM` (mesmo padrão da versão completa).
-  - Presencial: agrupa por dia, sem rodadas.
-  - Título do `<h1>` ganha sufixo `· Escala dos Alunos`.
-  - `<div class="sub">` complementa: "... · Apenas confirmados e aguardando troca".
-  - Mensagem de erro específica se vazio: "Nenhum aluno confirmado ou aguardando troca para exportar."
-- CSS novo no template: `.t-alunos td.n` (numeração), `.t-alunos td` (fonte 13px), `.tag-swap` (chip amarelo bg `#fff3cd` + border `#ffd96b` + color `#9a6b00`).
-- Versão completa permanece **idêntica** (mesmo HTML/CSS/estrutura) — refator preserva comportamento original.
-
 ### Checklist de Aplicação — refinos UX + cronômetro embutido + projeção em tempo real (2026-05-26)
 
 Sessão completa de refinos no Checklist de Aplicação (`tab-checklist`, função `renderCkCasos` e adjacências). Tudo entregue no mesmo dia, deploy completo (commits `c638edb` + rules deployadas).
@@ -1813,6 +1728,75 @@ Sessão completa de refinos no Checklist de Aplicação (`tab-checklist`, funç�
 - Crédito promocional Google Cloud: R$ 1.697,25 válido até 3/ago/2026. Não sai do cartão até lá.
 - Alerta de orçamento configurado em R$ 100/mês.
 - Pós-crédito, estimativa: R$ 5-15/mês no ritmo atual.
+
+### Sistema de Recursos — refator amplo da Coord (visão coord + visão aluno) (2026-05-28)
+
+Sessão maratona de evolução do Sistema de Recursos. Tudo entregue + deploy no fim. Pacote completo:
+
+**Visão Coord — lista de provas:**
+- Card da prova **inteiro clicável** → abre questões (não tem mais botão "📝 Questões")
+- **Lápis ✏️** inline ao lado do nome da prova (só ícone, sem texto "Editar"), com `stopPropagation`
+- 🗑️ continua à direita do card
+
+**Visão Coord — lista de questões dentro da prova:**
+- Cards de questão são **dropdowns** (chevron). Body expandido contém o form de edição completo + sugestões. Estado de expansão persistido em `S.recursos._questaoExpanded` (Set) — sobrevive a re-render.
+- **Drag-and-drop pra reordenar**: cada card é `draggable="true"` com handle ⠿. Drop renumera todas as afetadas em batch (até 400 ops por commit). Numeração derivada da posição.
+- **Filtros no topo**: TODAS / 📷 IMG PENDENTE / 🎯 GABARITO PENDENTE. Cada filtro só aparece se houver pelo menos 1 questão matching. Cor temática (laranja/amarelo).
+- Linha do card mostra: status badge (cor por parecer) + IMG PENDENTE (com **✕** discreto pra desmarcar falso positivo via `iqDescartarImgPendente`) + gabarito atual + ações.
+- **Ações na linha** (ordem): ✓ Validar gabarito (verde, com texto) · 💡 Sugerir recurso (laranja, com texto) · 🗑️ (sem 👁 Visualizar — redundante com o dropdown).
+
+**Form inline da questão (dentro do dropdown):**
+- Modo `'estruturado'` é o ÚNICO mode existente — radio "Bloco único" removido. Pareces antigos como `'bloco'`/`'vf'` renderizam compat como bloco/estruturado.
+- **Enunciado virou rich text** (`contenteditable`) com toolbar: B/I/U, listas, **📷 Imagem** (upload pra Storage + insere `<img>` inline com `execCommand insertHTML`), Limpar formatação.
+- **Imagem agora vive DENTRO do enunciado HTML** (não mais em campo `q.imagemUrl` separado). Legacy `q.imagemUrl` continua sendo renderizado anexado ao enunciado pra back-compat.
+- **Texto justificado** no editor (back) E no front aluno via CSS `.enunciado-editor`, `.enunciado-aluno-txt` com `text-align:justify !important; hyphens:none`.
+- **Alternativas em coluna vertical** (A em cima de B em cima de C em cima de D), cada uma com **chip clicável da letra à esquerda** (42×42px) que marca/desmarca como gabarito oficial (verde + glow + ✓). Sem mais select de gabarito.
+- Campo "Número" não aparece visível — fica `<input type="hidden">` só pra `iqSalvar` ler. Numeração 100% via drag.
+- **Padronização de tamanho de imagem** via CSS: `img.questao-img, .enunciado-aluno-txt img, .enunciado-editor img, .parecer-aluno-txt img { max-width:100%; max-height:400px; object-fit:contain; border-radius:8px; border:1px solid var(--border); margin:10px auto }`.
+- **Validação de número único** em `iqSalvar`: se outra questão da prova tem o mesmo número, erro inline.
+- **Sanitizer trocado de `_featSanitize` → `_gabSanitize`** pro enunciado, pois `_featSanitize` não permitia `<img>` na whitelist (strippava silenciosamente as imagens ao salvar — bug crítico). `_gabSanitize` permite IMG com src https/data:image.
+
+**Sugestões de recurso (modelo de múltiplos pareceres):**
+- `q.sugestoes[]` = array de `{id, profNome, parecer, argumento, imagemUrl, criadoEm, excluida?, excluidaEm?, excluidaPor?}`. Cada "💡 Sugerir recurso" + Salvar adiciona uma entrada via `arrayUnion(novaSugestao)` (atomic, evita race).
+- Aluno vê **TODAS as ativas** (não excluídas) como pareceres independentes — não há mais conceito de "parecer oficial único". `_alunoParecerBox(q)` renderiza cada uma com seu próprio bloco (CABE RECURSO / NÃO CABE), header "Parecer N de M" quando há múltiplas.
+- **Soft-delete**: cada sugestão tem flag `excluida` toggável. `_toggleExcluirSugestao(qId, sugId, marcarExcluida)` faz o toggle. **Excluídas ficam só visíveis pra coord** num accordion vermelho 🗑️ PARECERES EXCLUÍDOS (com botão ↩️ Restaurar por entrada).
+- **Status agregado** (`_recStatusQuestaoAluno`, `_recStatusQuestao`): qualquer ativa "cabe-recurso" → status CABE. Todas ativas "nao-cabe" → NÃO CABE. Senão estados de análise.
+- **Compat legado**: questão antiga sem `sugestoes[]` mas com `parecerFinalizado` continua renderizando via fallback "virtual sugestão" do `q.parecer*`.
+- **Sugerir recurso NÃO pede identidade do prof** — usa `S.currentUser.nome` direto (cada coord/prof tem login próprio agora).
+- **Autoria/data NÃO aparecem pro aluno** (só backend pra auditoria) — removido do `_alunoParecerBox`.
+
+**Cadastro de prova:**
+- Modal **fecha automaticamente** após save + toast verde "✅ Prova cadastrada/atualizada".
+- **Delete robusto** via `arosPrompt` (requireMatch:'EXCLUIR'). Cascade otimizado (paralelizado contestações + batches de 500). Modal de progresso enquanto roda.
+
+**Provas tipo ME:**
+- V/F descontinuado totalmente em sessões anteriores
+- **ME agora usa A-D** (igual TEA/TSA). `_letrasPorTipo(tipo)` retorna `['A','B','C','D']` pra qualquer tipo. Parser de gabarito também restringido a A-D.
+
+**Importação (3 fluxos refeitos):**
+- Botão único **"📥 Importar questões ▾"** com dropdown: "📋 Colando conteúdo (Ctrl+V)" e "📄 Importar PDF".
+- Botão único **"🎯 Importar gabarito ▾"** com dropdown análogo (focar textarea OU disparar file picker).
+- **Modal de Importar Bloco** renomeado pra "📋 Importar questões colando o texto". Regras de detecção viradas lista bullet legível.
+- **Parser de PDF unificado** — independe do tipo da prova. Sai sempre como `modo:'estruturado'`. Gabarito vem por fluxo separado.
+- **Importação de gabarito é standalone** (`modal-import-gabarito`): PDF ou texto colado (`1-A`, `1) A`, `Questão 1: B`, etc.). Parser robusto (`_parseGabaritoPdf`) com Y-bucket tolerância 3.5px + X-sort + multi-padrão regex + fallback tabular.
+- **Feedback visual rico durante import**: classe `.import-status` com **ampulheta ⏳ girando** (animação flip 180°), barra de progresso com **listras animadas** (efeito skate), pulse box-shadow, cores por estado (loading/success/err). `_yieldUI()` entre páginas do PDF (`requestAnimationFrame + setTimeout 0`) força repaint — sem isso JS bloqueia o spinner.
+- **Helper `arosImportarChoice`** modal padrão de 3 opções (Cancelar / Adicionar / Substituir) com **descrições clicáveis** (cada caixinha de descrição funciona como botão; cursor pointer + hover lift). Aplicado em import bloco, import PDF, import gabarito.
+- **Lógica per-número**:
+  - `'adicionar'` → ignora números do import, renumera como continuação (max+1, +2, ...).
+  - `'substituir'` → para cada importada, procura existente com mesmo número. Se achou: substitui conteúdo (preserva ID, reseta pareceres/sugestões/validação). Se não: cria nova com aquele número. **Demais existentes intactas.**
+- Função compartilhada `_importarQuestoes(provaId, questoes, modo, onProgress)` retorna `{reps, novas}` pra toast detalhado.
+- 2ª confirmação no "substituir" lista os números que serão sobrescritos vs criados (quando há matches).
+
+**Modais padronizados (decisão 2026-05-28 — convenção #11 das CRÍTICAS):**
+- **NUNCA mais `confirm/prompt/alert` nativos.** Sempre os 4 helpers: `arosConfirm` / `arosPrompt` (com `requireMatch` pra "EXCLUIR") / `arosAlert` / `arosToast`. Definidos perto de `window.CM`.
+- `_arosBuildModal({title,sub,icon,bodyHtml,footHtml,danger,maxWidth})` é o helper interno pra construir modal dinâmico (usado em `deleteProvaDireto`, `excluirSugestao`, `arosImportarChoice`, etc.).
+- Reusam classes `.mo`/`.md`/`.mh`/`.m-body`/`.m-foot` já estabelecidas. Suportam Esc/Enter, backdrop click cancela.
+
+**Otimização da visão aluno (`/recursos`):**
+- Antes: `for(const q of questoes) await getDocs(contestacoes)` sequencial → 160 questões = 30-60s.
+- Agora: renderiza UI imediatamente com `loadRecQuestoes` (1 round-trip), depois carrega contestações em **`Promise.all` paralelo** com indicador discreto no canto inferior direito. Cai pra ~2-3s.
+
+**Commits da sessão** (entregues no deploy final): refator do Sistema de Recursos completo.
 
 ### Catálogo de Produtos — redesign de features + pack + concorrentes + breve descrição (2026-05-27)
 
@@ -2028,6 +2012,13 @@ Não há build, lint, nem suíte de testes. Validação = abrir `index.html` no 
 8. **Distinguir oficial vs extra** sempre que mexer em listagem de simulados.
 9. **Sessão em localStorage** (`aros_session`). Não armazena senha, só username — re-resolvido em `S.usuarios` no boot.
 10. **Estrutura do menu lateral é DATA-DRIVEN**: ao mexer em sidebar, modal de permissões, ou qualquer renderização que dependa de grupos/abas, use `_menuEffectiveGroups()` em vez de iterar `TAB_GROUPS` direto. `TAB_GROUPS` é só fonte das tabs built-in; a layout final pode estar customizada em `config/menu.structure`.
+11. **NUNCA usar `confirm()`, `prompt()`, `alert()` nativos** (decisão 2026-05-28). Sempre usar os helpers customizados:
+    - `await arosConfirm({title, message, danger, confirmLabel, cancelLabel, icon})` → `Promise<bool>`
+    - `await arosPrompt({title, message, placeholder, default, requireMatch, danger, confirmLabel, cancelLabel, icon})` → `Promise<string|null>`. `requireMatch:'EXCLUIR'` força digitação exata pra ações destrutivas.
+    - `await arosAlert({title, message, icon, okLabel})` → `Promise<void>`
+    - `arosToast(message, kind, durationMs)` — fire-and-forget pra feedback rápido. `kind in ['info','success','warn','err']`
+    Definidos perto do `window.CM` (final do `<script>`). Reusam classes `.mo`/`.md`/`.mh`/`.m-body`/`.m-foot`/`.m-title`/`.m-sub`/`.m-close` já estabelecidas (consistência visual). Suportam Esc pra cancelar, Enter pra confirmar (em prompt/confirm), foco automático no campo de input ou botão OK, backdrop click cancela. **Por que**: browsers podem bloquear dialogs nativos (especialmente em fluxos não-iniciados-por-clique), UX inconsistente com o tema do app, não centralizam truncate/sanitize. Pra operações longas com progresso, usar `_arosBuildModal({title,sub,icon,bodyHtml,footHtml,danger,maxWidth})` direto (helper interno que retorna `{cont, close}`) e atualizar conteúdo via `cont.querySelector(...)` — vide `deleteProvaDireto` como exemplo canônico (confirma via `arosPrompt` com `requireMatch`, abre modal de progresso, atualiza msg em tempo real, fecha + `arosToast` de sucesso, `arosAlert` em erro).
+    **Retrofitting do código legado**: as ~centenas de `alert/confirm/prompt` espalhados serão substituídos gradualmente — não bloquear feature pra fazer migração massiva, mas **toda mudança nova já entra com o padrão novo**, sem exceção.
 
 ## Dívidas técnicas conhecidas (não corrigir sem pedirem)
 

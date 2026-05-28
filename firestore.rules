@@ -271,7 +271,7 @@ service cloud.firestore {
         allow read: if true;
         allow create, update: if isAuth()
                               && request.resource.data.numero is number
-                              && request.resource.data.modo in ['estruturado','bloco','vf'];
+                              && request.resource.data.modo in ['estruturado','bloco'];
         allow delete: if isAuth();
 
         match /contestacoes/{cId} {
