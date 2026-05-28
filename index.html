@@ -22231,22 +22231,42 @@ window.dStart=(e,id)=>{dId=id;e.dataTransfer.effectAllowed='move';};
 window.dEnd=()=>{dId=null;document.querySelectorAll('.drag-target,.drag-over').forEach(el=>el.classList.remove('drag-target','drag-over'));};
 window.dOver=(e,dia,rn)=>{e.preventDefault();document.getElementById(`rc-${dia}-${rn}`)?.classList.add('drag-over');};
 window.dOverPos=(e,dia,rn,p)=>{e.preventDefault();e.stopPropagation();document.getElementById(`pos-${dia}-${rn}-${p}`)?.classList.add('drag-target');};
+// Constrói o updateData de uma movimentação. Se o aluno estava em 'swap',
+// considera a troca resolvida — marca confirmed + swapResolved + preserva original.
+function _moverUpdData(s,dia,rodada,posicao){
+  const upd={dia,rodada};
+  if(posicao!==undefined)upd.posicao=posicao;else upd.posicao=null;
+  if(s.status==='swap'){
+    upd.status='confirmed';
+    upd.swapResolved=true;
+    upd.swapSlots=[];
+    upd.obs='';
+    upd.swapTargetDia=null;
+    upd.respondedAt=new Date().toISOString();
+    // Preserva originalDia/Rodada se já existirem (troca prévia); senão grava o slot anterior
+    if(!s.originalDia&&s.dia)upd.originalDia=s.dia;
+    if(!s.originalRodada&&s.rodada)upd.originalRodada=s.rodada;
+  }
+  return upd;
+}
+
 window.dDrop=async(e,dia,rn)=>{
   e.preventDefault();
   document.getElementById(`rc-${dia}-${rn}`)?.classList.remove('drag-over');
   if(!dId)return;
-  const s=S.students.find(x=>x.id===dId);
+  const s=S.students.find(x=>x.id===dId);if(!s)return;
   // Don't count the student being moved
   const inSlot=S.students.filter(x=>x.dia===dia&&x.rodada===rn&&x.id!==dId).length;
   const lim=getLim();
   if(inSlot>=lim){alert(`Rodada cheia (${lim}/${lim}). Escolha uma rodada com vaga.`);return;}
-  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${dId}`),{dia,rodada:rn,posicao:null});
+  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${dId}`),_moverUpdData(s,dia,rn));
 };
 window.dDropPos=async(e,dia,rn,p)=>{
   e.preventDefault();e.stopPropagation();
   document.querySelectorAll('.drag-target').forEach(el=>el.classList.remove('drag-target'));
   document.getElementById(`rc-${dia}-${rn}`)?.classList.remove('drag-over');
   if(!dId)return;
+  const s=S.students.find(x=>x.id===dId);if(!s)return;
   // Check if slot has room (excluding the student being moved)
   const inSlot=S.students.filter(x=>x.dia===dia&&x.rodada===rn&&x.id!==dId).length;
   const lim=getLim();
@@ -22254,7 +22274,7 @@ window.dDropPos=async(e,dia,rn,p)=>{
   // Check if that specific position is taken by someone else
   const inPos=S.students.find(x=>x.dia===dia&&x.rodada===rn&&x.posicao===p&&x.id!==dId);
   if(inPos){alert('Posição ocupada por outro aluno.');return;}
-  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${dId}`),{dia,rodada:rn,posicao:p});
+  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${dId}`),_moverUpdData(s,dia,rn,p));
 };
 
 window.resetSt=async id=>updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${id}`),{status:'pending',email:null,respondedAt:null,swapSlots:[],obs:''});
@@ -28357,7 +28377,7 @@ window.doMover=async(id,dia,rn)=>{
   const lim=getLim();
   const count=S.students.filter(x=>x.dia===dia&&x.rodada===rn&&x.id!==id).length;
   if(count>=lim){alert(`Rodada cheia (${lim}).`);return;}
-  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${id}`),{dia,rodada:rn,posicao:null});
+  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${id}`),_moverUpdData(s,dia,rn));
   CM('modal-mover');
 };
 
