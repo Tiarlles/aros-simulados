@@ -21582,7 +21582,8 @@ window.subResp=async()=>{
   const updateData={
     status:actualType,email,respondedAt:new Date().toISOString(),
     emailCadastrado:email,
-    ...(actualType==='swap'?{swapSlots,obs}:{swapSlots:[],obs:'',swapResolved:false})
+    // swapResolved sempre resetado: nova resposta (mesmo que swap) invalida resolução anterior.
+    ...(actualType==='swap'?{swapSlots,obs,swapResolved:false}:{swapSlots:[],obs:'',swapResolved:false})
   };
   // When student marks "Não irei", vacate the slot but keep original for record
   if(actualType==='absent'){
