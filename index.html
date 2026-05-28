@@ -21579,11 +21579,17 @@ window.subResp=async()=>{
   }
   errEl.classList.add('hidden');
 
+  // Bug 13: infere swapTargetDia se todos os slots desejados forem do dia oposto (preserva intenção)
+  let swapTargetDia=null;
+  if(actualType==='swap'&&swapSlots.length&&s.dia){
+    const otherDia=s.dia==='sabado'?'domingo':'sabado';
+    if(swapSlots.every(sl=>sl.dia===otherDia))swapTargetDia=otherDia;
+  }
   const updateData={
     status:actualType,email,respondedAt:new Date().toISOString(),
     emailCadastrado:email,
     // swapResolved sempre resetado: nova resposta (mesmo que swap) invalida resolução anterior.
-    ...(actualType==='swap'?{swapSlots,obs,swapResolved:false}:{swapSlots:[],obs:'',swapResolved:false})
+    ...(actualType==='swap'?{swapSlots,obs,swapResolved:false,swapTargetDia}:{swapSlots:[],obs:'',swapResolved:false,swapTargetDia:null})
   };
   // When student marks "Não irei", vacate the slot but keep original for record
   if(actualType==='absent'){
@@ -22236,6 +22242,8 @@ window.dOverPos=(e,dia,rn,p)=>{e.preventDefault();e.stopPropagation();document.g
 function _moverUpdData(s,dia,rodada,posicao){
   const upd={dia,rodada};
   if(posicao!==undefined)upd.posicao=posicao;else upd.posicao=null;
+  // Bug 9: movimentação manual da coord — limpa flag de "feito pelo sistema"
+  upd.autoEffective=false;
   if(s.status==='swap'){
     upd.status='confirmed';
     upd.swapResolved=true;
@@ -22259,7 +22267,10 @@ window.dDrop=async(e,dia,rn)=>{
   const inSlot=S.students.filter(x=>x.dia===dia&&x.rodada===rn&&x.id!==dId).length;
   const lim=getLim();
   if(inSlot>=lim){alert(`Rodada cheia (${lim}/${lim}). Escolha uma rodada com vaga.`);return;}
+  const oldDia=s.dia,oldRodada=s.rodada;
   await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${dId}`),_moverUpdData(s,dia,rn));
+  // Bug 3: se o aluno saiu de um slot válido, varre a fila pela vaga que abriu
+  if(oldDia&&oldRodada&&(oldDia!==dia||oldRodada!==rn))await processWaitingQueue(oldDia,oldRodada);
 };
 window.dDropPos=async(e,dia,rn,p)=>{
   e.preventDefault();e.stopPropagation();
@@ -22274,7 +22285,10 @@ window.dDropPos=async(e,dia,rn,p)=>{
   // Check if that specific position is taken by someone else
   const inPos=S.students.find(x=>x.dia===dia&&x.rodada===rn&&x.posicao===p&&x.id!==dId);
   if(inPos){alert('Posição ocupada por outro aluno.');return;}
+  const oldDia=s.dia,oldRodada=s.rodada;
   await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${dId}`),_moverUpdData(s,dia,rn,p));
+  // Bug 3: varre fila pela vaga que abriu
+  if(oldDia&&oldRodada&&(oldDia!==dia||oldRodada!==rn))await processWaitingQueue(oldDia,oldRodada);
 };
 
 window.resetSt=async id=>updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${id}`),{status:'pending',email:null,respondedAt:null,swapSlots:[],obs:''});
@@ -22322,8 +22336,17 @@ window.coChangeStatus=async(alunoId,newStatus)=>{
     upd.swapResolved=false;
   }
   try{
+    // Captura slot anterior pra varrer fila se virou ausente
+    const liberadoDia=newStatus==='absent'?s.dia:null;
+    const liberadoRodada=newStatus==='absent'?s.rodada:null;
     await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${alunoId}`),upd);
     try{audit('STATUS_ALTERADO',{collection:'simulados/alunos',simId:S.curSim.id,studentId:alunoId},{before:{status:s.status},after:{status:newStatus},meta:{nome:s.nome,via:'coord-escala'}});}catch(_){}
+    // Bug 3: se a coord marcou ausente, varre a fila pela vaga que abriu
+    if(liberadoDia&&liberadoRodada){
+      // Atualiza state local pra hasVacancy não contar o aluno ausente
+      Object.assign(s,upd);
+      await processWaitingQueue(liberadoDia,liberadoRodada);
+    }
   }catch(err){
     console.error('[coChangeStatus] falhou:',err);
     alert('Não foi possível salvar o novo status.\n\n'+(err?.message||'erro desconhecido'));
@@ -22735,20 +22758,71 @@ function countOccupants(dia,rodada,ignoreId){
   return S.students.filter(s=>s.dia===dia&&s.rodada===rodada&&s.id!==ignoreId).length;
 }
 function hasVacancy(dia,rodada,ignoreId){return countOccupants(dia,rodada,ignoreId)<getLim();}
+
+// === Helpers de robustez do auto-swap (corrigem bugs 1,2,4,7,8,12) ===
+// Bug 8: trava operações automáticas após o prazo de confirmação (coord segue movendo manualmente).
+function _isAfterDeadline(){return S.curSim?.deadline&&new Date()>new Date(S.curSim.deadline);}
+
+// Bug 1: re-checa capacidade direto no Firestore antes de gravar (fecha race condition).
+async function _hasVacancyFresh(simId,dia,rodada,ignoreId){
+  try{
+    const snap=await getDocs(query(collection(db,`simulados/${simId}/alunos`),where('dia','==',dia),where('rodada','==',rodada)));
+    const count=snap.docs.filter(d=>d.id!==ignoreId&&(d.data().status||'')!=='absent').length;
+    return count<getLim();
+  }catch(e){console.error('[_hasVacancyFresh] erro, caindo pra optimistic:',e);return hasVacancy(dia,rodada,ignoreId);}
+}
+
+// Bug 2: alguém mais antigo na fila quer esse slot? Se sim, novo solicitante espera (FIFO global).
+function _olderInQueueWants(dia,rodada,student){
+  const myTs=student.respondedAt?new Date(student.respondedAt).getTime():Date.now();
+  return S.students.some(s=>
+    s.id!==student.id&&s.status==='swap'&&!s.swapResolved
+    &&(s.swapSlots||[]).some(sl=>sl.dia===dia&&sl.rodada===rodada)
+    &&s.respondedAt&&new Date(s.respondedAt).getTime()<myTs
+  );
+}
+
+// Bug 7: preserva originalDia/Rodada se já existir (não sobrescreve histórico antigo).
+function _preserveOrig(s,fallbackDia,fallbackRodada){
+  return{
+    originalDia:s.originalDia||fallbackDia||null,
+    originalRodada:s.originalRodada||fallbackRodada||null
+  };
+}
+
+// Bug 12: envia email logando falha em auditLog para diagnóstico.
+async function _sendEmailLogged(args,contexto){
+  try{await emailjs.send('service_exyoa4r','template_r0vjejs',args);return true;}
+  catch(e){
+    console.error('[EmailJS]',contexto||'',e);
+    try{audit('EMAIL_FALHOU',{collection:'email',simId:S.curSim?.id||null},{meta:{contexto:contexto||'',to:args?.to_email||'',assunto:args?.assunto||'',erro:String(e?.message||e)}});}catch(_){}
+    return false;
+  }
+}
+
 async function sendSwapDoneEmail(s,dia,rodada){
   if(!s.email)return;
   const novoH=getH(dia,rodada);const novoD=dia==='sabado'?'Sábado':'Domingo';
-  try{await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:s.email,nome:s.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada automaticamente! ✅\n\nVocê foi realocado para: ${novoD} · ${novoH}`,simulado:S.curSim.nome,dia:novoD,horario:novoH});}catch(e){console.error('EmailJS:',e);}
+  await _sendEmailLogged({to_email:s.email,nome:s.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada automaticamente! ✅\n\nVocê foi realocado para: ${novoD} · ${novoH}`,simulado:S.curSim.nome,dia:novoD,horario:novoH},'sendSwapDoneEmail:'+s.nome);
 }
+
 // Tenta efetivar a troca do aluno na hora — respeita ordem de preferência em swapSlots[].
+// Bug 2: FIFO global — pula slot se há alguém mais antigo na fila querendo ele.
+// Bug 1: re-checa capacidade no Firestore antes de gravar.
+// Bug 8: aborta se passou do prazo.
+// Bug 7: preserva originalDia/Rodada.
 // Retorna {ok,dia,rodada} se efetivou, {ok:false} caso contrário.
 async function tryAutoSwap(student){
+  if(_isAfterDeadline())return{ok:false,blockedByDeadline:true};
   const slots=student.swapSlots||[];
   const oldDia=student.dia,oldRodada=student.rodada;
   for(const sl of slots){
     if(!hasVacancy(sl.dia,sl.rodada,student.id))continue;
-    await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${student.id}`),{dia:sl.dia,rodada:sl.rodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,respondedAt:new Date().toISOString(),originalDia:oldDia||null,originalRodada:oldRodada||null});
-    Object.assign(student,{dia:sl.dia,rodada:sl.rodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,originalDia:oldDia||null,originalRodada:oldRodada||null});
+    if(_olderInQueueWants(sl.dia,sl.rodada,student))continue; // FIFO global
+    if(!(await _hasVacancyFresh(S.curSim.id,sl.dia,sl.rodada,student.id)))continue; // re-check
+    const orig=_preserveOrig(student,oldDia,oldRodada);
+    await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${student.id}`),{dia:sl.dia,rodada:sl.rodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,respondedAt:new Date().toISOString(),...orig});
+    Object.assign(student,{dia:sl.dia,rodada:sl.rodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,...orig});
     await sendSwapDoneEmail(student,sl.dia,sl.rodada);
     if(oldDia&&oldRodada)await processWaitingQueue(oldDia,oldRodada);
     return{ok:true,dia:sl.dia,rodada:sl.rodada};
@@ -22756,8 +22830,12 @@ async function tryAutoSwap(student){
   return{ok:false};
 }
 // Tenta encontrar e executar troca CASADA automaticamente.
-// Aluno em Y pediu X; outro em X pediu Y → troca. FIFO desempata se houver múltiplos candidatos.
+// Bug 5: respeita preferência do solicitante (ordem de swapSlots) antes de FIFO por respondedAt.
+// Bug 1: re-checa capacidade no Firestore.
+// Bug 8: aborta se passou do prazo.
+// Bug 7: preserva originalDia/Rodada de ambos.
 async function tryAutoMatchedSwap(student){
+  if(_isAfterDeadline())return{ok:false,blockedByDeadline:true};
   const stuDia=student.dia,stuRodada=student.rodada;
   if(!stuDia||!stuRodada)return{ok:false};
   const mySlots=student.swapSlots||[];
@@ -22765,34 +22843,55 @@ async function tryAutoMatchedSwap(student){
     .filter(s=>s.id!==student.id&&s.status==='swap'&&!s.swapResolved&&s.dia&&s.rodada
       &&mySlots.some(sl=>sl.dia===s.dia&&sl.rodada===s.rodada)
       &&(s.swapSlots||[]).some(sl=>sl.dia===stuDia&&sl.rodada===stuRodada))
-    .sort((a,b)=>{const ta=a.respondedAt?new Date(a.respondedAt).getTime():0;const tb=b.respondedAt?new Date(b.respondedAt).getTime():0;return ta-tb;});
+    .sort((a,b)=>{
+      // Bug 5: preferência do solicitante primeiro (índice no swapSlots)
+      const ia=mySlots.findIndex(sl=>sl.dia===a.dia&&sl.rodada===a.rodada);
+      const ib=mySlots.findIndex(sl=>sl.dia===b.dia&&sl.rodada===b.rodada);
+      if(ia!==ib)return ia-ib;
+      // tiebreak: FIFO por respondedAt
+      const ta=a.respondedAt?new Date(a.respondedAt).getTime():0;const tb=b.respondedAt?new Date(b.respondedAt).getTime():0;return ta-tb;
+    });
   if(!candidatos.length)return{ok:false};
   const partner=candidatos[0];
   const partDia=partner.dia,partRodada=partner.rodada;
+  // Re-check capacidade dos 2 destinos (troca casada: cada slot perde 1 e ganha 1, mas algum outro fluxo pode estar mexendo)
+  const okStu=await _hasVacancyFresh(S.curSim.id,partDia,partRodada,student.id);
+  const okPart=await _hasVacancyFresh(S.curSim.id,stuDia,stuRodada,partner.id);
+  if(!okStu||!okPart)return{ok:false,raceDetected:true};
   const now=new Date().toISOString();
+  const origStu=_preserveOrig(student,stuDia,stuRodada);
+  const origPart=_preserveOrig(partner,partDia,partRodada);
   const batch=writeBatch(db);
-  batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${student.id}`),{dia:partDia,rodada:partRodada,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,autoEffective:true,originalDia:stuDia,originalRodada:stuRodada});
-  batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${partner.id}`),{dia:stuDia,rodada:stuRodada,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,autoEffective:true,originalDia:partDia,originalRodada:partRodada});
+  batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${student.id}`),{dia:partDia,rodada:partRodada,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,autoEffective:true,...origStu});
+  batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${partner.id}`),{dia:stuDia,rodada:stuRodada,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,autoEffective:true,...origPart});
   await batch.commit();
-  Object.assign(student,{dia:partDia,rodada:partRodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,originalDia:stuDia,originalRodada:stuRodada});
-  Object.assign(partner,{dia:stuDia,rodada:stuRodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,originalDia:partDia,originalRodada:partRodada});
+  Object.assign(student,{dia:partDia,rodada:partRodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,...origStu});
+  Object.assign(partner,{dia:stuDia,rodada:stuRodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,...origPart});
   await sendSwapDoneEmail(student,partDia,partRodada);
   await sendSwapDoneEmail(partner,stuDia,stuRodada);
   return{ok:true,dia:partDia,rodada:partRodada,matched:true,partner:partner.nome};
 }
 
 // Quando uma vaga abre, realoca o solicitante mais antigo (FIFO por respondedAt).
-async function processWaitingQueue(dia,rodada){
+// Bug 4: cap em 3 saltos de cascata pra não inundar de emails.
+// Bug 1: re-checa capacidade no Firestore.
+// Bug 8: aborta se passou do prazo.
+// Bug 7: preserva originalDia/Rodada.
+async function processWaitingQueue(dia,rodada,depth=0){
+  if(depth>=3)return; // máx 3 saltos pra evitar cascata infinita
+  if(_isAfterDeadline())return;
   if(!hasVacancy(dia,rodada,null))return;
   const fila=S.students
     .filter(s=>s.status==='swap'&&!s.swapResolved&&(s.swapSlots||[]).some(sl=>sl.dia===dia&&sl.rodada===rodada))
     .sort((a,b)=>{const ta=a.respondedAt?new Date(a.respondedAt).getTime():0;const tb=b.respondedAt?new Date(b.respondedAt).getTime():0;return ta-tb;});
   if(!fila.length)return;
   const c=fila[0];const oldDia=c.dia,oldRodada=c.rodada;
-  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${c.id}`),{dia,rodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,respondedAt:new Date().toISOString(),originalDia:oldDia||null,originalRodada:oldRodada||null});
-  Object.assign(c,{dia,rodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,originalDia:oldDia||null,originalRodada:oldRodada||null});
+  if(!(await _hasVacancyFresh(S.curSim.id,dia,rodada,c.id)))return; // race check
+  const orig=_preserveOrig(c,oldDia,oldRodada);
+  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${c.id}`),{dia,rodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,respondedAt:new Date().toISOString(),...orig});
+  Object.assign(c,{dia,rodada,posicao:null,status:'confirmed',swapResolved:true,autoEffective:true,...orig});
   await sendSwapDoneEmail(c,dia,rodada);
-  if(oldDia&&oldRodada)await processWaitingQueue(oldDia,oldRodada);
+  if(oldDia&&oldRodada)await processWaitingQueue(oldDia,oldRodada,depth+1);
 }
 
 window.doMatchedSwap=async(id1,id2)=>{
@@ -22807,9 +22906,16 @@ window.doMatchedSwap=async(id1,id2)=>{
   const inS1Target=d2&&r2?S.students.filter(x=>x.dia===d2&&x.rodada===r2&&x.id!==id1&&x.id!==id2).length:0;
   const inS2Target=d1&&r1?S.students.filter(x=>x.dia===d1&&x.rodada===r1&&x.id!==id1&&x.id!==id2).length:0;
   if(inS1Target>=lim||inS2Target>=lim){alert('Troca cancelada: um dos horários ficaria acima do limite.');return;}
+  // Bug 1: re-check fresh contra Firestore (fecha race)
+  const okS1=d2&&r2?await _hasVacancyFresh(S.curSim.id,d2,r2,id1):true;
+  const okS2=d1&&r1?await _hasVacancyFresh(S.curSim.id,d1,r1,id2):true;
+  if(!okS1||!okS2){alert('Troca cancelada: capacidade mudou entre seu clique e o salvamento. Tente novamente.');return;}
+  // Bug 7: preserva originalDia/Rodada de cada um (não sobrescreve histórico)
+  const orig1=_preserveOrig(s1,d1,r1);
+  const orig2=_preserveOrig(s2,d2,r2);
   const batch=writeBatch(db);
-  batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${id1}`),{dia:d2,rodada:r2,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,originalDia:d1||null,originalRodada:r1||null});
-  batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${id2}`),{dia:d1,rodada:r1,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,originalDia:d2||null,originalRodada:r2||null});
+  batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${id1}`),{dia:d2,rodada:r2,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,...orig1});
+  batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${id2}`),{dia:d1,rodada:r1,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,...orig2});
   await batch.commit();
   audit('ALUNO_SWAP',{collection:'simulados/alunos',simId:S.curSim.id,studentIds:[id1,id2]},{
     before:{[id1]:{dia:d1,rodada:r1,nome:s1.nome},[id2]:{dia:d2,rodada:r2,nome:s2.nome}},
@@ -22818,8 +22924,9 @@ window.doMatchedSwap=async(id1,id2)=>{
   });
   const novoH1=getH(d2,r2);const novoD1=d2==='sabado'?'Sábado':'Domingo';
   const novoH2=getH(d1,r1);const novoD2=d1==='sabado'?'Sábado':'Domingo';
-  if(s1.email)await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:s1.email,nome:s1.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD1} · ${novoH1}`,simulado:S.curSim.nome,dia:novoD1,horario:novoH1}).catch(e=>console.error(e));
-  if(s2.email)await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:s2.email,nome:s2.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD2} · ${novoH2}`,simulado:S.curSim.nome,dia:novoD2,horario:novoH2}).catch(e=>console.error(e));
+  // Bug 12: emails com log de falha
+  if(s1.email)await _sendEmailLogged({to_email:s1.email,nome:s1.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD1} · ${novoH1}`,simulado:S.curSim.nome,dia:novoD1,horario:novoH1},'doMatchedSwap:s1:'+s1.nome);
+  if(s2.email)await _sendEmailLogged({to_email:s2.email,nome:s2.nome,assunto:'✅ Troca Efetivada · AROS Simulado',mensagem:`Sua troca foi efetivada! ✅\n\nVocê foi realocado para: ${novoD2} · ${novoH2}`,simulado:S.curSim.nome,dia:novoD2,horario:novoH2},'doMatchedSwap:s2:'+s2.nome);
 };
 
 
@@ -28377,8 +28484,11 @@ window.doMover=async(id,dia,rn)=>{
   const lim=getLim();
   const count=S.students.filter(x=>x.dia===dia&&x.rodada===rn&&x.id!==id).length;
   if(count>=lim){alert(`Rodada cheia (${lim}).`);return;}
+  const oldDia=s.dia,oldRodada=s.rodada;
   await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${id}`),_moverUpdData(s,dia,rn));
   CM('modal-mover');
+  // Bug 3: varre fila pela vaga que abriu
+  if(oldDia&&oldRodada&&(oldDia!==dia||oldRodada!==rn))await processWaitingQueue(oldDia,oldRodada);
 };
 
 
@@ -29011,11 +29121,39 @@ async function checkTrocaToken(){
 
 async function aceitarTrocaDireta(proposta,propostaRef){
   const simId=proposta.simId;
+  // Bug 6: revalida estado de ambos alunos antes de efetivar — auto-match pode ter movido um deles
+  try{
+    const [snapDe,snapPara]=await Promise.all([
+      getDoc(doc(db,'simulados/'+simId+'/alunos/'+proposta.de.id)),
+      getDoc(doc(db,'simulados/'+simId+'/alunos/'+proposta.para.id))
+    ]);
+    if(!snapDe.exists()||!snapPara.exists()){
+      showTrocaResult('❌','Não foi possível encontrar os alunos no simulado.\nEntre em contato com a coordenação.','var(--red)');
+      return;
+    }
+    const de=snapDe.data(),para=snapPara.data();
+    const moveuDe=de.dia!==proposta.de.dia||de.rodada!==proposta.de.rodada;
+    const moveuPara=para.dia!==proposta.para.dia||para.rodada!==proposta.para.rodada;
+    if(moveuDe||moveuPara){
+      await updateDoc(propostaRef,{status:'invalidada',resolvidaEm:new Date().toISOString(),motivo:'aluno movido após envio da proposta'});
+      showTrocaResult('⚠️','Esta proposta não pode mais ser efetivada.\n\nUm dos alunos foi realocado depois que a proposta foi enviada (provavelmente por troca automática).\n\nO solicitante pode enviar uma nova proposta se ainda quiser trocar.','var(--orange)');
+      return;
+    }
+  }catch(e){
+    console.error('[aceitarTrocaDireta] validação:',e);
+    showTrocaResult('❌','Erro ao validar a proposta.\nTente novamente em alguns segundos.','var(--red)');
+    return;
+  }
+  // Bug 7: preserva originalDia/Rodada de ambos (pega valores do snap)
+  const s1=S.students.find(x=>x.id===proposta.de.id)||{dia:proposta.de.dia,rodada:proposta.de.rodada,originalDia:null,originalRodada:null};
+  const s2=S.students.find(x=>x.id===proposta.para.id)||{dia:proposta.para.dia,rodada:proposta.para.rodada,originalDia:null,originalRodada:null};
+  const orig1=_preserveOrig(s1,proposta.de.dia,proposta.de.rodada);
+  const orig2=_preserveOrig(s2,proposta.para.dia,proposta.para.rodada);
   // Swap the students in Firebase
   const batch=writeBatch(db);
   const now=new Date().toISOString();
-  batch.update(doc(db,'simulados/'+simId+'/alunos/'+proposta.de.id),{dia:proposta.para.dia,rodada:proposta.para.rodada,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true});
-  batch.update(doc(db,'simulados/'+simId+'/alunos/'+proposta.para.id),{dia:proposta.de.dia,rodada:proposta.de.rodada,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true});
+  batch.update(doc(db,'simulados/'+simId+'/alunos/'+proposta.de.id),{dia:proposta.para.dia,rodada:proposta.para.rodada,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,...orig1});
+  batch.update(doc(db,'simulados/'+simId+'/alunos/'+proposta.para.id),{dia:proposta.de.dia,rodada:proposta.de.rodada,posicao:null,status:'confirmed',respondedAt:now,swapResolved:true,...orig2});
   await batch.commit();
   // Mark as accepted
   await updateDoc(propostaRef,{status:'aceita',resolvidaEm:new Date().toISOString()});
@@ -29023,24 +29161,25 @@ async function aceitarTrocaDireta(proposta,propostaRef){
   const msg='A troca de horário no '+proposta.simNome+' foi confirmada!\n\n'+
     '▸ '+proposta.de.nome+': agora no horário '+proposta.para.horario+' ('+(proposta.para.dia==='sabado'?'Sábado':'Domingo')+')\n'+
     '▸ '+proposta.para.nome+': agora no horário '+proposta.de.horario+' ('+(proposta.de.dia==='sabado'?'Sábado':'Domingo')+')';
-  try{
-    await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:proposta.de.email,nome:proposta.de.nome,assunto:'✅ Troca confirmada — '+proposta.simNome,mensagem:msg,simulado:proposta.simNome,dia:'',horario:''});
-    await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:proposta.para.email,nome:proposta.para.nome,assunto:'✅ Troca confirmada — '+proposta.simNome,mensagem:msg,simulado:proposta.simNome,dia:'',horario:''});
-  }catch(e){}
+  // Bug 12: emails com log
+  await _sendEmailLogged({to_email:proposta.de.email,nome:proposta.de.nome,assunto:'✅ Troca confirmada — '+proposta.simNome,mensagem:msg,simulado:proposta.simNome,dia:'',horario:''},'aceitarTrocaDireta:de:'+proposta.de.nome);
+  await _sendEmailLogged({to_email:proposta.para.email,nome:proposta.para.nome,assunto:'✅ Troca confirmada — '+proposta.simNome,mensagem:msg,simulado:proposta.simNome,dia:'',horario:''},'aceitarTrocaDireta:para:'+proposta.para.nome);
   showTrocaResult('✅','Troca aceita com sucesso!\n\nVocê agora está no horário '+proposta.de.horario+' ('+(proposta.de.dia==='sabado'?'Sábado':'Domingo')+').\nAmbos receberão um email de confirmação.','var(--green)');
 }
 
 async function recusarTrocaDireta(proposta,propostaRef){
   await updateDoc(propostaRef,{status:'recusada',resolvidaEm:new Date().toISOString()});
-  // Notify requester
+  // Bug 11: limpa swapResolved zumbi do solicitante pra ele reaparecer no painel se ainda quiser trocar
   try{
-    await emailjs.send('service_exyoa4r','template_r0vjejs',{
-      to_email:proposta.de.email,nome:proposta.de.nome,
-      assunto:'❌ Proposta de troca recusada — '+proposta.simNome,
-      mensagem:proposta.para.nome+' recusou sua proposta de troca de horário no '+proposta.simNome+'.\n\nSeu horário continua sendo '+proposta.de.horario+' ('+(proposta.de.dia==='sabado'?'Sábado':'Domingo')+').',
-      simulado:proposta.simNome,dia:'',horario:''
-    });
-  }catch(e){}
+    await updateDoc(doc(db,'simulados/'+proposta.simId+'/alunos/'+proposta.de.id),{swapResolved:false});
+  }catch(e){console.error('[recusarTrocaDireta] limpar swapResolved:',e);}
+  // Notify requester
+  await _sendEmailLogged({
+    to_email:proposta.de.email,nome:proposta.de.nome,
+    assunto:'❌ Proposta de troca recusada — '+proposta.simNome,
+    mensagem:proposta.para.nome+' recusou sua proposta de troca de horário no '+proposta.simNome+'.\n\nSeu horário continua sendo '+proposta.de.horario+' ('+(proposta.de.dia==='sabado'?'Sábado':'Domingo')+').',
+    simulado:proposta.simNome,dia:'',horario:''
+  },'recusarTrocaDireta:'+proposta.de.nome);
   showTrocaResult('❌','Você recusou a proposta de troca.\n'+proposta.de.nome+' será notificado.','var(--red)');
 }
 
