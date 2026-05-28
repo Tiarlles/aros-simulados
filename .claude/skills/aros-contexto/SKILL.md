@@ -1654,6 +1654,52 @@ Refinamento UX completo da aba Gerenciamento (visão coord do simulado **online*
 - IDs preservados (`s-t`, `s-c`, `s-a`, `s-s`) — toda lógica JS de update segue funcionando sem mudança.
 - CSS antigo `.sg/.sc/.s-icon/...` mantido (dead code) para evitar alterar outros lugares; só a markup foi trocada.
 
+### Escala — status editável pela coord + auto-ausentes pós-prazo + PDF "Versão alunos" (2026-05-28)
+
+Três features pequenas e independentes na aba Escala (visão coord do simulado), entregues juntas.
+
+**1. Coluna STATUS virou dropdown editável (substitui badge readonly):**
+- Antes: `sbadge(a.status)` mostrava badge só-leitura. Pra mudar o status do aluno, coord precisava abrir o modal de resposta como se fosse o aluno (com email validation).
+- Agora: `<select>` inline na coluna STATUS com 4 opções — ✔ Confirmado, ⏳ Pendente, 🔄 Aguardando troca, ✗ Ausente — colorido por status (vide `_coStatusSel(a)` helper, perto da declaração de `renderCoSched`). Mesmas cores das pills (`--gl/--bg3/--yl/--rl`).
+- Aplicado em **rodadas** (`renderCoSched`, linha ~21772) e **presencial** (`renderCoSchedPres`, linha ~21843).
+- Handler: `window.coChangeStatus(alunoId, newStatus)` perto de `resetSt` (linha ~22225). Lógica por destino:
+  - `absent`: confirm() → salva `originalDia/originalRodada` + limpa `dia/rodada/posicao` (libera vaga; aluno vai pro painel "Ausentes").
+  - `pending`: reset completo (`email:null, respondedAt:null, swapSlots:[], obs:''`). Se vinha de `absent`, repõe na rodada original.
+  - `confirmed`: salva status + respondedAt + limpa swapSlots/obs. Se vinha de `absent`, repõe na rodada original.
+  - `swap`: mantém swapSlots/obs se já existiam (admin pode definir slots depois via outro fluxo).
+- Audit log `STATUS_ALTERADO` em `auditLog` com before/after status + meta `{nome, via:'coord-escala'}`.
+- Em caso de cancelamento do confirm (absent) ou erro de write → `renderCoSched()` re-renderiza pra resetar o select pro valor anterior (não fica em estado fantasma).
+
+**2. Auto-marcação de pendentes como ausentes ao abrir escala com prazo vencido:**
+- Função `_autoAbsentPostDeadline()` (linha ~22260) chamada no início de `renderCoSched` e `renderCoSchedPres` via `try{_autoAbsentPostDeadline()}catch(_){}`.
+- Trigger: `S.curSim.deadline && new Date() > new Date(deadline)` + há pelo menos 1 student com `status:'pending'`.
+- Bulk update via `Promise.all` em todos os pendentes: `{status:'absent', respondedAt:now, autoAbsent:true, autoAbsentAt:now, originalDia, originalRodada, dia:null, rodada:null, posicao:null}`.
+- Flag por sessão: `window._autoAbsentDoneSimIds` (Set) garante que roda uma vez por simulado por carregamento de página — protege contra loop (cada `updateDoc` dispara `onSnapshot` → `renderCoSched` → poderia re-triggerar).
+- Em caso de erro, libera o flag (`Set.delete(simId)`) pra retentar no próximo render.
+- Audit log `AUTO_AUSENTES_POS_PRAZO` com `meta:{qtd, alunos:[nomes], deadline}`.
+- **Banner verde** notifica: `_showCoBanner(msg)` cria/atualiza `#co-auto-banner` acima de `#co-sched` (insertBefore). Texto: "✓ N alunos pendentes foram marcados como ausente — prazo de confirmação encerrado." Botão ✕ pra fechar.
+- **Decisão UX**: ação é silenciosa (sem alert/confirm) — o user disse "automaticamente" e o banner persistente é avisação suficiente. Flag `autoAbsent:true` no doc fica como trilha de auditoria caso precise reverter.
+- **NÃO toca** em `status:'swap'` — alunos aguardando troca permanecem pendentes da troca, não viram ausentes automaticamente.
+- Limitação: só roda quando coord abre o simulado. Não há cron — se ninguém abrir o sim depois do deadline, ninguém vira ausente automaticamente. Aceitável (coord sempre revisa antes do simulado).
+
+**3. PDF da escala — dropdown com 2 modos (Versão completa + Versão alunos):**
+- Botão "📄 Baixar PDF" virou dropdown `📄 Baixar PDF ▾` (linha 3646, dentro do toolbar da Escala). Estrutura: `#pdf-dd-wrap` (relative) com `<button>` + `#pdf-dd-menu` (absolute, right-aligned, hidden por default).
+- 2 opções no menu: **Versão completa** (com professores e status — para a coordenação) e **Versão alunos** (só nomes, por rodada — para divulgação).
+- Handler de abrir/fechar: `window.togglePdfDD(ev)` (linha ~24773). `stopPropagation` no botão + listener global de click pra fechar quando clica fora (auto-removido após uso).
+- Função `window.exportEscalaPDF(modo)` refatorada (linha ~24793). Aceita `'completo'` (default) ou `'alunos'`. Estrutura única, branching interno por `isAlunos`.
+- **Versão alunos** — diferenças:
+  - Filtra `s.status==='confirmed' || s.status==='swap'` (omite pendentes e ausentes).
+  - Ordenação `ordAlunos`: confirmados primeiro (alfabético), depois aguardando troca (alfabético).
+  - Tabela `class="t-alunos"` com colunas `#` (numeração, 36px centralizada cinza) e `Aluno` (sem Professor, sem Status).
+  - Alunos em troca ganham chip `<span class="tag-swap">🔄 troca</span>` discreto à direita do nome.
+  - Header de cada rodada: `Rodada N · HH:MM` (mesmo padrão da versão completa).
+  - Presencial: agrupa por dia, sem rodadas.
+  - Título do `<h1>` ganha sufixo `· Escala dos Alunos`.
+  - `<div class="sub">` complementa: "... · Apenas confirmados e aguardando troca".
+  - Mensagem de erro específica se vazio: "Nenhum aluno confirmado ou aguardando troca para exportar."
+- CSS novo no template: `.t-alunos td.n` (numeração), `.t-alunos td` (fonte 13px), `.tag-swap` (chip amarelo bg `#fff3cd` + border `#ffd96b` + color `#9a6b00`).
+- Versão completa permanece **idêntica** (mesmo HTML/CSS/estrutura) — refator preserva comportamento original.
+
 ### Checklist de Aplicação — refinos UX + cronômetro embutido + projeção em tempo real (2026-05-26)
 
 Sessão completa de refinos no Checklist de Aplicação (`tab-checklist`, função `renderCkCasos` e adjacências). Tudo entregue no mesmo dia, deploy completo (commits `c638edb` + rules deployadas).

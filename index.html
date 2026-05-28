@@ -3643,7 +3643,19 @@ body.pro-rt-fs-on{overflow:hidden}
                 </select>
               </label>
               <div style="display:flex;gap:8px;margin-left:auto;align-self:end">
-                <button class="btn btn-g btn-sm" onclick="exportEscalaPDF()" style="font-size:12px;padding:8px 14px;height:36px">📄 Baixar PDF</button>
+                <div style="position:relative" id="pdf-dd-wrap">
+                  <button class="btn btn-g btn-sm" onclick="togglePdfDD(event)" style="font-size:12px;padding:8px 14px;height:36px;display:inline-flex;align-items:center;gap:6px">📄 Baixar PDF <span style="font-size:9px;opacity:.7">▾</span></button>
+                  <div id="pdf-dd-menu" class="hidden" style="position:absolute;top:calc(100% + 6px);right:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);box-shadow:0 8px 24px -8px rgba(0,0,0,.35);min-width:260px;z-index:50;padding:6px;animation:fi .15s var(--ease-out-soft)">
+                    <button onclick="exportEscalaPDF('completo')" style="display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:none;color:var(--text);font-family:inherit;font-size:13px;cursor:pointer;border-radius:8px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='none'">
+                      <div style="font-weight:700">Versão completa</div>
+                      <div style="font-size:11px;color:var(--t2);margin-top:2px">Com professores e status — para a coordenação</div>
+                    </button>
+                    <button onclick="exportEscalaPDF('alunos')" style="display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:none;color:var(--text);font-family:inherit;font-size:13px;cursor:pointer;border-radius:8px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='none'">
+                      <div style="font-weight:700">Versão alunos</div>
+                      <div style="font-size:11px;color:var(--t2);margin-top:2px">Só nomes, por rodada — para divulgação</div>
+                    </button>
+                  </div>
+                </div>
                 <button id="btn-toggle-all-rounds" class="btn btn-s btn-sm" onclick="toggleAllRounds()" style="font-size:12px;padding:8px 14px;height:36px">⊞ Expandir todos</button>
               </div>
             </div>
@@ -21704,8 +21716,29 @@ window.doMoverDist=(idx,dia,rn)=>{
 };
 
 // COORD SCHEDULE
+// Dropdown editável de status do aluno (visão coord — escala)
+function _coStatusSel(a){
+  const colors={
+    confirmed:{bg:'var(--gl)',fg:'var(--green)',bd:'rgba(63,185,80,.4)'},
+    pending:  {bg:'var(--bg3)',fg:'var(--t2)',bd:'var(--border)'},
+    swap:     {bg:'var(--yl)',fg:'var(--yellow)',bd:'rgba(210,153,34,.4)'},
+    absent:   {bg:'var(--rl)',fg:'var(--red)',bd:'rgba(248,81,73,.4)'}
+  };
+  const c=colors[a.status]||colors.pending;
+  return `<select onchange="coChangeStatus('${a.id}',this.value)"
+    style="border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;padding:3px 4px;outline:none;width:100%;min-width:120px;text-align:center;background:${c.bg};color:${c.fg};border:1px solid ${c.bd};font-family:inherit"
+    title="Alterar status do aluno">
+    <option value="confirmed" ${a.status==='confirmed'?'selected':''}>✔ Confirmado</option>
+    <option value="pending" ${a.status==='pending'?'selected':''}>⏳ Pendente</option>
+    <option value="swap" ${a.status==='swap'?'selected':''}>🔄 Aguardando troca</option>
+    <option value="absent" ${a.status==='absent'?'selected':''}>✗ Ausente</option>
+  </select>`;
+}
+
 function renderCoSched(){
   if(S.curSim?.presencial){return renderCoSchedPres();}
+  // Dispara auto-absent se prazo encerrou (não bloqueia render)
+  try{_autoAbsentPostDeadline();}catch(_){}
   ['sabado','domingo'].forEach(dia=>{
     const rods=getRods(dia);const con=document.getElementById(`rds-${dia==='sabado'?'sab':'dom'}`);const lim=getLim();
     if(!rods.length){con.innerHTML='<div class="es" style="padding:20px"><p>Nenhuma rodada para este dia.</p></div>';return;}
@@ -21769,8 +21802,8 @@ function renderCoSched(){
           <div class="pos-aluno pos-aluno-sticky" style="border-right:1px solid var(--border)">
             ${a?`<span class="drag-h" draggable="true" ondragstart="dStart(event,'${a.id}')" ondragend="dEnd(event)">⠿</span><span class="pos-name" style="font-size:13px">${a.nome}</span>`:'<span class="pos-empty">— vago —</span>'}
           </div>
-          <div style="display:flex;align-items:center;justify-content:center;padding:4px 8px;border-right:1px solid var(--border)">
-            ${a?sbadge(a.status):''}
+          <div style="display:flex;align-items:center;justify-content:center;padding:4px 6px;border-right:1px solid var(--border)">
+            ${a?_coStatusSel(a):''}
           </div>
           <div style="display:flex;align-items:center;justify-content:center;padding:4px 6px;border-right:1px solid var(--border)">
             ${a?`<select onchange="togglePresBtn('${S.curSim?.id||''}','${a.id}',this.value)"
@@ -21807,6 +21840,7 @@ function renderCoSched(){
 
 // === Visão coord — presencial ===
 function renderCoSchedPres(){
+  try{_autoAbsentPostDeadline();}catch(_){}
   const ord=(a,b)=>{
     const order={confirmed:0,swap:1,pending:2};
     const da=order[a.status]??3,db=order[b.status]??3;
@@ -21840,7 +21874,7 @@ function renderCoSchedPres(){
       </select>`;
       return`<div class="aluno-row ${s.status==='confirmed'?'status-confirmed':s.status==='swap'?'status-swap':''}">
         <div class="aluno-name">${s.nome}${swapLbl}</div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${sbadge(s.status)}${presSel}
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${_coStatusSel(s)}${presSel}
           <button class="btn btn-s btn-sm" onclick="moverDiaPres('${s.id}')" title="Trocar dia">↔️ Mover</button>
           <button class="btn btn-g btn-sm" onclick="confirmResetStPres('${s.id}')" title="Resetar">↺</button>
           <button class="btn btn-d btn-sm" onclick="rmSt('${s.id}')" title="Remover aluno">✕</button>
@@ -22223,6 +22257,96 @@ window.dDropPos=async(e,dia,rn,p)=>{
 };
 
 window.resetSt=async id=>updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${id}`),{status:'pending',email:null,respondedAt:null,swapSlots:[],obs:''});
+
+// Coord altera status do aluno na escala (confirmado / pendente / aguardando troca / ausente).
+window.coChangeStatus=async(alunoId,newStatus)=>{
+  if(!S.curSim)return;
+  const s=S.students.find(x=>x.id===alunoId);if(!s)return;
+  if(s.status===newStatus)return;
+  const labels={confirmed:'Confirmado',pending:'Pendente',swap:'Aguardando troca',absent:'Ausente'};
+  if(newStatus==='absent'){
+    if(!confirm(`Marcar ${s.nome} como ausente?\n\nA vaga (${s.dia==='sabado'?'Sáb':'Dom'} · rodada ${s.rodada||'—'}) será liberada e o aluno irá para o painel de ausentes.`)){
+      // Restaura visualmente: re-renderiza pra resetar o select
+      try{renderCoSched();}catch(_){}
+      return;
+    }
+  }
+  const now=new Date().toISOString();
+  const upd={status:newStatus,respondedAt:now};
+  if(newStatus==='absent'){
+    if(s.dia)upd.originalDia=s.dia;
+    if(s.rodada)upd.originalRodada=s.rodada;
+    upd.dia=null;upd.rodada=null;upd.posicao=null;
+  }else if(newStatus==='pending'){
+    upd.email=null;upd.respondedAt=null;upd.swapSlots=[];upd.obs='';upd.swapResolved=false;
+    // Se estava ausente, repõe na rodada original (se houver)
+    if(s.status==='absent'){
+      if(s.originalDia)upd.dia=s.originalDia;
+      if(s.originalRodada)upd.rodada=s.originalRodada;
+    }
+  }else if(newStatus==='confirmed'){
+    upd.swapSlots=[];upd.obs='';upd.swapResolved=false;
+    if(s.status==='absent'){
+      if(s.originalDia)upd.dia=s.originalDia;
+      if(s.originalRodada)upd.rodada=s.originalRodada;
+    }
+  }else if(newStatus==='swap'){
+    if(s.status==='absent'){
+      if(s.originalDia)upd.dia=s.originalDia;
+      if(s.originalRodada)upd.rodada=s.originalRodada;
+    }
+    // Mantém swapSlots/obs se já existiam; senão coord pode definir depois.
+  }
+  try{
+    await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${alunoId}`),upd);
+    try{audit('STATUS_ALTERADO',{collection:'simulados/alunos',simId:S.curSim.id,studentId:alunoId},{before:{status:s.status},after:{status:newStatus},meta:{nome:s.nome,via:'coord-escala'}});}catch(_){}
+  }catch(err){
+    console.error('[coChangeStatus] falhou:',err);
+    alert('Não foi possível salvar o novo status.\n\n'+(err?.message||'erro desconhecido'));
+    try{renderCoSched();}catch(_){}
+  }
+};
+
+// Após o prazo de confirmação encerrar, marca pendentes restantes como ausentes (uma vez por sessão por simulado).
+window._autoAbsentDoneSimIds=window._autoAbsentDoneSimIds||new Set();
+async function _autoAbsentPostDeadline(){
+  if(!S.curSim||!S.unlocked)return;
+  const simId=S.curSim.id;
+  if(window._autoAbsentDoneSimIds.has(simId))return;
+  const exp=S.curSim.deadline&&new Date()>new Date(S.curSim.deadline);
+  if(!exp)return;
+  const pendentes=S.students.filter(s=>s.status==='pending');
+  if(!pendentes.length){window._autoAbsentDoneSimIds.add(simId);return;}
+  window._autoAbsentDoneSimIds.add(simId);
+  const now=new Date().toISOString();
+  try{
+    await Promise.all(pendentes.map(s=>{
+      const upd={status:'absent',respondedAt:now,autoAbsent:true,autoAbsentAt:now};
+      if(s.dia)upd.originalDia=s.dia;
+      if(s.rodada)upd.originalRodada=s.rodada;
+      upd.dia=null;upd.rodada=null;upd.posicao=null;
+      return updateDoc(doc(db,`simulados/${simId}/alunos/${s.id}`),upd);
+    }));
+    try{audit('AUTO_AUSENTES_POS_PRAZO',{collection:'simulados/alunos',simId},{meta:{qtd:pendentes.length,alunos:pendentes.map(p=>p.nome),deadline:S.curSim.deadline}});}catch(_){}
+    _showCoBanner(`✓ ${pendentes.length} aluno${pendentes.length>1?'s':''} pendente${pendentes.length>1?'s':''} ${pendentes.length>1?'foram marcados':'foi marcado'} como ausente — prazo de confirmação encerrado.`);
+  }catch(err){
+    console.error('[autoAbsentPostDeadline] erro:',err);
+    // Libera flag pra retentar na próxima render
+    window._autoAbsentDoneSimIds.delete(simId);
+  }
+}
+
+function _showCoBanner(msg){
+  let el=document.getElementById('co-auto-banner');
+  if(!el){
+    el=document.createElement('div');
+    el.id='co-auto-banner';
+    el.style.cssText='margin:0 0 14px;padding:12px 16px;border-radius:var(--rs);background:var(--gl);border:1px solid rgba(63,185,80,.4);color:var(--green);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:12px;animation:fi .3s var(--ease-out-soft)';
+    const sched=document.getElementById('co-sched');
+    if(sched&&sched.parentNode)sched.parentNode.insertBefore(el,sched);
+  }
+  el.innerHTML=`<span>${msg}</span><button onclick="this.parentNode.remove()" style="background:none;border:none;color:inherit;cursor:pointer;font-size:18px;line-height:1;opacity:.6;padding:0 4px" title="Fechar">✕</button>`;
+}
 window.rmSt=async id=>{
   if(!confirm('Remover este aluno?'))return;
   const simId=S.curSim.id;
@@ -24658,29 +24782,71 @@ window._exportDesempenhoCSV_legacy=async()=>{
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download=`desempenho_${lista.nome}.csv`;a.click();
 };
 
-// CSV
-window.exportEscalaPDF=()=>{
+// Dropdown do botão Baixar PDF
+window.togglePdfDD=(ev)=>{
+  ev&&ev.stopPropagation();
+  const m=document.getElementById('pdf-dd-menu');if(!m)return;
+  const isOpen=!m.classList.contains('hidden');
+  m.classList.toggle('hidden');
+  if(!isOpen){
+    setTimeout(()=>{
+      const close=(e)=>{
+        if(!document.getElementById('pdf-dd-wrap')?.contains(e.target)){
+          m.classList.add('hidden');
+          document.removeEventListener('click',close);
+        }
+      };
+      document.addEventListener('click',close);
+    },0);
+  }
+};
+
+// Exporta PDF da escala em 2 modos:
+//   'completo' — coordenação: professor + aluno + status (todos exceto ausentes)
+//   'alunos'   — divulgação: só nomes confirmados + aguardando troca, por rodada
+window.exportEscalaPDF=(modo)=>{
+  modo=modo||'completo';
+  const menu=document.getElementById('pdf-dd-menu');if(menu)menu.classList.add('hidden');
   if(!S.curSim){alert('Selecione um simulado.');return;}
   if(!S.students.length){alert('Nenhum aluno na escala.');return;}
   const statusLbl={confirmed:'Confirmado',pending:'Pendente',swap:'Aguardando troca',absent:'Ausente'};
   const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const sim=S.curSim;
   const isPres=!!sim.presencial;
+  const isAlunos=modo==='alunos';
+  // Versão alunos: só confirmados + aguardando troca (ordenados: confirmados antes, troca depois — alfabético dentro de cada grupo)
+  const ordAlunos=(a,b)=>{
+    const r={confirmed:0,swap:1};
+    const da=r[a.status]??9,db=r[b.status]??9;
+    if(da!==db)return da-db;
+    return a.nome.localeCompare(b.nome,'pt-BR');
+  };
+  const filtAluno=s=>s.status==='confirmed'||s.status==='swap';
   let body='';
 
   if(isPres){
     ['sabado','domingo'].forEach(dia=>{
-      const list=S.students.filter(s=>s.dia===dia&&s.status!=='absent')
-        .sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
-      if(!list.length)return;
+      const baseList=isAlunos
+        ?S.students.filter(s=>s.dia===dia&&filtAluno(s)).sort(ordAlunos)
+        :S.students.filter(s=>s.dia===dia&&s.status!=='absent').sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+      if(!baseList.length)return;
       const data=dia==='sabado'?sim.dataSab:sim.dataDom;
       const dataStr=data?' · '+fD(data):'';
       body+=`<h2>📅 ${dia==='sabado'?'Sábado':'Domingo'}${esc(dataStr)}</h2>`;
-      body+=`<table><thead><tr><th>Professor</th><th>Aluno</th><th>Status</th></tr></thead><tbody>`;
-      list.forEach(s=>{
-        body+=`<tr><td>—</td><td>${esc(s.nome)}</td><td>${esc(statusLbl[s.status]||s.status||'')}</td></tr>`;
-      });
-      body+=`</tbody></table>`;
+      if(isAlunos){
+        body+=`<table class="t-alunos"><thead><tr><th style="width:36px">#</th><th>Aluno</th></tr></thead><tbody>`;
+        baseList.forEach((s,i)=>{
+          const sw=s.status==='swap'?' <span class="tag-swap">🔄 troca</span>':'';
+          body+=`<tr><td class="n">${i+1}</td><td>${esc(s.nome)}${sw}</td></tr>`;
+        });
+        body+=`</tbody></table>`;
+      }else{
+        body+=`<table><thead><tr><th>Professor</th><th>Aluno</th><th>Status</th></tr></thead><tbody>`;
+        baseList.forEach(s=>{
+          body+=`<tr><td>—</td><td>${esc(s.nome)}</td><td>${esc(statusLbl[s.status]||s.status||'')}</td></tr>`;
+        });
+        body+=`</tbody></table>`;
+      }
     });
   }else{
     ['sabado','domingo'].forEach(dia=>{
@@ -24691,6 +24857,20 @@ window.exportEscalaPDF=()=>{
       let diaHtml='';
       rods.forEach((rod,idx)=>{
         const rn=idx+1;
+        if(isAlunos){
+          // Versão alunos: lista enxuta por rodada
+          const sts=S.students.filter(s=>s.dia===dia&&s.rodada===rn&&filtAluno(s)).sort(ordAlunos);
+          if(!sts.length)return;
+          let rows='';
+          sts.forEach((a,i)=>{
+            const sw=a.status==='swap'?' <span class="tag-swap">🔄 troca</span>':'';
+            rows+=`<tr><td class="n">${i+1}</td><td>${esc(a.nome)}${sw}</td></tr>`;
+          });
+          diaHtml+=`<h3>Rodada ${rn} · ${esc(rod.horario||'')}</h3>`;
+          diaHtml+=`<table class="t-alunos"><thead><tr><th style="width:36px">#</th><th>Aluno</th></tr></thead><tbody>${rows}</tbody></table>`;
+          return;
+        }
+        // Versão completa (com professores e status)
         const sts=[...S.students.filter(s=>s.dia===dia&&s.rodada===rn&&s.status!=='absent')].sort(sortByStatusThenName);
         const lim=getLim();
         let rows='';
@@ -24721,9 +24901,10 @@ window.exportEscalaPDF=()=>{
     });
   }
 
-  if(!body){alert('Nada para exportar.');return;}
+  if(!body){alert(isAlunos?'Nenhum aluno confirmado ou aguardando troca para exportar.':'Nada para exportar.');return;}
 
-  const html=`<!doctype html><html><head><meta charset="utf-8"><title>${esc(sim.nome||'Escala')}</title>
+  const titulo=esc(sim.nome||'Escala')+(isAlunos?' · Escala dos Alunos':'');
+  const html=`<!doctype html><html><head><meta charset="utf-8"><title>${titulo}</title>
 <style>
 *{box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111;margin:24px;font-size:12px;line-height:1.45}
@@ -24735,10 +24916,13 @@ table{width:100%;border-collapse:collapse;margin-bottom:6px;page-break-inside:av
 th,td{border:1px solid #999;padding:5px 8px;text-align:left;vertical-align:top}
 th{background:#eee;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
 td:nth-child(3){white-space:nowrap}
+table.t-alunos td.n{text-align:center;color:#888;font-weight:600;width:36px}
+table.t-alunos td{font-size:13px;padding:6px 10px}
+.tag-swap{display:inline-block;margin-left:8px;font-size:10px;font-weight:700;color:#9a6b00;background:#fff3cd;border:1px solid #ffd96b;border-radius:10px;padding:1px 7px;letter-spacing:.2px;vertical-align:middle}
 @media print{body{margin:14mm}h2{page-break-after:avoid}h3{page-break-after:avoid}}
 </style></head><body>
-<h1>${esc(sim.nome||'Escala')}</h1>
-<div class="sub">Gerado em ${esc(new Date().toLocaleString('pt-BR'))}</div>
+<h1>${titulo}</h1>
+<div class="sub">Gerado em ${esc(new Date().toLocaleString('pt-BR'))}${isAlunos?' · Apenas confirmados e aguardando troca':''}</div>
 ${body}
 <scr`+`ipt>window.onload=()=>setTimeout(()=>window.print(),250);</scr`+`ipt>
 </body></html>`;
