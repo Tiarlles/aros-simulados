@@ -22296,6 +22296,9 @@ window.coChangeStatus=async(alunoId,newStatus)=>{
       if(s.originalRodada)upd.rodada=s.originalRodada;
     }
     // Mantém swapSlots/obs se já existiam; senão coord pode definir depois.
+    // CRÍTICO: sempre reseta swapResolved — senão aluno fica em zona morta
+    // (status:swap mas escondido do painel de Solicitações que filtra !swapResolved).
+    upd.swapResolved=false;
   }
   try{
     await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${alunoId}`),upd);
