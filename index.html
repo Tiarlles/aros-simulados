@@ -4310,7 +4310,6 @@ body.pro-rt-fs-on{overflow:hidden}
             <select id="ck-prof-sel" style="display:none"></select>
             <!-- Contribuir com Feedback Geral (visível quando simulado selecionado) -->
             <button class="hidden" id="btn-feedback-geral" onclick="openFeedbackGeralModal()" style="white-space:nowrap;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;padding:9px 18px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(79,70,229,.3);transition:all .2s">💬 Contribuir com Feedback Geral</button>
-            <button class="hidden" id="btn-ck-pdf" onclick="exportCkTemplatePDF()" title="Imprime o checklist em branco pro prof levar pra sala como backup" style="white-space:nowrap;background:var(--bg3);color:var(--text);border:1.5px solid var(--border);padding:9px 18px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;margin-left:8px;transition:all .2s" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">📄 Backup PDF</button>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
             <button onclick="openCkTemplateEditorAuth()" style="white-space:nowrap;background:var(--bg3);color:var(--text);border:1.5px solid var(--border);padding:9px 18px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:all .2s" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">⚙️ Configurar checklist do simulado</button>
@@ -27842,7 +27841,6 @@ window.loadCkSim=async()=>{
   }
   // Show feedback geral button when sim is selected
   document.getElementById('btn-feedback-geral')?.classList.remove('hidden');
-  document.getElementById('btn-ck-pdf')?.classList.remove('hidden');
   // Botão de admin pra gerenciar contribuições (só visível pra role=admin)
   const btnFgAdmin=document.getElementById('btn-fg-admin');
   if(btnFgAdmin){
@@ -28202,12 +28200,18 @@ function renderBlocoCards(studentId){
     const disabled=!totalCasos;
     const clickAttr=disabled?'':('onclick="openCkBloco(\''+b.key+'\')"');
     const hoverAttr=disabled?'':('onmouseover="this.style.borderColor=\''+b.color+'\'" onmouseout="this.style.borderColor=\''+borderColor+'\'"');
-    return`<div ${clickAttr} ${hoverAttr}
+    const blocoLabelShort=b.key==='criar'?'Criar':'Oral';
+    // Botão Backup PDF acima de cada card — exporta só esse bloco em branco pro prof imprimir
+    const btnBackup=disabled?'':`<button onclick="event.stopPropagation();exportCkTemplatePDF('${b.key}')" title="Imprime o checklist em branco do bloco ${blocoLabelShort} pro prof aplicador" style="white-space:nowrap;background:var(--bg2);color:var(--t2);border:1px dashed var(--border);padding:7px 14px;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;transition:all .15s;align-self:flex-start" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)';this.style.borderStyle='solid'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--border)';this.style.borderStyle='dashed'">📄 Backup PDF · ${blocoLabelShort}</button>`;
+    return`<div style="display:flex;flex-direction:column;gap:10px">
+      ${btnBackup}
+      <div ${clickAttr} ${hoverAttr}
       style="border:2px solid ${borderColor};border-radius:var(--r);padding:24px;cursor:${disabled?'default':'pointer'};transition:all .2s;opacity:${disabled?'.5':'1'};background:${statusBg(bSt)}">
       <p style="font-size:17px;font-weight:800;margin-bottom:8px">${b.label}</p>
       <p style="font-size:13px;color:var(--t2);margin-bottom:12px">${totalCasos} caso${totalCasos!==1?'s':''} · ${disabled?'Sem template configurado':status}</p>
       ${bSt==='green'&&nota!==undefined?`<p style="font-size:24px;font-weight:800;color:var(--green)">${nota.toFixed(1)} pts</p>`:''}
       ${(!disabled&&bSt!=='green')?`<p style="font-size:12px;color:${statusColor(bSt)}">Status: ${status}</p>`:''}
+      </div>
     </div>`;
   }).join('');
 }
@@ -28281,14 +28285,14 @@ function getPergStatus(cr,perg,pi){
 // Abre uma janela nova com HTML self-contained pronto pra impressão.
 // Inclui ambos os blocos (Criar + Oral) sequenciais, separados por page-break.
 // O prof imprime/salva como PDF pra usar como backup caso o sistema caia.
-window.exportCkTemplatePDF=()=>{
+// Param `blocoSolo`: 'criar', 'oral' ou undefined (= ambos)
+window.exportCkTemplatePDF=(blocoSolo)=>{
   if(!_ckSimId){alert('Selecione um simulado primeiro.');return;}
   const sim=S.sims.find(s=>s.id===_ckSimId);
   if(!sim){alert('Simulado não encontrado.');return;}
-  const blocoCriarHtml=_renderCkPrintHTML(sim,'criar');
-  const blocoOralHtml=_renderCkPrintHTML(sim,'oral');
-  const partes=[blocoCriarHtml,blocoOralHtml].filter(Boolean);
-  if(!partes.length){alert('Esse simulado não tem template de checklist cadastrado em nenhum bloco.');return;}
+  const blocosWanted=blocoSolo?[blocoSolo]:['criar','oral'];
+  const partes=blocosWanted.map(b=>_renderCkPrintHTML(sim,b)).filter(Boolean);
+  if(!partes.length){alert('Esse simulado não tem template de checklist cadastrado'+(blocoSolo?(' no bloco '+(blocoSolo==='criar'?'Criar':'Oral')):' em nenhum bloco')+'.');return;}
   const corpo=partes.join('<div class="page-break"></div>');
   const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Backup Checklist · ${(sim.nome||'').replace(/</g,'&lt;')}</title>
 <style>
@@ -28298,10 +28302,11 @@ h1{font-size:18pt;margin-bottom:2px;letter-spacing:-.3px}
 h2{font-size:13pt;margin:18px 0 8px;padding:8px 0 5px;border-bottom:2.5px solid #111}
 h3{font-size:11.5pt;margin:12px 0 4px;color:#222}
 .sub{color:#555;font-size:9.5pt;margin-bottom:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
-.meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 16px}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 16px;page-break-after:avoid}
 .meta-field{border-bottom:1.2px solid #333;padding:14px 4px 3px;font-size:9pt;color:#666;position:relative}
 .meta-field::before{content:attr(data-lbl);position:absolute;top:0;left:0;font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:8pt;color:#222}
-.caso{margin-top:18px;page-break-inside:avoid}
+.caso{margin-top:18px}
+.caso h2{page-break-after:avoid}
 .perg{margin:8px 0 2px 0;page-break-inside:avoid}
 .item{display:flex;align-items:flex-start;gap:10px;margin:5px 0 5px 18px;font-size:10pt}
 .item-lbl{font-weight:700;flex-shrink:0;width:18px}
@@ -28343,8 +28348,10 @@ function _renderCkPrintHTML(sim,blocoKey){
     const pergsHtml=(caso.perguntas||[]).map((p,pi)=>{
       const titulo=esc(p.titulo||'Pergunta '+(pi+1));
       const itensHtml=(p.itens||[]).map((it,ii)=>{
-        const lbl=String.fromCharCode(65+ii);
-        const texto=esc(it.texto||'');
+        // Label: usa o cadastrado se houver, senão A/B/C automático
+        const lbl=esc(it.label||String.fromCharCode(65+ii));
+        // Texto do item — campo correto é `descricao` (testou e o `texto` estava vazio)
+        const texto=esc(it.descricao||it.texto||'');
         if(it.negativo){
           return`<div class="item"><span class="item-lbl">${lbl})</span><span class="item-text">${texto}</span><span class="neg">PENALIDADE</span><div class="opts"><span class="opt"><span class="box"></span>Aplicar</span></div></div>`;
         }
