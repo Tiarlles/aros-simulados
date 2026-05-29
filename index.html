@@ -4310,6 +4310,7 @@ body.pro-rt-fs-on{overflow:hidden}
             <select id="ck-prof-sel" style="display:none"></select>
             <!-- Contribuir com Feedback Geral (visível quando simulado selecionado) -->
             <button class="hidden" id="btn-feedback-geral" onclick="openFeedbackGeralModal()" style="white-space:nowrap;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;padding:9px 18px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(79,70,229,.3);transition:all .2s">💬 Contribuir com Feedback Geral</button>
+            <button class="hidden" id="btn-ck-pdf" onclick="exportCkTemplatePDF()" title="Imprime o checklist em branco pro prof levar pra sala como backup" style="white-space:nowrap;background:var(--bg3);color:var(--text);border:1.5px solid var(--border);padding:9px 18px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;margin-left:8px;transition:all .2s" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">📄 Backup PDF</button>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
             <button onclick="openCkTemplateEditorAuth()" style="white-space:nowrap;background:var(--bg3);color:var(--text);border:1.5px solid var(--border);padding:9px 18px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:all .2s" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">⚙️ Configurar checklist do simulado</button>
@@ -27841,6 +27842,7 @@ window.loadCkSim=async()=>{
   }
   // Show feedback geral button when sim is selected
   document.getElementById('btn-feedback-geral')?.classList.remove('hidden');
+  document.getElementById('btn-ck-pdf')?.classList.remove('hidden');
   // Botão de admin pra gerenciar contribuições (só visível pra role=admin)
   const btnFgAdmin=document.getElementById('btn-fg-admin');
   if(btnFgAdmin){
@@ -28275,6 +28277,106 @@ function getPergStatus(cr,perg,pi){
 // Itens negativos (penalidades): se marcados como 'penalidade', subtraem ptsPorItem
 // (onde ptsPorItem é baseado APENAS nos itens positivos — penalidades não diluem o peso).
 // Nota mínima do caso = 0 (não fica negativa).
+// === Backup PDF do checklist em branco (template) ============================
+// Abre uma janela nova com HTML self-contained pronto pra impressão.
+// Inclui ambos os blocos (Criar + Oral) sequenciais, separados por page-break.
+// O prof imprime/salva como PDF pra usar como backup caso o sistema caia.
+window.exportCkTemplatePDF=()=>{
+  if(!_ckSimId){alert('Selecione um simulado primeiro.');return;}
+  const sim=S.sims.find(s=>s.id===_ckSimId);
+  if(!sim){alert('Simulado não encontrado.');return;}
+  const blocoCriarHtml=_renderCkPrintHTML(sim,'criar');
+  const blocoOralHtml=_renderCkPrintHTML(sim,'oral');
+  const partes=[blocoCriarHtml,blocoOralHtml].filter(Boolean);
+  if(!partes.length){alert('Esse simulado não tem template de checklist cadastrado em nenhum bloco.');return;}
+  const corpo=partes.join('<div class="page-break"></div>');
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Backup Checklist · ${(sim.nome||'').replace(/</g,'&lt;')}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:24px 28px;font-size:11pt;line-height:1.45;background:#fff}
+h1{font-size:18pt;margin-bottom:2px;letter-spacing:-.3px}
+h2{font-size:13pt;margin:18px 0 8px;padding:8px 0 5px;border-bottom:2.5px solid #111}
+h3{font-size:11.5pt;margin:12px 0 4px;color:#222}
+.sub{color:#555;font-size:9.5pt;margin-bottom:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 16px}
+.meta-field{border-bottom:1.2px solid #333;padding:14px 4px 3px;font-size:9pt;color:#666;position:relative}
+.meta-field::before{content:attr(data-lbl);position:absolute;top:0;left:0;font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:8pt;color:#222}
+.caso{margin-top:18px;page-break-inside:avoid}
+.perg{margin:8px 0 2px 0;page-break-inside:avoid}
+.item{display:flex;align-items:flex-start;gap:10px;margin:5px 0 5px 18px;font-size:10pt}
+.item-lbl{font-weight:700;flex-shrink:0;width:18px}
+.item-text{flex:1;line-height:1.35}
+.opts{display:flex;gap:12px;flex-shrink:0;padding-top:1px}
+.opt{display:inline-flex;align-items:center;gap:4px;font-size:9.5pt}
+.box{display:inline-block;width:12px;height:12px;border:1.4px solid #111;border-radius:2px;flex-shrink:0}
+.neg{background:#fee2e2;padding:1px 6px;border-radius:3px;font-size:8.5pt;color:#7f1d1d;font-weight:700;letter-spacing:.4px;margin-left:6px;align-self:center}
+.hab{margin:6px 0 4px 0;font-size:10pt;display:flex;align-items:center;gap:10px}
+.hab-name{min-width:200px;font-weight:600}
+.hab-line{flex:1;border-bottom:1px solid #333;height:16px}
+.hab-scale{font-size:8.5pt;color:#666}
+.fb{margin-top:16px;page-break-inside:avoid}
+.fb-lines{margin-top:6px}
+.fb-line{border-bottom:1px solid #333;height:24px}
+.nota{margin-top:18px;font-size:11pt;font-weight:700;border-top:2px solid #111;padding-top:8px;display:flex;justify-content:space-between;align-items:center}
+.page-break{page-break-after:always;height:0}
+.footer-print{margin-top:24px;padding-top:8px;border-top:1px solid #ccc;font-size:8pt;color:#888;text-align:center}
+@media print{body{padding:14px 18px}}
+</style></head><body>${corpo}<div class="footer-print">Backup gerado pelo AROS · ${new Date().toLocaleString('pt-BR')} · Use como fallback se o sistema falhar</div></body></html>`;
+  const win=window.open('','aros_ck_pdf_'+_ckSimId);
+  if(!win){alert('Pop-up bloqueado pelo navegador. Permita pop-ups e tente de novo.');return;}
+  win.document.open();win.document.write(html);win.document.close();
+  // Dá um tempinho pro HTML carregar antes de chamar print
+  setTimeout(()=>{try{win.focus();win.print();}catch(_){}},500);
+};
+
+function _renderCkPrintHTML(sim,blocoKey){
+  const tpl=_ckTemplate?.[blocoKey];
+  const casos=tpl?.casos||[];
+  if(!casos.length)return'';
+  const blocoLbl=blocoKey==='criar'?'BLOCO CRIAR':'BLOCO ORAL';
+  const dSab=sim.dataSab?'Sáb '+fD(sim.dataSab):'';
+  const dDom=sim.dataDom?'Dom '+fD(sim.dataDom):'';
+  const dataStr=[dSab,dDom].filter(Boolean).join(' · ');
+  const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const casosHtml=casos.map((caso,ci)=>{
+    const nomeCaso=esc(caso.nome||'Caso '+(ci+1));
+    const pergsHtml=(caso.perguntas||[]).map((p,pi)=>{
+      const titulo=esc(p.titulo||'Pergunta '+(pi+1));
+      const itensHtml=(p.itens||[]).map((it,ii)=>{
+        const lbl=String.fromCharCode(65+ii);
+        const texto=esc(it.texto||'');
+        if(it.negativo){
+          return`<div class="item"><span class="item-lbl">${lbl})</span><span class="item-text">${texto}</span><span class="neg">PENALIDADE</span><div class="opts"><span class="opt"><span class="box"></span>Aplicar</span></div></div>`;
+        }
+        return`<div class="item"><span class="item-lbl">${lbl})</span><span class="item-text">${texto}</span><div class="opts"><span class="opt"><span class="box"></span>Certo</span><span class="opt"><span class="box"></span>Parcial</span><span class="opt"><span class="box"></span>Errado</span></div></div>`;
+      }).join('');
+      return`<div class="perg"><h3>P${pi+1}. ${titulo}</h3>${itensHtml}</div>`;
+    }).join('');
+    return`<div class="caso"><h2>Caso ${ci+1}${nomeCaso&&nomeCaso!=='Caso '+(ci+1)?' · '+nomeCaso:''}</h2>${pergsHtml}</div>`;
+  }).join('');
+  const habHtml=HABILIDADES.map(h=>`<div class="hab"><span class="hab-name">${esc(h)}</span><span class="hab-scale">(1–5):</span><span class="hab-line"></span></div>`).join('');
+  return`
+    <h1>Checklist · ${esc(sim.nome||'')}</h1>
+    <div class="sub">${blocoLbl}${dataStr?' · '+dataStr:''}</div>
+    <div class="meta">
+      <div class="meta-field" data-lbl="Aluno"></div>
+      <div class="meta-field" data-lbl="Avaliador"></div>
+      <div class="meta-field" data-lbl="Data / Hora"></div>
+      <div class="meta-field" data-lbl="Rodada"></div>
+    </div>
+    ${casosHtml}
+    <h3 style="margin-top:24px">Habilidades</h3>
+    ${habHtml}
+    <div class="fb">
+      <h3>Feedback descritivo</h3>
+      <div class="fb-lines">
+        ${Array(8).fill('<div class="fb-line"></div>').join('')}
+      </div>
+    </div>
+    <div class="nota"><span>Nota ${blocoKey==='criar'?'Criar':'Oral'}:</span><span>________ / 100</span></div>
+  `;
+}
+
 function _calcCasoScore(cr,caso,ptsPorCaso){
   const perguntas=caso?.perguntas||[];
   let totalPositivos=0;
