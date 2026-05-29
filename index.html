@@ -797,6 +797,44 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 .rt-tb button:active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .rt-ed{min-height:60px;padding:8px 10px;border:1px solid var(--border);border-radius:0 0 5px 5px;background:var(--bg2);color:var(--text);font-family:inherit;font-size:13px;line-height:1.5;outline:none;transition:border-color .15s;overflow-wrap:break-word;word-wrap:break-word;text-align:justify;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none}
 .rt-ed:focus{border-color:var(--accent)}
+
+/* ════════════════════════════════════════════════════════════════════════
+ * Editor de template do checklist — design dark glass Apple-like
+ * ════════════════════════════════════════════════════════════════════════ */
+.tpl-caso{position:relative;margin-bottom:14px;border:1px solid color-mix(in srgb, var(--border) 85%, transparent);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,color-mix(in srgb, var(--bg2) 92%, transparent),color-mix(in srgb, var(--bg2) 96%, var(--bg)));backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 6px 22px -12px rgba(0,0,0,.5);transition:border-color .25s cubic-bezier(.4,0,.2,1),box-shadow .25s,transform .15s}
+.tpl-caso::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--tpl-cor,var(--accent)),color-mix(in srgb, var(--tpl-cor,var(--accent)) 50%, transparent));border-radius:3px;transition:width .25s,box-shadow .25s}
+.tpl-caso:hover{border-color:color-mix(in srgb, var(--tpl-cor,var(--accent)) 45%, var(--border));box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 12px 30px -14px color-mix(in srgb, var(--tpl-cor,var(--accent)) 50%, rgba(0,0,0,.5))}
+.tpl-caso:hover::before{width:5px;box-shadow:0 0 12px color-mix(in srgb, var(--tpl-cor,var(--accent)) 55%, transparent)}
+.tpl-caso.open{border-color:color-mix(in srgb, var(--tpl-cor,var(--accent)) 50%, var(--border))}
+.tpl-caso.open::before{width:5px;box-shadow:0 0 14px color-mix(in srgb, var(--tpl-cor,var(--accent)) 60%, transparent)}
+.tpl-caso-head{display:flex;align-items:center;gap:10px;padding:12px 16px 12px 22px;background:linear-gradient(180deg,color-mix(in srgb, var(--tpl-cor,var(--accent)) 6%, transparent),transparent);cursor:pointer;user-select:none;transition:background .2s;flex-wrap:wrap}
+.tpl-caso-head:hover{background:linear-gradient(180deg,color-mix(in srgb, var(--tpl-cor,var(--accent)) 10%, transparent),transparent)}
+.tpl-caret{font-size:10px;color:var(--t2);transition:transform .25s cubic-bezier(.4,0,.2,1),color .15s;display:inline-block;width:14px;flex-shrink:0;text-align:center}
+.tpl-caso:hover .tpl-caret,.tpl-caso.open .tpl-caret{color:var(--tpl-cor,var(--accent))}
+.tpl-caso.open .tpl-caret{transform:rotate(90deg)}
+.tpl-caso-num{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;color:var(--tpl-cor,var(--accent));background:color-mix(in srgb, var(--tpl-cor,var(--accent)) 14%, transparent);padding:4px 10px;border-radius:999px;letter-spacing:.6px;flex-shrink:0;border:1px solid color-mix(in srgb, var(--tpl-cor,var(--accent)) 30%, transparent)}
+.tpl-caso-input{flex:1;border:none;background:transparent;font-family:inherit;font-size:14.5px;font-weight:600;outline:none;color:var(--text);min-width:140px;letter-spacing:-.2px;padding:4px 6px;border-radius:6px;transition:background .15s}
+.tpl-caso-input:focus{background:color-mix(in srgb, var(--bg) 60%, transparent)}
+.tpl-caso-body{padding:16px 18px 18px 22px;border-top:1px solid color-mix(in srgb, var(--border) 70%, transparent);background:color-mix(in srgb, var(--bg) 50%, transparent)}
+.tpl-section-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--t2);margin-bottom:6px;display:block}
+.tpl-textarea{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:color-mix(in srgb, var(--bg) 80%, transparent);font-family:inherit;font-size:13.5px;line-height:1.55;color:var(--text);resize:vertical;outline:none;text-align:justify;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none;transition:border-color .15s,background .15s;backdrop-filter:blur(8px)}
+.tpl-textarea:focus{border-color:var(--accent);background:var(--bg)}
+.tpl-perg{margin-bottom:10px;border:1px solid color-mix(in srgb, var(--border) 80%, transparent);border-radius:12px;overflow:hidden;background:linear-gradient(180deg,color-mix(in srgb, var(--bg2) 88%, transparent),color-mix(in srgb, var(--bg2) 95%, var(--bg)));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:border-color .2s,box-shadow .2s}
+.tpl-perg:hover{border-color:color-mix(in srgb, var(--accent) 40%, var(--border));box-shadow:0 4px 16px -8px color-mix(in srgb, var(--accent) 35%, transparent)}
+.tpl-perg.open{border-color:color-mix(in srgb, var(--accent) 45%, var(--border))}
+.tpl-perg-head{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:linear-gradient(180deg,color-mix(in srgb, var(--accent) 4%, transparent),transparent);cursor:pointer;user-select:none;transition:background .2s}
+.tpl-perg-head:hover{background:linear-gradient(180deg,color-mix(in srgb, var(--accent) 8%, transparent),transparent)}
+.tpl-perg-caret{font-size:9px;color:var(--t2);transition:transform .25s cubic-bezier(.4,0,.2,1),color .15s;display:inline-block;width:14px;flex-shrink:0;text-align:center;padding-top:11px}
+.tpl-perg:hover .tpl-perg-caret,.tpl-perg.open .tpl-perg-caret{color:var(--accent)}
+.tpl-perg.open .tpl-perg-caret{transform:rotate(90deg)}
+.tpl-perg-num{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;color:var(--accent);background:var(--accent-dim);padding:4px 9px;border-radius:999px;letter-spacing:.5px;flex-shrink:0;padding-top:5px;height:21px;display:inline-flex;align-items:center;margin-top:6px}
+.tpl-perg-input{flex:1;border:1px solid color-mix(in srgb, var(--border) 70%, transparent);background:color-mix(in srgb, var(--bg) 70%, transparent);font-family:inherit;font-size:13px;font-weight:500;outline:none;color:var(--text);min-width:0;line-height:1.5;resize:vertical;padding:10px 12px;border-radius:8px;min-height:90px;text-align:justify;transition:border-color .15s,background .15s}
+.tpl-perg-input:focus{border-color:var(--accent);background:var(--bg)}
+.tpl-perg-body{padding:14px 16px;border-top:1px solid color-mix(in srgb, var(--border) 70%, transparent);background:color-mix(in srgb, var(--bg) 40%, transparent)}
+.tpl-btn-action{background:rgba(255,255,255,.04);color:var(--t2);border:1px solid color-mix(in srgb, var(--border) 80%, transparent);padding:6px 11px;border-radius:7px;cursor:pointer;font-size:11.5px;font-weight:600;font-family:inherit;letter-spacing:.1px;display:inline-flex;align-items:center;gap:4px;transition:all .15s;white-space:nowrap}
+.tpl-btn-action:hover{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+.tpl-btn-action.del{color:#ff7b7b;border-color:rgba(248,81,73,.3)}
+.tpl-btn-action.del:hover{background:rgba(248,81,73,.15);border-color:#f85149;color:#ff5c5c}
 .rt-ed b,.rt-ed strong{font-weight:700}
 .rt-ed i,.rt-ed em{font-style:italic}
 .rt-ed u{text-decoration:underline}
@@ -30352,40 +30390,57 @@ function _renderTplCaso(bloco,caso,ci){
   const openSet=_tplOpen[bloco].casos;
   const casoOpen=openSet.has(ci);
   const perguntas=caso.perguntas||[];
-  const corBloco=bloco==='oral'?'var(--orange)':'var(--accent)';
+  const corBloco=bloco==='oral'?'251,143,68':'47,129,247'; // RGB do orange/accent
   const idPrefix=`tpl-${bloco}`;
-  let html=`<div style="margin-bottom:12px;border:1.5px solid var(--border);border-left:3px solid ${corBloco};border-radius:var(--r);overflow:hidden;background:var(--bg2)">
-    <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg3)">
-      <span onclick="tplToggleCaso('${bloco}',${ci})" style="font-size:15px;cursor:pointer;padding:2px 6px;border-radius:4px" title="Expandir/recolher">${casoOpen?'▼':'▶'}</span>
-      <span style="font-weight:700;font-size:14px;color:var(--t2);white-space:nowrap">Caso ${ci+1} —</span>
-      <input id="${idPrefix}-hdr-caso-${ci}" value="${(caso.nome||'').replace(/"/g,'&quot;')}" placeholder="Nome do caso clínico"
+  const numSlides=(caso.slides||[]).length;
+  // Header inteiro clicável → toggle. Inputs e botões com closest() check
+  // pra não disparar o toggle quando o user clica neles.
+  const hdrToggle=`onclick="if(!event.target.closest('input,textarea,button'))tplToggleCaso('${bloco}',${ci})"`;
+  let html=`<div class="tpl-caso${casoOpen?' open':''}" style="--tpl-cor:rgb(${corBloco})">
+    <div class="tpl-caso-head" ${hdrToggle}>
+      <span class="tpl-caret">▶</span>
+      <span class="tpl-caso-num">CASO ${ci+1}</span>
+      <input id="${idPrefix}-hdr-caso-${ci}" class="tpl-caso-input" value="${(caso.nome||'').replace(/"/g,'&quot;')}" placeholder="Nome do caso clínico"
         oninput="${tplVar}.casos[${ci}].nome=this.value"
-        onblur="autoSaveCkTemplate()"
-        onclick="event.stopPropagation()"
-        style="flex:1;border:none;background:transparent;font-family:inherit;font-size:14px;font-weight:600;outline:none;color:var(--text);min-width:0"/>
-      <span style="font-size:12px;color:var(--t2);white-space:nowrap">${perguntas.length} pergunta${perguntas.length!==1?'s':''}</span>
-      ${bloco==='criar'?`<button class="btn btn-s btn-sm" onclick="openSlidesModal('${bloco}',${ci})" title="Editar slides de projeção deste caso" style="font-size:11px">🎬 Slides${(caso.slides||[]).length?' ('+caso.slides.length+')':''}</button>`:''}
-      <button class="btn btn-d btn-sm" onclick="rmCkCaso('${bloco}',${ci})" style="font-size:11px">✕ Remover</button>
+        onblur="autoSaveCkTemplate()"/>
+      ${bloco==='criar'?`<button class="tpl-btn-action" onclick="previewCasoSlides('${bloco}',${ci})" title="Pré-visualizar slides desse caso em janela separada">👁 Pré-visualizar</button>`:''}
+      ${bloco==='criar'?`<button class="tpl-btn-action" onclick="openSlidesModal('${bloco}',${ci})" title="Editar slides de projeção deste caso">🎬 Editar Slides${numSlides?' ('+numSlides+')':''}</button>`:''}
+      <button class="tpl-btn-action del" onclick="rmCkCaso('${bloco}',${ci})" title="Remover este caso">✕ Remover</button>
     </div>
-    <div id="${idPrefix}-caso-${ci}" style="display:${casoOpen?'block':'none'};padding:14px 16px">
-      <div style="margin-bottom:14px">
-        <label class="fl" style="display:block;margin-bottom:4px">📝 Enunciado do caso (opcional)</label>
-        <textarea id="${idPrefix}-enun-caso-${ci}"
+    <div id="${idPrefix}-caso-${ci}" class="tpl-caso-body" style="display:${casoOpen?'block':'none'}">
+      <div style="margin-bottom:16px">
+        <span class="tpl-section-label">📝 Enunciado</span>
+        <textarea id="${idPrefix}-enun-caso-${ci}" class="tpl-textarea"
           oninput="${tplVar}.casos[${ci}].enunciado=this.value"
           onblur="autoSaveCkTemplate()"
-          rows="3"
-          placeholder="Contexto/história clínica que será mostrado ao prof no início do caso..."
-          style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);font-family:inherit;font-size:13px;line-height:1.55;color:var(--text);resize:vertical;outline:none;text-align:justify">${(caso.enunciado||'').replace(/</g,'&lt;')}</textarea>
+          rows="6"
+          placeholder="Contexto/história clínica que será mostrado ao prof no início do caso...">${(caso.enunciado||'').replace(/</g,'&lt;')}</textarea>
         ${_renderTplImagensCk(caso.enunciadoImagens||[],bloco,ci,null)}
       </div>`;
   perguntas.forEach((perg,pi)=>{
     html+=_renderTplPergunta(bloco,ci,perg,pi);
   });
-  html+=`<button class="btn btn-s btn-sm" style="margin-top:10px" onclick="addCkPergunta('${bloco}',${ci})">+ Adicionar Pergunta</button>
+  html+=`<button class="tpl-btn-action" style="margin-top:10px" onclick="addCkPergunta('${bloco}',${ci})">+ Adicionar Pergunta</button>
     </div>
   </div>`;
   return html;
 }
+
+// Abre janela de preview com TODOS os slides de um caso específico (do editor de template).
+window.previewCasoSlides=(bloco,ci)=>{
+  const tpl=_tplBlocoObj(bloco);
+  const caso=tpl?.casos?.[ci];
+  if(!caso){alert('Caso não encontrado.');return;}
+  let slides=Array.isArray(caso.slides)?JSON.parse(JSON.stringify(caso.slides)):[];
+  if(!slides.length)slides=gerarSlidesPadrao(caso,ci);
+  slides=slides.map(_slideMigrar);
+  slides.forEach(s=>{if(!s.id)s.id=_slideUid();});
+  if(!slides.length){alert('Nenhum slide pra pré-visualizar.');return;}
+  try{localStorage.setItem('aros_preview_slides',JSON.stringify(slides));}catch(e){alert('Erro ao preparar preview: '+e.message);return;}
+  const url=window.location.pathname+'?modo=preview';
+  const win=window.open(url,'aros_preview_caso_'+bloco+'_'+ci,'width=1280,height=800');
+  if(!win){alert('A janela foi bloqueada pelo navegador. Permita pop-ups e clique novamente.');}
+};
 
 function _renderTplPergunta(bloco,ci,perg,pi){
   const tplVar=_tplBlocoVar(bloco);
@@ -30393,20 +30448,19 @@ function _renderTplPergunta(bloco,ci,perg,pi){
   const itens=perg.itens||[];
   const pergKey=`${ci}-${pi}`;
   const pergOpen=_tplOpen[bloco].perguntas.has(pergKey);
-  let html=`<div style="margin-bottom:10px;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden">
-    <div style="display:flex;align-items:flex-start;gap:8px;padding:9px 12px;background:var(--bg3)">
-      <span onclick="tplTogglePerg('${bloco}','${pergKey}')" style="font-size:12px;cursor:pointer;padding:6px 5px;border-radius:4px;flex-shrink:0" title="Expandir/recolher">${pergOpen?'▼':'▶'}</span>
-      <span style="font-size:12px;font-weight:700;color:var(--t2);white-space:nowrap;padding-top:8px">Pergunta ${pi+1} —</span>
-      <textarea id="${idPrefix}-hdr-perg-${pergKey}" placeholder="Título da pergunta (opcional)"
+  // Header inteiro clicável → toggle (excluindo input/textarea/button)
+  const hdrToggle=`onclick="if(!event.target.closest('input,textarea,button'))tplTogglePerg('${bloco}','${pergKey}')"`;
+  let html=`<div class="tpl-perg${pergOpen?' open':''}">
+    <div class="tpl-perg-head" ${hdrToggle}>
+      <span class="tpl-perg-caret">▶</span>
+      <span class="tpl-perg-num">P${pi+1}</span>
+      <textarea id="${idPrefix}-hdr-perg-${pergKey}" class="tpl-perg-input" placeholder="Título da pergunta (opcional)"
         oninput="${tplVar}.casos[${ci}].perguntas[${pi}].titulo=this.value"
         onblur="autoSaveCkTemplate()"
-        onclick="event.stopPropagation()"
-        rows="5"
-        style="flex:1;border:1px solid var(--border);background:var(--bg);font-family:inherit;font-size:13px;font-weight:600;outline:none;color:var(--text);min-width:0;line-height:1.5;resize:vertical;padding:8px 10px;border-radius:6px;min-height:110px;text-align:justify">${(perg.titulo||'').replace(/</g,'&lt;')}</textarea>
-      <span style="font-size:11px;color:var(--t2);white-space:nowrap;padding-top:8px">${itens.length} iten${itens.length!==1?'s':''}</span>
-      <button class="btn btn-d btn-sm" onclick="rmCkPergunta('${bloco}',${ci},${pi})" style="font-size:10px;align-self:flex-start;margin-top:4px">✕</button>
+        rows="4">${(perg.titulo||'').replace(/</g,'&lt;')}</textarea>
+      <button class="tpl-btn-action del" onclick="rmCkPergunta('${bloco}',${ci},${pi})" style="align-self:flex-start;margin-top:6px;padding:5px 8px" title="Remover pergunta">✕</button>
     </div>
-    <div id="${idPrefix}-perg-${pergKey}" style="display:${pergOpen?'block':'none'};padding:12px 14px">
+    <div id="${idPrefix}-perg-${pergKey}" class="tpl-perg-body" style="display:${pergOpen?'block':'none'}">
       ${_renderTplImagensCk(perg.perguntaImagens||[],bloco,ci,pi)}
       <div style="margin-bottom:10px;border:1px dashed var(--border);border-radius:var(--rs);overflow:hidden">
         <button type="button" onclick="const b=this.nextElementSibling;const op=b.style.display==='none'||!b.style.display;b.style.display=op?'block':'none';this.querySelector('.tpl-paste-arr').textContent=op?'▼':'▶';if(op){setTimeout(()=>b.querySelector('textarea')?.focus(),50);}" style="display:flex;align-items:center;gap:8px;width:100%;background:var(--bg3);border:none;padding:8px 12px;cursor:pointer;font-size:11.5px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;text-align:left;font-family:inherit">
