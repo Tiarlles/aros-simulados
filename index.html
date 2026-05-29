@@ -10720,6 +10720,7 @@ function _processRoute(){
   if(location.hash==='#tea')return goMural('tea');
   if(location.hash==='#mes')return goMural('mes');
   if(location.hash==='#admin'||location.hash==='#coord')return _revealCoordTab();
+  if(location.hash==='#simulados'||location.hash==='#aluno')return switchView('aluno');
   if(location.hash==='#home'||location.hash==='')return goHome();
 }
 window.addEventListener('hashchange',_processRoute);
