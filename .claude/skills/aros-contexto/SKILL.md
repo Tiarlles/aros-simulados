@@ -1739,11 +1739,23 @@ Sessão maratona de evolução do Sistema de Recursos. Tudo entregue + deploy no
 - 🗑️ continua à direita do card
 
 **Visão Coord — lista de questões dentro da prova:**
-- Cards de questão são **dropdowns** (chevron). Body expandido contém o form de edição completo + sugestões. Estado de expansão persistido em `S.recursos._questaoExpanded` (Set) — sobrevive a re-render.
+- Cards de questão são **dropdowns** (chevron). Body expandido contém o form de edição completo + sugestões. Estado de expansão persistido em `S.recursos._questaoExpanded` (Set) — sobrevive a re-render. **Ao clicar "← Voltar pra Provas" (`recVoltarProvas`), o Set é limpo + filtros e busca resetados** — ao reentrar todos os cards voltam fechados.
 - **Drag-and-drop pra reordenar**: cada card é `draggable="true"` com handle ⠿. Drop renumera todas as afetadas em batch (até 400 ops por commit). Numeração derivada da posição.
-- **Filtros no topo**: TODAS / 📷 IMG PENDENTE / 🎯 GABARITO PENDENTE. Cada filtro só aparece se houver pelo menos 1 questão matching. Cor temática (laranja/amarelo).
-- Linha do card mostra: status badge (cor por parecer) + IMG PENDENTE (com **✕** discreto pra desmarcar falso positivo via `iqDescartarImgPendente`) + gabarito atual + ações.
-- **Ações na linha** (ordem): ✓ Validar gabarito (verde, com texto) · 💡 Sugerir recurso (laranja, com texto) · 🗑️ (sem 👁 Visualizar — redundante com o dropdown).
+- **Filtros no topo**: TODAS / 📷 COM IMG (verde) / 📷 IMG PENDENTE / 🎯 GABARITO PENDENTE. Cada filtro só aparece se houver pelo menos 1 questão matching. Cor temática (verde/laranja/amarelo).
+- **Barra de busca** acima dos filtros: input arredondado com 🔍 + ✕ pra limpar. Filtra por **ID Anest** (substring case-insensitive em `q.idExterno`). State em `S.recursos.questoesSearch`. Foco é restaurado após cada keystroke pra não perder a digitação durante o re-render. Funciona combinada com qualquer filtro de chip.
+- Linha do card mostra (ordem): chip **ID ANT2614** (accent, antes do status, só se tiver `idExterno`) + status badge (cor por parecer) + 📷 IMG (verde — questão tem `<img>` no enunciado ou `imagemUrl` legacy) + 📷 IMG PENDENTE (com **✕** discreto pra desmarcar falso positivo via `iqDescartarImgPendente`) + gabarito atual + ações.
+- **Ações na linha** (ordem): 🎤/⏳/✓ Comentário (3 estados, ver bloco abaixo) · ✓ Validar gabarito (verde, com texto) · 💡 Sugerir recurso (laranja, com texto) · 🗑️ (sem 👁 Visualizar — redundante com o dropdown).
+
+**Workflow de comentário da questão (entrega 2026-05-29):**
+- Campos novos no doc `provas/{provaId}/questoes/{qId}`: `comentarioAssumidoPor` (string nome), `comentarioAssumidoEm` (ISO), `comentarioFinalizado` (bool), `comentarioFinalizadoPor`/`comentarioFinalizadoEm` (auditoria).
+- Botão `_recComentarioBtn(q)` tem 3 estados:
+  - **🎤 ASSUMIR COMENTÁRIO** (azul) quando nada está setado → clique chama `assumirComentario(qId)`, grava direto sem modal, toast "🎤 Você assumiu...".
+  - **⏳ COMENTÁRIO EM ANDAMENTO · Nome** (âmbar) quando `comentarioAssumidoPor` setado e não finalizado → clique chama `abrirAssumirComentario(qId)`. Modal via `arosConfirm`: se for outro prof, pergunta "está sendo comentada por X desde Y. Quer assumir o lugar?"; se for o mesmo prof, oferece **🔓 Liberar** pra outro pegar.
+  - **✓ QUESTÃO COMENTADA** (badge verde, não clicável) quando `validada || comentarioFinalizado`.
+- **Dois gatilhos pra estado final "QUESTÃO COMENTADA"**:
+  1. `validarGabarito(qId)` agora seta `validada:true` **E** `comentarioFinalizado:true` no mesmo write (auditoria via `comentarioFinalizadoPor/Em`).
+  2. `salvarParecer` em modo `isSugerir` → após salvar com sucesso, dispara `arosConfirm` com título "A questão foi comentada no Laravel??" e `message:''` (corpo vazio, intencional). Confirm seta `comentarioFinalizado:true`; cancelar segue fluxo normal sem alterar.
+- Cache de questões da prova é invalidado (`delete S.recursos.questoesCache[provaId]`) após cada write desse fluxo pra UI refletir imediatamente.
 
 **Form inline da questão (dentro do dropdown):**
 - Modo `'estruturado'` é o ÚNICO mode existente — radio "Bloco único" removido. Pareces antigos como `'bloco'`/`'vf'` renderizam compat como bloco/estruturado.
@@ -1774,8 +1786,18 @@ Sessão maratona de evolução do Sistema de Recursos. Tudo entregue + deploy no
 - **ME agora usa A-D** (igual TEA/TSA). `_letrasPorTipo(tipo)` retorna `['A','B','C','D']` pra qualquer tipo. Parser de gabarito também restringido a A-D.
 
 **Importação (3 fluxos refeitos):**
-- Botão único **"📥 Importar questões ▾"** com dropdown: "📋 Colando conteúdo (Ctrl+V)" e "📄 Importar PDF".
+- Botão único **"📥 Importar questões ▾"** com dropdown: "📋 Colando conteúdo (Ctrl+V)", "📄 Importar PDF" e **"🧩 Importar JSON"** (3ª opção entregue 2026-05-29). Subtítulo do botão: "PDF, JSON ou colar texto".
 - Botão único **"🎯 Importar gabarito ▾"** com dropdown análogo (focar textarea OU disparar file picker).
+
+**Importação JSON (lote estruturado com ID Anest + imagens base64):**
+- Modal `modal-import-json` (cor `#22c55e`, padrão visual `.mim-md`). Input `accept="application/json,.json"` + textarea pra colar + preview lado-a-lado.
+- Schema esperado: array de `{id, enunciado, enunciado_html?, alternativas:[{letra,texto}], gabarito}`. `id` (numérico ou string) vira **`idExterno`** (ID Anest). `numero` é gerado pela ordem do array (1..N).
+- Parser `_parseImportJson(texto)` retorna `{questoes, erro}`. Cada questão parsed tem campos extras temporários `enunciadoHtml` e `imgCount` (consumidos pelo upload).
+- **Upload de imagens base64**: `_uploadJsonImages(provaId, questoes, onProgress)` varre `<img src="data:image/...">` em cada `enunciadoHtml`, faz `fetch(dataUrl).blob()` e sobe pra Storage em `provas/{provaId}/import-{ts}/q{n}_img{j}.{ext}` via `window._fbStorage.uploadBytes`. Substitui src pela `getDownloadURL`. Falha por imagem: remove o src (não persiste base64 quebrado).
+- Após upload, aplica `_gabSanitize` no HTML final → atribui a `q.enunciado` (modelo moderno: imagem inline no enunciado HTML). Limpa `enunciadoHtml`/`imgCount` antes de salvar.
+- `_importarQuestoes` ganhou propagação opcional: `if(q.idExterno)payload.idExterno=q.idExterno` — só seta quando vier preenchido, então fluxos PDF/texto continuam intactos (não zeram idExterno de questões existentes em substituir).
+- Preview mostra: número, chip ID/⚠️ SEM ID, chip gabarito, contagem de alts, 📷 N img se houver. Cabeçalho do count agrega total de imagens detectadas.
+- Toast final inclui imagens enviadas: "N substituídas + M novas + K imagens enviadas".
 - **Modal de Importar Bloco** renomeado pra "📋 Importar questões colando o texto". Regras de detecção viradas lista bullet legível.
 - **Parser de PDF unificado** — independe do tipo da prova. Sai sempre como `modo:'estruturado'`. Gabarito vem por fluxo separado.
 - **Importação de gabarito é standalone** (`modal-import-gabarito`): PDF ou texto colado (`1-A`, `1) A`, `Questão 1: B`, etc.). Parser robusto (`_parseGabaritoPdf`) com Y-bucket tolerância 3.5px + X-sort + multi-padrão regex + fallback tabular.

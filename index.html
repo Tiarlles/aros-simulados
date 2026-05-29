@@ -6540,6 +6540,68 @@ body.pro-rt-fs-on{overflow:hidden}
   </div>
 </div>
 
+<!-- ══ MODAL: Importar questões via JSON ══ -->
+<div class="mo hidden" id="modal-import-json" data-no-backdrop-close>
+  <div class="md mim-md" style="max-width:920px;--mim-cor:#22c55e">
+    <div class="mh mim-mh">
+      <div>
+        <div class="mim-eyebrow">Importação · JSON</div>
+        <div class="m-title mim-title">Importar questões em lote (JSON)</div>
+        <div class="m-sub mim-sub">Envie o arquivo <code>.json</code> ou cole o conteúdo. O <strong>ID Anest</strong> de cada questão é lido automaticamente do campo <code>id</code>.</div>
+      </div>
+      <button class="mim-close" onclick="CM('modal-import-json')">✕</button>
+    </div>
+    <div class="mim-body">
+      <div class="mim-section">
+        <div class="mim-section-label">Arquivo JSON <span class="mim-opt-tag">opcional</span></div>
+        <div class="mim-pdf-drop">
+          <div class="mim-pdf-icon">🧩</div>
+          <div class="mim-pdf-info">
+            <input type="file" id="mij-arquivo" accept="application/json,.json" style="display:none" onchange="mijLerArquivo(event)"/>
+            <button type="button" class="mim-pdf-btn" onclick="document.getElementById('mij-arquivo').click()">🧩 Escolher JSON</button>
+            <div id="mij-status" class="import-status"><div class="imp-row"><span class="imp-msg mim-pdf-hint">Nenhum arquivo selecionado.</span></div><div class="imp-bar"><div class="imp-bar-fill"></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="mim-grid-2">
+        <div>
+          <div class="mim-section-label">Conteúdo JSON <span class="mim-opt-tag">edite se precisar</span><span class="mim-section-label-r" id="mij-count">0 questões detectadas</span></div>
+          <textarea id="mij-texto" class="mim-textarea" oninput="mijPreview()" style="min-height:400px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:12px" placeholder='[
+  {
+    "id": 52108,
+    "enunciado": "...",
+    "alternativas": [
+      { "letra": "A", "texto": "..." },
+      { "letra": "B", "texto": "..." },
+      ...
+    ],
+    "gabarito": "D"
+  },
+  ...
+]'></textarea>
+        </div>
+        <div>
+          <div class="mim-section-label">Pré-visualização</div>
+          <div id="mij-preview" class="mim-preview-box" style="min-height:400px;max-height:480px"></div>
+        </div>
+      </div>
+      <div class="mim-info-box">
+        <div class="mim-info-title">📌 Formato esperado</div>
+        <ul>
+          <li>Array de objetos. Cada objeto tem: <code>id</code> (vira ID Anest), <code>enunciado</code>, <code>alternativas</code> (com <code>letra</code> + <code>texto</code>) e <code>gabarito</code> (A–E).</li>
+          <li>O número da questão dentro da prova é gerado pela ordem do array (1, 2, 3...).</li>
+          <li>Campos extras como <code>enunciado_html</code> são ignorados — usamos o <code>enunciado</code> em texto puro.</li>
+        </ul>
+      </div>
+      <div id="mij-err" class="al al-e hidden" style="margin-top:10px;border-radius:10px"></div>
+    </div>
+    <div class="mim-foot">
+      <button class="mim-foot-btn-cancel" onclick="CM('modal-import-json')">Cancelar</button>
+      <button class="mim-foot-btn-ok" id="mij-save-btn" onclick="confirmarImportJson()" disabled>✓ Importar todas</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODAL: Coord visualiza/assume/finaliza parecer ══ -->
 <div class="mo hidden" id="modal-parecer" data-no-backdrop-close>
   <div class="md" style="max-width:880px">
@@ -13164,7 +13226,7 @@ async function _renderRecQuestoesView(){
         <span class="rec-import-btn-icon">📥</span>
         <span class="rec-import-btn-text">
           <span class="rec-import-btn-title">Importar Questões</span>
-          <span class="rec-import-btn-sub">PDF ou colar texto</span>
+          <span class="rec-import-btn-sub">PDF, JSON ou colar texto</span>
         </span>
         <span class="rec-import-btn-chev">▾</span>
       </button>
@@ -13181,6 +13243,13 @@ async function _renderRecQuestoesView(){
           <span class="rec-import-menu-body">
             <span class="rec-import-menu-title">Importar PDF</span>
             <span class="rec-import-menu-sub">Extrai questões automaticamente de um PDF</span>
+          </span>
+        </button>
+        <button class="rec-import-menu-opt" onclick="recImportMenuPick('json')">
+          <span class="rec-import-menu-icon">🧩</span>
+          <span class="rec-import-menu-body">
+            <span class="rec-import-menu-title">Importar JSON</span>
+            <span class="rec-import-menu-sub">Lote estruturado · traz o ID Anest automaticamente</span>
           </span>
         </button>
       </div>
@@ -13234,10 +13303,14 @@ async function _renderRecQuestoesView(){
     </div>`;
     return;
   }
+  // Detector central: questão tem imagem anexada (inline no enunciado HTML ou via imagemUrl legacy).
+  const _qTemImg=q=>/<img\b/i.test(q.enunciado||'')||!!q.imagemUrl;
   // Barra de filtros
   const filtroAtual=S.recursos.questoesFilter||'todas';
+  const buscaAtual=(S.recursos.questoesSearch||'').trim();
   const nImgPend=questoes.filter(q=>q.imagemPendente&&!q.imagemUrl).length;
   const nGabPend=questoes.filter(q=>!q.gabaritoOficial).length;
+  const nComImg=questoes.filter(_qTemImg).length;
   // Helper: lab+contagem opcional. corAtivo é a tonalidade quando o filtro está ON.
   const btnFiltro=(k,lab,n,corAtivo)=>{
     const ativo=filtroAtual===k;
@@ -13248,22 +13321,48 @@ async function _renderRecQuestoesView(){
   };
   const corImgPend={bg:'rgba(251,143,68,.15)',fg:'#fb8f44',bd:'rgba(251,143,68,.45)'};
   const corGabPend={bg:'rgba(210,153,34,.15)',fg:'#d29922',bd:'rgba(210,153,34,.45)'};
+  const corComImg={bg:'rgba(34,197,94,.15)',fg:'#22c55e',bd:'rgba(34,197,94,.45)'};
+  // Busca por ID Anest (idExterno) — input com clear button.
+  const buscaEsc=buscaAtual.replace(/"/g,'&quot;');
+  const barraBusca=`<div style="position:relative;margin-bottom:10px;max-width:360px">
+    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--t2);pointer-events:none">🔍</span>
+    <input id="rec-q-search" type="text" value="${buscaEsc}" oninput="recSetQSearch(this.value)" placeholder="Buscar por ID Anest (ex: ANT2614 ou 52108)" style="width:100%;padding:8px 32px 8px 34px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:12px;background:var(--bg2);border:1px solid var(--border);border-radius:999px;color:var(--t1);outline:none;letter-spacing:.4px"/>
+    ${buscaAtual?`<button onclick="recSetQSearch('')" title="Limpar busca" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--t2);font-size:14px;line-height:1;padding:4px 6px;border-radius:50%">✕</button>`:''}
+  </div>`;
   const barraFiltros=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
     ${btnFiltro('todas','TODAS',questoes.length)}
+    ${nComImg?btnFiltro('com-img','📷 COM IMG',nComImg,corComImg):''}
     ${nImgPend?btnFiltro('img-pend','📷 IMG PENDENTE',nImgPend,corImgPend):''}
     ${nGabPend?btnFiltro('gab-pend','🎯 GABARITO PENDENTE',nGabPend,corGabPend):''}
   </div>`;
-  // Aplica filtro
+  // Aplica filtro de chip
   let questoesFiltradas=questoes;
   if(filtroAtual==='img-pend')questoesFiltradas=questoes.filter(q=>q.imagemPendente&&!q.imagemUrl);
   else if(filtroAtual==='gab-pend')questoesFiltradas=questoes.filter(q=>!q.gabaritoOficial);
-  el.innerHTML=header+barraFiltros+(questoesFiltradas.length?`<div style="display:grid;gap:8px">
+  else if(filtroAtual==='com-img')questoesFiltradas=questoes.filter(_qTemImg);
+  // Aplica busca por ID Anest (case-insensitive, substring)
+  if(buscaAtual){
+    const termo=buscaAtual.toUpperCase();
+    questoesFiltradas=questoesFiltradas.filter(q=>(q.idExterno||'').toUpperCase().includes(termo));
+  }
+  const vazioMsg=buscaAtual?`Nenhuma questão com ID Anest contendo "<strong>${buscaEsc}</strong>".`:'Nenhuma questão bate com esse filtro.';
+  el.innerHTML=header+barraBusca+barraFiltros+(questoesFiltradas.length?`<div style="display:grid;gap:8px">
     ${questoesFiltradas.map(q=>_recQuestaoCard(q,prova)).join('')}
-  </div>`:`<div style="text-align:center;padding:40px 20px;background:var(--bg2);border:1px dashed var(--border);border-radius:14px;color:var(--t2);font-size:13px">Nenhuma questão bate com esse filtro.</div>`);
+  </div>`:`<div style="text-align:center;padding:40px 20px;background:var(--bg2);border:1px dashed var(--border);border-radius:14px;color:var(--t2);font-size:13px">${vazioMsg}</div>`);
+  // Restaura foco no input de busca após re-render (perde foco no innerHTML).
+  if(buscaAtual){
+    const inp=document.getElementById('rec-q-search');
+    if(inp){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);}
+  }
 }
 
 window.recSetQFilter=(k)=>{
   S.recursos.questoesFilter=k;
+  renderRecProvas();
+};
+
+window.recSetQSearch=(v)=>{
+  S.recursos.questoesSearch=v||'';
   renderRecProvas();
 };
 
@@ -13276,6 +13375,9 @@ function _recQuestaoCard(q,prova){
   const status=_recStatusQuestao(q);
   const gabResumo=`<strong>${q.gabaritoOficial||'—'}</strong>`;
   const imgPendBadge=(q.imagemPendente&&!q.imagemUrl)?`<span style="display:inline-flex;align-items:center;gap:2px;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.5px;padding:2px 4px 2px 7px;border-radius:999px;background:rgba(251,143,68,.14);color:#fb8f44;border:1px solid rgba(251,143,68,.4)" title="O PDF importado tinha imagem nessa questão. Expanda pra anexar a imagem — ou clique no ✕ se for falso positivo">📷 IMG PENDENTE<button onclick="event.stopPropagation();iqDescartarImgPendente('${q.id}')" title="Não tem imagem nessa questão — desmarcar" style="background:none;border:none;cursor:pointer;color:inherit;font-size:11px;padding:0 4px;margin-left:1px;opacity:.65;line-height:1;border-radius:50%" onmouseover="this.style.opacity='1';this.style.background='rgba(248,81,73,.25)'" onmouseout="this.style.opacity='.65';this.style.background='none'">✕</button></span>`:'';
+  // Badge verde quando a questão JÁ tem imagem (inline no enunciado ou via imagemUrl legacy)
+  const temImg=/<img\b/i.test(q.enunciado||'')||!!q.imagemUrl;
+  const imgBadge=(temImg&&!(q.imagemPendente&&!q.imagemUrl))?`<span title="Questão tem imagem anexada no enunciado" style="display:inline-flex;align-items:center;gap:3px;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:999px;background:rgba(34,197,94,.14);color:#22c55e;border:1px solid rgba(34,197,94,.4)">📷 IMG</span>`:'';
   const sugBadge=''; // badge de sugestões removido — status já reflete o parecer atual
   const expanded=S.recursos._questaoExpanded.has(q.id);
   return`<div class="rec-q-card" draggable="true" data-qid="${q.id}" data-numero="${numero}" ondragstart="iqDragStart(event,'${q.id}')" ondragend="iqDragEnd(event)" ondragover="iqDragOver(event,'${q.id}')" ondragleave="iqDragLeave(event)" ondrop="iqDrop(event,'${q.id}')" style="background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${status.cor};border-radius:10px;overflow:hidden;transition:transform .15s,box-shadow .15s">
@@ -13283,12 +13385,15 @@ function _recQuestaoCard(q,prova){
       <span title="Arraste para reordenar" style="cursor:grab;color:var(--t2);font-size:16px;line-height:1;padding:4px 2px;user-select:none" onmousedown="event.stopPropagation()">⠿</span>
       <span style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;color:var(--accent);min-width:42px;text-align:center">${numero}</span>
       <div style="flex:1;min-width:200px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        ${q.idExterno?`<span title="ID Anest" style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.6px;padding:2px 7px;border-radius:999px;background:color-mix(in srgb, var(--accent) 10%, transparent);color:var(--accent);border:1px solid color-mix(in srgb, var(--accent) 28%, transparent)">ID ${q.idExterno.replace(/</g,'&lt;')}</span>`:''}
         <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:999px;background:${status.bg};color:${status.cor};border:1px solid ${status.bd}">● ${status.label}</span>
         ${sugBadge}
+        ${imgBadge}
         ${imgPendBadge}
         <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--t2)">Gabarito: ${gabResumo}</span>
       </div>
       <div onclick="event.stopPropagation()" style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+        ${_recComentarioBtn(q)}
         ${!validada&&!_hasParecerFinalizado(q)?`<button class="btn btn-s btn-sm" onclick="validarGabarito('${q.id}')" title="Marcar como concordo com o gabarito oficial" style="background:var(--gl);color:var(--green);border-color:rgba(63,185,80,.3);font-size:11px;padding:4px 10px;font-weight:600">✓ Validar gabarito</button>`:''}
         <button class="btn btn-s btn-sm" onclick="abrirSugerirRecurso('${q.id}')" title="Cadastrar parecer proativo sem precisar de contestação do aluno" style="background:rgba(251,143,68,.12);color:#fb8f44;border-color:rgba(251,143,68,.35);font-size:11px;padding:4px 10px;font-weight:600">💡 Sugerir recurso</button>
         <button class="btn btn-d btn-sm" onclick="deleteQuestaoDireto('${q.id}')" title="Apagar questão" style="font-size:11px;padding:4px 8px">🗑️</button>
@@ -13729,6 +13834,83 @@ function _recStatusQuestao(q){
   return{key:'em-analise-time',label:'EM ANÁLISE PELO TIME',cor:'#8b949e',bg:'rgba(139,148,158,.1)',bd:'rgba(139,148,158,.3)'};
 }
 
+// Botão "Assumir comentário" — 3 estados conforme campos da questão.
+function _recComentarioBtn(q){
+  const finalizado=!!q.comentarioFinalizado||!!q.validada;
+  if(finalizado){
+    const tip=q.comentarioAssumidoPor?`Comentado por ${q.comentarioAssumidoPor}`:'Questão comentada';
+    return`<span title="${tip.replace(/"/g,'&quot;')}" style="display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.3px;padding:4px 10px;border-radius:6px;background:var(--gl);color:var(--green);border:1px solid rgba(63,185,80,.3)">✓ QUESTÃO COMENTADA</span>`;
+  }
+  if(q.comentarioAssumidoPor){
+    const nomeEsc=String(q.comentarioAssumidoPor).replace(/"/g,'&quot;').replace(/</g,'&lt;');
+    return`<button class="btn btn-s btn-sm" onclick="abrirAssumirComentario('${q.id}')" title="Clique para assumir o lugar de ${nomeEsc}" style="background:rgba(210,153,34,.14);color:#d29922;border-color:rgba(210,153,34,.4);font-size:11px;padding:4px 10px;font-weight:600">⏳ COMENTÁRIO EM ANDAMENTO · ${nomeEsc}</button>`;
+  }
+  return`<button class="btn btn-s btn-sm" onclick="assumirComentario('${q.id}')" title="Assumir o comentário desta questão" style="background:rgba(47,129,247,.12);color:var(--accent);border-color:rgba(47,129,247,.35);font-size:11px;padding:4px 10px;font-weight:600">🎤 ASSUMIR COMENTÁRIO</button>`;
+}
+
+// Assume direto: marca a questão como sendo comentada pelo prof atual.
+window.assumirComentario=async(qId)=>{
+  const provaId=S.recursos.curProvaId;if(!provaId)return;
+  const profNome=S.currentUser?.nome||S.currentUser?.username||S.currentUser?.email||'Professor';
+  const nowIso=new Date().toISOString();
+  try{
+    await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{
+      comentarioAssumidoPor:profNome,comentarioAssumidoEm:nowIso,updatedAt:nowIso
+    },{merge:true});
+  }catch(e){console.error('assumirComentario:',e);alert('Erro: '+(e.code||e.message));return;}
+  if(S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
+  arosToast('🎤 Você assumiu o comentário desta questão','success',2800);
+  await renderRecProvas();
+};
+
+// Modal pra outro prof assumir o lugar de quem já estava comentando.
+window.abrirAssumirComentario=async(qId)=>{
+  const provaId=S.recursos.curProvaId;if(!provaId)return;
+  const lista=S.recursos.questoesCache[provaId]||await loadRecQuestoes(provaId);
+  const q=lista.find(x=>x.id===qId);if(!q)return;
+  const atual=q.comentarioAssumidoPor||'';
+  const profNome=S.currentUser?.nome||S.currentUser?.username||S.currentUser?.email||'Professor';
+  if(!atual){return assumirComentario(qId);}
+  const desde=q.comentarioAssumidoEm?` desde ${fDT(q.comentarioAssumidoEm)}`:'';
+  // Caso 1: o prof logado é o próprio que assumiu — oferece liberar
+  if(atual===profNome){
+    const ok=await arosConfirm({
+      title:'Liberar comentário?',
+      icon:'🔓',
+      message:`Você está com esta questão${desde}.\n\nQuer liberar pra outro professor assumir?`,
+      confirmLabel:'Liberar',
+      cancelLabel:'Continuar comigo'
+    });
+    if(!ok)return;
+    try{
+      await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{
+        comentarioAssumidoPor:'',comentarioAssumidoEm:'',updatedAt:new Date().toISOString()
+      },{merge:true});
+    }catch(e){console.error('liberarComentario:',e);alert('Erro: '+(e.code||e.message));return;}
+    if(S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
+    arosToast('🔓 Comentário liberado','success',2500);
+    await renderRecProvas();
+    return;
+  }
+  // Caso 2: outro prof — confirma takeover
+  const ok=await arosConfirm({
+    title:'Assumir o lugar?',
+    icon:'🎤',
+    message:`Esta questão está sendo comentada por ${atual}${desde}.\n\nVocê quer assumir o lugar dele(a)?`,
+    confirmLabel:'Sim, assumir',
+    cancelLabel:'Cancelar'
+  });
+  if(!ok)return;
+  try{
+    await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{
+      comentarioAssumidoPor:profNome,comentarioAssumidoEm:new Date().toISOString(),updatedAt:new Date().toISOString()
+    },{merge:true});
+  }catch(e){console.error('assumirComentarioOver:',e);alert('Erro: '+(e.code||e.message));return;}
+  if(S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
+  arosToast(`🎤 Você assumiu o comentário no lugar de ${atual}`,'success',3000);
+  await renderRecProvas();
+};
+
 window.openQuestaoModal=(id)=>{
   const provaId=S.recursos.curProvaId;
   if(!provaId){alert('Selecione uma prova primeiro.');return;}
@@ -13968,12 +14150,16 @@ window.validarGabarito=async(qId)=>{
   const provaId=S.recursos.curProvaId;if(!provaId)return;
   const profNome=S.currentUser?.nome||S.currentUser?.username||'Professor';
   if(!confirm('Marcar como "concordo com o gabarito oficial"?'))return;
+  const nowIso=new Date().toISOString();
   try{
     await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{
-      validada:true,validadaPor:profNome,validadaEm:new Date().toISOString(),
-      updatedAt:new Date().toISOString()
+      validada:true,validadaPor:profNome,validadaEm:nowIso,
+      // Validar gabarito também encerra o comentário (estado final da questão).
+      comentarioFinalizado:true,comentarioFinalizadoEm:nowIso,comentarioFinalizadoPor:profNome,
+      updatedAt:nowIso
     },{merge:true});
   }catch(e){console.error('validarGabarito:',e);alert('Erro: '+(e.code||e.message));return;}
+  if(S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
   await renderRecProvas();
 };
 
@@ -14100,6 +14286,7 @@ async function _importarQuestoes(provaId,questoes,modo,onProgress){
       imagemPendente:!!q.imagemPendente,
       updatedAt:nowIso,
     };
+    if(q.idExterno)payload.idExterno=q.idExterno;
     if(existente){
       // Substitui o conteúdo + reseta análise (pareceres antigos não se aplicam ao novo conteúdo)
       payload.validada=false;
@@ -14184,6 +14371,219 @@ window.confirmarImportBloco=async()=>{
   await renderRecProvas();
 };
 
+// === Importação JSON (lote estruturado com ID Anest) ===
+window.openImportJsonModal=()=>{
+  const provaId=S.recursos.curProvaId;
+  if(!provaId){arosAlert({title:'Atenção',message:'Selecione uma prova primeiro.',icon:'⚠️'});return;}
+  document.getElementById('mij-arquivo').value='';
+  document.getElementById('mij-texto').value='';
+  document.getElementById('mij-preview').innerHTML='<p style="color:var(--t2);font-style:italic;text-align:center;padding:20px">Escolha o arquivo .json ou cole o conteúdo pra ver a pré-visualização aqui...</p>';
+  document.getElementById('mij-count').textContent='0 questões detectadas';
+  document.getElementById('mij-err').classList.add('hidden');
+  document.getElementById('mij-save-btn').disabled=true;
+  _setImpStatus('mij-status','idle','Nenhum arquivo selecionado.',0);
+  document.getElementById('modal-import-json').classList.remove('hidden');
+};
+
+window.mijLerArquivo=(ev)=>{
+  const f=ev.target.files&&ev.target.files[0];if(!f)return;
+  _setImpStatus('mij-status','loading',`Lendo "${f.name}"...`,30);
+  const rd=new FileReader();
+  rd.onload=()=>{
+    document.getElementById('mij-texto').value=rd.result||'';
+    _setImpStatus('mij-status','success',`"${f.name}" carregado`,100);
+    mijPreview();
+  };
+  rd.onerror=()=>_setImpStatus('mij-status','err','Falha ao ler o arquivo.',0);
+  rd.readAsText(f);
+};
+
+// Parser: aceita array no formato {id, enunciado, enunciado_html, alternativas:[{letra,texto}], gabarito}.
+// Retorna {questoes, erro}. `numero` é gerado pela ordem do array (1..N).
+// Se `enunciado_html` vier preenchido, guarda em `enunciadoHtml` (uso interno) pra
+// processamento de imagens em base64 depois — no save final, o HTML substitui o texto puro.
+function _parseImportJson(texto){
+  if(!texto||!texto.trim())return{questoes:[],erro:''};
+  let data;
+  try{data=JSON.parse(texto);}
+  catch(e){return{questoes:[],erro:'JSON inválido: '+(e.message||e)};}
+  if(!Array.isArray(data))return{questoes:[],erro:'O JSON precisa ser um array de questões.'};
+  const out=[];
+  for(let i=0;i<data.length;i++){
+    const o=data[i]||{};
+    const enunciado=(typeof o.enunciado==='string'?o.enunciado:'').trim();
+    const enunciadoHtml=(typeof o.enunciado_html==='string'?o.enunciado_html:'').trim();
+    const gabaritoOficial=(typeof o.gabarito==='string'?o.gabarito:'').trim().toUpperCase().slice(0,1);
+    let alts=Array.isArray(o.alternativas)?o.alternativas:[];
+    alts=alts.map(a=>{
+      if(a&&typeof a==='object')return{letra:(a.letra||'').toString().trim().toUpperCase().slice(0,1),texto:(a.texto||'').toString().trim()};
+      if(typeof a==='string')return{letra:'',texto:a.trim()};
+      return{letra:'',texto:''};
+    }).filter(a=>a.texto);
+    const idExterno=(o.id!=null?String(o.id):'').trim().toUpperCase().slice(0,8);
+    // Conta imagens base64 no HTML (pra mostrar no preview)
+    let imgCount=0;
+    if(enunciadoHtml){
+      const m=enunciadoHtml.match(/<img[^>]+src=["']data:image\//gi);
+      imgCount=m?m.length:0;
+    }
+    out.push({
+      numero:i+1,
+      modo:'estruturado',
+      enunciado,
+      enunciadoHtml,
+      imgCount,
+      alternativas:alts,
+      gabaritoOficial:/^[A-E]$/.test(gabaritoOficial)?gabaritoOficial:'',
+      idExterno,
+    });
+  }
+  return{questoes:out,erro:''};
+}
+
+// Faz upload das imagens base64 do enunciadoHtml de cada questão para o Storage,
+// substitui o src pela URL pública e atribui o resultado a q.enunciado (sanitizado).
+// Retorna o total de imagens enviadas com sucesso.
+async function _uploadJsonImages(provaId,questoes,onProgress){
+  const batchId='import-'+Date.now();
+  let total=0;
+  const trabalhos=[];
+  for(const q of questoes){
+    if(!q.enunciadoHtml)continue;
+    const tmp=document.createElement('div');tmp.innerHTML=q.enunciadoHtml;
+    const imgs=[...tmp.querySelectorAll('img')].filter(i=>/^data:image\//i.test(i.getAttribute('src')||''));
+    if(imgs.length)trabalhos.push({q,tmp,imgs});
+    total+=imgs.length;
+  }
+  let done=0;
+  for(const t of trabalhos){
+    let j=0;
+    for(const img of t.imgs){
+      j++;
+      const src=img.getAttribute('src')||'';
+      try{
+        const blob=await(await fetch(src)).blob();
+        const ext=((blob.type||'image/png').split('/')[1]||'png').replace(/[^a-z0-9]/gi,'').slice(0,5)||'png';
+        const path=`provas/${provaId}/${batchId}/q${t.q.numero}_img${j}.${ext}`;
+        const r=window._fbStorage.ref(window._fbStorage.storage,path);
+        await window._fbStorage.uploadBytes(r,blob);
+        const url=await window._fbStorage.getDownloadURL(r);
+        img.setAttribute('src',url);
+        if(!img.getAttribute('class'))img.setAttribute('class','questao-img');
+      }catch(e){
+        console.error('uploadJsonImages q'+t.q.numero+' img'+j+':',e);
+        // Falha: tira o src inválido pra não persistir base64 enorme nem URL quebrada
+        img.removeAttribute('src');
+      }
+      done++;
+      if(onProgress)onProgress(`Enviando imagens · ${done}/${total}`);
+    }
+  }
+  // Aplica o HTML final (com URLs do Storage) em quem tem enunciadoHtml — mesmo sem imgs,
+  // o HTML do JSON traz formatação útil (parágrafos, negritos) que vale preservar.
+  for(const q of questoes){
+    if(q.enunciadoHtml){
+      const tmp=document.createElement('div');
+      // Se já passamos pelo loop acima, queremos o HTML pós-substituição. Refaz lookup:
+      const t=trabalhos.find(x=>x.q===q);
+      tmp.innerHTML=t?t.tmp.innerHTML:q.enunciadoHtml;
+      q.enunciado=_gabSanitize(tmp.innerHTML);
+    }
+    delete q.enunciadoHtml;
+    delete q.imgCount;
+  }
+  return total;
+}
+
+window.mijPreview=()=>{
+  const txt=document.getElementById('mij-texto').value||'';
+  const {questoes,erro}=_parseImportJson(txt);
+  const err=document.getElementById('mij-err');
+  const cont=document.getElementById('mij-count');
+  const pv=document.getElementById('mij-preview');
+  const btn=document.getElementById('mij-save-btn');
+  if(erro){
+    err.textContent='⚠️ '+erro;err.classList.remove('hidden');
+    cont.textContent='0 questões detectadas';
+    pv.innerHTML='<p style="color:var(--t2);font-style:italic;text-align:center;padding:20px">Corrija o JSON pra ver a pré-visualização.</p>';
+    btn.disabled=true;return;
+  }
+  err.classList.add('hidden');
+  cont.textContent=`${questoes.length} ${questoes.length===1?'questão detectada':'questões detectadas'}`;
+  btn.disabled=questoes.length===0;
+  if(!questoes.length){
+    pv.innerHTML='<p style="color:var(--t2);font-style:italic;text-align:center;padding:20px">Nenhuma questão detectada ainda.</p>';
+    return;
+  }
+  const totalImgs=questoes.reduce((s,q)=>s+(q.imgCount||0),0);
+  if(totalImgs)cont.textContent+=` · ${totalImgs} imagem${totalImgs>1?'ns':''}`;
+  pv.innerHTML=questoes.slice(0,20).map(q=>{
+    const semGab=!q.gabaritoOficial;
+    const semId=!q.idExterno;
+    return`<div style="margin-bottom:10px;padding:8px 10px;background:var(--bg);border:1px solid ${(semGab||semId)?'rgba(210,153,34,.4)':'var(--border)'};border-radius:6px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap">
+        <strong style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">Q${q.numero}</strong>
+        ${q.idExterno?`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);font-weight:700">ID ${q.idExterno}</span>`:`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--yellow);font-weight:700">⚠️ SEM ID</span>`}
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:${semGab?'var(--yellow)':'var(--green)'};font-weight:700">${semGab?'⚠️ SEM GAB':'✓ GAB '+q.gabaritoOficial}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)">${q.alternativas.length} alts</span>
+        ${q.imgCount?`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#22c55e;font-weight:700">📷 ${q.imgCount} img</span>`:''}
+      </div>
+      <div style="font-size:11.5px;color:var(--t2);line-height:1.4">${(q.enunciado||'').slice(0,140).replace(/</g,'&lt;')}${(q.enunciado||'').length>140?'...':''}</div>
+    </div>`;
+  }).join('')+(questoes.length>20?`<div style="text-align:center;color:var(--t2);font-size:11px;padding:8px">+${questoes.length-20} questões adicionais...</div>`:'');
+};
+
+window.confirmarImportJson=async()=>{
+  const provaId=S.recursos.curProvaId;if(!provaId)return;
+  const {questoes,erro}=_parseImportJson(document.getElementById('mij-texto').value||'');
+  const err=document.getElementById('mij-err');
+  if(erro){err.textContent='⚠️ '+erro;err.classList.remove('hidden');return;}
+  if(!questoes.length){err.textContent='Nenhuma questão detectada.';err.classList.remove('hidden');return;}
+  err.classList.add('hidden');
+  const escolha=await arosImportarChoice({total:questoes.length,label:'questões'});
+  if(!escolha)return;
+  if(escolha==='substituir'){
+    const existentes=S.recursos.questoesCache[provaId]||await loadRecQuestoes(provaId);
+    const existentesByNum=new Map(existentes.map(q=>[Number(q.numero)||0,q]));
+    const importNums=questoes.map(q=>Number(q.numero)||0);
+    const matchNums=importNums.filter(n=>existentesByNum.has(n));
+    const novosNums=importNums.filter(n=>!existentesByNum.has(n));
+    let msg='';
+    if(matchNums.length)msg+=`Vai SUBSTITUIR o conteúdo de ${matchNums.length} questão${matchNums.length>1?'ões':''} (número${matchNums.length>1?'s':''}: ${matchNums.sort((a,b)=>a-b).join(', ')}).\n\n⚠️ Pareceres, sugestões e validação dessas questões serão reiniciados.`;
+    if(novosNums.length){if(msg)msg+='\n\n';msg+=`Vai criar ${novosNums.length} questão${novosNums.length>1?'ões':''} nova${novosNums.length>1?'s':''} (número${novosNums.length>1?'s':''}: ${novosNums.sort((a,b)=>a-b).join(', ')}).`;}
+    msg+=`\n\nAs demais ${existentes.length-matchNums.length} questões da prova ficarão intactas.`;
+    const ok=await arosConfirm({
+      title:matchNums.length?'Confirmar substituição':'Confirmar importação',
+      icon:matchNums.length?'⚠️':'📥',
+      danger:!!matchNums.length,
+      message:msg,
+      confirmLabel:matchNums.length?'⚠️ Sim, substituir':'📥 Importar',
+      cancelLabel:'Cancelar'
+    });
+    if(!ok)return;
+  }
+  const btn=document.getElementById('mij-save-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Importando...';}
+  let resultado={reps:0,novas:questoes.length};
+  let imgsEnviadas=0;
+  try{
+    imgsEnviadas=await _uploadJsonImages(provaId,questoes,t=>{if(btn)btn.textContent='⏳ '+t;});
+    resultado=await _importarQuestoes(provaId,questoes,escolha,t=>{if(btn)btn.textContent='⏳ '+t;});
+  }catch(e){
+    console.error('importJson:',e);
+    if(btn){btn.disabled=false;btn.textContent='✓ Importar todas';}
+    err.innerHTML=`❌ Erro: <strong>${e.code||e.message}</strong>`;err.classList.remove('hidden');return;
+  }
+  CM('modal-import-json');
+  if(S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
+  const parts=[];
+  if(resultado.reps)parts.push(`${resultado.reps} substituída${resultado.reps>1?'s':''}`);
+  if(resultado.novas)parts.push(`${resultado.novas} nova${resultado.novas>1?'s':''}`);
+  if(imgsEnviadas)parts.push(`${imgsEnviadas} imagem${imgsEnviadas>1?'ns':''} enviada${imgsEnviadas>1?'s':''}`);
+  arosToast(`✅ Importação concluída: ${parts.join(' + ')}`,'success',3500);
+  await renderRecProvas();
+};
+
 // Dropdown unificado "Importar questões" (bloco ou PDF)
 window.recToggleImportMenu=(ev)=>{
   ev&&ev.stopPropagation();
@@ -14209,6 +14609,7 @@ window.recImportMenuPick=(kind)=>{
   const m=document.getElementById('rec-import-q-menu');if(m)m.classList.add('hidden');
   if(kind==='bloco')openImportBlocoModal();
   else if(kind==='pdf')openImportPdfModal();
+  else if(kind==='json')openImportJsonModal();
 };
 
 // Dropdown unificado "Importar gabarito" (colar ou PDF)
@@ -15259,6 +15660,10 @@ window.recAbrirQuestoes=async(provaId)=>{
 window.recVoltarProvas=async()=>{
   S.recursos.curProvaId=null;
   S.recursos.viewMode='provas';
+  // Reset: ao sair da prova, cards fechados, filtro em "TODAS" e busca vazia.
+  if(S.recursos._questaoExpanded)S.recursos._questaoExpanded.clear();
+  S.recursos.questoesFilter='todas';
+  S.recursos.questoesSearch='';
   await renderRecProvas();
 };
 
@@ -15753,6 +16158,32 @@ window.salvarParecer=async()=>{
   // Invalida cache da prova pra forçar reload — garante que status novo aparece imediatamente
   if(S.recursos.questoesCache&&S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
   arosToast('✓ Parecer salvo — status atualizado','success',2500);
+  // Após salvar uma SUGESTÃO, pergunta se a questão já foi comentada no sistema externo.
+  // Se Sim → marca comentarioFinalizado:true (badge "QUESTÃO COMENTADA" no card).
+  if(isSugerir){
+    const comentou=await arosConfirm({
+      title:'A questão foi comentada no Laravel??',
+      icon:'🎤',
+      message:'',
+      confirmLabel:'Sim, já comentei',
+      cancelLabel:'Ainda não'
+    });
+    if(comentou){
+      try{
+        await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{
+          comentarioFinalizado:true,
+          comentarioFinalizadoEm:nowIso,
+          comentarioFinalizadoPor:profNome,
+          updatedAt:new Date().toISOString()
+        },{merge:true});
+        if(S.recursos.questoesCache&&S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
+        arosToast('✓ Questão marcada como comentada','success',2500);
+      }catch(e){
+        console.error('marcarComentada após sugestão:',e);
+        arosToast('⚠️ Sugestão salva, mas não consegui marcar como comentada','warn',3500);
+      }
+    }
+  }
   // renderRecGestao roda em BACKGROUND (não bloqueia) — é pesado e estava travando a re-render da view de Provas
   if(typeof renderRecGestao==='function'){
     renderRecGestao().catch(e=>console.warn('renderRecGestao falhou:',e));
