@@ -800,6 +800,84 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 .rt-ed b,.rt-ed strong{font-weight:700}
 .rt-ed i,.rt-ed em{font-style:italic}
 .rt-ed u{text-decoration:underline}
+
+/* ════════════════════════════════════════════════════════════════════════
+ * Editor de slides — design Apple-like (2026-05-29)
+ * Cards com glass effect, position picker visual, sliders modernos
+ * ════════════════════════════════════════════════════════════════════════ */
+.sl-card{position:relative;border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,var(--bg2) 0%,color-mix(in srgb, var(--bg2) 96%, var(--bg)) 100%);overflow:hidden;transition:border-color .25s cubic-bezier(.4,0,.2,1),box-shadow .25s cubic-bezier(.4,0,.2,1),transform .15s}
+.sl-card:hover{border-color:color-mix(in srgb, var(--accent) 40%, var(--border));box-shadow:0 6px 24px -10px color-mix(in srgb, var(--accent) 35%, transparent)}
+.sl-card.open{border-color:var(--accent);box-shadow:0 12px 36px -14px color-mix(in srgb, var(--accent) 45%, transparent),0 0 0 1px var(--accent-dim) inset}
+.sl-card-head{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;user-select:none;background:linear-gradient(180deg,rgba(47,129,247,.04),transparent);transition:background .2s}
+.sl-card-head:hover{background:linear-gradient(180deg,rgba(47,129,247,.08),transparent)}
+.sl-caret{font-size:11px;color:var(--t2);transition:transform .25s cubic-bezier(.4,0,.2,1);display:inline-block;width:14px;flex-shrink:0;transform:rotate(0deg)}
+.sl-card.open .sl-caret{transform:rotate(90deg);color:var(--accent)}
+.sl-badge-num{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;color:var(--accent);background:var(--accent-dim);padding:4px 9px;border-radius:999px;letter-spacing:.6px;flex-shrink:0}
+.sl-badge-tipo{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;padding:4px 9px;border-radius:999px;flex-shrink:0;border:1px solid currentColor;background:color-mix(in srgb, currentColor 12%, transparent)}
+.sl-snippet{flex:1;min-width:0;font-size:12.5px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.sl-head-acts{display:flex;gap:5px;flex-shrink:0}
+.sl-head-acts button{background:var(--bg);border:1px solid var(--border);color:var(--t2);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:11px;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}
+.sl-head-acts button:hover{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+.sl-head-acts button:disabled{opacity:.3;cursor:not-allowed}
+.sl-head-acts button:disabled:hover{transform:none;background:var(--bg);border-color:var(--border);color:var(--t2)}
+.sl-head-acts button.del:hover{background:rgba(248,81,73,.12);border-color:#f85149;color:#f85149}
+.sl-card-body{padding:18px 20px 22px;border-top:1px solid var(--border);background:var(--bg);display:grid;grid-template-columns:1fr 280px;gap:20px}
+@media(max-width:880px){.sl-card-body{grid-template-columns:1fr}}
+.sl-fields{display:flex;flex-direction:column;gap:12px}
+.sl-side{display:flex;flex-direction:column;gap:14px}
+.sl-section-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--t2);margin-bottom:5px}
+/* Position picker: 5 mini-thumbnails representando o layout */
+.sl-pos-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.sl-pos-btn{position:relative;border:1.5px solid var(--border);background:var(--bg2);border-radius:9px;padding:8px 4px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .18s cubic-bezier(.4,0,.2,1);overflow:hidden}
+.sl-pos-btn:hover{border-color:color-mix(in srgb, var(--accent) 55%, var(--border));background:var(--accent-dim);transform:translateY(-1px)}
+.sl-pos-btn.on{border-color:var(--accent);background:linear-gradient(180deg,color-mix(in srgb, var(--accent) 14%, var(--bg2)),var(--bg2));box-shadow:0 4px 12px -4px color-mix(in srgb, var(--accent) 45%, transparent)}
+.sl-pos-btn.on::after{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent)}
+.sl-pos-thumb{width:36px;height:22px;background:#fff;border:1px solid var(--border);border-radius:3px;display:flex;padding:2px;gap:1px;overflow:hidden}
+.sl-pos-btn.on .sl-pos-thumb{border-color:var(--accent)}
+.sl-pos-thumb .ppt-text{background:#bbb;border-radius:1px;flex:1}
+.sl-pos-thumb .ppt-img{background:linear-gradient(135deg,var(--accent),var(--accent2,var(--accent)));border-radius:1px;flex:1}
+.sl-pos-btn.on .sl-pos-thumb .ppt-text{background:#999}
+/* Variantes — cada posição arruma o flex-direction e size do .ppt-img */
+.sl-pos-thumb.cima{flex-direction:column}
+.sl-pos-thumb.cima .ppt-img{flex:0 0 50%}
+.sl-pos-thumb.cima .ppt-text{flex:1}
+.sl-pos-thumb.baixo{flex-direction:column}
+.sl-pos-thumb.baixo .ppt-text{flex:1}
+.sl-pos-thumb.baixo .ppt-img{flex:0 0 50%}
+.sl-pos-thumb.esq{flex-direction:row}
+.sl-pos-thumb.esq .ppt-img{flex:0 0 45%}
+.sl-pos-thumb.esq .ppt-text{flex:1}
+.sl-pos-thumb.dir{flex-direction:row}
+.sl-pos-thumb.dir .ppt-text{flex:1}
+.sl-pos-thumb.dir .ppt-img{flex:0 0 45%}
+.sl-pos-thumb.grande{padding:1px}
+.sl-pos-thumb.grande .ppt-text{display:none}
+.sl-pos-thumb.grande .ppt-img{flex:1}
+.sl-pos-lbl{font-size:9.5px;font-weight:600;color:var(--t2);letter-spacing:.2px;line-height:1.1;text-align:center}
+.sl-pos-btn.on .sl-pos-lbl{color:var(--accent);font-weight:700}
+/* Slider moderno (range input) */
+.sl-slider-wrap{display:flex;flex-direction:column;gap:6px}
+.sl-slider-row{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:var(--t2);font-weight:600}
+.sl-slider-val{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11.5px;color:var(--accent);font-weight:700;min-width:36px;text-align:right}
+.sl-slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;background:var(--bg3);border-radius:999px;outline:none;cursor:pointer;transition:background .15s}
+.sl-slider:hover{background:color-mix(in srgb, var(--accent) 25%, var(--bg3))}
+.sl-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;background:linear-gradient(135deg,var(--accent),var(--accent2,var(--accent)));border:2px solid #fff;border-radius:50%;cursor:pointer;box-shadow:0 2px 8px color-mix(in srgb, var(--accent) 50%, transparent);transition:transform .12s,box-shadow .2s}
+.sl-slider::-webkit-slider-thumb:hover{transform:scale(1.15);box-shadow:0 4px 14px color-mix(in srgb, var(--accent) 65%, transparent)}
+.sl-slider::-moz-range-thumb{width:18px;height:18px;background:linear-gradient(135deg,var(--accent),var(--accent2,var(--accent)));border:2px solid #fff;border-radius:50%;cursor:pointer;box-shadow:0 2px 8px color-mix(in srgb, var(--accent) 50%, transparent)}
+/* Image upload/preview area */
+.sl-img-wrap{position:relative;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff;aspect-ratio:16/10}
+.sl-img-wrap img{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
+.sl-img-rm{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:11px;display:inline-flex;align-items:center;justify-content:center;transition:background .15s,transform .15s}
+.sl-img-rm:hover{background:#f85149;transform:scale(1.08)}
+.sl-img-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1.5px dashed var(--border);border-radius:10px;padding:24px 18px;cursor:pointer;background:var(--bg3);min-height:108px;transition:all .2s;text-align:center}
+.sl-img-drop:hover{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, var(--bg3))}
+.sl-img-drop:hover .sl-img-drop-icon{transform:scale(1.1)}
+.sl-img-drop-icon{font-size:26px;transition:transform .2s}
+.sl-img-drop-lbl{font-size:11.5px;color:var(--t2);line-height:1.4;font-weight:500}
+/* Header e toolbar do modal */
+.sl-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 14px;background:linear-gradient(180deg,var(--bg2),var(--bg));border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.sl-toolbar-counter{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;color:var(--accent);background:var(--accent-dim);padding:4px 10px;border-radius:999px;font-weight:700;letter-spacing:.4px}
+.sl-toolbar-sep{width:1px;height:20px;background:var(--border);margin:0 2px}
 .rt-wrap[data-empty="1"] .rt-ed{position:relative}
 .rt-wrap[data-empty="1"] .rt-ed:not(:focus):empty::before{content:attr(data-ph);color:var(--t2);opacity:.55;pointer-events:none}
 @keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 var(--accent-glow)}50%{box-shadow:0 0 0 6px transparent}}
@@ -7469,13 +7547,18 @@ body.pro-rt-fs-on{overflow:hidden}
     #slides-preview .slide-perg .ptxt{font-size:clamp(14px,1.3vw,22px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify}
     #slides-preview .slide-perg .pbody{display:flex;gap:28px;min-height:0;align-items:flex-start;margin-top:6px}
     #slides-preview .slide-perg .pbody.dir{flex-direction:row;flex:1 1 auto}
-    #slides-preview .slide-perg .pbody.baixo,#slides-preview .slide-perg .pbody.grande{flex-direction:column;flex:0 1 50vh;max-height:50vh;overflow:hidden;width:100%}
+    #slides-preview .slide-perg .pbody.esq{flex-direction:row;flex:1 1 auto}
+    #slides-preview .slide-perg .pbody.baixo,#slides-preview .slide-perg .pbody.cima,#slides-preview .slide-perg .pbody.grande{flex-direction:column;flex:0 1 calc(50vh * var(--img-size, 1));max-height:calc(50vh * var(--img-size, 1));overflow:hidden;width:100%}
     #slides-preview .slide-perg .ptext-col{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;overflow:hidden}
     #slides-preview .slide-perg .pimg-col{display:flex;align-items:center;justify-content:center;min-height:0}
-    #slides-preview .slide-perg .pbody.dir .pimg-col{flex:0 0 45%;max-width:45%;align-self:stretch}
-    #slides-preview .slide-perg .pbody.baixo .pimg-col,#slides-preview .slide-perg .pbody.grande .pimg-col{width:100%;flex:1;min-height:0}
+    #slides-preview .slide-perg .pbody.dir .pimg-col,#slides-preview .slide-perg .pbody.esq .pimg-col{flex:0 0 calc(45% * var(--img-size, 1));max-width:calc(45% * var(--img-size, 1));align-self:stretch}
+    #slides-preview .slide-perg .pbody.baixo .pimg-col,#slides-preview .slide-perg .pbody.cima .pimg-col,#slides-preview .slide-perg .pbody.grande .pimg-col{width:100%;flex:1;min-height:0}
     #slides-preview .slide-perg .pbody.grande .ptext-col{flex:0 0 auto}
     #slides-preview .slide-perg .pimg-col img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
+    /* textScale na preview do modal */
+    #slides-preview .slide-perg .pcaso{font-size:calc(clamp(16px,1.9vw,30px) * var(--txt-scale, 1))}
+    #slides-preview .slide-perg .penun-label,#slides-preview .slide-perg .pperg{font-size:calc(clamp(18px,1.8vw,26px) * var(--txt-scale, 1))}
+    #slides-preview .slide-perg .penun,#slides-preview .slide-perg .ptxt{font-size:calc(clamp(14px,1.3vw,22px) * var(--txt-scale, 1))}
     #slides-preview .sp-nav{height:52px;background:#f7f7f7;border-top:1px solid #e5e5e5;display:flex;align-items:center;justify-content:center;gap:10px}
     #slides-preview .sp-nav button{background:#fff;border:1px solid #ccc;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;color:#333;font-family:inherit}
     #slides-preview .sp-nav button:hover:not(:disabled){background:#eee}
@@ -7504,15 +7587,15 @@ body.pro-rt-fs-on{overflow:hidden}
       <button class="m-close" onclick="CM('modal-slides')">✕</button>
     </div>
     <div class="m-body">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+      <div class="sl-toolbar" style="margin-bottom:14px">
         <button class="btn btn-s btn-sm" onclick="slideAdd()">+ Adicionar slide</button>
         <button class="btn btn-s btn-sm" onclick="slidesRegerarPadrao()" title="Recria os slides a partir do enunciado e perguntas do caso">🔄 Regenerar padrão</button>
         <button class="btn btn-p btn-sm" onclick="previewSlides()" title="Veja como os slides serão exibidos ao aluno">👁 Pré-visualizar</button>
-        <span style="width:1px;height:20px;background:var(--border);margin:0 4px"></span>
+        <span class="sl-toolbar-sep"></span>
         <button class="btn btn-s btn-sm" onclick="expandAllSlides()" title="Abrir todos os slides" style="font-size:11px">⊞ Expandir todos</button>
         <button class="btn btn-s btn-sm" onclick="collapseAllSlides()" title="Fechar todos os slides" style="font-size:11px">⊟ Recolher todos</button>
         <span style="flex:1"></span>
-        <span id="msl-counter" style="font-size:12px;color:var(--t2)"></span>
+        <span class="sl-toolbar-counter" id="msl-counter">0 slides</span>
       </div>
       <div id="msl-list" style="display:flex;flex-direction:column;gap:14px;padding:4px 6px 4px 2px"></div>
     </div>
@@ -8035,15 +8118,21 @@ async function _initProjecao(simId,casoId){
     .slide-perg .ptxt{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(16px,1.5vw,24px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify}
     .slide-perg .pbody{display:flex;gap:32px;min-height:0;align-items:flex-start;margin-top:8px}
     .slide-perg .pbody.dir{flex-direction:row;flex:1 1 auto}
-    .slide-perg .pbody.baixo{flex-direction:column;flex:0 1 50vh;max-height:50vh;overflow:hidden;width:100%}
-    .slide-perg .pbody.grande{flex-direction:column;flex:0 1 50vh;max-height:50vh;overflow:hidden;width:100%}
+    .slide-perg .pbody.esq{flex-direction:row;flex:1 1 auto}
+    .slide-perg .pbody.baixo{flex-direction:column;flex:0 1 calc(50vh * var(--img-size, 1));max-height:calc(50vh * var(--img-size, 1));overflow:hidden;width:100%}
+    .slide-perg .pbody.cima{flex-direction:column;flex:0 1 calc(50vh * var(--img-size, 1));max-height:calc(50vh * var(--img-size, 1));overflow:hidden;width:100%}
+    .slide-perg .pbody.grande{flex-direction:column;flex:0 1 calc(50vh * var(--img-size, 1));max-height:calc(50vh * var(--img-size, 1));overflow:hidden;width:100%}
     .slide-perg .ptext-col{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0;overflow:hidden}
     .slide-perg .pimg-col{display:flex;align-items:center;justify-content:center;min-height:0}
-    .slide-perg .pbody.dir .pimg-col{flex:0 0 45%;max-width:45%;align-self:stretch}
-    .slide-perg .pbody.baixo .pimg-col{width:100%;flex:1;min-height:0}
+    .slide-perg .pbody.dir .pimg-col,.slide-perg .pbody.esq .pimg-col{flex:0 0 calc(45% * var(--img-size, 1));max-width:calc(45% * var(--img-size, 1));align-self:stretch}
+    .slide-perg .pbody.baixo .pimg-col,.slide-perg .pbody.cima .pimg-col{width:100%;flex:1;min-height:0}
     .slide-perg .pbody.grande .pimg-col{width:100%;flex:1;min-height:0}
     .slide-perg .pbody.grande .ptext-col{flex:0 0 auto}
     .slide-perg .pimg-col img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
+    /* textScale: multiplica todos os tamanhos de fonte por var(--txt-scale) */
+    .slide-perg .pcaso{font-size:calc(clamp(20px,2.25vw,36px) * var(--txt-scale, 1))}
+    .slide-perg .penun-label,.slide-perg .pperg{font-size:calc(clamp(20px,2vw,28px) * var(--txt-scale, 1))}
+    .slide-perg .penun,.slide-perg .ptxt{font-size:calc(clamp(16px,1.5vw,24px) * var(--txt-scale, 1))}
     .slide-imgpura{flex:1;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
     .slide-imgpura img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
   </style>
@@ -8845,6 +8934,11 @@ function _renderSlideHTML(s){
     </div>`;
   }
   const pos=(s.imagemPos||'baixo');
+  // Tamanho da imagem (20-100%, default 100). Texto (70-150%, default 100).
+  // Aplicados como CSS custom properties unitless (0.2 a 1.5) pra usar em calc().
+  const imgSize=Math.max(20,Math.min(100,parseInt(s.imagemSize)||100));
+  const txtScale=Math.max(70,Math.min(150,parseInt(s.textScale)||100));
+  const slideStyle=`--img-size:${(imgSize/100).toFixed(2)};--txt-scale:${(txtScale/100).toFixed(2)}`;
   const ct=_escHtml(s.casoTitulo||'');
   const en=_ensureHTML(s.enunciado||'');
   const pt=_escHtml(s.pergTitulo||'');
@@ -8852,9 +8946,9 @@ function _renderSlideHTML(s){
   const img=s.imagem?`<div class="pimg-col"><img src="${s.imagem}" alt=""/></div>`:'';
   const enunImg=s.enunciadoImagem?`<div class="penun-img"><img src="${s.enunciadoImagem}" alt=""/></div>`:'';
   const enunBlock=(en||s.enunciadoImagem)?`<div class="penun-label">Enunciado</div>${en?`<div class="penun">${en}</div>`:''}${enunImg}`:'';
-  // Em 'grande': imagem domina, texto fica compacto em cima
+  // 'grande': imagem ocupa o slide, texto compacto em cima
   if(pos==='grande'&&s.imagem){
-    return `<div class="slide-perg">
+    return `<div class="slide-perg" style="${slideStyle}">
       ${ct?`<div class="pcaso">${ct}</div>`:''}
       ${enunBlock}
       ${pt?`<div class="pperg">${pt}</div>`:''}
@@ -8864,7 +8958,7 @@ function _renderSlideHTML(s){
   }
   // 'direita': texto à esquerda, imagem à direita
   if(pos==='direita'&&s.imagem){
-    return `<div class="slide-perg">
+    return `<div class="slide-perg" style="${slideStyle}">
       ${ct?`<div class="pcaso">${ct}</div>`:''}
       <div class="pbody dir">
         <div class="ptext-col">
@@ -8876,8 +8970,32 @@ function _renderSlideHTML(s){
       </div>
     </div>`;
   }
+  // NOVO 'esquerda': imagem à esquerda, texto à direita
+  if(pos==='esquerda'&&s.imagem){
+    return `<div class="slide-perg" style="${slideStyle}">
+      ${ct?`<div class="pcaso">${ct}</div>`:''}
+      <div class="pbody esq">
+        ${img}
+        <div class="ptext-col">
+          ${enunBlock}
+          ${pt?`<div class="pperg">${pt}</div>`:''}
+          ${px?`<div class="ptxt">${px}</div>`:''}
+        </div>
+      </div>
+    </div>`;
+  }
+  // NOVO 'cima': imagem em cima, texto embaixo
+  if(pos==='cima'&&s.imagem){
+    return `<div class="slide-perg" style="${slideStyle}">
+      ${ct?`<div class="pcaso">${ct}</div>`:''}
+      <div class="pbody cima">${img}</div>
+      ${enunBlock}
+      ${pt?`<div class="pperg">${pt}</div>`:''}
+      ${px?`<div class="ptxt">${px}</div>`:''}
+    </div>`;
+  }
   // 'baixo' (default): texto em cima, imagem embaixo
-  return `<div class="slide-perg">
+  return `<div class="slide-perg" style="${slideStyle}">
     ${ct?`<div class="pcaso">${ct}</div>`:''}
     ${enunBlock}
     ${pt?`<div class="pperg">${pt}</div>`:''}
@@ -29221,7 +29339,7 @@ function gerarSlidesPadrao(caso,casoIdx){
   const casoNum='CASO '+(casoIdx+1);
   const casoLabel=casoNum+(casoNome?': '+casoNome:'');
   // Slide 1 — Capa: nome do simulado + título do caso
-  slides.push({id:_slideUid(),capa:true,simNome,casoLabel,imagem:'',imagemPos:'baixo'});
+  slides.push({id:_slideUid(),capa:true,simNome,casoLabel,imagem:'',imagemPos:'baixo',imagemSize:100,textScale:100});
   // Slides N — CASO X / enunciado / Pergunta N / texto pergunta
   const enun=(caso.enunciado||'').trim();
   const enunImgs=Array.isArray(caso.enunciadoImagens)?caso.enunciadoImagens:[];
@@ -29239,7 +29357,9 @@ function gerarSlidesPadrao(caso,casoIdx){
       pergTitulo,
       pergTexto,
       imagem:pImgs[0]||'',
-      imagemPos:'baixo'
+      imagemPos:'baixo',
+      imagemSize:100,
+      textScale:100
     });
   });
   return slides;
@@ -29248,15 +29368,17 @@ function gerarSlidesPadrao(caso,casoIdx){
 // Migração de slides legados (formato antigo titulo+texto)
 function _slideMigrar(s){
   if(!s)return s;
-  if(s.casoTitulo!==undefined||s.simNome!==undefined)return s; // já novo formato
-  if(s.titulo===undefined&&s.texto===undefined)return s;
-  if(s.capa){return {...s,simNome:s.titulo||'',casoLabel:s.texto||'',imagemPos:s.imagemPos||'baixo'};}
+  // Garante defaults dos campos novos (imagemSize, textScale) pra slides antigos
+  const defaults={imagemSize:s.imagemSize||100,textScale:s.textScale||100};
+  if(s.casoTitulo!==undefined||s.simNome!==undefined)return {...s,...defaults}; // já novo formato
+  if(s.titulo===undefined&&s.texto===undefined)return {...s,...defaults};
+  if(s.capa){return {...s,simNome:s.titulo||'',casoLabel:s.texto||'',imagemPos:s.imagemPos||'baixo',...defaults};}
   // tenta separar enunciado de pergunta texto (split em \n\n)
   const txt=(s.texto||'').trim();
   const idx=txt.indexOf('\n\n');
   const enun=idx>=0?txt.slice(0,idx):'';
   const perg=idx>=0?txt.slice(idx+2):txt;
-  return {...s,casoTitulo:'',enunciado:enun,pergTitulo:s.titulo||'',pergTexto:perg,imagemPos:s.imagemPos||'baixo'};
+  return {...s,casoTitulo:'',enunciado:enun,pergTitulo:s.titulo||'',pergTexto:perg,imagemPos:s.imagemPos||'baixo',...defaults};
 }
 
 window.openSlidesModal=(bloco,ci)=>{
@@ -29288,86 +29410,134 @@ function _slidesRender(){
     list.innerHTML='<div class="al al-i">Nenhum slide. Clique em "Adicionar slide" ou "Regenerar padrão".</div>';
     return;
   }
-  list.innerHTML=_slidesEditList.map((s,i)=>{
-    const tipoLabel=s.imagemPura?'🖼️ Imagem pronta':(s.capa?'🎯 Capa':'📝 Pergunta');
-    const tipoColor=s.imagemPura?'var(--orange)':(s.capa?'var(--accent)':'var(--green)');
-    const ec=(v)=>String(v||'').replace(/"/g,'&quot;');
-    const isOpen=_slidesOpen.has(i);
-    const snippet=_slideSnippet(s);
-    const hasImg=!!s.imagem;
-    let camposHtml='';
-    if(s.imagemPura){
-      camposHtml=`<div style="padding:18px;background:var(--bg);border:1px dashed var(--border);border-radius:var(--rs);font-size:12px;color:var(--t2);line-height:1.5">
-        Este slide vai exibir <strong>apenas a imagem ao lado</strong>, ocupando o slide inteiro. Use isso quando você já tem uma imagem pronta (PowerPoint exportado, Canva, etc) com tudo desenhado e não quer que o sistema monte o layout.
-      </div>`;
-    }else if(s.capa){
-      camposHtml=`
-        <label class="fl" style="margin-top:4px">Nome do simulado</label>
-        ${_rtEditor(s.simNome,i,'simNome','Ex: Simulado 3')}
-        <div style="height:8px"></div>
-        <label class="fl">Título do caso</label>
-        ${_rtEditor(s.casoLabel,i,'casoLabel','Ex: CASO 1: Meningioma')}`;
-    }else{
-      const enunImgPreview=s.enunciadoImagem?`
-        <div style="margin:6px 0 8px;padding:8px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;display:flex;gap:10px;align-items:center">
-          <img src="${s.enunciadoImagem}" style="max-width:110px;max-height:74px;border-radius:4px;border:1px solid var(--border);background:#fff;object-fit:contain;flex-shrink:0"/>
-          <div style="font-size:11px;color:var(--t2);line-height:1.45;flex:1">
-            <div style="font-weight:700;color:var(--accent);margin-bottom:2px">📎 Imagem do enunciado</div>
-            <div style="opacity:.85">Aparece entre o enunciado e a pergunta. Gerencie na galeria do caso (editor de template).</div>
-          </div>
-        </div>`:'';
-      camposHtml=`
-        <label class="fl" style="margin-top:4px">Enunciado</label>
-        ${_rtEditor(s.enunciado,i,'enunciado','Paciente masculino, 56 anos...')}
-        ${enunImgPreview}
-        <div style="height:8px"></div>
-        <label class="fl">Título da pergunta</label>
-        <input class="fc" value="${ec(s.pergTitulo)}" placeholder="Pergunta 1" oninput="_slidesEditList[${i}].pergTitulo=this.value" style="margin-bottom:8px;font-size:13px;font-weight:600"/>
-        <label class="fl">Texto da pergunta</label>
-        ${_rtEditor(s.pergTexto,i,'pergTexto','Desenhe o polígono de Willis...')}`;
-    }
-    const posSel=(s.capa||s.imagemPura)?'':`
-      <div style="margin-top:8px">
-        <label class="fl" style="font-size:11px">Posição da imagem</label>
-        <select onchange="_slidesEditList[${i}].imagemPos=this.value;_slidesRender()" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;background:var(--bg2);color:var(--text);font-family:inherit;font-size:12px">
-          <option value="baixo" ${(s.imagemPos||'baixo')==='baixo'?'selected':''}>⬇️ Embaixo (centralizada)</option>
-          <option value="direita" ${s.imagemPos==='direita'?'selected':''}>➡️ À direita do texto</option>
-          <option value="grande" ${s.imagemPos==='grande'?'selected':''}>🔍 Grande (ocupa o slide)</option>
-        </select>
-      </div>`;
-    return `<div style="border:1.5px solid ${isOpen?'var(--accent)':'var(--border)'};border-radius:var(--r);background:var(--bg2);overflow:hidden;box-shadow:${isOpen?'0 4px 14px -6px rgba(47,129,247,.35)':'0 1px 2px rgba(0,0,0,.04)'};transition:border-color .15s,box-shadow .15s">
-      <div onclick="toggleSlideOpen(${i})" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;flex-wrap:wrap;transition:background .15s">
-        <span style="font-size:13px;color:var(--t2);transition:transform .15s;display:inline-block;transform:rotate(${isOpen?'90':'0'}deg);width:14px;flex-shrink:0">▶</span>
-        <span style="font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-dim);padding:3px 8px;border-radius:4px;flex-shrink:0">SLIDE ${i+1}</span>
-        <span style="font-size:11px;font-weight:700;color:${tipoColor};padding:3px 7px;border:1px solid ${tipoColor};border-radius:4px;flex-shrink:0;background:rgba(0,0,0,.04)">${tipoLabel}</span>
-        ${hasImg?'<span style="font-size:13px" title="Este slide tem imagem">📎</span>':''}
-        <span style="flex:1;min-width:0;font-size:12px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${snippet||'<em style="opacity:.5">(vazio)</em>'}</span>
-        <div onclick="event.stopPropagation()" style="display:flex;gap:5px;flex-shrink:0">
-          <button class="btn ${s.imagemPura?'btn-p':'btn-s'} btn-sm" onclick="slideToggleImagemPura(${i})" title="${s.imagemPura?'Voltar pra slide com texto':'Substituir por uma imagem pronta'}" style="font-size:11px">${s.imagemPura?'↩️':'🖼️'}</button>
-          <button class="btn btn-s btn-sm" onclick="slideMove(${i},-1)" ${i===0?'disabled':''} title="Mover pra cima" style="font-size:11px">▲</button>
-          <button class="btn btn-s btn-sm" onclick="slideMove(${i},1)" ${i===_slidesEditList.length-1?'disabled':''} title="Mover pra baixo" style="font-size:11px">▼</button>
-          <button class="btn btn-d btn-sm" onclick="slideRemove(${i})" title="Remover" style="font-size:11px">✕</button>
-        </div>
-      </div>
-      ${isOpen?`<div style="padding:14px 16px;border-top:1px solid var(--border);background:var(--bg)">
-        <div style="display:grid;grid-template-columns:1fr 220px;gap:14px;align-items:start">
-          <div>${camposHtml}</div>
-          <div>
-            ${s.imagem?`<div style="position:relative;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#fff">
-              <img src="${s.imagem}" style="width:100%;max-height:140px;object-fit:contain;display:block"/>
-              <button onclick="slideRemoveImg(${i})" title="Remover imagem" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:11px">✕</button>
-            </div>`:`<label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1.5px dashed var(--border);border-radius:8px;padding:18px;cursor:pointer;background:var(--bg3);min-height:90px">
-              <span style="font-size:22px">🖼️</span>
-              <span style="font-size:11px;color:var(--t2);text-align:center">Anexar imagem/GIF<br><span style="color:var(--t2);opacity:.7">até 15MB</span></span>
-              <input type="file" accept="image/*" onchange="slideUploadImg(${i},this.files[0]);this.value=''" style="display:none"/>
-            </label>`}
-            ${posSel}
-          </div>
-        </div>
-      </div>`:''}
-    </div>`;
-  }).join('');
+  list.innerHTML=_slidesEditList.map((s,i)=>_slideCardHTML(s,i)).join('');
 }
+
+// === Helpers do editor moderno (2026-05-29) ==================================
+function _slideCardHTML(s,i){
+  const isOpen=_slidesOpen.has(i);
+  const tipoLabel=s.imagemPura?'🖼️ Imagem pronta':(s.capa?'🎯 Capa':'📝 Pergunta');
+  const tipoColor=s.imagemPura?'#fb8f44':(s.capa?'#2f81f7':'#3fb950');
+  const snippet=_slideSnippet(s);
+  const hasImg=!!s.imagem;
+  return `<div class="sl-card${isOpen?' open':''}" id="sl-card-${i}">
+    <div class="sl-card-head" onclick="toggleSlideOpen(${i})">
+      <span class="sl-caret">▶</span>
+      <span class="sl-badge-num">SLIDE ${i+1}</span>
+      <span class="sl-badge-tipo" style="color:${tipoColor}">${tipoLabel}</span>
+      ${hasImg?'<span style="font-size:13px" title="Tem imagem">📎</span>':''}
+      <span class="sl-snippet">${snippet||'<em style="opacity:.5">(vazio)</em>'}</span>
+      <div class="sl-head-acts" onclick="event.stopPropagation()">
+        <button onclick="slideToggleImagemPura(${i})" title="${s.imagemPura?'Voltar pra slide com texto':'Substituir por imagem pronta'}">${s.imagemPura?'↩':'🖼'}</button>
+        <button onclick="slideMove(${i},-1)" ${i===0?'disabled':''} title="Mover pra cima">▲</button>
+        <button onclick="slideMove(${i},1)" ${i===_slidesEditList.length-1?'disabled':''} title="Mover pra baixo">▼</button>
+        <button class="del" onclick="slideRemove(${i})" title="Remover">✕</button>
+      </div>
+    </div>
+    ${isOpen?`<div class="sl-card-body">${_slideBodyHTML(s,i)}</div>`:''}
+  </div>`;
+}
+
+function _slideBodyHTML(s,i){
+  const ec=v=>String(v||'').replace(/"/g,'&quot;');
+  if(s.imagemPura){
+    return `<div class="sl-fields">
+      <div style="padding:16px 18px;background:var(--bg2);border:1px dashed var(--border);border-radius:10px;font-size:12.5px;color:var(--t2);line-height:1.55">
+        Este slide exibe <strong>apenas a imagem ao lado</strong>, ocupando o slide inteiro. Use quando você já tem uma imagem pronta (PowerPoint, Canva, etc) com layout próprio.
+      </div>
+    </div>
+    <div class="sl-side">${_slideImgBox(s,i)}</div>`;
+  }
+  if(s.capa){
+    return `<div class="sl-fields">
+      <div><div class="sl-section-label">Nome do simulado</div>${_rtEditor(s.simNome,i,'simNome','Ex: Simulado 3')}</div>
+      <div><div class="sl-section-label">Título do caso</div>${_rtEditor(s.casoLabel,i,'casoLabel','Ex: CASO 1: Meningioma')}</div>
+    </div>
+    <div class="sl-side">${_slideImgBox(s,i)}</div>`;
+  }
+  // Slide de pergunta normal
+  const enunImgPreview=s.enunciadoImagem?`
+    <div style="margin:8px 0 0;padding:9px 11px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;display:flex;gap:10px;align-items:center">
+      <img src="${s.enunciadoImagem}" style="max-width:80px;max-height:54px;border-radius:5px;border:1px solid var(--border);background:#fff;object-fit:contain;flex-shrink:0"/>
+      <div style="font-size:11px;color:var(--t2);line-height:1.45;flex:1">
+        <div style="font-weight:700;color:var(--accent);margin-bottom:2px">📎 Imagem do enunciado</div>
+        <div style="opacity:.85">Vinda da galeria do caso (editor de template).</div>
+      </div>
+    </div>`:'';
+  const fieldsHtml=`<div class="sl-fields">
+    <div>
+      <div class="sl-section-label">Enunciado</div>
+      ${_rtEditor(s.enunciado,i,'enunciado','Paciente masculino, 56 anos...')}
+      ${enunImgPreview}
+    </div>
+    <div>
+      <div class="sl-section-label">Título da pergunta</div>
+      <input class="fc" value="${ec(s.pergTitulo)}" placeholder="Pergunta 1" oninput="_slidesEditList[${i}].pergTitulo=this.value" style="font-size:13.5px;font-weight:600"/>
+    </div>
+    <div>
+      <div class="sl-section-label">Texto da pergunta</div>
+      ${_rtEditor(s.pergTexto,i,'pergTexto','Desenhe o polígono de Willis...')}
+    </div>
+    <div class="sl-slider-wrap" style="margin-top:4px">
+      <div class="sl-slider-row"><span>📝 Tamanho do texto</span><span class="sl-slider-val" id="sl-txt-val-${i}">${s.textScale||100}%</span></div>
+      <input type="range" class="sl-slider" min="70" max="150" step="5" value="${s.textScale||100}" oninput="_slideUpdateScale(${i},'textScale',this.value)"/>
+    </div>
+  </div>`;
+  const sideHtml=`<div class="sl-side">
+    ${_slideImgBox(s,i)}
+    ${_slidePosPicker(s,i)}
+    <div class="sl-slider-wrap">
+      <div class="sl-slider-row"><span>🔍 Tamanho da imagem</span><span class="sl-slider-val" id="sl-img-val-${i}">${s.imagemSize||100}%</span></div>
+      <input type="range" class="sl-slider" min="20" max="100" step="5" value="${s.imagemSize||100}" oninput="_slideUpdateScale(${i},'imagemSize',this.value)"/>
+    </div>
+  </div>`;
+  return fieldsHtml+sideHtml;
+}
+
+function _slideImgBox(s,i){
+  if(s.imagem){
+    return `<div class="sl-img-wrap">
+      <img src="${s.imagem}" alt="Imagem do slide"/>
+      <button class="sl-img-rm" onclick="slideRemoveImg(${i})" title="Remover imagem">✕</button>
+    </div>`;
+  }
+  return `<label class="sl-img-drop">
+    <span class="sl-img-drop-icon">🖼️</span>
+    <span class="sl-img-drop-lbl">Anexar imagem ou GIF<br><span style="opacity:.65">PNG/JPG/GIF até 15MB</span></span>
+    <input type="file" accept="image/*" onchange="slideUploadImg(${i},this.files[0]);this.value=''" style="display:none"/>
+  </label>`;
+}
+
+function _slidePosPicker(s,i){
+  const pos=s.imagemPos||'baixo';
+  const opts=[
+    {key:'cima',lbl:'Acima',thumb:'cima'},
+    {key:'baixo',lbl:'Abaixo',thumb:'baixo'},
+    {key:'esquerda',lbl:'Esquerda',thumb:'esq'},
+    {key:'direita',lbl:'Direita',thumb:'dir'},
+    {key:'grande',lbl:'Tela cheia',thumb:'grande'}
+  ];
+  const btns=opts.map(p=>`<button type="button" class="sl-pos-btn${pos===p.key?' on':''}" onclick="_slideSetPos(${i},'${p.key}')" title="${p.lbl}">
+    <div class="sl-pos-thumb ${p.thumb}"><span class="ppt-text"></span><span class="ppt-img"></span></div>
+    <span class="sl-pos-lbl">${p.lbl}</span>
+  </button>`).join('');
+  return `<div>
+    <div class="sl-section-label">📍 Posição da imagem</div>
+    <div class="sl-pos-grid">${btns}</div>
+  </div>`;
+}
+
+// Updates sem re-render — preserva foco em inputs/sliders
+window._slideUpdateScale=(i,field,val)=>{
+  const n=parseInt(val)||100;
+  _slidesEditList[i][field]=n;
+  const el=document.getElementById(field==='imagemSize'?`sl-img-val-${i}`:`sl-txt-val-${i}`);
+  if(el)el.textContent=n+'%';
+};
+window._slideSetPos=(i,pos)=>{
+  _slidesEditList[i].imagemPos=pos;
+  _slidesRender(); // re-render só atualiza a classe `on` dos botões — slider mantém valor
+};
 
 // ── Mini editor de texto (B/I/U/A+/A-/limpar) ──
 function _sanitizeSlideHTML(html){
@@ -29428,7 +29598,7 @@ window.rtChanged=(ed)=>{
   _slidesEditList[i][f]=_sanitizeSlideHTML(ed.innerHTML);
 };
 
-window.slideAdd=()=>{const i=_slidesEditList.length;_slidesEditList.push({id:_slideUid(),casoTitulo:'',enunciado:'',pergTitulo:'',pergTexto:'',imagem:'',imagemPos:'baixo'});_slidesOpen.add(i);_slidesRender();};
+window.slideAdd=()=>{const i=_slidesEditList.length;_slidesEditList.push({id:_slideUid(),casoTitulo:'',enunciado:'',pergTitulo:'',pergTexto:'',imagem:'',imagemPos:'baixo',imagemSize:100,textScale:100});_slidesOpen.add(i);_slidesRender();};
 window.slideToggleImagemPura=(i)=>{
   const s=_slidesEditList[i];if(!s)return;
   s.imagemPura=!s.imagemPura;
