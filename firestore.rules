@@ -260,11 +260,14 @@ service cloud.firestore {
     // ────────────────────────────────────────────────────────────────────────
     match /provas/{provaId} {
       allow read: if true;
+      // tipo: aceita qualquer string não-vazia (built-in TSA/TEA/ME1/ME2/ME3 + custom de recursosConfig.tiposCustom).
+      // status: aceita schema novo (rascunho/publicada) e legado (ativa/encerrada) — front usa novo, docs antigos ainda têm legado.
       allow create, update: if isAuth()
                             && request.resource.data.nome is string
                             && request.resource.data.nome.size() > 0
-                            && request.resource.data.tipo in ['TSA','TEA','ME1','ME2','ME3']
-                            && request.resource.data.status in ['ativa','encerrada'];
+                            && request.resource.data.tipo is string
+                            && request.resource.data.tipo.size() > 0
+                            && request.resource.data.status in ['rascunho','publicada','ativa','encerrada'];
       allow delete: if isAuth();
 
       match /questoes/{qId} {

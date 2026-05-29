@@ -413,8 +413,18 @@ body:has(.mo:not(.hidden)){overflow:hidden}
 .tp-ok{width:100%;margin-top:14px}
 
 /* ═══ COORD PANELS — SIDEBAR · TECH v2 ═══ */
-.co-layout{display:grid;grid-template-columns:248px 1fr;gap:28px;align-items:start;position:relative}
+.co-layout{display:grid;grid-template-columns:248px 1fr;gap:28px;align-items:start;position:relative;transition:grid-template-columns .25s cubic-bezier(.4,0,.2,1),gap .25s}
 .co-layout::before{content:"";position:absolute;left:-12px;right:-12px;top:-18px;height:1px;background:linear-gradient(90deg,transparent 5%,var(--accent) 50%,transparent 95%);opacity:.3;pointer-events:none}
+.co-layout.sidebar-closed{grid-template-columns:0 1fr;gap:0}
+.co-layout.sidebar-closed > .co-tabs{opacity:0;pointer-events:none;transform:translateX(-12px);transition:opacity .15s,transform .25s cubic-bezier(.4,0,.2,1);overflow:hidden}
+/* Toggle ☰ — dark glass com borda neon. Inspiração: ícones de menu do macOS Sonoma. */
+.co-sidebar-toggle{position:relative;display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:13px;background:rgba(13,17,23,.55);border:1px solid color-mix(in srgb, var(--accent) 60%, transparent);color:var(--accent);cursor:pointer;font-size:21px;font-weight:600;line-height:1;flex-shrink:0;transition:transform .18s,border-color .2s,box-shadow .25s,background .2s,color .15s;backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);box-shadow:0 0 0 1px rgba(255,255,255,.04) inset,0 0 12px -1px color-mix(in srgb, var(--accent) 35%, transparent),0 4px 14px -6px rgba(0,0,0,.45)}
+:root[data-theme="light"] .co-sidebar-toggle{background:rgba(255,255,255,.55);box-shadow:0 0 0 1px rgba(255,255,255,.6) inset,0 0 12px -1px color-mix(in srgb, var(--accent) 35%, transparent),0 4px 14px -6px rgba(9,105,218,.18)}
+.co-sidebar-toggle::after{content:"";position:absolute;inset:-1px;border-radius:13px;border:1px solid color-mix(in srgb, var(--accent) 80%, transparent);opacity:.35;pointer-events:none;animation:coTogglePulse 2.6s ease-in-out infinite}
+@keyframes coTogglePulse{0%,100%{opacity:.25;box-shadow:0 0 0 0 transparent}50%{opacity:.6;box-shadow:0 0 14px 1px color-mix(in srgb, var(--accent) 55%, transparent)}}
+.co-sidebar-toggle:hover{transform:translateY(-1px);border-color:var(--accent);color:var(--text);background:rgba(13,17,23,.7);box-shadow:0 0 0 1px rgba(255,255,255,.06) inset,0 0 20px -1px color-mix(in srgb, var(--accent) 55%, transparent),0 8px 22px -8px rgba(0,0,0,.55)}
+:root[data-theme="light"] .co-sidebar-toggle:hover{background:rgba(255,255,255,.78);color:var(--accent);box-shadow:0 0 0 1px rgba(255,255,255,.8) inset,0 0 20px -1px color-mix(in srgb, var(--accent) 55%, transparent),0 8px 22px -8px rgba(9,105,218,.25)}
+.co-sidebar-toggle:active{transform:scale(.94)}
 
 /* Sidebar — painel "command center" */
 .co-tabs{position:sticky;top:78px;display:flex;flex-direction:column;gap:0;padding:0;background:linear-gradient(180deg,rgba(47,129,247,.05) 0%,rgba(0,0,0,0) 22%),linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%);border:1px solid var(--border);border-radius:16px;box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 24px 60px rgba(0,0,0,.4),0 0 0 1px var(--accent-dim) inset;overflow:hidden}
@@ -461,7 +471,10 @@ body:has(.mo:not(.hidden)){overflow:hidden}
 .co-tab.on::after{content:"";position:absolute;right:12px;top:50%;width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent),0 0 4px var(--accent);transform:translateY(-50%)}
 :root[data-theme="light"] .co-tab.on{color:var(--accent);background:linear-gradient(90deg,rgba(9,105,218,.14) 0%,rgba(9,105,218,.02) 100%)}
 
-/* Foot — user card */
+/* Head — user card no topo da sidebar (identificação clara de quem está logado) */
+.co-sidebar-head{padding:12px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(47,129,247,.06),transparent)}
+:root[data-theme="light"] .co-sidebar-head{background:linear-gradient(180deg,rgba(9,105,218,.04),transparent)}
+/* Foot — logout button */
 .co-sidebar-foot{margin-top:auto;padding:12px;border-top:1px solid var(--border);background:linear-gradient(180deg,transparent,rgba(0,0,0,.22));display:flex;flex-direction:column;gap:8px}
 :root[data-theme="light"] .co-sidebar-foot{background:linear-gradient(180deg,transparent,rgba(0,0,0,.03))}
 .co-user-info{position:relative;display:flex;align-items:center;gap:10px;padding:10px;background:linear-gradient(180deg,var(--bg3),var(--bg2));border:1px solid var(--border);border-radius:10px;overflow:hidden}
@@ -808,7 +821,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 <header>
   <div class="hi">
     <div class="logo" onclick="goHome()" style="cursor:pointer" title="Voltar para a Home">
-      <img src="https://aros.anestreview.com.br/assets/assets/logo-anestreview.png" alt="AnestReview AROS"/>
+      <img src="/assets/assets/logo-medreview.png" alt="MedReview AROS"/>
     </div>
     <div class="header-right">
       <div class="view-tabs" id="view-tabs">
@@ -3922,9 +3935,12 @@ body.pro-rt-fs-on{overflow:hidden}
   <!-- PANEL -->
   <div id="co-panel" class="hidden">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
-      <div>
-        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;letter-spacing:-.4px;line-height:1.15">Painel da Coordenação</h2>
-        <p style="font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;color:var(--accent);font-size:11px;font-weight:600;letter-spacing:2.2px;text-transform:uppercase;margin-top:4px">AnestReview</p>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="co-sidebar-toggle" id="co-sidebar-toggle-btn" onclick="toggleCoSidebar()" title="Mostrar/ocultar menu lateral" aria-label="Alternar menu">☰</button>
+        <div>
+          <h2 style="font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;letter-spacing:-.4px;line-height:1.15">Painel da Coordenação</h2>
+          <p style="font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;color:var(--accent);font-size:11px;font-weight:600;letter-spacing:2.2px;text-transform:uppercase;margin-top:4px">MEDREVIEW</p>
+        </div>
       </div>
       <button class="btn btn-p btn-sm" id="btn-novo-sim" onclick="openNewSimAuth()" style="display:none">+ Novo Simulado</button>
     </div>
@@ -3933,9 +3949,11 @@ body.pro-rt-fs-on{overflow:hidden}
     <div class="co-layout">
     <!-- Co tabs (sidebar — gerada dinamicamente em renderSidebar()) -->
     <div class="co-tabs">
+      <div class="co-sidebar-head">
+        <div class="co-user-info" id="co-user-info"></div>
+      </div>
       <div id="co-tabs-list"></div>
       <div class="co-sidebar-foot">
-        <div class="co-user-info" id="co-user-info"></div>
         <button class="btn btn-s btn-sm" onclick="logout()" style="justify-content:center">↪ Sair</button>
       </div>
     </div>
@@ -7039,6 +7057,35 @@ body.pro-rt-fs-on{overflow:hidden}
   font-size:10px;color:var(--t2);
   letter-spacing:.3px;
 }
+/* Mini-slider de status no card da prova (lista) — versão compacta do mpv-status-toggle */
+.rec-card-status-toggle{
+  position:relative;display:grid;grid-template-columns:1fr 1fr;gap:0;padding:2px;
+  background:color-mix(in srgb, var(--bg) 70%, transparent);border:1px solid var(--border);
+  border-radius:999px;cursor:pointer;user-select:none;overflow:hidden;
+  transition:border-color .2s,opacity .2s;min-width:170px;
+}
+.rec-card-status-toggle:hover{border-color:color-mix(in srgb, var(--status-cor, var(--accent)) 45%, var(--border))}
+.rec-card-status-toggle.busy{opacity:.55;cursor:wait;pointer-events:none}
+.rec-card-status-thumb{
+  position:absolute;top:2px;left:2px;bottom:2px;width:calc(50% - 2px);
+  background:linear-gradient(135deg, var(--status-cor, var(--t2)) 0%, color-mix(in srgb, var(--status-cor, var(--t2)) 72%, #5b9eff) 100%);
+  border-radius:999px;
+  box-shadow:0 2px 8px color-mix(in srgb, var(--status-cor, var(--t2)) 35%, transparent), inset 0 1px 0 rgba(255,255,255,.18);
+  transition:transform .25s var(--ease-out-soft), background .3s;z-index:1;
+}
+.rec-card-status-toggle.on .rec-card-status-thumb{transform:translateX(100%)}
+.rec-card-status-opt{
+  position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:5px;
+  padding:5px 10px;
+  font-family:'JetBrains Mono','SF Mono',monospace;
+  font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--t2);transition:color .25s;white-space:nowrap;
+}
+.rec-card-status-toggle:not(.on) .rec-card-status-opt.off{color:#fff}
+.rec-card-status-toggle.on .rec-card-status-opt.on{color:#fff}
+.rec-card-status-dot{width:5px;height:5px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor}
+.rec-card-status-toggle:not(.on) .rec-card-status-opt.off .rec-card-status-dot{animation:recPulse 1.6s ease-in-out infinite}
+.rec-card-status-toggle.on .rec-card-status-opt.on .rec-card-status-dot{animation:recPulse 1.6s ease-in-out infinite}
 </style>
 <div class="mo hidden" id="modal-prova" data-no-backdrop-close>
   <div class="md">
@@ -8918,6 +8965,7 @@ window.switchView=v=>{
   const clEl=document.getElementById('view-conteudos');if(clEl)clEl.classList.toggle('hidden',v!=='conteudos');
   document.getElementById('view-al').classList.toggle('hidden',v!=='aluno');
   document.getElementById('view-co').classList.toggle('hidden',v!=='coord');
+  if(v==='coord'&&typeof _applyCoSidebarPref==='function')_applyCoSidebarPref();
   const mtaEl=document.getElementById('view-mta');if(mtaEl)mtaEl.classList.toggle('hidden',v!=='mentoria');
   const recEl=document.getElementById('view-rec');if(recEl)recEl.classList.toggle('hidden',v!=='recursos');
   const homeBtn=document.getElementById('tab-home');if(homeBtn)homeBtn.classList.toggle('on',v==='home');
@@ -8965,8 +9013,19 @@ window.goMentoriaAluno=()=>{
   switchView('mentoria');
   mtaReset();
 };
-window.goRecursosAluno=()=>{
+window.goRecursosAluno=async()=>{
   switchView('recursos');
+  // Deep-link via email do parecer: ?provaRec=X&qRec=Y abre direto a prova e foca a questão
+  const params=new URLSearchParams(window.location.search);
+  const provaRec=params.get('provaRec');
+  const qRec=params.get('qRec');
+  if(provaRec){
+    // Limpa params da URL pra não re-abrir em navegações futuras
+    try{const u=new URL(window.location.href);u.searchParams.delete('provaRec');u.searchParams.delete('qRec');history.replaceState(null,'',u.toString());}catch(_){}
+    // Garante que provas estão carregadas antes de tentar abrir
+    if(!(S.recursos.provas||[]).length&&typeof loadRecProvas==='function'){try{await loadRecProvas();}catch(_){}}
+    if(typeof recAbrirProva==='function'){await recAbrirProva(provaRec,{qIdAutoScroll:qRec||null});return;}
+  }
   if(typeof renderRecAluno==='function')renderRecAluno();
 };
 window.recVoltar=()=>{switchView('aluno');};
@@ -10346,7 +10405,21 @@ function _revealCoordTab(){
   switchView('coord');
 }
 // Botão 🔐 do header — abre painel de coord (login ou painel se já logado)
-window.openCoordPanel=()=>{switchView('coord');};
+window.openCoordPanel=()=>{switchView('coord');_applyCoSidebarPref();};
+
+// Sidebar colapsável do painel da coordenação — default fechada, persiste em localStorage.
+window.toggleCoSidebar=()=>{
+  const layout=document.querySelector('.co-layout');if(!layout)return;
+  const closed=layout.classList.toggle('sidebar-closed');
+  try{localStorage.setItem('aros_co_sidebar_closed',closed?'1':'0');}catch(_){}
+};
+function _applyCoSidebarPref(){
+  const layout=document.querySelector('.co-layout');if(!layout)return;
+  let saved=null;try{saved=localStorage.getItem('aros_co_sidebar_closed');}catch(_){}
+  // Sem preferência salva = fechada por padrão
+  const closed=saved==null?true:saved==='1';
+  layout.classList.toggle('sidebar-closed',closed);
+}
 
 // === Mobile menu (hambúrguer) ===
 window.openMobileMenu=()=>{
@@ -10950,8 +11023,21 @@ function renderSidebar(){
   const isAdmin=getTipo(S.currentUser)==='adm';
   // Strict-admin tabs (ex: auditoria) só aparecem para o tipo 'adm'
   if(!isAdmin){STRICT_ADMIN_TABS.forEach(t=>allowed.delete(t));}
-  const collapsed=new Set(JSON.parse(localStorage.getItem('aros-sidebar-collapsed')||'[]'));
-  container.innerHTML=_menuEffectiveGroups().map(g=>{
+  // Default: TODOS os grupos/subgrupos colapsados na primeira visita.
+  // Quando user clica e abre algum, a escolha é persistida em localStorage.
+  const _savedCollapsed=localStorage.getItem('aros-sidebar-collapsed');
+  const _menuGroups=_menuEffectiveGroups();
+  let collapsed;
+  if(_savedCollapsed==null){
+    collapsed=new Set();
+    _menuGroups.forEach(g=>{
+      collapsed.add(g.id);
+      (g.items||[]).forEach(it=>{if(it.kind!=='tab')collapsed.add(it.id);});
+    });
+  }else{
+    collapsed=new Set(JSON.parse(_savedCollapsed));
+  }
+  container.innerHTML=_menuGroups.map(g=>{
     // Filtra items pela permissão do usuário
     const filtered=g.items.map(it=>{
       if(it.kind==='tab')return allowed.has(it.tab.id)?it:null;
@@ -12061,16 +12147,21 @@ S.recursos.alunoState={provaId:null,email:'',questoes:[],expandidas:new Set(),pa
 
 const _RECALU_EMAIL_KEY=(pid)=>`aros_recursos_email_${pid}`;
 
-window.recAbrirProva=async(provaId)=>{
+window.recAbrirProva=async(provaId,opts)=>{
   const prova=(S.recursos.provas||[]).find(p=>p.id===provaId);
   if(!prova){alert('Prova não encontrada.');return;}
   S.recursos.alunoState.provaId=provaId;
+  // qIdAutoScroll: vindo do deep-link do email do parecer — expande a questão depois do render
+  const qScroll=opts&&opts.qIdAutoScroll||null;
   // Tenta recuperar email salvo
   const emailSalvo=localStorage.getItem(_RECALU_EMAIL_KEY(provaId))||'';
   if(emailSalvo){
     S.recursos.alunoState.email=emailSalvo;
     await renderAlunoProva();
+    if(qScroll&&typeof alunoIrParaQuestao==='function')setTimeout(()=>alunoIrParaQuestao(qScroll),120);
   }else{
+    // Guarda o qScroll pra usar depois que o aluno confirmar o email
+    if(qScroll)S.recursos.alunoState._pendingQScroll=qScroll;
     abrirModalIdentificacao(provaId);
   }
 };
@@ -12109,6 +12200,12 @@ window.recAluConfirmarEmail=async()=>{
   S.recursos.alunoState.email=email;
   localStorage.setItem(_RECALU_EMAIL_KEY(S.recursos.alunoState.provaId),email);
   await renderAlunoProva();
+  // Deep-link pendente: aluno chegou via email do parecer, confirmou identidade — agora foca a questão
+  const qScroll=S.recursos.alunoState._pendingQScroll;
+  if(qScroll){
+    delete S.recursos.alunoState._pendingQScroll;
+    if(typeof alunoIrParaQuestao==='function')setTimeout(()=>alunoIrParaQuestao(qScroll),120);
+  }
 };
 
 window.recAluTrocarEmail=()=>{
@@ -12285,7 +12382,7 @@ function _renderAlunoStats(questoes){
 
 // === Subtarefa 21: mapa de navegação ===
 function _renderMapaQuestoes(questoes){
-  if(questoes.length<=10)return''; // só renderiza se tem muitas questões
+  if(questoes.length<5)return''; // só renderiza quando vale a navegação (5+ questões)
   // Computa quantas questões por status, pra montar legenda dinâmica (só mostra status presentes)
   const contagem={};
   const cells=questoes.map(q=>{
@@ -14588,18 +14685,22 @@ window.confirmarImportPdf=async()=>{
 function _recProvaCard(p){
   const tipoCor=_MENTORIA_CORES[p.tipo]||_MENTORIA_CORES.TSA;
   const ativo=_provaPublicada(p);
-  const statusCor=ativo?'var(--green)':'var(--t2)';
-  const statusLabel=ativo?'PUBLICADA':'RASCUNHO';
-  const statusBg=ativo?'var(--gl)':'var(--bg3)';
   const limite=p.dataLimite?fDT(p.dataLimite):'';
   const ano=p.ano||'';
   const nome=(p.nome||'(sem nome)').replace(/</g,'&lt;');
   const tituloProva=`${(p.tipo||'').toUpperCase()}${ano?' · '+ano:''}`;
+  // Mini-slider clicável pra alternar rascunho ↔ publicada sem abrir o modal
+  const statusCor=ativo?'#3fb950':'#8b949e';
+  const slider=`<div class="rec-card-status-toggle${ativo?' on':''}" data-prova-id="${p.id}" onclick="event.stopPropagation();toggleProvaStatus('${p.id}',this)" title="${ativo?'Clique pra voltar pra rascunho':'Clique pra publicar (visível pros alunos)'}" style="--status-cor:${statusCor}">
+    <span class="rec-card-status-thumb"></span>
+    <span class="rec-card-status-opt off"><span class="rec-card-status-dot"></span>Rascunho</span>
+    <span class="rec-card-status-opt on"><span class="rec-card-status-dot"></span>Publicada</span>
+  </div>`;
   return`<div onclick="recAbrirQuestoes('${p.id}')" style="padding:14px 18px;background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${tipoCor.fg};border-radius:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;cursor:pointer;transition:background .15s,border-color .15s" onmouseover="this.style.background='var(--bg3)';this.style.borderColor='var(--accent)'" onmouseout="this.style.background='var(--bg2)';this.style.borderColor='var(--border)'">
     <div style="flex:1;min-width:240px">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.4px;color:${tipoCor.fg}">${tituloProva}</span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.6px;padding:2px 8px;border-radius:999px;background:${statusBg};color:${statusCor};border:1px solid ${ativo?'rgba(63,185,80,.3)':'var(--border)'}">● ${statusLabel}</span>
+        ${slider}
         <button onclick="event.stopPropagation();openProvaModal('${p.id}')" title="Editar prova" style="background:none;border:none;cursor:pointer;font-size:14px;padding:4px 6px;border-radius:6px;line-height:1;opacity:.55;transition:opacity .15s,background .15s" onmouseover="this.style.opacity='1';this.style.background='var(--bg3)'" onmouseout="this.style.opacity='.55';this.style.background='none'">✏️</button>
       </div>
       ${limite?`<div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--t2);margin-top:6px">⏱ Recursos até ${limite}</div>`:''}
@@ -14609,6 +14710,37 @@ function _recProvaCard(p){
     </div>
   </div>`;
 }
+
+window.toggleProvaStatus=async(provaId,el)=>{
+  const p=(S.recursos.provas||[]).find(x=>x.id===provaId);
+  if(!p)return;
+  const ehPublicada=_provaPublicada(p);
+  const novoStatus=ehPublicada?'rascunho':'publicada';
+  const statusAnterior=p.status||'';
+  // Otimista: atualiza UI imediatamente
+  if(el){
+    el.classList.add('busy');
+    el.classList.toggle('on',novoStatus==='publicada');
+    el.style.setProperty('--status-cor',novoStatus==='publicada'?'#3fb950':'#8b949e');
+  }
+  try{
+    await setDoc(doc(db,'provas',provaId),{status:novoStatus,updatedAt:new Date().toISOString()},{merge:true});
+    p.status=novoStatus;
+    try{audit('PROVA_STATUS_TOGGLE',{collection:'provas',provaId},{before:{status:statusAnterior},after:{status:novoStatus}});}catch(_){}
+    if(el){el.classList.remove('busy');el.title=novoStatus==='publicada'?'Clique pra voltar pra rascunho':'Clique pra publicar (visível pros alunos)';}
+    arosToast(novoStatus==='publicada'?'✅ Prova publicada (visível pros alunos)':'📝 Prova marcada como rascunho','success',2200);
+  }catch(e){
+    console.error('toggleProvaStatus:',e);
+    // Reverte UI
+    if(el){
+      el.classList.remove('busy');
+      el.classList.toggle('on',ehPublicada);
+      el.style.setProperty('--status-cor',ehPublicada?'#3fb950':'#8b949e');
+    }
+    const codigo=e?.code||e?.message||String(e);
+    arosToast('❌ Falha ao alterar status: '+codigo,'err',4500);
+  }
+};
 
 window.deleteProvaDireto=async(provaId)=>{
   console.log('[deleteProvaDireto] iniciado pra:',provaId);
@@ -15403,7 +15535,7 @@ window.salvarParecer=async()=>{
           motivo:cdata.motivo,
           status:'respondida',respondidoEm:nowIso,respostaSnapshot,
         },{merge:true});
-        try{await sendParecerEmail(cdata.emailAluno,prova_questao_email_ctx(provaId,qId),parecer,argumento);}
+        try{await sendParecerEmail(cdata.emailAluno,prova_questao_email_ctx(provaId,qId),{parecer,argumento,imagemUrl,fonte,fonteCustom,capitulo,pagina,profNome});}
         catch(e){console.warn('email parecer falhou:',e);}
       }
     }
@@ -15429,21 +15561,69 @@ function prova_questao_email_ctx(provaId,qId){
   const p=(S.recursos.provas||[]).find(x=>x.id===provaId);
   const lista=S.recursos.questoesCache[provaId]||[];
   const q=lista.find(x=>x.id===qId);
-  return{provaNome:p?.nome||'Prova',questaoNumero:q?.numero||'?'};
+  return{provaId,qId,provaNome:p?.nome||'Prova',questaoNumero:q?.numero||'?'};
 }
 
-// Stub do email (subtarefa 16). Quando o template do EmailJS estiver pronto,
-// trocamos `template_r0vjejs` por um template novo dedicado e ampliamos as vars.
-async function sendParecerEmail(emailAluno,ctx,parecer,argumento){
+// Resolve nome da bibliografia: fonteCustom é texto livre; fonte é id na coleção S.recursos.fontes
+function _resolveFonteNome(fonte,fonteCustom){
+  if(fonteCustom)return fonteCustom;
+  if(!fonte)return '';
+  const f=(S.recursos.fontes||[]).find(x=>x.id===fonte);
+  return f?(f.titulo||f.nome||''):'';
+}
+
+// Converte HTML sanitizado pra texto puro com \n nas quebras de linha visuais.
+// Why: o template do email não usa {{{ }}} pra renderizar HTML — então mandamos texto puro
+// com quebras reais; o template renderiza dentro de um <div white-space:pre-wrap>.
+function _htmlParaTexto(html){
+  if(!html)return '';
+  const tmp=document.createElement('div');
+  tmp.innerHTML=String(html);
+  tmp.querySelectorAll('br').forEach(b=>b.replaceWith('\n'));
+  tmp.querySelectorAll('p,div,li').forEach(el=>{el.append('\n');});
+  let txt=tmp.textContent||'';
+  return txt.replace(/\n{3,}/g,'\n\n').trim();
+}
+
+// Email de parecer · usa template dedicado `template_recurso_parecer`.
+// Arquivo de referência: /email-template-recurso.html.
+async function sendParecerEmail(emailAluno,ctx,data){
   if(!emailAluno||!emailjs)return;
+  const {parecer,argumento,imagemUrl,fonte,fonteCustom,capitulo,pagina,profNome}=data||{};
   const labels={'cabe-recurso':'Cabe Recurso','nao-cabe-recurso':'Não Cabe Recurso','em-analise':'Em análise'};
-  const subject=`📋 Parecer AnestReview · Questão ${ctx.questaoNumero} (${labels[parecer]||parecer})`;
-  const mensagem=`Olá,\n\nA AnestReview avaliou sua contestação da questão ${ctx.questaoNumero} (${ctx.provaNome}).\n\nParecer: ${labels[parecer]||parecer}\n\nParecer para o aluno:\n${argumento||'(sem parecer adicional)'}\n\nAcesse o sistema pra ver o parecer completo e mais detalhes:\nhttps://aros.anestreview.com.br/recursos`;
-  return emailjs.send('service_exyoa4r','template_r0vjejs',{
-    to_email:emailAluno,nome:emailAluno,
-    assunto:subject,mensagem,
-    simulado:'Recursos · '+ctx.provaNome,
-    dia:'',horario:'',
+  const cores={
+    'cabe-recurso':{bg:'#dafbe1',fg:'#1a7f37'},
+    'nao-cabe-recurso':{bg:'#ffebe9',fg:'#cf222e'},
+    'em-analise':{bg:'#ddf4ff',fg:'#0969da'}
+  };
+  const cor=cores[parecer]||{bg:'#f6f8fa',fg:'#1f2328'};
+  // Argumento: HTML → texto puro com \n. Template renderiza com white-space:pre-wrap.
+  const argumentoText=_htmlParaTexto(argumento);
+  // Bibliografia: monta texto se houver fonte/cap/pag. Empty → bloco do email some.
+  const fonteNome=_resolveFonteNome(fonte,fonteCustom);
+  const bibliografia=[fonteNome,capitulo?`Cap. ${capitulo}`:'',pagina?`pág. ${pagina}`:''].filter(Boolean).join(' · ');
+  // Bloco HTML pronto pra bibliografia (vazio se sem conteúdo) — template usa {{{bibliografia_html}}}
+  const bibliografiaHtml=bibliografia
+    ?`<div style="font-family:Tahoma,Geneva,Verdana,sans-serif;font-size:12.5px;color:#656d76;padding:11px 14px;background:#f6f8fa;border:1px solid #d0d7de;border-radius:8px;margin-bottom:14px">📖 <strong style="color:#1f2328;font-family:Tahoma,Geneva,Verdana,sans-serif">${bibliografia}</strong></div>`
+    :'';
+  // Bloco HTML pronto pra imagem (vazio se sem URL) — template usa {{{imagem_html}}}
+  const imagemHtml=imagemUrl
+    ?`<div style="margin-bottom:18px"><a href="${imagemUrl}" style="font-family:Tahoma,Geneva,Verdana,sans-serif;color:#0969da;font-size:13px;text-decoration:none;font-weight:600">🖼️ Ver imagem do parecer</a></div>`
+    :'';
+  const linkRecurso=`https://aros.anestreview.com.br/recursos?provaRec=${encodeURIComponent(ctx.provaId)}&qRec=${encodeURIComponent(ctx.qId)}`;
+  return emailjs.send('service_exyoa4r','template_recurso_parecer',{
+    to_email:emailAluno,
+    nome_aluno:emailAluno,
+    prova_nome:ctx.provaNome,
+    questao_numero:ctx.questaoNumero,
+    parecer_label:labels[parecer]||parecer||'',
+    parecer_cor_bg:cor.bg,
+    parecer_cor_fg:cor.fg,
+    argumento:argumentoText,
+    bibliografia_html:bibliografiaHtml,
+    imagem_html:imagemHtml,
+    link_recurso:linkRecurso,
+    prof_nome:profNome||'AnestReview'
   });
 }
 // === Bibliografia (subtarefa 6) ===
@@ -23280,9 +23460,16 @@ function renderNotGoingPanel(containerId,exp,isCoord){
 }
 
 function renderAlunoDay(list,exp,expandAll=false){
-  if(!list.length)return'<div class="es" style="padding:32px"><p>Nenhum aluno escalado para este dia.</p></div>';
-  const byRod={};list.forEach(s=>{if(!byRod[s.rodada])byRod[s.rodada]=[];byRod[s.rodada].push(s);});
-  return Object.entries(byRod).sort(([a],[b])=>Number(a)-Number(b)).map(([rod,studs])=>{
+  // Após o deadline: rodadas só com confirmed; demais (ausente + swap + pendente residual)
+  // vão pra um box único "Alunos que não confirmaram" no rodapé.
+  // Why: prof precisa achar rapidamente quem não confirmou mas apareceu, pra liberar a sala.
+  // Pesquisa em S.students inteira (não só `list`) porque os auto-ausentes têm dia=null.
+  const naoConf=exp?S.students.filter(s=>s.status!=='confirmed'):[];
+  const naoConfHTML=naoConf.length?renderNaoConfirmaramBox(naoConf,expandAll):'';
+  if(!list.length&&!naoConfHTML)return'<div class="es" style="padding:32px"><p>Nenhum aluno escalado para este dia.</p></div>';
+  const inRods=exp?list.filter(s=>s.status==='confirmed'):list;
+  const byRod={};inRods.forEach(s=>{if(!byRod[s.rodada])byRod[s.rodada]=[];byRod[s.rodada].push(s);});
+  const rodsHTML=Object.entries(byRod).sort(([a],[b])=>Number(a)-Number(b)).map(([rod,studs])=>{
     const h=getH(studs[0].dia,parseInt(rod));
     const sorted=[...studs].sort(sortByStatusThenName);
     const id=`rod-body-${studs[0].dia}-${rod}`;
@@ -23301,6 +23488,30 @@ function renderAlunoDay(list,exp,expandAll=false){
       </div>
     </div>`;
   }).join('');
+  const emptyConf=exp&&!inRods.length&&list.length?'<div class="es" style="padding:24px"><p style="color:var(--t2)">Nenhum aluno confirmou presença neste dia.</p></div>':'';
+  return rodsHTML+emptyConf+naoConfHTML;
+}
+
+function renderNaoConfirmaramBox(naoConf,expandAll=false){
+  const sorted=[...naoConf].sort(sortByStatusThenName);
+  const rows=sorted.map(s=>{
+    // Auto-ausentes têm dia=null mas guardam originalDia; explicit absent guarda dia
+    const diaInfo=s.originalDia?`${s.originalDia==='sabado'?'Sáb':'Dom'}${s.originalRodada?' · '+getH(s.originalDia,s.originalRodada):''}`
+                  :(s.dia?`${s.dia==='sabado'?'Sáb':'Dom'}${s.rodada?' · '+getH(s.dia,s.rodada):''}`:'');
+    const chip=diaInfo?` <span style="font-size:10px;color:var(--t2);font-weight:500;background:var(--bg3);padding:2px 7px;border-radius:10px;margin-left:4px;letter-spacing:.2px">${diaInfo}</span>`:'';
+    return alunoRowHTML(s,true,chip);
+  }).join('');
+  const openAttr=expandAll?' open':'';
+  return`<details class="card" style="overflow:visible;margin-top:14px;border:1px dashed var(--border)"${openAttr}>
+    <summary style="padding:12px 16px;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:revert">
+      <span style="font-family:Fraunces,serif;font-size:15px;font-weight:600;color:var(--t2)">⚠️ Alunos que não confirmaram</span>
+      <span class="badge b-pend">${naoConf.length}</span>
+    </summary>
+    <div style="padding:10px 12px 12px 12px;border-top:1px solid var(--border)">
+      <p style="font-size:11px;color:var(--t2);margin:0 0 10px 2px">Caso algum apareça no dia, o professor pode habilitar a sala pra ele aqui.</p>
+      ${rows}
+    </div>
+  </details>`;
 }
 
 window._expandedRods=new Set();
@@ -23332,7 +23543,7 @@ window.toggleExpandAll=()=>{
   document.getElementById('al-list-dom').innerHTML=renderAlunoDay(dom,exp,window._allExpanded);
 };
 
-function alunoRowHTML(s,exp){
+function alunoRowHTML(s,exp,extraAfterName=''){
   const cls=s.status==='confirmed'?'status-confirmed':s.status==='absent'?'status-absent':s.status==='swap'?'status-swap':'';
   let acts='';
   if(s.status==='pending'){
@@ -23342,21 +23553,24 @@ function alunoRowHTML(s,exp){
     const alterarBtn=exp?'':` <button class="rb" style="background:var(--bg3);color:var(--t2);border:1px solid var(--border);padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer" onclick="openResp('${s.id}','alterar')">✏️ Alterar</button>`;
     acts=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${sbadge(s.status)}${s.respondedAt?`<span style="font-size:11px;color:var(--t2)">${fDT(s.respondedAt)}</span>`:''}${alterarBtn}</div>`;
   }
-  // Botão "Entrar na sala" — aparece quando o prof habilitou a projeção remota deste aluno
+  // Botão "Entrar na sala" — só renderiza se prof liberou A SALA E temos simId em mãos.
+  // Guard contra S.curSim=null: aluno auto-ausente pode aparecer sem simId carregado.
+  const simId=S.curSim&&S.curSim.id;
   const liveAtivo=!!(_alunoLiveStatus[s.id]&&_alunoLiveStatus[s.id].ativo);
-  const btnSala=liveAtivo?_alunoBtnEntrarSala(s):'';
-  return`<div class="aluno-row ${cls}"><div class="aluno-name">${s.nome}</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">${btnSala}${acts}</div></div>`;
+  const btnSala=(liveAtivo&&simId)?_alunoBtnEntrarSala(s,simId):'';
+  return`<div class="aluno-row ${cls}"><div class="aluno-name">${s.nome}${extraAfterName}</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">${btnSala}${acts}</div></div>`;
 }
 
-// Botão "Entrar na sala" do aluno (visão aluno) — abre projeção em nova janela
-function _alunoBtnEntrarSala(s){
-  return `<button onclick="abrirSalaAluno('${S.curSim.id}','${s.id}')" style="background:linear-gradient(135deg,var(--accent),var(--blue));color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.3px;box-shadow:0 4px 12px -2px rgba(47,129,247,.45);animation:btn-pulse 1.6s ease-in-out infinite" title="O professor liberou a sala — clique pra entrar na projeção">🎬 Entrar na sala</button>`;
+// Botão "Entrar na sala" do aluno (visão aluno) — abre projeção em nova aba
+function _alunoBtnEntrarSala(s,simId){
+  return `<button onclick="abrirSalaAluno('${simId}','${s.id}')" style="background:linear-gradient(135deg,var(--accent),var(--blue));color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.3px;box-shadow:0 4px 12px -2px rgba(47,129,247,.45);animation:btn-pulse 1.6s ease-in-out infinite" title="O professor liberou a sala — clique pra entrar na projeção">🎬 Entrar na sala</button>`;
 }
 
-// Abre a janela da projeção pro aluno
+// Abre a janela da projeção pro aluno.
+// Sem feature-string (width/height) pra evitar popup-block em iOS/Android — sai como nova aba.
 window.abrirSalaAluno=(simId,alunoId)=>{
   const url=window.location.pathname+'?modo=projecao-live&sim='+encodeURIComponent(simId)+'&aluno='+encodeURIComponent(alunoId)+'&role=aluno';
-  window.open(url,'aros_sala_'+simId+'_'+alunoId,'width=1280,height=800');
+  window.open(url,'aros_sala_'+simId+'_'+alunoId);
 };
 
 window.searchAluno=()=>{
@@ -27592,7 +27806,15 @@ window.backFromCkFill=()=>{
 
 // ── Load sim students for checklist ──────────────────────────────────────────
 window.loadCkSim=async()=>{
-  _ckSimId=document.getElementById('ck-sim-sel').value;
+  const novoSimId=document.getElementById('ck-sim-sel').value;
+  // Encerra projeções ativas da sim anterior antes de trocar — senão ao projetar um
+  // caso novo, o código detecta _projAtivo[ci] existente e reabre a janela do sim antigo.
+  if(_ckSimId&&novoSimId!==_ckSimId){
+    for(const ci of Object.keys(_projAtivo)){
+      try{await encerrarProjecao(Number(ci));}catch(_){}
+    }
+  }
+  _ckSimId=novoSimId;
   const studentList=document.getElementById('ck-student-list');
   const noTpl=document.getElementById('ck-no-template');
   if(!_ckSimId){studentList?.classList.add('hidden');noTpl?.classList.add('hidden');return;}
@@ -28699,6 +28921,14 @@ window.saveCkCaso=async(ci)=>{
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
   const blocoKey=_ckBloco||'criar';
   const blocoResp=resp[blocoKey];if(!blocoResp)return;
+  // Guard: bloco já finalizado — alterar exige re-recalcular nota, então confirma antes.
+  if(blocoResp.finalizado){
+    const ok=confirm('Esse bloco já foi finalizado e a nota calculada.\n\nAo salvar de novo, a nota será recalculada automaticamente. Continuar?');
+    if(!ok)return;
+    // Reseta pra estado não-finalizado; o auto-finalize lá embaixo recalcula se o bloco
+    // continuar verde, ou deixa não-finalizado se o user introduzir pendência.
+    blocoResp.finalizado=false;
+  }
   const cr=blocoResp.casos?.[ci]||{};
 
   // Check for pending items (warn but allow saving)
