@@ -28950,25 +28950,27 @@ window.saveCkCaso=async(ci)=>{
     // continuar verde, ou deixa não-finalizado se o user introduzir pendência.
     blocoResp.finalizado=false;
   }
-  const cr=blocoResp.casos?.[ci]||{};
+  // Garante que o caso existe (necessário pro auto-fill abaixo)
+  if(!blocoResp.casos[ci])blocoResp.casos[ci]={itens:{},habilidades:{},feedback:'',prof:''};
+  if(!blocoResp.casos[ci].itens)blocoResp.casos[ci].itens={};
+  const cr=blocoResp.casos[ci];
 
-  // Check for pending items (warn but allow saving)
+  // === REGRA: ao salvar, itens positivos não marcados viram 'errado' automaticamente.
+  // Negativos ficam intocados — só aplicam penalidade quando o prof marcar explicitamente.
   const template=window._ckTemplateCurrent||_ckTemplate?.criar||_ckTemplate;const caso=template?.casos?.[ci];
   const perguntas=caso?.perguntas||[];
-  const itensFaltando=[];
+  let autoFillCount=0;
   perguntas.forEach((perg,pi)=>{
-    (perg.itens||[]).forEach((_,ii)=>{
-      if(!cr.itens?.[`${pi}_${ii}`]){
-        const lbl=String.fromCharCode(65+ii);
-        itensFaltando.push(`Pergunta ${pi+1} - Item ${lbl}`);
-      }
+    (perg.itens||[]).forEach((it,ii)=>{
+      if(it.negativo)return; // negativos: missing = sem penalidade (mantém)
+      const k=`${pi}_${ii}`;
+      if(!cr.itens[k]){cr.itens[k]='errado';autoFillCount++;}
     });
   });
-  const temPendencia=itensFaltando.length>0;
-  if(temPendencia){
-    const continuar=confirm('Há itens não preenchidos:\n\n'+itensFaltando.join('\n')+'\n\nDeseja salvar mesmo assim? O caso ficará marcado como pendente.');
-    if(!continuar)return;
-  }
+
+  // Pendência só faz sentido pra negativos (opcionais) — agora positivos sempre estão preenchidos.
+  // Mantém temPendencia=false porque negativo não é "faltando", é "não aplicável".
+  const temPendencia=false;
 
   const temHab=Object.values(cr.habilidades||{}).some(v=>v>0);
   const fbVal=(document.getElementById(`ck-fb-caso-${ci}`)?.value||cr.feedback||'').trim();
@@ -28993,7 +28995,7 @@ window.saveCkCaso=async(ci)=>{
   try{
     await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),removeUndefined(resp),{merge:true});
     // AUDIT — rede de segurança pra recuperar caso some/sobreescrever
-    try{audit('CK_CASO_SALVO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey,ci},{before:_auditBefore,after:{caso:_ckSnapshot(blocoResp.casos?.[ci]),finalizado:blocoResp.finalizado},meta:{nomeAluno:(_ckStudents.find(x=>x.id===_ckStudentId)||{}).nome||''}});}catch(_){}
+    try{audit('CK_CASO_SALVO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey,ci},{before:_auditBefore,after:{caso:_ckSnapshot(blocoResp.casos?.[ci]),finalizado:blocoResp.finalizado},meta:{nomeAluno:(_ckStudents.find(x=>x.id===_ckStudentId)||{}).nome||'',autoFillErrado:autoFillCount}});}catch(_){}
     // Show success message, close caso, re-render
     const msgEl=document.getElementById(`ck-save-msg-${ci}`);
     if(msgEl){msgEl.style.display='inline';setTimeout(()=>{msgEl.style.display='none';},2000);}
