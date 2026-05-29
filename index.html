@@ -795,7 +795,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 .rt-tb button{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:3px 8px;font-size:11px;cursor:pointer;border-radius:3px;font-weight:600;min-width:26px;line-height:1.2;font-family:inherit}
 .rt-tb button:hover{background:var(--bg)}
 .rt-tb button:active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.rt-ed{min-height:60px;padding:8px 10px;border:1px solid var(--border);border-radius:0 0 5px 5px;background:var(--bg2);color:var(--text);font-family:inherit;font-size:13px;line-height:1.5;outline:none;transition:border-color .15s;overflow-wrap:break-word;word-wrap:break-word}
+.rt-ed{min-height:60px;padding:8px 10px;border:1px solid var(--border);border-radius:0 0 5px 5px;background:var(--bg2);color:var(--text);font-family:inherit;font-size:13px;line-height:1.5;outline:none;transition:border-color .15s;overflow-wrap:break-word;word-wrap:break-word;text-align:justify;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none}
 .rt-ed:focus{border-color:var(--accent)}
 .rt-ed b,.rt-ed strong{font-weight:700}
 .rt-ed i,.rt-ed em{font-style:italic}
@@ -808,6 +808,11 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 .sl-card{position:relative;border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,var(--bg2) 0%,color-mix(in srgb, var(--bg2) 96%, var(--bg)) 100%);overflow:hidden;transition:border-color .25s cubic-bezier(.4,0,.2,1),box-shadow .25s cubic-bezier(.4,0,.2,1),transform .15s}
 .sl-card:hover{border-color:color-mix(in srgb, var(--accent) 40%, var(--border));box-shadow:0 6px 24px -10px color-mix(in srgb, var(--accent) 35%, transparent)}
 .sl-card.open{border-color:var(--accent);box-shadow:0 12px 36px -14px color-mix(in srgb, var(--accent) 45%, transparent),0 0 0 1px var(--accent-dim) inset}
+.sl-card.drag-over{box-shadow:0 0 0 2px var(--accent),0 10px 26px -12px color-mix(in srgb, var(--accent) 50%, transparent);transform:translateY(-2px)}
+.sl-card.dragging{opacity:.45}
+.sl-drag{cursor:grab;font-size:16px;color:var(--t2);transition:color .15s,background .15s;user-select:none;padding:4px 6px;border-radius:5px;line-height:1;flex-shrink:0}
+.sl-drag:hover{color:var(--accent);background:var(--accent-dim)}
+.sl-drag:active{cursor:grabbing}
 .sl-card-head{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;user-select:none;background:linear-gradient(180deg,rgba(47,129,247,.04),transparent);transition:background .2s}
 .sl-card-head:hover{background:linear-gradient(180deg,rgba(47,129,247,.08),transparent)}
 .sl-caret{font-size:11px;color:var(--t2);transition:transform .25s cubic-bezier(.4,0,.2,1);display:inline-block;width:14px;flex-shrink:0;transform:rotate(0deg)}
@@ -816,7 +821,9 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 .sl-badge-tipo{font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;padding:4px 9px;border-radius:999px;flex-shrink:0;border:1px solid currentColor;background:color-mix(in srgb, currentColor 12%, transparent)}
 .sl-snippet{flex:1;min-width:0;font-size:12.5px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
 .sl-head-acts{display:flex;gap:5px;flex-shrink:0}
-.sl-head-acts button{background:var(--bg);border:1px solid var(--border);color:var(--t2);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:11px;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}
+.sl-head-acts button{background:var(--bg);border:1px solid var(--border);color:var(--t2);height:30px;padding:0 10px;min-width:30px;border-radius:7px;cursor:pointer;font-size:11px;display:inline-flex;align-items:center;justify-content:center;gap:3px;transition:all .15s;white-space:nowrap;font-family:inherit}
+.sl-head-acts button.del{padding:0;min-width:30px}
+.sl-btn-lbl{font-weight:600;letter-spacing:.1px;line-height:1;font-size:11px}
 .sl-head-acts button:hover{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
 .sl-head-acts button:disabled{opacity:.3;cursor:not-allowed}
 .sl-head-acts button:disabled:hover{transform:none;background:var(--bg);border-color:var(--border);color:var(--t2)}
@@ -869,15 +876,18 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 .sl-img-wrap img{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
 .sl-img-rm{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:11px;display:inline-flex;align-items:center;justify-content:center;transition:background .15s,transform .15s}
 .sl-img-rm:hover{background:#f85149;transform:scale(1.08)}
-.sl-img-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1.5px dashed var(--border);border-radius:10px;padding:24px 18px;cursor:pointer;background:var(--bg3);min-height:108px;transition:all .2s;text-align:center}
+.sl-img-drop{display:flex;flex-direction:row;align-items:center;gap:10px;border:1.5px dashed var(--border);border-radius:9px;padding:9px 12px;cursor:pointer;background:var(--bg3);min-height:42px;transition:all .2s;text-align:left}
 .sl-img-drop:hover{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, var(--bg3))}
-.sl-img-drop:hover .sl-img-drop-icon{transform:scale(1.1)}
-.sl-img-drop-icon{font-size:26px;transition:transform .2s}
-.sl-img-drop-lbl{font-size:11.5px;color:var(--t2);line-height:1.4;font-weight:500}
+.sl-img-drop:hover .sl-img-drop-icon{transform:scale(1.12)}
+.sl-img-drop-icon{font-size:18px;transition:transform .2s;flex-shrink:0;line-height:1}
+.sl-img-drop-lbl{font-size:11.5px;color:var(--t2);line-height:1.3;font-weight:500;flex:1}
 /* Header e toolbar do modal */
 .sl-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 14px;background:linear-gradient(180deg,var(--bg2),var(--bg));border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .sl-toolbar-counter{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;color:var(--accent);background:var(--accent-dim);padding:4px 10px;border-radius:999px;font-weight:700;letter-spacing:.4px}
 .sl-toolbar-sep{width:1px;height:20px;background:var(--border);margin:0 2px}
+/* 👁 ativo: highlight do botão quando a janela de preview ao vivo está aberta */
+.sl-head-acts button.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px -2px color-mix(in srgb, var(--accent) 50%, transparent)}
+.sl-head-acts button.active:hover{background:var(--accent);color:#fff;transform:translateY(-1px)}
 .rt-wrap[data-empty="1"] .rt-ed{position:relative}
 .rt-wrap[data-empty="1"] .rt-ed:not(:focus):empty::before{content:attr(data-ph);color:var(--t2);opacity:.55;pointer-events:none}
 @keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 var(--accent-glow)}50%{box-shadow:0 0 0 6px transparent}}
@@ -2137,7 +2147,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-bonus-card-meta{display:flex;gap:4px;margin-top:2px;flex-wrap:wrap}
 #tab-produtos .pro-bonus-card-arrow{color:var(--t2);font-size:18px;font-weight:300;line-height:1;flex-shrink:0;transition:color .15s,transform .15s}
 #tab-produtos .pro-bonus-card:hover .pro-bonus-card-arrow{color:#fbbf24;transform:translateX(3px)}
-#tab-produtos .pro-text-block{font-size:14px;line-height:1.6;color:var(--text);max-width:820px;white-space:pre-wrap;text-align:justify}
+#tab-produtos .pro-text-block{font-size:14px;line-height:1.6;color:var(--text);max-width:820px;white-space:pre-wrap;text-align:justify;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none}
 
 /* Features renderizam uma por linha (não mais 2 colunas) — facilita scanning
    vertical, especialmente quando descrições/diferenciais ficam longos. */
@@ -7539,16 +7549,17 @@ body.pro-rt-fs-on{overflow:hidden}
     #slides-preview .slide-perg{flex:1;display:flex;flex-direction:column;gap:10px;width:100%;min-height:0}
     #slides-preview .slide-perg .pcaso{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(16px,1.9vw,30px);font-weight:700;color:#000;line-height:1;letter-spacing:-.5px}
     #slides-preview .slide-perg .penun-label{font-size:clamp(18px,1.8vw,26px);font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
-    #slides-preview .slide-perg .penun{font-size:clamp(14px,1.3vw,22px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify}
+    #slides-preview .slide-perg .penun{font-size:clamp(14px,1.3vw,22px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none}
     #slides-preview .slide-perg .penun-img{display:flex;justify-content:center;align-items:center;margin:8px 0;max-height:50vh;flex:0 1 auto;overflow:hidden}
     #slides-preview .slide-perg .penun-img img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;border-radius:4px}
     #slides-preview .slide-perg .pbody.dir .ptext-col .penun-img{max-height:35vh}
     #slides-preview .slide-perg .pperg{font-size:clamp(18px,1.8vw,26px);font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
-    #slides-preview .slide-perg .ptxt{font-size:clamp(14px,1.3vw,22px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify}
+    #slides-preview .slide-perg .ptxt{font-size:clamp(14px,1.3vw,22px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none}
     #slides-preview .slide-perg .pbody{display:flex;gap:28px;min-height:0;align-items:flex-start;margin-top:6px}
     #slides-preview .slide-perg .pbody.dir{flex-direction:row;flex:1 1 auto}
     #slides-preview .slide-perg .pbody.esq{flex-direction:row;flex:1 1 auto}
-    #slides-preview .slide-perg .pbody.baixo,#slides-preview .slide-perg .pbody.cima,#slides-preview .slide-perg .pbody.grande{flex-direction:column;flex:0 1 calc(50vh * var(--img-size, 1));max-height:calc(50vh * var(--img-size, 1));overflow:hidden;width:100%}
+    #slides-preview .slide-perg .pbody.baixo,#slides-preview .slide-perg .pbody.cima,#slides-preview .slide-perg .pbody.grande{flex-direction:column;flex:1 1 0;min-height:0;overflow:hidden;width:100%}
+    #slides-preview .slide-perg .pbody.baixo .pimg-col img,#slides-preview .slide-perg .pbody.cima .pimg-col img,#slides-preview .slide-perg .pbody.grande .pimg-col img{transform:scale(var(--img-size, 1));transform-origin:center}
     #slides-preview .slide-perg .ptext-col{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;overflow:hidden}
     #slides-preview .slide-perg .pimg-col{display:flex;align-items:center;justify-content:center;min-height:0}
     #slides-preview .slide-perg .pbody.dir .pimg-col,#slides-preview .slide-perg .pbody.esq .pimg-col{flex:0 0 calc(45% * var(--img-size, 1));max-width:calc(45% * var(--img-size, 1));align-self:stretch}
@@ -7557,8 +7568,10 @@ body.pro-rt-fs-on{overflow:hidden}
     #slides-preview .slide-perg .pimg-col img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
     /* textScale na preview do modal */
     #slides-preview .slide-perg .pcaso{font-size:calc(clamp(16px,1.9vw,30px) * var(--txt-scale, 1))}
-    #slides-preview .slide-perg .penun-label,#slides-preview .slide-perg .pperg{font-size:calc(clamp(18px,1.8vw,26px) * var(--txt-scale, 1))}
-    #slides-preview .slide-perg .penun,#slides-preview .slide-perg .ptxt{font-size:calc(clamp(14px,1.3vw,22px) * var(--txt-scale, 1))}
+    #slides-preview .slide-perg .penun-label{font-size:calc(clamp(18px,1.8vw,26px) * var(--txt-enun, var(--txt-scale, 1)))}
+    #slides-preview .slide-perg .pperg{font-size:calc(clamp(18px,1.8vw,26px) * var(--txt-perg, var(--txt-scale, 1)))}
+    #slides-preview .slide-perg .penun{font-size:calc(clamp(14px,1.3vw,22px) * var(--txt-enun, var(--txt-scale, 1)))}
+    #slides-preview .slide-perg .ptxt{font-size:calc(clamp(14px,1.3vw,22px) * var(--txt-perg, var(--txt-scale, 1)))}
     #slides-preview .sp-nav{height:52px;background:#f7f7f7;border-top:1px solid #e5e5e5;display:flex;align-items:center;justify-content:center;gap:10px}
     #slides-preview .sp-nav button{background:#fff;border:1px solid #ccc;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;color:#333;font-family:inherit}
     #slides-preview .sp-nav button:hover:not(:disabled){background:#eee}
@@ -7580,7 +7593,7 @@ body.pro-rt-fs-on{overflow:hidden}
 </div>
 
 <!-- ══ MODAL: Slides de projeção ══ -->
-<div class="mo hidden" id="modal-slides">
+<div class="mo hidden" id="modal-slides" data-no-backdrop-close>
   <div class="md" style="max-width:980px">
     <div class="mh">
       <div><div class="m-title">🎬 Slides de projeção</div><div class="m-sub" id="msl-sub">Sequência exibida ao aluno durante o simulado</div></div>
@@ -7592,8 +7605,7 @@ body.pro-rt-fs-on{overflow:hidden}
         <button class="btn btn-s btn-sm" onclick="slidesRegerarPadrao()" title="Recria os slides a partir do enunciado e perguntas do caso">🔄 Regenerar padrão</button>
         <button class="btn btn-p btn-sm" onclick="previewSlides()" title="Veja como os slides serão exibidos ao aluno">👁 Pré-visualizar</button>
         <span class="sl-toolbar-sep"></span>
-        <button class="btn btn-s btn-sm" onclick="expandAllSlides()" title="Abrir todos os slides" style="font-size:11px">⊞ Expandir todos</button>
-        <button class="btn btn-s btn-sm" onclick="collapseAllSlides()" title="Fechar todos os slides" style="font-size:11px">⊟ Recolher todos</button>
+        <button class="btn btn-s btn-sm" id="msl-toggle-all-btn" onclick="toggleAllSlides()" title="Abrir ou fechar todos os slides" style="font-size:11px">⊞ Expandir todos</button>
         <span style="flex:1"></span>
         <span class="sl-toolbar-counter" id="msl-counter">0 slides</span>
       </div>
@@ -8110,18 +8122,17 @@ async function _initProjecao(simId,casoId){
     .slide-perg{flex:1;display:flex;flex-direction:column;gap:10px;width:100%;min-height:0}
     .slide-perg .pcaso{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(20px,2.25vw,36px);font-weight:700;color:#000;line-height:1;letter-spacing:-.5px}
     .slide-perg .penun-label{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(20px,2vw,28px);font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
-    .slide-perg .penun{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(16px,1.5vw,24px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify}
+    .slide-perg .penun{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(16px,1.5vw,24px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none}
     .slide-perg .penun-img{display:flex;justify-content:center;align-items:center;margin:10px 0;max-height:50vh;flex:0 1 auto;overflow:hidden}
     .slide-perg .penun-img img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;border-radius:4px}
     .slide-perg .pbody.dir .ptext-col .penun-img{max-height:35vh}
     .slide-perg .pperg{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(20px,2vw,28px);font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
-    .slide-perg .ptxt{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(16px,1.5vw,24px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify}
+    .slide-perg .ptxt{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(16px,1.5vw,24px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none}
     .slide-perg .pbody{display:flex;gap:32px;min-height:0;align-items:flex-start;margin-top:8px}
     .slide-perg .pbody.dir{flex-direction:row;flex:1 1 auto}
     .slide-perg .pbody.esq{flex-direction:row;flex:1 1 auto}
-    .slide-perg .pbody.baixo{flex-direction:column;flex:0 1 calc(50vh * var(--img-size, 1));max-height:calc(50vh * var(--img-size, 1));overflow:hidden;width:100%}
-    .slide-perg .pbody.cima{flex-direction:column;flex:0 1 calc(50vh * var(--img-size, 1));max-height:calc(50vh * var(--img-size, 1));overflow:hidden;width:100%}
-    .slide-perg .pbody.grande{flex-direction:column;flex:0 1 calc(50vh * var(--img-size, 1));max-height:calc(50vh * var(--img-size, 1));overflow:hidden;width:100%}
+    .slide-perg .pbody.baixo,.slide-perg .pbody.cima,.slide-perg .pbody.grande{flex-direction:column;flex:1 1 0;min-height:0;overflow:hidden;width:100%}
+    .slide-perg .pbody.baixo .pimg-col img,.slide-perg .pbody.cima .pimg-col img,.slide-perg .pbody.grande .pimg-col img{transform:scale(var(--img-size, 1));transform-origin:center}
     .slide-perg .ptext-col{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0;overflow:hidden}
     .slide-perg .pimg-col{display:flex;align-items:center;justify-content:center;min-height:0}
     .slide-perg .pbody.dir .pimg-col,.slide-perg .pbody.esq .pimg-col{flex:0 0 calc(45% * var(--img-size, 1));max-width:calc(45% * var(--img-size, 1));align-self:stretch}
@@ -8131,8 +8142,10 @@ async function _initProjecao(simId,casoId){
     .slide-perg .pimg-col img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
     /* textScale: multiplica todos os tamanhos de fonte por var(--txt-scale) */
     .slide-perg .pcaso{font-size:calc(clamp(20px,2.25vw,36px) * var(--txt-scale, 1))}
-    .slide-perg .penun-label,.slide-perg .pperg{font-size:calc(clamp(20px,2vw,28px) * var(--txt-scale, 1))}
-    .slide-perg .penun,.slide-perg .ptxt{font-size:calc(clamp(16px,1.5vw,24px) * var(--txt-scale, 1))}
+    .slide-perg .penun-label{font-size:calc(clamp(20px,2vw,28px) * var(--txt-enun, var(--txt-scale, 1)))}
+    .slide-perg .pperg{font-size:calc(clamp(20px,2vw,28px) * var(--txt-perg, var(--txt-scale, 1)))}
+    .slide-perg .penun{font-size:calc(clamp(16px,1.5vw,24px) * var(--txt-enun, var(--txt-scale, 1)))}
+    .slide-perg .ptxt{font-size:calc(clamp(16px,1.5vw,24px) * var(--txt-perg, var(--txt-scale, 1)))}
     .slide-imgpura{flex:1;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
     .slide-imgpura img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
   </style>
@@ -8272,12 +8285,12 @@ async function _initProjecaoLive(simId,alunoId,role){
     .slide-perg{flex:1;display:flex;flex-direction:column;gap:.56em;width:100%;min-height:0}
     .slide-perg .pcaso{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:1.78em;font-weight:700;color:#000;line-height:1;letter-spacing:-.02em}
     .slide-perg .penun-label{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:1.44em;font-weight:700;color:#000;line-height:1.15;margin-top:.22em;text-transform:uppercase}
-    .slide-perg .penun{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:1.22em;font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify}
+    .slide-perg .penun{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:1.22em;font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none}
     .slide-perg .penun-img{display:flex;justify-content:center;align-items:center;margin:.56em 0;max-height:25em;flex:0 1 auto;overflow:hidden}
     .slide-perg .penun-img img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;border-radius:.22em}
     .slide-perg .pbody.dir .ptext-col .penun-img{max-height:17.5em}
     .slide-perg .pperg{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:1.44em;font-weight:700;color:#000;line-height:1.15;margin-top:.22em;text-transform:uppercase}
-    .slide-perg .ptxt{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:1.22em;font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify}
+    .slide-perg .ptxt{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:1.22em;font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none}
     .slide-perg .pbody{display:flex;gap:1.78em;min-height:0;align-items:flex-start;margin-top:.44em}
     .slide-perg .pbody.dir{flex-direction:row;flex:1 1 auto}
     .slide-perg .pbody.baixo{flex-direction:column;flex:0 1 25em;max-height:25em;overflow:hidden;width:100%}
@@ -8301,21 +8314,36 @@ async function _initProjecaoLive(simId,alunoId,role){
     #proj-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none;touch-action:none}
     #proj-canvas.pen-ativa{pointer-events:auto;cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M3 21l2-6L17 3l4 4L9 19l-6 2z" fill="white"/><path d="M14 6l4 4"/><path d="M3 21l2.5-2.5" stroke="black" stroke-width="2"/></svg>') 3 21, crosshair}
     #proj-canvas.eraser-ativa{pointer-events:auto;cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="9" rx="1.6" fill="pink" stroke="black" stroke-width="1.5"/><rect x="3" y="9" width="6" height="9" rx="1.6" fill="white" stroke="black" stroke-width="1.5"/><line x1="9" y1="9" x2="9" y2="18" stroke="black" stroke-width="1.2"/></svg>') 12 13, cell}
-    #draw-toolbar{position:fixed;bottom:18px;right:18px;z-index:20;display:flex;gap:8px;align-items:center;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);border:1px solid #333;border-radius:10px;padding:8px 10px;box-shadow:0 6px 24px rgba(0,0,0,.45);font-family:-apple-system,Segoe UI,Roboto,sans-serif}
-    #draw-toolbar button{background:#1a1a1a;color:#fff;border:1px solid #333;border-radius:6px;padding:7px 13px;cursor:pointer;font-size:12.5px;font-weight:600;font-family:inherit;transition:background .15s,border-color .15s,box-shadow .15s}
+    /* Barra de desenho — inline no #proj-timer (entre cronômetro e nav buttons).
+       Visível pra todos porque a iframe do PIP do prof carrega como role=aluno,
+       e é nessa iframe que o prof desenha. */
+    #draw-toolbar{display:inline-flex;gap:6px;align-items:center;font-family:-apple-system,Segoe UI,Roboto,sans-serif;border-left:1px solid #333;padding-left:12px;margin-left:4px}
+    #draw-toolbar button{background:#1a1a1a;color:#fff;border:1px solid #333;border-radius:4px;padding:6px 11px;cursor:pointer;font-size:12.5px;font-weight:600;font-family:inherit;transition:background .15s,border-color .15s,box-shadow .15s;letter-spacing:normal}
     #draw-toolbar button:hover{background:#252525;border-color:#444}
-    #draw-toolbar button.danger{color:#ff7b7b;border-color:#553}
+    #draw-toolbar button.danger{color:#ff7b7b;border-color:#553;background:transparent}
     #draw-toolbar button#btn-pen-toggle.ativo{background:var(--accent,#2f81f7);border-color:var(--accent,#2f81f7);color:#fff;box-shadow:0 0 0 3px rgba(47,129,247,.3)}
     #draw-toolbar button#btn-eraser.ativo{background:#fff;border-color:#fff;color:#000;box-shadow:0 0 0 3px rgba(255,255,255,.3)}
-    #draw-toolbar button#btn-eraser.ativo{background:#fff;border-color:#fff;color:#000;box-shadow:0 0 0 3px rgba(255,255,255,.3)}
-    #draw-toolbar #pen-colors{display:flex;gap:5px;align-items:center;padding:0 4px;border-left:1px solid #333;border-right:1px solid #333;margin:0 4px;height:30px}
+    #draw-toolbar #pen-colors{display:flex;gap:4px;align-items:center;padding:0 4px;height:28px}
     #draw-toolbar #pen-colors.hidden{display:none}
-    #draw-toolbar .color-btn{width:22px;height:22px;padding:0;border-radius:50%;border:2px solid #555;cursor:pointer;transition:transform .12s,border-color .15s,box-shadow .15s}
+    #draw-toolbar .color-btn{width:20px;height:20px;padding:0;border-radius:50%;border:2px solid #555;cursor:pointer;transition:transform .12s,border-color .15s,box-shadow .15s;letter-spacing:normal}
     #draw-toolbar .color-btn:hover{transform:scale(1.15)}
-    #draw-toolbar .color-btn.selected{border-color:#fff;box-shadow:0 0 0 2px var(--accent,#2f81f7),0 0 12px rgba(255,255,255,.4)}
+    #draw-toolbar .color-btn.selected{border-color:#fff;box-shadow:0 0 0 2px var(--accent,#2f81f7),0 0 10px rgba(255,255,255,.4)}
   </style>
   <div id="proj-timer">
     <span class="tval">00:00</span>
+    <span id="draw-toolbar">
+      <button id="btn-pen-toggle" title="Liga/desliga modo caneta">✏️ Caneta</button>
+      <span id="pen-colors" class="hidden">
+        <button class="color-btn" data-color="#dc2626" title="Vermelho" style="background:#dc2626"></button>
+        <button class="color-btn" data-color="#2563eb" title="Azul" style="background:#2563eb"></button>
+        <button class="color-btn" data-color="#16a34a" title="Verde" style="background:#16a34a"></button>
+        <button class="color-btn" data-color="#eab308" title="Amarelo" style="background:#eab308"></button>
+        <button class="color-btn" data-color="#000000" title="Preto" style="background:#000000"></button>
+        <button class="color-btn" data-color="#ffffff" title="Branco" style="background:#ffffff"></button>
+      </span>
+      <button id="btn-eraser" title="Borracha — apaga o traço inteiro ao passar por cima"><svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:-2px;margin-right:3px"><rect x="3" y="9" width="18" height="9" rx="1.6" fill="#fda4af" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="9" width="6" height="9" rx="1.6" fill="#fff" stroke="currentColor" stroke-width="1.5"/><line x1="9" y1="9" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/></svg>Borracha</button>
+      <button id="btn-limpar" class="danger" title="Apaga todos os traços deste slide">🗑 Limpar</button>
+    </span>
     <span class="ctrl-bar">
       <button id="btn-prev" title="Anterior">◀</button>
       <span class="pos" id="proj-pos">1 / 1</span>
@@ -8329,19 +8357,6 @@ async function _initProjecaoLive(simId,alunoId,role){
       <div id="proj-stage"></div>
       <canvas id="proj-canvas"></canvas>
     </div>
-  </div>
-  <div id="draw-toolbar">
-    <button id="btn-pen-toggle" title="Liga/desliga modo caneta">✏️ Caneta</button>
-    <span id="pen-colors" class="hidden">
-      <button class="color-btn" data-color="#dc2626" title="Vermelho" style="background:#dc2626"></button>
-      <button class="color-btn" data-color="#2563eb" title="Azul" style="background:#2563eb"></button>
-      <button class="color-btn" data-color="#16a34a" title="Verde" style="background:#16a34a"></button>
-      <button class="color-btn" data-color="#eab308" title="Amarelo" style="background:#eab308"></button>
-      <button class="color-btn" data-color="#000000" title="Preto" style="background:#000000"></button>
-      <button class="color-btn" data-color="#ffffff" title="Branco" style="background:#ffffff"></button>
-    </span>
-    <button id="btn-eraser" title="Borracha — apaga o traço inteiro ao passar por cima"><svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:-3px;margin-right:4px"><rect x="3" y="9" width="18" height="9" rx="1.6" fill="#fda4af" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="9" width="6" height="9" rx="1.6" fill="#fff" stroke="currentColor" stroke-width="1.5"/><line x1="9" y1="9" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/></svg>Borracha</button>
-    <button id="btn-limpar" class="danger" title="Apaga todos os traços deste slide">🗑 Limpar</button>
   </div>`;
   // Refs cacheadas — sobrevivem a um eventual transplante do DOM pra janela PIP.
   // (document.getElementById passaria a apontar pro doc errado se chamado depois do move.)
@@ -8847,10 +8862,14 @@ async function _initProjecaoLive(simId,alunoId,role){
 
 async function _initPreview(){
   document.title='Preview Slides · AROS';
-  let slides=[];
-  try{slides=JSON.parse(localStorage.getItem('aros_preview_slides')||'[]');}catch(e){}
+  // Filter opcional: se a URL tem ?slideId=X, mostra só esse slide (visão individual ao vivo)
+  const _previewParams=new URLSearchParams(location.search);
+  const filterSlideId=_previewParams.get('slideId');
+  let allSlides=[];
+  try{allSlides=JSON.parse(localStorage.getItem('aros_preview_slides')||'[]');}catch(e){}
+  allSlides=allSlides.map(_slideMigrar);
+  let slides=filterSlideId?allSlides.filter(s=>s.id===filterSlideId):allSlides;
   if(!slides.length){document.body.innerHTML='<div style="color:#fff;font-family:sans-serif;padding:40px;background:#111;min-height:100vh">Nenhum slide pra pré-visualizar.</div>';return;}
-  slides=slides.map(_slideMigrar);
   let idx=0;
   document.body.innerHTML=`<style>
     html,body{margin:0;padding:0;background:#fff;color:#000;font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;overflow:hidden;height:100vh}
@@ -8865,21 +8884,22 @@ async function _initPreview(){
     .slide-capa .sim{font-family:inherit;font-size:clamp(42px,5.5vw,80px);font-weight:700;color:#000;line-height:1.1}
     .slide-capa .caso{font-family:inherit;font-size:clamp(42px,5.5vw,80px);font-weight:700;color:#000;line-height:1.1}
     .slide-perg{flex:1;display:flex;flex-direction:column;gap:10px;width:100%;min-height:0}
-    .slide-perg .pcaso{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(20px,2.25vw,36px);font-weight:700;color:#000;line-height:1;letter-spacing:-.5px}
-    .slide-perg .penun-label{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(20px,2vw,28px);font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
-    .slide-perg .penun{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(16px,1.5vw,24px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify}
+    .slide-perg .pcaso{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:calc(clamp(20px,2.25vw,36px) * var(--txt-scale, 1));font-weight:700;color:#000;line-height:1;letter-spacing:-.5px}
+    .slide-perg .penun-label{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:calc(clamp(20px,2vw,28px) * var(--txt-enun, var(--txt-scale, 1)));font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
+    .slide-perg .penun{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:calc(clamp(16px,1.5vw,24px) * var(--txt-enun, var(--txt-scale, 1)));font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none}
     .slide-perg .penun-img{display:flex;justify-content:center;align-items:center;margin:10px 0;max-height:50vh;flex:0 1 auto;overflow:hidden}
     .slide-perg .penun-img img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;border-radius:4px}
-    .slide-perg .pbody.dir .ptext-col .penun-img{max-height:35vh}
-    .slide-perg .pperg{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(20px,2vw,28px);font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
-    .slide-perg .ptxt{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:clamp(16px,1.5vw,24px);font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify}
+    .slide-perg .pbody.dir .ptext-col .penun-img,.slide-perg .pbody.esq .ptext-col .penun-img{max-height:35vh}
+    .slide-perg .pperg{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:calc(clamp(20px,2vw,28px) * var(--txt-perg, var(--txt-scale, 1)));font-weight:700;color:#000;line-height:1.15;margin-top:4px;text-transform:uppercase}
+    .slide-perg .ptxt{font-family:Calibri,'Open Sans','Helvetica Neue',Arial,sans-serif;font-size:calc(clamp(16px,1.5vw,24px) * var(--txt-perg, var(--txt-scale, 1)));font-weight:400;color:#000;line-height:1.4;white-space:pre-wrap;text-align:justify;hyphens:none;-webkit-hyphens:none;-moz-hyphens:none}
     .slide-perg .pbody{display:flex;gap:32px;min-height:0;align-items:flex-start;margin-top:8px}
-    .slide-perg .pbody.dir{flex-direction:row;flex:1 1 auto}
-    .slide-perg .pbody.baixo,.slide-perg .pbody.grande{flex-direction:column;flex:0 1 50vh;max-height:50vh;overflow:hidden;width:100%}
+    .slide-perg .pbody.dir,.slide-perg .pbody.esq{flex-direction:row;flex:1 1 auto}
+    .slide-perg .pbody.baixo,.slide-perg .pbody.cima,.slide-perg .pbody.grande{flex-direction:column;flex:1 1 0;min-height:0;overflow:hidden;width:100%}
+    .slide-perg .pbody.baixo .pimg-col img,.slide-perg .pbody.cima .pimg-col img,.slide-perg .pbody.grande .pimg-col img{transform:scale(var(--img-size, 1));transform-origin:center}
     .slide-perg .ptext-col{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0;overflow:hidden}
     .slide-perg .pimg-col{display:flex;align-items:center;justify-content:center;min-height:0}
-    .slide-perg .pbody.dir .pimg-col{flex:0 0 45%;max-width:45%;align-self:stretch}
-    .slide-perg .pbody.baixo .pimg-col,.slide-perg .pbody.grande .pimg-col{width:100%;flex:1;min-height:0}
+    .slide-perg .pbody.dir .pimg-col,.slide-perg .pbody.esq .pimg-col{flex:0 0 calc(45% * var(--img-size, 1));max-width:calc(45% * var(--img-size, 1));align-self:stretch}
+    .slide-perg .pbody.baixo .pimg-col,.slide-perg .pbody.cima .pimg-col,.slide-perg .pbody.grande .pimg-col{width:100%;flex:1;min-height:0}
     .slide-perg .pbody.grande .ptext-col{flex:0 0 auto}
     .slide-perg .pimg-col img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
     .slide-imgpura{flex:1;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
@@ -8917,6 +8937,31 @@ async function _initPreview(){
     else if(e.key==='End')go(Infinity);
     else if(e.key==='Escape')window.close();
   });
+  // Live updates do editor (BroadcastChannel) — refresca slides quando user edita
+  try{
+    const _ch=new BroadcastChannel('aros-slides-edit');
+    _ch.onmessage=(ev)=>{
+      if(!ev.data||ev.data.type!=='slides-update')return;
+      const fresh=(ev.data.slides||[]).map(_slideMigrar);
+      const next=filterSlideId?fresh.filter(s=>s.id===filterSlideId):fresh;
+      if(!next.length)return; // se o slide foi removido, não atualiza
+      slides.length=0;next.forEach(s=>slides.push(s));
+      // Mantém idx no range válido
+      if(idx>=slides.length)idx=slides.length-1;
+      render();
+    };
+  }catch(_){}
+  // Badge visual indicando que está ao vivo
+  const hdr=document.getElementById('pv-header');
+  if(hdr){
+    const live=document.createElement('span');
+    live.style.cssText='display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:#3fb950;margin-left:auto;padding-right:14px';
+    live.innerHTML='<span style="width:7px;height:7px;border-radius:50%;background:#3fb950;box-shadow:0 0 0 3px rgba(63,185,80,.18),0 0 8px rgba(63,185,80,.5);animation:pvLivePulse 1.8s ease-in-out infinite"></span>AO VIVO';
+    const styleEl=document.createElement('style');
+    styleEl.textContent='@keyframes pvLivePulse{0%,100%{opacity:1}50%{opacity:.55}}';
+    document.head.appendChild(styleEl);
+    hdr.appendChild(live);
+  }
   render();
 }
 
@@ -8934,11 +8979,12 @@ function _renderSlideHTML(s){
     </div>`;
   }
   const pos=(s.imagemPos||'baixo');
-  // Tamanho da imagem (20-100%, default 100). Texto (70-150%, default 100).
-  // Aplicados como CSS custom properties unitless (0.2 a 1.5) pra usar em calc().
+  // Tamanho da imagem (20-100%) + 2 sliders de texto independentes (Enunciado + Pergunta).
+  // Fallback: se textScaleEnun/Perg não existir, usa textScale legacy. Range 70-150%.
   const imgSize=Math.max(20,Math.min(100,parseInt(s.imagemSize)||100));
-  const txtScale=Math.max(70,Math.min(150,parseInt(s.textScale)||100));
-  const slideStyle=`--img-size:${(imgSize/100).toFixed(2)};--txt-scale:${(txtScale/100).toFixed(2)}`;
+  const enunSc=Math.max(70,Math.min(150,parseInt(s.textScaleEnun)||parseInt(s.textScale)||100));
+  const pergSc=Math.max(70,Math.min(150,parseInt(s.textScalePerg)||parseInt(s.textScale)||100));
+  const slideStyle=`--img-size:${(imgSize/100).toFixed(2)};--txt-enun:${(enunSc/100).toFixed(2)};--txt-perg:${(pergSc/100).toFixed(2)};--txt-scale:${(enunSc/100).toFixed(2)}`;
   const ct=_escHtml(s.casoTitulo||'');
   const en=_ensureHTML(s.enunciado||'');
   const pt=_escHtml(s.pergTitulo||'');
@@ -29328,9 +29374,25 @@ function _slideSnippet(s){
 window.toggleSlideOpen=(i)=>{
   if(_slidesOpen.has(i))_slidesOpen.delete(i);else _slidesOpen.add(i);
   _slidesRender();
+  _updateToggleAllBtn();
 };
-window.expandAllSlides=()=>{_slidesEditList.forEach((_,i)=>_slidesOpen.add(i));_slidesRender();};
-window.collapseAllSlides=()=>{_slidesOpen.clear();_slidesRender();};
+window.expandAllSlides=()=>{_slidesEditList.forEach((_,i)=>_slidesOpen.add(i));_slidesRender();_updateToggleAllBtn();};
+window.collapseAllSlides=()=>{_slidesOpen.clear();_slidesRender();_updateToggleAllBtn();};
+// Toggle único: se TODOS abertos → recolhe; senão → expande tudo
+window.toggleAllSlides=()=>{
+  const total=_slidesEditList.length;
+  const abertos=_slidesOpen.size;
+  if(total>0&&abertos===total)collapseAllSlides();
+  else expandAllSlides();
+};
+function _updateToggleAllBtn(){
+  const btn=document.getElementById('msl-toggle-all-btn');if(!btn)return;
+  const total=_slidesEditList.length;
+  const abertos=_slidesOpen.size;
+  const tudoAberto=total>0&&abertos===total;
+  btn.textContent=tudoAberto?'⊟ Recolher todos':'⊞ Expandir todos';
+  btn.title=tudoAberto?'Fechar todos os slides':'Abrir todos os slides';
+}
 
 function gerarSlidesPadrao(caso,casoIdx){
   const slides=[];
@@ -29408,29 +29470,27 @@ function _slidesRender(){
   counter.textContent=_slidesEditList.length+' slide'+(_slidesEditList.length!==1?'s':'');
   if(!_slidesEditList.length){
     list.innerHTML='<div class="al al-i">Nenhum slide. Clique em "Adicionar slide" ou "Regenerar padrão".</div>';
+    _broadcastSlides();
     return;
   }
   list.innerHTML=_slidesEditList.map((s,i)=>_slideCardHTML(s,i)).join('');
+  _broadcastSlides();
 }
 
 // === Helpers do editor moderno (2026-05-29) ==================================
 function _slideCardHTML(s,i){
   const isOpen=_slidesOpen.has(i);
-  const tipoLabel=s.imagemPura?'🖼️ Imagem pronta':(s.capa?'🎯 Capa':'📝 Pergunta');
-  const tipoColor=s.imagemPura?'#fb8f44':(s.capa?'#2f81f7':'#3fb950');
-  const snippet=_slideSnippet(s);
-  const hasImg=!!s.imagem;
-  return `<div class="sl-card${isOpen?' open':''}" id="sl-card-${i}">
+  const pronto=s.imagemPura;
+  return `<div class="sl-card${isOpen?' open':''}" id="sl-card-${i}" data-idx="${i}"
+    ondragover="_slDragOver(event,${i})" ondragleave="_slDragLeave(event)" ondrop="_slDrop(event,${i})">
     <div class="sl-card-head" onclick="toggleSlideOpen(${i})">
+      <span class="sl-drag" draggable="true" ondragstart="_slDragStart(event,${i})" ondragend="_slDragEnd(event)" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span>
       <span class="sl-caret">▶</span>
       <span class="sl-badge-num">SLIDE ${i+1}</span>
-      <span class="sl-badge-tipo" style="color:${tipoColor}">${tipoLabel}</span>
-      ${hasImg?'<span style="font-size:13px" title="Tem imagem">📎</span>':''}
-      <span class="sl-snippet">${snippet||'<em style="opacity:.5">(vazio)</em>'}</span>
+      <span style="flex:1"></span>
       <div class="sl-head-acts" onclick="event.stopPropagation()">
-        <button onclick="slideToggleImagemPura(${i})" title="${s.imagemPura?'Voltar pra slide com texto':'Substituir por imagem pronta'}">${s.imagemPura?'↩':'🖼'}</button>
-        <button onclick="slideMove(${i},-1)" ${i===0?'disabled':''} title="Mover pra cima">▲</button>
-        <button onclick="slideMove(${i},1)" ${i===_slidesEditList.length-1?'disabled':''} title="Mover pra baixo">▼</button>
+        <button onclick="previewSlide(${i})" title="Abre janela de pré-visualização ao vivo (mesma que o aluno vê)">👁 <span class="sl-btn-lbl">Preview</span></button>
+        <button onclick="slideToggleImagemPura(${i})" title="${pronto?'Voltar pra slide automático (com texto e layout)':'Converter em slide pronto (só uma imagem)'}">${pronto?'↩':'🖼'} <span class="sl-btn-lbl">${pronto?'Slide automático':'Slide pronto'}</span></button>
         <button class="del" onclick="slideRemove(${i})" title="Remover">✕</button>
       </div>
     </div>
@@ -29440,6 +29500,7 @@ function _slideCardHTML(s,i){
 
 function _slideBodyHTML(s,i){
   const ec=v=>String(v||'').replace(/"/g,'&quot;');
+  // Big preview agora vive em popup flutuante (sl-floating-prev), não dentro do card.
   if(s.imagemPura){
     return `<div class="sl-fields">
       <div style="padding:16px 18px;background:var(--bg2);border:1px dashed var(--border);border-radius:10px;font-size:12.5px;color:var(--t2);line-height:1.55">
@@ -29469,18 +29530,22 @@ function _slideBodyHTML(s,i){
       <div class="sl-section-label">Enunciado</div>
       ${_rtEditor(s.enunciado,i,'enunciado','Paciente masculino, 56 anos...')}
       ${enunImgPreview}
+      <div class="sl-slider-wrap" style="margin-top:8px">
+        <div class="sl-slider-row"><span>📝 Tamanho do texto · Enunciado</span><span class="sl-slider-val" id="sl-txt-enun-val-${i}">${s.textScaleEnun||s.textScale||100}%</span></div>
+        <input type="range" class="sl-slider" min="70" max="150" step="5" value="${s.textScaleEnun||s.textScale||100}" oninput="_slideUpdateScale(${i},'textScaleEnun',this.value)"/>
+      </div>
     </div>
     <div>
       <div class="sl-section-label">Título da pergunta</div>
-      <input class="fc" value="${ec(s.pergTitulo)}" placeholder="Pergunta 1" oninput="_slidesEditList[${i}].pergTitulo=this.value" style="font-size:13.5px;font-weight:600"/>
+      <input class="fc" value="${ec(s.pergTitulo)}" placeholder="Pergunta 1" oninput="_slideFieldUpdate(${i},'pergTitulo',this.value)" style="font-size:13.5px;font-weight:600"/>
     </div>
     <div>
       <div class="sl-section-label">Texto da pergunta</div>
       ${_rtEditor(s.pergTexto,i,'pergTexto','Desenhe o polígono de Willis...')}
-    </div>
-    <div class="sl-slider-wrap" style="margin-top:4px">
-      <div class="sl-slider-row"><span>📝 Tamanho do texto</span><span class="sl-slider-val" id="sl-txt-val-${i}">${s.textScale||100}%</span></div>
-      <input type="range" class="sl-slider" min="70" max="150" step="5" value="${s.textScale||100}" oninput="_slideUpdateScale(${i},'textScale',this.value)"/>
+      <div class="sl-slider-wrap" style="margin-top:8px">
+        <div class="sl-slider-row"><span>📝 Tamanho do texto · Pergunta</span><span class="sl-slider-val" id="sl-txt-perg-val-${i}">${s.textScalePerg||s.textScale||100}%</span></div>
+        <input type="range" class="sl-slider" min="70" max="150" step="5" value="${s.textScalePerg||s.textScale||100}" oninput="_slideUpdateScale(${i},'textScalePerg',this.value)"/>
+      </div>
     </div>
   </div>`;
   const sideHtml=`<div class="sl-side">
@@ -29488,7 +29553,7 @@ function _slideBodyHTML(s,i){
     ${_slidePosPicker(s,i)}
     <div class="sl-slider-wrap">
       <div class="sl-slider-row"><span>🔍 Tamanho da imagem</span><span class="sl-slider-val" id="sl-img-val-${i}">${s.imagemSize||100}%</span></div>
-      <input type="range" class="sl-slider" min="20" max="100" step="5" value="${s.imagemSize||100}" oninput="_slideUpdateScale(${i},'imagemSize',this.value)"/>
+      <input type="range" class="sl-slider" min="20" max="200" step="5" value="${s.imagemSize||100}" oninput="_slideUpdateScale(${i},'imagemSize',this.value)"/>
     </div>
   </div>`;
   return fieldsHtml+sideHtml;
@@ -29503,7 +29568,7 @@ function _slideImgBox(s,i){
   }
   return `<label class="sl-img-drop">
     <span class="sl-img-drop-icon">🖼️</span>
-    <span class="sl-img-drop-lbl">Anexar imagem ou GIF<br><span style="opacity:.65">PNG/JPG/GIF até 15MB</span></span>
+    <span class="sl-img-drop-lbl">Anexar imagem ou GIF <span style="opacity:.65">· até 50MB</span></span>
     <input type="file" accept="image/*" onchange="slideUploadImg(${i},this.files[0]);this.value=''" style="display:none"/>
   </label>`;
 }
@@ -29531,12 +29596,103 @@ function _slidePosPicker(s,i){
 window._slideUpdateScale=(i,field,val)=>{
   const n=parseInt(val)||100;
   _slidesEditList[i][field]=n;
-  const el=document.getElementById(field==='imagemSize'?`sl-img-val-${i}`:`sl-txt-val-${i}`);
+  // Mapa de id do label de valor pra cada campo
+  const idMap={imagemSize:`sl-img-val-${i}`,textScale:`sl-txt-val-${i}`,textScaleEnun:`sl-txt-enun-val-${i}`,textScalePerg:`sl-txt-perg-val-${i}`};
+  const el=document.getElementById(idMap[field]);
   if(el)el.textContent=n+'%';
+  _updateMiniPrev(i);
 };
 window._slideSetPos=(i,pos)=>{
   _slidesEditList[i].imagemPos=pos;
-  _slidesRender(); // re-render só atualiza a classe `on` dos botões — slider mantém valor
+  _slidesRender(); // re-render só atualiza a classe `on` dos botões — preview redesenhado tb
+};
+// Update genérico pra campos texto plano (input ao invés de contenteditable)
+window._slideFieldUpdate=(i,field,val)=>{
+  _slidesEditList[i][field]=val;
+  _updateMiniPrev(i);
+};
+// === Pré-visualização ao vivo via BroadcastChannel ============================
+// Cada edição chama _updateMiniPrev → broadcast pra janela(s) de preview abertas.
+function _updateMiniPrev(i){_broadcastSlides();}
+// Lazy init do channel — só cria quando o editor é usado
+function _getSlChannel(){
+  if(!window._slEditChannel){
+    try{window._slEditChannel=new BroadcastChannel('aros-slides-edit');}catch(_){}
+  }
+  return window._slEditChannel;
+}
+let _slBroadcastScheduled=false;
+function _broadcastSlides(){
+  if(_slBroadcastScheduled)return;
+  _slBroadcastScheduled=true;
+  requestAnimationFrame(()=>{
+    _slBroadcastScheduled=false;
+    const ch=_getSlChannel();if(!ch)return;
+    try{
+      // localStorage atualizado pra novas janelas pegarem estado fresco no boot
+      localStorage.setItem('aros_preview_slides',JSON.stringify(_slidesEditList));
+      ch.postMessage({type:'slides-update',slides:_slidesEditList});
+    }catch(_){}
+  });
+}
+// Compat stubs (chamados em locais antigos que removeram o popup)
+function _hideFloatingPrev(){}
+// === Drag-and-drop pra reordenar slides ====================================
+window._slDragStart=(e,idx)=>{
+  window._slDragIdx=idx;
+  try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(idx));}catch(_){}
+  const card=document.getElementById('sl-card-'+idx);
+  if(card)card.classList.add('dragging');
+};
+window._slDragEnd=(e)=>{
+  document.querySelectorAll('.sl-card').forEach(c=>{c.classList.remove('drag-over');c.classList.remove('dragging');});
+  window._slDragIdx=null;
+};
+window._slDragOver=(e,idx)=>{
+  if(window._slDragIdx==null||window._slDragIdx===idx)return;
+  e.preventDefault();
+  try{e.dataTransfer.dropEffect='move';}catch(_){}
+  // só destaca o card alvo, remove dos outros
+  document.querySelectorAll('.sl-card.drag-over').forEach(c=>c.classList.remove('drag-over'));
+  e.currentTarget.classList.add('drag-over');
+};
+window._slDragLeave=(e)=>{
+  // Só remove se o cursor REALMENTE saiu do card (dragLeave dispara em children tb)
+  if(e.currentTarget.contains(e.relatedTarget))return;
+  e.currentTarget.classList.remove('drag-over');
+};
+window._slDrop=(e,targetIdx)=>{
+  e.preventDefault();
+  const fromIdx=window._slDragIdx;
+  document.querySelectorAll('.sl-card').forEach(c=>{c.classList.remove('drag-over');c.classList.remove('dragging');});
+  window._slDragIdx=null;
+  if(fromIdx==null||fromIdx===targetIdx)return;
+  const [moved]=_slidesEditList.splice(fromIdx,1);
+  _slidesEditList.splice(targetIdx,0,moved);
+  // Recalcula índices abertos: tudo entre as posições deslocadas muda 1
+  const wasOpen=Array.from(_slidesOpen);
+  const newOpen=new Set();
+  wasOpen.forEach(oldIdx=>{
+    let newIdx=oldIdx;
+    if(oldIdx===fromIdx)newIdx=targetIdx;
+    else if(fromIdx<targetIdx&&oldIdx>fromIdx&&oldIdx<=targetIdx)newIdx=oldIdx-1;
+    else if(fromIdx>targetIdx&&oldIdx>=targetIdx&&oldIdx<fromIdx)newIdx=oldIdx+1;
+    newOpen.add(newIdx);
+  });
+  _slidesOpen=newOpen;
+  _slidesRender();
+};
+
+// Pré-visualiza UM slide na janela real (mesma do aluno), com live updates via BroadcastChannel.
+// Janela usa named target — se já está aberta pra mesmo slide, browser foca; senão cria nova.
+window.previewSlide=(i)=>{
+  const s=_slidesEditList[i];if(!s)return;
+  if(!s.id)s.id=_slideUid();
+  // Atualiza localStorage com snapshot completo — preview window filtra pelo slideId
+  try{localStorage.setItem('aros_preview_slides',JSON.stringify(_slidesEditList));}catch(e){alert('Erro: '+e.message);return;}
+  const url=window.location.pathname+'?modo=preview&slideId='+encodeURIComponent(s.id);
+  const win=window.open(url,'aros_preview_'+s.id,'width=1280,height=800');
+  if(!win){alert('A janela foi bloqueada pelo navegador. Permita pop-ups e clique novamente.');return;}
 };
 
 // ── Mini editor de texto (B/I/U/A+/A-/limpar) ──
@@ -29551,8 +29707,8 @@ function _sanitizeSlideHTML(html){
       if(n.startsWith('on'))el.removeAttribute(a.name);
       else if(n==='href'&&/^javascript:/i.test(a.value))el.removeAttribute(a.name);
       else if(n==='style'){
-        // só permite font-size, font-weight, font-style, text-decoration
-        const safe=a.value.split(';').map(s=>s.trim()).filter(s=>/^(font-size|font-weight|font-style|text-decoration)\s*:/i.test(s)).join('; ');
+        // permite font-size, font-weight, font-style, text-decoration, text-align
+        const safe=a.value.split(';').map(s=>s.trim()).filter(s=>/^(font-size|font-weight|font-style|text-decoration|text-align)\s*:/i.test(s)).join('; ');
         if(safe)el.setAttribute('style',safe);else el.removeAttribute('style');
       }
     });
@@ -29573,8 +29729,11 @@ function _rtEditor(value,i,field,placeholder){
       <button type="button" onclick="rtCmd(this,'italic')" title="Itálico (Ctrl+I)"><i>I</i></button>
       <button type="button" onclick="rtCmd(this,'underline')" title="Sublinhado"><u>U</u></button>
       <span style="width:1px;background:var(--border);align-self:stretch;margin:2px 4px"></span>
-      <button type="button" onclick="rtCmd(this,'fontSize','5')" title="Aumentar">A+</button>
-      <button type="button" onclick="rtCmd(this,'fontSize','2')" title="Diminuir" style="font-size:9px">A-</button>
+      <button type="button" onclick="rtCmd(this,'justifyLeft')" title="Alinhar à esquerda"><svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" style="display:block"><rect x="1" y="2" width="12" height="1.4" rx=".4"/><rect x="1" y="5" width="8" height="1.4" rx=".4"/><rect x="1" y="8" width="11" height="1.4" rx=".4"/><rect x="1" y="11" width="6" height="1.4" rx=".4"/></svg></button>
+      <button type="button" onclick="rtCmd(this,'justifyCenter')" title="Centralizar"><svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" style="display:block"><rect x="1" y="2" width="12" height="1.4" rx=".4"/><rect x="3" y="5" width="8" height="1.4" rx=".4"/><rect x="1.5" y="8" width="11" height="1.4" rx=".4"/><rect x="4" y="11" width="6" height="1.4" rx=".4"/></svg></button>
+      <button type="button" onclick="rtCmd(this,'justifyRight')" title="Alinhar à direita"><svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" style="display:block"><rect x="1" y="2" width="12" height="1.4" rx=".4"/><rect x="5" y="5" width="8" height="1.4" rx=".4"/><rect x="2" y="8" width="11" height="1.4" rx=".4"/><rect x="7" y="11" width="6" height="1.4" rx=".4"/></svg></button>
+      <button type="button" onclick="rtCmd(this,'justifyFull')" title="Justificar (padrão)"><svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" style="display:block"><rect x="1" y="2" width="12" height="1.4" rx=".4"/><rect x="1" y="5" width="12" height="1.4" rx=".4"/><rect x="1" y="8" width="12" height="1.4" rx=".4"/><rect x="1" y="11" width="12" height="1.4" rx=".4"/></svg></button>
+      <span style="width:1px;background:var(--border);align-self:stretch;margin:2px 4px"></span>
       <button type="button" onclick="rtCmd(this,'removeFormat')" title="Limpar formatação">⌫</button>
     </div>
     <div class="rt-ed" contenteditable="true" data-i="${i}" data-field="${field}" data-ph="${ph}"
@@ -29596,9 +29755,12 @@ window.rtChanged=(ed)=>{
   const f=ed.dataset.field;
   if(isNaN(i)||!f||!_slidesEditList[i])return;
   _slidesEditList[i][f]=_sanitizeSlideHTML(ed.innerHTML);
+  _updateMiniPrev(i);
 };
 
 window.slideAdd=()=>{const i=_slidesEditList.length;_slidesEditList.push({id:_slideUid(),casoTitulo:'',enunciado:'',pergTitulo:'',pergTexto:'',imagem:'',imagemPos:'baixo',imagemSize:100,textScale:100});_slidesOpen.add(i);_slidesRender();};
+// Adiciona um slide já no modo "imagem pronta" (sem texto, só a imagem ocupa o slide inteiro)
+window.slideAddImagemPura=()=>{const i=_slidesEditList.length;_slidesEditList.push({id:_slideUid(),imagemPura:true,imagem:'',imagemPos:'baixo',imagemSize:100,textScale:100});_slidesOpen.add(i);_slidesRender();};
 window.slideToggleImagemPura=(i)=>{
   const s=_slidesEditList[i];if(!s)return;
   s.imagemPura=!s.imagemPura;
@@ -29610,7 +29772,7 @@ window.slideRemoveImg=(idx)=>{if(!confirm('Remover imagem deste slide?'))return;
 
 window.slideUploadImg=async(idx,f)=>{
   if(!f)return;
-  if(f.size>15*1024*1024){alert('Imagem muito grande (máx 15MB).');return;}
+  if(f.size>50*1024*1024){alert('Imagem muito grande (máx 50MB).');return;}
   if(!_ckSimId){alert('Simulado não identificado.');return;}
   const bloco=_ckBlocoEdit==='oral'?'oral':'criar';
   const caso=_tplBlocoObj(bloco).casos[_slidesEditCasoIdx];
@@ -29662,6 +29824,7 @@ window.saveSlidesModal=async()=>{
   caso.slidesManual=!_slidesIguaisAoPadrao(caso.slides,caso,_slidesEditCasoIdx);
   try{
     await _persistBlocoTemplate(bloco);
+    _hideFloatingPrev();window._slidesPrevShownFor=null;
     CM('modal-slides');
     renderTemplateEditor();
   }catch(e){
@@ -29712,9 +29875,9 @@ function renderProjPanel(ci,numSlides){
     <button onclick="event.stopPropagation();projecaoTimer(${ci},'reset')" title="Zerar cronômetro" style="${btnLbl}" onmouseover="${btnHover}" onmouseout="${btnOut}"><span>⟲</span><span>Zerar</span></button>
     <button onclick="event.stopPropagation();projecaoTimer(${ci},'${state.timerRunning?'pause':'play'}')" title="${state.timerRunning?'Pausar':'Iniciar'}" style="${btnIcon}" onmouseover="${btnHover}" onmouseout="${btnOut}">${state.timerRunning?'⏸':'▶'}</button>
     <span style="width:1px;height:18px;background:rgba(255,255,255,.18);margin:0 2px"></span>
-    <button onclick="event.stopPropagation();projecaoNav(${ci},'prev')" ${idx===0?'disabled':''} title="Slide anterior" style="${btnLbl}${idx===0?';'+disStyle:''}" ${idx===0?'':`onmouseover="${btnHover}" onmouseout="${btnOut}"`}><span>◀</span><span>Anterior</span></button>
+    <button onclick="event.stopPropagation();projecaoNav(${ci},'prev')" ${idx===0||state._navLocked?'disabled':''} title="${state._navLocked?'Aguarde…':'Slide anterior'}" style="${btnLbl}${idx===0?';'+disStyle:''}${state._navLocked?';opacity:.55;cursor:wait':''}" ${idx===0||state._navLocked?'':`onmouseover="${btnHover}" onmouseout="${btnOut}"`}><span>◀</span><span>Anterior</span></button>
     <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);min-width:32px;text-align:center">${idx+1}/${total}</span>
-    <button onclick="event.stopPropagation();projecaoNav(${ci},'next')" ${idx>=total-1?'disabled':''} title="Próximo slide" style="${btnLbl}${idx>=total-1?';'+disStyle:''}" ${idx>=total-1?'':`onmouseover="${btnHover}" onmouseout="${btnOut}"`}><span>Próximo</span><span>▶</span></button>
+    <button onclick="event.stopPropagation();projecaoNav(${ci},'next')" ${idx>=total-1||state._navLocked?'disabled':''} title="${state._navLocked?'Aguarde…':'Próximo slide'}" style="${btnLbl}${idx>=total-1?';'+disStyle:''}${state._navLocked?';opacity:.55;cursor:wait':''}" ${idx>=total-1||state._navLocked?'':`onmouseover="${btnHover}" onmouseout="${btnOut}"`}><span>Próximo</span><span>▶</span></button>
 
     <span style="width:1px;height:18px;background:rgba(255,255,255,.18);margin:0 2px"></span>
     <button onclick="event.stopPropagation();projecaoReabrirJanela(${ci})" title="Reabrir janela de projeção" style="${btnLbl}" onmouseover="${btnHover}" onmouseout="${btnOut}"><span>🔄</span><span>Reabrir</span></button>
@@ -29804,10 +29967,23 @@ function _atualizaBarraFixa(){
   if(playEl){playEl.textContent=state.timerRunning?'⏸':'▶';playEl.title=state.timerRunning?'Pausar':'Iniciar';}
   const posEl=bar.querySelector('#pfb-pos');
   if(posEl)posEl.textContent=(idx+1)+' / '+total;
+  const navLock=!!state._navLocked;
   const prevEl=bar.querySelector('#pfb-prev');
-  if(prevEl){prevEl.disabled=idx===0;prevEl.style.opacity=idx===0?'.4':'1';prevEl.style.cursor=idx===0?'not-allowed':'pointer';}
+  if(prevEl){
+    const dis=idx===0;
+    prevEl.disabled=dis||navLock;
+    prevEl.style.opacity=dis?'.4':(navLock?'.55':'1');
+    prevEl.style.cursor=dis?'not-allowed':(navLock?'wait':'pointer');
+    prevEl.title=navLock?'Aguarde…':'';
+  }
   const nextEl=bar.querySelector('#pfb-next');
-  if(nextEl){nextEl.disabled=idx>=total-1;nextEl.style.opacity=idx>=total-1?'.4':'1';nextEl.style.cursor=idx>=total-1?'not-allowed':'pointer';}
+  if(nextEl){
+    const dis=idx>=total-1;
+    nextEl.disabled=dis||navLock;
+    nextEl.style.opacity=dis?'.4':(navLock?'.55':'1');
+    nextEl.style.cursor=dis?'not-allowed':(navLock?'wait':'pointer');
+    nextEl.title=navLock?'Aguarde…':'';
+  }
   document.body.classList.add('has-proj-bar');
 }
 
@@ -29884,14 +30060,35 @@ window.iniciarProjecao=async(ci)=>{
   }
   // Abre PIP (preferido) ou popup tradicional como fallback
   await _abrirProjecaoUI(state);
-  // Tick local pra atualizar visual do cronômetro
-  state.tickInt=setInterval(()=>{if(state.timerRunning)_atualizaPainelProj(ci);},500);
+  // Tick local pra atualizar visual do cronômetro.
+  // IMPORTANTE: NÃO chamar _atualizaPainelProj aqui — ela substitui innerHTML do painel
+  // a cada 500ms, e cliques em Próximo/Anterior caem no buraco quando acontecem
+  // exatamente no re-render (mouseup chega num botão diferente do mousedown).
+  // Em vez disso, atualiza só o texto do timer in-place + a barra fixa (que tem skeleton estável).
+  state.tickInt=setInterval(()=>{
+    if(!state.timerRunning)return;
+    const tEl=document.getElementById('proj-timer-'+ci);
+    if(tEl){
+      const ms=Date.now()-state.timerStartLocal+state.timerMsBase;
+      const limStr=S.cfg.cronometroLimite||'07:30';
+      const [lm,ls]=limStr.split(':').map(Number);
+      const limMs=((lm||0)*60+(ls||0))*1000;
+      const over=ms>limMs;
+      tEl.textContent=_fmtTimer(ms);
+      tEl.style.color=over?'#ff5c5c':'#fff';
+    }
+    _atualizaBarraFixa(); // barra fixa não recria buttons, só atualiza atributos
+  },500);
   _atualizaPainelProj(ci);
 };
 
 // Navega slides via Firestore (otimista local) + auto-inicia cronômetro ao sair da capa
 window.projecaoNav=async(ci,acao)=>{
   const st=_projAtivo[ci];if(!st)return;
+  // BLOQUEIO ANTI-DOUBLE-CLICK: prof às vezes clica 2x rápido porque a projeção
+  // demora pra atualizar (round-trip Firestore). O lock ignora cliques durante
+  // ~450ms — UI mostra cursor de espera nesse intervalo.
+  if(st._navLocked)return;
   const total=st.total||1;
   const prev=st.idx||0;
   let novoIdx=prev;
@@ -29900,6 +30097,9 @@ window.projecaoNav=async(ci,acao)=>{
   else if(acao==='first')novoIdx=0;
   else if(acao==='last')novoIdx=total-1;
   if(novoIdx===prev)return; // sem mudança
+  // Lock + tempo de início pra calcular tempo restante depois
+  st._navLocked=true;
+  const lockedAt=Date.now();
   // Optimistic UI: atualiza local instantaneamente; sync do Firestore confirma depois
   st.idx=novoIdx;
   const payload={idx:novoIdx,updatedAt:new Date().toISOString()};
@@ -29917,6 +30117,16 @@ window.projecaoNav=async(ci,acao)=>{
   try{
     await setDoc(doc(db,'projecaoLive',st.liveId),payload,{merge:true});
   }catch(e){console.warn('projecaoNav:',e);}
+  // Mantém o lock por no mínimo 450ms desde o clique. Se Firestore foi rápido,
+  // espera até completar 450ms. Se demorou mais, libera imediatamente.
+  const elapsed=Date.now()-lockedAt;
+  const remaining=Math.max(0,450-elapsed);
+  setTimeout(()=>{
+    if(_projAtivo[ci]){
+      _projAtivo[ci]._navLocked=false;
+      _atualizaPainelProj(ci);
+    }
+  },remaining);
 };
 
 // Cronômetro via Firestore. Mantém o padrão "timer baseado em timestamp": gravamos
