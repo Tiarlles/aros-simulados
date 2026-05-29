@@ -7921,7 +7921,10 @@ const AUDIT_ACTIONS=[
   'CRUZAR_DESCARTOU_APROVADO','CRUZAR_CONFIRMOU_MANUAL','CRUZAR_VINCULOU_MANUAL',
   'PROVA_APROVADOS_CRIADA','PROVA_APROVADOS_EDITADA','PROVA_APROVADOS_REMOVIDA',
   'RESULTADO_APROVADOS_CRIADO','RESULTADO_APROVADOS_EDITADO','RESULTADO_APROVADOS_REMOVIDO',
-  'CONFIG_ALTERADA'
+  'CONFIG_ALTERADA',
+  // Checklist — rede de segurança pra recuperar dados perdidos
+  'CK_CASO_SALVO','CK_BLOCO_FINALIZADO','CK_CASO_RESETADO','CK_PERGUNTA_RESETADA','CK_ALUNO_RESETADO',
+  'PROVA_STATUS_TOGGLE','AUTO_AUSENTES_POS_PRAZO'
 ];
 window.AUDIT_ACTIONS=AUDIT_ACTIONS;
 
@@ -28119,6 +28122,17 @@ window.resetarSimuladoAluno=async(studentId)=>{
     const alunoData=lista?(lista.alunos||[]).find(a=>(typeof a==='object'?a.nome:a).toLowerCase().trim()===student.nome.toLowerCase().trim()):null;
     const mat=typeof alunoData==='object'?alunoData?.matricula||'':'';
     const key=mat||student.nome.toLowerCase().trim();
+    // SNAPSHOT BEFORE — operação mais destrutiva, audit é a rede de segurança crítica.
+    // Lê fresh do Firestore (não da memória) pra garantir estado autoritativo.
+    let _auditRespostasBefore=null,_auditNotasBefore=null;
+    try{
+      const [snapResp,snapNotas]=await Promise.all([
+        getDoc(doc(db,`checklists/${_ckSimId}/respostas/${studentId}`)),
+        getDoc(doc(db,`notas/${_ckSimId}/alunos/${key}`))
+      ]);
+      if(snapResp.exists())_auditRespostasBefore=_ckSnapshot(snapResp.data());
+      if(snapNotas.exists())_auditNotasBefore=_ckSnapshot(snapNotas.data());
+    }catch(_){}
     // Apaga respostas do checklist
     await deleteDoc(doc(db,`checklists/${_ckSimId}/respostas/${studentId}`)).catch(e=>{
       // Se delete falhar (rule), zera os campos via setDoc merge
@@ -28127,6 +28141,8 @@ window.resetarSimuladoAluno=async(studentId)=>{
     });
     // Zera notas no Desempenho (merge:true preserva o doc, só limpa os campos da avaliação)
     await setDoc(doc(db,`notas/${_ckSimId}/alunos/${key}`),{criar:null,oral:null,notaFinal:null,updatedAt:new Date().toISOString()},{merge:true}).catch(e=>console.warn('reset notas falhou:',e.code||e.message));
+    // AUDIT — guarda snapshot completo pra recuperar manualmente se preciso
+    try{audit('CK_ALUNO_RESETADO',{collection:'checklists/respostas',simId:_ckSimId,studentId,notaKey:key},{before:{respostas:_auditRespostasBefore,notas:_auditNotasBefore},after:null,meta:{nomeAluno:student.nome,simNome}});}catch(_){}
     // Limpa memória local
     delete _ckRespostas[studentId];
     alert(`✅ Avaliação de "${student.nome}" resetada.`);
@@ -28916,11 +28932,16 @@ window.autoSaveFeedbackGeral=()=>{
 };
 
 // ── Save per case ─────────────────────────────────────────────────────────────
+// Helper: deep clone seguro pra snapshot de audit (JSON safe — só dados, sem refs).
+function _ckSnapshot(v){try{return JSON.parse(JSON.stringify(v));}catch(_){return null;}}
+
 window.saveCkCaso=async(ci)=>{
   if(!_ckSimId||!_ckStudentId)return;
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
   const blocoKey=_ckBloco||'criar';
   const blocoResp=resp[blocoKey];if(!blocoResp)return;
+  // SNAPSHOT BEFORE — pra audit (recuperação se algo sumir)
+  const _auditBefore={caso:_ckSnapshot(blocoResp.casos?.[ci]),finalizado:blocoResp.finalizado,nota:blocoKey==='criar'?blocoResp.notaCriar:blocoResp.notaOral};
   // Guard: bloco já finalizado — alterar exige re-recalcular nota, então confirma antes.
   if(blocoResp.finalizado){
     const ok=confirm('Esse bloco já foi finalizado e a nota calculada.\n\nAo salvar de novo, a nota será recalculada automaticamente. Continuar?');
@@ -28971,6 +28992,8 @@ window.saveCkCaso=async(ci)=>{
 
   try{
     await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),removeUndefined(resp),{merge:true});
+    // AUDIT — rede de segurança pra recuperar caso some/sobreescrever
+    try{audit('CK_CASO_SALVO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey,ci},{before:_auditBefore,after:{caso:_ckSnapshot(blocoResp.casos?.[ci]),finalizado:blocoResp.finalizado},meta:{nomeAluno:(_ckStudents.find(x=>x.id===_ckStudentId)||{}).nome||''}});}catch(_){}
     // Show success message, close caso, re-render
     const msgEl=document.getElementById(`ck-save-msg-${ci}`);
     if(msgEl){msgEl.style.display='inline';setTimeout(()=>{msgEl.style.display='none';},2000);}
@@ -28994,6 +29017,8 @@ window.finalizarChecklist=async(silent=false)=>{
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
   const blocoKey=_ckBloco;
   const blocoResp=resp[blocoKey];if(!blocoResp)return;
+  // SNAPSHOT BEFORE — pra audit
+  const _auditBefore={casos:_ckSnapshot(blocoResp.casos),finalizado:blocoResp.finalizado,nota:blocoKey==='criar'?blocoResp.notaCriar:blocoResp.notaOral};
   const template=window._ckTemplateCurrent||_ckTemplate?.[blocoKey];
   const casos=template?.casos||[];
   const ptsPorCaso=casos.length?100/casos.length:0;
@@ -29017,6 +29042,8 @@ window.finalizarChecklist=async(silent=false)=>{
   // Save to checklists
   await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),removeUndefined(resp),{merge:true});
   _ckRespostas[_ckStudentId]=resp;
+  // AUDIT — rede de segurança pra recuperar nota anterior
+  try{audit('CK_BLOCO_FINALIZADO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey},{before:_auditBefore,after:{nota,finalizado:true},meta:{nomeAluno:(_ckStudents.find(x=>x.id===_ckStudentId)||{}).nome||''}});}catch(_){}
 
   // Save nota to desempenho. Após gravar o bloco atual, verifica se o OUTRO bloco já tem nota:
   // se sim, calcula notaFinal = (criar + oral) / 2 e grava no mesmo doc.
@@ -31278,6 +31305,8 @@ window.resetCkCaso=async(ci)=>{
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
   const blocoKey2=_ckBloco||'criar';
   const blocoResp2=resp[blocoKey2];if(!blocoResp2)return;
+  // SNAPSHOT BEFORE — destrutivo, audit é a única chance de recuperar
+  const _auditBefore={caso:_ckSnapshot(blocoResp2.casos?.[ci]),finalizado:blocoResp2.finalizado,nota:blocoKey2==='criar'?blocoResp2.notaCriar:blocoResp2.notaOral};
   blocoResp2.casos[ci]={itens:{},habilidades:{},feedback:'',prof:''};
   blocoResp2.finalizado=false;
   if(blocoKey2==='criar')delete blocoResp2.notaCriar;else delete blocoResp2.notaOral;
@@ -31286,6 +31315,7 @@ window.resetCkCaso=async(ci)=>{
   Object.keys(blocoResp2.casos||{}).forEach(k=>{if(parseInt(k)>=tplLen)delete blocoResp2.casos[k];});
   await setDoc(doc(db,'checklists/'+_ckSimId+'/respostas/'+_ckStudentId),removeUndefined(resp));
   _ckRespostas[_ckStudentId]=resp;
+  try{audit('CK_CASO_RESETADO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey2,ci},{before:_auditBefore,after:{caso:{itens:{},habilidades:{},feedback:'',prof:''}},meta:{nomeAluno}});}catch(_){}
   window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
   _sessionProfCasos.delete((blocoKey2+':'+ci));
   renderCkCasos(blocoResp2);
@@ -31327,6 +31357,8 @@ window.resetCkPergunta=async(ci,pi)=>{
   const blocoKey3=_ckBloco||'criar';
   const blocoResp3=resp[blocoKey3];if(!blocoResp3)return;
   if(!blocoResp3.casos[ci])return;
+  // SNAPSHOT BEFORE — pra audit
+  const _auditBefore={caso:_ckSnapshot(blocoResp3.casos[ci]),finalizado:blocoResp3.finalizado,nota:blocoKey3==='criar'?blocoResp3.notaCriar:blocoResp3.notaOral};
   const itensToReset=Object.keys(blocoResp3.casos[ci].itens||{}).filter(k=>k.startsWith(pi+'_'));
   itensToReset.forEach(k=>delete blocoResp3.casos[ci].itens[k]);
   delete blocoResp3.casos[ci].savedAt;
@@ -31336,6 +31368,7 @@ window.resetCkPergunta=async(ci,pi)=>{
   if(blocoKey3==='criar')delete blocoResp3.notaCriar;else delete blocoResp3.notaOral;
   await setDoc(doc(db,'checklists/'+_ckSimId+'/respostas/'+_ckStudentId),removeUndefined(resp));
   _ckRespostas[_ckStudentId]=resp;
+  try{audit('CK_PERGUNTA_RESETADA',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey3,ci,pi},{before:_auditBefore,after:{caso:_ckSnapshot(blocoResp3.casos[ci])},meta:{nomePergunta:nomePerg}});}catch(_){}
   window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
   _sessionProfCasos.delete((blocoKey3+':'+ci));
   renderCkCasos(blocoResp3);
