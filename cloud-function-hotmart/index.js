@@ -10,6 +10,9 @@ const db = admin.firestore();
 // Re-exporta a function do Dex (pergunta IA sobre catálogo de produtos)
 exports.perguntarDex = require('./dex').perguntarDex;
 
+// Re-exporta a function de IA dos feedbacks (revisa feedback de caso + Feedback Geral)
+exports.gerarFeedbackIA = require('./feedback-ia').gerarFeedbackIA;
+
 // Helper que faz UPSERT em alunosAprovados (Cruzar Lista) a partir do webhook Hotmart
 const { upsertAluno } = require('./hotmart-alunos');
 
