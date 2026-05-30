@@ -3473,6 +3473,35 @@ body.pro-rt-fs-on{overflow:hidden}
 }
 </style>
 
+<style id="home-rec-banner-styles">
+/* Banner do Sistema de Recursos na home (replica o hero da página /recursos, clicável) */
+#view-home .home-rec-banner{display:block;width:100%;text-align:left;cursor:pointer;font-family:inherit;position:relative;border-radius:18px;padding:18px 22px;margin-top:20px;overflow:hidden;background:linear-gradient(135deg, rgba(13,17,23,.78) 0%, rgba(22,27,34,.72) 100%);border:1px solid color-mix(in srgb, var(--accent) 24%, var(--border));backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);box-shadow:0 12px 36px -18px color-mix(in srgb, var(--accent) 32%, transparent), inset 0 1px 0 color-mix(in srgb, var(--accent) 18%, transparent);transition:transform .25s var(--ease-out-soft,ease),box-shadow .3s var(--ease-out-soft,ease),border-color .25s var(--ease-out-soft,ease)}
+:root[data-theme="light"] #view-home .home-rec-banner{background:linear-gradient(135deg, color-mix(in srgb, var(--bg2) 96%, transparent) 0%, color-mix(in srgb, var(--accent) 6%, var(--bg2)) 100%)}
+#view-home .home-rec-banner:hover{transform:translateY(-2px);border-color:color-mix(in srgb, var(--accent) 50%, var(--border));box-shadow:0 22px 52px -24px color-mix(in srgb, var(--accent) 42%, transparent)}
+#view-home .home-rec-banner::before{content:'';position:absolute;inset:0;background-image:linear-gradient(color-mix(in srgb, var(--accent) 6%, transparent) 1px, transparent 1px),linear-gradient(90deg, color-mix(in srgb, var(--accent) 6%, transparent) 1px, transparent 1px);background-size:32px 32px;background-position:-1px -1px;pointer-events:none;mask-image:radial-gradient(ellipse at 50% 50%, #000 30%, transparent 80%);-webkit-mask-image:radial-gradient(ellipse at 50% 50%, #000 30%, transparent 80%);opacity:.7}
+#view-home .home-rec-banner::after{content:'';position:absolute;top:-40%;right:-10%;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle, color-mix(in srgb, #a371f7 22%, transparent) 0%, transparent 60%);pointer-events:none;animation:recHeroFloat 14s ease-in-out infinite}
+#view-home .hrb-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+#view-home .hrb-left{display:flex;flex-direction:column;gap:6px;flex:1;min-width:240px}
+#view-home .hrb-tagrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#view-home .hrb-eyebrow{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono','SF Mono',Consolas,monospace;color:var(--accent);font-size:9.5px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;padding:4px 11px;border-radius:999px;background:color-mix(in srgb, var(--accent) 14%, transparent);border:1px solid color-mix(in srgb, var(--accent) 36%, transparent)}
+#view-home .hrb-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:recPulse 2s ease-in-out infinite}
+#view-home .hrb-status{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:9.5px;font-weight:600;letter-spacing:1.2px;color:var(--t2);padding:4px 10px;border-radius:999px;background:color-mix(in srgb, var(--bg) 60%, transparent);border:1px solid var(--border)}
+#view-home .hrb-brand{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;letter-spacing:-.7px;line-height:1.1;font-size:24px;margin:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+#view-home .hrb-sys{color:var(--text)}
+#view-home .hrb-name{background:linear-gradient(135deg, var(--accent) 0%, #a371f7 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+#view-home .hrb-sub{font-size:12.5px;color:var(--t2);max-width:560px;margin:0;line-height:1.5}
+#view-home .hrb-corner{position:absolute;width:18px;height:18px;border-color:color-mix(in srgb, var(--accent) 70%, transparent);border-style:solid;pointer-events:none;z-index:2;opacity:.7}
+#view-home .hrb-tl{top:10px;left:10px;border-width:1.5px 0 0 1.5px;border-radius:3px 0 0 0}
+#view-home .hrb-tr{top:10px;right:10px;border-width:1.5px 1.5px 0 0;border-radius:0 3px 0 0}
+#view-home .hrb-bl{bottom:10px;left:10px;border-width:0 0 1.5px 1.5px;border-radius:0 0 0 3px}
+#view-home .hrb-br{bottom:10px;right:10px;border-width:0 1.5px 1.5px 0;border-radius:0 0 3px 0}
+#view-home .hrb-cta{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;flex-shrink:0;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#fff;padding:11px 20px;border-radius:12px;background:linear-gradient(135deg, var(--accent) 0%, #a371f7 100%);box-shadow:0 8px 22px color-mix(in srgb, var(--accent) 38%, transparent);transition:transform .2s}
+#view-home .home-rec-banner:hover .hrb-cta{transform:translateX(2px)}
+#view-home .hrb-arrow{transition:transform .2s}
+#view-home .home-rec-banner:hover .hrb-arrow{transform:translateX(3px)}
+@media(max-width:640px){#view-home .home-rec-banner{padding:16px 18px}#view-home .hrb-brand{font-size:21px}#view-home .hrb-cta{width:100%;justify-content:center}}
+</style>
+
 <div id="view-home">
   <div class="home-shell">
     <div class="home-hero">
@@ -3483,6 +3512,23 @@ body.pro-rt-fs-on{overflow:hidden}
     <div class="home-grid" id="home-grid">
       <!-- 3 cards injetados via renderHomeCards() -->
     </div>
+    <button class="home-rec-banner reveal" onclick="goRecursosAluno()" aria-label="Abrir o Sistema de Recursos">
+      <div class="hrb-corner hrb-tl"></div>
+      <div class="hrb-corner hrb-tr"></div>
+      <div class="hrb-corner hrb-bl"></div>
+      <div class="hrb-corner hrb-br"></div>
+      <div class="hrb-inner">
+        <div class="hrb-left">
+          <div class="hrb-tagrow">
+            <span class="hrb-eyebrow">Plataforma de Recursos</span>
+            <span class="hrb-status">🛡️ Online</span>
+          </div>
+          <h2 class="hrb-brand"><span class="hrb-sys">Sistema de Recursos</span><span class="hrb-name">AnestReview</span></h2>
+          <p class="hrb-sub">Selecione uma prova ativa para ler os pareceres e enviar sua contestação.</p>
+        </div>
+        <span class="hrb-cta">Acessar <span class="hrb-arrow">→</span></span>
+      </div>
+    </button>
     <div class="home-foot reveal">AnestReview · by MedReview</div>
   </div>
 </div>
@@ -9493,7 +9539,20 @@ async function loadComunicacaoCards(){
     }else{
       S.comunicacao.cards={};S.comunicacao.order={tsa:[],tea:[],mes:[]};
     }
+    // Cacheia pra render instantâneo dos cards da home no próximo boot (stale-while-revalidate).
+    try{localStorage.setItem('aros_comcards',JSON.stringify({cards:S.comunicacao.cards,order:S.comunicacao.order}));}catch(_){}
   }catch(e){console.error('loadComunicacaoCards:',e);S.comunicacao.cards={};S.comunicacao.order={tsa:[],tea:[],mes:[]};}
+}
+// Hidrata os cards da home a partir do cache (só se ainda não vieram do Firestore).
+function _hydrateComCardsFromCache(){
+  if(!S.comunicacao)return;
+  if(S.comunicacao.cards&&Object.keys(S.comunicacao.cards).length)return;
+  try{
+    const raw=localStorage.getItem('aros_comcards');if(!raw)return;
+    const d=JSON.parse(raw);
+    if(d&&d.cards)S.comunicacao.cards=d.cards;
+    if(d&&d.order)S.comunicacao.order=d.order;
+  }catch(_){}
 }
 
 // Ordena posts: pinned no topo; depois usa o array `order` do Firestore;
@@ -10045,6 +10104,11 @@ window.cpInsertImageUpload=async(ev)=>{
 
 window.renderHomeCards=()=>{
   const grid=document.getElementById('home-grid');if(!grid)return;
+  // Assinatura dos dados dos cards — se não mudou, não re-renderiza (evita flicker/re-animação
+  // quando o boot chama de novo com os mesmos dados que já vieram do cache).
+  const _sig=JSON.stringify(COM_CATS.map(c=>{const f=_comCardCfg(c.id);return[c.id,f.titulo,f.subtitulo,f.imagem];}));
+  if(grid.dataset.sig===_sig)return;
+  grid.dataset.sig=_sig;
   // Card fixo "Atualizações" no topo
   const clCard=`<button class="home-card reveal" data-cat="conteudos" data-tilt style="transition-delay:0ms" onclick="goConteudos()">
     <div class="home-card-cover" style="background:linear-gradient(135deg, color-mix(in srgb, #22c55e 35%, #000) 0%, #000 85%)">
@@ -10075,6 +10139,11 @@ window.renderHomeCards=()=>{
   try{_arosBindTilt();}catch(e){console.warn('tilt:',e);}
   try{_arosObserveReveal();}catch(e){console.warn('reveal:',e);document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));}
 };
+
+// Render IMEDIATO dos cards da home (do cache), antes de qualquer ida ao Firestore —
+// faz os cards aparecerem instantâneos no boot. O boot() recarrega e atualiza depois
+// (o guard de assinatura evita re-render quando os dados são iguais).
+try{ _hydrateComCardsFromCache(); if(typeof renderHomeCards==='function')renderHomeCards(); }catch(e){}
 
 // ── CONTEÚDOS LIBERADOS · view do aluno ──
 window.goConteudos=async()=>{
@@ -24515,12 +24584,13 @@ window.abrirSalaAluno=(simId,alunoId)=>{
 };
 
 window.searchAluno=()=>{
-  const q=(document.getElementById('al-search').value||'').toLowerCase().trim();
+  // Busca tolerante a acento: "mario" acha "Mário" e vice-versa (_proNormBusca normaliza).
+  const q=_proNormBusca(document.getElementById('al-search').value||'').trim();
   const exp=S.curSim?.deadline&&new Date()>new Date(S.curSim.deadline);
   // Presencial: usa o renderer próprio (sem rodadas)
   if(S.curSim?.presencial){
     const ord=(a,b)=>{const ord2={confirmed:0,swap:1,pending:2};const da=ord2[a.status]??3,db=ord2[b.status]??3;if(da!==db)return da-db;return a.nome.localeCompare(b.nome,'pt-BR');};
-    const filt=s=>s.status!=='absent'&&(!q||s.nome.toLowerCase().includes(q));
+    const filt=s=>s.status!=='absent'&&(!q||_proNormBusca(s.nome).includes(q));
     const sab=S.students.filter(s=>s.dia==='sabado'&&filt(s)).sort(ord);
     const dom=S.students.filter(s=>s.dia==='domingo'&&filt(s)).sort(ord);
     const elS=document.getElementById('al-list-sab');
@@ -24540,8 +24610,8 @@ window.searchAluno=()=>{
     document.getElementById('al-list-dom').innerHTML=renderAlunoDay(dom,exp,window._allExpanded);
     return;
   }
-  const sab=S.students.filter(s=>s.dia==='sabado'&&s.status!=='absent'&&s.nome.toLowerCase().includes(q));
-  const dom=S.students.filter(s=>s.dia==='domingo'&&s.status!=='absent'&&s.nome.toLowerCase().includes(q));
+  const sab=S.students.filter(s=>s.dia==='sabado'&&s.status!=='absent'&&_proNormBusca(s.nome).includes(q));
+  const dom=S.students.filter(s=>s.dia==='domingo'&&s.status!=='absent'&&_proNormBusca(s.nome).includes(q));
   document.getElementById('al-list-sab').innerHTML=renderAlunoDay(sab,exp,true);
   document.getElementById('al-list-dom').innerHTML=renderAlunoDay(dom,exp,true);
   if(sab.length&&!dom.length){switchAlunoDay('sabado',document.getElementById('al-tab-sab'));}
@@ -29037,8 +29107,9 @@ async function reloadRespostasAndRender(){
 }
 
 window.filterCkStudents=()=>{
-  const q=(document.getElementById('ck-search')?.value||'').toLowerCase();
-  renderCkStudents(_ckStudents.filter(s=>s.nome.toLowerCase().includes(q)));
+  // Busca tolerante a acento: "mario" acha "Mário" e vice-versa (_proNormBusca normaliza).
+  const q=_proNormBusca(document.getElementById('ck-search')?.value||'');
+  renderCkStudents(_ckStudents.filter(s=>_proNormBusca(s.nome).includes(q)));
 };
 
 function renderCkStudents(list){
