@@ -24210,9 +24210,11 @@ window.saveUser=async()=>{
   const invalido=emailsArr.find(e=>!emailRegex.test(e));
   if(invalido){_muErr('Email inválido: '+invalido,'mu-email');return;}
   if(emailsArr.length>3){_muErr('Máximo 3 emails. Você informou '+emailsArr.length+'.','mu-email-sec');return;}
-  // Conflito: username diferente do editId E já existe outro
-  const conflito=S.usuarios.some(u=>(u.username||u.id)===username && u.id!==editId);
-  if(conflito){_muErr('Já existe um usuário com esse nome.','mu-username');return;}
+  // Conflito: username diferente do editId E já existe outro ATIVO.
+  // Ignora inativos (deletados são soft-delete) — assim dá pra reutilizar o nome de um
+  // usuário apagado; o setDoc sobrescreve o doc morto pelo novo ativo (mesmo slug = mesmo ID).
+  const conflito=S.usuarios.some(u=>!u.inativo && (u.username||u.id)===username && u.id!==editId);
+  if(conflito){_muErr('Já existe um usuário ativo com esse nome.','mu-username');return;}
   // Conflito de email: dois usuários ativos não podem compartilhar o mesmo email
   if(email){
     const emailConflito=S.usuarios.some(u=>!u.inativo&&u.email&&u.email.toLowerCase()===email&&u.id!==editId&&(u.username||u.id)!==username);
