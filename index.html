@@ -4498,10 +4498,23 @@ body.pro-rt-fs-on{overflow:hidden}
         </div>
 
         <!-- Student list -->
+        <style id="ck-bfilter-styles">
+        .ck-bfilter{display:inline-flex;align-items:center;gap:7px;font-size:12px;background:var(--bg2);border:1px solid var(--border);border-radius:999px;padding:4px 6px 4px 12px;transition:border-color .15s,background .15s}
+        .ck-bfilter .ck-bf-lbl{font-weight:700;color:var(--text);white-space:nowrap}
+        .ck-bfilter select{border:1px solid var(--border);background:var(--bg3);color:var(--text);font:inherit;font-weight:600;cursor:pointer;outline:none;padding:3px 6px;border-radius:7px}
+        .ck-bfilter.active{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--bg2))}
+        .ck-bfilter.active select{border-color:var(--accent);color:var(--accent);font-weight:700}
+        </style>
         <div id="ck-student-list" class="hidden">
-          <div class="search-wrap" style="margin-bottom:12px">
+          <div class="search-wrap" style="margin-bottom:10px">
             <span class="search-icon" style="font-size:14px">🔍</span>
             <input class="search-input" id="ck-search" placeholder="Buscar aluno..." oninput="filterCkStudents()" style="padding:8px 8px 8px 36px;font-size:13px;border-radius:8px"/>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+            <span style="font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t2)">Filtrar bloco:</span>
+            <label class="ck-bfilter" id="ck-bf-criar"><span class="ck-bf-lbl">📋 Criar</span><select id="ck-filter-criar" onchange="ckSetBlocoFilter('criar',this.value)"><option value="">Todos</option><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="finalizado">Finalizado</option></select></label>
+            <label class="ck-bfilter" id="ck-bf-oral"><span class="ck-bf-lbl">🎙️ Oral Online</span><select id="ck-filter-oral" onchange="ckSetBlocoFilter('oral',this.value)"><option value="">Todos</option><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="finalizado">Finalizado</option></select></label>
+            <button id="ck-filter-clear" onclick="ckLimparFiltroBloco()" style="display:none;background:none;border:none;color:var(--t2);font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit">✕ Limpar</button>
           </div>
           <div id="ck-students-grid" style="display:flex;flex-direction:column;gap:6px"></div>
         </div>
@@ -29059,6 +29072,10 @@ window.loadCkSim=async()=>{
   }catch(e){_ckRespostas={};}
 
   studentList?.classList.remove('hidden');
+  // Reseta o filtro por bloco ao (re)carregar o simulado (estado + selects + chip Limpar).
+  S.ckFiltroBloco={criar:'',oral:''};
+  ['criar','oral'].forEach(b=>{const _s=document.getElementById('ck-filter-'+b);if(_s)_s.value='';const _l=document.getElementById('ck-bf-'+b);if(_l)_l.classList.remove('active');});
+  const _ckClr=document.getElementById('ck-filter-clear');if(_ckClr)_ckClr.style.display='none';
   renderCkStudents(_ckStudents);
   // Assina o status da projeção ao vivo de cada aluno deste simulado
   _ckSubscribeLiveStatus();
@@ -29241,15 +29258,46 @@ async function reloadRespostasAndRender(){
   renderCkStudents(_ckStudents);
 }
 
-window.filterCkStudents=()=>{
-  // Busca tolerante a acento: "mario" acha "Mário" e vice-versa (_proNormBusca normaliza).
+// Status de um bloco (criar/oral) de um aluno: 'finalizado' | 'andamento' | 'pendente'.
+function _ckStatusBloco(s,bloco){
+  const resp=_ckRespostas[s.id];
+  const st=resp?getBlocoStatus(resp[bloco],_ckTemplate?.[bloco]):'red';
+  return st==='green'?'finalizado':st==='yellow'?'andamento':'pendente';
+}
+// Aplica busca por nome (tolerante a acento) + filtros por bloco (Criar/Oral) à lista.
+function _ckApplyFilters(list){
   const q=_proNormBusca(document.getElementById('ck-search')?.value||'');
-  renderCkStudents(_ckStudents.filter(s=>_proNormBusca(s.nome).includes(q)));
+  const fb=S.ckFiltroBloco||{};
+  return (list||[]).filter(s=>{
+    if(q&&!_proNormBusca(s.nome).includes(q))return false;
+    if(fb.criar&&_ckStatusBloco(s,'criar')!==fb.criar)return false;
+    if(fb.oral&&_ckStatusBloco(s,'oral')!==fb.oral)return false;
+    return true;
+  });
+}
+window.filterCkStudents=()=>renderCkStudents(_ckStudents);
+window.ckSetBlocoFilter=(bloco,val)=>{
+  S.ckFiltroBloco=S.ckFiltroBloco||{criar:'',oral:''};
+  S.ckFiltroBloco[bloco]=val;
+  const lbl=document.getElementById('ck-bf-'+bloco);if(lbl)lbl.classList.toggle('active',!!val);
+  const clr=document.getElementById('ck-filter-clear');if(clr)clr.style.display=(S.ckFiltroBloco.criar||S.ckFiltroBloco.oral)?'':'none';
+  renderCkStudents(_ckStudents);
+};
+window.ckLimparFiltroBloco=()=>{
+  S.ckFiltroBloco={criar:'',oral:''};
+  ['criar','oral'].forEach(b=>{const sel=document.getElementById('ck-filter-'+b);if(sel)sel.value='';const lbl=document.getElementById('ck-bf-'+b);if(lbl)lbl.classList.remove('active');});
+  const clr=document.getElementById('ck-filter-clear');if(clr)clr.style.display='none';
+  renderCkStudents(_ckStudents);
 };
 
 function renderCkStudents(list){
   const grid=document.getElementById('ck-students-grid');if(!grid)return;
-  const sorted=[...list].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  const filtrada=_ckApplyFilters(list);
+  if(!filtrada.length){
+    grid.innerHTML=`<div style="text-align:center;padding:28px 16px;color:var(--t2);font-size:13px;background:var(--bg2);border:1px dashed var(--border);border-radius:var(--rs)">Nenhum aluno com esse filtro.</div>`;
+    return;
+  }
+  const sorted=[...filtrada].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
   grid.innerHTML=sorted.map((s,idx)=>{
     const resp=_ckRespostas[s.id];
     const blocoSt=(b)=>getBlocoStatus(resp?.[b],_ckTemplate?.[b]);
@@ -29263,12 +29311,17 @@ function renderCkStudents(list){
     // Determine overall student status from both blocos
     const overallSt=done?'green':emAndamento?'yellow':'red';
     const isNaoIniciado=!resp||(!emAndamento&&!done);
-    const borderColor=done?'var(--green)':emAndamento?'var(--yellow)':'var(--border)';
+    // Borda sempre neutra — o status é comunicado SÓ pelo fundo da linha (sem borda colorida forte).
+    const borderColor='var(--border)';
+    // Fundo da linha: ambos pendentes → neutro (atual); misto/em andamento → amarelo bem leve;
+    // ambos finalizados → verde bem leve.
+    const rowBg=done?'rgba(63,185,80,.08)':emAndamento?'rgba(210,153,34,.08)':'var(--bg2)';
+    const rowBgHover=done?'rgba(63,185,80,.14)':emAndamento?'rgba(210,153,34,.14)':'var(--bg3)';
+    // Badge de status geral REMOVIDO (redundante com os selos por bloco). Mantém só o botão
+    // Gerar Feedback quando os dois blocos estão finalizados.
     const statusBadge=done
-      ?`<span class="badge b-conf">✔ Finalizado</span><button onclick="event.stopPropagation();gerarFeedbackAluno('${s.id}')" class="btn btn-p btn-sm" style="font-size:11px;padding:3px 10px;margin-left:8px;background:linear-gradient(135deg,#1e3a5f,#2563eb)">🔖 Gerar Feedback</button>`
-      :emAndamento
-      ?`<span style="background:var(--yl);color:var(--yellow);border:1px solid rgba(210,153,34,.4);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600">⏳ Em andamento</span>`
-      :`<span style="background:var(--bg3);color:var(--t2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600">Não iniciado</span>`;
+      ?`<button onclick="event.stopPropagation();gerarFeedbackAluno('${s.id}')" class="btn btn-p btn-sm" style="font-size:11px;padding:3px 10px;background:linear-gradient(135deg,#1e3a5f,#2563eb)">🔖 Gerar Feedback</button>`
+      :'';
     // Botão de reset só aparece quando há alguma avaliação registrada (em andamento ou finalizado)
     const btnReset=(emAndamento||done)
       ?`<button onclick="event.stopPropagation();resetarSimuladoAluno('${s.id}')" class="btn btn-d btn-sm" title="Resetar toda a avaliação deste aluno neste simulado" style="font-size:11px;padding:3px 10px">🔄 Resetar</button>`
@@ -29282,16 +29335,28 @@ function renderCkStudents(list){
     const btnCopyLink=liveAtivo
       ?`<button onclick="event.stopPropagation();copiarLinkSalaAluno('${s.id}',this)" class="btn btn-s btn-sm" title="Copia o link direto da sala deste aluno — útil pra Simulado Extra (manda por WhatsApp/email)" style="font-size:11px;padding:3px 10px;background:rgba(251,143,68,.1);border-color:rgba(251,143,68,.4);color:#fb8f44">📋 Link</button>`
       :'';
+    // Botões de status por bloco (Criar / Oral Online) — refletem o bloco e levam direto a ele.
+    const _nomeEsc=String(s.nome||'').replace(/"/g,'&quot;');
+    const _blocoStatusBtn=(key,label,emoji)=>{
+      const tplB=key==='criar'?_ckTemplate?.criar:_ckTemplate?.oral;
+      const hasTpl=((tplB&&tplB.casos)||[]).length>0;
+      const st=key==='criar'?stCriar:stOral;
+      const M={green:{t:'Finalizado',c:'#3fb950',bg:'rgba(63,185,80,.13)',bd:'rgba(63,185,80,.4)'},yellow:{t:'Em andamento',c:'#d29922',bg:'rgba(210,153,34,.13)',bd:'rgba(210,153,34,.4)'},red:{t:'Pendente',c:'var(--t2)',bg:'var(--bg3)',bd:'var(--border)'}};
+      const m=M[st]||M.red;
+      if(!hasTpl)return `<span title="Bloco ${label} sem template configurado" style="display:inline-flex;align-items:center;gap:5px;background:var(--bg3);color:var(--t3);border:1px solid var(--border);border-radius:999px;padding:4px 11px;font-size:11px;font-weight:600;white-space:nowrap;opacity:.6">${emoji} ${label} · —</span>`;
+      return `<button onclick="event.stopPropagation();ckGoBloco('${s.id}','${key}')" title="Abrir o bloco ${label} de ${_nomeEsc}" style="display:inline-flex;align-items:center;gap:6px;background:${m.bg};color:${m.c};border:1px solid ${m.bd};border-radius:999px;padding:4px 11px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:filter .15s,transform .15s" onmouseover="this.style.filter='brightness(1.12)';this.style.transform='translateY(-1px)'" onmouseout="this.style.filter='';this.style.transform=''"><span style="font-weight:800">${emoji} ${label}</span><span style="opacity:.5">·</span><span>${m.t}</span></button>`;
+    };
+    const blockBtns=`<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap">${_blocoStatusBtn('criar','Criar','📋')}${_blocoStatusBtn('oral','Oral Online','🎙️')}</div>`;
     return`<div onclick="openCkFill('${s.id}')"
-      style="background:var(--bg2);border:1.5px solid ${borderColor};border-radius:var(--rs);padding:12px 16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:space-between;gap:12px"
-      onmouseover="this.style.background='var(--bg3)';this.style.borderColor='var(--accent)'"
-      onmouseout="this.style.background='var(--bg2)';this.style.borderColor='${borderColor}'">
+      style="background:${rowBg};border:1.5px solid ${borderColor};border-radius:var(--rs);padding:12px 16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:space-between;gap:12px"
+      onmouseover="this.style.background='${rowBgHover}';this.style.borderColor='var(--accent)'"
+      onmouseout="this.style.background='${rowBg}';this.style.borderColor='${borderColor}'">
       <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
         <span style="font-size:13px;font-weight:700;color:var(--t3);min-width:24px">${idx+1}.</span>
-        <div style="min-width:0">
+        <div style="min-width:0;max-width:220px">
           <p style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.nome}</p>
-
         </div>
+        ${blockBtns}
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">${btnHabilitar}${btnCopyLink}${statusBadge}${btnReset}</div>
     </div>`;
@@ -29433,6 +29498,12 @@ window.openCkBloco=(bloco)=>{
   }
   showCkView('ck-fill');
   }catch(err){console.error('openCkBloco error:',err);alert('Erro ao abrir bloco: '+err.message);}
+};
+
+// Vai DIRETO pro bloco (criar/oral) de um aluno a partir da lista — seleciona o aluno e abre o bloco.
+window.ckGoBloco=async(studentId,bloco)=>{
+  try{ await openCkFill(studentId); openCkBloco(bloco); }
+  catch(e){ console.error('ckGoBloco:',e); }
 };
 
 
@@ -30937,6 +31008,14 @@ function _ensureBarraFixaStyle(){
 }
 
 function _atualizaBarraFixa(){
+  // 2026-05-31: barra FIXA de projeção no topo REMOVIDA — os controles (cronômetro, play,
+  // anterior/próximo, reabrir, encerrar) ficam SÓ no box do caso (renderProjPanel), evitando
+  // dois cronômetros na tela. Esta função agora só garante que nenhuma barra residual exista.
+  const _pfb=document.getElementById('proj-fixed-bar');
+  if(_pfb)_pfb.remove();
+  document.body.classList.remove('has-proj-bar');
+  return;
+  // ↓ código antigo da barra fixa mantido inerte (nunca executa — early return acima) ↓
   const cis=Object.keys(_projAtivo);
   let bar=document.getElementById('proj-fixed-bar');
   if(!cis.length){
@@ -31039,6 +31118,11 @@ window.iniciarProjecao=async(ci)=>{
   const liveId=`${simId}__${alunoId}`;
   // Limpeza defensiva: apaga traços remanescentes de qualquer sessão anterior antes de começar
   await _limparStrokesProjLive(simId,alunoId);
+  // UM cronômetro por vez: encerra automaticamente qualquer OUTRA projeção ativa antes de iniciar
+  // esta — evita que o aplicador deixe 2-3 cronômetros rodando ao trocar de caso sem encerrar.
+  const _outrasProj=Object.keys(_projAtivo).map(Number).filter(o=>o!==ci);
+  for(const o of _outrasProj){ try{ await encerrarProjecao(o); }catch(_){} }
+  if(_outrasProj.length&&typeof arosToast==='function')arosToast('⏱️ Cronômetro do caso anterior encerrado','info',2800);
   const state={simId,alunoId,casoId,ci,idx:0,total,timerMs:0,timerRunning:false,timerMsBase:0,timerStartLocal:0,win:null,tickInt:null,unsub:null,liveId};
   _projAtivo[ci]=state;
   // Subscribe pro doc — recebe confirmações + atualizações de qualquer fonte
