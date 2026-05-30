@@ -3794,10 +3794,17 @@ body.pro-rt-fs-on{overflow:hidden}
 #view-rec .rec-prova-card-fechada{opacity:.78}
 #view-rec .rec-prova-card-fechada::before{background:linear-gradient(180deg, #f85149 0%, color-mix(in srgb, #f85149 60%, var(--t2)) 100%)}
 #view-rec .rec-prova-card-fechada:hover{border-color:color-mix(in srgb, #f85149 40%, var(--border));box-shadow:0 20px 50px -22px rgba(248,81,73,.4)}
-#view-rec .rec-empty{padding:64px 28px;text-align:center;background:color-mix(in srgb, var(--bg2) 80%, transparent);border:1.5px dashed color-mix(in srgb, var(--border) 90%, transparent);border-radius:20px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-#view-rec .rec-empty-icon{display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:50%;background:color-mix(in srgb, var(--accent) 8%, transparent);border:1px solid color-mix(in srgb, var(--accent) 22%, transparent);font-size:32px;margin-bottom:18px;opacity:.85}
-#view-rec .rec-empty-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:8px}
-#view-rec .rec-empty-text{font-size:13.5px;color:var(--t2);max-width:380px;margin:0 auto;line-height:1.6}
+#view-rec .rec-empty{position:relative;overflow:hidden;padding:54px 32px 58px;text-align:center;background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 7%, var(--bg2)) 0%, color-mix(in srgb, var(--bg2) 82%, transparent) 58%);border:1px solid color-mix(in srgb, var(--accent) 16%, var(--border));border-radius:26px;backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:0 30px 80px -42px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.05)}
+/* halo de luz no topo */
+#view-rec .rec-empty::before{content:'';position:absolute;top:-32%;left:50%;transform:translateX(-50%);width:440px;height:440px;max-width:120%;background:radial-gradient(circle, color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 62%);pointer-events:none;opacity:.7;animation:recEmptyGlow 6s ease-in-out infinite}
+@keyframes recEmptyGlow{0%,100%{opacity:.5}50%{opacity:.85}}
+#view-rec .rec-empty-eyebrow{position:relative;display:inline-block;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;color:var(--accent);background:color-mix(in srgb, var(--accent) 10%, transparent);border:1px solid color-mix(in srgb, var(--accent) 26%, var(--border));padding:5px 13px;border-radius:999px;margin-bottom:22px}
+/* área da ilustração — recebe a imagem (rec-empty-art img) ou o ícone fallback */
+#view-rec .rec-empty-art{position:relative;display:inline-flex;align-items:center;justify-content:center;width:150px;height:150px;margin-bottom:20px}
+#view-rec .rec-empty-art img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 18px 38px color-mix(in srgb, var(--accent) 34%, transparent))}
+#view-rec .rec-empty-icon{display:inline-flex;align-items:center;justify-content:center;width:118px;height:118px;border-radius:50%;font-size:50px;background:radial-gradient(circle at 32% 26%, color-mix(in srgb, var(--accent) 24%, var(--bg3)) 0%, var(--bg2) 76%);border:1px solid color-mix(in srgb, var(--accent) 28%, var(--border));box-shadow:0 22px 52px -22px color-mix(in srgb, var(--accent) 55%, transparent),inset 0 2px 6px rgba(255,255,255,.06)}
+#view-rec .rec-empty-title{position:relative;font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:10px}
+#view-rec .rec-empty-text{position:relative;font-size:13.5px;color:var(--t2);max-width:400px;margin:0 auto;line-height:1.62}
 #view-rec .rec-foot{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:36px;flex-wrap:wrap}
 #view-rec .rec-foot .btn{border-radius:12px;padding:10px 18px;font-weight:600}
 #view-rec .rec-loading{text-align:center;padding:48px 20px;color:var(--t2);font-size:13px;font-family:'JetBrains Mono','SF Mono',Consolas,monospace}
@@ -5851,6 +5858,73 @@ body.pro-rt-fs-on{overflow:hidden}
     <div class="m-foot">
       <button class="btn btn-s" onclick="CM('modal-feedback-geral')">Cancelar</button>
       <button class="btn btn-p" onclick="salvarFeedbackGeral()">💾 Enviar contribuição</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Vídeo da Live (admin) — cadastra a transmissão YouTube exibida pro aluno ══ -->
+<style id="rec-live-styles">
+/* bloco do vídeo ao vivo na visão do aluno */
+#view-rec .rec-live-wrap{margin-top:22px;border:1px solid color-mix(in srgb, var(--accent) 16%, var(--border));border-radius:22px;overflow:hidden;background:color-mix(in srgb, var(--bg2) 80%, transparent);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:0 28px 70px -40px rgba(0,0,0,.6)}
+#view-rec .rec-live-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid color-mix(in srgb, var(--accent) 10%, var(--border))}
+#view-rec .rec-live-dot{width:9px;height:9px;border-radius:50%;background:#f85149;animation:recLivePulse 1.6s ease-out infinite;flex-shrink:0}
+@keyframes recLivePulse{0%{box-shadow:0 0 0 0 rgba(248,81,73,.55)}70%{box-shadow:0 0 0 10px rgba(248,81,73,0)}100%{box-shadow:0 0 0 0 rgba(248,81,73,0)}}
+#view-rec .rec-live-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:#f85149}
+#view-rec .rec-live-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;font-weight:600;color:var(--text);margin-left:2px}
+#view-rec .rec-live-frame{position:relative;width:100%;padding-top:56.25%;background:#000}
+#view-rec .rec-live-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+/* mini-player compacto dentro da aba da prova */
+#view-rec .rec-live-mini{max-width:420px;margin:0 0 18px;border:1px solid color-mix(in srgb, var(--accent) 16%, var(--border));border-radius:16px;overflow:hidden;background:color-mix(in srgb, var(--bg2) 80%, transparent);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);box-shadow:0 18px 48px -30px rgba(0,0,0,.55)}
+#view-rec .rec-live-mini>summary{list-style:none;cursor:pointer;user-select:none;display:flex;align-items:center;gap:9px;padding:10px 13px}
+#view-rec .rec-live-mini>summary::-webkit-details-marker{display:none}
+#view-rec .rec-live-mini-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#view-rec .rec-live-mini-chev{margin-left:auto;color:var(--t2);font-size:12px;transition:transform .2s;flex-shrink:0}
+#view-rec .rec-live-mini[open]>summary .rec-live-mini-chev{transform:rotate(180deg)}
+#view-rec .rec-live-mini-frame{position:relative;width:100%;padding-top:56.25%;background:#000;border-top:1px solid color-mix(in srgb, var(--accent) 10%, var(--border))}
+#view-rec .rec-live-mini-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+/* modal de cadastro */
+#modal-rec-live .md{max-width:680px;width:min(96vw,680px);max-height:94vh;display:flex;flex-direction:column;border-radius:24px;background:color-mix(in srgb, var(--bg2) 76%, transparent);backdrop-filter:blur(36px) saturate(185%);-webkit-backdrop-filter:blur(36px) saturate(185%);border:1px solid color-mix(in srgb, var(--accent) 18%, var(--border));box-shadow:0 44px 130px -34px rgba(0,0,0,.72),0 0 0 1px var(--accent-dim),inset 0 1px 0 rgba(255,255,255,.05)}
+#modal-rec-live .mh{padding:22px 26px 16px;background:color-mix(in srgb, var(--bg2) 55%, transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid color-mix(in srgb, var(--accent) 12%, var(--border))}
+#modal-rec-live .m-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.4px}
+#modal-rec-live .m-sub{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--t2);margin-top:5px}
+#modal-rec-live .m-body{padding:22px 26px;overflow-y:auto;flex:1}
+#modal-rec-live .mf{padding:16px 26px 22px;background:color-mix(in srgb, var(--bg2) 55%, transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid color-mix(in srgb, var(--accent) 12%, var(--border));display:flex;gap:10px;align-items:center}
+#modal-rec-live .fl{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent)}
+#modal-rec-live .fc{background:color-mix(in srgb, var(--bg) 58%, transparent);border:1px solid var(--border);border-radius:12px}
+#modal-rec-live .fc:focus{border-color:color-mix(in srgb, var(--accent) 50%, var(--border));box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 11%, transparent)}
+#modal-rec-live .rec-live-toggle{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1px solid var(--border);border-radius:13px;background:color-mix(in srgb, var(--bg) 50%, transparent);cursor:pointer;user-select:none}
+#modal-rec-live .rec-live-prev{margin-top:6px;border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative;width:100%;padding-top:56.25%;background:#000}
+#modal-rec-live .rec-live-prev iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#modal-rec-live .rec-live-prev-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--t2);font-size:12.5px;padding:0 20px;background:color-mix(in srgb, var(--bg) 60%, transparent)}
+</style>
+<div class="mo hidden" id="modal-rec-live" data-no-backdrop-close>
+  <div class="md">
+    <div class="mh">
+      <div><div class="m-title">🔴 Vídeo da Live</div><div class="m-sub">transmissão exibida abaixo das provas pro aluno</div></div>
+      <button class="m-close" onclick="CM('modal-rec-live')">✕</button>
+    </div>
+    <div class="m-body">
+      <div class="fg" style="margin-bottom:16px">
+        <label class="fl">Link do YouTube (live do StreamYard)</label>
+        <input class="fc" id="rec-live-url" type="text" placeholder="youtube.com/watch?v=… · youtu.be/… · …/live/…" oninput="recLivePreview()" style="font-family:'JetBrains Mono','SF Mono',monospace;font-size:12.5px"/>
+        <p style="font-size:11px;color:var(--t2);margin-top:6px;line-height:1.5">No StreamYard, a live também é transmitida no YouTube — cole aqui o link desse vídeo do YouTube.</p>
+      </div>
+      <div class="fg" style="margin-bottom:16px">
+        <label class="fl">Título (opcional)</label>
+        <input class="fc" id="rec-live-titulo" type="text" placeholder="Ex: Live de recursos — TSA 2025" maxlength="80"/>
+      </div>
+      <label class="rec-live-toggle" style="margin-bottom:18px">
+        <input type="checkbox" id="rec-live-ativo" style="width:18px;height:18px;accent-color:var(--accent);flex-shrink:0"/>
+        <span style="font-size:13px;font-weight:600;color:var(--text)">Exibir agora na página dos alunos</span>
+      </label>
+      <div class="fl" style="margin-bottom:8px">Pré-visualização</div>
+      <div class="rec-live-prev" id="rec-live-prev"><div class="rec-live-prev-empty">Cole um link válido pra pré-visualizar</div></div>
+      <div id="rec-live-err" class="al al-e hidden" style="margin-top:12px"></div>
+    </div>
+    <div class="mf">
+      <span id="rec-live-saved" style="margin-right:auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--green);opacity:0;transition:opacity .3s">✅ salvo</span>
+      <button class="btn btn-s" onclick="CM('modal-rec-live')">Fechar</button>
+      <button class="btn btn-p" id="rec-live-save-btn" onclick="saveRecLive()">💾 Salvar</button>
     </div>
   </div>
 </div>
@@ -12474,13 +12548,30 @@ async function loadRecConfig(){
 window.renderRecAluno=async()=>{
   const el=document.getElementById('rec-aluno-content');if(!el)return;
   el.innerHTML=`<div class="rec-loading"><div class="rec-loading-spin">⏳</div><div>Carregando provas…</div></div>`;
-  await loadRecProvas();
+  await Promise.all([loadRecProvas(),loadRecConfig()]);
   const ativas=(S.recursos.provas||[]).filter(p=>_provaPublicada(p));
+  // Vídeo da live (YouTube). Se "Exibir agora" estiver marcado, aparece abaixo das
+  // provas — e, quando NÃO há prova ativa, SUBSTITUI o card "nenhuma prova".
+  const _lvCfg=S.recursos.config||{};const _lv=_lvCfg.liveVideo;
+  let _liveHtml='';
+  if(_lv&&_lv.ativo&&_lv.videoId){
+    const _t=(_lv.titulo||'').trim();
+    _liveHtml=`<div class="rec-live-wrap">
+      <div class="rec-live-head"><span class="rec-live-dot"></span><span class="rec-live-label">Ao vivo</span>${_t?`<span class="rec-live-title">${_t.replace(/</g,'&lt;')}</span>`:''}</div>
+      <div class="rec-live-frame"><iframe src="https://www.youtube.com/embed/${encodeURIComponent(_lv.videoId)}?rel=0&autoplay=1&mute=1&playsinline=1" title="Transmissão ao vivo" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
+    </div>`;
+  }
   if(!ativas.length){
+    // Sem prova ativa: se a live estiver marcada como "Exibir agora", ela substitui o card vazio.
+    if(_liveHtml){el.innerHTML=_liveHtml;return;}
     el.innerHTML=`<div class="rec-empty">
-      <div class="rec-empty-icon">📭</div>
+      <span class="rec-empty-eyebrow">Plataforma de Recursos</span>
+      <div class="rec-empty-art">
+        <!-- Pra usar a imagem gerada, troque o ícone abaixo por: <img src="URL_DA_IMAGEM" alt="Nenhuma prova ativa"> -->
+        <div class="rec-empty-icon">📭</div>
+      </div>
       <div class="rec-empty-title">Nenhuma prova ativa no momento</div>
-      <p class="rec-empty-text">Quando a coordenação publicar uma prova com período de recurso aberto, ela aparecerá aqui para você consultar e contestar.</p>
+      <p class="rec-empty-text">Quando a coordenação publicar uma prova com período de recurso aberto, ela aparece aqui para você consultar os pareceres e enviar sua contestação.</p>
     </div>`;
     return;
   }
@@ -12501,7 +12592,7 @@ window.renderRecAluno=async()=>{
         <button class="rec-prova-cta" onclick="event.stopPropagation();recAbrirProva('${p.id}')">Abrir <span class="rec-prova-cta-arrow">→</span></button>
       </div>`;
     }).join('')}
-  </div>`;
+  </div>${_liveHtml}`;
 };
 
 // === Aluno - abrir prova: identificação por email + listagem de questões ===
@@ -12587,8 +12678,8 @@ async function renderAlunoProva(){
   // 0) Carrega bibliografias em paralelo (precisa estar pronto antes do parecer renderizar
   // pra resolver os nomes das referências bibliográficas que aparecem na resposta).
   if(!(S.recursos.fontes||[]).length){try{await loadRecFontes();}catch(e){console.warn('loadRecFontes:',e);}}
-  // 1) Carrega questões (1 round-trip — rápido)
-  const questoes=await loadRecQuestoes(provaId);
+  // 1) Carrega questões (1 round-trip — rápido) + config (pro mini-player da live), em paralelo
+  const [questoes]=await Promise.all([loadRecQuestoes(provaId),(typeof loadRecConfig==='function'?loadRecConfig():Promise.resolve())]);
   S.recursos.alunoState.questoes=questoes;
   S.recursos.alunoState.contestacoes={};
   S.recursos.alunoState.todasContestacoes={};
@@ -12630,6 +12721,16 @@ function _renderAlunoProvaUI(prova,questoes){
   const limite=prova.dataLimite?fDT(prova.dataLimite):'';
   const email=S.recursos.alunoState.email;
   const msgTopo=(S.recursos.config?.mensagemTopo||prova.mensagemInicial||'').replace(/\n/g,'<br>');
+  // Mini-player da live dentro da prova (compacto, colapsável). Só se "Exibir agora" marcado.
+  const _lvP=S.recursos.config&&S.recursos.config.liveVideo;
+  let _liveMini='';
+  if(_lvP&&_lvP.ativo&&_lvP.videoId){
+    const _tp=(_lvP.titulo||'').trim();
+    _liveMini=`<details class="rec-live-mini" open>
+      <summary><span class="rec-live-dot"></span><span class="rec-live-label">Ao vivo</span>${_tp?`<span class="rec-live-mini-title">${_tp.replace(/</g,'&lt;')}</span>`:''}<span class="rec-live-mini-chev">▾</span></summary>
+      <div class="rec-live-mini-frame"><iframe src="https://www.youtube.com/embed/${encodeURIComponent(_lvP.videoId)}?rel=0&autoplay=1&mute=1&playsinline=1" title="Transmissão ao vivo" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
+    </details>`;
+  }
   // Tempo médio de resposta (subtarefa 23) — calcula das contestações respondidas dessa prova
   const tempoMedio=_calcularTempoMedioProva(prova.id);
   // Filtro de busca (subtarefa 20)
@@ -12652,7 +12753,7 @@ function _renderAlunoProvaUI(prova,questoes){
       ${prova.dataLimite?_renderContadorRegressivo(prova.dataLimite):''}
     </div>
     ${msgTopo?`<div class="rec-prova-hero-msg">${msgTopo}</div>`:''}
-  </div>`;
+  </div>${_liveMini}`;
   if(!questoes.length){
     el.innerHTML=header+`<div style="text-align:center;padding:60px 20px;background:var(--bg2);border:1px dashed var(--border);border-radius:14px">
       <div style="font-size:42px;margin-bottom:12px;opacity:.5">📝</div>
@@ -15847,6 +15948,13 @@ window.renderRecGestao=async()=>{
         <span class="rec-instrucoes-btn-sub">Texto exibido para o aluno</span>
       </span>
     </button>
+    <button class="rec-instrucoes-btn" onclick="openRecLiveModal()">
+      <span class="rec-instrucoes-btn-icon">🔴</span>
+      <span class="rec-instrucoes-btn-text">
+        <span class="rec-instrucoes-btn-title">Vídeo da Live</span>
+        <span class="rec-instrucoes-btn-sub">Transmissão exibida pro aluno</span>
+      </span>
+    </button>
     <button class="btn btn-s btn-sm" onclick="renderRecGestao()">🔄 Atualizar</button>
   `;
   el.innerHTML='<div style="text-align:center;padding:30px;color:var(--t2);font-size:13px">⏳ Carregando contestações...</div>';
@@ -16690,6 +16798,64 @@ window.saveInstrucoes=async()=>{
   if(btn){btn.disabled=false;btn.textContent='💾 Salvar instruções';}
   const saved=document.getElementById('mins-saved');
   if(saved){const hh=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});saved.textContent=`✅ salvo às ${hh}`;saved.style.opacity='1';clearTimeout(window._minsSavedTimer);window._minsSavedTimer=setTimeout(()=>{saved.style.opacity='.55';},2200);}
+};
+
+// === Vídeo da Live (YouTube) — exibido abaixo das provas na visão do aluno ===
+// Extrai o ID de 11 chars de um vídeo do YouTube (URL watch/live/embed/youtu.be ou ID cru).
+function _ytExtractId(input){
+  const s=String(input||'').trim();
+  if(!s)return '';
+  if(/^[a-zA-Z0-9_-]{11}$/.test(s))return s;
+  let m;
+  m=s.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);if(m)return m[1];
+  m=s.match(/[?&]v=([a-zA-Z0-9_-]{11})/);if(m)return m[1];
+  m=s.match(/\/(?:live|embed|shorts|v)\/([a-zA-Z0-9_-]{11})/);if(m)return m[1];
+  return '';
+}
+window.openRecLiveModal=async()=>{
+  if(!S.recursos.config||typeof S.recursos.config.instrucoes==='undefined'){try{await loadRecConfig();}catch(_){}}
+  const lv=(S.recursos.config&&S.recursos.config.liveVideo)||{};
+  const urlEl=document.getElementById('rec-live-url');
+  const titEl=document.getElementById('rec-live-titulo');
+  const ativoEl=document.getElementById('rec-live-ativo');
+  if(urlEl)urlEl.value=lv.url||lv.videoId||'';
+  if(titEl)titEl.value=lv.titulo||'';
+  if(ativoEl)ativoEl.checked=!!lv.ativo;
+  document.getElementById('rec-live-err')?.classList.add('hidden');
+  const saved=document.getElementById('rec-live-saved');if(saved)saved.style.opacity='0';
+  document.getElementById('modal-rec-live')?.classList.remove('hidden');
+  recLivePreview();
+};
+window.recLivePreview=()=>{
+  const url=document.getElementById('rec-live-url')?.value||'';
+  const id=_ytExtractId(url);
+  const prev=document.getElementById('rec-live-prev');
+  if(!prev)return;
+  if(id){
+    prev.innerHTML=`<iframe src="https://www.youtube.com/embed/${id}?rel=0&mute=1&playsinline=1" title="Pré-visualização" frameborder="0" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+  }else{
+    prev.innerHTML=`<div class="rec-live-prev-empty">${url.trim()?'Link não reconhecido — confira se é um vídeo do YouTube':'Cole um link válido pra pré-visualizar'}</div>`;
+  }
+};
+window.saveRecLive=async()=>{
+  const url=(document.getElementById('rec-live-url')?.value||'').trim();
+  const titulo=(document.getElementById('rec-live-titulo')?.value||'').trim();
+  const ativo=!!document.getElementById('rec-live-ativo')?.checked;
+  const err=document.getElementById('rec-live-err');
+  const btn=document.getElementById('rec-live-save-btn');
+  const videoId=_ytExtractId(url);
+  if(ativo&&!videoId){if(err){err.textContent='Pra exibir, cole um link válido de um vídeo do YouTube.';err.classList.remove('hidden');}return;}
+  if(err)err.classList.add('hidden');
+  const orig=btn?btn.innerHTML:'';
+  if(btn){btn.innerHTML='⏳ Salvando...';btn.disabled=true;}
+  try{
+    const liveVideo={videoId,url,titulo,ativo,updatedAt:new Date().toISOString()};
+    await setDoc(doc(db,'recursosConfig','settings'),{liveVideo},{merge:true});
+    S.recursos.config=S.recursos.config||{};S.recursos.config.liveVideo=liveVideo;
+    const saved=document.getElementById('rec-live-saved');if(saved){saved.style.opacity='1';setTimeout(()=>{if(saved)saved.style.opacity='0';},2400);}
+    if(typeof arosToast==='function')arosToast(ativo?'🔴 Vídeo publicado pros alunos':'✅ Salvo (oculto pros alunos)','success',2800);
+  }catch(e){console.error('saveRecLive:',e);if(err){err.innerHTML='❌ Erro: <strong>'+(e.code||e.message)+'</strong>';err.classList.remove('hidden');}}
+  finally{if(btn){btn.innerHTML=orig;btn.disabled=false;}}
 };
 // === Métricas (subtarefa 19) — inclui pareceres proativos (sugestões) ===
 window.renderRecMetricas=async()=>{
