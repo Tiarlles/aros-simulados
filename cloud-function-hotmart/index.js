@@ -13,6 +13,9 @@ exports.perguntarDex = require('./dex').perguntarDex;
 // Re-exporta a function de IA dos feedbacks (revisa feedback de caso + Feedback Geral)
 exports.gerarFeedbackIA = require('./feedback-ia').gerarFeedbackIA;
 
+// Re-exporta a function de convite de acesso (cria conta Auth + link de definição de senha)
+exports.criarAcessoConvite = require('./criar-acesso').criarAcessoConvite;
+
 // Helper que faz UPSERT em alunosAprovados (Cruzar Lista) a partir do webhook Hotmart
 const { upsertAluno } = require('./hotmart-alunos');
 

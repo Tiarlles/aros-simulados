@@ -5349,15 +5349,64 @@ body.pro-rt-fs-on{overflow:hidden}
 </div>
 
 <!-- ══ MODAL: Usuário (CRUD) ══ -->
-<div class="mo hidden" id="modal-user">
-  <div class="md" style="max-width:460px">
-    <div class="mh"><div><div class="m-title" id="mu-title">Novo usuário</div><div class="m-sub">Defina credenciais e papel</div></div><button class="m-close" onclick="CM('modal-user')">✕</button></div>
+<style id="modal-user-styles">
+#modal-user .md{max-width:520px;width:min(96vw,520px);max-height:94vh;display:flex;flex-direction:column;border-radius:24px;background:color-mix(in srgb, var(--bg2) 78%, transparent);backdrop-filter:blur(36px) saturate(185%);-webkit-backdrop-filter:blur(36px) saturate(185%);border:1px solid color-mix(in srgb, var(--accent) 18%, var(--border));box-shadow:0 44px 130px -34px rgba(0,0,0,.72),0 0 0 1px var(--accent-dim),inset 0 1px 0 rgba(255,255,255,.05)}
+#modal-user .mh{padding:22px 26px 16px;background:color-mix(in srgb, var(--bg2) 55%, transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid color-mix(in srgb, var(--accent) 12%, var(--border))}
+#modal-user .m-title{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;letter-spacing:-.4px}
+#modal-user .m-body{padding:20px 26px;overflow-y:auto;flex:1}
+#modal-user .m-foot{padding:16px 26px 22px;background:color-mix(in srgb, var(--bg2) 55%, transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid color-mix(in srgb, var(--accent) 12%, var(--border))}
+#modal-user .fg{margin-bottom:17px}
+#modal-user .fl{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:7px}
+#modal-user .fl .opt{color:var(--t2);font-weight:400;font-size:10px;text-transform:none;letter-spacing:0}
+#modal-user .fc{background:color-mix(in srgb, var(--bg) 58%, transparent);border:1px solid var(--border);border-radius:12px;transition:border-color .15s,box-shadow .15s}
+#modal-user .fc:focus{border-color:color-mix(in srgb, var(--accent) 50%, var(--border));box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 11%, transparent)}
+#modal-user .mu-hint{font-size:11px;color:var(--t2);margin-top:6px;line-height:1.5}
+#modal-user .mu-grid{display:flex;flex-direction:column;gap:8px;border:1px solid var(--border);border-radius:12px;padding:10px;background:color-mix(in srgb, var(--bg) 48%, transparent)}
+#modal-user .mu-invalid{border-color:#f85149 !important;box-shadow:0 0 0 3px rgba(248,81,73,.2) !important;outline:none;animation:muShake .3s ease}
+@keyframes muShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+/* ── Grupos de permissão recolhíveis ── */
+#modal-user .mu-pgroup{border:1px solid var(--border);border-radius:11px;background:color-mix(in srgb, var(--bg) 55%, transparent);overflow:hidden}
+#modal-user .mu-pgroup>summary{list-style:none;display:flex;align-items:center;gap:9px;padding:9px 11px;cursor:pointer;user-select:none;transition:background .15s}
+#modal-user .mu-pgroup>summary::-webkit-details-marker{display:none}
+#modal-user .mu-pgroup>summary:hover{background:color-mix(in srgb, var(--accent) 7%, transparent)}
+#modal-user .mu-pgroup>summary .mu-gname{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--t2);flex:1;min-width:0}
+#modal-user .mu-pgroup>summary .mu-chev{font-size:10px;color:var(--t2);transition:transform .2s var(--ease-out-soft);flex-shrink:0}
+#modal-user .mu-pgroup[open]>summary .mu-chev{transform:rotate(180deg)}
+#modal-user .mu-group-chk{width:15px;height:15px;cursor:pointer;accent-color:var(--accent);flex-shrink:0}
+#modal-user .mu-gbody{padding:4px 11px 9px;display:flex;flex-direction:column;gap:1px}
+#modal-user .mu-subg{margin:5px 0 2px;padding-left:9px;border-left:1px dashed var(--border)}
+#modal-user .mu-subg-name{font-size:9.5px;font-weight:700;color:var(--t3);letter-spacing:.5px;text-transform:uppercase;margin:4px 0 2px}
+/* ── Linha de aba: [ver]  Nome  ........  [slider admin] ── */
+#modal-user .mu-row{display:flex;align-items:center;gap:9px;padding:6px 7px;border-radius:8px;transition:background .12s}
+#modal-user .mu-row:hover{background:color-mix(in srgb, var(--accent) 6%, transparent)}
+#modal-user .mu-row .mu-perm{width:15px;height:15px;cursor:pointer;accent-color:var(--accent);flex-shrink:0}
+#modal-user .mu-row .mu-rlabel{font-size:13px;color:var(--text);flex:1;min-width:0;cursor:pointer}
+/* slider iOS-like pro Admin */
+#modal-user .mu-switch{position:relative;display:inline-block;width:48px;height:22px;flex-shrink:0}
+#modal-user .mu-switch input{position:absolute;opacity:0;width:0;height:0}
+#modal-user .mu-switch .mu-track{position:absolute;inset:0;border-radius:22px;background:color-mix(in srgb, var(--bg) 30%, var(--border));border:1px solid var(--border);transition:background .2s,border-color .2s;cursor:pointer}
+/* Texto "ADM" em transparência dentro do slider — fica do lado oposto ao botão. */
+#modal-user .mu-switch .mu-track::after{content:'ADM';position:absolute;top:0;bottom:0;right:7px;display:flex;align-items:center;font-family:'JetBrains Mono','SF Mono',monospace;font-size:8px;font-weight:800;letter-spacing:.5px;color:var(--text);opacity:.4;pointer-events:none;transition:opacity .2s,color .2s}
+#modal-user .mu-switch .mu-track::before{content:'';position:absolute;top:2px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform .2s var(--ease-out-soft);z-index:1}
+#modal-user .mu-switch input:checked+.mu-track{background:var(--accent);border-color:var(--accent)}
+#modal-user .mu-switch input:checked+.mu-track::before{transform:translateX(26px)}
+#modal-user .mu-switch input:checked+.mu-track::after{right:auto;left:8px;color:#fff;opacity:.7}
+</style>
+<div class="mo hidden" id="modal-user" data-no-backdrop-close>
+  <div class="md">
+    <div class="mh"><div><div class="m-title" id="mu-title">Cadastro de Usuário</div></div><button class="m-close" onclick="CM('modal-user')">✕</button></div>
     <div class="m-body">
-      <div class="fg"><label class="fl">Nome de usuário (login + display)</label><input class="fc" id="mu-username" placeholder="ex: Maria Silva" autocomplete="off"/></div>
-      <div class="fg"><label class="fl">Email principal (login)</label><input class="fc" id="mu-email" type="email" placeholder="email@dom.com" autocomplete="off"/><p style="font-size:11px;color:var(--t2);margin-top:4px">Obrigatório. Usado pra login via Google ou Firebase.</p></div>
+      <div class="fg"><label class="fl">Nome de Usuário</label><input class="fc" id="mu-username" placeholder="ex: Maria Silva" autocomplete="off"/></div>
+      <div class="fg"><label class="fl">Email principal (login)</label><input class="fc" id="mu-email" type="email" placeholder="email@dom.com" autocomplete="off"/></div>
       <!-- Emails secundários — só visível pra tipo=prof. Toggla via onTipoChange. -->
-      <div class="fg hidden" id="mu-email-sec-row"><label class="fl">Emails secundários <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional)</span></label><input class="fc" id="mu-email-sec" type="text" placeholder="email2@dom.com; email3@outro.com" autocomplete="off"/><p style="font-size:11px;color:var(--t2);margin-top:4px">Até 2 emails extras pra comunicação (NF, RPA, avisos da coord). Separe por <code>;</code>.</p></div>
-      <div class="fg"><label class="fl">Senha</label><input class="fc" id="mu-senha" type="text" placeholder="Senha de acesso" autocomplete="new-password"/></div>
+      <div class="fg hidden" id="mu-email-sec-row"><label class="fl">Emails secundários <span class="opt">(opcional)</span></label><input class="fc" id="mu-email-sec" type="text" placeholder="email2@dom.com; email3@outro.com" autocomplete="off"/><p class="mu-hint">Até 2 emails extras pra comunicação | Separe por <code>;</code></p></div>
+      <div class="fg"><label class="fl">Senha <span class="opt">(opcional)</span></label><input class="fc" id="mu-senha" type="text" placeholder="Deixe em branco — a pessoa define pelo convite" autocomplete="new-password"/><p class="mu-hint">Pode deixar em branco, o usuário criará a senha no convite.</p></div>
+      <div class="fg" id="mu-invite-block">
+        <label style="display:flex;align-items:center;gap:9px;cursor:pointer;font-size:13px;font-weight:600;padding:11px 13px;background:color-mix(in srgb,var(--accent) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent) 32%,var(--border));border-radius:12px">
+          <input type="checkbox" id="mu-invite-acesso" checked style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:var(--accent)"/>
+          <span>📧 Enviar convite de acesso por email</span>
+        </label>
+      </div>
       <div class="fg">
         <label class="fl">Tipo de usuário</label>
         <select class="fc" id="mu-tipo" onchange="onTipoChange()">
@@ -5367,43 +5416,24 @@ body.pro-rt-fs-on{overflow:hidden}
           <option value="financeiro">💰 Financeiro</option>
           <option value="adm">🛡️ Administrador (acesso total)</option>
         </select>
-        <p style="font-size:11px;color:var(--t2);margin-top:4px">Define o conjunto de abas padrão. Pode customizar abaixo.</p>
       </div>
-      <!-- Visível só quando tipo=prof. Informa o admin que o prof entra automaticamente nas listagens
-           e oferece convite por email no mesmo salvamento (sem precisar ir em Cadastros → Professores). -->
+      <!-- Visível só quando tipo=prof. Informa o admin que o prof entra automaticamente nas listagens. -->
       <div id="mu-prof-extra" class="hidden">
-        <div style="background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;font-size:12px;line-height:1.5;color:var(--t1)">
+        <div style="background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:12px;padding:10px 12px;margin-bottom:16px;font-size:12px;line-height:1.5;color:var(--t1)">
           📌 Este professor entrará automaticamente nas listagens (Financeiro, Mentorias, Disponibilidade, dropdowns) ao salvar.
-        </div>
-        <div class="fg" style="margin-bottom:6px">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px">
-            <input type="checkbox" id="mu-prof-invite" checked style="width:16px;height:16px;cursor:pointer"/>
-            <span>📧 Enviar convite de acesso por email ao salvar</span>
-          </label>
-          <p style="font-size:11px;color:var(--t2);margin-top:4px;padding-left:24px">Manda email pro endereço cadastrado acima com link e senha provisória. Pode reenviar depois em <em>Cadastros → Professores</em>.</p>
         </div>
       </div>
       <div class="fg" id="mu-perms-section">
-        <label class="fl">Permissões (abas que o usuário vê)</label>
-        <div id="mu-perms-grid" style="display:flex;flex-direction:column;gap:4px;border:1px solid var(--border);border-radius:var(--rs);padding:10px;background:var(--bg3)"></div>
-        <p style="font-size:11px;color:var(--t2);margin-top:6px">Apenas as abas marcadas serão visíveis. Acesso à aba = controle total dentro dela. Novas abas criadas no futuro NÃO ficam visíveis automaticamente.</p>
-      </div>
-      <div class="fg" id="mu-extras-section">
-        <label class="fl">Permissões extras (granulares — fora do controle de abas)</label>
-        <div id="mu-extras-grid" style="display:flex;flex-direction:column;gap:4px;border:1px solid var(--border);border-radius:var(--rs);padding:10px;background:var(--bg3)">
-          <label style="display:flex;align-items:center;gap:8px;padding:5px 8px;cursor:pointer;border-radius:6px">
-            <input type="checkbox" class="mu-perm-extra" value="gerenciarCatalogo" style="width:14px;height:14px;cursor:pointer"/>
-            <span style="font-size:13px">🛍️ Gerenciar catálogo de produtos</span>
-          </label>
-        </div>
-        <p style="font-size:11px;color:var(--t2);margin-top:6px">Liberam ações administrativas dentro de abas compartilhadas. Não vêm habilitadas por padrão em nenhum preset — ative manualmente.</p>
+        <label class="fl">Permissões</label>
+        <p class="mu-hint" style="margin:-2px 0 8px">A coluna <strong>ver</strong> define quais abas a pessoa enxerga. O <strong>slider</strong> à direita concede poder de administração dentro da aba (quando aplicável).</p>
+        <div id="mu-perms-grid" class="mu-grid"></div>
       </div>
       <div id="mu-err" class="al al-e hidden"></div>
     </div>
     <div class="m-foot">
       <button class="btn btn-d btn-sm" id="mu-del" onclick="deleteUser()" style="margin-right:auto;display:none">🗑️ Apagar</button>
       <button class="btn btn-s" onclick="CM('modal-user')">Cancelar</button>
-      <button class="btn btn-p" onclick="saveUser()">💾 Salvar</button>
+      <button class="btn btn-p" id="mu-save-btn" onclick="saveUser()">💾 Salvar</button>
     </div>
   </div>
 </div>
@@ -11338,6 +11368,9 @@ const ALL_TABS=TAB_GROUPS.flatMap(g=>g.tabs.map(t=>t.id));
 // Abas historicamente reservadas a administradores. Hoje serve só como fallback —
 // o badge "ADM" no menu é decidido dinamicamente por isAdmExclusiveTab (ver abaixo).
 const ADMIN_ONLY_TABS=new Set(['usuarios','config','financeiro','orcamento','features','recProvas','recFontes','recMetricas','comunicacao','senhasAcessos','auditoria','cruzarLista']);
+// Únicas abas que têm camada de ADMIN separada (ações gated por _isAdminEm). Só elas
+// ganham o slider Admin no modal de usuário. Nas demais, "ver" = acesso total.
+const ADMIN_LAYER_TABS=new Set(['financeiro','orcamento','senhasAcessos','cruzarLista','produtos']);
 // Retorna true se a aba é EXCLUSIVA do tipo 'adm' — ou seja, nenhum outro tipo (prof/coord/suporte/financeiro/custom)
 // tem essa aba no seu preset. STRICT_ADMIN_TABS (ex: auditoria) sempre conta como exclusiva.
 function isAdmExclusiveTab(tabId){
@@ -11352,7 +11385,8 @@ function isAdmExclusiveTab(tabId){
 }
 window.isAdmExclusiveTab=isAdmExclusiveTab;
 // Abas STRICT-admin: SÓ aparecem pra role==='admin'. Não dá pra granular como permissão.
-const STRICT_ADMIN_TABS=new Set(['auditoria']);
+// (auditoria foi removida — agora é delegável como aba normal "ver".)
+const STRICT_ADMIN_TABS=new Set([]);
 
 // Labels customizáveis pelo admin (sobrescrevem os defaults de TAB_GROUPS)
 // Clock do status bar da sidebar de Coordenação
@@ -11506,10 +11540,22 @@ function _isAdminEm(tab){
   const u=S.currentUser;
   if(!u)return false;
   if(getTipo(u)==='adm')return true;
-  if(Array.isArray(u.permissoes)&&u.permissoes.includes(tab))return true;
+  if(Array.isArray(u.adminTabs))return u.adminTabs.includes(tab);   // modelo novo: adminTabs[] é a fonte de verdade
+  if(Array.isArray(u.permissoes))return u.permissoes.includes(tab); // LEGADO: usuário antigo sem adminTabs mantém comportamento atual (não remover — evita tirar acesso de quem já existe)
   return false;
 }
 window._isAdminEm=_isAdminEm;
+
+// "Esse usuário u é admin DESTA aba?" — usado pra pré-marcar os sliders Admin no modal.
+// Inclui fallback legado (sem adminTabs → permissoes[]) e o caso especial gerenciarCatalogo→produtos,
+// pra que salvar um usuário antigo NÃO remova o admin que ele já tinha implicitamente.
+function _userIsAdminTab(u,tab){
+  if(getTipo(u)==='adm')return true;
+  if(Array.isArray(u.adminTabs))return u.adminTabs.includes(tab);
+  if(tab==='produtos'&&Array.isArray(u.permissoes)&&u.permissoes.includes('gerenciarCatalogo'))return true;
+  return Array.isArray(u.permissoes)&&u.permissoes.includes(tab);
+}
+window._userIsAdminTab=_userIsAdminTab;
 
 function userRoleLabel(u){
   if(!u)return'Usuário';
@@ -23473,13 +23519,28 @@ window.onboardingCadastrar=onboardingCadastrar;
 // Envio do convite — núcleo. Recebe o user doc + email direto.
 // Usa template dedicado (template_rruper4) com variáveis prof_nome + prof_email.
 // Audit usa USUARIO_EDITADO (mais coerente: estamos editando o doc do user).
+// Cloud Function que cria a conta no Firebase Auth + gera o link de definição de senha.
+const CRIAR_ACESSO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/criarAcessoConvite';
+async function _criarAcessoConvite(email){
+  const u=window._fbAuth?.auth?.currentUser;
+  if(!u)throw new Error('Faça login com Google ou Email pra enviar convites de acesso.');
+  const token=await u.getIdToken();
+  const resp=await fetch(CRIAR_ACESSO_ENDPOINT,{method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({email})});
+  let data={};try{data=await resp.json();}catch(_){}
+  if(!resp.ok)throw new Error(data.error||`Erro ${resp.status} ao gerar o acesso.`);
+  return data.link;
+}
 async function _onbSendInvite(user,email){
   if(typeof emailjs==='undefined')throw new Error('EmailJS não carregado.');
   const nome=user.nome||user.username||'Professor(a)';
+  // 1. Cria a conta no Firebase + gera o link pra a pessoa definir a PRÓPRIA senha.
+  const setupLink=await _criarAcessoConvite(email);
+  // 2. Envia o email branded com o link de definição de senha.
   await emailjs.send('service_exyoa4r','template_rruper4',{
     to_email:email,
     prof_nome:nome,
-    prof_email:email
+    prof_email:email,
+    setup_link:setupLink
   });
   const _before={onboardingEnviadoEm:user.onboardingEnviadoEm||null};
   user.onboardingEnviadoEm=new Date().toISOString();
@@ -23601,7 +23662,7 @@ window.onboardingConvidarTodos=onboardingConvidarTodos;
 window.openUserModal=(id)=>{
   const isEdit=!!id;
   const u=isEdit?S.usuarios.find(x=>x.id===id):null;
-  document.getElementById('mu-title').textContent=isEdit?'Editar usuário':'Novo usuário';
+  document.getElementById('mu-title').textContent=isEdit?'Editar Usuário':'Cadastro de Usuário';
   // Display name primeiro (preservar acentos/espaços); username é fallback pra docs antigos
   document.getElementById('mu-username').value=u?.nome||u?.username||'';
   // Edição liberada: admin pode renomear. Renomeio cria novo doc + marca o velho inativo.
@@ -23657,46 +23718,55 @@ window.openUserModal=(id)=>{
   if(profExtra)profExtra.classList.toggle('hidden',tipo!=='prof');
   const emailSecRow=document.getElementById('mu-email-sec-row');
   if(emailSecRow)emailSecRow.classList.toggle('hidden',tipo!=='prof');
-  // Checkbox de convite começa marcado em create mode; em edit mode, desmarcado
-  // (editar prof não envia convite automaticamente — admin usa o checkbox se
-  // quiser reenviar, ou usa o botão dedicado em Cadastros → Professores).
-  const inviteCb=document.getElementById('mu-prof-invite');
+  // Checkbox de convite: marcado em create mode; desmarcado ao editar (evita reenvio acidental).
+  const inviteCb=document.getElementById('mu-invite-acesso');
   if(inviteCb)inviteCb.checked=!isEdit;
-  // Monta grid de checkboxes seguindo a estrutura efetiva (grupos + subgrupos + ordem custom)
+  // Monta grid de grupos recolhíveis. Cada aba = [chk ver] Nome ... [slider admin?].
+  // STRICT_ADMIN_TABS continua filtrando abas que só o tipo 'adm' pode ter (hoje vazio).
   const userPerms=new Set(userTabs(u));
   const grid=document.getElementById('mu-perms-grid');
-  // STRICT_ADMIN_TABS (auditoria) não pode ser concedida como permissão granular — só tipo 'adm'.
-  const _tabCheckbox=(t,extraStyle)=>STRICT_ADMIN_TABS.has(t.id)?'':`<label style="display:flex;align-items:center;gap:8px;padding:5px 8px;cursor:pointer;border-radius:6px;${extraStyle||''}" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background=''">
-        <input type="checkbox" class="mu-perm" value="${t.id}" ${tipo==='adm'||userPerms.has(t.id)?'checked':''} style="width:14px;height:14px;cursor:pointer"/>
-        <span style="font-size:13px">${tabLabel(t)}</span>
-      </label>`;
-  const groupsHtml=_menuEffectiveGroups().map(g=>`
-    <div style="margin-bottom:10px">
-      <div style="font-size:10px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">${(g.label||'').replace(/</g,'&lt;')}</div>
-      ${g.items.map(it=>{
-        if(it.kind==='tab')return _tabCheckbox(it.tab);
-        const sg=it;
-        return `<div style="margin:4px 0 4px 8px;padding-left:8px;border-left:1px dashed var(--border)">
-          <div style="font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.5px;text-transform:uppercase;margin:4px 0 2px">${(sg.label||'').replace(/</g,'&lt;')}</div>
-          ${sg.tabs.map(t=>_tabCheckbox(t,'margin-left:4px')).join('')}
-        </div>`;
-      }).join('')}
-    </div>
-  `).join('');
+  const _esc=s=>String(s||'').replace(/</g,'&lt;');
+  // Linha de uma aba. checked "ver" se adm OU userPerms tem; slider só pra ADMIN_LAYER_TABS.
+  const _tabRow=(t)=>{
+    if(STRICT_ADMIN_TABS.has(t.id))return '';
+    const verChecked=(tipo==='adm'||userPerms.has(t.id))?'checked':'';
+    const hasAdmin=ADMIN_LAYER_TABS.has(t.id);
+    const admChecked=(u&&_userIsAdminTab(u,t.id))?'checked':'';
+    const slider=hasAdmin
+      ?`<label class="mu-switch" title="Admin desta aba"><input type="checkbox" class="mu-admin" value="${t.id}" ${admChecked}/><span class="mu-track"></span></label>`
+      :'';
+    return `<div class="mu-row">
+      <input type="checkbox" class="mu-perm" id="muperm-${t.id}" value="${t.id}" ${verChecked} onchange="_muSyncGroupChk(this.closest('.mu-pgroup'))"/>
+      <label class="mu-rlabel" for="muperm-${t.id}">${_esc(tabLabel(t))}</label>
+      ${slider}
+    </div>`;
+  };
+  const groupsHtml=_menuEffectiveGroups().map(g=>{
+    const rows=g.items.map(it=>{
+      if(it.kind==='tab')return _tabRow(it.tab);
+      const sg=it;
+      const subRows=sg.tabs.map(_tabRow).join('');
+      if(!subRows.trim())return '';
+      return `<div class="mu-subg"><div class="mu-subg-name">${_esc(sg.label)}</div>${subRows}</div>`;
+    }).join('');
+    if(!rows.trim())return '';
+    return `<details class="mu-pgroup">
+      <summary>
+        <input type="checkbox" class="mu-group-chk" onclick="event.stopPropagation()" onchange="_muToggleGroup(this)"/>
+        <span class="mu-gname">${_esc(g.label)}</span>
+        <span class="mu-chev">▼</span>
+      </summary>
+      <div class="mu-gbody">${rows}</div>
+    </details>`;
+  }).join('');
   grid.innerHTML=groupsHtml;
-  // Marca os checkboxes de permissões extras com base nas permissões persistidas do usuário.
-  // Adm sempre tem implicitamente — checkbox marcado e seção escondida.
-  const userPermsList=Array.isArray(u?.permissoes)?u.permissoes:[];
-  document.querySelectorAll('.mu-perm-extra').forEach(cb=>{
-    cb.checked=(tipo==='adm')||userPermsList.includes(cb.value);
-  });
+  // Sincroniza o checkbox de cada grupo (parcial/total) com os filhos recém-montados.
+  grid.querySelectorAll('.mu-pgroup').forEach(_muSyncGroupChk);
   // Ajusta visibilidade da seção de permissões e (se for novo usuário) aplica preset
   if(isEdit){
-    // Edit: respeita as permissoes salvas (já marcadas acima) — só ajusta visibilidade
+    // Edit: respeita as permissoes/adminTabs salvas (já marcadas acima) — só ajusta visibilidade
     const section=document.getElementById('mu-perms-section');
     if(section)section.style.display=tipo==='adm'?'none':'';
-    const extrasSection=document.getElementById('mu-extras-section');
-    if(extrasSection)extrasSection.style.display=tipo==='adm'?'none':'';
   }else{
     // Novo: aplica preset do tipo default
     onTipoChange();
@@ -23707,6 +23777,11 @@ window.openUserModal=(id)=>{
   delBtn.style.display=isEdit&&S.currentUser?.id!==id?'':'none';
   delBtn.dataset.id=id||'';
   document.getElementById('modal-user').dataset.editId=id||'';
+  // Reset defensivo: botão habilitado/normal e sem destaques de validação de uma abertura anterior.
+  const _sb=document.getElementById('mu-save-btn');if(_sb){_sb.disabled=false;_sb.innerHTML='💾 Salvar';}
+  document.querySelectorAll('#modal-user .mu-invalid').forEach(el=>el.classList.remove('mu-invalid'));
+  // Convite: marcado por padrão pra usuário NOVO; desmarcado ao editar (evita reenvio acidental).
+  const _inv=document.getElementById('mu-invite-acesso');if(_inv)_inv.checked=!id;
   document.getElementById('modal-user').classList.remove('hidden');
 };
 
@@ -23766,27 +23841,46 @@ function _tiposMeta(){
   return merged;
 }
 window._tiposMeta=_tiposMeta;
+
+// Marca/desmarca todas as abas "ver" de um grupo (checkbox do header).
+function _muToggleGroup(chk){
+  const group=chk.closest('.mu-pgroup');if(!group)return;
+  group.querySelectorAll('.mu-perm').forEach(cb=>{cb.checked=chk.checked;});
+  chk.indeterminate=false;
+}
+window._muToggleGroup=_muToggleGroup;
+
+// Ajusta o checkbox do header do grupo: total / parcial (indeterminate) / vazio.
+function _muSyncGroupChk(group){
+  if(!group)return;
+  const head=group.querySelector('.mu-group-chk');if(!head)return;
+  const boxes=group.querySelectorAll('.mu-perm');
+  const total=boxes.length;
+  let on=0;boxes.forEach(cb=>{if(cb.checked)on++;});
+  head.checked=total>0&&on===total;
+  head.indeterminate=on>0&&on<total;
+}
+window._muSyncGroupChk=_muSyncGroupChk;
+
 function onTipoChange(){
   const tipo=document.getElementById('mu-tipo').value;
   const permsSection=document.getElementById('mu-perms-section');
-  const extrasSection=document.getElementById('mu-extras-section');
   if(tipo==='adm'){
     if(permsSection)permsSection.style.display='none';
-    if(extrasSection)extrasSection.style.display='none';
-    document.querySelectorAll('#mu-perms-grid input[type=checkbox]').forEach(cb=>cb.checked=true);
-    document.querySelectorAll('.mu-perm-extra').forEach(cb=>cb.checked=true);
+    document.querySelectorAll('#mu-perms-grid .mu-perm').forEach(cb=>cb.checked=true);
   }else{
     if(permsSection)permsSection.style.display='';
-    if(extrasSection)extrasSection.style.display='';
     const preset=new Set((_tiposPresets()[tipo])||[]);
-    document.querySelectorAll('#mu-perms-grid input[type=checkbox]').forEach(cb=>{
+    // Presets definem só os checkboxes "ver" (visibilidade).
+    document.querySelectorAll('#mu-perms-grid .mu-perm').forEach(cb=>{
       cb.checked=preset.has(cb.value);
     });
-    // Extras default OFF — admin marca manualmente em quem precisar
-    document.querySelectorAll('.mu-perm-extra').forEach(cb=>{
-      cb.checked=preset.has(cb.value);
-    });
+    // Sliders Admin começam SEMPRE desligados ao aplicar preset — admin liga explicitamente
+    // quem precisa de poder de administração dentro da aba.
+    document.querySelectorAll('#mu-perms-grid .mu-admin').forEach(cb=>{cb.checked=false;});
   }
+  // Reconcilia o estado parcial/total do checkbox de cada grupo.
+  document.querySelectorAll('#mu-perms-grid .mu-pgroup').forEach(_muSyncGroupChk);
   // Mostra/esconde bloco prof-extra (aviso de listagens + checkbox de convite)
   // E linha de emails secundários (visível só pra prof).
   const profExtra=document.getElementById('mu-prof-extra');
@@ -24086,42 +24180,67 @@ window.saveUser=async()=>{
   const senha=document.getElementById('mu-senha').value;
   const tipo=document.getElementById('mu-tipo').value;
   const isAdmin=tipo==='adm';
-  const tabPerms=isAdmin?[]:Array.from(document.querySelectorAll('.mu-perm:checked')).map(c=>c.value);
-  const extraPerms=isAdmin?[]:Array.from(document.querySelectorAll('.mu-perm-extra:checked')).map(c=>c.value);
-  const permissoes=isAdmin?[]:[...tabPerms,...extraPerms];
+  const tabPerms=isAdmin?[]:Array.from(document.querySelectorAll('#mu-perms-grid .mu-perm:checked')).map(c=>c.value);
+  // permissoes[] = abas que a pessoa VÊ. adminTabs[] = abas onde é ADMIN (sliders).
+  const permissoes=isAdmin?[]:tabPerms;
+  const adminTabs=isAdmin?[]:Array.from(document.querySelectorAll('#mu-perms-grid .mu-admin:checked')).map(c=>c.value);
   const errEl=document.getElementById('mu-err');
-  if(!usernameDisplay||!senha){errEl.textContent='Preencha usuário e senha.';errEl.classList.remove('hidden');return;}
+  // Mostra o erro E foca/destaca o campo que falta (em vez de só uma mensagem discreta
+  // que passa batido — evita a sensação de "cliquei e nada aconteceu").
+  const _muErr=(msg,focus)=>{
+    errEl.textContent=msg;errEl.classList.remove('hidden');
+    const el=typeof focus==='string'?document.getElementById(focus):focus;
+    if(el){
+      try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}
+      try{el.focus({preventScroll:true});}catch(_){}
+      el.classList.add('mu-invalid');
+      const clear=()=>el.classList.remove('mu-invalid');
+      el.addEventListener('input',clear,{once:true});
+      el.addEventListener('change',clear,{once:true});
+    }else{try{errEl.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}}
+  };
+  if(!usernameDisplay){_muErr('Preencha o nome de usuário.','mu-username');return;}
   // ID do doc: normaliza o username pra slug (lowercase, sem acentos/espaços) — usado como chave Firestore.
   const username=usernameDisplay.toLowerCase()
     .normalize('NFD').replace(/[̀-ͯ]/g,'')
     .replace(/\s+/g,'.').replace(/[^a-z0-9._@+-]/g,'');
-  if(!username){errEl.textContent='Nome de usuário inválido.';errEl.classList.remove('hidden');return;}
-  if(!email){errEl.textContent='Email é obrigatório. Necessário pra login via Google ou redefinição de senha.';errEl.classList.remove('hidden');return;}
+  if(!username){_muErr('Nome de usuário inválido.','mu-username');return;}
+  if(!email){_muErr('Email é obrigatório. Necessário pra login via Google ou redefinição de senha.','mu-email');return;}
   const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const invalido=emailsArr.find(e=>!emailRegex.test(e));
-  if(invalido){errEl.textContent='Email inválido: '+invalido;errEl.classList.remove('hidden');return;}
-  if(emailsArr.length>3){errEl.textContent='Máximo 3 emails. Você informou '+emailsArr.length+'.';errEl.classList.remove('hidden');return;}
+  if(invalido){_muErr('Email inválido: '+invalido,'mu-email');return;}
+  if(emailsArr.length>3){_muErr('Máximo 3 emails. Você informou '+emailsArr.length+'.','mu-email-sec');return;}
   // Conflito: username diferente do editId E já existe outro
   const conflito=S.usuarios.some(u=>(u.username||u.id)===username && u.id!==editId);
-  if(conflito){errEl.textContent='Já existe um usuário com esse nome.';errEl.classList.remove('hidden');return;}
+  if(conflito){_muErr('Já existe um usuário com esse nome.','mu-username');return;}
   // Conflito de email: dois usuários ativos não podem compartilhar o mesmo email
   if(email){
     const emailConflito=S.usuarios.some(u=>!u.inativo&&u.email&&u.email.toLowerCase()===email&&u.id!==editId&&(u.username||u.id)!==username);
-    if(emailConflito){errEl.textContent='Já existe um usuário ativo com esse email.';errEl.classList.remove('hidden');return;}
+    if(emailConflito){_muErr('Já existe um usuário ativo com esse email.','mu-email');return;}
   }
-  if(!isAdmin&&!tabPerms.length){errEl.textContent='Marque ao menos uma permissão de aba (ou escolha Administrador).';errEl.classList.remove('hidden');return;}
+  if(!isAdmin&&!tabPerms.length){_muErr('Marque ao menos uma permissão de aba (ou escolha Administrador).',document.querySelector('.mu-perm'));return;}
   // role mantido por compat backward: 'admin' pra tipo adm, 'user' caso contrário.
-  const data={username,nome:usernameDisplay,email,senha,tipo,role:isAdmin?'admin':'user',permissoes,inativo:false};
-  // Sanitiza senha pro audit log (não vazar credencial)
-  const _dataForAudit={...data,senha:'***'};
   const _userBefore=editId?S.usuarios.find(u=>u.id===editId):null;
   const _userBeforeSan=_userBefore?{..._userBefore,senha:'***'}:null;
+  // Senha OPCIONAL: edição sem preencher mantém a senha atual; criação sem senha gera um
+  // placeholder não-adivinhável (login clássico fica indisponível — a pessoa define a senha
+  // real pelo convite/Firebase Auth).
+  let senhaFinal=senha;
+  if(!senhaFinal)senhaFinal=(editId&&_userBefore&&_userBefore.senha)?_userBefore.senha:('_acesso_'+Math.random().toString(36).slice(2,12));
+  const data={username,nome:usernameDisplay,email,senha:senhaFinal,tipo,role:isAdmin?'admin':'user',permissoes,adminTabs,inativo:false};
+  // Sanitiza senha pro audit log (não vazar credencial)
+  const _dataForAudit={...data,senha:'***'};
+  // Feedback imediato no botão (a operação tem 1 ida à rede; o spinner deixa a UI responsiva).
+  const _saveBtn=document.getElementById('mu-save-btn');
+  const _saveOrig=_saveBtn?_saveBtn.innerHTML:'';
+  const _restoreSaveBtn=()=>{if(_saveBtn){_saveBtn.disabled=false;_saveBtn.innerHTML=_saveOrig;}};
+  if(_saveBtn){_saveBtn.disabled=true;_saveBtn.innerHTML='⏳ Salvando...';}
   // === Renomeio: editId existe E username mudou ===
   // Doc IDs no Firestore são imutáveis. Estratégia: cria novo doc com novo ID,
   // marca o velho como inativo (rules bloqueiam delete em /usuarios). Login filtra inativos.
   const renomeando=editId&&editId!==username;
   if(renomeando){
-    if(!confirm(`Renomear usuário de "${editId}" pra "${username}"?\n\nO doc antigo será marcado como inativo (não deletado) por restrição das rules. O novo doc carrega todos os dados e ganha as novas credenciais.\n\nClique OK pra prosseguir.`)){return;}
+    if(!confirm(`Renomear usuário de "${editId}" pra "${username}"?\n\nO doc antigo será marcado como inativo (não deletado) por restrição das rules. O novo doc carrega todos os dados e ganha as novas credenciais.\n\nClique OK pra prosseguir.`)){_restoreSaveBtn();return;}
     try{
       const original=S.usuarios.find(u=>u.id===editId);
       // 1. Cria novo doc com os dados atualizados
@@ -24140,13 +24259,25 @@ window.saveUser=async()=>{
     }catch(e){
       console.error('saveUser rename:',e);
       errEl.textContent='Erro ao renomear: '+(e?.code||e?.message||e);errEl.classList.remove('hidden');
+      _restoreSaveBtn();
       return;
     }
   }else{
-    await setDoc(doc(db,'usuarios',username),data);
+    try{
+      await setDoc(doc(db,'usuarios',username),data);
+    }catch(e){
+      console.error('saveUser:',e);
+      errEl.textContent='Erro ao salvar: '+(e?.code||e?.message||e);errEl.classList.remove('hidden');
+      _restoreSaveBtn();
+      return;
+    }
     audit(editId?'USUARIO_EDITADO':'USUARIO_CRIADO',{collection:'usuarios',username},{before:_userBeforeSan,after:_dataForAudit});
   }
-  await loadUsuarios();
+  // Atualiza o estado local sem re-baixar a lista inteira do banco (UI fluida — corta 1 ida à rede).
+  const _localUser={id:username,...data};
+  const _ui=S.usuarios.findIndex(u=>u.id===username);
+  if(_ui>=0)S.usuarios[_ui]=_localUser; else S.usuarios.push(_localUser);
+  if(renomeando){const _oi=S.usuarios.findIndex(u=>u.id===editId);if(_oi>=0)S.usuarios[_oi]={...S.usuarios[_oi],inativo:true,renomeadoPara:username};}
   // Se editou o próprio usuário logado, atualiza S.currentUser + sessão pra refletir
   if(editId&&S.currentUser?.id===editId){
     S.currentUser=S.usuarios.find(u=>u.id===username)||S.currentUser;
@@ -24182,21 +24313,23 @@ window.saveUser=async()=>{
       // Não bloqueia — usuário foi criado/editado com sucesso. Só avisa.
       if(typeof _revShowToast==='function')_revShowToast('⚠️ Usuário salvo, mas falha ao sincronizar lista de profs','var(--yellow)');
     }
-    // Envio de convite por email se o checkbox estiver marcado
-    const inviteCb=document.getElementById('mu-prof-invite');
-    if(inviteCb&&inviteCb.checked&&email){
-      try{
-        const userDoc=S.usuarios.find(u=>u.id===username);
-        if(userDoc&&typeof _onbSendInvite==='function'){
-          await _onbSendInvite(userDoc,email);
-          _inviteFlash='✓ Usuário salvo e convite enviado pra '+email;
-        }
-      }catch(e){
-        console.error('saveUser invite:',e);
-        _inviteFlash='⚠️ Usuário salvo, mas falha ao enviar convite: '+(e?.text||e?.message||e);
+  }
+  // === Convite de acesso (QUALQUER tipo) — cria conta Firebase + link de definição de senha ===
+  const inviteCb=document.getElementById('mu-invite-acesso');
+  if(inviteCb&&inviteCb.checked&&email){
+    if(_saveBtn)_saveBtn.innerHTML='📧 Enviando convite...';
+    try{
+      const userDoc=S.usuarios.find(u=>u.id===username);
+      if(userDoc&&typeof _onbSendInvite==='function'){
+        await _onbSendInvite(userDoc,email);
+        _inviteFlash='✓ Usuário salvo e convite enviado pra '+email;
       }
+    }catch(e){
+      console.error('saveUser invite:',e);
+      _inviteFlash='⚠️ Usuário salvo, mas falha ao enviar convite: '+(e?.text||e?.message||e);
     }
   }
+  _restoreSaveBtn();
   CM('modal-user');renderUsuarios();
   // Se sincronizou com lista de profs, re-renderiza Cadastros → Professores
   // pra atualizar badge "+1, +2" de multi-email + status de convite.
@@ -33973,8 +34106,8 @@ function _proFmtDateShort(ts){
 
 function _proCanEdit(){
   const u=S.currentUser;if(!u)return false;
-  if(getTipo(u)==='adm')return true;
-  return Array.isArray(u.permissoes)&&u.permissoes.includes('gerenciarCatalogo');
+  // Slider Admin da aba Produtos (modelo novo) OU fallback legado gerenciarCatalogo.
+  return _isAdminEm('produtos')||(Array.isArray(u.permissoes)&&u.permissoes.includes('gerenciarCatalogo'));
 }
 
 function _proEsc(s){return _comEsc(s);}
