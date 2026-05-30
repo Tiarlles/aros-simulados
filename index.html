@@ -13306,12 +13306,22 @@ async function _renderRecQuestoesView(){
   }
   // Detector central: questão tem imagem anexada (inline no enunciado HTML ou via imagemUrl legacy).
   const _qTemImg=q=>/<img\b/i.test(q.enunciado||'')||!!q.imagemUrl;
+  // Contestações pendentes (não assumidas): marca CONTESTADA. Cacheado por prova; carrega em background.
+  const _contestMap=S.recursos._contestMapCache[provaId];
+  const _contestLoaded=!!_contestMap;
+  questoes.forEach(q=>{
+    const pend=_contestLoaded?(_contestMap[q.id]||0):0;
+    q._contestPend=pend>0&&!q.parecerAtribuidoA;
+  });
   // Barra de filtros
-  const filtroAtual=S.recursos.questoesFilter||'todas';
+  let filtroAtual=S.recursos.questoesFilter||'todas';
   const buscaAtual=(S.recursos.questoesSearch||'').trim();
   const nImgPend=questoes.filter(q=>q.imagemPendente&&!q.imagemUrl).length;
   const nGabPend=questoes.filter(q=>!q.gabaritoOficial).length;
   const nComImg=questoes.filter(_qTemImg).length;
+  const nContestadas=questoes.filter(q=>q._contestPend).length;
+  // Se o filtro CONTESTADAS estava ativo e zerou (chip some), volta pra TODAS — evita lista vazia sem chip visível.
+  if(filtroAtual==='contestadas'&&_contestLoaded&&!nContestadas){filtroAtual='todas';S.recursos.questoesFilter='todas';}
   // Helper: lab+contagem opcional. corAtivo é a tonalidade quando o filtro está ON.
   const btnFiltro=(k,lab,n,corAtivo)=>{
     const ativo=filtroAtual===k;
@@ -13323,6 +13333,7 @@ async function _renderRecQuestoesView(){
   const corImgPend={bg:'rgba(251,143,68,.15)',fg:'#fb8f44',bd:'rgba(251,143,68,.45)'};
   const corGabPend={bg:'rgba(210,153,34,.15)',fg:'#d29922',bd:'rgba(210,153,34,.45)'};
   const corComImg={bg:'rgba(34,197,94,.15)',fg:'#22c55e',bd:'rgba(34,197,94,.45)'};
+  const corContestada={bg:'rgba(210,153,34,.18)',fg:'#d29922',bd:'rgba(210,153,34,.5)'};
   // Busca por ID Anest (idExterno) — input com clear button.
   const buscaEsc=buscaAtual.replace(/"/g,'&quot;');
   const barraBusca=`<div style="position:relative;margin-bottom:10px;max-width:360px">
@@ -13332,6 +13343,7 @@ async function _renderRecQuestoesView(){
   </div>`;
   const barraFiltros=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
     ${btnFiltro('todas','TODAS',questoes.length)}
+    ${(_contestLoaded&&nContestadas)?btnFiltro('contestadas','⚠️ CONTESTADAS',nContestadas,corContestada):''}
     ${nComImg?btnFiltro('com-img','📷 COM IMG',nComImg,corComImg):''}
     ${nImgPend?btnFiltro('img-pend','📷 IMG PENDENTE',nImgPend,corImgPend):''}
     ${nGabPend?btnFiltro('gab-pend','🎯 GABARITO PENDENTE',nGabPend,corGabPend):''}
@@ -13341,6 +13353,7 @@ async function _renderRecQuestoesView(){
   if(filtroAtual==='img-pend')questoesFiltradas=questoes.filter(q=>q.imagemPendente&&!q.imagemUrl);
   else if(filtroAtual==='gab-pend')questoesFiltradas=questoes.filter(q=>!q.gabaritoOficial);
   else if(filtroAtual==='com-img')questoesFiltradas=questoes.filter(_qTemImg);
+  else if(filtroAtual==='contestadas')questoesFiltradas=questoes.filter(q=>q._contestPend);
   // Aplica busca por ID Anest (case-insensitive, substring)
   if(buscaAtual){
     const termo=buscaAtual.toUpperCase();
@@ -13354,6 +13367,13 @@ async function _renderRecQuestoesView(){
   if(buscaAtual){
     const inp=document.getElementById('rec-q-search');
     if(inp){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);}
+  }
+  // Carrega contestações pendentes em background (1ª abertura da prova) e re-renderiza pra mostrar CONTESTADA.
+  if(!_contestLoaded){
+    loadContestPendMap(provaId,questoes).then(map=>{
+      S.recursos._contestMapCache[provaId]=map;
+      if(S.recursos.curProvaId===provaId&&S.recursos.viewMode==='questoes')renderRecProvas();
+    }).catch(e=>console.warn('contest map:',e));
   }
 }
 
@@ -13369,6 +13389,8 @@ window.recSetQSearch=(v)=>{
 
 // Conjunto de questões expandidas (persiste entre re-renders)
 S.recursos._questaoExpanded=S.recursos._questaoExpanded||new Set();
+// Cache {provaId: {qId: nContestPend}} pra badge CONTESTADA — carregado em background
+S.recursos._contestMapCache=S.recursos._contestMapCache||{};
 
 function _recQuestaoCard(q,prova){
   const numero=q.numero||'?';
@@ -13380,13 +13402,18 @@ function _recQuestaoCard(q,prova){
   const temImg=/<img\b/i.test(q.enunciado||'')||!!q.imagemUrl;
   const imgBadge=(temImg&&!(q.imagemPendente&&!q.imagemUrl))?`<span title="Questão tem imagem anexada no enunciado" style="display:inline-flex;align-items:center;gap:3px;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:999px;background:rgba(34,197,94,.14);color:#22c55e;border:1px solid rgba(34,197,94,.4)">📷 IMG</span>`:'';
   const sugBadge=''; // badge de sugestões removido — status já reflete o parecer atual
+  // Questão contestada por aluno e ainda não assumida por nenhum prof → marca CONTESTADA + cabeçalho amarelado.
+  const contestPend=!!q._contestPend;
+  const headBg=contestPend?'background:rgba(210,153,34,.12);':'';
+  const contestBadge=contestPend?`<span title="Questão contestada por aluno — ainda não assumida por nenhum professor na Gestão de Recursos" style="display:inline-flex;align-items:center;gap:3px;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:800;letter-spacing:.6px;padding:2px 8px;border-radius:999px;background:rgba(210,153,34,.2);color:#d29922;border:1px solid rgba(210,153,34,.55)">⚠️ CONTESTADA</span>`:'';
   const expanded=S.recursos._questaoExpanded.has(q.id);
   return`<div class="rec-q-card" draggable="true" data-qid="${q.id}" data-numero="${numero}" ondragstart="iqDragStart(event,'${q.id}')" ondragend="iqDragEnd(event)" ondragover="iqDragOver(event,'${q.id}')" ondragleave="iqDragLeave(event)" ondrop="iqDrop(event,'${q.id}')" style="background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${status.cor};border-radius:10px;overflow:hidden;transition:transform .15s,box-shadow .15s">
-    <div onclick="recToggleQuestao('${q.id}')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none;flex-wrap:wrap">
+    <div onclick="recToggleQuestao('${q.id}')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none;flex-wrap:wrap;${headBg}">
       <span title="Arraste para reordenar" style="cursor:grab;color:var(--t2);font-size:16px;line-height:1;padding:4px 2px;user-select:none" onmousedown="event.stopPropagation()">⠿</span>
       <span style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;color:var(--accent);min-width:42px;text-align:center">${numero}</span>
       <div style="flex:1;min-width:200px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
         ${q.idExterno?`<span title="ID Anest" style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.6px;padding:2px 7px;border-radius:999px;background:color-mix(in srgb, var(--accent) 10%, transparent);color:var(--accent);border:1px solid color-mix(in srgb, var(--accent) 28%, transparent)">ID ${q.idExterno.replace(/</g,'&lt;')}</span>`:''}
+        ${contestBadge}
         <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:999px;background:${status.bg};color:${status.cor};border:1px solid ${status.bd}">● ${status.label}</span>
         ${sugBadge}
         ${imgBadge}
@@ -15652,6 +15679,21 @@ async function loadRecQuestoes(provaId){
   }catch(e){console.error('loadRecQuestoes:',e);return[];}
 }
 
+// Conta contestações PENDENTES (status != 'respondida') por questão da prova.
+// Usado pra marcar "CONTESTADA" na lista de questões da gestão. Fan-out por questão (reads).
+async function loadContestPendMap(provaId,questoes){
+  const lista=questoes||S.recursos.questoesCache[provaId]||[];
+  const entries=await Promise.all(lista.map(async q=>{
+    try{
+      const csnap=await getDocs(collection(db,`provas/${provaId}/questoes/${q.id}/contestacoes`));
+      const pend=csnap.docs.filter(cd=>((cd.data()||{}).status||'')!=='respondida').length;
+      return[q.id,pend];
+    }catch(_){return[q.id,0];}
+  }));
+  const map={};entries.forEach(([id,n])=>{map[id]=n;});
+  return map;
+}
+
 window.recAbrirQuestoes=async(provaId)=>{
   S.recursos.curProvaId=provaId;
   S.recursos.viewMode='questoes';
@@ -15665,6 +15707,8 @@ window.recVoltarProvas=async()=>{
   if(S.recursos._questaoExpanded)S.recursos._questaoExpanded.clear();
   S.recursos.questoesFilter='todas';
   S.recursos.questoesSearch='';
+  // Limpa cache de contestações pra refletir contestações novas ao reabrir a prova.
+  S.recursos._contestMapCache={};
   await renderRecProvas();
 };
 
