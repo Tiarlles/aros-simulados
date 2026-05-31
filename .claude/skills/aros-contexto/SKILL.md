@@ -274,6 +274,7 @@ produtos/{produtoId}                — Catálogo Interno de Produtos (descritiv
     provasAlvo:[str],               // multi-select de config/catalogoConfig.provasAlvo (dedup auto)
     responsaveis:[str],             // tags livres multi (dedup auto)
     status:'rascunho'|'ativo'|'em-breve'|'descontinuado',
+    isCombo:bool,                   // 2026-05-31 — produto é combo (oferta com vários produtos). Mostra tag "COMBO" (gradient roxo→rosa) antes do nome no card
     features:[Feature],             // shape detalhada abaixo
     temMentoria:'sim'|'opcional'|'nao',   // string 3-estados (compat: bool true→sim, false→nao)
     mentoriaDescricao:'',           // breve descrição da mentoria (textarea no editor, parágrafo no detalhe quando temMentoria != 'nao')
@@ -299,6 +300,8 @@ Feature = {
   linkUrl, linkLabel,              // botão de link nomeável (gradient azul→roxo no detalhe)
   pdfUrl, pdfLabel, pdfPath, pdfSize, pdfName,  // anexo PDF nomeável (gradient âmbar/vermelho)
                                    // Storage: produtos/{pid}/features/{fid}/pdf-{ts}.pdf, limite 20MB
+  imgUrl, imgLabel, imgPath, imgSize, imgName,  // anexo IMAGEM nomeável (gradient teal/esmeralda) — 2026-05-31
+                                   // botão abre em lightbox (openImgLightbox), NÃO baixa. Storage: produtos/{pid}/features/{fid}/img-{ts}.{ext}, limite 15MB
   updatedAt                        // Timestamp.now() — NÃO serverTimestamp (proibido dentro de array)
 }
 ```
@@ -1226,6 +1229,50 @@ npx -y firebase-tools functions:log --only perguntarDex --lines 50
 - **Login custom legado NÃO funciona com Dex** — exige Firebase Auth (Google ou Email/Password).
 - `S._dexConfigDirty` impede o snapshot listener de sobrescrever edições em andamento.
 - Save dos PDFs é independente do save do textarea (PDFs commitam imediatamente; textarea via Salvar/Cancelar).
+
+### Catálogo + Dex — sessão grande (2026-05-31) ⚠️ PENDENTE DEPLOY
+
+Sessão de polimento do catálogo + rearquitetura do Dex. **Frontend (`index.html`) commitado mas NÃO pushado; Cloud Function (`dex.js`) editada mas NÃO deployada.** As mudanças de `dex.js` (itens 5, 6, 7) só valem APÓS `firebase deploy --only functions`. Supersede partes das seções "Pergunte ao Dex — evolução (2026-05-25)" (abas por perfil e PDFs foram REMOVIDOS).
+
+**1. Box "Dores dos Nossos Clientes"** (clone do padrão Editais):
+- Caixa colapsável no topo do catálogo (após Jornada). Cada cliente é um card-dropdown com `nome` + `info` (rich-text editável via modal). Reusa classes `.pro-edital-*` / `.pro-editais-modal-*`.
+- Firestore: `config/{verticalDoc('doresClientes')}` = `{ lista:[{id,nome,info,updatedAt,updatedBy}], updatedAt, updatedBy }`.
+- Funções: `_proDoresHTML`, `_proDoreItemHTML`, `_proDoresModalHTML`, `proDoresAbrirNovo/Editar/Remover/ModalSalvar`, `proToggleDores`, `proDoreToggle`. Audit `DORE_CRIADO/EDITADO/REMOVIDO`.
+- Lida pela IA (ver item 7 — leitor dedicado `formatarDores` no `dex.js`).
+
+**2. Tag COMBO** — produto com `isCombo:true` mostra pílula "COMBO" (gradient roxo→rosa, `.pro-combo-tag`) antes do nome no card. Toggle `.pro-combo-toggle` na seção Básico do editor (abaixo de Status). Campo persistido no payload do `_proSalvar`.
+
+**3. Anexo de IMAGEM por feature** (espelha o anexo PDF): campos `imgUrl/imgLabel/imgPath/imgSize/imgName`. Botão verde-esmeralda `.pro-feat-img-btn` no card **abre em lightbox** (`openImgLightbox`, reusado da Revisão) — NÃO baixa. Editor: linha "🖼️ Imagem" após PDF, com label + miniatura + remover/trocar. Upload `_proFeatImgUpload` / `_proFeatImgRemove`, Storage `produtos/{pid}/features/{fid}/img-{ts}.{ext}` (15MB; rule `produtos/{produtoId}/{allPaths=**}` já aceita img até 20MB). Campos adicionados em `_proNormFeature`, `_proPrepareFeatures`, `_proFeatEqual` (keys), e nos 3 criadores de feature default.
+
+**4. Dex — PROMPT ÚNICO (substitui abas por perfil):**
+- Em vez de 4 campos (`templateGeral/Suporte/Vendas/Marketing`), agora **um campo só `templateUnico`** com instruções gerais + blocos condicionais escritos pelo admin (ex: "Se o perfil ativo for VENDAS: ..."). Os 4 campos legados continuam salvos (compat) mas a UI não os edita mais.
+- **Migração automática** em `_proDexConfigEnsureDraft`: se `templateUnico` vazio e há prompts legados, `_proDexMontarUnicoDeLegado()` monta um prompt único estruturado (instruções gerais = templateGeral + blocos "SE O PERFIL ATIVO FOR X" pros outros). Marca dirty pra nudge ao salvar. (Banner explicativo REMOVIDO a pedido — `S._dexConfigMigrado` ainda existe mas não renderiza banner.)
+- **Chips de perfil seguem** no input (quem pergunta escolhe Geral/Suporte/Vendas/Marketing). O backend injeta o perfil ativo no system prompt (ver item 6).
+- Popup **Expandir** (`_proDexConfigExpandInstr('templateUnico', ...)`) — editor em tela cheia, montado no `<body>` (escapa ancestral transformado), fecha SÓ no ✕/Fechar (backdrop sem onclick). Classes globais `.pro-dex-instr-ta`.
+
+**5. Dex — PDF REMOVIDO** (UI já removida antes + backend agora):
+- UI de anexar PDF (`_proDexConfigPdfsHTML`) já não é renderizada; `dex.js` não monta mais blocos `document`/PDF — `messages` é só histórico + pergunta. Campos `pdfs*` e Storage `dex/pdfs/` ficam órfãos (não lidos). Removido `pdfs_count` do log.
+
+**6. Dex — config UI redesenhada:**
+- Botão da engrenagem agora é **"⚙️ CONFIGURAÇÕES"** (ícone+texto, `.pro-dex-cfg-btn`) com estado `.on` = fundo gradient roxo (bem visível quando aberto).
+- Modelo de IA + Tamanho da resposta embutidos no **dropdown colapsável "Configurações do Modelo de IA"** (`.pro-dex-cfg-disc`, toggle `_proDexCfgModeloToggle`, state `S._dexCfgModeloOpen`, começa fechado).
+- **Removidos:** botões "Carregar exemplo" / "Usar padrão", o hint-rodapé do prompt, o "— único, para todos os perfis" do cabeçalho (vira só "Prompt do Dex"). Rodapé = só Cancelar/Salvar.
+- Backend `buildSystemPromptFromInstructions` ganhou `ctx.perfilAtivo` → injeta seção "## PERFIL ATIVO NESTA CONSULTA" (só no modo prompt único). `PERFIL_LABEL` mapeia perfil→label. `usandoUnico = !!templateUnico` decide entre prompt único e fallback legado por perfil.
+- Doc `config/dexPrompt` ganhou campo `templateUnico`. Audit `DEX_PROMPT_SALVO` agora loga `{modelo,maxTokens,unico:bool}`.
+
+**7. Dex — AUTO-LEITURA de qualquer box novo (`dexLer:true`):**
+- Objetivo: novos "boxes" passam a ser lidos pela IA **sem editar `dex.js`**. Qualquer doc em `config` com `dexLer:true` vira contexto automaticamente.
+- `dex.js`: query `db.collection('config').where('dexLer','==',true).get()` (no Promise.all, com `.catch(()=>null)`). `formatarCaixasExtra(snap, vertical)` formata genericamente: shape `lista:[{...}]` → `### <1º campo string>\n<demais campos>` (strip HTML); shape `texto` → parágrafo. Filtra por `vertical` (campo no doc; ausente=anestreview) e **pula** doc-bases com leitor próprio (`FONTES_COM_LEITOR_PROPRIO`: jornadaCliente, editais, datasImportantes(+Tipos), doresClientes, dexPrompt, catalogoConfig, settings, professores, menu, simExtra, slackTime, featurePack, recursosConfig). Seção injetada antes do catálogo via `ctx.caixasExtraFmt`.
+- Convenção pra box futuro entrar na IA: gravar no doc de config `{dexLer:true, dexTitulo, dexDescricao, vertical}`. (Produtos já são 100% auto-lidos; entries de qualquer box já são auto-lidos — isto cobre TIPOS de box novos.)
+- Formatador testado isoladamente via node (lista, texto, strip HTML, skip bespoke, filtro vertical, ignora dexLer:false). ⚠️ A query Firestore só foi validada por raciocínio (não há índice composto — equality simples).
+
+**8. Fixes de UX (catálogo):**
+- **Seletor de ícone fora da tela** (`_proOpenIconPop`) + picker genérico (`_proOpenMsPicker`): reparentados pro `<body>` ao abrir. Causa: ancestral com `transform`/`filter` no shell logado fazia o `position:fixed` ancorar no ancestral, não na viewport. (Provado com teste sintético.)
+- **"Atualizado em…"** nos boxes (Jornada/Dores/Editais/Datas): só data (sem hora, sem "por X"), via `_proFmtDateShort`. Alinhamento à direita corrigido com `.pro-jornada-head:not(:has(.pro-jornada-meta)) .pro-jornada-caret` (dois `margin-left:auto` brigavam quando fechado).
+- **Botão "Pergunte ao Dex"** mais destacado: maior + pulso de brilho (`@keyframes dexBtnPulse`), respeita `prefers-reduced-motion`.
+- **Save de produto sem disponibilidade**: removido o bloqueio que exigia marcar disponibilidade de todas as features (inclusive as do pack) antes de salvar. Feature sem marcação → `disponivel:''` → exibida como disponível por padrão (fallback em `_proFeatDisp`/`PRO_FEAT_DISP_META`).
+
+**Dev tooling:** `.claude/launch.json` + `.claude/static-server.js` (servidor estático Node na porta 8766) pro preview MCP — o `http.server` do Python falha no sandbox do preview. App exige login, então verificação visual usa overlay com `id="tab-produtos"` (herda CSS scoped) injetado via `preview_eval`.
 
 ### Jornada do Cliente — auto-save em rascunho (2026-05-25)
 

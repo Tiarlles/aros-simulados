@@ -2118,6 +2118,18 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-badge.s-em-breve{background:color-mix(in srgb, var(--accent) 14%, transparent);border-color:color-mix(in srgb, var(--accent) 50%, var(--border));color:var(--accent)}
 #tab-produtos .pro-badge.s-rascunho{background:color-mix(in srgb, #f59e0b 14%, transparent);border-color:color-mix(in srgb, #f59e0b 50%, var(--border));color:#f59e0b}
 #tab-produtos .pro-badge.s-descontinuado{background:var(--bg3);border-color:var(--border);color:var(--t2)}
+/* Tag COMBO — destaque no nome do produto (lista) */
+#tab-produtos .pro-combo-tag{display:inline-flex;align-items:center;vertical-align:middle;margin-right:8px;padding:2px 8px;border-radius:6px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,#a855f7 0%,#ec4899 100%);border:1px solid color-mix(in srgb,#ec4899 50%,#a855f7);box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 6px color-mix(in srgb,#a855f7 32%,transparent);flex-shrink:0}
+/* Toggle "É um combo" no editor */
+#tab-produtos .pro-combo-toggle{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:border-color .15s,background .15s}
+#tab-produtos .pro-combo-toggle:hover{border-color:color-mix(in srgb,#a855f7 36%,var(--border))}
+#tab-produtos .pro-combo-toggle.on{background:color-mix(in srgb,#a855f7 8%,var(--bg3));border-color:color-mix(in srgb,#a855f7 46%,var(--border))}
+#tab-produtos .pro-combo-toggle input[type="checkbox"]{width:18px;height:18px;cursor:pointer;accent-color:#a855f7;flex-shrink:0;margin:0}
+#tab-produtos .pro-combo-toggle-ico{font-size:20px;line-height:1;flex-shrink:0}
+#tab-produtos .pro-combo-toggle-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+#tab-produtos .pro-combo-toggle-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;color:var(--text)}
+#tab-produtos .pro-combo-toggle-desc{font-size:12px;color:var(--t2);line-height:1.4}
+#tab-produtos .pro-combo-toggle-desc strong{color:#a855f7;font-weight:700;letter-spacing:.5px}
 #tab-produtos .pro-empty{padding:48px 24px;text-align:center;color:var(--t2)}
 #tab-produtos .pro-empty .pro-empty-icon{font-size:48px;margin-bottom:12px;opacity:.6}
 
@@ -2231,6 +2243,9 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 /* Botão PDF: gradient âmbar/vermelho pra diferenciar visualmente do botão de link */
 #tab-produtos .pro-feat-pdf-btn{background:linear-gradient(135deg,#dc2626 0%,#f59e0b 100%);border-color:color-mix(in srgb,#f59e0b 60%,#dc2626);box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 8px color-mix(in srgb,#dc2626 28%,transparent)}
 #tab-produtos .pro-feat-pdf-btn:hover{box-shadow:0 1px 0 rgba(255,255,255,.22) inset,0 4px 14px color-mix(in srgb,#dc2626 40%,transparent)}
+/* Botão Imagem: gradient teal/esmeralda — abre a imagem em tela cheia ao clicar */
+#tab-produtos .pro-feat-img-btn{cursor:pointer;background:linear-gradient(135deg,#0d9488 0%,#10b981 100%);border-color:color-mix(in srgb,#10b981 60%,#0d9488);box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 8px color-mix(in srgb,#0d9488 28%,transparent)}
+#tab-produtos .pro-feat-img-btn:hover{box-shadow:0 1px 0 rgba(255,255,255,.22) inset,0 4px 14px color-mix(in srgb,#0d9488 40%,transparent)}
 #tab-produtos .pro-feat-pdf-size{opacity:.75;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:500;margin-left:4px}
 /* Editor: bloco mostrando PDF atual com link, botão remover e trocar */
 #tab-produtos .pro-feat-pdf-current{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px;background:color-mix(in srgb,#f59e0b 8%,var(--bg));border:1px solid color-mix(in srgb,#f59e0b 28%,var(--border));border-radius:8px}
@@ -2607,7 +2622,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-jornada-ico{font-size:14px;opacity:.95}
 #tab-produtos .pro-jornada-meta{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;color:var(--t2);margin-left:auto;letter-spacing:.4px}
 #tab-produtos .pro-jornada-caret{font-family:'JetBrains Mono','SF Mono',monospace;color:var(--t2);font-size:11px;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));line-height:1;margin-left:8px}
-#tab-produtos .pro-jornada-disc:not(.open) .pro-jornada-caret{margin-left:auto}
+#tab-produtos .pro-jornada-disc:not(.open) .pro-jornada-head:not(:has(.pro-jornada-meta)) .pro-jornada-caret{margin-left:auto}
 #tab-produtos .pro-jornada-disc.open .pro-jornada-caret{transform:rotate(180deg);color:#06b6d4}
 #tab-produtos .pro-jornada-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .4s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .25s,padding .2s}
 #tab-produtos .pro-jornada-disc.open .pro-jornada-body{max-height:3000px;opacity:1;padding:6px 20px 20px;overflow-y:auto}
@@ -2662,6 +2677,12 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
   .pro-editais-modal-backdrop{padding:0}
   .pro-editais-modal{max-width:none;height:100vh;max-height:100vh;border-radius:0;border:none}
 }
+/* Popup de instruções do Dex (montado no body — classes globais) */
+.pro-dex-instr-ta{width:100%;min-height:58vh;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-size:13px;font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;line-height:1.6;resize:vertical;transition:border-color .15s,box-shadow .15s}
+.pro-dex-instr-ta:focus{outline:none;border-color:#a855f7;box-shadow:0 0 0 2px color-mix(in srgb,#a855f7 22%,transparent)}
+.pro-dex-instr-ta::placeholder{color:var(--t2);opacity:.6}
+.pro-dex-instr-hint{font-size:12px;color:var(--t2);line-height:1.5;margin-top:10px}
+.pro-dex-instr-hint strong{color:var(--text);font-weight:700}
 
 /* Datas Importantes — cards colapsáveis (clone do padrão Editais, com cor/tipo por evento) */
 #tab-produtos .pro-dimp-card{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--c,#06b6d4);border-radius:10px;overflow:hidden;transition:border-color .15s,opacity .2s}
@@ -3336,9 +3357,12 @@ body.pro-rt-fs-on{overflow:hidden}
 }
 
 /* ─── Pergunte ao Dex — botão tech-apple (glass dark + accent ciano) ──── */
-#tab-produtos .pro-dex-btn{position:relative;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg,#1a2332 0%,#0f1825 100%);border:1px solid color-mix(in srgb,#22d3ee 26%,var(--border));color:#e0f2fe;padding:10px 18px;border-radius:12px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;letter-spacing:.2px;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px rgba(34,211,238,.08),0 2px 6px rgba(0,0,0,.3),0 0 18px rgba(34,211,238,.12);backdrop-filter:blur(12px) saturate(140%);-webkit-backdrop-filter:blur(12px) saturate(140%);transition:border-color .25s,box-shadow .25s,transform .15s,background .25s;flex-shrink:0;overflow:hidden}
+#tab-produtos .pro-dex-btn{position:relative;display:inline-flex;align-items:center;gap:9px;background:linear-gradient(180deg,#1a2332 0%,#0f1825 100%);border:1px solid color-mix(in srgb,#22d3ee 40%,var(--border));color:#e0f2fe;padding:12px 22px;border-radius:13px;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;letter-spacing:.2px;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px rgba(34,211,238,.08),0 2px 6px rgba(0,0,0,.3),0 0 18px rgba(34,211,238,.12);backdrop-filter:blur(12px) saturate(140%);-webkit-backdrop-filter:blur(12px) saturate(140%);transition:border-color .25s,box-shadow .25s,transform .15s,background .25s;flex-shrink:0;overflow:hidden;animation:dexBtnPulse 2.8s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)) infinite}
 #tab-produtos .pro-dex-btn::before{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(34,211,238,.12),transparent);transition:left .6s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));pointer-events:none}
-#tab-produtos .pro-dex-btn:hover{border-color:#22d3ee;color:#fff;transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 0 0 1px rgba(34,211,238,.2),0 6px 18px rgba(0,0,0,.4),0 0 28px rgba(34,211,238,.32);background:linear-gradient(180deg,#1e2a3d 0%,#13202f 100%)}
+@keyframes dexBtnPulse{0%,100%{box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px rgba(34,211,238,.08),0 2px 6px rgba(0,0,0,.3),0 0 18px rgba(34,211,238,.12)}50%{box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 0 0 1px rgba(34,211,238,.28),0 2px 8px rgba(0,0,0,.34),0 0 30px rgba(34,211,238,.40)}}
+#tab-produtos .pro-dex-btn:hover{border-color:#22d3ee;color:#fff;transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 0 0 1px rgba(34,211,238,.2),0 6px 18px rgba(0,0,0,.4),0 0 28px rgba(34,211,238,.32);background:linear-gradient(180deg,#1e2a3d 0%,#13202f 100%);animation:none}
+#tab-produtos .pro-dex-btn.on{animation:none}
+@media (prefers-reduced-motion:reduce){#tab-produtos .pro-dex-btn{animation:none}}
 #tab-produtos .pro-dex-btn:hover::before{left:100%}
 #tab-produtos .pro-dex-btn.on{border-color:#22d3ee;background:linear-gradient(180deg,#0c2030 0%,#081521 100%);box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px #22d3ee,0 0 24px rgba(34,211,238,.4)}
 #tab-produtos .pro-dex-btn-ico{font-size:15px;line-height:1;filter:drop-shadow(0 0 6px rgba(34,211,238,.6))}
@@ -3353,9 +3377,11 @@ body.pro-rt-fs-on{overflow:hidden}
 #tab-produtos .pro-dex-close{background:transparent;border:none;color:var(--t2);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:6px;line-height:1;transition:color .15s,background .15s}
 #tab-produtos .pro-dex-close:hover{color:var(--text);background:color-mix(in srgb,var(--accent) 8%,transparent)}
 #tab-produtos .pro-dex-head-actions{display:inline-flex;align-items:center;gap:4px}
-#tab-produtos .pro-dex-cfg-btn{background:transparent;border:none;color:var(--t2);font-size:15px;cursor:pointer;padding:4px 7px;border-radius:6px;line-height:1;transition:color .15s,background .15s,transform .12s}
-#tab-produtos .pro-dex-cfg-btn:hover{color:#a855f7;background:color-mix(in srgb,#a855f7 12%,transparent);transform:rotate(45deg)}
-#tab-produtos .pro-dex-cfg-btn.on{color:#a855f7;background:color-mix(in srgb,#a855f7 16%,transparent);transform:rotate(45deg)}
+#tab-produtos .pro-dex-cfg-btn{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--border);color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;padding:6px 12px;border-radius:8px;line-height:1;transition:color .15s,background .15s,border-color .15s,box-shadow .15s}
+#tab-produtos .pro-dex-cfg-btn-ico{font-size:13px;line-height:1}
+#tab-produtos .pro-dex-cfg-btn:hover{color:#a855f7;border-color:color-mix(in srgb,#a855f7 40%,var(--border));background:color-mix(in srgb,#a855f7 8%,transparent)}
+#tab-produtos .pro-dex-cfg-btn.on{color:#fff;background:linear-gradient(135deg,#3b82f6,#a855f7);border-color:transparent;box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 8px rgba(168,85,247,.34)}
+#tab-produtos .pro-dex-cfg-btn.on .pro-dex-cfg-btn-ico{filter:drop-shadow(0 0 4px rgba(255,255,255,.5))}
 /* Botão Resetar conversa — visível com ícone + texto */
 #tab-produtos .pro-dex-reset-btn{display:inline-flex;align-items:center;gap:6px;background:color-mix(in srgb,#fb923c 12%,transparent);border:1px solid color-mix(in srgb,#fb923c 42%,var(--border));color:#fb923c;padding:5px 11px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;line-height:1;transition:all .15s}
 #tab-produtos .pro-dex-reset-btn:hover{background:color-mix(in srgb,#fb923c 22%,transparent);border-color:#fb923c;transform:translateY(-1px);box-shadow:0 2px 8px color-mix(in srgb,#fb923c 18%,transparent)}
@@ -3373,6 +3399,20 @@ body.pro-rt-fs-on{overflow:hidden}
 #tab-produtos .pro-dex-cfg-dirty{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#f59e0b;background:color-mix(in srgb,#f59e0b 12%,transparent);border:1px solid color-mix(in srgb,#f59e0b 40%,var(--border));padding:3px 8px;border-radius:6px}
 #tab-produtos .pro-dex-cfg-fg{margin-bottom:14px;display:flex;flex-direction:column;gap:6px}
 #tab-produtos .pro-dex-cfg-lbl{font-size:12px;font-weight:600;color:var(--text);font-family:'JetBrains Mono','SF Mono',monospace;letter-spacing:.4px}
+#tab-produtos .pro-dex-cfg-lbl-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+#tab-produtos .pro-dex-cfg-expand-btn{display:inline-flex;align-items:center;gap:6px;background:color-mix(in srgb,#a855f7 8%,var(--bg));border:1px solid color-mix(in srgb,#a855f7 32%,var(--border));color:#a855f7;padding:5px 11px;border-radius:8px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .15s;flex-shrink:0}
+#tab-produtos .pro-dex-cfg-expand-btn:hover{background:color-mix(in srgb,#a855f7 16%,transparent);border-color:#a855f7;transform:translateY(-1px)}
+#tab-produtos .pro-dex-cfg-migr-banner{margin:0 0 14px;padding:11px 14px;background:color-mix(in srgb,#f59e0b 10%,var(--bg));border:1px solid color-mix(in srgb,#f59e0b 42%,var(--border));border-radius:10px;font-size:12.5px;line-height:1.5;color:var(--text)}
+#tab-produtos .pro-dex-cfg-migr-banner strong{color:#f59e0b;font-weight:700}
+/* Dropdown "Configurações do Modelo de IA" */
+#tab-produtos .pro-dex-cfg-disc{margin:0 0 14px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:color-mix(in srgb,#a855f7 3%,var(--bg))}
+#tab-produtos .pro-dex-cfg-disc-head{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;background:transparent;border:none;cursor:pointer;color:var(--text);font:inherit;text-align:left;transition:background .15s}
+#tab-produtos .pro-dex-cfg-disc-head:hover{background:color-mix(in srgb,#a855f7 6%,transparent)}
+#tab-produtos .pro-dex-cfg-disc-title{flex:1;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text)}
+#tab-produtos .pro-dex-cfg-disc-caret{font-family:'JetBrains Mono','SF Mono',monospace;color:var(--t2);font-size:11px;transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1))}
+#tab-produtos .pro-dex-cfg-disc.open .pro-dex-cfg-disc-caret{transform:rotate(180deg);color:#a855f7}
+#tab-produtos .pro-dex-cfg-disc-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .3s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),opacity .2s,padding .2s;padding:0 14px}
+#tab-produtos .pro-dex-cfg-disc.open .pro-dex-cfg-disc-body{max-height:400px;opacity:1;padding:4px 14px 14px}
 #tab-produtos .pro-dex-cfg-sel{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;cursor:pointer;transition:border-color .15s,box-shadow .15s}
 #tab-produtos .pro-dex-cfg-sel:focus{outline:none;border-color:#a855f7;box-shadow:0 0 0 2px color-mix(in srgb,#a855f7 22%,transparent)}
 #tab-produtos .pro-dex-cfg-range{accent-color:#a855f7;width:100%;height:6px;cursor:pointer}
@@ -33824,6 +33864,12 @@ S._editaisOpen=false; // box principal aberto/fechado
 S._editaisModalOpen=false; // modal de cadastro/edição aberto
 S._editaisEditando=null; // {id, nomeProva, ano, info} sendo editado (ou null pra novo)
 S._editalAbertos=new Set(); // ids dos editais expandidos na lista
+// Dores dos clientes — coleção de perfis de cliente com as dores descritas (rich-text)
+S.dores={lista:[],loaded:false,updatedAt:null,updatedBy:''};
+S._doresOpen=false; // box principal aberto/fechado
+S._doresModalOpen=false; // modal de cadastro/edição aberto
+S._doresEditando=null; // {id, nome, info} sendo editado (ou null pra novo)
+S._doreAbertos=new Set(); // ids dos clientes expandidos na lista
 // Datas importantes — eventos de prova/revisão/liberação/inscrição por vertical
 S.datasImp={lista:[],escopos:[],loaded:false,updatedAt:null,updatedBy:''};
 S._datasImpOpen=false;
@@ -33865,6 +33911,7 @@ S.datasImpTipos={lista:[],deletedSystemIds:[],loaded:false,updatedAt:null,update
 S._datasImpEditandoTipoId=null;
 // Configuração editável do Dex (prompts por perfil, modelo, max_tokens, PDFs)
 S.dexConfig={
+  templateUnico:'',
   templateGeral:'',templateSuporte:'',templateVendas:'',templateMarketing:'',
   pdfsGeral:[],pdfsSuporte:[],pdfsVendas:[],pdfsMarketing:[],
   modelo:'haiku',maxTokens:1024,
@@ -33875,6 +33922,8 @@ const DEX_PDF_MAX_QTDE=5; // máximo de PDFs por perfil
 S._dexConfigOpen=false;
 S._dexConfigDirty=false;
 S._dexConfigDraft=null;
+S._dexConfigMigrado=false; // true quando o draft foi montado a partir dos prompts legados
+S._dexCfgModeloOpen=false; // dropdown "Configurações do Modelo de IA" (começa fechado)
 S._dexConfigTab='geral'; // qual perfil está sendo editado no painel
 // Perfil de quem está perguntando (chips acima do input).
 // Sempre começa em 'geral' a cada page load. Durante a sessão, troca livre.
@@ -33909,6 +33958,7 @@ function _ensureSlackTimeListener(){
 }
 let _proJornadaUnsub=null;
 let _proEditaisUnsub=null;
+let _proDoresUnsub=null;
 let _proDatasImpUnsub=null;
 let _datasImpTiposUnsub=null;
 let _proUnsub=null;
@@ -34145,6 +34195,11 @@ function _proNormFeature(f){
     pdfPath:f.pdfPath||'',
     pdfSize:typeof f.pdfSize==='number'?f.pdfSize:0,
     pdfName:f.pdfName||'',
+    imgUrl:f.imgUrl||'',
+    imgLabel:f.imgLabel||'',
+    imgPath:f.imgPath||'',
+    imgSize:typeof f.imgSize==='number'?f.imgSize:0,
+    imgName:f.imgName||'',
     isBonus:!!f.isBonus,
     isMentoria:!!f.isMentoria,
     updatedAt:f.updatedAt||null
@@ -34167,7 +34222,7 @@ function _proFeatIcone(f){return (f&&f.icone)||PRO_FEAT_ICONE_DEFAULT;}
 function _proFeatNumero(f){return (f&&f.numeroChave)||'';}
 function _proFeatEqual(a,b){
   if(!a||!b)return false;
-  const keys=['titulo','icone','numeroChave','disponivel','diferenciais','linkUrl','linkLabel','pdfUrl','pdfLabel','pdfPath'];
+  const keys=['titulo','icone','numeroChave','disponivel','diferenciais','linkUrl','linkLabel','pdfUrl','pdfLabel','pdfPath','imgUrl','imgLabel','imgPath'];
   for(const k of keys){
     const va=(a[k]===undefined?null:a[k]);
     const vb=(b[k]===undefined?null:b[k]);
@@ -34226,6 +34281,7 @@ function _proRebindVerticalListeners(){
   if(_proCatUnsub){try{_proCatUnsub();}catch(e){}_proCatUnsub=null;}
   if(_proJornadaUnsub){try{_proJornadaUnsub();}catch(e){}_proJornadaUnsub=null;}
   if(_proEditaisUnsub){try{_proEditaisUnsub();}catch(e){}_proEditaisUnsub=null;}
+  if(_proDoresUnsub){try{_proDoresUnsub();}catch(e){}_proDoresUnsub=null;}
   if(_proDatasImpUnsub){try{_proDatasImpUnsub();}catch(e){}_proDatasImpUnsub=null;}
   if(_proDexCfgUnsub){try{_proDexCfgUnsub();}catch(e){}_proDexCfgUnsub=null;}
   if(_proAprovacoesProvasUnsub){try{_proAprovacoesProvasUnsub();}catch(e){}_proAprovacoesProvasUnsub=null;}
@@ -34235,8 +34291,9 @@ function _proRebindVerticalListeners(){
   S.catalogoConfig.publicosAlvo=[];S.catalogoConfig.provasAlvo=[];S.catalogoConfig.loaded=false;
   S.jornadaCliente.texto='';S.jornadaCliente.videoUrl='';S.jornadaCliente.imagemUrl='';S.jornadaCliente.imagemPath='';S.jornadaCliente.updatedAt=null;S.jornadaCliente.updatedBy='';S.jornadaCliente.loaded=false;
   S.editais.lista=[];S.editais.updatedAt=null;S.editais.updatedBy='';S.editais.loaded=false;
+  S.dores.lista=[];S.dores.updatedAt=null;S.dores.updatedBy='';S.dores.loaded=false;
   S.datasImp.lista=[];S.datasImp.updatedAt=null;S.datasImp.updatedBy='';S.datasImp.loaded=false;
-  S.dexConfig.templateGeral='';S.dexConfig.templateSuporte='';S.dexConfig.templateVendas='';S.dexConfig.templateMarketing='';
+  S.dexConfig.templateUnico='';S.dexConfig.templateGeral='';S.dexConfig.templateSuporte='';S.dexConfig.templateVendas='';S.dexConfig.templateMarketing='';
   S.dexConfig.pdfsGeral=[];S.dexConfig.pdfsSuporte=[];S.dexConfig.pdfsVendas=[];S.dexConfig.pdfsMarketing=[];
   S.dexConfig.modelo='haiku';S.dexConfig.maxTokens=1024;S.dexConfig.updatedAt=null;S.dexConfig.updatedBy='';S.dexConfig.loaded=false;
   S.aprovacoes.provas=[];S.aprovacoes.resultados=[];S.aprovacoes.loaded=false;
@@ -34280,6 +34337,15 @@ function _proRebindVerticalListeners(){
     S.editais.loaded=true;
     if(S.produtosLoaded&&S.produtosView==='list'&&!S._editaisModalOpen)_proEditaisRefresh();
   },err=>{console.warn('editais onSnapshot:',err);S.editais.loaded=true;});
+  // dores dos clientes
+  _proDoresUnsub=onSnapshot(doc(db,'config',_verticalDocId('doresClientes')),snap=>{
+    const d=snap.exists()?(snap.data()||{}):{};
+    S.dores.lista=Array.isArray(d.lista)?d.lista.filter(e=>e&&e.id):[];
+    S.dores.updatedAt=d.updatedAt||null;
+    S.dores.updatedBy=String(d.updatedBy||'');
+    S.dores.loaded=true;
+    if(S.produtosLoaded&&S.produtosView==='list'&&!S._doresModalOpen)_proDoresRefresh();
+  },err=>{console.warn('dores onSnapshot:',err);S.dores.loaded=true;});
   // datasImportantesTipos (global — independe da vertical, mas garantimos que tá rodando aqui)
   _ensureDatasImpTiposListener();
   // datasImportantes
@@ -34297,6 +34363,7 @@ function _proRebindVerticalListeners(){
     const d=snap.exists()?(snap.data()||{}):{};
     if(!S._dexConfigDirty){
       const legacy=String(d.template||'');
+      S.dexConfig.templateUnico=String(d.templateUnico||'');
       S.dexConfig.templateGeral=String(d.templateGeral||legacy||'');
       S.dexConfig.templateSuporte=String(d.templateSuporte||legacy||'');
       S.dexConfig.templateVendas=String(d.templateVendas||legacy||'');
@@ -34561,6 +34628,7 @@ function _proRenderList(root){
     </div>
     <div id="pro-dex-container"></div>
     <div id="pro-jornada-wrap">${_proJornadaHTML()}</div>
+    <div id="pro-dores-wrap">${_proDoresHTML()}</div>
     <div id="pro-editais-wrap">${_proEditaisHTML()}</div>
     <div id="pro-datas-imp-wrap">${_proDatasImpHTML()}</div>
     <div id="pro-aprovacoes-wrap">${_proAprovacoesHTML()}</div>
@@ -34585,7 +34653,7 @@ function _proRowHTML(p){
   return `<div class="pro-card" data-pro-card-id="${_proEscAttr(p.id)}" ${dragAttrs} onclick="S._proNavStack=[];proAbrir('${_proEscAttr(p.id)}')">
     ${dragHandle}
     <div class="pro-card-main">
-      <div class="pro-card-name">${_proEsc(p.nome||'Sem nome')}</div>
+      <div class="pro-card-name">${p.isCombo?`<span class="pro-combo-tag">Combo</span>`:''}${_proEsc(p.nome||'Sem nome')}</div>
       <div class="pro-card-resp">${respHtml}</div>
     </div>
     <span class="pro-badge s-${st}">${_proEsc(PRO_STATUS_LABEL[st]||st)}</span>
@@ -34622,7 +34690,7 @@ function _proJornadaHTML(){
   const dirty=!!S._jornadaDirty;
   const loaded=!!j.loaded;
   const dirtyPill=dirty?'<span class="pro-jornada-dirty">● Não salvo</span>':'';
-  const updMeta=(j.updatedAt&&j.updatedBy)?`<span class="pro-jornada-meta">Atualizado em ${_proEsc(_proFmtDate(j.updatedAt))} por ${_proEsc(j.updatedBy)}</span>`:'';
+  const updMeta=j.updatedAt?`<span class="pro-jornada-meta">Atualizado em ${_proEsc(_proFmtDateShort(j.updatedAt))}</span>`:'';
   // Body
   let bodyHtml;
   if(!loaded){
@@ -34728,7 +34796,7 @@ function _proEditaisHTML(){
       `<p style="color:var(--t2);font-style:italic;margin:0">Nenhum edital cadastrado ainda.${canEdit?' Clique em "Cadastrar edital" pra começar.':''}</p>`;
     bodyHtml=`${cadastrarBtn}<div class="pro-editais-lista">${listaHtml}</div>`;
   }
-  const updMeta=(S.editais.updatedAt&&S.editais.updatedBy)?`<span class="pro-jornada-meta">Atualizado em ${_proEsc(_proFmtDate(S.editais.updatedAt))} por ${_proEsc(S.editais.updatedBy)}</span>`:'';
+  const updMeta=S.editais.updatedAt?`<span class="pro-jornada-meta">Atualizado em ${_proEsc(_proFmtDateShort(S.editais.updatedAt))}</span>`:'';
   const modalHtml=S._editaisModalOpen?_proEditaisModalHTML():'';
   return `<div class="pro-jornada-disc${open?' open':''}" data-editais-disc>
     <div class="pro-jornada-head" role="button" tabindex="0" onclick="proToggleEditais()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proToggleEditais()}" aria-expanded="${open}">
@@ -34896,6 +34964,190 @@ window.proEditaisRemover=async(id)=>{
     S._editalAbertos.delete(id);
     _proSaveFeedback('ok');
     _proEditaisRefresh();
+  }catch(err){
+    alert('Erro ao remover: '+(err.message||err));
+  }
+};
+
+// ════════════════════════════════════════════════════════════════════════
+// DORES DOS CLIENTES — perfis de cliente com as dores descritas (rich-text)
+// Persistido em config/doresClientes_{vertical} (anestreview = sem sufixo).
+// Shape: { lista:[{id,nome,info,updatedAt,updatedBy}], updatedAt, updatedBy }
+// Reusa as classes de CSS de Editais (.pro-edital-*, .pro-editais-modal-*).
+// ════════════════════════════════════════════════════════════════════════
+
+function _proDoresHTML(){
+  const canEdit=_proCanEdit();
+  const open=!!S._doresOpen;
+  const loaded=!!S.dores.loaded;
+  const lista=Array.isArray(S.dores.lista)?S.dores.lista:[];
+  // Ordena por nome do cliente
+  const ord=lista.slice().sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'));
+  let bodyHtml;
+  if(!loaded){
+    bodyHtml=`<p style="color:var(--t2);font-style:italic;margin:0">Carregando…</p>`;
+  }else{
+    const cadastrarBtn=canEdit?`<button class="btn btn-p btn-sm" type="button" onclick="proDoresAbrirNovo()" style="margin-bottom:14px">＋ Cadastrar cliente</button>`:'';
+    const listaHtml=ord.length?ord.map(e=>_proDoreItemHTML(e,canEdit)).join(''):
+      `<p style="color:var(--t2);font-style:italic;margin:0">Nenhum cliente cadastrado ainda.${canEdit?' Clique em "Cadastrar cliente" pra começar.':''}</p>`;
+    bodyHtml=`${cadastrarBtn}<div class="pro-editais-lista">${listaHtml}</div>`;
+  }
+  const updMeta=S.dores.updatedAt?`<span class="pro-jornada-meta">Atualizado em ${_proEsc(_proFmtDateShort(S.dores.updatedAt))}</span>`:'';
+  const modalHtml=S._doresModalOpen?_proDoresModalHTML():'';
+  return `<div class="pro-jornada-disc${open?' open':''}" data-dores-disc>
+    <div class="pro-jornada-head" role="button" tabindex="0" onclick="proToggleDores()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proToggleDores()}" aria-expanded="${open}">
+      <span class="pro-jornada-title"><span class="pro-jornada-ico">💢</span> Dores dos Nossos Clientes</span>
+      ${updMeta}
+      <span class="pro-jornada-caret">▾</span>
+    </div>
+    <div class="pro-jornada-body">${bodyHtml}</div>
+  </div>${modalHtml}`;
+}
+
+function _proDoreItemHTML(e,canEdit){
+  const id=String(e.id||'');
+  const aberto=S._doreAbertos.has(id);
+  const nome=String(e.nome||'').trim()||'(sem nome)';
+  const info=String(e.info||'').trim();
+  const actions=canEdit?`<div class="pro-edital-actions" onclick="event.stopPropagation()">
+    <button class="pro-icon-btn" type="button" onclick="event.stopPropagation();proDoresEditar('${_proEscAttr(id)}')" title="Editar cliente">✏️</button>
+    <button class="pro-icon-btn" type="button" onclick="event.stopPropagation();proDoresRemover('${_proEscAttr(id)}')" title="Remover cliente">🗑</button>
+  </div>`:'';
+  const infoBody=info?_proRtRepairDetails(_renderRichText(info)):'<p style="color:var(--t2);font-style:italic;margin:0">Nenhuma dor descrita ainda.</p>';
+  return `<div class="pro-edital-card${aberto?' open':''}" data-dore-id="${_proEscAttr(id)}">
+    <div class="pro-edital-head" role="button" tabindex="0" onclick="proDoreToggle('${_proEscAttr(id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proDoreToggle('${_proEscAttr(id)}')}" aria-expanded="${aberto}">
+      <span class="pro-edital-icon">👤</span>
+      <span class="pro-edital-title-group">
+        <span class="pro-edital-nome">${_proEsc(nome)}</span>
+      </span>
+      ${actions}
+      <span class="pro-edital-caret">▾</span>
+    </div>
+    <div class="pro-edital-body"><div class="pro-edital-info">${infoBody}</div></div>
+  </div>`;
+}
+
+function _proDoresModalHTML(){
+  const e=S._doresEditando||{nome:'',info:''};
+  const isEdit=!!e.id;
+  const titulo=isEdit?'Editar cliente':'Cadastrar cliente';
+  return `<div class="pro-editais-modal-backdrop">
+    <div class="pro-editais-modal" role="dialog" aria-modal="true">
+      <div class="pro-editais-modal-head">
+        <h3 class="pro-editais-modal-title">💢 ${titulo}</h3>
+        <button class="pro-editais-modal-close" type="button" onclick="proDoresModalFechar()" title="Fechar">✕</button>
+      </div>
+      <div class="pro-editais-modal-body">
+        <div class="fg" style="margin-bottom:14px">
+          <label class="fl">Cliente</label>
+          <input type="text" class="fc" id="pro-dore-nome" placeholder="Ex: Residente ME1 ansioso com a 1ª prova" value="${_proEscAttr(e.nome||'')}" oninput="_proDoresSetCampo('nome',this.value)"/>
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label class="fl">Dores desse cliente</label>
+          ${_proRtHTML('dore-info',e.info||'','Descreva as dores, frustrações, medos e desejos desse perfil de cliente.',"_proDoresSetCampo('info',_proRtGet('dore-info'))",{colors:true,justify:true,tall:true,expandable:true,collapsibles:true})}
+        </div>
+      </div>
+      <div class="pro-editais-modal-foot">
+        <button class="btn btn-s btn-sm" type="button" onclick="proDoresModalFechar()">Cancelar</button>
+        <button class="btn btn-p btn-sm" type="button" onclick="proDoresModalSalvar()">💾 Salvar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function _proDoresRefresh(){
+  const wrap=document.getElementById('pro-dores-wrap');
+  if(!wrap)return;
+  // Preserva foco do editor do modal se houver
+  const ed=document.querySelector('[data-rt-ed="dore-info"]');
+  const wasFocused=ed&&document.activeElement===ed;
+  wrap.innerHTML=_proDoresHTML();
+  if(wasFocused){
+    const ed2=document.querySelector('[data-rt-ed="dore-info"]');
+    if(ed2)ed2.focus();
+  }
+}
+
+window.proToggleDores=()=>{
+  S._doresOpen=!S._doresOpen;
+  const el=document.querySelector('#tab-produtos [data-dores-disc]');
+  if(el)el.classList.toggle('open',!!S._doresOpen);
+};
+
+window.proDoreToggle=(id)=>{
+  if(S._doreAbertos.has(id))S._doreAbertos.delete(id);else S._doreAbertos.add(id);
+  const el=document.querySelector(`#tab-produtos .pro-edital-card[data-dore-id="${id}"]`);
+  if(el)el.classList.toggle('open',S._doreAbertos.has(id));
+};
+
+window.proDoresAbrirNovo=()=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  S._doresEditando={id:null,nome:'',info:''};
+  S._doresModalOpen=true;
+  _proDoresRefresh();
+};
+
+window.proDoresEditar=(id)=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const e=S.dores.lista.find(x=>x.id===id);
+  if(!e)return alert('Cliente não encontrado.');
+  S._doresEditando={id:e.id,nome:String(e.nome||''),info:String(e.info||'')};
+  S._doresModalOpen=true;
+  _proDoresRefresh();
+};
+
+window.proDoresModalFechar=()=>{
+  S._doresModalOpen=false;
+  S._doresEditando=null;
+  _proDoresRefresh();
+};
+
+window._proDoresSetCampo=(campo,valor)=>{
+  if(!S._doresEditando)return;
+  S._doresEditando[campo]=valor;
+};
+
+window.proDoresModalSalvar=async()=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const e=S._doresEditando;
+  if(!e)return;
+  const nome=String(e.nome||'').trim();
+  if(!nome)return alert('Informe o nome/perfil do cliente.');
+  const info=_proSanitizeResp(e.info||'');
+  try{
+    const user=(S.currentUser&&S.currentUser.username)||'?';
+    const novaLista=S.dores.lista.slice();
+    if(e.id){
+      const idx=novaLista.findIndex(x=>x.id===e.id);
+      if(idx>=0)novaLista[idx]={...novaLista[idx],nome,info,updatedAt:new Date().toISOString(),updatedBy:user};
+    }else{
+      novaLista.push({id:_proUid(),nome,info,updatedAt:new Date().toISOString(),updatedBy:user});
+    }
+    await setDoc(doc(db,'config',_verticalDocId('doresClientes')),{lista:novaLista,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    if(typeof audit==='function')audit(e.id?'DORE_EDITADO':'DORE_CRIADO',{collection:'config',id:'doresClientes'},{after:{nome}});
+    S._doresModalOpen=false;
+    S._doresEditando=null;
+    _proSaveFeedback('ok');
+    _proDoresRefresh();
+  }catch(err){
+    alert('Erro ao salvar: '+(err.message||err));
+  }
+};
+
+window.proDoresRemover=async(id)=>{
+  if(!_proCanEdit())return alert('Sem permissão.');
+  const e=S.dores.lista.find(x=>x.id===id);
+  if(!e)return;
+  const lbl=String(e.nome||'').trim()||'(sem nome)';
+  if(!confirm(`Remover o cliente "${lbl}"? Esta ação não pode ser desfeita.`))return;
+  try{
+    const user=(S.currentUser&&S.currentUser.username)||'?';
+    const novaLista=S.dores.lista.filter(x=>x.id!==id);
+    await setDoc(doc(db,'config',_verticalDocId('doresClientes')),{lista:novaLista,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
+    if(typeof audit==='function')audit('DORE_REMOVIDO',{collection:'config',id:'doresClientes'},{after:{nome:lbl}});
+    S._doreAbertos.delete(id);
+    _proSaveFeedback('ok');
+    _proDoresRefresh();
   }catch(err){
     alert('Erro ao remover: '+(err.message||err));
   }
@@ -35244,7 +35496,7 @@ function _proDatasImpHTML(){
     }
     bodyHtml=`${toolbar}${filtrosWrap}${listaHtml}`;
   }
-  const updMeta=(S.datasImp.updatedAt&&S.datasImp.updatedBy)?`<span class="pro-jornada-meta">Atualizado em ${_proEsc(_proFmtDate(S.datasImp.updatedAt))} por ${_proEsc(S.datasImp.updatedBy)}</span>`:'';
+  const updMeta=S.datasImp.updatedAt?`<span class="pro-jornada-meta">Atualizado em ${_proEsc(_proFmtDateShort(S.datasImp.updatedAt))}</span>`:'';
   const modalHtml=S._datasImpModalOpen?_proDatasImpModalHTML():'';
   const gerTiposHtml=S._datasImpGerenciarTiposOpen?_proDatasImpGerenciarTiposHTML():'';
   const gerEscoposHtml=S._datasImpGerenciarEscoposOpen?_proDatasImpGerenciarEscoposHTML():'';
@@ -36685,7 +36937,7 @@ function _proDexRender(){
   }
 
   // Botão de configuração — só pra quem pode editar (admin/coord)
-  const cfgBtn=_proCanEdit()?`<button class="pro-dex-cfg-btn${S._dexConfigOpen?' on':''}" onclick="proDexConfigToggle()" title="Configurar comportamento do Dex (prompt, modelo)">⚙️</button>`:'';
+  const cfgBtn=_proCanEdit()?`<button class="pro-dex-cfg-btn${S._dexConfigOpen?' on':''}" onclick="proDexConfigToggle()" title="Configurar o assistente (prompt e modelo)"><span class="pro-dex-cfg-btn-ico">⚙️</span><span class="pro-dex-cfg-btn-lbl">Configurações</span></button>`:'';
   // Botão de nova conversa — só aparece se já tem histórico, com texto visível
   const novaBtn=historico.length?`<button class="pro-dex-reset-btn" onclick="proDexNovaConversa()" title="Limpa o histórico e começa do zero"><span class="pro-dex-reset-ico">🔄</span><span class="pro-dex-reset-lbl">Resetar conversa</span></button>`:'';
   // Painel de configuração (inline disclosure)
@@ -36788,17 +37040,10 @@ function _proDexConfigHTML(){
   ];
   const opts=modelos.map(m=>`<option value="${m.v}"${modelo===m.v?' selected':''}>${_proEsc(m.l)} — ${_proEsc(m.d)}</option>`).join('');
 
-  // Abas por perfil
-  const perfis=[
-    {id:'geral',ico:'🧭',lbl:'Geral',campo:'templateGeral'},
-    {id:'suporte',ico:'💁',lbl:'Suporte',campo:'templateSuporte'},
-    {id:'vendas',ico:'💰',lbl:'Vendas',campo:'templateVendas'},
-    {id:'marketing',ico:'📢',lbl:'Marketing',campo:'templateMarketing'},
-  ];
-  const tabAtiva=S._dexConfigTab||'geral';
-  const tabsHtml=perfis.map(p=>`<button type="button" class="pro-dex-cfg-tab${tabAtiva===p.id?' on':''}" onclick="_proDexConfigSetTab('${p.id}')">${p.ico} ${p.lbl}</button>`).join('');
-  const perfilAtivo=perfis.find(p=>p.id===tabAtiva)||perfis[0];
-  const template=String(d[perfilAtivo.campo]||'');
+  // Prompt único — um campo só. O perfil ativo é escolhido por quem pergunta (chips)
+  // e injetado pela Cloud Function; o usuário escreve condicionais por perfil no texto.
+  const templateUnico=String(d.templateUnico||'');
+  const modeloOpen=!!S._dexCfgModeloOpen;
 
   return `
     <div class="pro-dex-cfg-panel">
@@ -36808,34 +37053,34 @@ function _proDexConfigHTML(){
         ${dirty?'<span class="pro-dex-cfg-dirty">● Não salvo</span>':''}
       </div>
 
-      <div class="pro-dex-cfg-fg">
-        <label class="pro-dex-cfg-lbl">Modelo de IA (vale pra todos os perfis)</label>
-        <select class="pro-dex-cfg-sel" onchange="_proDexConfigSet('modelo',this.value)">${opts}</select>
-        <div class="pro-dex-cfg-hint">Modelos mais inteligentes dão respostas melhores mas custam mais por pergunta.</div>
-      </div>
-
-      <div class="pro-dex-cfg-fg">
-        <label class="pro-dex-cfg-lbl">Tamanho máximo da resposta · ${maxTokens} tokens (vale pra todos os perfis)</label>
-        <input type="range" min="256" max="4096" step="128" value="${maxTokens}" class="pro-dex-cfg-range" oninput="_proDexConfigSet('maxTokens',parseInt(this.value,10));this.previousElementSibling.textContent='Tamanho máximo da resposta · '+this.value+' tokens (vale pra todos os perfis)'"/>
-        <div class="pro-dex-cfg-hint">~750 palavras por 1000 tokens. Padrão: 1024.</div>
-      </div>
-
-      <div class="pro-dex-cfg-tabs">${tabsHtml}</div>
-
-      <div class="pro-dex-cfg-fg">
-        <label class="pro-dex-cfg-lbl">Instruções para o perfil <strong>${perfilAtivo.lbl}</strong></label>
-        <textarea class="pro-dex-cfg-ta" placeholder="Deixe vazio pra usar o exemplo padrão deste perfil. Ou escreva instruções personalizadas." oninput="_proDexConfigSet('${perfilAtivo.campo}',this.value)">${_proEsc(template)}</textarea>
-        <div class="pro-dex-cfg-hint">
-          A <strong>Jornada do Cliente</strong> e o <strong>Catálogo de Produtos</strong> são sempre anexados automaticamente. Você só escreve as instruções de comportamento pra este perfil. Se deixar vazio, o Dex usa o exemplo padrão.
+      <div class="pro-dex-cfg-disc${modeloOpen?' open':''}">
+        <button type="button" class="pro-dex-cfg-disc-head" onclick="_proDexCfgModeloToggle()">
+          <span class="pro-dex-cfg-disc-title">⚙️ Configurações do Modelo de IA</span>
+          <span class="pro-dex-cfg-disc-caret">▾</span>
+        </button>
+        <div class="pro-dex-cfg-disc-body">
+          <div class="pro-dex-cfg-fg">
+            <label class="pro-dex-cfg-lbl">Modelo de IA</label>
+            <select class="pro-dex-cfg-sel" onchange="_proDexConfigSet('modelo',this.value)">${opts}</select>
+            <div class="pro-dex-cfg-hint">Modelos mais inteligentes dão respostas melhores mas custam mais por pergunta.</div>
+          </div>
+          <div class="pro-dex-cfg-fg" style="margin-bottom:0">
+            <label class="pro-dex-cfg-lbl">Tamanho máximo da resposta · ${maxTokens} tokens</label>
+            <input type="range" min="256" max="4096" step="128" value="${maxTokens}" class="pro-dex-cfg-range" oninput="_proDexConfigSet('maxTokens',parseInt(this.value,10));this.previousElementSibling.textContent='Tamanho máximo da resposta · '+this.value+' tokens'"/>
+            <div class="pro-dex-cfg-hint">~750 palavras por 1000 tokens. Padrão: 1024.</div>
+          </div>
         </div>
       </div>
 
-      ${_proDexConfigPdfsHTML(perfilAtivo.id)}
+      <div class="pro-dex-cfg-fg">
+        <div class="pro-dex-cfg-lbl-row">
+          <label class="pro-dex-cfg-lbl" style="margin-bottom:0">Prompt do Dex</label>
+          <button type="button" class="pro-dex-cfg-expand-btn" onclick="_proDexConfigExpandInstr('templateUnico','Prompt do Dex')" title="Expandir em janela maior">⛶ Expandir</button>
+        </div>
+        <textarea class="pro-dex-cfg-ta" style="min-height:300px" placeholder="Escreva as instruções gerais e, quando precisar, blocos condicionais por perfil. Ex: 'Se o perfil ativo for VENDAS, ...'" oninput="_proDexConfigSet('templateUnico',this.value)">${_proEsc(templateUnico)}</textarea>
+      </div>
 
       <div class="pro-dex-cfg-foot">
-        <button class="btn btn-s btn-sm" type="button" onclick="_proDexConfigCarregarExemplo()" title="Preenche a textarea com o exemplo padrão deste perfil — você pode editar a partir dele">📋 Carregar exemplo</button>
-        <button class="btn btn-d btn-sm" type="button" onclick="_proDexConfigRestaurar()" title="Limpa as instruções deste perfil — volta a usar o exemplo padrão">↶ Usar padrão</button>
-        <span style="flex:1"></span>
         <button class="btn btn-s btn-sm" type="button" onclick="_proDexConfigCancelar()">Cancelar</button>
         <button class="btn btn-p btn-sm" type="button" onclick="_proDexConfigSalvar()" ${dirty?'':'disabled'}>💾 Salvar</button>
       </div>
@@ -36899,10 +37144,100 @@ REGRAS:
 8. Português brasileiro.`,
 };
 
+// Exemplo de PROMPT ÚNICO — instruções gerais + blocos condicionais por perfil.
+const _proDexExemploUnico=`INSTRUÇÕES GERAIS (valem para todos os perfis)
+
+Você é o Dex, assistente do catálogo da MedReview. Responda sempre com base APENAS na Jornada do Cliente, nas Dores dos clientes e no Catálogo de Produtos anexados abaixo — nunca invente preço, data, link ou contato.
+
+- Frases curtas e objetivas. Português brasileiro.
+- Ao citar um produto, formate como [Nome do Produto](produto:ID_DO_PRODUTO) usando o ID exato do catálogo.
+- Se a informação não estiver no catálogo nem na jornada, diga claramente e sugira a fonte oficial.
+- Não dê opinião clínica/médica.
+
+────────────────────────────
+INSTRUÇÕES POR PERFIL
+Quem pergunta escolhe o perfil ativo. Além das instruções gerais acima, siga o bloco do perfil ativo nesta consulta:
+
+▸ SE O PERFIL ATIVO FOR "SUPORTE":
+Foque em resolver dúvida de cliente rápido. Responda "tenho acesso ao X?", "isso está incluído?" com base estrita no catálogo (em qual produto a feature está, se é incluída ou opcional).
+
+▸ SE O PERFIL ATIVO FOR "VENDAS":
+Conecte a dor do cliente com a solução certa. Entenda primeiro a situação (qual prova, qual ano da residência). Recomende o produto mais aderente, traga argumentos de venda do catálogo e ajude a contornar objeções. Tom consultivo, não empurra.
+
+▸ SE O PERFIL ATIVO FOR "MARKETING":
+Traga de forma estruturada: público-alvo, prova-alvo, principais features, diferenciais e ganchos de copy (combinando argumentos de venda com a dor correspondente na jornada). Tom estratégico, organizado em tópicos.
+
+(Quando o perfil for "Geral", siga apenas as instruções gerais.)`;
+
+// Monta um prompt único a partir dos 4 prompts legados (migração automática).
+// Retorna '' se não houver nada legado pra migrar.
+function _proDexMontarUnicoDeLegado(){
+  const g=String(S.dexConfig.templateGeral||'').trim();
+  const s=String(S.dexConfig.templateSuporte||'').trim();
+  const v=String(S.dexConfig.templateVendas||'').trim();
+  const m=String(S.dexConfig.templateMarketing||'').trim();
+  if(!g&&!s&&!v&&!m)return '';
+  let out='INSTRUÇÕES GERAIS (valem para todos os perfis)\n\n';
+  out+=(g||'(escreva aqui as instruções que valem para qualquer perfil)')+'\n\n';
+  out+='────────────────────────────\nINSTRUÇÕES POR PERFIL\nQuem pergunta escolhe o perfil ativo. Além das instruções gerais acima, siga o bloco do perfil ativo nesta consulta:\n\n';
+  if(s)out+='▸ SE O PERFIL ATIVO FOR "SUPORTE":\n'+s+'\n\n';
+  if(v)out+='▸ SE O PERFIL ATIVO FOR "VENDAS":\n'+v+'\n\n';
+  if(m)out+='▸ SE O PERFIL ATIVO FOR "MARKETING":\n'+m+'\n\n';
+  out+='(Quando o perfil for "Geral", siga apenas as instruções gerais.)';
+  return out.trim();
+}
+
 window._proDexConfigSetTab=(tab)=>{
   if(!_DEX_PERFIS.includes(tab))return;
   S._dexConfigTab=tab;
   _proDexRender();
+};
+
+// Dropdown "Configurações do Modelo de IA" — toggle via classe (sem re-render).
+window._proDexCfgModeloToggle=()=>{
+  S._dexCfgModeloOpen=!S._dexCfgModeloOpen;
+  const el=document.querySelector('.pro-dex-cfg-disc');
+  if(el)el.classList.toggle('open',S._dexCfgModeloOpen);
+};
+
+// ── Popup de edição expandida das instruções do perfil ──────────────────
+// Montado no <body> (escapa ancestrais com transform). Fecha SÓ no X / Fechar —
+// clicar no backdrop NÃO fecha (sem handler no backdrop).
+window._proDexConfigExpandInstr=(campo,lbl)=>{
+  if(!_proCanEdit())return;
+  _proDexConfigCloseExpand();
+  _proDexConfigEnsureDraft();
+  const d=S._dexConfigDraft||S.dexConfig;
+  const val=String(d[campo]||'');
+  const ov=document.createElement('div');
+  ov.className='pro-editais-modal-backdrop';
+  ov.id='pro-dex-instr-modal';
+  ov.innerHTML=`
+    <div class="pro-editais-modal" role="dialog" aria-modal="true" style="max-width:940px">
+      <div class="pro-editais-modal-head">
+        <h3 class="pro-editais-modal-title">⚙️ Instruções · ${_proEsc(lbl)}</h3>
+        <button class="pro-editais-modal-close" type="button" onclick="_proDexConfigCloseExpand()" title="Fechar">✕</button>
+      </div>
+      <div class="pro-editais-modal-body">
+        <textarea class="pro-dex-instr-ta" id="pro-dex-instr-modal-ta" placeholder="Escreva as instruções gerais e, quando precisar, blocos condicionais por perfil. Ex: 'Se o perfil ativo for VENDAS, ...'" oninput="_proDexConfigSet('${campo}',this.value)">${_proEsc(val)}</textarea>
+      </div>
+      <div class="pro-editais-modal-foot">
+        <button class="btn btn-s btn-sm" type="button" onclick="_proDexConfigCloseExpand()">Fechar</button>
+        <button class="btn btn-p btn-sm" type="button" onclick="_proDexConfigSalvarExpand()">💾 Salvar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+  setTimeout(()=>{const ta=document.getElementById('pro-dex-instr-modal-ta');if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}},30);
+};
+window._proDexConfigCloseExpand=()=>{
+  const ov=document.getElementById('pro-dex-instr-modal');
+  if(ov)ov.remove();
+  // Re-render do painel pra a textarea inline refletir o que foi editado no popup
+  if(S._dexConfigOpen)_proDexRender();
+};
+window._proDexConfigSalvarExpand=async()=>{
+  await _proDexConfigSalvar();
+  _proDexConfigCloseExpand();
 };
 
 // ── PDFs anexados por perfil (vão pro Claude como documentos de referência) ──
@@ -37015,19 +37350,26 @@ window._proDexConfigPdfRemove=async(perfil,idx)=>{
 };
 
 window._proDexConfigCarregarExemplo=()=>{
-  const tab=S._dexConfigTab||'geral';
-  const campo='template'+tab.charAt(0).toUpperCase()+tab.slice(1);
-  const atual=String((S._dexConfigDraft||S.dexConfig)[campo]||'').trim();
-  if(atual&&!confirm('Já existe texto no perfil '+tab+'. Substituir pelo exemplo?'))return;
+  const atual=String((S._dexConfigDraft||S.dexConfig).templateUnico||'').trim();
+  if(atual&&!confirm('Já existe texto no prompt. Substituir pelo exemplo?'))return;
   _proDexConfigEnsureDraft();
-  S._dexConfigDraft[campo]=_proDexExemplos[tab]||'';
+  S._dexConfigDraft.templateUnico=_proDexExemploUnico;
+  S._dexConfigMigrado=false;
   S._dexConfigDirty=true;
   _proDexRender();
 };
 
 function _proDexConfigEnsureDraft(){
   if(!S._dexConfigDraft){
+    // Prompt único: usa o salvo; se vazio, tenta migrar dos 4 prompts legados.
+    let unico=String(S.dexConfig.templateUnico||'');
+    let migrado=false;
+    if(!unico.trim()){
+      const merged=_proDexMontarUnicoDeLegado();
+      if(merged){unico=merged;migrado=true;}
+    }
     S._dexConfigDraft={
+      templateUnico:unico,
       templateGeral:String(S.dexConfig.templateGeral||''),
       templateSuporte:String(S.dexConfig.templateSuporte||''),
       templateVendas:String(S.dexConfig.templateVendas||''),
@@ -37035,6 +37377,8 @@ function _proDexConfigEnsureDraft(){
       modelo:String(S.dexConfig.modelo||'haiku'),
       maxTokens:Number(S.dexConfig.maxTokens)||1024,
     };
+    S._dexConfigMigrado=migrado;
+    if(migrado)S._dexConfigDirty=true; // nudge pra salvar o resultado da migração
   }
 }
 
@@ -37065,6 +37409,7 @@ window.proDexConfigToggle=()=>{
     S._dexConfigOpen=false;
     S._dexConfigDirty=false;
     S._dexConfigDraft=null;
+    S._dexConfigMigrado=false;
   }else{
     S._dexConfigOpen=true;
     _proDexConfigEnsureDraft();
@@ -37079,15 +37424,15 @@ window._proDexConfigCancelar=()=>{
   S._dexConfigOpen=false;
   S._dexConfigDirty=false;
   S._dexConfigDraft=null;
+  S._dexConfigMigrado=false;
   _proDexRender();
 };
 
 window._proDexConfigRestaurar=()=>{
-  const tab=S._dexConfigTab||'geral';
-  const campo='template'+tab.charAt(0).toUpperCase()+tab.slice(1);
-  if(!confirm('Limpar as instruções do perfil '+tab+' e voltar a usar o exemplo padrão?'))return;
+  if(!confirm('Limpar o prompt e voltar a usar o exemplo padrão do sistema?'))return;
   _proDexConfigEnsureDraft();
-  S._dexConfigDraft[campo]='';
+  S._dexConfigDraft.templateUnico='';
+  S._dexConfigMigrado=false;
   S._dexConfigDirty=true;
   _proDexRender();
 };
@@ -37101,6 +37446,7 @@ window._proDexConfigSalvar=async()=>{
   try{
     const user=S.currentUser?.username||'?';
     const payload={
+      templateUnico:String(d.templateUnico||'').trim(),
       templateGeral:String(d.templateGeral||'').trim(),
       templateSuporte:String(d.templateSuporte||'').trim(),
       templateVendas:String(d.templateVendas||'').trim(),
@@ -37111,9 +37457,10 @@ window._proDexConfigSalvar=async()=>{
       updatedBy:user
     };
     await setDoc(doc(db,'config',_verticalDocId('dexPrompt')),payload,{merge:true});
-    if(typeof audit==='function')audit('DEX_PROMPT_SALVO',{collection:'config',id:'dexPrompt'},{after:{modelo:payload.modelo,maxTokens:payload.maxTokens,custom:{geral:!!payload.templateGeral,suporte:!!payload.templateSuporte,vendas:!!payload.templateVendas,marketing:!!payload.templateMarketing}}});
+    if(typeof audit==='function')audit('DEX_PROMPT_SALVO',{collection:'config',id:'dexPrompt'},{after:{modelo:payload.modelo,maxTokens:payload.maxTokens,unico:!!payload.templateUnico}});
     S._dexConfigDirty=false;
     S._dexConfigDraft=null;
+    S._dexConfigMigrado=false;
     _proSaveFeedback('ok');
     _proDexRender();
   }catch(e){
@@ -37536,7 +37883,8 @@ window.proNovo=()=>{
         numeroChave:'',
         diferenciais:'',
         linkUrl:'',linkLabel:'',
-        pdfUrl:'',pdfLabel:'',pdfPath:'',pdfSize:0,pdfName:''
+        pdfUrl:'',pdfLabel:'',pdfPath:'',pdfSize:0,pdfName:'',
+        imgUrl:'',imgLabel:'',imgPath:'',imgSize:0,imgName:''
       };
     });
   }else{
@@ -37545,6 +37893,7 @@ window.proNovo=()=>{
   S.produtoAtual={
     id:null,nome:'',breveDescricao:'',publicoAlvo:[],capa:null,
     provasAlvo:[],temposAcesso:[],temposAcessoObs:'',tempoTesteRecomendado:'',status:'rascunho',responsaveis:[],features:packFeats,featuresProdutoIds:[],
+    isCombo:false,
     sazonal:false,sazonalidadeDescricao:'',janelaVendasInicio:'',janelaVendasFim:'',
     vagasLimitadas:false,vagasLimitacaoDescricao:'',
     mentoriaResponsaveis:[],
@@ -37949,10 +38298,14 @@ function _proFeatDetailHTML(f,productUpdatedAt){
   const pdfLabel=String(nf.pdfLabel||'').trim()||nf.pdfName||'Baixar PDF';
   const pdfSizeStr=nf.pdfSize?_proFmtSizeShort(nf.pdfSize):'';
   const pdfHtml=pdfUrl?`<a class="pro-feat-link pro-feat-pdf-btn" href="${_proEscAttr(pdfUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="${_proEscAttr(nf.pdfName||pdfLabel)}${pdfSizeStr?' · '+pdfSizeStr:''}" download><span class="pro-feat-link-ico">📄</span> <span>${_proEsc(pdfLabel)}${pdfSizeStr?` <span class="pro-feat-pdf-size">· ${_proEsc(pdfSizeStr)}</span>`:''}</span></a>`:'';
+  // Imagem anexa: botão que abre a imagem em tela cheia (lightbox)
+  const imgUrl=String(nf.imgUrl||'').trim();
+  const imgLabel=String(nf.imgLabel||'').trim()||nf.imgName||'Ver imagem';
+  const imgHtml=imgUrl?`<button type="button" class="pro-feat-link pro-feat-img-btn" onclick="event.stopPropagation();openImgLightbox('${_proEscAttr(imgUrl)}')" title="${_proEscAttr(nf.imgName||imgLabel)}"><span class="pro-feat-link-ico">🖼️</span> <span>${_proEsc(imgLabel)}</span></button>`:'';
   const updHtml=updStr?`<span class="pro-feat-updated">Atualizado em ${_proEsc(updStr)}</span>`:'';
 
-  // Tem conteúdo expandível? (diferenciais, link, PDF ou data de atualização)
-  const hasDetail=!!(difHtml||linkHtml||pdfHtml||updHtml);
+  // Tem conteúdo expandível? (diferenciais, link, PDF, imagem ou data de atualização)
+  const hasDetail=!!(difHtml||linkHtml||pdfHtml||imgHtml||updHtml);
   if(!S._proFeatDetOpen)S._proFeatDetOpen={};
   const isOpen=hasDetail&&!!S._proFeatDetOpen[featId];
 
@@ -37976,7 +38329,7 @@ function _proFeatDetailHTML(f,productUpdatedAt){
     </div>
     ${hasDetail?`<div class="pro-feat-detail" id="pro-feat-det-${_proEscAttr(featId)}">
       ${difHtml}
-      ${(linkHtml||pdfHtml)?`<div class="pro-feat-actions">${linkHtml}${pdfHtml}</div>`:''}
+      ${(linkHtml||pdfHtml||imgHtml)?`<div class="pro-feat-actions">${linkHtml}${pdfHtml}${imgHtml}</div>`:''}
       ${updHtml}
     </div>`:''}
   </div>`;
@@ -38101,6 +38454,15 @@ function _proRenderEdit(root){
               ${Object.keys(PRO_STATUS_LABEL).map(s=>`<option value="${s}" ${p.status===s?'selected':''}>${PRO_STATUS_LABEL[s]}</option>`).join('')}
             </select>
           </div>
+
+          <label class="pro-combo-toggle${p.isCombo?' on':''}">
+            <input type="checkbox" ${p.isCombo?'checked':''} onchange="_proSetField('isCombo',this.checked);this.closest('.pro-combo-toggle').classList.toggle('on',this.checked)"/>
+            <span class="pro-combo-toggle-ico">🎁</span>
+            <span class="pro-combo-toggle-txt">
+              <span class="pro-combo-toggle-title">É um combo</span>
+              <span class="pro-combo-toggle-desc">Oferta que junta vários produtos. Mostra a tag <strong>COMBO</strong> no card.</span>
+            </span>
+          </label>
 
           <div class="fg"><label class="fl">Breve descrição <span style="font-weight:400;color:var(--t2);font-size:11px">— aparece no topo do produto. Resumo curto; o detalhe completo expande quando o leitor clicar em "saiba mais".</span></label>
             ${_proRtHTML('breve-desc',breve,'Frase ou parágrafo que resume o produto…',"_proSetBreve(_proRtGet('breve-desc'))",{colors:true,justify:true,tall:false,expandable:true})}
@@ -38954,6 +39316,21 @@ function _proFeatEditHTML(f,i,source){
                 <button type="button" class="btn btn-s btn-sm" id="pro-feat-pdf-btn-${f.id}" onclick="document.getElementById('pro-feat-pdf-file-${f.id}').click()">Trocar</button>
               </div>
             `:`<button type="button" class="btn btn-s btn-sm" id="pro-feat-pdf-btn-${f.id}" onclick="document.getElementById('pro-feat-pdf-file-${f.id}').click()">📎 Anexar PDF (máx 20MB)</button>`}
+          </div>
+        </div>
+        <div class="pro-feat-edit-row" style="align-items:flex-start">
+          <label class="fl" style="min-width:140px;padding-top:8px">🖼️ Imagem</label>
+          <div style="display:flex;gap:8px;flex:1;min-width:200px;flex-wrap:wrap;align-items:center">
+            <input class="fc" type="text" placeholder="Texto do botão (ex: Ver exemplo)" maxlength="60" value="${_proEscAttr(f.imgLabel||'')}" oninput="_proFeatSet(${i},'imgLabel',this.value,'${source}')" style="flex:1 1 180px;min-width:140px"/>
+            <input type="file" id="pro-feat-img-file-${f.id}" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" style="display:none" onchange="_proFeatImgUpload(${i},'${source}',this)"/>
+            ${f.imgUrl?`
+              <div class="pro-feat-pdf-current">
+                <img src="${_proEscAttr(f.imgUrl)}" alt="" onclick="openImgLightbox('${_proEscAttr(f.imgUrl)}')" style="width:34px;height:34px;object-fit:cover;border-radius:6px;border:1px solid var(--border);cursor:zoom-in;flex-shrink:0"/>
+                <a href="${_proEscAttr(f.imgUrl)}" onclick="event.preventDefault();openImgLightbox('${_proEscAttr(f.imgUrl)}')" class="pro-feat-pdf-link" title="Ver imagem atual">🖼️ ${_proEsc(f.imgName||'imagem')}${f.imgSize?` <span class="pro-feat-pdf-size">· ${_proEsc(_proFmtSizeShort(f.imgSize))}</span>`:''}</a>
+                <button type="button" class="pro-icon-btn" onclick="_proFeatImgRemove(${i},'${source}')" title="Remover imagem">🗑</button>
+                <button type="button" class="btn btn-s btn-sm" id="pro-feat-img-btn-${f.id}" onclick="document.getElementById('pro-feat-img-file-${f.id}').click()">Trocar</button>
+              </div>
+            `:`<button type="button" class="btn btn-s btn-sm" id="pro-feat-img-btn-${f.id}" onclick="document.getElementById('pro-feat-img-file-${f.id}').click()">📎 Anexar imagem (máx 15MB)</button>`}
           </div>
         </div>
       </div>
@@ -40187,6 +40564,11 @@ window._proFeatAdd=(source)=>{
     pdfPath:'',
     pdfSize:0,
     pdfName:'',
+    imgUrl:'',
+    imgLabel:'',
+    imgPath:'',
+    imgSize:0,
+    imgName:'',
     isBonus:source==='bonusFeatures',
     isMentoria:source==='mentoriaFeatures'
   };
@@ -40226,7 +40608,8 @@ window.proAplicarPackNoEditor=()=>{
       numeroChave:'',
       diferenciais:'',
       linkUrl:'',linkLabel:'',
-      pdfUrl:'',pdfLabel:'',pdfPath:'',pdfSize:0,pdfName:''
+      pdfUrl:'',pdfLabel:'',pdfPath:'',pdfSize:0,pdfName:'',
+      imgUrl:'',imgLabel:'',imgPath:'',imgSize:0,imgName:''
     });
     existentes.add(key);
     adicionadas++;
@@ -40283,6 +40666,8 @@ window._proOpenMsPicker=(ev,tipo)=>{
   _proMsPickerTipo=tipo;
   _proRenderMsPicker();
   const pop=document.getElementById('pro-picker-pop');
+  // Reparenta pro <body> — mesmo motivo do popup de ícone (escapa containing block transformado).
+  if(pop.parentElement!==document.body)document.body.appendChild(pop);
   _proPositionPicker(pop,ev.currentTarget);
   pop.classList.remove('hidden');
   _proEnsureGlobalDismiss();
@@ -40389,6 +40774,9 @@ window._proOpenIconPop=(ev,featIdx,source)=>{
   _proIconTargetIdx=featIdx;
   _proIconTargetSource=source||'features';
   const pop=document.getElementById('pro-icon-pop');if(!pop)return;
+  // Reparenta pro <body> pra escapar qualquer ancestral com transform/filter/perspective
+  // (que faria o position:fixed ancorar no ancestral em vez da viewport → popup fora da tela).
+  if(pop.parentElement!==document.body)document.body.appendChild(pop);
   pop.innerHTML=`
     <div class="pro-icon-grid">${PRO_ICONES_CURADOS.map(ic=>`<button onclick="_proPickIcon('${_proEscAttr(ic)}')">${ic}</button>`).join('')}</div>
     <div class="pro-icon-pop-foot">
@@ -40838,6 +41226,59 @@ window._proFeatPdfRemove=async(i,source)=>{
   f.pdfUrl='';f.pdfPath='';f.pdfName='';f.pdfSize=0;f.pdfLabel='';
   _proMark();_proRefreshFeats(source);
 };
+
+// ── Imagem anexa por feature (exibida em lightbox ao clicar no botão) ──────
+window._proFeatImgUpload=async(i,source,fileInput)=>{
+  const file=fileInput&&fileInput.files&&fileInput.files[0];
+  if(!file){fileInput.value='';return;}
+  if(!/^image\//.test(file.type||'')){
+    alert('Apenas arquivos de imagem são aceitos (JPG, PNG, WebP, GIF).');fileInput.value='';return;
+  }
+  if(file.size>15*1024*1024){
+    alert(`"${file.name}" tem ${(file.size/1024/1024).toFixed(1)}MB — limite é 15MB.`);
+    fileInput.value='';return;
+  }
+  const arr=_proFeatArr(source);
+  const f=arr[i];if(!f){fileInput.value='';return;}
+  const pid=S.produtoAtual.id||S.produtoAtual._pidTmp||('tmp_'+_proUid());
+  if(!S.produtoAtual.id)S.produtoAtual._pidTmp=pid;
+  const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+  const path=`produtos/${pid}/features/${f.id}/img-${Date.now()}.${ext}`;
+  const btn=document.getElementById(`pro-feat-img-btn-${f.id}`);
+  const origLabel=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='⏳ Enviando…';}
+  try{
+    // Se já tinha imagem anterior, tenta apagar do Storage (best-effort)
+    if(f.imgPath){
+      try{await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,f.imgPath));}catch(e){/* ignora */}
+    }
+    const r=window._fbStorage.ref(window._fbStorage.storage,path);
+    await window._fbStorage.uploadBytes(r,file);
+    const url=await window._fbStorage.getDownloadURL(r);
+    f.imgUrl=url;
+    f.imgPath=path;
+    f.imgName=file.name;
+    f.imgSize=file.size;
+    if(!f.imgLabel)f.imgLabel=file.name.replace(/\.[^.]+$/,'').slice(0,60);
+    _proMark();
+    _proRefreshFeats(source);
+  }catch(e){
+    alert('Erro no upload da imagem: '+(e.message||e));
+    if(btn){btn.disabled=false;btn.textContent=origLabel||'Anexar imagem';}
+  }finally{
+    fileInput.value='';
+  }
+};
+window._proFeatImgRemove=async(i,source)=>{
+  const arr=_proFeatArr(source);
+  const f=arr[i];if(!f)return;
+  if(!confirm(`Remover a imagem anexada "${f.imgName||f.imgLabel||'imagem'}"?`))return;
+  if(f.imgPath){
+    try{await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,f.imgPath));}catch(e){/* ignora — arquivo já pode ter sido removido */}
+  }
+  f.imgUrl='';f.imgPath='';f.imgName='';f.imgSize=0;f.imgLabel='';
+  _proMark();_proRefreshFeats(source);
+};
 function _proFmtSizeShort(n){
   if(!n||n<1)return '';
   if(n<1024)return n+' B';
@@ -40869,6 +41310,12 @@ function _proPrepareFeatures(arr,beforeArr){
       pdfPath:String(f.pdfPath||''),
       pdfSize:typeof f.pdfSize==='number'?f.pdfSize:0,
       pdfName:String(f.pdfName||''),
+      // Imagem anexa: URL + path do Storage + label customizável + metadata
+      imgUrl:String(f.imgUrl||''),
+      imgLabel:String(f.imgLabel||'').trim().slice(0,60),
+      imgPath:String(f.imgPath||''),
+      imgSize:typeof f.imgSize==='number'?f.imgSize:0,
+      imgName:String(f.imgName||''),
       // Classificação (mutuamente exclusiva)
       isBonus:!!f.isBonus,
       isMentoria:!!f.isMentoria
@@ -40900,24 +41347,9 @@ window._proSalvar=async()=>{
   if(!_proCanEdit())return alert('Sem permissão.');
   const p=S.produtoAtual;
   if(!p.nome||!p.nome.trim())return alert('Informe o nome do produto.');
-  // Validação: toda feature precisa ter `disponivel` marcado (Sim/Não/Em construção).
-  // Bloqueia o save (inclusive o save silencioso do botão Voltar).
-  const featsArr=Array.isArray(p.features)?p.features:[];
-  const featsSemDisp=featsArr.filter(f=>{
-    const d=_proFeatDisp(f);
-    return !d; // string vazia ou null
-  });
-  if(featsSemDisp.length){
-    const titulos=featsSemDisp.map(f=>String(f.titulo||'').trim()||'(sem título)').slice(0,8);
-    const extra=featsSemDisp.length>titulos.length?` (+${featsSemDisp.length-titulos.length} mais)`:'';
-    alert(`Faltou marcar a disponibilidade em ${featsSemDisp.length} feature${featsSemDisp.length===1?'':'s'}:\n\n• ${titulos.join('\n• ')}${extra}\n\nMarque tudo antes de salvar.`);
-    // Garante que o accordion Features esteja aberto pro usuário ver o que falta
-    const acc=document.querySelector('#tab-produtos .pro-edit-accordion[data-acc="features"]');
-    if(acc&&!acc.classList.contains('open'))_proAnimOpen(acc,'.pro-edit-acc-body');
-    // Re-render pra destacar visualmente os cards pendentes
-    _proRefreshFeats();
-    return;
-  }
+  // Disponibilidade das features é opcional no save — features sem marcação
+  // são persistidas com `disponivel:''` e exibidas como disponíveis por padrão
+  // (fallback em _proFeatDisp/PRO_FEAT_DISP_META). Sem bloqueio.
   const isNew=S.produtosView==='new';
   const user=S.currentUser?.username||'?';
   const before=isNew?null:S.produtos.find(x=>x.id===p.id);
@@ -40941,6 +41373,7 @@ window._proSalvar=async()=>{
     tempoTesteRecomendado:String(p.tempoTesteRecomendado||'').trim(),
     responsaveis:responsaveisArr,
     status:p.status||'rascunho',
+    isCombo:!!p.isCombo,
     sazonal:!!p.sazonal,
     sazonalidadeDescricao:p.sazonal?String(p.sazonalidadeDescricao||'').trim():'',
     janelaVendasInicio:p.sazonal?String(p.janelaVendasInicio||'').trim():'',
