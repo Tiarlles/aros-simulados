@@ -622,27 +622,20 @@ body:has(.mo:not(.hidden)){overflow:hidden}
 
 /* POSITION ROWS */
 .pos-tbl{overflow-x:auto;overflow-y:visible}
-.pos-hdr{display:grid;grid-template-columns:32px 130px 240px 160px 110px 220px 160px;min-width:max-content;background:var(--bg3);border-bottom:1px solid var(--border)}
+.pos-hdr{display:grid;grid-template-columns:32px 130px 240px 160px 110px 160px;min-width:max-content;background:var(--bg3);border-bottom:1px solid var(--border)}
 .pos-hdr>div{padding:5px 10px;font-size:10px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;border-right:1px solid var(--border);overflow:hidden}
 .pos-hdr>div:last-child{border-right:none;background:none}
 .pos-hdr>div:nth-last-child(2){border-right:1px solid var(--border)}
 .pos-hdr>div:nth-child(1){position:sticky;left:0;z-index:3;background:var(--bg3)}
 .pos-hdr>div:nth-child(2){position:sticky;left:32px;z-index:3;background:var(--bg3)}
 .pos-hdr>div:nth-child(3){position:sticky;left:162px;z-index:3;background:var(--bg3)}
-.pos-hdr .pos-ctrl-h{display:flex;flex-direction:column;justify-content:center;gap:3px;padding:3px 4px;text-transform:none;font-size:inherit}
-.pos-ctrl-h .pos-ctrl-title{font-size:10px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;text-align:center}
-.pos-ctrl-h .pos-ctrl-sub{display:grid;grid-template-columns:1fr 1fr 1fr;font-size:9px;font-weight:600;color:var(--t3);text-align:center}
-.pos-ctrl-h .pos-ctrl-sub>span{padding:1px 2px;border-left:1px solid var(--border)}
-.pos-ctrl-h .pos-ctrl-sub>span:first-child{border-left:none}
-.pos-row{display:grid;grid-template-columns:32px 130px 240px 160px 110px 220px 160px;min-width:max-content;border-bottom:1px solid var(--border);min-height:44px;background:var(--row-bg,transparent);transition:background .15s}
+.pos-row{display:grid;grid-template-columns:32px 130px 240px 160px 110px 160px;min-width:max-content;border-bottom:1px solid var(--border);min-height:44px;background:var(--row-bg,transparent);transition:background .15s}
 .pos-row:last-child{border-bottom:none}
 .pos-row:hover{--row-bg:var(--bg3)}
 .pos-row.drag-target{--row-bg:var(--accent-dim);border-color:var(--accent)}
 .pos-num{position:sticky;left:0;z-index:2;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--t3);border-right:1px solid var(--border);background:var(--bg3)}
 .pos-prof{position:sticky;left:32px;z-index:2;display:flex;align-items:center;padding:6px 10px;border-right:1px solid var(--border);gap:6px;background-color:var(--bg2);background-image:linear-gradient(var(--row-bg,transparent),var(--row-bg,transparent));overflow:hidden}
 .pos-aluno-sticky{position:sticky;left:162px;z-index:2;background-color:var(--bg2);background-image:linear-gradient(var(--row-bg,transparent),var(--row-bg,transparent));overflow:hidden}
-.pos-ctrl-c{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;justify-items:center;padding:4px 6px;border-right:1px solid var(--border)}
-.pos-ctrl-c input[type="checkbox"]{width:16px;height:16px;cursor:pointer;accent-color:var(--accent);margin:0}
 .pos-prof select{border:none;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--t2);outline:none;cursor:pointer;width:100%;transition:color .2s}
 .pos-prof select:hover,.pos-prof select:focus{color:var(--text)}
 .pos-aluno{display:flex;align-items:center;padding:6px 10px;gap:8px;min-width:0}
@@ -24636,12 +24629,16 @@ function renderNotGoingPanel(containerId,exp,isCoord){
   const rows=naoVao.map(s=>{
     const ts=s.respondedAt?fDT(s.respondedAt):'—';
     const orig=s.originalDia&&s.originalRodada?`${s.originalDia==='sabado'?'Sáb':'Dom'} · ${getH(s.originalDia,s.originalRodada)}`:'';
-    const btn=exp?'<span style="font-size:11px;color:var(--t2)">Prazo encerrado</span>':
-      `<button class="btn btn-s btn-sm" onclick="openPickSlot('${s.id}')">📅 Voltar para a escala</button>`;
+    // Botão sempre disponível: mesmo quem não confirmou pode aparecer no dia e ser realocado.
+    const btn=`<button class="btn btn-s btn-sm" onclick="openPickSlot('${s.id}')">📅 Voltar para a escala</button>`;
+    const tag=s.noShow?'<span style="font-size:10px;font-weight:700;color:var(--red);background:var(--rl);border:1px solid rgba(248,81,73,.35);padding:1px 7px;border-radius:10px;margin-left:6px;white-space:nowrap">🚫 Faltou no dia</span>':'';
+    const info=s.noShow
+      ?`${orig?'Vaga liberada: '+orig+' · ':''}Ausente desde ${s.noShowAt?fDT(s.noShowAt):ts}`
+      :`${orig?'Vaga liberada: '+orig+' · ':''}Marcado em ${ts}`;
     return`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px;flex-wrap:wrap">
       <div style="flex:1;min-width:180px">
-        <p style="font-weight:700;font-size:14px">${s.nome}</p>
-        <p style="font-size:11px;color:var(--t2);margin-top:2px">${orig?'Vaga liberada: '+orig+' · ':''}Marcado em ${ts}</p>
+        <p style="font-weight:700;font-size:14px">${s.nome}${tag}</p>
+        <p style="font-size:11px;color:var(--t2);margin-top:2px">${info}</p>
       </div>
       ${btn}
     </div>`;
@@ -25317,6 +25314,7 @@ function renderCoSched(){
   if(S.curSim?.presencial){return renderCoSchedPres();}
   // Dispara auto-absent se prazo encerrou (não bloqueia render)
   try{_autoAbsentPostDeadline();}catch(_){}
+  try{_startNoShowSweep();_noShowSweep();}catch(_){}
   ['sabado','domingo'].forEach(dia=>{
     const rods=getRods(dia);const con=document.getElementById(`rds-${dia==='sabado'?'sab':'dom'}`);const lim=getLim();
     if(!rods.length){con.innerHTML='<div class="es" style="padding:20px"><p>Nenhuma rodada para este dia.</p></div>';return;}
@@ -25340,7 +25338,7 @@ function renderCoSched(){
       html+=`<div class="rc${_rcCol}" id="${_rcId}" ondragover="dOver(event,'${dia}',${rn})" ondrop="dDrop(event,'${dia}',${rn})" ondragleave="e=>e.currentTarget.classList.remove('drag-over')">
         <div class="rh" onclick="if(event.target.closest('button'))return;toggleRoundCard(this.parentElement)"><span class="r-time"><span class="rh-toggle">▾</span>Rodada ${rn} · ${rod.horario}</span>
         </div>
-        <div class="pos-tbl"><div class="pos-hdr"><div style="text-align:center">#</div><div>PROF.</div><div>ALUNO</div><div style="text-align:center">STATUS</div><div style="text-align:center">PRESENÇA</div><div class="pos-ctrl-h"><span class="pos-ctrl-title">CONTROLE</span><span class="pos-ctrl-sub"><span>Triagem</span><span>Áudio</span><span>Vídeo</span></span></div><div style="text-align:center">AÇÕES</div></div><div>`;
+        <div class="pos-tbl"><div class="pos-hdr"><div style="text-align:center">#</div><div>PROF.</div><div>ALUNO</div><div style="text-align:center">STATUS</div><div style="text-align:center">PRESENÇA</div><div style="text-align:center">AÇÕES</div></div><div>`;
 
       for(let p=1;p<=lim;p++){
         const key=`${dia}-${rn}-${p}`;
@@ -25365,9 +25363,8 @@ function renderCoSched(){
           a=!assignedPos.has(p)?unpos[fillIdx]||null:null;
         }
 
-        const statusCls=a?a.status==='swap'?' style="--row-bg:var(--yl)"':a.status==='confirmed'?' style="--row-bg:var(--gl)"':a.status==='absent'?' style="--row-bg:var(--rl)"':'':'';
-        const ctrl=a?.controle||{};
-        const ctrlChk=(k)=>a?`<input type="checkbox" ${ctrl[k]?'checked':''} onchange="toggleCtrl('${S.curSim?.id||''}','${a.id}','${k}',this.checked)" title="${k}">`:'';
+        const _rowBg=a?(a.presenca==='ausente'?'var(--rl)':a.status==='swap'?'var(--yl)':a.status==='confirmed'?'var(--gl)':a.status==='absent'?'var(--rl)':''):'';
+        const statusCls=_rowBg?` style="--row-bg:${_rowBg}"`:'';
 
         html+=`<div class="pos-row"${statusCls} id="pos-${dia}-${rn}-${p}" ondragover="dOverPos(event,'${dia}',${rn},${p})" ondrop="dDropPos(event,'${dia}',${rn},${p})" ondragleave="e=>e.currentTarget.classList.remove('drag-target')">
           <div class="pos-num">${p}</div>
@@ -25384,7 +25381,7 @@ function renderCoSched(){
             ${a?_coStatusSel(a):''}
           </div>
           <div style="display:flex;align-items:center;justify-content:center;padding:4px 6px;border-right:1px solid var(--border)">
-            ${a?`<select onchange="togglePresBtn('${S.curSim?.id||''}','${a.id}',this.value)"
+            ${a?`<select onchange="togglePresBtn('${S.curSim?.id||''}','${a.id}',this.value,this)"
               style="border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;padding:3px 4px;outline:none;width:100%;text-align:center;
               background:${a.presenca==='presente'?'var(--gl)':a.presenca==='ausente'?'var(--rl)':'var(--bg3)'};
               color:${a.presenca==='presente'?'var(--green)':a.presenca==='ausente'?'var(--red)':'var(--t2)'};
@@ -25393,9 +25390,6 @@ function renderCoSched(){
               <option value="presente" ${a.presenca==='presente'?'selected':''}>✅ Presente</option>
               <option value="ausente" ${a.presenca==='ausente'?'selected':''}>❌ Ausente</option>
             </select>`:''}
-          </div>
-          <div class="pos-ctrl-c">
-            ${ctrlChk('triagem')}${ctrlChk('audio')}${ctrlChk('video')}
           </div>
           <div class="pos-acts" style="gap:5px;padding:4px 8px">
             ${a?`
@@ -25419,6 +25413,7 @@ function renderCoSched(){
 // === Visão coord — presencial ===
 function renderCoSchedPres(){
   try{_autoAbsentPostDeadline();}catch(_){}
+  try{_startNoShowSweep();_noShowSweep();}catch(_){}
   const ord=(a,b)=>{
     const order={confirmed:0,swap:1,pending:2};
     const da=order[a.status]??3,db=order[b.status]??3;
@@ -25445,7 +25440,7 @@ function renderCoSchedPres(){
     if(!list.length){con.innerHTML=head+'<div class="cb"><div class="es" style="padding:24px"><p>Nenhum aluno alocado neste dia.</p></div></div></div>';return;}
     const rows=list.map(s=>{
       const swapLbl=s.status==='swap'&&s.swapTargetDia?` <span class="badge b-swap">→ ${s.swapTargetDia==='sabado'?'Sáb':'Dom'}</span>`:'';
-      const presSel=`<select onchange="togglePresBtn('${S.curSim.id}','${s.id}',this.value)" style="border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;padding:3px 4px;outline:none;text-align:center;background:${s.presenca==='presente'?'var(--gl)':s.presenca==='ausente'?'var(--rl)':'var(--bg3)'};color:${s.presenca==='presente'?'var(--green)':s.presenca==='ausente'?'var(--red)':'var(--t2)'};border:1px solid ${s.presenca==='presente'?'rgba(63,185,80,.4)':s.presenca==='ausente'?'rgba(248,81,73,.4)':'var(--border)'}">
+      const presSel=`<select onchange="togglePresBtn('${S.curSim.id}','${s.id}',this.value,this)" style="border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;padding:3px 4px;outline:none;text-align:center;background:${s.presenca==='presente'?'var(--gl)':s.presenca==='ausente'?'var(--rl)':'var(--bg3)'};color:${s.presenca==='presente'?'var(--green)':s.presenca==='ausente'?'var(--red)':'var(--t2)'};border:1px solid ${s.presenca==='presente'?'rgba(63,185,80,.4)':s.presenca==='ausente'?'rgba(248,81,73,.4)':'var(--border)'}">
         <option value="" ${!s.presenca?'selected':''}>— marcar —</option>
         <option value="presente" ${s.presenca==='presente'?'selected':''}>✅ Presente</option>
         <option value="ausente" ${s.presenca==='ausente'?'selected':''}>❌ Ausente</option>
@@ -25906,6 +25901,10 @@ window.coChangeStatus=async(alunoId,newStatus)=>{
     // (status:swap mas escondido do painel de Solicitações que filtra !swapResolved).
     upd.swapResolved=false;
   }
+  // Ao tirar de ausente, limpa a marca de falta (presença) — senão a varredura de 30 min re-move.
+  if(newStatus!=='absent'&&s.status==='absent'){
+    upd.presenca=null;upd.presencaAusenteAt=null;upd.noShow=false;upd.noShowAt=null;
+  }
   try{
     // Captura slot anterior pra varrer fila se virou ausente
     const liberadoDia=newStatus==='absent'?s.dia:null;
@@ -25952,6 +25951,40 @@ async function _autoAbsentPostDeadline(){
     // Libera flag pra retentar na próxima render
     window._autoAbsentDoneSimIds.delete(simId);
   }
+}
+
+// ── No-show: aluno marcado AUSENTE na presença há ≥30 min → painel de ausentes ──
+// Reusa o mecanismo de status:'absent' (mesmo box no rodapé, botão "Voltar para a escala").
+// NÃO puxa a fila de espera (não faz sentido chamar alguém no meio da rodada).
+const NO_SHOW_MIN=30;
+let _noShowTimer=null;
+function _startNoShowSweep(){
+  if(_noShowTimer)return;
+  _noShowTimer=setInterval(()=>{try{_noShowSweep();}catch(_){}},60000);
+}
+async function _noShowSweep(){
+  if(!S.curSim||!S.unlocked)return;
+  const simId=S.curSim.id;
+  const limMs=NO_SHOW_MIN*60*1000;
+  const nowMs=Date.now();
+  const toMove=(S.students||[]).filter(s=>
+    s.presenca==='ausente' && s.status!=='absent' && s.presencaAusenteAt &&
+    (nowMs-new Date(s.presencaAusenteAt).getTime())>=limMs
+  );
+  if(!toMove.length)return;
+  const now=new Date().toISOString();
+  try{
+    await Promise.all(toMove.map(s=>{
+      const upd={status:'absent',respondedAt:now,noShow:true,noShowAt:now};
+      if(s.dia)upd.originalDia=s.dia;
+      if(s.rodada)upd.originalRodada=s.rodada;
+      upd.dia=null;upd.rodada=null;upd.posicao=null;
+      Object.assign(s,upd); // atualiza state local p/ não re-disparar antes do snapshot
+      return updateDoc(doc(db,`simulados/${simId}/alunos/${s.id}`),upd);
+    }));
+    try{audit('NO_SHOW_AUTO_AUSENTE',{collection:'simulados/alunos',simId},{meta:{qtd:toMove.length,alunos:toMove.map(p=>p.nome),minutos:NO_SHOW_MIN}});}catch(_){}
+    _showCoBanner(`✓ ${toMove.length} aluno${toMove.length>1?'s':''} ausente${toMove.length>1?'s':''} há mais de ${NO_SHOW_MIN} min ${toMove.length>1?'foram movidos':'foi movido'} para o painel de ausentes.`);
+  }catch(err){console.error('[noShowSweep] erro:',err);}
 }
 
 function _showCoBanner(msg){
@@ -26269,7 +26302,8 @@ window.confirmPickSlotPres=async(dia)=>{
     status:'confirmed',dia,rodada:null,posicao:null,
     respondedAt:new Date().toISOString(),
     email:email||null,
-    originalDia:null,originalRodada:null
+    originalDia:null,originalRodada:null,
+    presenca:null,presencaAusenteAt:null,noShow:false,noShowAt:null
   });
   if(email){
     try{await emailjs.send('service_exyoa4r','template_r0vjejs',{to_email:email,nome:s.nome,assunto:'✅ Presença Confirmada · AROS Simulado',mensagem:`Sua presença foi CONFIRMADA! ✅\n\nDia: ${lbl}${data?' '+fD(data):''}`,simulado:S.curSim.nome,dia:lbl,horario:''});}catch(e){console.error(e);}
@@ -26289,7 +26323,8 @@ window.confirmPickSlot=async(dia,rodada)=>{
     status:'confirmed',dia,rodada,posicao:null,
     respondedAt:new Date().toISOString(),
     email:email||null,
-    originalDia:null,originalRodada:null
+    originalDia:null,originalRodada:null,
+    presenca:null,presencaAusenteAt:null,noShow:false,noShowAt:null
   });
   // Send confirmation email if we have one
   if(email){
@@ -27890,20 +27925,41 @@ window.togglePresenca=async(simId,studentId,val)=>{
   audit('PRESENCA_TOGGLE',{collection:'simulados/alunos',simId,studentId},{after:{presenca:val},meta:{presente:val==='presente'}});
 };
 
-window.togglePresBtn=async(simId,studentId,val)=>{
+// Aplica visual de presença num <select> e na linha (sombreado), sem esperar a rede.
+function _applyPresVisual(sel,presenca,status){
+  if(!sel)return;
+  sel.style.background=presenca==='presente'?'var(--gl)':presenca==='ausente'?'var(--rl)':'var(--bg3)';
+  sel.style.color=presenca==='presente'?'var(--green)':presenca==='ausente'?'var(--red)':'var(--t2)';
+  sel.style.borderColor=presenca==='presente'?'rgba(63,185,80,.4)':presenca==='ausente'?'rgba(248,81,73,.4)':'var(--border)';
+  const row=sel.closest('.pos-row');
+  if(row){
+    const bg=presenca==='ausente'?'var(--rl)':status==='swap'?'var(--yl)':status==='confirmed'?'var(--gl)':status==='absent'?'var(--rl)':'';
+    if(bg)row.style.setProperty('--row-bg',bg);else row.style.removeProperty('--row-bg');
+  }
+}
+
+window.togglePresBtn=async(simId,studentId,val,sel)=>{
   if(!simId||!studentId)return;
   const presenca=val||null;
-  await updateDoc(doc(db,`simulados/${simId}/alunos/${studentId}`),{presenca});
-  audit('PRESENCA_TOGGLE',{collection:'simulados/alunos',simId,studentId},{after:{presenca},meta:{presente:presenca==='presente'}});
-};
-
-window.toggleCtrl=async(simId,studentId,key,checked)=>{
-  if(!simId||!studentId)return;
-  if(!['triagem','audio','video'].includes(key))return;
+  // Carimba quando o aluno ficou ausente — usado pra movê-lo ao painel de ausentes após 30 min.
+  // Ao desmarcar (presente/—), limpa o carimbo.
+  const presencaAusenteAt=presenca==='ausente'?new Date().toISOString():null;
+  // Update otimista: estado local + visual instantâneo (sem esperar o round-trip do Firestore)
+  const st=(S.students||[]).find(s=>s.id===studentId);
+  const prev=st?st.presenca:undefined;
+  const prevAt=st?st.presencaAusenteAt:undefined;
+  if(st){st.presenca=presenca;st.presencaAusenteAt=presencaAusenteAt;}
+  _applyPresVisual(sel,presenca,st&&st.status);
   try{
-    await updateDoc(doc(db,`simulados/${simId}/alunos/${studentId}`),{[`controle.${key}`]:!!checked});
-    audit('CONTROLE_TOGGLE',{collection:'simulados/alunos',simId,studentId},{after:{[`controle.${key}`]:!!checked}});
-  }catch(e){console.error('toggleCtrl',e);alert('Erro ao salvar controle.');}
+    await updateDoc(doc(db,`simulados/${simId}/alunos/${studentId}`),{presenca,presencaAusenteAt});
+    audit('PRESENCA_TOGGLE',{collection:'simulados/alunos',simId,studentId},{after:{presenca},meta:{presente:presenca==='presente'}});
+  }catch(e){
+    console.error('togglePresBtn',e);
+    if(st){st.presenca=prev;st.presencaAusenteAt=prevAt;}
+    _applyPresVisual(sel,prev,st&&st.status);
+    if(sel)sel.value=prev||'';
+    alert('Erro ao salvar presença. Tente novamente.');
+  }
 };
 
 // ── Populate desempenho lista selector ────────────────────────────────────────
@@ -33458,10 +33514,42 @@ window.deletarContribFeedback=async(simId,idx)=>{
 };
 
 
+// Modal de confirmação estilizado (Sim/Não) — retorna Promise<boolean>.
+function uiConfirm(message,opts={}){
+  const {title='Confirmar',yesLabel='Sim',noLabel='Não',yesClass='btn-p'}=opts;
+  return new Promise(resolve=>{
+    const ov=document.createElement('div');
+    ov.className='mo';ov.style.zIndex='300';
+    const md=document.createElement('div');
+    md.className='md';md.style.maxWidth='440px';
+    md.innerHTML=`<div class="mh"><div><div class="m-title"></div></div></div>`+
+      `<div class="m-body"><p class="ui-confirm-msg" style="font-size:14px;line-height:1.55;color:var(--text);margin:0;white-space:pre-line"></p></div>`+
+      `<div class="m-foot"><button class="btn btn-s" data-no></button><button class="btn ${yesClass}" data-yes></button></div>`;
+    md.querySelector('.m-title').textContent=title;
+    md.querySelector('.ui-confirm-msg').textContent=message;
+    md.querySelector('[data-no]').textContent=noLabel;
+    md.querySelector('[data-yes]').textContent=yesLabel;
+    ov.appendChild(md);
+    document.body.appendChild(ov);
+    const done=v=>{try{ov.remove();}catch(_){}resolve(v);};
+    md.querySelector('[data-yes]').onclick=()=>done(true);
+    md.querySelector('[data-no]').onclick=()=>done(false);
+    ov.addEventListener('click',e=>{if(e.target===ov)done(false);});
+    setTimeout(()=>{try{md.querySelector('[data-yes]').focus();}catch(_){}},30);
+  });
+}
+
 // ── Gerar Feedback via nova estrutura de blocos ────────────────────────────────
 window.gerarFeedbackAluno=async(studentId)=>{
   const simId=_ckSimId||document.getElementById('ck-sim-sel')?.value;
   if(!simId){alert('Selecione um simulado primeiro.');return;}
+  // Avisa se o feedback geral da turma ainda não foi configurado.
+  let _fgConfigurado='';
+  try{const _fgSnap=await getDoc(doc(db,`feedbackGeral/${simId}`));if(_fgSnap.exists())_fgConfigurado=(_fgSnap.data().textoFinal||'').trim();}catch(e){}
+  if(!_fgConfigurado){
+    const seguir=await uiConfirm('O feedback geral para a turma ainda não foi configurado. Deseja seguir com o feedback mesmo assim?',{title:'💬 Feedback geral não configurado',yesLabel:'Sim, seguir',noLabel:'Não'});
+    if(!seguir)return;
+  }
   // Get student info
   let student=_ckStudents.find(s=>s.id===studentId);
   if(!student){
