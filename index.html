@@ -2731,7 +2731,7 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-dimp-escopos-manage-empty{background:transparent;border:1px dashed var(--border);color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.5px;padding:6px 10px;border-radius:8px;cursor:pointer;transition:all .15s}
 #tab-produtos .pro-dimp-escopos-manage-empty:hover{border-color:color-mix(in srgb,#a855f7 36%,var(--border));color:#a855f7;background:color-mix(in srgb,#a855f7 5%,var(--bg2))}
 /* Badge de escopo no card de evento (header) */
-#tab-produtos .pro-dimp-escopo-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;border:1px solid color-mix(in srgb,#a855f7 36%,var(--border));background:color-mix(in srgb,#a855f7 10%,var(--bg2));color:#a855f7;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
+#tab-produtos .pro-dimp-escopo-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;border:1px solid color-mix(in srgb,var(--c,#a855f7) 36%,var(--border));background:color-mix(in srgb,var(--c,#a855f7) 12%,var(--bg2));color:var(--c,#a855f7);font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
 /* Barra de filtro de status (Confirmados vs Previstos) — separada da de escopo */
 #tab-produtos .pro-dimp-status-bar{display:flex;align-items:center;gap:10px;margin:6px 0 4px;padding:8px 4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
 #tab-produtos .pro-dimp-status-bar-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--t2);text-transform:uppercase;flex-shrink:0}
@@ -2771,10 +2771,10 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
   #tab-produtos .pro-dimp-filtros-panel-head{flex-direction:column;align-items:stretch;gap:6px}
   #tab-produtos .pro-dimp-filtros-panel-head .pro-dimp-filtros-clear-wrap{justify-content:flex-end;display:flex}
 }
-/* Cards "Previsto" — borda esquerda tracejada amarela substitui a borda do tipo */
-#tab-produtos .pro-dimp-card.pro-dimp-previsto{border-left:3px dashed var(--yellow);background:color-mix(in srgb,var(--yellow) 18%,var(--bg2))}
-#tab-produtos .pro-dimp-card.pro-dimp-previsto:hover{border-color:color-mix(in srgb,var(--yellow) 50%,var(--border));border-left-color:var(--yellow);background:color-mix(in srgb,var(--yellow) 22%,var(--bg2))}
-#tab-produtos .pro-dimp-card.pro-dimp-previsto.open{border-color:color-mix(in srgb,var(--yellow) 58%,var(--border));background:color-mix(in srgb,var(--yellow) 20%,var(--bg2))}
+/* Cards "Previsto" — borda esquerda tracejada âmbar discreta + sombreado escuro sutil */
+#tab-produtos .pro-dimp-card.pro-dimp-previsto{border-left:3px dashed color-mix(in srgb,#b45309 60%,var(--border));background:color-mix(in srgb,#92710a 13%,var(--bg2))}
+#tab-produtos .pro-dimp-card.pro-dimp-previsto:hover{border-color:color-mix(in srgb,#b45309 40%,var(--border));border-left-color:color-mix(in srgb,#b45309 70%,var(--border));background:color-mix(in srgb,#92710a 18%,var(--bg2))}
+#tab-produtos .pro-dimp-card.pro-dimp-previsto.open{border-color:color-mix(in srgb,#b45309 45%,var(--border));background:color-mix(in srgb,#92710a 16%,var(--bg2))}
 #tab-produtos .pro-dimp-card.pro-dimp-previsto .pro-dimp-head{background:transparent}
 /* Badge "⚠️ Previsto" no header do card */
 #tab-produtos .pro-dimp-badge-previsto{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;border:1px solid color-mix(in srgb,var(--yellow) 50%,var(--border));background:color-mix(in srgb,var(--yellow) 14%,transparent);color:var(--yellow);font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;flex-shrink:0;line-height:1.3;white-space:nowrap}
@@ -2876,6 +2876,174 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
   .pro-dimp-cal-evpop-body{padding:12px 14px;gap:10px}
   .pro-dimp-cal-evpop-foot{padding:10px 14px;gap:6px}
   .pro-dimp-cal-evpop-foot .btn{flex:1;min-width:0}
+}
+
+/* ── Datas Importantes: card de entrada + página dedicada + visões (2026-06-01) ── */
+#tab-produtos .pro-dimp-entry{display:flex;align-items:center;gap:14px;padding:16px 18px;margin:14px 0;background:color-mix(in srgb,var(--bg2) 92%,transparent);border:1px solid var(--border);border-radius:14px;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .15s;backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%)}
+#tab-produtos .pro-dimp-entry:hover{border-color:color-mix(in srgb,#06b6d4 40%,var(--border));box-shadow:0 4px 18px -6px color-mix(in srgb,#06b6d4 30%,transparent)}
+#tab-produtos .pro-dimp-entry:active{transform:scale(.995)}
+#tab-produtos .pro-dimp-entry-ico{font-size:26px;line-height:1;flex-shrink:0;width:46px;height:46px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:color-mix(in srgb,#06b6d4 14%,transparent);border:1px solid color-mix(in srgb,#06b6d4 30%,var(--border))}
+#tab-produtos .pro-dimp-entry-main{flex:1;min-width:0}
+#tab-produtos .pro-dimp-entry-title{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.2px}
+#tab-produtos .pro-dimp-entry-count{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;color:#06b6d4;background:color-mix(in srgb,#06b6d4 14%,transparent);border:1px solid color-mix(in srgb,#06b6d4 32%,var(--border));padding:1px 8px;border-radius:999px;line-height:1.4}
+#tab-produtos .pro-dimp-entry-sub{font-size:12.5px;color:var(--t2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tab-produtos .pro-dimp-entry-arrow{font-size:18px;color:var(--t2);flex-shrink:0;transition:transform .2s,color .2s}
+#tab-produtos .pro-dimp-entry:hover .pro-dimp-entry-arrow{color:#06b6d4;transform:translateX(3px)}
+#tab-produtos .pro-dimp-page{position:relative}
+#tab-produtos .pro-dimp-page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:6px 0 16px;flex-wrap:wrap}
+#tab-produtos .pro-dimp-page-title{margin:0;font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:700;letter-spacing:-.4px;line-height:1.1}
+#tab-produtos .pro-dimp-page-sub{margin:5px 0 0;font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#06b6d4}
+#tab-produtos .pro-dimp-page-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+#tab-produtos .pro-dimp-page-filtros{flex:0 1 auto}
+#tab-produtos .pro-dimp-page-filtros .pro-dimp-filtros-wrap{margin:0}
+#tab-produtos .pro-dimp-viewswitch{display:inline-flex;gap:3px;padding:3px;background:var(--bg3);border:1px solid var(--border);border-radius:12px}
+#tab-produtos .pro-dimp-viewbtn{appearance:none;border:none;background:transparent;color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.5px;padding:7px 14px;border-radius:9px;cursor:pointer;transition:all .15s;white-space:nowrap}
+#tab-produtos .pro-dimp-viewbtn:hover{color:var(--text)}
+#tab-produtos .pro-dimp-viewbtn.on{background:var(--bg2);color:#06b6d4;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.pro-dimp-cal.inline{position:relative;width:100%;height:auto;max-width:none;max-height:none;border:1px solid var(--border);border-radius:14px;box-shadow:none;background:var(--bg2);overflow:visible}
+.pro-dimp-cal.inline .pro-dimp-cal-grid-wrap{flex:none;overflow:visible}
+.pro-dimp-cal.inline .pro-dimp-cal-nav{border-radius:14px 14px 0 0}
+/* Mês inline: células crescem com o conteúdo e os títulos quebram em várias linhas (legibilidade) */
+.pro-dimp-cal.inline .pro-dimp-cal-grid{grid-auto-rows:minmax(124px,auto)}
+.pro-dimp-cal.inline .pro-dimp-cal-cell{min-height:124px;overflow:visible}
+.pro-dimp-cal.inline .pro-dimp-cal-chips{overflow:visible}
+.pro-dimp-cal.inline .pro-dimp-cal-chip{align-items:flex-start;white-space:normal;line-height:1.3;padding:4px 8px;font-size:11.5px;border-radius:7px}
+.pro-dimp-cal.inline .pro-dimp-cal-chip .ico{margin-top:1px}
+.pro-dimp-cal.inline .pro-dimp-cal-chip .titulo{white-space:normal;overflow:visible;text-overflow:clip;word-break:break-word}
+/* Agenda — cada mês é um dropdown (mês atual aberto por padrão) */
+#tab-produtos .pro-dimp-agenda{display:flex;flex-direction:column;gap:10px}
+#tab-produtos .pro-dimp-agenda-toolbar{display:flex;justify-content:flex-end;margin-bottom:-2px}
+#tab-produtos .pro-dimp-expand-btn{background:transparent;border:1px solid var(--border);color:var(--t2);font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;padding:7px 13px;border-radius:10px;cursor:pointer;transition:all .15s}
+#tab-produtos .pro-dimp-expand-btn:hover{border-color:color-mix(in srgb,#06b6d4 40%,var(--border));color:#06b6d4;background:color-mix(in srgb,#06b6d4 6%,transparent)}
+#tab-produtos .pro-dimp-agenda-disc{border:1px solid var(--border);border-radius:14px;background:color-mix(in srgb,var(--bg2) 60%,transparent);overflow:hidden;transition:border-color .15s}
+#tab-produtos .pro-dimp-agenda-disc:hover{border-color:color-mix(in srgb,#06b6d4 22%,var(--border))}
+#tab-produtos .pro-dimp-agenda-summary{list-style:none;cursor:pointer;user-select:none;display:flex;align-items:center;gap:10px;padding:13px 16px;font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;color:var(--text);text-transform:capitalize;transition:background .15s}
+#tab-produtos .pro-dimp-agenda-summary::-webkit-details-marker{display:none}
+#tab-produtos .pro-dimp-agenda-summary:hover{background:color-mix(in srgb,#06b6d4 5%,transparent)}
+#tab-produtos .pro-dimp-agenda-caret{font-size:12px;color:var(--t2);transition:transform .2s;flex-shrink:0}
+#tab-produtos .pro-dimp-agenda-disc[open]>.pro-dimp-agenda-summary .pro-dimp-agenda-caret{transform:rotate(180deg);color:#06b6d4}
+#tab-produtos .pro-dimp-agenda-disc[open]>.pro-dimp-agenda-summary{border-bottom:1px solid var(--border)}
+#tab-produtos .pro-dimp-agenda-mes-nome{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:17px;font-weight:800;text-transform:uppercase;letter-spacing:1px}
+#tab-produtos .pro-dimp-agenda-disc[open]>.pro-dimp-agenda-summary .pro-dimp-agenda-mes-nome{color:#06b6d4}
+#tab-produtos .pro-dimp-agenda-mes-count{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;color:var(--t2);background:color-mix(in srgb,var(--t2) 10%,transparent);border:1px solid var(--border);padding:1px 8px;border-radius:999px;flex-shrink:0}
+#tab-produtos .pro-dimp-agenda .pro-editais-lista{display:flex;flex-direction:column;gap:8px;padding:12px}
+/* Nome + data juntos (data logo após o nome, cor discreta) | escopo | tipo | ações */
+#tab-produtos .pro-dimp-titlewrap{display:flex;align-items:baseline;gap:9px;min-width:0}
+#tab-produtos .pro-dimp-titlewrap .pro-dimp-title{flex:0 1 auto}
+#tab-produtos .pro-dimp-titlewrap .pro-dimp-data{flex:none;color:color-mix(in srgb,var(--text) 55%,transparent)}
+#tab-produtos .pro-dimp-col{display:flex;align-items:center;gap:6px;min-width:0}
+#tab-produtos .pro-dimp-col-acts{justify-content:flex-end;gap:4px;margin-left:auto}
+#tab-produtos .pro-dimp-col-escopo .pro-dimp-escopo-badge{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Tag do TIPO na visão Ano: monocromática (a cor do tipo fica na bolinha + traço lateral) */
+#tab-produtos .pro-dimp-agenda .pro-dimp-col-tipo .pro-dimp-badge{color:var(--t2);background:color-mix(in srgb,var(--t2) 11%,transparent);border:1px solid var(--border)}
+@media(min-width:641px){
+  #tab-produtos .pro-dimp-agenda .pro-dimp-head{display:grid;grid-template-columns:16px minmax(60px,1fr) 120px 100px 196px;align-items:center;gap:10px}
+}
+@media(max-width:640px){
+  #tab-produtos .pro-dimp-agenda .pro-dimp-head{flex-wrap:wrap}
+  #tab-produtos .pro-dimp-titlewrap{flex:1 1 100%}
+}
+#tab-produtos .pro-dimp-ano-nav{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+#tab-produtos .pro-dimp-ano-titulo{flex:1;text-align:center;font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-size:32px;font-weight:800;color:var(--text);letter-spacing:.5px;line-height:1}
+#tab-produtos .pro-dimp-ano-grid{display:flex;flex-direction:column;gap:8px}
+#tab-produtos .pro-dimp-ano-row{display:flex;align-items:stretch;gap:12px;padding:10px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;transition:border-color .15s}
+#tab-produtos .pro-dimp-ano-row.passou{opacity:.5}
+#tab-produtos .pro-dimp-ano-row.atual{border-color:color-mix(in srgb,#06b6d4 45%,var(--border));background:color-mix(in srgb,#06b6d4 5%,var(--bg2))}
+#tab-produtos .pro-dimp-ano-mes{flex-shrink:0;width:120px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;background:transparent;border:none;border-right:1px solid var(--border);padding:4px 12px 4px 6px;cursor:pointer;text-align:left}
+#tab-produtos .pro-dimp-ano-mes-nome{font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.5px;transition:color .15s}
+#tab-produtos .pro-dimp-ano-mes:hover .pro-dimp-ano-mes-nome{color:#06b6d4}
+#tab-produtos .pro-dimp-ano-mes-count{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;color:var(--t2)}
+#tab-produtos .pro-dimp-ano-pills{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:6px;align-content:center}
+#tab-produtos .pro-dimp-ano-pill{display:inline-flex;align-items:center;gap:5px;max-width:240px;padding:4px 10px;border-radius:999px;cursor:pointer;font-size:12px;font-weight:600;color:var(--c,#06b6d4);background:color-mix(in srgb,var(--c,#06b6d4) 12%,transparent);border:1px solid color-mix(in srgb,var(--c,#06b6d4) 32%,var(--border));transition:all .15s}
+#tab-produtos .pro-dimp-ano-pill:hover{background:color-mix(in srgb,var(--c,#06b6d4) 22%,transparent)}
+#tab-produtos .pro-dimp-ano-pill.previsto{border-style:dashed}
+#tab-produtos .pro-dimp-ano-pill .d{font-family:'JetBrains Mono','SF Mono',monospace;font-size:10.5px;font-weight:700;opacity:.85;flex-shrink:0}
+#tab-produtos .pro-dimp-ano-pill .i{flex-shrink:0}
+#tab-produtos .pro-dimp-ano-pill .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+#tab-produtos .pro-dimp-ano-pill-esc{font-weight:700;color:var(--c,#06b6d4)}
+#tab-produtos .pro-dimp-ano-vazio{align-self:center;font-size:12.5px;color:var(--t2);font-style:italic}
+#tab-produtos .pro-dimp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 16px;color:var(--t2)}
+#tab-produtos .pro-dimp-empty-ico{font-size:46px;margin-bottom:10px;opacity:.7}
+#tab-produtos .pro-dimp-empty p{margin:0;font-size:14px}
+/* ── Refino Apple-like / tecnológico da página de Datas ── */
+#tab-produtos .pro-dimp-page{background:radial-gradient(90% 260px at 50% -60px,color-mix(in srgb,#06b6d4 13%,transparent),transparent 72%)}
+#tab-produtos .pro-dimp-page-title{font-size:27px;letter-spacing:-.6px}
+#tab-produtos .pro-dimp-entry{border-radius:16px}
+#tab-produtos .pro-dimp-viewswitch{gap:2px;padding:4px;border-radius:13px;background:color-mix(in srgb,var(--bg3) 82%,transparent);border:1px solid color-mix(in srgb,var(--border) 80%,transparent);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%)}
+#tab-produtos .pro-dimp-viewbtn{border-radius:10px;transition:all .22s cubic-bezier(.2,.7,.2,1)}
+#tab-produtos .pro-dimp-viewbtn.on{background:var(--bg2);color:#06b6d4;box-shadow:0 1px 1px rgba(0,0,0,.2),0 6px 16px -9px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.06)}
+#tab-produtos .pro-dimp-page-filtros .pro-dimp-filtros-btn{border-radius:13px;backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%)}
+.pro-dimp-cal.inline{border-color:color-mix(in srgb,var(--border) 70%,transparent);border-radius:18px;background:color-mix(in srgb,var(--bg2) 72%,transparent);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 18px 50px -30px rgba(0,0,0,.6)}
+.pro-dimp-cal.inline .pro-dimp-cal-nav{background:transparent;border-bottom-color:color-mix(in srgb,var(--border) 55%,transparent)}
+.pro-dimp-cal.inline .pro-dimp-cal-mes{font-size:17px;letter-spacing:-.3px}
+.pro-dimp-cal.inline .pro-dimp-cal-nav-btn{width:34px;height:34px;border-radius:999px;background:color-mix(in srgb,var(--bg3) 70%,transparent);border-color:color-mix(in srgb,var(--border) 65%,transparent);transition:all .18s}
+.pro-dimp-cal.inline .pro-dimp-cal-nav-btn:hover{transform:translateY(-1px);color:#06b6d4;box-shadow:0 4px 12px -6px rgba(0,0,0,.5)}
+.pro-dimp-cal.inline .pro-dimp-cal-hoje{border-radius:999px}
+.pro-dimp-cal.inline .pro-dimp-cal-wd{font-size:10px;letter-spacing:1.4px;opacity:.75}
+.pro-dimp-cal.inline .pro-dimp-cal-grid{gap:8px}
+.pro-dimp-cal.inline .pro-dimp-cal-cell{border-radius:14px;border-color:color-mix(in srgb,var(--border) 50%,transparent);background:color-mix(in srgb,var(--bg) 50%,transparent);transition:background .18s,border-color .18s}
+.pro-dimp-cal.inline .pro-dimp-cal-cell:hover{background:color-mix(in srgb,var(--bg3) 55%,transparent);border-color:color-mix(in srgb,#06b6d4 22%,var(--border))}
+.pro-dimp-cal.inline .pro-dimp-cal-cell.today{border-color:color-mix(in srgb,#06b6d4 28%,var(--border));background:color-mix(in srgb,#06b6d4 6%,transparent);box-shadow:none}
+.pro-dimp-cal.inline .pro-dimp-cal-cell.today .pro-dimp-cal-day{color:#fff;background:#06b6d4;border-radius:999px;min-width:23px;height:23px;display:inline-flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 10px -2px color-mix(in srgb,#06b6d4 70%,transparent)}
+.pro-dimp-cal.inline .pro-dimp-cal-chip:not(.previsto){border:none;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c,#06b6d4) 22%,transparent)}
+.pro-dimp-cal.inline .pro-dimp-cal-chip{transition:all .15s}
+.pro-dimp-cal.inline .pro-dimp-cal-chip:hover{background:color-mix(in srgb,var(--c,#06b6d4) 26%,transparent);transform:translateY(-1px)}
+#tab-produtos .pro-dimp-agenda .pro-dimp-card{border-radius:14px;transition:transform .18s,border-color .18s,box-shadow .18s}
+#tab-produtos .pro-dimp-agenda .pro-dimp-card:hover{transform:translateY(-1px);box-shadow:0 12px 28px -18px rgba(0,0,0,.65)}
+#tab-produtos .pro-dimp-ano-row{border-radius:14px;background:color-mix(in srgb,var(--bg2) 72%,transparent);backdrop-filter:blur(8px) saturate(150%);-webkit-backdrop-filter:blur(8px) saturate(150%);transition:border-color .15s,transform .15s}
+#tab-produtos .pro-dimp-ano-row{cursor:pointer}
+#tab-produtos .pro-dimp-ano-row:hover{border-color:color-mix(in srgb,#06b6d4 22%,var(--border))}
+#tab-produtos .pro-dimp-ano-row:hover .pro-dimp-ano-mes-nome{color:#06b6d4}
+#tab-produtos .pro-dimp-ano-row:focus-visible{outline:2px solid #06b6d4;outline-offset:2px}
+#tab-produtos .pro-dimp-ano-pill{transition:all .15s}
+#tab-produtos .pro-dimp-ano-pill:hover{transform:translateY(-1px)}
+.pro-dimp-evpop-portal .pro-dimp-cal-evpop{border-radius:20px;box-shadow:0 32px 80px -28px rgba(0,0,0,.7),0 0 0 1px color-mix(in srgb,#06b6d4 18%,transparent)}
+.pro-dimp-evpop-portal .pro-dimp-cal-evpop-backdrop{backdrop-filter:blur(8px) saturate(120%);-webkit-backdrop-filter:blur(8px) saturate(120%)}
+.pro-dimp-evpop-portal{position:fixed;inset:0;z-index:200}
+/* Ao re-renderizar o overlay com o modal já aberto, não re-anima (evita o "piscar") */
+#pro-dimp-overlays.pro-dimp-no-anim .pro-editais-modal-backdrop{animation:none}
+/* ── Bolinha neon do evento (substitui ícone) + dropdowns do form + botão Cadastrar ── */
+.pro-dimp-dot{display:inline-block;width:8px;height:8px;border-radius:999px;background:var(--c,#06b6d4);box-shadow:0 0 0 2px color-mix(in srgb,var(--c,#06b6d4) 20%,transparent),0 0 7px color-mix(in srgb,var(--c,#06b6d4) 85%,transparent),0 0 2px var(--c,#06b6d4);flex-shrink:0}
+.pro-dimp-cal.inline .pro-dimp-cal-chip .pro-dimp-dot{margin-top:3px}
+/* Filtrar logo abaixo do switcher Agenda/Mês/Ano */
+#tab-produtos .pro-dimp-page-controls{flex-direction:column;align-items:flex-start;gap:10px}
+#tab-produtos .pro-dimp-page-filtros{width:100%}
+/* Painel de filtro: Status | Escopo | Tipo lado a lado na mesma linha */
+#tab-produtos .pro-dimp-page .pro-dimp-filtros-panel-body{flex-direction:row;flex-wrap:wrap;align-items:flex-start;gap:10px 18px}
+#tab-produtos .pro-dimp-page .pro-dimp-filtros-panel-body>div{margin:0!important;overflow:visible}
+/* Chips multi-seleção dos filtros (Tipo · Escopo · Status) */
+#tab-produtos .pro-dimp-fbar{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+#tab-produtos .pro-dimp-fbar-label{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--t2);text-transform:uppercase;flex-shrink:0;padding-top:6px}
+#tab-produtos .pro-dimp-fbar-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#tab-produtos .pro-dimp-fchip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;border:1px solid var(--border);background:var(--bg2);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+#tab-produtos .pro-dimp-fchip:hover{border-color:color-mix(in srgb,var(--c,var(--accent)) 40%,var(--border));color:var(--text)}
+#tab-produtos .pro-dimp-fchip.on{border-color:var(--c,var(--accent));background:color-mix(in srgb,var(--c,var(--accent)) 16%,var(--bg2));color:var(--c,var(--accent))}
+#tab-produtos .pro-dimp-fchip .pro-dimp-dot{width:7px;height:7px}
+/* Botão "Cadastrar evento" — dark glass destacado */
+#tab-produtos .pro-dimp-cadastrar-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:13px;font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.1px;cursor:pointer;color:#fff;border:1px solid color-mix(in srgb,#06b6d4 55%,var(--border));background:linear-gradient(180deg,color-mix(in srgb,#06b6d4 30%,var(--bg2)),color-mix(in srgb,#06b6d4 14%,var(--bg2)));backdrop-filter:blur(16px) saturate(170%);-webkit-backdrop-filter:blur(16px) saturate(170%);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 8px 24px -10px color-mix(in srgb,#06b6d4 70%,transparent);transition:all .18s cubic-bezier(.2,.7,.2,1)}
+#tab-produtos .pro-dimp-cadastrar-btn:hover{transform:translateY(-1px);border-color:#06b6d4;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 12px 30px -10px color-mix(in srgb,#06b6d4 85%,transparent)}
+#tab-produtos .pro-dimp-cadastrar-btn:active{transform:translateY(0)}
+/* Linha de form (select + botões) no modal de cadastro */
+.pro-dimp-form-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pro-dimp-form-select{flex:1;min-width:160px}
+.pro-dimp-form-addbtn{flex-shrink:0;background:transparent;border:1px dashed var(--border);color:var(--t2);font-size:13px;font-weight:600;padding:8px 12px;border-radius:10px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.pro-dimp-form-addbtn:hover{border-color:color-mix(in srgb,#06b6d4 40%,var(--border));color:#06b6d4;background:color-mix(in srgb,#06b6d4 6%,transparent)}
+/* Visão Ano — dropdown "Meses passados" */
+#tab-produtos .pro-dimp-ano-passados{margin-top:10px;border:1px solid var(--border);border-radius:14px;background:color-mix(in srgb,var(--bg2) 60%,transparent);overflow:hidden}
+#tab-produtos .pro-dimp-ano-passados>summary{list-style:none;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t2);transition:color .15s}
+#tab-produtos .pro-dimp-ano-passados>summary::-webkit-details-marker{display:none}
+#tab-produtos .pro-dimp-ano-passados>summary:hover{color:var(--text)}
+#tab-produtos .pro-dimp-ano-passados[open]>summary{border-bottom:1px solid var(--border)}
+#tab-produtos .pro-dimp-ano-passados-count{font-size:10.5px;color:var(--t2);background:color-mix(in srgb,var(--t2) 12%,transparent);border:1px solid var(--border);padding:1px 8px;border-radius:999px}
+#tab-produtos .pro-dimp-ano-passados .pro-dimp-ano-grid{padding:10px}
+.pro-dimp-evpop-portal .pro-dimp-cal-evpop-backdrop{position:absolute;inset:0}
+@media (max-width:640px){
+  #tab-produtos .pro-dimp-page-controls{flex-direction:column;align-items:stretch}
+  #tab-produtos .pro-dimp-viewswitch{width:100%;justify-content:space-between}
+  #tab-produtos .pro-dimp-viewbtn{flex:1;text-align:center;padding:8px 6px}
+  #tab-produtos .pro-dimp-ano-row{flex-direction:column;gap:8px}
+  #tab-produtos .pro-dimp-ano-mes{width:100%;flex-direction:row;align-items:center;gap:8px;border-right:none;border-bottom:1px solid var(--border);padding:0 0 6px}
+  #tab-produtos .pro-dimp-ano-pill{max-width:100%}
 }
 
 #tab-produtos .pro-jornada-hint{font-size:12.5px;color:var(--t2);line-height:1.5;margin:0 0 14px;font-style:italic}
@@ -33971,9 +34139,9 @@ S._datasImpNovoTipoForm=null; // {nome,icone,cor} ou null
 S._datasImpGerenciarTiposOpen=false;
 // Escopos (classificação por audiência/track — TEA, TSA, MEs, Outros, etc)
 // Single-select por evento; eventos sem escopo viram "Sem escopo".
-S._datasImpFiltroEscopo='todos'; // 'todos' | <escopoId> | 'sem-escopo'
-S._datasImpFiltroStatus='todos'; // 'todos' | 'confirmados' | 'previstos'
-S._datasImpFiltroTipo='todos'; // 'todos' | <tipoId>
+S._datasImpFiltroEscopo=[]; // multi-seleção: array de <escopoId> + 'sem-escopo' (vazio = todos)
+S._datasImpFiltroStatus=[]; // multi-seleção: array de 'confirmados'|'previstos' (vazio = todos)
+S._datasImpFiltroTipo=[]; // multi-seleção: array de <tipoId> (vazio = todos)
 S._datasImpFiltrosOpen=false; // dropdown "🔍 Filtrar" começa colapsado
 S._datasImpGerenciarEscoposOpen=false;
 S._datasImpNovoEscopoForm=null; // {nome:''} ou null
@@ -33983,6 +34151,8 @@ S._datasImpCalOpen=false;
 S._datasImpCalMes=null; // 'YYYY-MM' (default = mês atual quando abre)
 // Popup de detalhe sobre o calendário (id do evento OU null)
 S._datasImpCalEventPopup=null;
+// Página dedicada de Datas Importantes — visão ativa: 'mes' | 'agenda' | 'ano' (padrão mês, uso interno coord)
+S._datasImpVisualizacao='mes';
 // Aprovações — provas + resultados da vertical atual (read-only no catálogo)
 S.aprovacoes={provas:[],resultados:[],loaded:false};
 S._aprovacoesOpen=false;
@@ -34444,7 +34614,7 @@ function _proRebindVerticalListeners(){
     S.datasImp.updatedAt=d.updatedAt||null;
     S.datasImp.updatedBy=String(d.updatedBy||'');
     S.datasImp.loaded=true;
-    if(S.produtosLoaded&&S.produtosView==='list'&&!S._datasImpModalOpen)_proDatasImpRefresh();
+    if(S.produtosLoaded&&(S.produtosView==='list'||S.produtosView==='datas')&&!S._datasImpModalOpen)_proDatasImpRefresh();
   },err=>{console.warn('datasImportantes onSnapshot:',err);S.datasImp.loaded=true;});
   // dexPrompt
   _proDexCfgUnsub=onSnapshot(doc(db,'config',_verticalDocId('dexPrompt')),snap=>{
@@ -34556,6 +34726,7 @@ function _proRender(){
   if(!S.produtosLoaded){root.innerHTML='<div class="ld" style="padding:24px"><div class="sp"></div> Carregando catálogo...</div>';return;}
   if(S.produtosView==='detail')return _proRenderDetail(root);
   if(S.produtosView==='edit'||S.produtosView==='new')return _proRenderEdit(root);
+  if(S.produtosView==='datas')return _proRenderDatas(root);
   return _proRenderList(root);
 }
 
@@ -34606,9 +34777,9 @@ window.proSelectVertical=(id)=>{
   S._datasImpCalOpen=false;
   S._datasImpCalMes=null;
   S._datasImpCalEventPopup=null;
-  S._datasImpFiltroEscopo='todos';
-  S._datasImpFiltroStatus='todos';
-  S._datasImpFiltroTipo='todos';
+  S._datasImpFiltroEscopo=[];
+  S._datasImpFiltroStatus=[];
+  S._datasImpFiltroTipo=[];
   S._datasImpFiltrosOpen=false;
   S._datasImpGerenciarEscoposOpen=false;
   S._datasImpNovoEscopoForm=null;
@@ -34640,9 +34811,9 @@ window.proVoltarVerticais=()=>{
   S._datasImpCalOpen=false;
   S._datasImpCalMes=null;
   S._datasImpCalEventPopup=null;
-  S._datasImpFiltroEscopo='todos';
-  S._datasImpFiltroStatus='todos';
-  S._datasImpFiltroTipo='todos';
+  S._datasImpFiltroEscopo=[];
+  S._datasImpFiltroStatus=[];
+  S._datasImpFiltroTipo=[];
   S._datasImpFiltrosOpen=false;
   S._datasImpGerenciarEscoposOpen=false;
   S._datasImpNovoEscopoForm=null;
@@ -34718,8 +34889,8 @@ function _proRenderList(root){
     <div id="pro-jornada-wrap">${_proJornadaHTML()}</div>
     <div id="pro-dores-wrap">${_proDoresHTML()}</div>
     <div id="pro-editais-wrap">${_proEditaisHTML()}</div>
-    <div id="pro-datas-imp-wrap">${_proDatasImpHTML()}</div>
     <div id="pro-aprovacoes-wrap">${_proAprovacoesHTML()}</div>
+    <div id="pro-datas-imp-wrap">${_proDatasImpHTML()}</div>
     ${listHtml}
   `;
   _proDexRender();
@@ -35442,7 +35613,9 @@ const PRO_DIMP_TIPOS_SYSTEM=[
 // passa por _proDimpTiposAll que mescla system + custom carregados do Firestore).
 const PRO_DIMP_TIPOS=PRO_DIMP_TIPOS_SYSTEM.map(t=>({id:t.id,label:t.nome,ico:t.icone,cor:t.cor}));
 // Paleta fixa de cores oferecidas no formulário de novo tipo
-const PRO_DIMP_CORES_PALETA=['#ef4444','#f97316','#eab308','#16a34a','#06b6d4','#2563eb','#a855f7','#ec4899'];
+const PRO_DIMP_CORES_PALETA=['#ef4444','#f43f5e','#ec4899','#d946ef','#a855f7','#8b5cf6','#6366f1','#3b82f6','#0ea5e9','#06b6d4','#14b8a6','#10b981','#22c55e','#84cc16','#eab308','#f59e0b','#f97316','#fb7185'];
+// Paleta de escopos — hues bem espalhados pra ficarem visualmente distintos entre si.
+const PRO_DIMP_ESCOPO_CORES=['#06b6d4','#a855f7','#22c55e','#f59e0b','#ec4899','#3b82f6','#ef4444','#14b8a6','#8b5cf6','#84cc16','#f97316','#0ea5e9'];
 
 // Retorna a lista combinada (system - tombstones, com overrides aplicados, + custom).
 // Overrides: entry em `lista` com mesmo id de um system substitui nome/icone/cor mas mantém system:true.
@@ -35463,7 +35636,8 @@ function _proDimpTiposAll(){
       if(!ov)return t;
       return {id:t.id,nome:String(ov.nome||t.nome),icone:String(ov.icone||t.icone),cor:String(ov.cor||t.cor),system:true};
     });
-  return [...systemFinais,...customs];
+  // Ordem alfabética (afeta cadastro, filtro e gerenciar de forma consistente)
+  return [...systemFinais,...customs].sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR',{sensitivity:'base'}));
 }
 function _proDimpTipoMeta(tid){
   const all=_proDimpTiposAll();
@@ -35496,7 +35670,7 @@ function _ensureDatasImpTiposListener(){
     S.datasImpTipos.loaded=true;
     // Re-render sempre que tipos mudarem (chips do modal de evento, modal de gerenciar tipos,
     // ícones/cores dos cards na lista, e chips do calendário todos dependem disso)
-    if(S.produtosLoaded&&S.produtosView==='list')_proDatasImpRefresh();
+    if(S.produtosLoaded&&(S.produtosView==='list'||S.produtosView==='datas'))_proDatasImpRefresh();
   },err=>{console.warn('datasImportantesTipos onSnapshot:',err);S.datasImpTipos.loaded=true;});
 }
 function _proDimpHoje(){return new Date().toISOString().slice(0,10);}
@@ -35528,139 +35702,340 @@ function _proDimpEscopoMeta(eid){
   const hit=lista.find(x=>x&&x.id===id);
   return hit||null;
 }
+// Escopos em ordem alfabética (cópia) — usado no filtro, cadastro e gerenciamento.
+function _proDimpEscoposOrd(){
+  const lista=Array.isArray(S.datasImp&&S.datasImp.escopos)?S.datasImp.escopos:[];
+  return lista.slice().sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR',{sensitivity:'base'}));
+}
+// Cor distinta por escopo — derivada da posição na lista alfabética (paleta de tipos).
+function _proDimpEscopoCor(escId){
+  const id=String(escId||'');
+  if(!id)return '';
+  const idx=_proDimpEscoposOrd().findIndex(x=>x&&x.id===id);
+  return idx<0?'':PRO_DIMP_ESCOPO_CORES[idx%PRO_DIMP_ESCOPO_CORES.length];
+}
 // Aplica os filtros vigentes (escopo + status + tipo) a uma lista de eventos.
 // Eventos antigos sem `confirmado` são tratados como confirmados (default true).
 function _proDimpAplicaFiltros(arr){
-  const fe=String(S._datasImpFiltroEscopo||'todos');
-  const fs=String(S._datasImpFiltroStatus||'todos');
-  const ft=String(S._datasImpFiltroTipo||'todos');
+  // Filtros são multi-seleção (arrays). Array vazio numa dimensão = sem filtro nela.
+  const fe=Array.isArray(S._datasImpFiltroEscopo)?S._datasImpFiltroEscopo:[];
+  const fs=Array.isArray(S._datasImpFiltroStatus)?S._datasImpFiltroStatus:[];
+  const ft=Array.isArray(S._datasImpFiltroTipo)?S._datasImpFiltroTipo:[];
   let out=arr;
-  if(fe!=='todos'){
-    if(fe==='sem-escopo')out=out.filter(e=>!e||!e.escopoId);
-    else out=out.filter(e=>e&&String(e.escopoId||'')===fe);
+  if(fe.length){
+    out=out.filter(e=>{
+      if(!e)return false;
+      const eid=String(e.escopoId||'');
+      return eid?fe.includes(eid):fe.includes('sem-escopo');
+    });
   }
-  if(fs!=='todos'){
-    if(fs==='previstos')out=out.filter(e=>e&&e.confirmado===false);
-    else if(fs==='confirmados')out=out.filter(e=>!e||e.confirmado!==false);
+  if(fs.length){
+    const wantConf=fs.includes('confirmados'),wantPrev=fs.includes('previstos');
+    if(wantConf&&!wantPrev)out=out.filter(e=>!e||e.confirmado!==false);
+    else if(wantPrev&&!wantConf)out=out.filter(e=>e&&e.confirmado===false);
+    // ambos = sem filtro
   }
-  if(ft!=='todos'){
-    out=out.filter(e=>e&&String(e.tipo||'')===ft);
+  if(ft.length){
+    out=out.filter(e=>e&&ft.includes(String(e.tipo||'')));
   }
   return out;
 }
 // Alias retrocompatível — não usar em código novo.
 function _proDimpAplicaFiltroEscopo(arr){return _proDimpAplicaFiltros(arr);}
 
+// ───── Datas Importantes: card de entrada na lista → abre página dedicada ─────
 function _proDatasImpHTML(){
-  const canEdit=_proCanEdit();
-  const open=!!S._datasImpOpen;
   const loaded=!!S.datasImp.loaded;
   const listaRaw=Array.isArray(S.datasImp.lista)?S.datasImp.lista:[];
-  const lista=_proDimpAplicaFiltros(listaRaw);
-  const ord=lista.slice().sort((a,b)=>_proDimpOrdKey(a).localeCompare(_proDimpOrdKey(b)));
-  const futuras=ord.filter(e=>!_proDimpPassou(e));
-  const passadas=ord.filter(e=>_proDimpPassou(e));
-  let bodyHtml;
-  if(!loaded){
-    bodyHtml=`<p style="color:var(--t2);font-style:italic;margin:0">Carregando…</p>`;
-  }else{
-    const cadastrarBtn=canEdit?`<button class="btn btn-p btn-sm" type="button" onclick="proDatasImpAbrirNovo()">＋ Cadastrar evento</button>`:'';
-    const calendarioBtn=`<button class="btn btn-s btn-sm" type="button" onclick="proDatasImpAbrirCalendario()" title="Ver eventos no calendário">📅 Ver calendário</button>`;
-    const toolbar=(canEdit||listaRaw.length)?`<div class="pro-dimp-toolbar">${cadastrarBtn}${calendarioBtn}</div>`:'';
-    const filtrosWrap=_proDatasImpFiltrosWrapHTML(canEdit);
-    let listaHtml='';
-    if(!listaRaw.length){
-      listaHtml=`<p style="color:var(--t2);font-style:italic;margin:0">Nenhum evento cadastrado ainda.${canEdit?' Clique em "Cadastrar evento" pra começar.':''}</p>`;
-    }else if(!futuras.length&&!passadas.length){
-      listaHtml=`<p style="color:var(--t2);font-style:italic;margin:0">Nenhum evento corresponde aos filtros atuais (status/tipo/escopo). Troque algum filtro pra ver outros.</p>`;
-    }else{
-      const futurasHtml=futuras.length?futuras.map(e=>_proDatasImpItemHTML(e,canEdit,false)).join(''):
-        `<p style="color:var(--t2);font-style:italic;margin:0">Nenhum evento futuro. ${passadas.length?'Veja os passados abaixo.':''}</p>`;
-      const verPassadosBtn=passadas.length?
-        `<button class="pro-dimp-ver-passados" type="button" onclick="proDatasImpToggleVerPassados()">${S._datasImpVerPassados?'▴ Ocultar passados':`▾ Ver passados (${passadas.length})`}</button>`:'';
-      const passadasHtml=(S._datasImpVerPassados&&passadas.length)?
-        `<div class="pro-editais-lista" style="margin-top:10px">${passadas.map(e=>_proDatasImpItemHTML(e,canEdit,true)).join('')}</div>`:'';
-      listaHtml=`<div class="pro-editais-lista">${futurasHtml}</div>${verPassadosBtn}${passadasHtml}`;
-    }
-    bodyHtml=`${toolbar}${filtrosWrap}${listaHtml}`;
-  }
-  const updMeta=S.datasImp.updatedAt?`<span class="pro-jornada-meta">Atualizado em ${_proEsc(_proFmtDateShort(S.datasImp.updatedAt))}</span>`:'';
+  const futuras=listaRaw.filter(e=>e&&!_proDimpPassou(e)).sort((a,b)=>_proDimpOrdKey(a).localeCompare(_proDimpOrdKey(b)));
+  const prox=futuras[0]||null;
+  let sub;
+  if(!loaded)sub='Carregando…';
+  else if(prox){
+    const meta=_proDimpTipoMeta(prox.tipo);
+    const dataTxt=prox.modo==='periodo'?_proDimpFmtDataCurta(prox.dataInicioISO):_proDimpFmtDataCurta(prox.dataISO);
+    const tit=String(prox.titulo||'').trim()||'(sem título)';
+    sub=`Próximo: ${_proEsc(tit)} · ${_proEsc(dataTxt)}`;
+  }else sub=listaRaw.length?'Toque para ver o histórico de eventos':'Nenhum evento cadastrado ainda';
+  const countBadge=(loaded&&futuras.length)?`<span class="pro-dimp-entry-count">${futuras.length}</span>`:'';
+  return `<div class="pro-dimp-entry" role="button" tabindex="0" onclick="proDatasImpAbrirPagina()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proDatasImpAbrirPagina()}" aria-label="Abrir Datas importantes">
+    <span class="pro-dimp-entry-ico">📆</span>
+    <div class="pro-dimp-entry-main">
+      <div class="pro-dimp-entry-title">Datas importantes${countBadge}</div>
+      <div class="pro-dimp-entry-sub">${sub}</div>
+    </div>
+    <span class="pro-dimp-entry-arrow">→</span>
+  </div>`;
+}
+
+// ───── Página dedicada de Datas Importantes (view 'datas') ─────
+function _proDimpViewStorageKey(){return 'aros.datasImp.view.'+(S.verticalAtual||'anestreview');}
+function _proDimpView(){
+  // Duas visões: 'mes' (calendário) e 'agenda' (lista por mês, rotulada "Ano"). Legado 'ano' → agenda.
+  const v=S._datasImpVisualizacao;
+  return (v==='mes')?'mes':'agenda';
+}
+window.proDatasImpAbrirPagina=()=>{
+  S._datasImpCalMes=S._datasImpCalMes||_proDimpMesAtual();
+  try{const saved=localStorage.getItem(_proDimpViewStorageKey());if(saved==='mes'||saved==='agenda'||saved==='ano')S._datasImpVisualizacao=saved;}catch(e){}
+  S.produtosView='datas';
+  _proRender();
+  try{const t=document.getElementById('tab-produtos');if(t)t.scrollIntoView({block:'start'});}catch(e){}
+};
+window.proDatasImpVoltarCatalogo=()=>{
+  S._datasImpModalOpen=false;S._datasImpEditando=null;S._datasImpCalEventPopup=null;
+  S._datasImpGerenciarTiposOpen=false;S._datasImpGerenciarEscoposOpen=false;
+  document.querySelectorAll('body > .pro-dimp-evpop-portal').forEach(n=>n.remove());
+  S.produtosView='list';
+  _proRender();
+};
+window.proDatasImpSetView=(v)=>{
+  if(v!=='mes'&&v!=='agenda')return;
+  S._datasImpVisualizacao=v;
+  try{localStorage.setItem(_proDimpViewStorageKey(),v);}catch(e){}
+  _proDatasImpRefresh();
+};
+window.proDatasImpAgendaToggleAll=()=>{
+  S._datasImpAgendaExpandAll=(S._datasImpAgendaExpandAll===true)?false:true;
+  _proDatasImpRefresh();
+};
+window.proDatasImpCalNavAno=(delta)=>{
+  S._datasImpCalMes=_proDimpAddMes(S._datasImpCalMes||_proDimpMesAtual(),delta*12);
+  _proDatasImpRefresh();
+};
+window.proDatasImpAbrirMesDoAno=(ym)=>{
+  S._datasImpCalMes=String(ym||_proDimpMesAtual());
+  S._datasImpVisualizacao='mes';
+  try{localStorage.setItem(_proDimpViewStorageKey(),'mes');}catch(e){}
+  _proDatasImpRefresh();
+};
+
+function _proRenderDatas(root){
+  // Modais ficam num container próprio (#pro-dimp-overlays) pra que interações dentro
+  // do modal NÃO re-renderizem a página/calendário (evita flicker e re-render a cada tecla).
+  root.innerHTML=`<div class="pro-dimp-page" id="pro-datas-imp-page">${_proDatasImpPageInnerHTML()}</div><div id="pro-dimp-overlays" data-open="0">${_proDimpOverlaysHTML()}</div>`;
+}
+function _proDimpOverlaysHTML(){
   const modalHtml=S._datasImpModalOpen?_proDatasImpModalHTML():'';
   const gerTiposHtml=S._datasImpGerenciarTiposOpen?_proDatasImpGerenciarTiposHTML():'';
   const gerEscoposHtml=S._datasImpGerenciarEscoposOpen?_proDatasImpGerenciarEscoposHTML():'';
-  const calHtml=S._datasImpCalOpen?_proDatasImpCalendarioHTML():'';
-  return `<div class="pro-jornada-disc${open?' open':''}" data-datas-imp-disc>
-    <div class="pro-jornada-head" role="button" tabindex="0" onclick="proToggleDatasImp()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proToggleDatasImp()}" aria-expanded="${open}">
-      <span class="pro-jornada-title"><span class="pro-jornada-ico">📆</span> Datas importantes</span>
-      ${updMeta}
-      <span class="pro-jornada-caret">▾</span>
-    </div>
-    <div class="pro-jornada-body">${bodyHtml}</div>
-  </div>${modalHtml}${gerTiposHtml}${gerEscoposHtml}${calHtml}`;
+  const evpopHtml=_proDatasImpCalEventPopupHTML();
+  return `${modalHtml}${gerTiposHtml}${gerEscoposHtml}${evpopHtml}`;
 }
 
-// Barra horizontal de chips de status (confirmado vs previsto). Sempre visível.
-function _proDatasImpFiltroStatusHTML(){
-  const f=String(S._datasImpFiltroStatus||'todos');
-  const opt=(v,lbl)=>`<option value="${v}"${f===v?' selected':''}>${_proEsc(lbl)}</option>`;
-  const opts=[opt('todos','Todos'),opt('confirmados','Confirmados'),opt('previstos','⚠️ Previstos')];
-  return `<div class="pro-dimp-tipo-bar">
-    <span class="pro-dimp-tipo-bar-label">Status:</span>
-    <select class="pro-dimp-tipo-select" onchange="proDatasImpSetFiltroStatus(this.value)">${opts.join('')}</select>
+function _proDatasImpPageInnerHTML(){
+  const canEdit=_proCanEdit();
+  const loaded=!!S.datasImp.loaded;
+  const vert=_verticalById(S.verticalAtual||'anestreview');
+  const view=_proDimpView();
+  const cadastrarBtn=canEdit?`<button class="pro-dimp-cadastrar-btn" type="button" onclick="proDatasImpAbrirNovo()">＋ Cadastrar evento</button>`:'';
+  const switchBtn=(v,lbl)=>`<button type="button" class="pro-dimp-viewbtn${view===v?' on':''}" onclick="proDatasImpSetView('${v}')">${lbl}</button>`;
+  const switcher=`<div class="pro-dimp-viewswitch" role="tablist">${switchBtn('mes','🗓️ Mês')}${switchBtn('agenda','📅 Ano')}</div>`;
+  const filtrosWrap=_proDatasImpFiltrosWrapHTML(canEdit);
+  let viewHtml;
+  if(!loaded)viewHtml='<p style="color:var(--t2);font-style:italic;margin:24px 4px">Carregando…</p>';
+  else if(view==='mes')viewHtml=_proDatasImpViewMesHTML();
+  else viewHtml=_proDatasImpViewAgendaHTML(canEdit);
+  return `<div class="pro-vert-breadcrumb" style="--vert-cor-atual:${vert.cor}">
+      <button class="pro-vert-breadcrumb-btn" type="button" onclick="proDatasImpVoltarCatalogo()" title="Voltar ao catálogo">← ${vert.ico} ${_proEsc(vert.nome)}</button>
+      <span>/</span>
+      <span class="pro-vert-breadcrumb-atual">📆 Datas importantes</span>
+    </div>
+    <div class="pro-dimp-page-head">
+      <div class="pro-dimp-page-head-l">
+        <h3 class="pro-dimp-page-title">📆 Datas importantes</h3>
+        <p class="pro-dimp-page-sub">${_proEsc(String(vert.tag||vert.nome||'').toUpperCase())}</p>
+      </div>
+      <div class="pro-dimp-page-tools">${cadastrarBtn}</div>
+    </div>
+    <div class="pro-dimp-page-controls">
+      ${switcher}
+      <div class="pro-dimp-page-filtros">${filtrosWrap}</div>
+    </div>
+    <div class="pro-dimp-view">${viewHtml}</div>`;
+}
+
+function _proDimpEmptyHTML(canEdit){
+  const btn=canEdit?`<button class="btn btn-p btn-sm" type="button" onclick="proDatasImpAbrirNovo()" style="margin-top:14px">＋ Cadastrar primeiro evento</button>`:'';
+  return `<div class="pro-dimp-empty"><div class="pro-dimp-empty-ico">📆</div><p>Nenhum evento cadastrado ainda.</p>${btn}</div>`;
+}
+
+// ── Visão MÊS (calendário em grade, inline na página) ──
+function _proDatasImpViewMesHTML(){
+  const ym=S._datasImpCalMes||_proDimpMesAtual();
+  const [y,m]=ym.split('-').map(Number);
+  const mesNome=new Date(y,m-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const cellsHtml=_proDimpCalendarioRender();
+  const weekdays=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const wdHtml=weekdays.map(w=>`<div class="pro-dimp-cal-wd">${w}</div>`).join('');
+  return `<div class="pro-dimp-cal inline">
+    <div class="pro-dimp-cal-nav">
+      <button class="pro-dimp-cal-nav-btn" type="button" onclick="proDatasImpCalNav(-1)" title="Mês anterior">←</button>
+      <div class="pro-dimp-cal-mes">${_proEsc(mesNome)}</div>
+      <button class="pro-dimp-cal-nav-btn" type="button" onclick="proDatasImpCalNav(1)" title="Próximo mês">→</button>
+      <button class="pro-dimp-cal-hoje" type="button" onclick="proDatasImpCalHoje()" title="Ir pro mês atual">Hoje</button>
+    </div>
+    <div class="pro-dimp-cal-grid-wrap">
+      <div class="pro-dimp-cal-weekdays">${wdHtml}</div>
+      <div class="pro-dimp-cal-grid">${cellsHtml}</div>
+    </div>
   </div>`;
 }
-window.proDatasImpSetFiltroStatus=(valor)=>{
-  const v=String(valor||'todos');
-  S._datasImpFiltroStatus=(v==='confirmados'||v==='previstos')?v:'todos';
+
+// ── Visão "ANO" (lista por ano: navegação de ano no topo + meses do ano em dropdowns) ──
+function _proDatasImpViewAgendaHTML(canEdit){
+  const listaRaw=Array.isArray(S.datasImp.lista)?S.datasImp.lista:[];
+  if(!listaRaw.length)return _proDimpEmptyHTML(canEdit);
+  const ym=S._datasImpCalMes||_proDimpMesAtual();
+  const ano=Number(ym.split('-')[0])||new Date().getFullYear();
+  const nav=`<div class="pro-dimp-ano-nav">
+    <button class="pro-dimp-cal-nav-btn" type="button" onclick="proDatasImpCalNavAno(-1)" title="Ano anterior">←</button>
+    <div class="pro-dimp-ano-titulo">${ano}</div>
+    <button class="pro-dimp-cal-nav-btn" type="button" onclick="proDatasImpCalNavAno(1)" title="Próximo ano">→</button>
+    <button class="pro-dimp-cal-hoje" type="button" onclick="proDatasImpCalHoje()" title="Ano atual">Hoje</button>
+  </div>`;
+  // Eventos só do ano selecionado, em ordem cronológica.
+  const lista=_proDimpAplicaFiltros(listaRaw).filter(e=>Number(_proDimpOrdKey(e).split('-')[0])===ano).sort((a,b)=>_proDimpOrdKey(a).localeCompare(_proDimpOrdKey(b)));
+  if(!lista.length){
+    const extra=_proDimpFiltrosAtivosCount()?' com os filtros atuais':'';
+    return `<div class="pro-dimp-agenda">${nav}<p style="color:var(--t2);font-style:italic;margin:18px 4px">Nenhum evento em ${ano}${extra}.</p></div>`;
+  }
+  // Agrupa por mês; cada mês é um dropdown. Mês atual abre por padrão; demais fechados.
+  const grupos=new Map();
+  lista.forEach(e=>{const k=_proDimpOrdKey(e).slice(0,7);if(!grupos.has(k))grupos.set(k,[]);grupos.get(k).push(e);});
+  const mesAtualKey=_proDimpMesAtual();
+  const exp=S._datasImpAgendaExpandAll;  // true=todos abertos · false=todos fechados · null=só o mês atual
+  const html=[...grupos.keys()].sort().map(k=>{
+    const evs=grupos.get(k);
+    const [yy,mm]=k.split('-').map(Number);
+    const mesNome=isNaN(yy)?'Sem data':new Date(yy,mm-1,1).toLocaleDateString('pt-BR',{month:'long'});
+    const open=(exp===true)?' open':(exp===false)?'':((k===mesAtualKey)?' open':'');
+    const cards=evs.map(e=>_proDatasImpItemHTML(e,canEdit,_proDimpPassou(e))).join('');
+    return `<details class="pro-dimp-agenda-disc"${open}>
+      <summary class="pro-dimp-agenda-summary">
+        <span class="pro-dimp-agenda-caret">▾</span>
+        <span class="pro-dimp-agenda-mes-nome">${_proEsc(mesNome)}</span>
+        <span class="pro-dimp-agenda-mes-count">${evs.length}</span>
+      </summary>
+      <div class="pro-editais-lista">${cards}</div>
+    </details>`;
+  }).join('');
+  const toolbar=grupos.size>1?`<div class="pro-dimp-agenda-toolbar"><button type="button" class="pro-dimp-expand-btn" onclick="proDatasImpAgendaToggleAll()">${exp===true?'⊟ Recolher todos':'⊞ Expandir todos'}</button></div>`:'';
+  return `<div class="pro-dimp-agenda">${nav}${toolbar}${html}</div>`;
+}
+
+// ── Visão ANO (12 meses, pílulas coloridas por evento) ──
+function _proDatasImpViewAnoHTML(){
+  const ym=S._datasImpCalMes||_proDimpMesAtual();
+  const ano=Number(ym.split('-')[0])||new Date().getFullYear();
+  const listaRaw=Array.isArray(S.datasImp.lista)?S.datasImp.lista:[];
+  const lista=_proDimpAplicaFiltros(listaRaw);
+  const porMes={};for(let i=1;i<=12;i++)porMes[i]=[];
+  lista.forEach(e=>{
+    const [yy,mm]=_proDimpOrdKey(e).split('-').map(Number);
+    if(yy===ano&&mm>=1&&mm<=12)porMes[mm].push(e);
+  });
+  const hoje=new Date();const mesAtual=hoje.getMonth()+1;const anoAtual=hoje.getFullYear();
+  const rowHTML=(mi)=>{
+    const nome=new Date(ano,mi-1,1).toLocaleDateString('pt-BR',{month:'long'});
+    const evs=porMes[mi].slice().sort((a,b)=>_proDimpOrdKey(a).localeCompare(_proDimpOrdKey(b)));
+    const isPast=(ano<anoAtual)||(ano===anoAtual&&mi<mesAtual);
+    const isNow=(ano===anoAtual&&mi===mesAtual);
+    const ymThis=`${ano}-${String(mi).padStart(2,'0')}`;
+    const pills=evs.map(e=>{
+      const meta=_proDimpTipoMeta(e.tipo);
+      const tit=String(e.titulo||'').trim()||'(sem título)';
+      const escMeta=_proDimpEscopoMeta(e.escopoId);
+      const escNome=escMeta?String(escMeta.nome||'').trim():'';
+      const prev=(e.confirmado===false)?' previsto':'';
+      const label=escNome?`${escNome} - ${tit}`:tit;
+      const inner=escNome?`<span class="pro-dimp-ano-pill-esc">${_proEsc(escNome)}</span> - ${_proEsc(tit)}`:_proEsc(tit);
+      return `<span class="pro-dimp-ano-pill${prev}" style="--c:${meta.cor}" title="${_proEscAttr(label)}" onclick="event.stopPropagation();proDatasImpCalAbrirPopupEvento('${_proEscAttr(e.id)}')"><span class="pro-dimp-dot"></span><span class="t">${inner}</span></span>`;
+    }).join('');
+    const conteudo=evs.length?`<div class="pro-dimp-ano-pills">${pills}</div>`:`<span class="pro-dimp-ano-vazio">Sem eventos</span>`;
+    return `<div class="pro-dimp-ano-row${isPast?' passou':''}${isNow?' atual':''}" role="button" tabindex="0" onclick="proDatasImpAbrirMesDoAno('${ymThis}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();proDatasImpAbrirMesDoAno('${ymThis}')}" title="Ver ${_proEsc(nome)} no calendário">
+      <div class="pro-dimp-ano-mes">
+        <span class="pro-dimp-ano-mes-nome">${_proEsc(nome)}</span>
+        <span class="pro-dimp-ano-mes-count">${evs.length||''}</span>
+      </div>
+      ${conteudo}
+    </div>`;
+  };
+  const ehPassado=(mi)=>(ano<anoAtual)||(ano===anoAtual&&mi<mesAtual);
+  const passadosMeses=[];const atuaisMeses=[];
+  for(let mi=1;mi<=12;mi++){(ehPassado(mi)?passadosMeses:atuaisMeses).push(mi);}
+  const atuaisHtml=atuaisMeses.map(rowHTML).join('');
+  const passadosHtml=passadosMeses.length
+    ?`<details class="pro-dimp-ano-passados">
+        <summary><span>▾ Meses passados</span><span class="pro-dimp-ano-passados-count">${passadosMeses.length}</span></summary>
+        <div class="pro-dimp-ano-grid" style="margin-top:8px">${passadosMeses.map(rowHTML).join('')}</div>
+      </details>`
+    :'';
+  return `<div class="pro-dimp-ano">
+    <div class="pro-dimp-ano-nav">
+      <button class="pro-dimp-cal-nav-btn" type="button" onclick="proDatasImpCalNavAno(-1)" title="Ano anterior">←</button>
+      <div class="pro-dimp-ano-titulo">${ano}</div>
+      <button class="pro-dimp-cal-nav-btn" type="button" onclick="proDatasImpCalNavAno(1)" title="Próximo ano">→</button>
+      <button class="pro-dimp-cal-hoje" type="button" onclick="proDatasImpCalHoje()" title="Ano atual">Hoje</button>
+    </div>
+    ${atuaisHtml?`<div class="pro-dimp-ano-grid">${atuaisHtml}</div>`:'<p style="color:var(--t2);font-style:italic;margin:8px 4px">Nenhum mês futuro neste ano.</p>'}
+    ${passadosHtml}
+  </div>`;
+}
+
+// Filtro de STATUS — chips multi-seleção (Confirmados / Previstos). Vazio = todos.
+function _proDatasImpFiltroStatusHTML(){
+  const arr=Array.isArray(S._datasImpFiltroStatus)?S._datasImpFiltroStatus:[];
+  const chip=(v,lbl)=>`<button type="button" class="pro-dimp-fchip${arr.includes(v)?' on':''}" onclick="proDatasImpToggleFiltroStatus('${v}')">${lbl}</button>`;
+  return `<div class="pro-dimp-fbar">
+    <span class="pro-dimp-fbar-label">Status:</span>
+    <div class="pro-dimp-fbar-chips">${chip('confirmados','Confirmados')}${chip('previstos','⚠️ Previstos')}</div>
+  </div>`;
+}
+window.proDatasImpToggleFiltroStatus=(v)=>{
+  if(v!=='confirmados'&&v!=='previstos')return;
+  const arr=Array.isArray(S._datasImpFiltroStatus)?S._datasImpFiltroStatus.slice():[];
+  const i=arr.indexOf(v);if(i>=0)arr.splice(i,1);else arr.push(v);
+  S._datasImpFiltroStatus=arr;
   _proDatasImpRefresh();
-  if(S._datasImpCalOpen&&typeof _proDatasImpCalRepaint==='function')_proDatasImpCalRepaint();
 };
 
-// Barra horizontal de chips por tipo de evento. Sempre visível (system tipos
-// existem por padrão). Chip ativo herda a cor do próprio tipo.
+// Filtro de TIPO — chips multi-seleção, cada um na cor do tipo. Vazio = todos.
 function _proDatasImpFiltroTipoHTML(){
   const tipos=_proDimpTiposAll();
-  const f=String(S._datasImpFiltroTipo||'todos');
-  const opts=[`<option value="todos"${f==='todos'?' selected':''}>Todos os tipos</option>`];
-  tipos.forEach(t=>{
-    const sel=f===t.id?' selected':'';
-    const nome=String(t.nome||'(sem nome)');
-    const ico=String(t.icone||'📌');
-    opts.push(`<option value="${_proEscAttr(t.id)}"${sel}>${_proEsc(ico)}  ${_proEsc(nome)}</option>`);
-  });
-  return `<div class="pro-dimp-tipo-bar">
-    <span class="pro-dimp-tipo-bar-label">Tipo:</span>
-    <select class="pro-dimp-tipo-select" onchange="proDatasImpSetFiltroTipo(this.value)">${opts.join('')}</select>
+  const arr=Array.isArray(S._datasImpFiltroTipo)?S._datasImpFiltroTipo:[];
+  const chips=tipos.map(t=>`<button type="button" class="pro-dimp-fchip${arr.includes(t.id)?' on':''}" style="--c:${t.cor}" onclick="proDatasImpToggleFiltroTipo('${_proEscAttr(t.id)}')"><span class="pro-dimp-dot"></span>${_proEsc(String(t.nome||'(sem nome)'))}</button>`).join('');
+  return `<div class="pro-dimp-fbar">
+    <span class="pro-dimp-fbar-label">Tipo:</span>
+    <div class="pro-dimp-fbar-chips">${chips}</div>
   </div>`;
 }
-window.proDatasImpSetFiltroTipo=(valor)=>{
-  S._datasImpFiltroTipo=String(valor||'todos');
+window.proDatasImpToggleFiltroTipo=(id)=>{
+  id=String(id||'');if(!id)return;
+  const arr=Array.isArray(S._datasImpFiltroTipo)?S._datasImpFiltroTipo.slice():[];
+  const i=arr.indexOf(id);if(i>=0)arr.splice(i,1);else arr.push(id);
+  S._datasImpFiltroTipo=arr;
   _proDatasImpRefresh();
-  if(S._datasImpCalOpen&&typeof _proDatasImpCalRepaint==='function')_proDatasImpCalRepaint();
 };
 
 // Botão pequeno "Limpar filtros" — aparece se algum dos 3 filtros está ativo.
 function _proDatasImpFiltrosClearHTML(){
-  const fe=String(S._datasImpFiltroEscopo||'todos');
-  const fs=String(S._datasImpFiltroStatus||'todos');
-  const ft=String(S._datasImpFiltroTipo||'todos');
-  if(fe==='todos'&&fs==='todos'&&ft==='todos')return '';
+  if(!_proDimpFiltrosAtivosCount())return '';
   return `<div class="pro-dimp-filtros-clear-wrap"><button type="button" class="pro-dimp-filtros-clear" onclick="proDatasImpLimparFiltros()" title="Limpar todos os filtros">✕ Limpar filtros</button></div>`;
 }
 window.proDatasImpLimparFiltros=()=>{
-  S._datasImpFiltroEscopo='todos';
-  S._datasImpFiltroStatus='todos';
-  S._datasImpFiltroTipo='todos';
+  S._datasImpFiltroEscopo=[];
+  S._datasImpFiltroStatus=[];
+  S._datasImpFiltroTipo=[];
   _proDatasImpRefresh();
-  if(S._datasImpCalOpen&&typeof _proDatasImpCalRepaint==='function')_proDatasImpCalRepaint();
 };
 
-// Conta quantos dos 3 filtros estão diferentes de 'todos'
+// Conta quantas das 3 dimensões de filtro têm seleção (array não-vazio)
 function _proDimpFiltrosAtivosCount(){
   let n=0;
-  if(S._datasImpFiltroStatus&&S._datasImpFiltroStatus!=='todos')n++;
-  if(S._datasImpFiltroTipo&&S._datasImpFiltroTipo!=='todos')n++;
-  if(S._datasImpFiltroEscopo&&S._datasImpFiltroEscopo!=='todos')n++;
+  if(Array.isArray(S._datasImpFiltroStatus)&&S._datasImpFiltroStatus.length)n++;
+  if(Array.isArray(S._datasImpFiltroTipo)&&S._datasImpFiltroTipo.length)n++;
+  if(Array.isArray(S._datasImpFiltroEscopo)&&S._datasImpFiltroEscopo.length)n++;
   return n;
 }
 
@@ -35683,9 +36058,9 @@ function _proDatasImpFiltrosWrapHTML(canEdit){
         ${clearBar}
       </div>
       <div class="pro-dimp-filtros-panel-body">
-        ${statusBar}
-        ${escopoBar}
         ${tipoBar}
+        ${escopoBar}
+        ${statusBar}
       </div>
     </div>
   </div>`;
@@ -35696,23 +36071,16 @@ window.proDatasImpToggleFiltros=()=>{
   _proDatasImpRefresh();
 };
 
-// Barra horizontal de chips de escopo (filtro de visualização)
+// Filtro de ESCOPO — chips multi-seleção. Vazio = todos. Sem escopos cadastrados → não aparece.
 function _proDatasImpFiltroEscopoHTML(canEdit){
-  const escopos=Array.isArray(S.datasImp&&S.datasImp.escopos)?S.datasImp.escopos:[];
-  const f=String(S._datasImpFiltroEscopo||'todos');
-  const manageBtn=canEdit?`<button type="button" class="pro-dimp-escopos-manage-btn" onclick="proDatasImpAbrirGerenciarEscopos()" title="Gerenciar escopos">⚙</button>`:'';
-  // Se NÃO há escopos cadastrados, mostra só o botão discreto (se canEdit)
-  if(!escopos.length){
-    return canEdit?`<div class="pro-dimp-tipo-bar"><span class="pro-dimp-tipo-bar-label">Escopo:</span><button type="button" class="pro-dimp-escopos-manage-empty" onclick="proDatasImpAbrirGerenciarEscopos()" title="Criar escopos pra classificar eventos por público">⚙ Gerenciar escopos</button></div>`:'';
-  }
-  const opt=(v,lbl)=>`<option value="${_proEscAttr(v)}"${f===v?' selected':''}>${_proEsc(lbl)}</option>`;
-  const opts=[opt('todos','Todos')];
-  escopos.forEach(esc=>{opts.push(opt(esc.id,String(esc.nome||'(sem nome)')));});
-  opts.push(opt('sem-escopo','Sem escopo'));
-  return `<div class="pro-dimp-tipo-bar">
-    <span class="pro-dimp-tipo-bar-label">Escopo:</span>
-    <select class="pro-dimp-tipo-select" onchange="proDatasImpSetFiltroEscopo(this.value)">${opts.join('')}</select>
-    ${manageBtn}
+  const escopos=_proDimpEscoposOrd();
+  if(!escopos.length)return '';
+  const arr=Array.isArray(S._datasImpFiltroEscopo)?S._datasImpFiltroEscopo:[];
+  const chip=(v,lbl,cor)=>`<button type="button" class="pro-dimp-fchip${arr.includes(v)?' on':''}"${cor?` style="--c:${cor}"`:''} onclick="proDatasImpToggleFiltroEscopo('${_proEscAttr(v)}')">${cor?'<span class="pro-dimp-dot"></span>':''}${_proEsc(lbl)}</button>`;
+  const chips=[...escopos.map(e=>chip(e.id,String(e.nome||'(sem nome)'),_proDimpEscopoCor(e.id))),chip('sem-escopo','Sem escopo','')].join('');
+  return `<div class="pro-dimp-fbar">
+    <span class="pro-dimp-fbar-label">Escopo:</span>
+    <div class="pro-dimp-fbar-chips">${chips}</div>
   </div>`;
 }
 
@@ -35741,7 +36109,7 @@ function _proDatasImpItemHTML(e,canEdit,passou){
   const badgeCls=passou?'pro-dimp-badge passou':'pro-dimp-badge';
   const badgeLabel=passou?'passou':String(meta.nome||'');
   const escopo=_proDimpEscopoMeta(e.escopoId);
-  const escopoBadge=escopo?`<span class="pro-dimp-escopo-badge" title="Escopo: ${_proEscAttr(escopo.nome)}">${_proEsc(escopo.nome)}</span>`:'';
+  const escopoBadge=escopo?`<span class="pro-dimp-escopo-badge" style="--c:${_proDimpEscopoCor(e.escopoId)||'#a855f7'}" title="Escopo: ${_proEscAttr(escopo.nome)}">${_proEsc(escopo.nome)}</span>`:'';
   const isPrevisto=(e.confirmado===false);
   const previstoBadge=isPrevisto?`<span class="pro-dimp-badge-previsto" title="Evento ainda não confirmado pela coordenação">⚠️ Previsto</span>`:'';
   const cardCls=`pro-dimp-card${passou?' passou':''}${aberto&&hasBody?' open':''}${isPrevisto?' pro-dimp-previsto':''}`;
@@ -35750,14 +36118,14 @@ function _proDatasImpItemHTML(e,canEdit,passou){
   const caretCls=hasBody?'pro-dimp-caret':'pro-dimp-caret disabled';
   return `<div class="${cardCls}" style="--c:${meta.cor}" data-dimp-id="${_proEscAttr(id)}">
     <div class="${headCls}"${headOnclick}>
-      <span class="pro-dimp-ico">${meta.icone}</span>
-      <span class="pro-dimp-title">${_proEsc(titulo)}</span>
-      <span class="pro-dimp-data">${_proEsc(dataTxt)}${horaHtml}</span>
-      ${escopoBadge}
-      ${previstoBadge}
-      <span class="${badgeCls}">${_proEsc(badgeLabel)}</span>
-      ${actions}
-      <span class="${caretCls}">▾</span>
+      <span class="pro-dimp-dot"></span>
+      <span class="pro-dimp-titlewrap">
+        <span class="pro-dimp-title">${_proEsc(titulo)}</span>
+        <span class="pro-dimp-data">${_proEsc(dataTxt)}${horaHtml}</span>
+      </span>
+      <span class="pro-dimp-col pro-dimp-col-escopo">${escopoBadge}</span>
+      <span class="pro-dimp-col pro-dimp-col-tipo"><span class="${badgeCls}">${_proEsc(badgeLabel)}</span></span>
+      <span class="pro-dimp-col pro-dimp-col-acts">${previstoBadge}${actions}<span class="${caretCls}">▾</span></span>
     </div>
     ${hasBody?`<div class="pro-dimp-body">${descHtml}${linkHtml}</div>`:''}
   </div>`;
@@ -35769,22 +36137,18 @@ function _proDatasImpModalHTML(){
   const titulo=isEdit?'Editar evento':'Cadastrar evento';
   const canEdit=_proCanEdit();
   const allTipos=_proDimpTiposAll();
-  const tiposChips=allTipos.length?allTipos.map(t=>{
-    const on=e.tipo===t.id;
-    return `<div class="pro-dimp-tipo-chip${on?' on':''}" style="--c:${t.cor}" onclick="_proDatasImpSetCampo('tipo','${_proEscAttr(t.id)}')"><span>${t.icone}</span><span>${_proEsc(t.nome)}</span></div>`;
-  }).join(''):`<span style="color:var(--t2);font-style:italic;font-size:13px">Nenhum tipo cadastrado. ${canEdit?'Crie um abaixo.':''}</span>`;
-  const novoTipoChip=canEdit?`<div class="pro-dimp-tipo-chip add" onclick="_proDatasImpToggleNovoTipoForm()" title="Criar novo tipo">＋ Novo tipo</div>`:'';
-  const manageBtn=canEdit?`<button type="button" class="pro-dimp-tipos-manage" onclick="proDatasImpAbrirGerenciarTipos()" title="Gerenciar tipos personalizados">⚙ Gerenciar tipos</button>`:'';
+  const tipoSelect=allTipos.length
+    ?`<select class="fc pro-dimp-form-select" onchange="_proDatasImpSetCampo('tipo',this.value)">${allTipos.map(t=>`<option value="${_proEscAttr(t.id)}"${e.tipo===t.id?' selected':''}>${_proEsc(t.nome)}</option>`).join('')}</select>`
+    :`<span style="color:var(--t2);font-style:italic;font-size:13px">Nenhum tipo cadastrado. ${canEdit?'Crie um abaixo.':''}</span>`;
+  const novoTipoBtn=canEdit?`<button type="button" class="pro-dimp-form-addbtn" onclick="_proDatasImpToggleNovoTipoForm()" title="Criar novo tipo">＋ Novo</button>`:'';
+  const manageBtn=canEdit?`<button type="button" class="pro-dimp-form-addbtn" onclick="proDatasImpAbrirGerenciarTipos()" title="Gerenciar tipos">⚙</button>`:'';
   const novoTipoForm=S._datasImpNovoTipoForm?_proDatasImpNovoTipoFormHTML():'';
-  // Escopo (single-select): "Sem escopo" + escopos cadastrados + "+ Novo" (se canEdit)
-  const escopos=Array.isArray(S.datasImp&&S.datasImp.escopos)?S.datasImp.escopos:[];
+  // Escopo (single-select via dropdown): "Sem escopo" + escopos cadastrados + criar/gerenciar
+  const escopos=_proDimpEscoposOrd();
   const escopoAtual=String(e.escopoId||'');
-  const escopoChips=[
-    `<div class="pro-dimp-escopo-chip${!escopoAtual?' on':''}" onclick="_proDatasImpSetCampoEscopo('')">Sem escopo</div>`,
-    ...escopos.map(esc=>`<div class="pro-dimp-escopo-chip${escopoAtual===esc.id?' on':''}" onclick="_proDatasImpSetCampoEscopo('${_proEscAttr(esc.id)}')">${_proEsc(esc.nome||'(sem nome)')}</div>`)
-  ].join('');
-  const novoEscopoChip=(canEdit&&!S._datasImpNovoEscopoForm)?`<div class="pro-dimp-escopo-chip add" onclick="proDatasImpToggleNovoEscopoForm()" title="Criar novo escopo">＋ Novo</div>`:'';
-  const manageEscBtn=canEdit?`<button type="button" class="pro-dimp-tipos-manage" onclick="proDatasImpAbrirGerenciarEscopos()" title="Gerenciar escopos">⚙ Gerenciar</button>`:'';
+  const escopoSelect=`<select class="fc pro-dimp-form-select" onchange="_proDatasImpSetCampoEscopo(this.value)"><option value=""${!escopoAtual?' selected':''}>Sem escopo</option>${escopos.map(esc=>`<option value="${_proEscAttr(esc.id)}"${escopoAtual===esc.id?' selected':''}>${_proEsc(esc.nome||'(sem nome)')}</option>`).join('')}</select>`;
+  const novoEscopoBtn=(canEdit&&!S._datasImpNovoEscopoForm)?`<button type="button" class="pro-dimp-form-addbtn" onclick="proDatasImpToggleNovoEscopoForm()" title="Criar novo escopo">＋ Novo</button>`:'';
+  const manageEscBtn=canEdit?`<button type="button" class="pro-dimp-form-addbtn" onclick="proDatasImpAbrirGerenciarEscopos()" title="Gerenciar escopos">⚙</button>`:'';
   const novoEscopoForm=S._datasImpNovoEscopoForm?_proDatasImpNovoEscopoFormHTML():'';
   const modoPontualOn=e.modo!=='periodo';
   const modoPeriodoOn=e.modo==='periodo';
@@ -35817,18 +36181,12 @@ function _proDatasImpModalHTML(){
       <div class="pro-editais-modal-body">
         <div class="fg" style="margin-bottom:14px">
           <label class="fl">Tipo</label>
-          <div class="pro-dimp-tipos-row">
-            <div class="pro-dimp-tipos-chips">${tiposChips}${novoTipoChip}</div>
-            ${manageBtn}
-          </div>
+          <div class="pro-dimp-form-row">${tipoSelect}${novoTipoBtn}${manageBtn}</div>
           ${novoTipoForm}
         </div>
         <div class="fg" style="margin-bottom:14px">
           <label class="fl">Escopo</label>
-          <div class="pro-dimp-tipos-row">
-            <div class="pro-dimp-tipos-chips">${escopoChips}${novoEscopoChip}</div>
-            ${manageEscBtn}
-          </div>
+          <div class="pro-dimp-form-row">${escopoSelect}${novoEscopoBtn}${manageEscBtn}</div>
           ${novoEscopoForm}
         </div>
         <div class="fg" style="margin-bottom:14px">
@@ -35868,13 +36226,49 @@ function _proDatasImpModalHTML(){
 }
 
 function _proDatasImpRefresh(){
+  const page=document.getElementById('pro-datas-imp-page');
+  if(page){
+    const ov=document.getElementById('pro-dimp-overlays');
+    const stillOpen=!!(S._datasImpModalOpen||S._datasImpGerenciarTiposOpen||S._datasImpGerenciarEscoposOpen);
+    // Interação DENTRO de um modal que continua aberto → atualiza só o overlay
+    // (não toca na página/calendário, e sem replay da animação = sem flicker).
+    if(ov&&ov.getAttribute('data-open')==='1'&&stillOpen){_proDimpOverlaysRefresh();return;}
+    _proDimpRefreshInto(page,_proDatasImpPageInnerHTML);
+    _proDimpOverlaysRefresh();
+    return;
+  }
   const wrap=document.getElementById('pro-datas-imp-wrap');
-  if(!wrap)return;
-  // Preserva foco em inputs do modal (qual campo + posição do cursor pra inputs de texto)
+  if(wrap)return _proDimpRefreshInto(wrap,_proDatasImpHTML);
+}
+function _proDimpOverlaysRefresh(){
+  const ov=document.getElementById('pro-dimp-overlays');
+  if(!ov)return;
+  const wasOpen=ov.getAttribute('data-open')==='1';
+  _proDimpRefreshInto(ov,_proDimpOverlaysHTML);
+  const isOpen=!!(S._datasImpModalOpen||S._datasImpGerenciarTiposOpen||S._datasImpGerenciarEscoposOpen);
+  ov.setAttribute('data-open',isOpen?'1':'0');
+  // Já estava aberto e continua aberto → re-render sem re-animar (mata o flicker).
+  ov.classList.toggle('pro-dimp-no-anim',wasOpen&&isOpen);
+  _proDimpSyncEvpopPortal();
+}
+// O popup de evento precisa viver no <body> porque #view-co tem transform (cria
+// containing block), o que prenderia um position:fixed dentro dele. Movemos pro body.
+function _proDimpSyncEvpopPortal(){
+  document.querySelectorAll('body > .pro-dimp-evpop-portal').forEach(n=>n.remove());
+  const ov=document.getElementById('pro-dimp-overlays');
+  const ev=ov&&ov.querySelector('.pro-dimp-cal-evpop-backdrop');
+  if(ev){
+    const portal=document.createElement('div');
+    portal.className='pro-dimp-evpop-portal';
+    portal.appendChild(ev);
+    document.body.appendChild(portal);
+  }
+}
+// Re-renderiza um container preservando foco/cursor de inputs (modal de cadastro).
+function _proDimpRefreshInto(wrap,htmlFn){
   const ae=document.activeElement;
   let focusKey=null,selStart=null,selEnd=null;
   if(ae&&wrap.contains(ae)){
-    // identifica por atributos onde estamos
     const tag=ae.tagName;
     const oninput=ae.getAttribute('oninput')||'';
     focusKey=`${tag}|${oninput}`;
@@ -35882,7 +36276,7 @@ function _proDatasImpRefresh(){
       try{selStart=ae.selectionStart;selEnd=ae.selectionEnd;}catch(e){}
     }
   }
-  wrap.innerHTML=_proDatasImpHTML();
+  wrap.innerHTML=htmlFn();
   if(focusKey){
     const [tag,oninput]=focusKey.split('|');
     const sel=`${tag.toLowerCase()}[oninput="${oninput.replace(/"/g,'\\"')}"]`;
@@ -36009,8 +36403,8 @@ window.proDatasImpModalFechar=()=>{
 window._proDatasImpSetCampo=(campo,valor)=>{
   if(!S._datasImpEditando)return;
   S._datasImpEditando[campo]=valor;
-  // Mudanças que afetam o layout do modal precisam re-render
-  if(campo==='tipo'||campo==='modo')_proDatasImpRefresh();
+  // Só 'modo' muda o layout do modal (alterna campos de data). Tipo/escopo são <select> (mostram sozinhos).
+  if(campo==='modo')_proDatasImpRefresh();
 };
 
 window.proDatasImpModalSalvar=async()=>{
@@ -36039,7 +36433,7 @@ window.proDatasImpModalSalvar=async()=>{
   const link=String(e.link||'').trim();
   if(link&&!/^https?:\/\//i.test(link))return alert('Link inválido — deve começar com http:// ou https://');
   // Valida escopoId: se vazio = null (sem escopo); se setado, precisa bater com algum escopo existente.
-  const escopos=Array.isArray(S.datasImp&&S.datasImp.escopos)?S.datasImp.escopos:[];
+  const escopos=_proDimpEscoposOrd();
   const escopoIdRaw=String(e.escopoId||'').trim();
   const escopoId=(escopoIdRaw&&escopos.some(x=>x.id===escopoIdRaw))?escopoIdRaw:null;
   try{
@@ -36213,7 +36607,7 @@ function _proDatasImpGerenciarTiposHTML(){
     const actions=canEdit?`<button class="pro-icon-btn" type="button" onclick="proDatasImpEditarTipo('${_proEscAttr(t.id)}')" title="Editar tipo"${isEditing?' disabled style="opacity:.5"':''}>✏️</button>
       <button class="pro-icon-btn" type="button" onclick="proDatasImpRemoverTipo('${_proEscAttr(t.id)}')" title="Remover tipo">🗑</button>`:'';
     return `<div class="pro-dimp-tipos-list-item${isEditing?' editing':''}" style="--c:${t.cor}">
-      <span class="ico">${t.icone}</span>
+      <span class="pro-dimp-dot" style="width:10px;height:10px"></span>
       <span class="nome">${_proEsc(t.nome)}</span>
       <span class="meta">${usoMap[t.id]||0} eventos</span>
       ${actions}
@@ -36301,10 +36695,6 @@ window.proDatasImpRemoverTipo=async(tid)=>{
 function _proDatasImpNovoTipoFormHTML(){
   const f=S._datasImpNovoTipoForm||{nome:'',icone:'📌',cor:PRO_DIMP_CORES_PALETA[0]};
   const isEdit=!!S._datasImpEditandoTipoId;
-  const iconesGrid=PRO_ICONES_CURADOS.map(ic=>{
-    const on=f.icone===ic;
-    return `<button type="button" onclick="_proDatasImpSetNovoTipo('icone','${_proEscAttr(ic)}')" style="${on?'border-color:#06b6d4;background:color-mix(in srgb,#06b6d4 14%,var(--bg3));':''}">${ic}</button>`;
-  }).join('');
   const coresChips=PRO_DIMP_CORES_PALETA.map(c=>{
     const on=f.cor===c;
     return `<div class="pro-dimp-cor-chip${on?' on':''}" style="--c:${c}" onclick="_proDatasImpSetNovoTipo('cor','${c}')" title="${c}"></div>`;
@@ -36315,15 +36705,6 @@ function _proDatasImpNovoTipoFormHTML(){
     <div class="fg" style="margin-bottom:0">
       <label class="fl">${labelNome}</label>
       <input type="text" class="fc" maxlength="30" placeholder="Ex: Recesso, Live, Bônus..." value="${_proEscAttr(f.nome||'')}" oninput="_proDatasImpSetNovoTipoNome(this.value)"/>
-    </div>
-    <div class="fg" style="margin-bottom:0">
-      <label class="fl">Ícone</label>
-      <div class="pro-icon-grid pro-icon-grid-sm">${iconesGrid}</div>
-      <div class="pro-dimp-icon-custom">
-        <span class="pro-dimp-icon-custom-label">Ou cole/digite um emoji:</span>
-        <input type="text" maxlength="8" placeholder="🎉" value="${_proEscAttr(PRO_ICONES_CURADOS.includes(f.icone)?'':f.icone)}" oninput="_proDatasImpSetIconeCustom(this.value)"/>
-        <div class="pro-dimp-icon-preview" title="Pré-visualização">${_proEsc(f.icone||'')}</div>
-      </div>
     </div>
     <div class="fg" style="margin-bottom:0">
       <label class="fl">Cor</label>
@@ -36340,15 +36721,16 @@ function _proDatasImpNovoTipoFormHTML(){
 // ESCOPOS — classificação por audiência/track (TEA, TSA, MEs, Outros)
 // 1 escopo por evento (escopoId:string|null). Por vertical (mesmo doc).
 // ════════════════════════════════════════════════════════════════════════
-window.proDatasImpSetFiltroEscopo=(valor)=>{
-  S._datasImpFiltroEscopo=String(valor||'todos');
+window.proDatasImpToggleFiltroEscopo=(id)=>{
+  id=String(id||'');if(!id)return;
+  const arr=Array.isArray(S._datasImpFiltroEscopo)?S._datasImpFiltroEscopo.slice():[];
+  const i=arr.indexOf(id);if(i>=0)arr.splice(i,1);else arr.push(id);
+  S._datasImpFiltroEscopo=arr;
   _proDatasImpRefresh();
-  if(S._datasImpCalOpen&&typeof _proDatasImpCalRepaint==='function')_proDatasImpCalRepaint();
 };
 window._proDatasImpSetCampoEscopo=(escopoId)=>{
   if(!S._datasImpEditando)return;
   S._datasImpEditando.escopoId=String(escopoId||'');
-  _proDatasImpRefresh();
 };
 window.proDatasImpToggleNovoEscopoForm=()=>{
   if(!_proCanEdit())return alert('Sem permissão.');
@@ -36428,8 +36810,8 @@ window.proDatasImpRemoverEscopo=async(eid)=>{
     const novaListaEventos=(S.datasImp.lista||[]).map(e=>(e&&String(e.escopoId||'')===eid)?{...e,escopoId:null}:e);
     await setDoc(doc(db,'config',_verticalDocId('datasImportantes')),{escopos:novosEscopos,lista:novaListaEventos,updatedAt:serverTimestamp(),updatedBy:user},{merge:true});
     if(typeof audit==='function')audit('DATA_IMP_ESCOPO_REMOVIDO',{collection:'config',id:'datasImportantes'},{after:{id:eid,nome:esc.nome,uso}});
-    // Se o filtro estava nesse escopo, volta pra "todos"
-    if(S._datasImpFiltroEscopo===eid)S._datasImpFiltroEscopo='todos';
+    // Remove o escopo apagado da seleção de filtro, se presente
+    if(Array.isArray(S._datasImpFiltroEscopo)){const _i=S._datasImpFiltroEscopo.indexOf(eid);if(_i>=0)S._datasImpFiltroEscopo.splice(_i,1);}
     if(S._datasImpEditandoEscopoId===eid){
       S._datasImpEditandoEscopoId=null;
       S._datasImpNovoEscopoForm=null;
@@ -36472,7 +36854,7 @@ function _proDatasImpNovoEscopoFormHTML(){
 // Modal lateral "Gerenciar escopos"
 function _proDatasImpGerenciarEscoposHTML(){
   const canEdit=_proCanEdit();
-  const escopos=Array.isArray(S.datasImp&&S.datasImp.escopos)?S.datasImp.escopos:[];
+  const escopos=_proDimpEscoposOrd();
   const usoMap={};
   (S.datasImp.lista||[]).forEach(e=>{if(e&&e.escopoId){usoMap[e.escopoId]=(usoMap[e.escopoId]||0)+1;}});
   const editandoId=S._datasImpEditandoEscopoId||null;
@@ -36581,7 +36963,7 @@ function _proDimpCalendarioRender(){
       const previstoIco=isPrevisto?'<span class="ico">⚠️</span>':'';
       const previstoTitle=isPrevisto?` — previsto (não confirmado)`:'';
       return `<span class="pro-dimp-cal-chip${previstoCls}" style="--c:${meta.cor}" onclick="event.stopPropagation();proDatasImpCalAbrirPopupEvento('${_proEscAttr(e.id)}')" title="${_proEscAttr(tit+previstoTitle)}">
-        ${previstoIco}<span class="ico">${meta.icone}</span>
+        ${previstoIco}<span class="pro-dimp-dot"></span>
         <span class="titulo">${_proEsc(hora+tit)}</span>
         ${periodoBadge}
       </span>`;
@@ -36672,13 +37054,19 @@ function _proDatasImpCalRepaint(){
   const slot=cal.querySelector('.pro-dimp-cal-evpop-slot');
   if(slot)slot.innerHTML=_proDatasImpCalEventPopupHTML();
 }
+// Na página dedicada (produtosView==='datas') usamos refresh completo da página;
+// no modal antigo, o repaint cirúrgico evita flicker.
+function _proDimpCalApply(){
+  if(S.produtosView==='datas')_proDatasImpRefresh();
+  else _proDatasImpCalRepaint();
+}
 window.proDatasImpCalNav=(delta)=>{
   S._datasImpCalMes=_proDimpAddMes(S._datasImpCalMes||_proDimpMesAtual(),delta);
-  _proDatasImpCalRepaint();
+  _proDimpCalApply();
 };
 window.proDatasImpCalHoje=()=>{
   S._datasImpCalMes=_proDimpMesAtual();
-  _proDatasImpCalRepaint();
+  _proDimpCalApply();
 };
 // DEPRECATED: substituída por proDatasImpCalAbrirPopupEvento (abre popup sobre o calendário em vez de fechar).
 // Mantida só por compatibilidade — não é chamada de lugar nenhum atualmente.
@@ -36706,11 +37094,11 @@ window.proDatasImpCalAbrirPopupEvento=(id)=>{
   // Limpa popover "+N eventos" se estiver aberto (o chip pode ter sido clicado de dentro dele)
   document.querySelectorAll('.pro-dimp-cal-mais-pop').forEach(n=>n.remove());
   S._datasImpCalEventPopup=String(id||'');
-  _proDatasImpCalRepaint();
+  _proDimpCalApply();
 };
 window.proDatasImpCalFecharPopupEvento=()=>{
   S._datasImpCalEventPopup=null;
-  _proDatasImpCalRepaint();
+  _proDimpCalApply();
 };
 window.proDatasImpCalEditarDoPopup=(id)=>{
   // Fecha popup + calendário, abre modal de edição
@@ -36763,13 +37151,13 @@ function _proDatasImpCalEventPopupHTML(){
   return `<div class="pro-dimp-cal-evpop-backdrop" onclick="if(event.target===this)proDatasImpCalFecharPopupEvento()">
     <div class="pro-dimp-cal-evpop" role="dialog" aria-modal="true" aria-label="Detalhes do evento">
       <div class="pro-dimp-cal-evpop-head">
-        <span class="pro-dimp-cal-evpop-ico-big" style="--c:${meta.cor}">${meta.icone}</span>
+        <span class="pro-dimp-cal-evpop-ico-big" style="--c:${meta.cor}"><span class="pro-dimp-dot" style="width:15px;height:15px"></span></span>
         <h3 class="pro-dimp-cal-evpop-title">${_proEsc(tit)}</h3>
         <button class="pro-dimp-cal-evpop-close" type="button" onclick="proDatasImpCalFecharPopupEvento()" title="Fechar (Esc)">✕</button>
       </div>
       <div class="pro-dimp-cal-evpop-body">
         <span class="pro-dimp-cal-evpop-badge" style="--c:${meta.cor}">
-          <span>${meta.icone}</span> <span>${_proEsc(meta.nome)}</span>
+          <span class="pro-dimp-dot"></span> <span>${_proEsc(meta.nome)}</span>
         </span>
         ${previstoBadge}
         <div class="pro-dimp-cal-evpop-row"><span class="pro-dimp-cal-evpop-ico">📅</span> ${_proEsc(dataLinha)}</div>
@@ -36803,7 +37191,7 @@ window.proDatasImpCalMostrarMais=(ev,isoDia)=>{
     const previstoCls=isPrevisto?' previsto':'';
     const previstoIco=isPrevisto?'<span class="ico">⚠️</span>':'';
     return `<span class="pro-dimp-cal-chip${previstoCls}" style="--c:${meta.cor}" onclick="proDatasImpCalAbrirPopupEvento('${_proEscAttr(e.id)}')">
-      ${previstoIco}<span class="ico">${meta.icone}</span>
+      ${previstoIco}<span class="pro-dimp-dot"></span>
       <span class="titulo" style="display:inline">${_proEsc(hora+tit)}</span>
     </span>`;
   }).join('');

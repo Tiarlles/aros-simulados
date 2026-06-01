@@ -1381,27 +1381,42 @@ Nova seção colapsável "📋 Editais" entre Jornada do Cliente e a lista de pr
 - Bloco `=== EDITAIS CADASTRADOS (${verticalNome}) ===` injetado no system prompt, com **ano atual** (`new Date().getFullYear()`) explícito.
 - Regra de estilo no `ESTILO_UNIVERSAL`: se a resposta usar info de edital de ano anterior ao atual, começa avisando ("Com base no edital de XXXX...").
 
-### Catálogo de Produtos — Datas Importantes (2026-05-26)
+### Catálogo de Produtos — Datas Importantes (página dedicada, redesign 2026-06-01)
 
-Nova seção colapsável "📆 Datas importantes" logo abaixo de Editais. Calendário de eventos da vertical (provas, revisões, liberações, prazos) com link/descrição. Dex/Íris/Thor/Lux lêem essas datas pra responder perguntas tipo "qual o link da revisão extrema TEA?", "quando é a próxima prova?".
+Calendário de eventos da vertical (provas, revisões, liberações, prazos) com link/descrição. Dex/Íris/Thor/Lux lêem essas datas. **Refeito em 2026-06-01**: deixou de ser caixa colapsável inline e virou **PÁGINA DEDICADA** (`S.produtosView==='datas'`, roteada em `_proRender`).
 
-**UI:**
-- Caixa estilo `pro-jornada-disc` com toggle.
-- Toolbar: `＋ Cadastrar evento` · `📅 Ver calendário` · `⚙ Gerenciar tipos` (modais).
-- **Barra de filtro de escopo** acima dos cards: `[Todos] [TEA] [TSA] [MEs] [Outros] [Sem escopo] ⚙` — afeta lista E calendário ao mesmo tempo. Esconde a barra se não há escopos cadastrados (deixa só o ⚙).
-- Cards colapsáveis: header com ícone do tipo + título + data formatada + horário + badge do tipo + badge do escopo (roxo) + ações; body com descrição (pre-wrap) + link clicável.
-- Card sem descrição/link fica não-clicável (caret cinza desabilitado).
-- Eventos passados ocultos por padrão; botão "Ver passados (N)" no rodapé expande.
-- Calendário tela cheia (modal `pro-dimp-cal-*`): grid 7 colunas, navegação `←/→/Hoje`, chips dos eventos por dia (até 3 + "+N eventos" com popover). Período aparece SÓ no dia de início.
-- Popup do evento sobre o calendário (sem fechar o grid): backdrop translúcido + card com ícone/badge/data/horário/escopo/descrição/link + botões Editar/Remover/Fechar. Esc inteligente: fecha popup primeiro; se já fechado, fecha calendário.
+**Arquitetura da página:**
+- Entrada: na lista do catálogo (`_proRenderList`), `<div id="pro-datas-imp-wrap">` renderiza `_proDatasImpHTML()` = um **card de entrada** clicável (`.pro-dimp-entry`: 📆 + título + "Próximo: …" + contador) que chama `proDatasImpAbrirPagina()`. Fica logo **abaixo do box Aprovações**.
+- `_proRenderDatas(root)` monta `<div id="pro-datas-imp-page">` (via `_proDatasImpPageInnerHTML`) + `<div id="pro-dimp-overlays">` (modais separados — ver Flicker).
+- Header: breadcrumb "← {vertical}" + título "📆 Datas importantes" + botão **Cadastrar evento** (`.pro-dimp-cadastrar-btn`, dark glass destacado, só `canEdit`).
+- **Switcher (segmented control iOS, `.pro-dimp-viewswitch`)**: só **🗓️ Mês** e **📅 Ano** (a antiga grade "Ano" foi removida; o que era "Agenda" foi renomeado pra "Ano"). Estado `S._datasImpVisualizacao` ('mes'|'agenda'), default 'mes', salvo por vertical em `localStorage['aros.datasImp.view.<vertical>']`. `_proDimpView()` mapeia qualquer coisa ≠'mes' (inclui legado 'ano') → 'agenda'.
+- **Filtrar** fica numa linha abaixo do switcher; painel inline (não modal) com os 3 filtros lado a lado, **ordem TIPO · ESCOPO · STATUS**.
+- Refresh: `_proDatasImpRefresh()` re-renderiza a página OU (se um modal está aberto) só o `#pro-dimp-overlays` (ver Flicker).
 
-**Modal de cadastro/edição:**
-- Tipo (chips com ícone+cor) → botão "+ Novo tipo" (subform inline com input nome, grid compacta de ícones curados + **input livre de emoji personalizado**, paleta de 8 cores) → botão "⚙ Gerenciar tipos".
-- **Escopo** (chips single-select roxos, incluindo "Sem escopo") → botão "+ Novo" inline → "⚙ Gerenciar".
-- Título obrigatório.
-- Modo **pontual** (data + horário opcional) ou **período** (data início + fim, fim ≥ início).
-- Descrição (textarea, não rich-text, max no servidor).
-- Link (URL, validado pra começar com `http://` ou `https://`).
+**Visão MÊS (`_proDatasImpViewMesHTML`):** calendário em grade inline (`.pro-dimp-cal.inline`, vidro fosco), reusa `_proDimpCalendarioRender` (grid 7 col, células crescem com conteúdo e títulos quebram em linha). Nav `←/→/Hoje`. Hoje = número vira **círculo ciano preenchido** (estilo Apple). Chips por dia (até 3 + "+N" popover). Clique no chip → popup do evento.
+
+**Visão ANO (`_proDatasImpViewAgendaHTML`):** lista **por ano**. Topo: **ano grande centralizado** (`.pro-dimp-ano-titulo` 32px) com **← {ano} →** (`proDatasImpCalNavAno(±1)` muda o ano via `S._datasImpCalMes`) + botão **Hoje**. Abaixo: botão **⊞ Expandir/⊟ Recolher todos** (`proDatasImpAgendaToggleAll`, estado `S._datasImpAgendaExpandAll` true/false/null). Eventos só do ano selecionado, agrupados por mês — cada mês é um **`<details>`** (`.pro-dimp-agenda-disc`); **mês atual aberto por padrão**, demais fechados. Nome do mês em MAIÚSCULO destacado (mês aberto fica ciano), **sem repetir o ano**.
+- Card do evento (`_proDatasImpItemHTML`): grid alinhado no desktop (`@media min-width:641px`): `[bolinha] [nome+data] [escopo] [tipo] [ações]`. Data fica **logo após o nome** em cor discreta (`color-mix(text 55%)`). Colunas de escopo e tipo **alinhadas** entre linhas. Tag **Previsto** fica junto do lápis (na coluna de ações). No mobile (≤640) vira flex que quebra linha.
+
+**Bolinhas neon (não mais ícones de tipo):** eventos usam `.pro-dimp-dot` (bolinha na cor do tipo com glow) no lugar do emoji — no calendário, nos cards da lista, no popup e no gerenciar tipos. O tipo NÃO tem mais seletor de emoji.
+
+**Cores:**
+- **Tipo:** cada tipo tem cor (paleta `PRO_DIMP_CORES_PALETA`, 18 cores). Bolinha + traço lateral esquerdo do card usam a cor do tipo. **A tag de tipo escrita** (badge "PROVA" etc) na visão Ano é **monocromática** (cinza neutro) — a cor fica só na bolinha+traço.
+- **Escopo:** cor distinta por escopo, derivada da posição alfabética via `_proDimpEscopoCor()` + paleta dedicada `PRO_DIMP_ESCOPO_CORES` (hues espalhados). Badge na lista + chips do filtro.
+- **Previsto:** sombreado âmbar escuro discreto (`#92710a`/`#b45309`), borda esquerda tracejada.
+
+**Popup do evento:** vive num **portal no `<body>`** (`.pro-dimp-evpop-portal`, `position:fixed`) porque `#view-co` tem `transform` (criaria containing block e prenderia o fixed). `_proDimpSyncEvpopPortal()` move o backdrop pro body a cada refresh.
+
+**Filtros — MULTI-SELEÇÃO (chips, 2026-06-01):** `S._datasImpFiltroTipo`, `_datasImpFiltroEscopo`, `_datasImpFiltroStatus` são **arrays** (vazio = todos). Chips `.pro-dimp-fchip` que alternam (`proDatasImpToggleFiltroTipo/Escopo/Status`). Combina E entre dimensões, OU dentro. `_proDimpAplicaFiltros` lê os 3 arrays. Tipo sem emoji (só nome + bolinha); escopo com bolinha colorida; status = Confirmados/Previstos. Badge no "Filtrar" conta dimensões ativas; "✕ Limpar filtros".
+
+**Modal de cadastro/edição (no `#pro-dimp-overlays`):**
+- **Tipo: dropdown** (`<select>`, ordem alfabética) + "＋ Novo" + "⚙" (gerenciar). Sem emoji.
+- **Escopo: dropdown** (alfabético, "Sem escopo" + cadastrados) + "＋ Novo" + "⚙".
+- Novo/editar tipo: só **Nome + Cor** (paleta 18 cores) — **sem seletor de emoji** (removido 2026-06-01).
+- Título obrigatório. Modo **pontual** (data+horário) ou **período** (início+fim). Descrição (textarea). Link (URL http/https).
+- Só `_proDatasImpSetCampo('modo',…)` re-renderiza o modal; tipo/escopo são `<select>` (mostram sozinhos, sem refresh).
+
+**Flicker fix (modais separados):** o `#pro-dimp-overlays` é re-renderizado isolado quando um modal está aberto (`_proDimpOverlaysRefresh`), sem tocar na página/calendário; a animação de abertura é suprimida no re-render via classe `.pro-dimp-no-anim`. Resolve o "piscar" ao clicar campos do modal.
 
 **Tipos de evento (system + custom + override + tombstone):**
 - 4 system fixos hardcoded em `PRO_DIMP_TIPOS_SYSTEM`: `prova` 📅 #ef4444, `revisao` 📚 #2563eb, `liberacao` 🎁 #16a34a, `inscricao` 📝 #e46d0a.
@@ -1410,14 +1425,15 @@ Nova seção colapsável "📆 Datas importantes" logo abaixo de Editais. Calend
 - **TUDO renomeável/removível** (system inclusive). Renomear "prova": cria entry em `lista` com `id:'prova'` e novos campos. Remover "prova": adiciona `'prova'` em `deletedSystemIds`.
 - Eventos cujo tipo foi deletado: render mostra "❓ (tipo removido)" — não quebra.
 - Painel "Gerenciar tipos": lista TODOS (system + custom + overrides), botões ✏️ Editar (subform pré-preenchido) + 🗑 Remover (confirm com count de eventos afetados).
-- Ícone personalizado: input de emoji (max 8 chars — cobre compostos tipo 👨‍⚕️). Limpa highlight da grade ao usar campo livre. Grade reduzida pra 8 cols x 16px (`.pro-icon-grid-sm`).
+- ~~Ícone/emoji do tipo~~ **REMOVIDO 2026-06-01** (eventos usam bolinha colorida). Campo `icone` ainda existe no doc por compat mas não é editável nem exibido. Novo/editar tipo = só Nome + Cor.
 
 **Escopos (por vertical, 1 por evento):**
 - Persiste no MESMO doc `config/datasImportantes_{vertical}` campo `escopos:[{id,nome,criadoEm,criadoPor}]`.
 - Eventos têm `escopoId: string|null`. Vazio = "Sem escopo".
-- Painel "Gerenciar escopos": lista com count de eventos por escopo, renomear inline + remover (confirm com count). Remover zera `escopoId` em eventos afetados no MESMO write; se filtro vigente apontava pro removido, reseta pra "todos".
-- Filtro NÃO persiste entre sessões (reset em page load + `proSelectVertical` + `proVoltarVerticais`).
-- Cor visual dos escopos: roxo `#a855f7` (distinção do tipo que tem cor variável).
+- Painel "Gerenciar escopos": lista com count de eventos por escopo, renomear inline + remover (confirm com count). Remover zera `escopoId` em eventos afetados no MESMO write; remove o id do array de filtro se presente. Gerenciar escopo fica SÓ no cadastro de evento (não há mais engrenagem no filtro).
+- Filtro multi-seleção (arrays) NÃO persiste entre sessões (reset em page load + `proSelectVertical` + `proVoltarVerticais`).
+- Cor dos escopos: distinta por escopo via `_proDimpEscopoCor()` + `PRO_DIMP_ESCOPO_CORES` (era roxo fixo `#a855f7` até 2026-06-01).
+- Listas de escopos sempre alfabéticas via `_proDimpEscoposOrd()` (filtro, cadastro, gerenciar). Tipos também alfabéticos via sort em `_proDimpTiposAll()`.
 - Nome duplicado (case-insensitive) bloqueado.
 
 **Persistência principal (eventos):**
