@@ -29803,9 +29803,13 @@ function getPergStatus(cr,perg,pi){
 }
 
 // Pontuação corrente de um caso (em pontos, mesma escala da nota final do bloco).
+// Distribuição hierárquica e igualitária:
+//   ptsPorCaso (X)      = 100 / nº casos
+//   ptsPorPergunta (Y)  = X / nº perguntas        (toda pergunta vale igual)
+//   ptsPorItem          = Y / nº itens POSITIVOS daquela pergunta
 // Itens positivos: certo = ptsPorItem, parcial = ptsPorItem/2, errado = 0.
 // Itens negativos (penalidades): se marcados como 'penalidade', subtraem ptsPorItem
-// (onde ptsPorItem é baseado APENAS nos itens positivos — penalidades não diluem o peso).
+// (penalidades não diluem o peso — ptsPorItem é baseado só nos positivos da pergunta).
 // Nota mínima do caso = 0 (não fica negativa).
 // === Backup PDF do checklist em branco (template) ============================
 // Abre uma janela nova com HTML self-contained pronto pra impressão.
@@ -29912,12 +29916,14 @@ function _renderCkPrintHTML(sim,blocoKey){
 
 function _calcCasoScore(cr,caso,ptsPorCaso){
   const perguntas=caso?.perguntas||[];
-  let totalPositivos=0;
-  perguntas.forEach(p=>(p.itens||[]).forEach(it=>{if(!it.negativo)totalPositivos++;}));
-  const ptsPorItem=totalPositivos>0?ptsPorCaso/totalPositivos:0;
+  const ptsPorPergunta=perguntas.length?ptsPorCaso/perguntas.length:0;
   let score=0;
   perguntas.forEach((p,pi)=>{
-    (p.itens||[]).forEach((it,ii)=>{
+    const itens=p.itens||[];
+    let positivos=0;
+    itens.forEach(it=>{if(!it.negativo)positivos++;});
+    const ptsPorItem=positivos>0?ptsPorPergunta/positivos:0;
+    itens.forEach((it,ii)=>{
       const v=cr?.itens?.[pi+'_'+ii];
       if(it.negativo){
         if(v==='penalidade')score-=ptsPorItem;
