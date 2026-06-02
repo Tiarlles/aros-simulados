@@ -738,7 +738,7 @@ Sistema de contestação de gabarito de provas TSA/TEA/ME1/ME2/ME3. Aluno públi
 
 **Lista de Questões (coord, aba 📚 Provas):**
 - Cards mostram número, gabarito compacto (`A` em TEA/TSA, `A=V · B=F · C=V · D=F · E=V` em VF).
-- Botões por card: **✓ Validar** (concordo com gabarito oficial — bool global `validada`), **💡 Sugerir recurso** (parecer proativo sem precisar de contestação), **✏️ Editar**, **🗑️ Apagar**.
+- Botões por card: **✓ Validar** (concordo com gabarito oficial — bool global `validada`), **💡 Emitir parecer** (parecer proativo sem precisar de contestação — renomeado de "Sugerir recurso" em 2026-06-02), **✏️ Editar**, **🗑️ Apagar**.
 - Status derivado (`_recStatusQuestao`): "EM ANÁLISE PELO TIME" → "GABARITO VALIDADO" (verde claro) ou "CABE RECURSO" / "NÃO CABE" — **só conta parecer finalizado** (rascunho não muda o status visual).
 
 **Visão aluno (`/recursos`):**
@@ -762,11 +762,12 @@ Sistema de contestação de gabarito de provas TSA/TEA/ME1/ME2/ME3. Aluno públi
 7. Modal **bloqueia close ao clicar fora** via atributo `data-no-backdrop-close` (handler global no `.mo` respeita esse atributo).
 8. Em modo VF, todo workflow é **por alternativa** — `pareceresPorAlt[letra]` tem seus próprios `atribuidoA`, `rascunho`, `finalizado`, etc.
 
-**Botão "💡 Sugerir recurso" (parecer proativo):**
+**Botão "💡 Emitir parecer" (parecer proativo — renomeado de "Sugerir recurso" em 2026-06-02):**
 - Bypassa o fluxo de assumir/rascunho — abre modal direto editável.
 - Em modo VF, abre `prompt()` pedindo qual alternativa (A-E).
 - Dropdown de parecer pré-selecionado em **"Cabe Recurso"** automaticamente.
-- Botão final é **"✓ Salvar sugestão"** (cabe recurso direto), não "Finalizar".
+- Botão final é **"✓ Salvar parecer"** (cabe recurso direto), não "Finalizar".
+- **Editar parecer existente**: botão `✏️ Editar` em cada parecer ativo → `editarSugestao` → `abrirParecer(...,{editSug})` (modo `isEdit`) → salva via `_salvarParecerEdicao` (atualiza o item no array, não cria novo; não reenvia email). Ver changelog 2026-06-02.
 
 **Importação por PDF (dual em TEA/TSA, single em ME):**
 - Modal tem 2 uploads: PDF da prova + PDF do gabarito (opcional, só TEA/TSA).
@@ -1888,6 +1889,33 @@ Sessão maratona de evolução do Sistema de Recursos. Tudo entregue + deploy no
 - Agora: renderiza UI imediatamente com `loadRecQuestoes` (1 round-trip), depois carrega contestações em **`Promise.all` paralelo** com indicador discreto no canto inferior direito. Cai pra ~2-3s.
 
 **Commits da sessão** (entregues no deploy final): refator do Sistema de Recursos completo.
+
+### Sistema de Recursos — reordenar provas, cores no front, editar parecer, anti-flash (2026-06-02)
+
+Pacote entregue + deploy. Mudanças:
+
+**Provas reordenáveis (visão Coord, lista de provas):**
+- Campo novo `ordem` (number) no doc `provas/{id}`. `_recProvaSort`: quem tem `ordem` manda (crescente); quem não tem fica no topo, mais novas primeiro (`criadoEm` desc) até ser posicionado. `loadRecProvas` ordena por `_recProvaSort`.
+- Cada card tem alça `⠿` (`.rec-prova-grip`) — só ela liga `draggable=true` (`onmousedown`), reset no `mouseup`/`dragend` pra não atrapalhar o clique-abre-questões. Handlers `recProvaDragStart/Over/End`. Dragover move o nó no DOM (sem re-render); dragend lê a ordem final do DOM e grava `ordem` 0..n via `setDoc merge` só nas que mudaram. Container `#rec-provas-list`. Audit `PROVAS_REORDENADAS`.
+- O **front do aluno reflete** automaticamente (mesmo array ordenado).
+
+**Cores da prova por tipo no front (aluno):**
+- Card `.rec-prova-card` recebe `style="--tipo-cor:${tipoCor.fg}"`. CSS usa `var(--tipo-cor, var(--accent))` na barra lateral (`::before`), glow (`::after`), hover, nome, pill de prazo e botão "Abrir". Antes tudo era accent fixo. `.rec-prova-card-fechada` (prazo encerrado) continua sobrescrevendo pra vermelho.
+
+**Anti-flash (2 telas distintas):**
+- `renderAlunoProva` (aluno): o 2º render que mostra as contestações deixou de reconstruir todo o `#rec-aluno-content`. Novo `_alunoRefreshContestacoes(prova,questoes)` atualiza in-place só `#rec-aluno-mapa`, `#rec-aluno-stats` e cada `[id^=rec-q-card-]` via `outerHTML`. Cabeçalho/contador preservados.
+- `_renderRecQuestoesView` (coord): o re-render pós-load das contestações pendentes não passa mais pelo spinner + refetch. Flag `S.recursos._qViewQuiet` + cache `S.recursos._qViewCache={provaId,questoes}` — quando o callback de `loadContestPendMap` marca `quiet=true` e chama `renderRecProvas`, reusa as questões cacheadas e pula o "⏳ Carregando questões...". Flag reseta no início de cada render.
+
+**Badge CONTESTADA clicável:** na linha da questão (coord), `⚠️ CONTESTADA →` agora é clicável → `event.stopPropagation();abrirParecer(prova.id,q.id,'')` (abre o modal de parecer mostrando a contestação) + hover effect.
+
+**Editar parecer + renomeações:**
+- "PARECER OFICIAL" — título do bloco em `_renderSugestoesBoxHTML` virou `📋 PARECER OFICIAL` (era "💡 SUGESTÕES DE RECURSO (N)"); a nota "a mais recente vale..." só aparece com 2+.
+- **Botão "Sugerir recurso" renomeado pra "Emitir parecer"** em todos os lugares visíveis (card, modal visualizar, título do modal-parecer `💡 Emitir parecer`, save `✓ Salvar parecer`, prefixo do sub `💡 EMITIR PARECER ·`). Funções internas (`abrirSugerirRecurso`, `mvqSugerir`) mantêm o nome.
+- **Editar parecer existente**: cada parecer ativo ganhou `✏️ Editar` (ao lado do 🗑️). `editarSugestao(qId,sugId)` abre `abrirParecer(provaId,qId,'',{editSug})`. `abrirParecer` ganhou modo `isEdit`: pré-preenche os campos com a sugestão, título `✏️ Editar parecer`, save `✓ Salvar edição`, esconde rascunho/assumir, grava `dataset.editSugId`. `salvarParecer` desvia pra `_salvarParecerEdicao` quando `editSugId` setado: atualiza o item no array `sugestoes` (preserva id/autor/`criadoEm`, adiciona `editadoEm`/`editadoPor`), recalcula o parecer oficial (mais recente ativo) e espelha nos campos de topo. **Não reenvia email nem mexe no status das contestações.** Audit `PARECER_EDITADO`.
+
+**Botão "marcar como comentada" no modal de liberar:** `abrirAssumirComentario` (quando o prof é o próprio que assumiu) abre `_comentarioFinalizarModal(desde)` — 3 ações: ✓ Marcar como comentada (= valida gabarito + `comentarioFinalizado`, mesmo efeito do `validarGabarito`) · 🔓 Liberar · Continuar comigo. Audit `QUESTAO_COMENTADA`.
+
+**Modal genérico:** `.m-foot` ganhou `flex-wrap:wrap` (rodapé com 3 botões quebra linha em vez de cortar em telas estreitas).
 
 ### Catálogo de Produtos — redesign de features + pack + concorrentes + breve descrição (2026-05-27)
 

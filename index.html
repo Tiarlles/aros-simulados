@@ -390,7 +390,7 @@ body:has(.mo:not(.hidden)){overflow:hidden}
 .m-title{font-family:'Fraunces',serif;font-size:19px;font-weight:700;letter-spacing:-.2px}
 .m-sub{color:var(--t2);font-size:13px;margin-top:3px}
 .m-body{padding:20px 24px}
-.m-foot{padding:14px 24px 20px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--border);position:sticky;bottom:0;background:var(--bg2)}
+.m-foot{padding:14px 24px 20px;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;border-top:1px solid var(--border);position:sticky;bottom:0;background:var(--bg2)}
 .m-close{background:var(--bg3);border:1px solid var(--border);cursor:pointer;color:var(--t2);font-size:16px;line-height:1;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;transition:all .15s}
 .m-close:hover{color:var(--text);background:var(--bg4);border-color:var(--accent);transform:rotate(90deg)}
 
@@ -4007,35 +4007,35 @@ body.pro-rt-fs-on{overflow:hidden}
 @keyframes recPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.85)}}
 #view-rec .rec-prova-grid{display:grid;gap:14px}
 #view-rec .rec-prova-card{position:relative;display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:20px 22px;background:color-mix(in srgb, var(--bg2) 92%, transparent);border:1px solid var(--border);border-radius:18px;cursor:pointer;overflow:hidden;backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);transition:transform .25s var(--ease-out-soft),box-shadow .3s var(--ease-out-soft),border-color .25s var(--ease-out-soft)}
-#view-rec .rec-prova-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 55%, #a371f7) 100%);transition:width .25s var(--ease-out-soft)}
-#view-rec .rec-prova-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%), color-mix(in srgb, var(--accent) 8%, transparent) 0%, transparent 55%);opacity:0;transition:opacity .3s var(--ease-out-soft);pointer-events:none}
-#view-rec .rec-prova-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb, var(--accent) 50%, var(--border));box-shadow:0 20px 50px -22px color-mix(in srgb, var(--accent) 40%, transparent)}
+#view-rec .rec-prova-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg, var(--tipo-cor, var(--accent)) 0%, color-mix(in srgb, var(--tipo-cor, var(--accent)) 55%, #a371f7) 100%);transition:width .25s var(--ease-out-soft)}
+#view-rec .rec-prova-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%), color-mix(in srgb, var(--tipo-cor, var(--accent)) 8%, transparent) 0%, transparent 55%);opacity:0;transition:opacity .3s var(--ease-out-soft);pointer-events:none}
+#view-rec .rec-prova-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb, var(--tipo-cor, var(--accent)) 50%, var(--border));box-shadow:0 20px 50px -22px color-mix(in srgb, var(--tipo-cor, var(--accent)) 40%, transparent)}
 #view-rec .rec-prova-card:hover::before{width:7px}
 #view-rec .rec-prova-card:hover::after{opacity:1}
 #view-rec .rec-prova-info{flex:1;min-width:240px;position:relative;z-index:1}
 #view-rec .rec-prova-badge{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:10px;font-weight:700;color:var(--accent);background:color-mix(in srgb, var(--accent) 12%, transparent);border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);padding:3px 10px;border-radius:999px;letter-spacing:1.3px;margin-bottom:8px}
-#view-rec .rec-prova-nome{font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;letter-spacing:-.6px;line-height:1.15}
+#view-rec .rec-prova-nome{font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;letter-spacing:-.6px;line-height:1.15;color:var(--tipo-cor, var(--text))}
 #view-rec .rec-prova-meta{
   display:inline-flex;align-items:center;gap:7px;
   margin-top:10px;
   padding:5px 12px;
   font-family:'JetBrains Mono','SF Mono',Consolas,monospace;
   font-size:11.5px;font-weight:700;
-  color:color-mix(in srgb, var(--accent) 90%, var(--text));
-  background:color-mix(in srgb, var(--accent) 10%, transparent);
-  border:1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  color:color-mix(in srgb, var(--tipo-cor, var(--accent)) 90%, var(--text));
+  background:color-mix(in srgb, var(--tipo-cor, var(--accent)) 10%, transparent);
+  border:1px solid color-mix(in srgb, var(--tipo-cor, var(--accent)) 28%, transparent);
   border-radius:999px;
   letter-spacing:.4px;
 }
 #view-rec .rec-prova-meta::before{
   content:'';
   width:6px;height:6px;border-radius:50%;
-  background:var(--accent);
-  box-shadow:0 0 8px var(--accent);
+  background:var(--tipo-cor, var(--accent));
+  box-shadow:0 0 8px var(--tipo-cor, var(--accent));
   animation:recPulse 2s ease-in-out infinite;
 }
-#view-rec .rec-prova-cta{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border:none;border-radius:12px;background:linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 75%, #5b9eff) 100%);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:.15px;cursor:pointer;box-shadow:0 6px 18px color-mix(in srgb, var(--accent) 32%, transparent);transition:transform .2s var(--ease-out-soft),box-shadow .25s var(--ease-out-soft)}
-#view-rec .rec-prova-card:hover .rec-prova-cta{transform:translateX(2px);box-shadow:0 10px 26px color-mix(in srgb, var(--accent) 42%, transparent)}
+#view-rec .rec-prova-cta{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border:none;border-radius:12px;background:linear-gradient(135deg, var(--tipo-cor, var(--accent)) 0%, color-mix(in srgb, var(--tipo-cor, var(--accent)) 75%, #5b9eff) 100%);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:.15px;cursor:pointer;box-shadow:0 6px 18px color-mix(in srgb, var(--tipo-cor, var(--accent)) 32%, transparent);transition:transform .2s var(--ease-out-soft),box-shadow .25s var(--ease-out-soft)}
+#view-rec .rec-prova-card:hover .rec-prova-cta{transform:translateX(2px);box-shadow:0 10px 26px color-mix(in srgb, var(--tipo-cor, var(--accent)) 42%, transparent)}
 #view-rec .rec-prova-cta-arrow{font-weight:700;transition:transform .25s var(--ease-out-soft)}
 #view-rec .rec-prova-card:hover .rec-prova-cta-arrow{transform:translateX(3px)}
 #view-rec .rec-prova-card-fechada{opacity:.78}
@@ -7191,7 +7191,7 @@ body.pro-rt-fs-on{overflow:hidden}
     </div>
     <div class="m-foot">
       <button class="btn btn-s" onclick="CM('modal-visualizar-q')">Fechar</button>
-      <button class="btn btn-p" id="mvq-sugerir-btn" onclick="mvqSugerir()" style="background:rgba(251,143,68,.18);color:#fb8f44;border-color:rgba(251,143,68,.4)">💡 Sugerir recurso</button>
+      <button class="btn btn-p" id="mvq-sugerir-btn" onclick="mvqSugerir()" style="background:rgba(251,143,68,.18);color:#fb8f44;border-color:rgba(251,143,68,.4)">💡 Emitir parecer</button>
     </div>
   </div>
 </div>
@@ -7704,6 +7704,15 @@ body.pro-rt-fs-on{overflow:hidden}
   letter-spacing:.3px;
 }
 /* Mini-slider de status no card da prova (lista) — versão compacta do mpv-status-toggle */
+.rec-prova-grip{
+  flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+  width:24px;align-self:stretch;margin:-6px 0;color:var(--t2);opacity:.45;
+  font-size:18px;line-height:1;cursor:grab;user-select:none;
+  transition:opacity .15s,color .15s;touch-action:none;
+}
+.rec-prova-grip:hover{opacity:1;color:var(--accent)}
+.rec-prova-grip:active{cursor:grabbing}
+[data-prova-card][draggable="true"]{cursor:grabbing}
 .rec-card-status-toggle{
   position:relative;display:grid;grid-template-columns:1fr 1fr;gap:0;padding:2px;
   background:color-mix(in srgb, var(--bg) 70%, transparent);border:1px solid var(--border);
@@ -12850,11 +12859,19 @@ S.recursos={
   contestacoesPendentes:[],// flat list pra aba Gestão
 };
 
+// Ordenação das provas: quem tem `ordem` (definida manualmente arrastando no cadastro)
+// manda, em ordem crescente. Provas sem `ordem` ficam no topo, mais novas primeiro
+// (comportamento legado), até serem posicionadas num arraste.
+function _recProvaSort(a,b){
+  const ao=typeof a.ordem==='number',bo=typeof b.ordem==='number';
+  if(ao&&bo)return a.ordem-b.ordem;
+  if(!ao&&!bo)return (b.criadoEm||'').localeCompare(a.criadoEm||'');
+  return ao?1:-1; // sem ordem vem antes (topo)
+}
 async function loadRecProvas(){
   try{
     const snap=await getDocs(collection(db,'provas'));
-    S.recursos.provas=snap.docs.map(d=>({id:d.id,...d.data()}))
-      .sort((a,b)=>(b.criadoEm||'').localeCompare(a.criadoEm||''));
+    S.recursos.provas=snap.docs.map(d=>({id:d.id,...d.data()})).sort(_recProvaSort);
   }catch(e){console.error('loadRecProvas:',e);S.recursos.provas=[];}
 }
 async function loadRecFontes(){
@@ -12909,10 +12926,11 @@ window.renderRecAluno=async()=>{
       const tipo=(p.tipo||'').toUpperCase();
       const ano=p.ano||'';
       const titulo=`${tipo}${ano?' · '+ano:''}`;
+      const tipoCor=_MENTORIA_CORES[p.tipo]||_MENTORIA_CORES.TSA;
       const limite=p.dataLimite?fDT(p.dataLimite):'';
       const encerrado=_prazoRecursoEncerrado(p);
       const badgeEncerrado=encerrado?`<div style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:4px 10px;background:rgba(248,81,73,.12);border:1px solid rgba(248,81,73,.4);border-radius:999px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;color:#f85149;letter-spacing:1px">🔒 PRAZO ENCERRADO</div>`:'';
-      return`<div class="rec-prova-card${encerrado?' rec-prova-card-fechada':''}" onclick="recAbrirProva('${p.id}')" onmousemove="this.style.setProperty('--mx',(event.offsetX/this.offsetWidth*100)+'%');this.style.setProperty('--my',(event.offsetY/this.offsetHeight*100)+'%')">
+      return`<div class="rec-prova-card${encerrado?' rec-prova-card-fechada':''}" style="--tipo-cor:${tipoCor.fg}" onclick="recAbrirProva('${p.id}')" onmousemove="this.style.setProperty('--mx',(event.offsetX/this.offsetWidth*100)+'%');this.style.setProperty('--my',(event.offsetY/this.offsetHeight*100)+'%')">
         <div class="rec-prova-info">
           <div class="rec-prova-nome">${titulo}</div>
           ${limite?`<div class="rec-prova-meta">⏱ Recursos até ${limite}</div>`:''}
@@ -13036,9 +13054,11 @@ async function renderAlunoProva(){
       if(todas.length)S.recursos.alunoState.todasContestacoes[qId]=todas;
       if(minhas.length)S.recursos.alunoState.contestacoes[qId]=minhas;
     });
-    // Re-renderiza pra exibir as contestações (com state preservado de expansão)
+    // Atualiza só o que depende das contestações (mapa, stats e cada card) — update
+    // cirúrgico in-place em vez de reconstruir todo o #rec-aluno-content, que causava
+    // um "flash"/piscada visível ao abrir a prova (cabeçalho e lista redesenhavam à toa).
     const provaAtual=(S.recursos.provas||[]).find(p=>p.id===provaId);
-    if(provaAtual)_renderAlunoProvaUI(provaAtual,questoes);
+    if(provaAtual)_alunoRefreshContestacoes(provaAtual,questoes);
   }catch(e){console.error('load contestacoes paralelo falhou:',e);}
   finally{document.getElementById('rec-aluno-cont-loading')?.remove();}
 }
@@ -13104,11 +13124,25 @@ function _renderAlunoProvaUI(prova,questoes){
     ${termo?`<button class="btn btn-s btn-sm" onclick="alunoBuscaChange('')">✕ Limpar</button>`:''}
     ${termo?`<span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--t2)">${questoesFiltradas.length}/${questoes.length}</span>`:''}
   </div>`;
-  el.innerHTML=header+mapa+stats+buscaUI+`<div id="rec-aluno-questoes" style="display:flex;flex-direction:column;gap:10px">
+  el.innerHTML=header+`<div id="rec-aluno-mapa">${mapa}</div><div id="rec-aluno-stats">${stats}</div>`+buscaUI+`<div id="rec-aluno-questoes" style="display:flex;flex-direction:column;gap:10px">
     ${questoesFiltradas.length?questoesFiltradas.map(q=>_alunoQuestaoBox(q,prova)).join(''):'<div style="text-align:center;padding:30px;color:var(--t2);font-style:italic">Nenhuma questão encontrada com esse termo.</div>'}
   </div>`;
   // Inicia atualização do contador regressivo
   if(prova.dataLimite)_iniciarContadorRegressivo(prova.dataLimite);
+}
+
+// Atualiza in-place só os elementos que dependem das contestações carregadas em
+// background (mapa, stats e cada card), preservando cabeçalho/contador/scroll.
+// Substitui o re-render total do #rec-aluno-content que causava a piscada ao abrir a prova.
+function _alunoRefreshContestacoes(prova,questoes){
+  const mapaEl=document.getElementById('rec-aluno-mapa');
+  if(mapaEl)mapaEl.innerHTML=_renderMapaQuestoes(questoes);
+  const statsEl=document.getElementById('rec-aluno-stats');
+  if(statsEl)statsEl.innerHTML=_renderAlunoStats(questoes);
+  (questoes||[]).forEach(q=>{
+    const card=document.getElementById('rec-q-card-'+q.id);
+    if(card)card.outerHTML=_alunoQuestaoBox(q,prova);
+  });
 }
 
 // === Subtarefa 20: busca ===
@@ -13288,7 +13322,7 @@ function _alunoQuestaoBox(q,prova){
   const expandido=S.recursos.alunoState.expandidas.has(q.id);
   const numero=q.numero||'?';
   const gab=q.gabaritoOficial||'—';
-  return`<div style="background:var(--bg2);border:1px solid ${status.bd};border-left:4px solid ${status.cor};border-radius:10px;overflow:hidden;transition:all .2s">
+  return`<div id="rec-q-card-${q.id}" style="background:var(--bg2);border:1px solid ${status.bd};border-left:4px solid ${status.cor};border-radius:10px;overflow:hidden;transition:all .2s">
     <div onclick="alunoToggleQuestao('${q.id}')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none;background:${status.bgSubtle};transition:background .15s" onmouseover="this.style.background='${status.bgHover}'" onmouseout="this.style.background='${status.bgSubtle}'">
       <span style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;color:${status.cor};min-width:42px;text-align:center">${numero}</span>
       <div style="flex:1;min-width:0">
@@ -13734,7 +13768,8 @@ window.renderRecProvas=async()=>{
     </div>`;
     return;
   }
-  el.innerHTML=`<div style="display:grid;gap:10px">
+  el.innerHTML=`<div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--t2);margin:0 0 8px 2px;display:flex;align-items:center;gap:6px"><span style="opacity:.6">⠿</span> Arraste pela alça pra reordenar — a ordem vale também pra lista dos alunos.</div>
+  <div id="rec-provas-list" style="display:grid;gap:10px">
     ${provas.map(p=>_recProvaCard(p)).join('')}
   </div>`;
 };
@@ -13806,8 +13841,19 @@ async function _renderRecQuestoesView(){
       </div>
     </div>
   `;
-  el.innerHTML='<div style="text-align:center;padding:30px;color:var(--t2);font-size:13px">⏳ Carregando questões...</div>';
-  const questoes=await loadRecQuestoes(provaId);
+  // Re-render "quieto" (após carregar contestações pendentes em background): reusa as
+  // questões já buscadas e NÃO mostra o spinner nem refaz o fetch — era isso que
+  // fazia a tela "piscar" alguns ms depois de abrir a prova.
+  const _quieto=S.recursos._qViewQuiet&&S.recursos._qViewCache&&S.recursos._qViewCache.provaId===provaId;
+  S.recursos._qViewQuiet=false;
+  let questoes;
+  if(_quieto){
+    questoes=S.recursos._qViewCache.questoes;
+  }else{
+    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--t2);font-size:13px">⏳ Carregando questões...</div>';
+    questoes=await loadRecQuestoes(provaId);
+    S.recursos._qViewCache={provaId,questoes};
+  }
   const tipoCor=_MENTORIA_CORES[prova.tipo]||_MENTORIA_CORES.TSA;
   // Cabeçalho da prova — título é tipo+ano direto (sem chip redundante)
   const tituloProva=`${(prova.tipo||'').toUpperCase()}${prova.ano?' · '+prova.ano:''}`;
@@ -13892,11 +13938,13 @@ async function _renderRecQuestoesView(){
     const inp=document.getElementById('rec-q-search');
     if(inp){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);}
   }
-  // Carrega contestações pendentes em background (1ª abertura da prova) e re-renderiza pra mostrar CONTESTADA.
+  // Carrega contestações pendentes em background (1ª abertura da prova) e re-renderiza pra
+  // mostrar CONTESTADA. Marca _qViewQuiet pra o re-render reusar as questões já carregadas
+  // e pular o spinner/fetch — sem isso, a tela "piscava" ao abrir a prova.
   if(!_contestLoaded){
     loadContestPendMap(provaId,questoes).then(map=>{
       S.recursos._contestMapCache[provaId]=map;
-      if(S.recursos.curProvaId===provaId&&S.recursos.viewMode==='questoes')renderRecProvas();
+      if(S.recursos.curProvaId===provaId&&S.recursos.viewMode==='questoes'){S.recursos._qViewQuiet=true;renderRecProvas();}
     }).catch(e=>console.warn('contest map:',e));
   }
 }
@@ -13929,7 +13977,7 @@ function _recQuestaoCard(q,prova){
   // Questão contestada por aluno e ainda não assumida por nenhum prof → marca CONTESTADA + cabeçalho amarelado.
   const contestPend=!!q._contestPend;
   const headBg=contestPend?'background:rgba(210,153,34,.12);':'';
-  const contestBadge=contestPend?`<span title="Questão contestada por aluno — ainda não assumida por nenhum professor na Gestão de Recursos" style="display:inline-flex;align-items:center;gap:3px;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:800;letter-spacing:.6px;padding:2px 8px;border-radius:999px;background:rgba(210,153,34,.2);color:#d29922;border:1px solid rgba(210,153,34,.55)">⚠️ CONTESTADA</span>`:'';
+  const contestBadge=contestPend?`<span onclick="event.stopPropagation();abrirParecer('${prova.id}','${q.id}','')" title="Clique para ver a contestação e dar o parecer" style="cursor:pointer;display:inline-flex;align-items:center;gap:3px;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:800;letter-spacing:.6px;padding:2px 8px;border-radius:999px;background:rgba(210,153,34,.2);color:#d29922;border:1px solid rgba(210,153,34,.55);transition:background .15s,border-color .15s,transform .12s" onmouseover="this.style.background='rgba(210,153,34,.34)';this.style.borderColor='rgba(210,153,34,.85)';this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(210,153,34,.2)';this.style.borderColor='rgba(210,153,34,.55)';this.style.transform=''">⚠️ CONTESTADA →</span>`:'';
   const expanded=S.recursos._questaoExpanded.has(q.id);
   return`<div class="rec-q-card" draggable="true" data-qid="${q.id}" data-numero="${numero}" ondragstart="iqDragStart(event,'${q.id}')" ondragend="iqDragEnd(event)" ondragover="iqDragOver(event,'${q.id}')" ondragleave="iqDragLeave(event)" ondrop="iqDrop(event,'${q.id}')" style="background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${status.cor};border-radius:10px;overflow:hidden;transition:transform .15s,box-shadow .15s">
     <div onclick="recToggleQuestao('${q.id}')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none;flex-wrap:wrap;${headBg}">
@@ -13947,7 +13995,7 @@ function _recQuestaoCard(q,prova){
       <div onclick="event.stopPropagation()" style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
         ${_recComentarioBtn(q)}
         ${!validada&&!_hasParecerFinalizado(q)?`<button class="btn btn-s btn-sm" onclick="validarGabarito('${q.id}')" title="Marcar como concordo com o gabarito oficial" style="background:var(--gl);color:var(--green);border-color:rgba(63,185,80,.3);font-size:11px;padding:4px 10px;font-weight:600">✓ Validar gabarito</button>`:''}
-        <button class="btn btn-s btn-sm" onclick="abrirSugerirRecurso('${q.id}')" title="Cadastrar parecer proativo sem precisar de contestação do aluno" style="background:rgba(251,143,68,.12);color:#fb8f44;border-color:rgba(251,143,68,.35);font-size:11px;padding:4px 10px;font-weight:600">💡 Sugerir recurso</button>
+        <button class="btn btn-s btn-sm" onclick="abrirSugerirRecurso('${q.id}')" title="Cadastrar parecer proativo sem precisar de contestação do aluno" style="background:rgba(251,143,68,.12);color:#fb8f44;border-color:rgba(251,143,68,.35);font-size:11px;padding:4px 10px;font-weight:600">💡 Emitir parecer</button>
         <button class="btn btn-d btn-sm" onclick="deleteQuestaoDireto('${q.id}')" title="Apagar questão" style="font-size:11px;padding:4px 8px">🗑️</button>
       </div>
       <span id="recq-chev-${q.id}" style="font-size:13px;color:var(--t2);transition:transform .2s;display:inline-block;transform:rotate(${expanded?'90deg':'0deg'})">▶</span>
@@ -14050,7 +14098,7 @@ function _renderSugestoesBoxHTML(q){
     const excluidaInfo=extra.excluida?`<div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#f85149;margin-top:4px">✕ Excluída por ${s.excluidaPor||'?'} · ${s.excluidaEm?fDT(s.excluidaEm):''}</div>`:'';
     const acao=extra.excluida
       ?`<button class="btn btn-s btn-sm" onclick="restaurarSugestao('${q.id}','${s.id}')" style="font-size:10.5px;padding:3px 8px;background:rgba(63,185,80,.12);color:var(--green);border-color:rgba(63,185,80,.4)">↩️ Restaurar</button>`
-      :`<button class="btn btn-d btn-sm" onclick="excluirSugestao('${q.id}','${s.id}')" title="Excluir sugestão (dá pra restaurar depois)" style="font-size:10.5px;padding:3px 8px">🗑️</button>`;
+      :`<button class="btn btn-s btn-sm" onclick="event.stopPropagation();editarSugestao('${q.id}','${s.id}')" title="Editar este parecer" style="font-size:10.5px;padding:3px 8px;background:rgba(47,129,247,.12);color:var(--accent);border-color:rgba(47,129,247,.35)">✏️ Editar</button><button class="btn btn-d btn-sm" onclick="excluirSugestao('${q.id}','${s.id}')" title="Excluir parecer (dá pra restaurar depois)" style="font-size:10.5px;padding:3px 8px;margin-left:6px">🗑️</button>`;
     const bgCard=extra.excluida?'var(--bg)':'var(--bg2)';
     const opacity=extra.excluida?'.65':'1';
     return`<div style="padding:10px 12px;background:${bgCard};border:1px solid var(--border);border-left:3px solid ${cor};border-radius:6px;opacity:${opacity}">
@@ -14071,8 +14119,8 @@ function _renderSugestoesBoxHTML(q){
   if(ativas.length>=1){
     html+=`<div style="margin-top:14px">
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        💡 SUGESTÕES DE RECURSO (${ativas.length})
-        <span style="font-size:10px;color:var(--t2);font-weight:500">— a mais recente vale como parecer oficial</span>
+        📋 PARECER OFICIAL
+        ${ativas.length>1?`<span style="font-size:10px;color:var(--t2);font-weight:500">— a mais recente vale como parecer oficial</span>`:''}
       </div>
       <div style="display:flex;flex-direction:column;gap:6px">
         ${ativas.map((s,i)=>item(s,{atual:i===0})).join('')}
@@ -14415,6 +14463,32 @@ window.assumirComentario=async(qId)=>{
   await renderRecProvas();
 };
 
+// Modal do prof que está comentando a questão: 3 ações — marcar como comentada
+// (valida gabarito + encerra), liberar pra outro, ou continuar comigo.
+// Retorna Promise<'comentada'|'liberar'|null>. `desde` já vem formatado (ex: " desde 02/06 14:30").
+function _comentarioFinalizarModal(desde=''){
+  return new Promise(resolve=>{
+    const{cont,close}=_arosBuildModal({
+      title:'Comentário desta questão',
+      icon:'🎤',
+      maxWidth:540,
+      bodyHtml:`<div style="font-size:13.5px;line-height:1.6;color:var(--text)">Você está com esta questão${desde}.</div>
+        <div style="margin-top:12px;padding:11px 13px;background:var(--gl);border:1px solid rgba(63,185,80,.3);border-radius:10px;font-size:12.5px;line-height:1.55;color:var(--text)"><strong style="color:var(--green)">✓ Marcar como comentada</strong> — registra que você já comentou, <strong>valida o gabarito oficial</strong> e encerra a questão (passa a exibir “QUESTÃO COMENTADA”).</div>`,
+      footHtml:`<button class="btn btn-s" data-aros-cont style="margin-right:auto">Continuar comigo</button>
+        <button class="btn btn-s" data-aros-liberar>🔓 Liberar</button>
+        <button class="btn btn-p" data-aros-comentada style="background:var(--green);border-color:var(--green);color:#fff">✓ Marcar como comentada</button>`
+    });
+    const fin=(v)=>{close();resolve(v);};
+    cont.querySelector('[data-aros-comentada]').onclick=()=>fin('comentada');
+    cont.querySelector('[data-aros-liberar]').onclick=()=>fin('liberar');
+    cont.querySelector('[data-aros-cont]').onclick=()=>fin(null);
+    cont.querySelector('[data-aros-close]').onclick=()=>fin(null);
+    cont.onclick=(e)=>{if(e.target===cont)fin(null);};
+    document.addEventListener('keydown',function esc(e){if(e.key==='Escape'){fin(null);document.removeEventListener('keydown',esc);}});
+    setTimeout(()=>cont.querySelector('[data-aros-comentada]')?.focus(),50);
+  });
+}
+
 // Modal pra outro prof assumir o lugar de quem já estava comentando.
 window.abrirAssumirComentario=async(qId)=>{
   const provaId=S.recursos.curProvaId;if(!provaId)return;
@@ -14424,24 +14498,35 @@ window.abrirAssumirComentario=async(qId)=>{
   const profNome=S.currentUser?.nome||S.currentUser?.username||S.currentUser?.email||'Professor';
   if(!atual){return assumirComentario(qId);}
   const desde=q.comentarioAssumidoEm?` desde ${fDT(q.comentarioAssumidoEm)}`:'';
-  // Caso 1: o prof logado é o próprio que assumiu — oferece liberar
+  // Caso 1: o prof logado é o próprio que assumiu — modal com 3 ações:
+  // marcar como comentada (valida gabarito + encerra), liberar pra outro, ou continuar.
   if(atual===profNome){
-    const ok=await arosConfirm({
-      title:'Liberar comentário?',
-      icon:'🔓',
-      message:`Você está com esta questão${desde}.\n\nQuer liberar pra outro professor assumir?`,
-      confirmLabel:'Liberar',
-      cancelLabel:'Continuar comigo'
-    });
-    if(!ok)return;
-    try{
-      await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{
-        comentarioAssumidoPor:'',comentarioAssumidoEm:'',updatedAt:new Date().toISOString()
-      },{merge:true});
-    }catch(e){console.error('liberarComentario:',e);alert('Erro: '+(e.code||e.message));return;}
-    if(S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
-    arosToast('🔓 Comentário liberado','success',2500);
-    await renderRecProvas();
+    const escolha=await _comentarioFinalizarModal(desde);
+    if(escolha==='comentada'){
+      const nowIso=new Date().toISOString();
+      try{
+        await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{
+          validada:true,validadaPor:profNome,validadaEm:nowIso,
+          comentarioFinalizado:true,comentarioFinalizadoEm:nowIso,comentarioFinalizadoPor:profNome,
+          updatedAt:nowIso
+        },{merge:true});
+      }catch(e){console.error('marcarComentada:',e);alert('Erro: '+(e.code||e.message));return;}
+      if(S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
+      try{audit('QUESTAO_COMENTADA',{collection:'provas',provaId,questaoId:qId},{after:{validada:true,comentarioFinalizado:true}});}catch(_){}
+      arosToast('✓ Questão marcada como comentada e gabarito validado','success',3000);
+      await renderRecProvas();
+      return;
+    }
+    if(escolha==='liberar'){
+      try{
+        await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{
+          comentarioAssumidoPor:'',comentarioAssumidoEm:'',updatedAt:new Date().toISOString()
+        },{merge:true});
+      }catch(e){console.error('liberarComentario:',e);alert('Erro: '+(e.code||e.message));return;}
+      if(S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
+      arosToast('🔓 Comentário liberado','success',2500);
+      await renderRecProvas();
+    }
     return;
   }
   // Caso 2: outro prof — confirma takeover
@@ -14695,6 +14780,17 @@ window.restaurarSugestao=async(qId,sugId)=>{
   CM('modal-visualizar-q');
   await openVisualizarQuestao(qId,provaId);
   if(typeof renderRecProvas==='function')renderRecProvas();
+};
+
+// Abre o modal de parecer em modo EDIÇÃO, pré-preenchido com a sugestão existente.
+window.editarSugestao=async(qId,sugId)=>{
+  const provaId=S.recursos.curProvaId;if(!provaId)return;
+  const lista=S.recursos.questoesCache[provaId]||await loadRecQuestoes(provaId);
+  const q=lista.find(x=>x.id===qId);if(!q){arosToast('Questão não encontrada — recarregue a página.','err');return;}
+  const sug=(q.sugestoes||[]).find(s=>s.id===sugId&&!s.excluida);
+  if(!sug){arosToast('Parecer não encontrado.','err');return;}
+  CM('modal-visualizar-q'); // fecha o modal de visualização, se estiver aberto
+  await abrirParecer(provaId,qId,'',{editSug:sug});
 };
 
 // Stub do botão validar (será implementado de fato na subtarefa 9)
@@ -15854,7 +15950,8 @@ function _recProvaCard(p){
     <span class="rec-card-status-opt off"><span class="rec-card-status-dot"></span>Rascunho</span>
     <span class="rec-card-status-opt on"><span class="rec-card-status-dot"></span>Publicada</span>
   </div>`;
-  return`<div onclick="recAbrirQuestoes('${p.id}')" style="padding:14px 18px;background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${tipoCor.fg};border-radius:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;cursor:pointer;transition:background .15s,border-color .15s" onmouseover="this.style.background='var(--bg3)';this.style.borderColor='var(--accent)'" onmouseout="this.style.background='var(--bg2)';this.style.borderColor='var(--border)'">
+  return`<div data-prova-card data-prova-id="${p.id}" draggable="false" ondragstart="recProvaDragStart(event,'${p.id}')" ondragover="recProvaDragOver(event)" ondragend="recProvaDragEnd(event)" ondrop="event.preventDefault()" onclick="recAbrirQuestoes('${p.id}')" style="padding:14px 18px;background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${tipoCor.fg};border-radius:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;cursor:pointer;transition:background .15s,border-color .15s,opacity .15s" onmouseover="this.style.background='var(--bg3)';this.style.borderColor='var(--accent)'" onmouseout="this.style.background='var(--bg2)';this.style.borderColor='var(--border)'">
+    <span class="rec-prova-grip" onclick="event.stopPropagation()" onmousedown="this.closest('[data-prova-card]').draggable=true" onmouseup="this.closest('[data-prova-card]').draggable=false" title="Arraste pra reordenar" aria-label="Arraste pra reordenar">⠿</span>
     <div style="flex:1;min-width:240px">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.4px;color:${tipoCor.fg}">${tituloProva}</span>
@@ -15868,6 +15965,56 @@ function _recProvaCard(p){
     </div>
   </div>`;
 }
+
+// === Reordenar provas arrastando (drag-and-drop por alça) ===
+// O arraste só inicia quando o usuário segura a alça (⠿), que liga draggable=true no
+// card. Durante o dragover, o card arrastado é movido no DOM (sem re-render). Ao soltar,
+// lê-se a ordem final do DOM e grava `ordem` (0..n) no Firestore — o front usa o mesmo
+// array ordenado, então reflete automaticamente.
+let _recDragNode=null;
+window.recProvaDragStart=(e,provaId)=>{
+  _recDragNode=e.currentTarget;
+  e.dataTransfer.effectAllowed='move';
+  try{e.dataTransfer.setData('text/plain',provaId);}catch(_){}
+  // leve atraso pra o browser tirar o "fantasma" com a opacidade aplicada
+  setTimeout(()=>{if(_recDragNode)_recDragNode.style.opacity='.4';},0);
+};
+window.recProvaDragOver=(e)=>{
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  const alvo=e.currentTarget;
+  if(!_recDragNode||alvo===_recDragNode)return;
+  const r=alvo.getBoundingClientRect();
+  const depois=e.clientY>r.top+r.height/2; // soltar na metade de baixo = inserir depois
+  alvo.parentNode.insertBefore(_recDragNode,depois?alvo.nextSibling:alvo);
+};
+window.recProvaDragEnd=async(e)=>{
+  const node=_recDragNode;_recDragNode=null;
+  if(node){node.style.opacity='';node.draggable=false;}
+  const lista=document.getElementById('rec-provas-list');
+  if(!lista)return;
+  const ids=[...lista.querySelectorAll('[data-prova-id]')].map(n=>n.getAttribute('data-prova-id'));
+  // Reordena o array em memória conforme o DOM e atribui ordem 0..n
+  const byId={};(S.recursos.provas||[]).forEach(p=>byId[p.id]=p);
+  const novas=[];const aGravar=[];
+  ids.forEach((id,i)=>{
+    const p=byId[id];if(!p)return;
+    if(p.ordem!==i){p.ordem=i;aGravar.push(p);}
+    novas.push(p);
+  });
+  if(!novas.length)return;
+  S.recursos.provas=novas;
+  if(!aGravar.length)return; // nada mudou
+  try{
+    await Promise.all(aGravar.map(p=>setDoc(doc(db,'provas',p.id),{ordem:p.ordem,updatedAt:new Date().toISOString()},{merge:true})));
+    try{audit('PROVAS_REORDENADAS',{collection:'provas'},{after:{ordem:ids}});}catch(_){}
+    arosToast('✅ Ordem das provas salva','success',1800);
+  }catch(err){
+    console.error('reordenar provas:',err);
+    arosToast('❌ Falha ao salvar a ordem: '+(err?.code||err?.message||err),'err',4500);
+    await renderRecProvas(); // recarrega do banco pra desfazer o estado visual
+  }
+};
 
 window.toggleProvaStatus=async(provaId,el)=>{
   const p=(S.recursos.provas||[]).find(x=>x.id===provaId);
@@ -16357,7 +16504,9 @@ function _gestaoContestRow(c,estado){
 }
 
 window.abrirParecer=async(provaId,qId,cId,opts)=>{
-  // opts: {sugerir: bool, altLetra: string}
+  // opts: {sugerir: bool, altLetra: string, editSug: sugestaoObj}
+  const editSug=(opts&&opts.editSug)||null;
+  const isEdit=!!editSug;
   const isSugerir=!!(opts&&opts.sugerir);
   const altOverride=opts&&opts.altLetra||'';
   // Carrega prova + questão + contestações + parecer atual
@@ -16375,7 +16524,7 @@ window.abrirParecer=async(provaId,qId,cId,opts)=>{
   let modo=questao.modo||'estruturado';
   if(modo==='vf')modo='bloco';
   // Sub
-  const prefixoSugerir=isSugerir?'💡 SUGERIR RECURSO · ':'';
+  const prefixoSugerir=isSugerir?'💡 EMITIR PARECER · ':(isEdit?'✏️ EDITAR PARECER · ':'');
   document.getElementById('mpr-sub').innerHTML=`${prefixoSugerir}${prova?.nome||''} · Questão ${questao.numero||'?'} · Gabarito: ${questao.gabaritoOficial||'—'}`;
   // Box da questão — enunciado pode ser HTML rico
   const enunRawP=questao.enunciado||questao.blocoTexto||'';
@@ -16415,7 +16564,7 @@ window.abrirParecer=async(provaId,qId,cId,opts)=>{
   const atribuidoEm=questao.parecerAtribuidoEm||'';
   const assumiu=!!atribuido;
   const atribuicaoBox=document.getElementById('mpr-atribuicao-box');
-  if(isSugerir){
+  if(isSugerir||isEdit){
     atribuicaoBox.innerHTML='';
   }else if(assumiu){
     atribuicaoBox.innerHTML=`<div style="padding:12px 16px;background:rgba(163,113,247,.08);border:1px solid rgba(163,113,247,.35);border-radius:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
@@ -16436,8 +16585,8 @@ window.abrirParecer=async(provaId,qId,cId,opts)=>{
     </div>`;
   }
 
-  // Em modo "sugerir" sem contestações ainda, não exibe nada nesse box
-  if(isSugerir&&!contestacoesShow.length){
+  // Em modo "sugerir"/"editar" sem contestações ainda, não exibe nada nesse box
+  if((isSugerir||isEdit)&&!contestacoesShow.length){
     document.getElementById('mpr-contestacoes-box').innerHTML='';
   }else{
     document.getElementById('mpr-contestacoes-box').innerHTML=`<strong style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.5px;display:block;margin-bottom:8px">📨 CONTESTAÇÕES (${contestacoesShow.length})</strong>${contestHtml}`;
@@ -16451,6 +16600,16 @@ window.abrirParecer=async(provaId,qId,cId,opts)=>{
   let fonteCustomAtual=questao.parecerFonteCustom||ras.fonteCustom||'';
   let capAtual=questao.parecerCapitulo||ras.capitulo||'';
   let pagAtual=questao.parecerPagina||ras.pagina||'';
+  // Modo EDIÇÃO: ignora o parecer atual da questão e carrega os dados da sugestão escolhida.
+  if(isEdit){
+    parAtual=editSug.parecer||'cabe-recurso';
+    argAtual=editSug.argumento||'';
+    imgAtual=editSug.imagemUrl||'';
+    fonteAtual=editSug.fonte||'';
+    fonteCustomAtual=editSug.fonteCustom||'';
+    capAtual=editSug.capitulo||'';
+    pagAtual=editSug.pagina||'';
+  }
   // Popula select de bibliografia (carrega fontes se ainda não carregou)
   if(!(S.recursos.fontes||[]).length){try{await loadRecFontes();}catch(e){console.warn('loadRecFontes:',e);}}
   const fonteSel=document.getElementById('mpr-fonte');
@@ -16462,19 +16621,19 @@ window.abrirParecer=async(provaId,qId,cId,opts)=>{
   document.getElementById('mpr-pagina').value=pagAtual||'';
   // No fluxo "Sugerir recurso", força "cabe-recurso" no dropdown (a intenção do botão é sugerir um recurso)
   if(isSugerir&&parAtual==='em-analise')parAtual='cabe-recurso';
-  // Mostra/esconde campos editáveis baseado em atribuição (sugerir = sempre editável)
-  const podeEditar=isSugerir||assumiu;
+  // Mostra/esconde campos editáveis baseado em atribuição (sugerir/editar = sempre editável)
+  const podeEditar=isSugerir||assumiu||isEdit;
   document.getElementById('mpr-fields').classList.toggle('hidden',!podeEditar);
   // Reset explícito do estado dos botões (evita disabled/texto residual de sessões anteriores interrompidas)
   const saveBtn=document.getElementById('mpr-save-btn');
   saveBtn.classList.toggle('hidden',!podeEditar);
   saveBtn.disabled=false;
-  saveBtn.textContent=isSugerir?'✓ Salvar sugestão':'✓ Finalizar parecer';
+  saveBtn.textContent=isEdit?'✓ Salvar edição':(isSugerir?'✓ Salvar parecer':'✓ Finalizar parecer');
   const rascBtn=document.getElementById('mpr-rascunho-btn');
-  rascBtn.classList.toggle('hidden',!podeEditar||isSugerir);
+  rascBtn.classList.toggle('hidden',!podeEditar||isSugerir||isEdit);
   rascBtn.disabled=false;
   rascBtn.textContent='💾 Salvar rascunho';
-  document.getElementById('mpr-title').textContent=isSugerir?'💡 Sugerir recurso':(assumiu?'🛠️ Análise da solicitação':'👁 Visualizar solicitação');
+  document.getElementById('mpr-title').textContent=isEdit?'✏️ Editar parecer':(isSugerir?'💡 Emitir parecer':(assumiu?'🛠️ Análise da solicitação':'👁 Visualizar solicitação'));
   document.getElementById('mpr-parecer').value=parAtual;
   // Argumento como contenteditable (HTML). Compat: se for texto puro, escapa e converte quebras.
   const argEl=document.getElementById('mpr-argumento');
@@ -16491,6 +16650,7 @@ window.abrirParecer=async(provaId,qId,cId,opts)=>{
   document.getElementById('modal-parecer').dataset.alternativaLetra='';
   document.getElementById('modal-parecer').dataset.imagemUrl=imgAtual;
   document.getElementById('modal-parecer').dataset.isSugerir=isSugerir?'1':'';
+  document.getElementById('modal-parecer').dataset.editSugId=isEdit?(editSug.id||''):'';
   document.getElementById('modal-parecer').dataset.sugerirProfNome=(opts&&opts.profNome)||'';
   document.getElementById('modal-parecer').classList.remove('hidden');
 };
@@ -16677,6 +16837,10 @@ window.salvarParecer=async()=>{
     return;
   }
   if(!argumentoText){err.textContent='Escreva o parecer para o aluno antes de finalizar.';err.classList.remove('hidden');return;}
+  // Modo EDIÇÃO: atualiza a sugestão existente em vez de criar uma nova (não reenvia email
+  // nem remexe no status das contestações já respondidas).
+  const editSugId=document.getElementById('modal-parecer').dataset.editSugId||'';
+  if(editSugId){return _salvarParecerEdicao({provaId,qId,editSugId,parecer,argumento,imagemUrl,fonte,fonteCustom,capitulo,pagina,err});}
   const okFinal=await arosConfirm({title:'Finalizar parecer?',icon:'✓',message:'O parecer será gravado, ficará visível pro aluno e as contestações pendentes desta questão serão marcadas como respondidas. O aluno receberá o email automaticamente.',confirmLabel:'✓ Finalizar parecer'});
   if(!okFinal)return;
   err.classList.add('hidden');
@@ -16768,6 +16932,45 @@ window.salvarParecer=async()=>{
   if(typeof renderRecProvas==='function')await renderRecProvas();
   console.log('[salvarParecer] re-render concluído');
 };
+
+// Salva a EDIÇÃO de um parecer existente: atualiza o item no array `sugestoes` (preservando
+// id/autor/data de criação), recalcula o parecer oficial (mais recente ativo) e espelha nos
+// campos de topo. NÃO reenvia email nem altera o status das contestações já respondidas.
+async function _salvarParecerEdicao({provaId,qId,editSugId,parecer,argumento,imagemUrl,fonte,fonteCustom,capitulo,pagina,err}){
+  const okEdit=await arosConfirm({title:'Salvar edição do parecer?',icon:'✏️',message:'As alterações ficam visíveis pro aluno. Não reenvia email nem altera o status das contestações já respondidas.',confirmLabel:'✓ Salvar edição'});
+  if(!okEdit)return;
+  const editadoPor=(typeof getProfLogadoNome==='function'&&getProfLogadoNome())||S.currentUser?.nome||S.currentUser?.username||'Professor';
+  const nowIso=new Date().toISOString();
+  const btn=document.getElementById('mpr-save-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Salvando...';}
+  try{
+    const qd=await getDoc(doc(db,`provas/${provaId}/questoes/${qId}`));
+    const qdata=qd.exists()?qd.data():{};
+    const arr=Array.isArray(qdata.sugestoes)?qdata.sugestoes.slice():[];
+    const idx=arr.findIndex(s=>s.id===editSugId);
+    if(idx<0)throw new Error('Parecer não encontrado (pode ter sido removido). Recarregue a página.');
+    arr[idx]={...arr[idx],parecer,argumento,imagemUrl,fonte,fonteCustom,capitulo,pagina,editadoEm:nowIso,editadoPor};
+    // Parecer oficial = mais recente ativo (espelha nos campos de topo usados pelo aluno/status)
+    const oficial=arr.filter(s=>!s.excluida).sort((a,b)=>(b.criadoEm||'').localeCompare(a.criadoEm||''))[0]||arr[idx];
+    await setDoc(doc(db,`provas/${provaId}/questoes/${qId}`),{
+      sugestoes:arr,
+      parecer:oficial.parecer,parecerArgumento:oficial.argumento||'',parecerImagemUrl:oficial.imagemUrl||'',
+      parecerFonte:oficial.fonte||'',parecerFonteCustom:oficial.fonteCustom||'',parecerCapitulo:oficial.capitulo||'',parecerPagina:oficial.pagina||'',
+      parecerPor:oficial.profNome||'',parecerEm:oficial.criadoEm||nowIso,parecerFinalizado:true,
+      updatedAt:nowIso,
+    },{merge:true});
+    try{audit('PARECER_EDITADO',{collection:'provas',provaId,questaoId:qId,sugId:editSugId},{after:{parecer}});}catch(_){}
+  }catch(e){
+    console.error('_salvarParecerEdicao:',e);
+    if(btn){btn.disabled=false;btn.textContent='✓ Salvar edição';}
+    err.innerHTML=`❌ Erro: <strong>${e.code||e.message}</strong>`;err.classList.remove('hidden');return;
+  }
+  CM('modal-parecer');
+  if(S.recursos.questoesCache&&S.recursos.questoesCache[provaId])delete S.recursos.questoesCache[provaId];
+  arosToast('✓ Parecer editado','success',2500);
+  if(typeof renderRecGestao==='function')renderRecGestao().catch(e=>console.warn('renderRecGestao falhou:',e));
+  if(typeof renderRecProvas==='function')await renderRecProvas();
+}
 
 function prova_questao_email_ctx(provaId,qId){
   const p=(S.recursos.provas||[]).find(x=>x.id===provaId);
