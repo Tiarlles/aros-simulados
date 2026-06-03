@@ -1917,6 +1917,8 @@ Pacote entregue + deploy. Mudanças:
 
 **Modal genérico:** `.m-foot` ganhou `flex-wrap:wrap` (rodapé com 3 botões quebra linha em vez de cortar em telas estreitas).
 
+**Barra de progresso "% comentadas" no card da prova (visão Coord):** cada `_recProvaCard` exibe uma barra com quantas questões da prova já estão no estado "comentada" (`comentarioFinalizado || validada`) / total. `_recProvaCarregarProgresso(provas)` roda em background na `renderRecProvas` (1 `getDocs` por prova na subcoleção `questoes`), cacheia em `S.recursos._provaProgCache[provaId]={total,comentadas}` e preenche cada `#rec-prova-prog-${id}` via `_recProvaProgressRender`/`_recProvaProgressHTML`. Cor escala por faixa: <34% vermelho, <67% laranja, ≥67%/100% verde; 100% mostra "✓ 100%". Visual: track + fill com gradiente da cor + glow + shimmer (`@keyframes recProgShimmer`). Cache dá display instantâneo no re-render; o background sempre recomputa fresco (sem invalidação manual necessária).
+
 ### Catálogo de Produtos — redesign de features + pack + concorrentes + breve descrição (2026-05-27)
 
 Refatoração grande de UX e modelo de dados do catálogo. Tudo entregue e deployado no mesmo dia. Mudanças cobrem 4 áreas:

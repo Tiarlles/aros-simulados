@@ -7713,6 +7713,16 @@ body.pro-rt-fs-on{overflow:hidden}
 .rec-prova-grip:hover{opacity:1;color:var(--accent)}
 .rec-prova-grip:active{cursor:grabbing}
 [data-prova-card][draggable="true"]{cursor:grabbing}
+/* Barra de progresso "% comentadas" no card da prova (visão Coord) */
+.rec-prova-prog{margin-top:10px;max-width:560px}
+.rec-prova-prog-head{display:flex;align-items:center;gap:7px;margin-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.3px;color:var(--t2)}
+.rec-prova-prog-ico{font-size:12px;line-height:1}
+.rec-prova-prog-pct{margin-left:auto;font-size:13px;font-weight:800;letter-spacing:.2px}
+.rec-prova-prog-track{position:relative;height:10px;border-radius:999px;background:color-mix(in srgb,var(--t2) 16%,transparent);overflow:hidden;border:1px solid color-mix(in srgb,var(--border) 75%,transparent)}
+.rec-prova-prog-fill{height:100%;border-radius:999px;transition:width .7s cubic-bezier(.4,0,.2,1);position:relative;min-width:2px}
+.rec-prova-prog-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);transform:translateX(-100%);animation:recProgShimmer 2.4s ease-in-out infinite}
+@keyframes recProgShimmer{0%{transform:translateX(-100%)}55%,100%{transform:translateX(220%)}}
+.rec-prova-prog-loading,.rec-prova-prog-empty{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);opacity:.7}
 .rec-card-status-toggle{
   position:relative;display:grid;grid-template-columns:1fr 1fr;gap:0;padding:2px;
   background:color-mix(in srgb, var(--bg) 70%, transparent);border:1px solid var(--border);
@@ -13772,6 +13782,8 @@ window.renderRecProvas=async()=>{
   <div id="rec-provas-list" style="display:grid;gap:10px">
     ${provas.map(p=>_recProvaCard(p)).join('')}
   </div>`;
+  // Progresso de "% comentadas" por prova — carrega em background e preenche cada barra
+  _recProvaCarregarProgresso(provas);
 };
 
 async function _renderRecQuestoesView(){
@@ -15959,11 +15971,47 @@ function _recProvaCard(p){
         <button onclick="event.stopPropagation();openProvaModal('${p.id}')" title="Editar prova" style="background:none;border:none;cursor:pointer;font-size:14px;padding:4px 6px;border-radius:6px;line-height:1;opacity:.55;transition:opacity .15s,background .15s" onmouseover="this.style.opacity='1';this.style.background='var(--bg3)'" onmouseout="this.style.opacity='.55';this.style.background='none'">✏️</button>
       </div>
       ${limite?`<div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--t2);margin-top:6px">⏱ Recursos até ${limite}</div>`:''}
+      <div class="rec-prova-prog" id="rec-prova-prog-${p.id}">${(S.recursos._provaProgCache||{})[p.id]?_recProvaProgressHTML(S.recursos._provaProgCache[p.id]):'<div class="rec-prova-prog-loading">💬 calculando questões comentadas…</div>'}</div>
     </div>
     <div onclick="event.stopPropagation()" style="display:flex;gap:6px;flex-wrap:wrap">
       <button class="btn btn-d btn-sm" onclick="deleteProvaDireto('${p.id}')" title="Apagar prova">🗑️</button>
     </div>
   </div>`;
+}
+
+// === Barra de progresso "% de questões comentadas" por prova (visão Coord) ===
+// Conta questões com comentarioFinalizado||validada (estado "QUESTÃO COMENTADA") / total.
+// Carrega em background pra não travar a lista; cacheia em S.recursos._provaProgCache.
+function _recProvaProgressHTML(st){
+  const total=st&&st.total||0, comentadas=st&&st.comentadas||0;
+  if(!total)return`<div class="rec-prova-prog-empty">Nenhuma questão cadastrada ainda</div>`;
+  const pct=Math.round(comentadas/total*100);
+  const done=pct>=100;
+  const cor=done?'#3fb950':pct>=67?'#3fb950':pct>=34?'#fb8f44':'#f85149';
+  return`<div class="rec-prova-prog-head">
+      <span class="rec-prova-prog-ico">💬</span>
+      <span class="rec-prova-prog-txt">${comentadas}/${total} comentada${comentadas===1?'':'s'}</span>
+      <span class="rec-prova-prog-pct" style="color:${cor}">${done?'✓ ':''}${pct}%</span>
+    </div>
+    <div class="rec-prova-prog-track"><div class="rec-prova-prog-fill" style="width:${pct}%;background:linear-gradient(90deg, ${cor}, color-mix(in srgb, ${cor} 76%, #fff));box-shadow:0 0 10px -2px ${cor}99"></div></div>`;
+}
+function _recProvaProgressRender(provaId){
+  const el=document.getElementById('rec-prova-prog-'+provaId);
+  if(!el)return;
+  const st=(S.recursos._provaProgCache||{})[provaId];
+  if(st)el.innerHTML=_recProvaProgressHTML(st);
+}
+async function _recProvaCarregarProgresso(provas){
+  S.recursos._provaProgCache=S.recursos._provaProgCache||{};
+  await Promise.all((provas||[]).map(async p=>{
+    try{
+      const snap=await getDocs(collection(db,`provas/${p.id}/questoes`));
+      let comentadas=0;
+      snap.forEach(d=>{const q=d.data();if(q.comentarioFinalizado||q.validada)comentadas++;});
+      S.recursos._provaProgCache[p.id]={total:snap.size,comentadas};
+    }catch(e){console.warn('progresso prova',p.id,e);return;}
+    _recProvaProgressRender(p.id);
+  }));
 }
 
 // === Reordenar provas arrastando (drag-and-drop por alça) ===
