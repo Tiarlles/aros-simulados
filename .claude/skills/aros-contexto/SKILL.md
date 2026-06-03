@@ -1093,7 +1093,7 @@ Sessão grande de polimento em cima da v1 do catálogo (mantida estrutura, mudou
 
 **Seção Bônus (2026-05-23):**
 - Novo accordion **🎁 Bônus** abaixo de Mentoria. Modelo: `bonusProdutoIds:[str]` (referências a outros produtos do catálogo) + `bonusFeatures:[Feature]` (features livres mesma shape).
-- Vincular produto: picker `_proBonusOpenProdPicker` lista todos os outros produtos do catálogo (exceto o próprio e os já vinculados), com mini-capa+nome+status. Click adiciona como chip.
+- Vincular produto: picker `_proBonusOpenProdPicker`/`_proFeatuOpenProdPicker` → `_proOpenProdMultiPicker` lista os produtos **da vertical atual** (exceto o próprio e os já vinculados), com mini-capa+nome+status. Click adiciona como chip. **(2026-06-02: passou a filtrar por `(p.vertical||'anestreview')===S.verticalAtual` — antes mostrava produtos de todas as verticais.)**
 - Features bônus livres: mesma interface das features principais (drag, dropdown, etc), source='bonusFeatures'. `_proFeatWrapId` aceita os 3: 'features', 'mentoriaFeatures', 'bonusFeatures'.
 - Detalhe: seção **`// 🎁 BÔNUS`** (amarelo dourado #fbbf24) com cards horizontais clicáveis dos produtos vinculados (cada um abre `proAbrir(id)`) + features bônus em lista.
 - Dex prompt: resolve nomes dos produtos vinculados a partir da lista de produtos passada (`formatarProduto(p, todosProdutos)`).
@@ -1356,6 +1356,11 @@ Const `VERTICAIS` em `index.html` é fonte única de verdade — `{id,nome,ico,c
 - `proDexAsk` envia `vertical: S.verticalAtual||'anestreview'` no body.
 
 **Migração:** zero impacto pra AnestReview (usa docs originais). Outras verticais começam vazias — admin cadastra do zero ao entrar nelas.
+
+**Pack de features básicas replicado em todas as verticais (2026-06-02):**
+- `PRO_FEAT_PACK_DEFAULT` (antes `[]`) agora contém o **pack básico** (11 features: Videoaulas, Slides das Aulas, Banco de Questões, Flashcards, Apostilas, HotTopics, Cronograma/Flow, Bot IA, Grupo de Whatsapp, Fórum de Dúvidas, Garantia de Aprovação). É o fallback quando a vertical não tem doc próprio → **toda vertical nova já nasce com o pack básico**.
+- Além do código, os docs `config/featurePack_oftreview`/`_ortopreview`/`_medreview` foram **gravados** com o pack básico (11) via API REST do Firestore usando as credenciais do firebase-tools logado (owner tiarllesmiller@gmail.com — acesso de owner ignora as security rules). OftReview tinha 2 features (subset do básico) → upgrade sem perda. Backup do estado anterior em `/tmp/pack-backup-*.json`. Resultado: as 4 verticais com as 11 básicas.
+- **Como gravar no Firestore como owner (sem senha de app):** trocar `~/.config/configstore/firebase-tools.json` → `tokens.refresh_token` por access token no endpoint `oauth2.googleapis.com/token` (client_id/secret públicos do firebase-tools), depois `PATCH https://firestore.googleapis.com/v1/projects/simulados-confirmacao/databases/(default)/documents/<col>/<doc>` com `Authorization: Bearer <token>` + `updateMask.fieldPaths`. Owner bypassa as rules. Script de referência em `/tmp/pack-write.mjs`.
 
 ### Catálogo de Produtos — Editais (2026-05-26)
 

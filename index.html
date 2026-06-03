@@ -34486,8 +34486,22 @@ let _proDirty=false;
 let _proCatSeeded=false;
 
 // Pack default global — usado quando uma vertical não tem doc próprio.
-// Lista inicial vazia; admin edita e o primeiro save cria o doc da vertical.
-const PRO_FEAT_PACK_DEFAULT=[];
+// É o "pack de features básicas" (replicado em todas as verticais sem pack customizado):
+// toda vertical nova/vazia (ex.: OrtopReview, MedReview) já nasce com essas features.
+// Verticais que editaram e salvaram seu próprio pack (têm doc) usam o delas, não este.
+const PRO_FEAT_PACK_DEFAULT=[
+  {id:'8g7mi92j',icone:'🎥',titulo:'Videoaulas'},
+  {id:'68pqcc3u',icone:'📑',titulo:'Slides das Aulas'},
+  {id:'sn1xaja8',icone:'📝',titulo:'Banco de Questões'},
+  {id:'h4vaf3l8',icone:'🃏',titulo:'Flashcards'},
+  {id:'kocu2ot8',icone:'📚',titulo:'Apostilas'},
+  {id:'0gklf38t',icone:'🗂️',titulo:'HotTopics (Resumos; Ficha Resumo)'},
+  {id:'l29svajm',icone:'⏱️',titulo:'Cronograma Personalizado (Flow)'},
+  {id:'vx041e5b',icone:'🤖',titulo:'Bot IA embutido no sistema'},
+  {id:'d5pqus7v',icone:'💬',titulo:'Grupo de Whatsapp'},
+  {id:'tn7ud3em',icone:'🙋🏻',titulo:'Fórum de Dúvidas com acesso direto ao professor'},
+  {id:'cdzcmqlj',icone:'🏆',titulo:'Garantia de Aprovação'}
+];
 
 const PRO_ICONES_CURADOS=['🎥','📚','🗂️','📝','🎯','🏆','💬','📊','🧠','🎓','⏱️','🔬','💊','🩺','📖','📋','🎙️','🧪','🎬','📺','🔖','🗓️','👥','💡','📈'];
 const PRO_STATUS_LABEL={ativo:'Ativo','aguardando-descricao':'Ativo · aguardando descrição','em-breve':'Em breve',rascunho:'Rascunho',descontinuado:'Descontinuado'};
@@ -41859,8 +41873,10 @@ window._proOpenProdMultiPicker=(ev,ctx)=>{
   const pop=document.getElementById('pro-picker-pop');if(!pop)return;
   const atual=S.produtoAtual;
   const linked=new Set(ctx.alreadyLinked||[]);
+  // Só produtos da vertical atual (mesma regra da listagem: sem campo `vertical` = 'anestreview' legado)
+  const vert=S.verticalAtual||'anestreview';
   const opts=(S.produtos||[])
-    .filter(p=>p.id&&p.id!==atual.id&&!linked.has(p.id))
+    .filter(p=>p.id&&p.id!==atual.id&&!linked.has(p.id)&&(p.vertical||'anestreview')===vert)
     .sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'));
   _proMultiPickSel=new Set();
   _proMultiPickConfirmFn=ctx.onConfirm||null;
