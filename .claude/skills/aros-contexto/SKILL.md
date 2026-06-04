@@ -20,7 +20,7 @@ SPA monolítico single-file (HTML+CSS+JS vanilla, ~7500+ linhas em `index.html`)
 | CDN externos | EmailJS (envio de email), SheetJS (export/import xlsx), Firebase JS SDK |
 | Banco | Firebase Firestore (projeto `simulados-confirmacao`) |
 | Storage | Firebase Storage (imagens de revisão, checklists, slides) |
-| Auth | **Firebase Auth** (Email/Password + Google) coexistindo com **login custom legado** em `usuarios/{username}` (senhas plaintext). Custom login virou read-only após apertarem as Rules (2026-05-21) — sobrevive como fallback até migração completa. **Senha admin atual mudou** (perguntar ao Tiarlles; `aros2025` é DESATUALIZADA). |
+| Auth | **Firebase Auth APENAS** (Email/Password + Google). **Login custom legado APOSENTADO em 2026-06-04** — `checkPass` agora só faz Firebase; input sem `@` é rejeitado ("entre com e-mail"). Leitura de `usuarios` exige login (`isAuth()`). Senhas plaintext ainda existem nos docs `usuarios` mas NÃO são mais públicas (read travado) — remoção pendente (Camada 2c). **Senha admin: perguntar ao Tiarlles; `aros2025` é DESATUALIZADA e morta.** |
 | Email | EmailJS (`service_exyoa4r`). **Templates:** `template_r0vjejs` (simulados TSA Oral — trocas/confirmação/presença) e `template_hb89fxv` (Mentoria — todos os 5 tipos + envio de link da reunião). Mentoria usa var `{{tipo_mentoria}}` (TEA/TSA/ME1/ME2/ME3) em vez de `{{simulado}}`. |
 | Pagamentos | Hotmart (produto "+3 Simulados Extras Online AROS!") |
 | Notificações | Slack Incoming Webhook (canal `#notificacao-simulado-extra`) |
@@ -529,14 +529,12 @@ Renderização da sidebar usa `_menuEffectiveGroups()` que:
 
 A aba Coordenação fica **oculta na visão inicial** (`tab-co` com `display:none`). Acesso via hash `#admin` ou `#coord` na URL.
 
-### Sistema de auth (refeito em 2026-05-21)
-**Coexistência de 2 sistemas** na tela `co-login`:
-1. **Firebase Auth** (novo): Google sign-in (`loginGoogle`) + Email/Password (`loginEmailFirebase`). Email/senha pode usar `sendPasswordResetEmail`.
-2. **Login custom legado** (`checkPass`): fallback para users sem email no Firebase. Aceita slug, display name ou email — case-insensitive.
+### Sistema de auth (login custom APOSENTADO em 2026-06-04 — só Firebase agora)
+Tela `co-login` tem **só Firebase Auth**: Google sign-in (`loginGoogle`) + Email/Password (`loginEmailFirebase`, com `sendPasswordResetEmail` no "Esqueci a senha"). O login custom legado (comparava `usuarios.senha` plaintext no cliente) foi **removido do `checkPass`** — todos os coord/profs já estavam migrados.
 
-**Fluxo do `checkPass`**: se input contém `@` → tenta Firebase Auth primeiro, com fallback pro custom em `auth/invalid-credential` / `auth/user-not-found` / `auth/wrong-password`. Senão, vai direto pro custom.
+**Fluxo do `checkPass` (atual)**: se input não tem `@` → erro "entre com seu e-mail (ou Google)". Senão → `loginEmailFirebase(raw,senha)`. Sem mais fallback custom, sem migração transparente, sem leitura de `usuarios` pré-login. Campo `co-user` é `type=email` placeholder "E-mail".
 
-**Listener `onAuthStateChanged`** popula `S.currentUser` após sign-in Firebase: busca user doc por `email` em `S.usuarios`. Se não acha → erro + `signOut()`. Guard pra `?modo=projecao|projecao-live|preview` (não manipula DOM destruído). Flag `window._freshFirebaseLogin` evita auditar `LOGIN_*` em cada reload.
+**Listener `onAuthStateChanged`** popula `S.currentUser` após sign-in Firebase E **restaura a sessão ao recarregar** (Firebase persiste o login): busca user doc por `email` em `S.usuarios` (carrega `loadUsuarios()` pós-auth). Se não acha → erro + `signOut()`. Guard pra `?modo=projecao|projecao-live|preview`. Flag `window._freshFirebaseLogin` evita auditar `LOGIN_*` em cada reload. **É o ÚNICO caminho de login/restauração agora** — a antiga `_restoreSession` (localStorage) foi REMOVIDA (causava "pisca" e apagava sessão antes do Firebase confirmar).
 
 **`esqueceuSenha`**: se input tem `@` → `sendPasswordResetEmail`; senão → mensagem orientando contatar coord.
 
@@ -568,7 +566,22 @@ A aba Coordenação fica **oculta na visão inicial** (`tab-co` com `display:non
 - Helper `isAdmExclusiveTab(tabId)`: `true` se a aba é STRICT_ADMIN OU se nenhum tipo não-adm tem essa aba no preset. Substituiu `ADMIN_ONLY_TABS.has(tabId)` hardcoded.
 - Badge no menu lateral reflete dinamicamente as decisões de preset.
 
-**Sessão persistida em localStorage** (`aros_session` = username). Refresh mantém login. Logout limpa. Em Firebase Auth, `onAuthStateChanged` restaura `S.currentUser` independente do localStorage.
+**Sessão persistida pelo Firebase Auth** (IndexedDB próprio do SDK). Refresh mantém login via `onAuthStateChanged`. Logout = `signOut()`. (O `localStorage.aros_session` ainda é escrito por `_applyLocalSession` mas é vestigial/não-lido — limpar quando der.)
+
+**⚠️ Boot NÃO carrega dados de coordenação (2026-06-04):** o `Promise.all` do `boot()` deixou de chamar `loadUsuarios()`, `loadFinanceiro()`, `loadSenhasAcessos()` — senão desceriam pro navegador de TODO visitante (alunos incluídos; `usuarios` tem senhas plaintext). Esses carregam sob demanda: `onAuthStateChanged` (pós-login) e ao abrir a aba (`loadSenhasAcessos` no switch da aba; `_ensureFinanceiroListener` no tab financeiro). Ao mexer no boot, NÃO re-adicione esses loaders.
+
+### Blindagem de leitura do Firestore (2026-06-04)
+O AROS sempre teve `allow read: if true` em quase tudo (alunos navegam sem login → reads públicos por design). Isso vazava dados sensíveis (a apiKey do Firebase é pública; read aberto = legível por qualquer um via SDK). Blindagem feita em camadas (deploy de `firestore.rules`):
+- **Fase 1:** `config/senhasAcessos` (cofre de senhas) e `config/financeiro` → `read: if isAuth()`. Feito via wildcard `config/{cfgId}` negando esses dois IDs + matches específicos. Faxina: removidas senhas mortas `password`/`profPassword` de `config/settings` (deleteField ao abrir aba Config logado).
+- **Camada 1:** travadas pra `isAuth()` 10 coleções que NENHUM fluxo público usa: `notas`, `orcamentos`, `tarefas`, `disponibilidade`, `feedbackGeral`, `auditLog` (create segue aberto p/ legado), `produtos`, `revisaoCasos/comentarios`, `revisaoCasos/historico`, `adminUids`.
+- **Camada 2:** `usuarios` → `read: if isAuth()` (+ login legado aposentado, ver acima). CPF já era protegido (`alunosAprovados` é admin-only).
+- **AINDA público (Camada 3 pendente):** `simulados`(+alunos), `listas`, `mentorias`, `clinicas`(+alunos), `blocosClinica`, `revisaoCasos`(parent), `provas`(+questoes+contestacoes), `fontesRecurso`, `recursosConfig`, `config/{settings,menu,simExtra,comunicacao,conteudosLiberados}`, `comunicacao/posts`, `trocasDiretas`, `projecaoLive`, `checklists`(meta+respostas), `orcamentos`? (não — travado), `solicitacoesExtra`. Essas alimentam as abas públicas — contêm **emails de alunos** (listas/mentorias/clinicas/solicitacoesExtra/simulados-alunos) e o **Slack webhook** em `config/simExtra`. Camada 3 = separar emails pra doc protegido sem quebrar a navegação. Ver [[project_aros_seguranca_leituras]].
+
+**Regra de ouro ao mexer em rules ou no que uma aba lê:** as 4 abas públicas (Início, Simulados, Recursos, Mentorias) + Mural + sim-extra do aluno + boot rodam SEM login. Qualquer coleção que elas leem precisa continuar pública; o resto deve exigir `isAuth()`.
+
+### Endereço da coordenação (subdomínio) — gating por host
+O `index.html` tem `arosIsPainelHost()` + `window.AROS_IS_PAINEL` (perto de `window.switchView`). A coordenação só funciona em hosts da lista `AROS_PAINEL_HOSTS` (+ localhost/file/`*.github.io` p/ dev). No endereço do aluno a coord fica TOTALMENTE bloqueada: `switchView('coord')`, `openCoordPanel`, `_revealCoordTab` caem em `goHome()`; cadeado 🔐 + atalho mobile removidos no load. Objetivo: coord em `admin.anestreview.com.br`, alunos em `aros.anestreview.com.br`.
+**Estado transitório:** `AROS_PAINEL_HOSTS` inclui TEMPORARIAMENTE `aros.anestreview.com.br` (coord funciona nos dois) enquanto `admin.*` não está no ar. Quando admin.* for publicado/testado, REMOVER `aros.anestreview.com.br` da lista. Plano de infra (2º repo GitHub Pages `aros-admin` + Action de sync em `.github/workflows/sync-admin.yml` — NÃO commitado até o repo existir) em [[project_aros_painel_subdominio]]. **Adicionar admin.* em Firebase Auth → Authorized domains** senão login quebra.
 
 ### Auto-seleção de simulado por aba
 Várias abas que dependem de "qual sim?" usam helpers comuns:

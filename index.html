@@ -4294,13 +4294,13 @@ body.pro-rt-fs-on{overflow:hidden}
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>
     <div style="margin-bottom:8px">
-      <input class="fc" id="co-user" type="text" placeholder="Email ou usuário" autocomplete="username" style="text-align:center" onkeydown="if(event.key==='Enter')checkPass()"/>
+      <input class="fc" id="co-user" type="email" placeholder="E-mail" autocomplete="email" style="text-align:center" onkeydown="if(event.key==='Enter')checkPass()"/>
     </div>
     <div style="position:relative;margin-bottom:8px">
       <input class="fc" id="co-pass" type="password" placeholder="Senha" autocomplete="current-password" style="text-align:center;padding-right:40px" onkeydown="if(event.key==='Enter')checkPass()"/>
       <button type="button" onclick="togglePwd('co-pass','eye-login')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--t2);font-size:16px;padding:4px" id="eye-login">👁</button>
     </div>
-    <div id="pass-err" class="al al-e hidden">Usuário ou senha incorretos.</div>
+    <div id="pass-err" class="al al-e hidden">E-mail ou senha incorretos.</div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <button class="btn btn-s" style="flex:1" onclick="switchView('aluno')">Voltar</button>
       <button class="btn btn-p" style="flex:2" onclick="checkPass()">Entrar</button>
@@ -8539,7 +8539,7 @@ const auth=getAuth(_fbApp);
 window._fbStorage={ref:storageRef,uploadBytes,getDownloadURL,deleteObject,storage:_storage};
 window._fbAuth={auth,signInWithEmailAndPassword,signInWithPopup,sendPasswordResetEmail,signOut,onAuthStateChanged,GoogleAuthProvider};
 
-const S={view:'home',unlocked:false,profUnlocked:false,currentUser:null,usuarios:[],sims:[],curSim:null,students:[],coDay:'sabado',alDay:'sabado',step:1,cfg:{password:'aros2025',profPassword:'Anestreview1531',profTabs:['simulados','trocas','professores','listas','desempenho','checklist']},pendSwap:null,profs:[],listas:[],simExtraCfg:{linkPagoAluno:'',linkPagoExterno:'',linkGratuito:'',slackWebhook:'',listaVigenteId:'',alunosGratuitos:[]},solicitacoesExtra:[],simStats:{},_id:null,_rSab:[],_rDom:[]};
+const S={view:'home',unlocked:false,profUnlocked:false,currentUser:null,usuarios:[],sims:[],curSim:null,students:[],coDay:'sabado',alDay:'sabado',step:1,cfg:{profTabs:['simulados','trocas','professores','listas','desempenho','checklist']},pendSwap:null,profs:[],listas:[],simExtraCfg:{linkPagoAluno:'',linkPagoExterno:'',linkGratuito:'',slackWebhook:'',listaVigenteId:'',alunosGratuitos:[]},solicitacoesExtra:[],simStats:{},_id:null,_rSab:[],_rDom:[]};
 window.S=S;
 
 // ── IDENTIDADE: prof logado (Fase 2 da migração Firebase Auth) ───────────────
@@ -8713,13 +8713,16 @@ async function boot(){
   if(S.cfg&&Array.isArray(S.cfg.professorPreset)&&!S.cfg.tiposPresets){
     S.cfg.tiposPresets={prof:S.cfg.professorPreset};
   }
-  await Promise.all([loadSims(),loadProfs(),loadListas(),loadUsuarios(),loadMenuLabels(),loadSimExtra(),loadFinanceiro(),loadMentorias(),loadBlocos(),loadClinicas(),loadRevisoes(),loadRecProvas(),loadComunicacaoCards(),loadConteudosLiberados(),loadSenhasAcessos()]);
+  // Dados de COORDENAÇÃO (usuarios c/ senhas, financeiro, cofre de senhas) NÃO são
+  // carregados aqui — senão desceriam pro navegador de todo visitante (inclusive alunos).
+  // Eles carregam sob demanda: no login, no onAuthStateChanged e ao abrir a aba.
+  await Promise.all([loadSims(),loadProfs(),loadListas(),loadMenuLabels(),loadSimExtra(),loadMentorias(),loadBlocos(),loadClinicas(),loadRevisoes(),loadRecProvas(),loadComunicacaoCards(),loadConteudosLiberados()]);
   // Pre-carrega contagens de posts pra mostrar o badge "X avisos" nos cards da home
   try{await Promise.all(['tsa','tea','mes'].map(c=>loadComunicacaoPosts(c)));}catch(e){}
   renderSimCards();
   if(typeof renderHomeCards==='function')renderHomeCards();
   if(typeof _clAdminRender==='function')_clAdminRender();
-  if(typeof _restoreSession==='function')_restoreSession();
+  // (sessão da coordenação é restaurada pelo Firebase Auth via onAuthStateChanged)
   if(typeof _initMentoriaHash==='function')_initMentoriaHash();
   // apply saved theme
   const t=localStorage.getItem('aros-theme')||'dark';
@@ -9778,7 +9781,35 @@ window.toggleTheme=()=>{
 };
 
 // view switching
+// === Separação coordenação × front por endereço (host) ===
+// A coordenação (login + painel) só funciona no subdomínio dedicado, ou em
+// ambiente de teste (arquivo aberto direto, localhost, ou *.github.io de preview).
+// No endereço público do aluno a coordenação fica TOTALMENTE bloqueada e invisível.
+// ⚠️ TRANSIÇÃO: 'aros.anestreview.com.br' está aqui TEMPORARIAMENTE pra coordenação
+// continuar funcionando no endereço atual enquanto o subdomínio admin.* não está no ar.
+// Quando admin.anestreview.com.br estiver publicado e testado, REMOVER 'aros.anestreview.com.br'
+// desta lista (e republicar) — aí a coordenação fica bloqueada no endereço do aluno.
+const AROS_PAINEL_HOSTS=['admin.anestreview.com.br','aros.anestreview.com.br'];
+const AROS_DEV_HOSTS=['localhost','127.0.0.1','0.0.0.0'];
+function arosIsPainelHost(){
+  const h=(location.hostname||'').toLowerCase();
+  if(location.protocol==='file:')return true;     // abrir o index.html direto = ambiente de teste
+  if(AROS_DEV_HOSTS.includes(h))return true;       // servidor de desenvolvimento local
+  if(h.endsWith('.github.io'))return true;         // preview no endereço padrão do GitHub Pages
+  return AROS_PAINEL_HOSTS.includes(h);
+}
+window.AROS_IS_PAINEL=arosIsPainelHost();
+// No endereço do aluno: remove o cadeado e o atalho de Coordenação do menu.
+if(!window.AROS_IS_PAINEL){
+  try{
+    const lock=document.getElementById('admin-lock-btn');if(lock)lock.remove();
+    document.querySelectorAll('.mm-action').forEach(b=>{if(/Painel da Coordena/i.test(b.textContent||''))b.remove();});
+  }catch(_){}
+}
+
 window.switchView=v=>{
+  // Coordenação não existe no endereço do aluno — qualquer tentativa cai na Home.
+  if(v==='coord'&&!window.AROS_IS_PAINEL){return (typeof goHome==='function')?goHome():undefined;}
   S.view=v;
   const homeEl=document.getElementById('view-home');if(homeEl)homeEl.classList.toggle('hidden',v!=='home');
   const muralEl=document.getElementById('view-mural');if(muralEl)muralEl.classList.toggle('hidden',v!=='mural');
@@ -11245,10 +11276,14 @@ window.addEventListener('resize',()=>{requestAnimationFrame(()=>_arosUpdateDayTa
 // (mantém compat com #admin/#coord no hash, mas o botão tab-co fica sempre oculto —
 //  acesso ao painel é via cadeado 🔐 no header)
 function _revealCoordTab(){
+  if(!window.AROS_IS_PAINEL)return goHome();   // bloqueado no endereço do aluno
   switchView('coord');
 }
 // Botão 🔐 do header — abre painel de coord (login ou painel se já logado)
-window.openCoordPanel=()=>{switchView('coord');_applyCoSidebarPref();};
+window.openCoordPanel=()=>{
+  if(!window.AROS_IS_PAINEL)return goHome();    // bloqueado no endereço do aluno
+  switchView('coord');_applyCoSidebarPref();
+};
 
 // Sidebar colapsável do painel da coordenação — default fechada, persiste em localStorage.
 window.toggleCoSidebar=()=>{
@@ -11297,7 +11332,11 @@ function _processRoute(){
   if(location.hash==='#mes')return goMural('mes');
   if(location.hash==='#admin'||location.hash==='#coord')return _revealCoordTab();
   if(location.hash==='#simulados'||location.hash==='#aluno')return switchView('aluno');
-  if(location.hash==='#home'||location.hash==='')return goHome();
+  // No subdomínio do painel, sem rota específica, já abre a coordenação (login).
+  if(location.hash==='#home'||location.hash===''){
+    if(window.AROS_IS_PAINEL&&location.pathname!=='/recursos')return _revealCoordTab();
+    return goHome();
+  }
 }
 window.addEventListener('hashchange',_processRoute);
 window.addEventListener('popstate',_processRoute);
@@ -21355,7 +21394,7 @@ window._baixarPdfRevLegacy=async()=>{
   */
 };
 
-S.financeiro={profsFin:{},tipos:[],meses:{}};
+S.financeiro={profsFin:{},tipos:[],meses:{},notaFiscalCfg:{}};
 const FIN_DEFAULT_TIPOS=[
   {id:'sys-rodada',nome:'Rodada de simulado oficial',valorPadrao:200,system:true},
   {id:'sys-simextra',nome:'Simulado Extra',valorPadrao:1000,system:true},
@@ -23676,83 +23715,27 @@ window.checkPass=async()=>{
   const raw=(usernameEl?.value||'').trim();
   const username=raw.toLowerCase();
   const senha=passEl?.value||'';
-  if(!username||!senha){errEl.textContent='Preencha usuário e senha.';errEl.classList.remove('hidden');return;}
-  // Se contém @, tenta Firebase Auth primeiro; se credencial não existir lá, cai pro custom
-  // (cobre coords cadastrados com email como username no sistema antigo).
-  if(username.includes('@')){
-    try{
-      await loginEmailFirebase(raw,senha);
-      errEl.classList.add('hidden');
-      // onAuthStateChanged popula S.currentUser e abre o painel
-      return;
-    }catch(e){
-      console.error('loginEmail:',e);
-      const code=e?.code||'';
-      const fallbackCodes=['auth/invalid-credential','auth/user-not-found','auth/wrong-password'];
-      if(!fallbackCodes.includes(code)){
-        let msg='Email ou senha incorretos.';
-        if(code==='auth/invalid-email')msg='Email inválido.';
-        else if(code==='auth/user-disabled')msg='Usuário desativado.';
-        else if(code==='auth/too-many-requests')msg='Muitas tentativas. Tente mais tarde.';
-        else if(code==='auth/network-request-failed')msg='Sem conexão. Verifique a internet.';
-        errEl.textContent=msg;errEl.classList.remove('hidden');
-        return;
-      }
-      // credencial não bate no Firebase — tenta fluxo custom abaixo
-    }
+  if(!username||!senha){errEl.textContent='Preencha e-mail e senha.';errEl.classList.remove('hidden');return;}
+  // Login SÓ via Firebase Auth (Google ou e-mail verificado). O login antigo
+  // (usuário + senha guardada no banco) foi aposentado — por isso a coleção
+  // `usuarios` não é mais lida antes do login, e suas leituras exigem login.
+  if(!username.includes('@')){
+    errEl.textContent='Entre com seu e-mail (ou use o botão do Google).';errEl.classList.remove('hidden');return;
   }
-  // Fallback: login custom clássico. Aceita digitar tanto o slug (username/id),
-  // quanto o display name (campo nome), QUANTO o email cadastrado — case-insensitive.
-  // O match por email cobre users criados via onboarding mas sem conta no Firebase Auth.
-  try{await loadUsuarios();}catch(e){console.error(e);}
-  const u=S.usuarios.find(x=>{
-    if(x.inativo||x.senha!==senha)return false;
-    const slug=(x.username||x.id||'').toLowerCase();
-    const display=(x.nome||'').toLowerCase();
-    const mail=(x.email||'').toLowerCase();
-    return slug===username||display===username||(mail&&mail===username);
-  });
-  if(!u){errEl.textContent='Usuário ou senha incorretos.';errEl.classList.remove('hidden');return;}
-  errEl.classList.add('hidden');
-
-  // ────────────────────────────────────────────────────────────────────────
-  // MIGRAÇÃO TRANSPARENTE PRO FIREBASE AUTH
-  // Se o usuário tem email cadastrado, tenta logar/criar conta no Firebase Auth
-  // com a mesma senha. Próximas vezes ele entra direto pelo Firebase (ganhando
-  // permissão real pra escrever em coleções coord/prof). Falhas são silenciosas
-  // — cai pro _applyLocalSession antigo e o user entra normal.
-  // ────────────────────────────────────────────────────────────────────────
-  if(u.email&&senha&&senha.length>=6){
-    try{
-      window._freshFirebaseLogin=true;
-      await signInWithEmailAndPassword(auth,u.email,senha);
-      // onAuthStateChanged faz _applyLocalSession + audit — terminamos aqui.
-      return;
-    }catch(e){
-      const code=e?.code||'';
-      if(code==='auth/user-not-found'||code==='auth/invalid-credential'){
-        // Provável: conta Auth ainda não existe. Tenta criar com a mesma senha.
-        try{
-          await createUserWithEmailAndPassword(auth,u.email,senha);
-          audit('USUARIO_MIGRADO_AUTH',{username:u.username||u.id,email:u.email});
-          // onAuthStateChanged faz _applyLocalSession + audit do LOGIN
-          return;
-        }catch(e2){
-          // email-already-in-use significa que existe Auth account com senha
-          // diferente da legacy — não dá pra migrar transparente. Cai pro custom.
-          console.warn('migração Auth (create):',e2?.code||e2?.message||e2);
-          window._freshFirebaseLogin=false;
-        }
-      }else{
-        // wrong-password / outros: cai pro custom
-        console.warn('migração Auth (signin):',code);
-        window._freshFirebaseLogin=false;
-      }
-    }
+  try{
+    await loginEmailFirebase(raw,senha);
+    errEl.classList.add('hidden');
+    // onAuthStateChanged popula S.currentUser e abre o painel
+  }catch(e){
+    console.error('loginEmail:',e);
+    const code=e?.code||'';
+    let msg='E-mail ou senha incorretos.';
+    if(code==='auth/invalid-email')msg='E-mail inválido.';
+    else if(code==='auth/user-disabled')msg='Usuário desativado.';
+    else if(code==='auth/too-many-requests')msg='Muitas tentativas. Tente mais tarde.';
+    else if(code==='auth/network-request-failed')msg='Sem conexão. Verifique a internet.';
+    errEl.textContent=msg;errEl.classList.remove('hidden');
   }
-
-  _applyLocalSession(u);
-  audit('LOGIN_CUSTOM',{username:u.username||u.id});
 };
 
 window.logout=async()=>{
@@ -23766,8 +23749,9 @@ window.logout=async()=>{
   const p=document.getElementById('co-pass');if(p)p.value='';
 };
 
-// Listener Firebase Auth: ativa quando login Google/Email Firebase resolve.
-// Custom login (username+senha) não dispara isso — segue caminho próprio em _applyLocalSession.
+// Listener Firebase Auth: ativa quando login Google/Email Firebase resolve, e também
+// restaura a sessão automaticamente ao recarregar a página (Firebase persiste o login).
+// É o ÚNICO caminho de login agora — o login custom (usuário+senha) foi aposentado.
 onAuthStateChanged(auth,async(user)=>{
   // Modo projeção/preview destrói o DOM da coord — listener não faz nada
   const _modo=new URLSearchParams(location.search).get('modo');
@@ -23815,16 +23799,11 @@ onAuthStateChanged(auth,async(user)=>{
   }
 });
 
-// Restaura sessão do localStorage (chamado no boot, após loadUsuarios)
-function _restoreSession(){
-  try{
-    const savedUser=localStorage.getItem('aros_session');
-    if(!savedUser)return;
-    const u=S.usuarios.find(x=>!x.inativo&&(x.username||x.id||'').toLowerCase()===savedUser.toLowerCase());
-    if(!u){localStorage.removeItem('aros_session');return;}
-    _applyLocalSession(u);
-  }catch(e){console.warn('restoreSession:',e);}
-}
+// Restauração de sessão agora é 100% via Firebase Auth (onAuthStateChanged abaixo):
+// ao recarregar a página, o Firebase recupera a sessão persistida e o listener
+// chama _applyLocalSession. A antiga restauração via localStorage foi removida —
+// com o login custom aposentado, ela só causava "pisca" da tela de login e
+// apagava a sessão salva antes do Firebase confirmar o login.
 
 // ── CRUD USUÁRIOS ────────────────────────────────────────────────────────────
 function renderUsuarios(){
@@ -28879,7 +28858,7 @@ window.switchCoTab = (tab, btn) => {
   if(tab==='recFontes') renderRecFontes();
   if(tab==='recMetricas') renderRecMetricas();
   if(tab==='comunicacao') renderComunicacaoAdmin();
-  if(tab==='senhasAcessos') renderSenhasAcessos();
+  if(tab==='senhasAcessos'){loadSenhasAcessos().then(()=>renderSenhasAcessos());}
   if(tab==='senhasPublicas') renderSenhasPublicas();
   if(tab==='auditoria') renderAuditoria();
 };
@@ -29842,9 +29821,13 @@ window.switchCoTab=(tab,btn)=>{
   if(tab==='config'){
     const el=document.getElementById('ai-prompt');if(el&&S._aiPrompt)el.value=S._aiPrompt;
     const urlEl=document.getElementById('cfg-url');if(urlEl&&S.cfg.systemUrl)urlEl.value=S.cfg.systemUrl;
-    // Load prof config
-    const profPassEl=document.getElementById('prof-pass-input');
-    if(profPassEl)profPassEl.value=S.cfg.profPassword||'Anestreview1531';
+    // Faxina única: remove senhas legadas (já não usadas pra nada) que ficavam
+    // gravadas em config/settings — e portanto legíveis. Dispara quando um admin
+    // (logado) abre Configurações; depois disso os campos somem do banco.
+    if(S.cfg.password!==undefined||S.cfg.profPassword!==undefined){
+      delete S.cfg.password;delete S.cfg.profPassword;
+      updateDoc(doc(db,'config','settings'),{password:deleteField(),profPassword:deleteField()}).catch(()=>{});
+    }
     const aiPromptEl=document.getElementById('ai-prompt');
     if(aiPromptEl)aiPromptEl.value=S.cfg.aiPrompt||S._aiPrompt||'';
     const allowedTabs=S.cfg.profTabs||['simulados','trocas','professores','listas','desempenho','checklist'];

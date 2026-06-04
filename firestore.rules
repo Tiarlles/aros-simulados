@@ -56,7 +56,9 @@ service cloud.firestore {
     //    Function quando aposentar o custom login.
     // ────────────────────────────────────────────────────────────────────────
     match /usuarios/{username} {
-      allow read: if true;
+      // blindado: lista de usuários (com email/senha) só legível por quem está
+      // logado (Firebase Auth). Login antigo aposentado — nada lê isto pré-login.
+      allow read: if isAuth();
       allow create, update: if isAuth()
                             && request.resource.data.username is string
                             && request.resource.data.senha is string
@@ -108,7 +110,7 @@ service cloud.firestore {
     // de aluno aqui).
     // ────────────────────────────────────────────────────────────────────────
     match /orcamentos/{eventoId} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: só coordenação logada
       allow create, update: if isAuth()
                             && request.resource.data.nome is string
                             && request.resource.data.nome.size() > 0
@@ -121,7 +123,10 @@ service cloud.firestore {
     // ⚠️  Slack webhook em config/simExtra ainda é leitura pública.
     // ────────────────────────────────────────────────────────────────────────
     match /config/{cfgId} {
-      allow read: if true;
+      // Leitura pública das configs que o front do aluno precisa (settings, menu,
+      // simExtra, etc.). EXCETO docs sensíveis (senhasAcessos, financeiro), que
+      // exigem login — protegidos por regras próprias logo abaixo.
+      allow read: if cfgId != 'senhasAcessos' && cfgId != 'financeiro';
       // Write geral: exige auth (coord/admin editando configurações).
       // Exceção: config/simExtra pode receber update anônimo SE alterar somente
       // o campo `alunosGratuitos` (incremento de quotaUsada pelo aluno gratuito
@@ -133,11 +138,17 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Docs SENSÍVEIS dentro de config — leitura só para usuário logado (coord/prof).
+    // A escrita já é coberta pela regra wildcard acima (exige auth). Sem isto, o
+    // cofre de senhas e o financeiro ficavam legíveis por qualquer um na internet.
+    match /config/senhasAcessos { allow read: if isAuth(); }
+    match /config/financeiro    { allow read: if isAuth(); }
+
     // ────────────────────────────────────────────────────────────────────────
     // NOTAS — coord/prof lançam. Escrita exige auth.
     // ────────────────────────────────────────────────────────────────────────
     match /notas/{simId}/alunos/{matricula} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: notas só coordenação logada
       allow create, update: if isAuth();
       allow delete: if false;
     }
@@ -159,7 +170,7 @@ service cloud.firestore {
     // DISPONIBILIDADE — prof/coord registra disponibilidade. Exige auth.
     // ────────────────────────────────────────────────────────────────────────
     match /disponibilidade/{simId}/profs/{profKey} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: só coordenação/prof logado
       allow create, update: if isAuth();
       allow delete: if isAuth();
     }
@@ -168,7 +179,7 @@ service cloud.firestore {
     // FEEDBACK GERAL — coord/prof escreve. Exige auth.
     // ────────────────────────────────────────────────────────────────────────
     match /feedbackGeral/{simId} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: só coordenação/prof logado
       allow create, update: if isAuth();
       allow delete: if false;
     }
@@ -177,7 +188,7 @@ service cloud.firestore {
     // FEATURES / TAREFAS (kanban interno). Exige auth.
     // ────────────────────────────────────────────────────────────────────────
     match /tarefas/{taskId} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: kanban interno só logado
       allow create, update: if isAuth()
                             && request.resource.data.titulo is string
                             && request.resource.data.titulo.size() > 0
@@ -238,7 +249,7 @@ service cloud.firestore {
       allow delete: if isAuth();
 
       match /comentarios/{cmtId} {
-        allow read: if true;
+        allow read: if isAuth();  // blindado: só coordenação/prof logado
         allow create, update: if isAuth()
                               && request.resource.data.profNome is string
                               && request.resource.data.profNome.size() > 0
@@ -247,7 +258,7 @@ service cloud.firestore {
       }
 
       match /historico/{histId} {
-        allow read: if true;
+        allow read: if isAuth();  // blindado: só coordenação/prof logado
         allow create, update: if isAuth()
                               && request.resource.data.editadoPor is string;
         allow delete: if false;
@@ -359,7 +370,7 @@ service cloud.firestore {
     // é gateada na UI; rules não distinguem permissões dentro de coord/prof.
     // ────────────────────────────────────────────────────────────────────────
     match /produtos/{produtoId} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: catálogo interno só logado
       allow create, update: if isAuth()
                             && request.resource.data.nome is string
                             && request.resource.data.nome.size() > 0
@@ -375,7 +386,7 @@ service cloud.firestore {
     // ⚠️  Reads abertos: refatorar pra exigir auth quando aposentar custom login.
     // ────────────────────────────────────────────────────────────────────────
     match /auditLog/{logId} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: log só admin logado (create segue aberto p/ legado)
       allow create: if request.resource.data.action is string
                     && request.resource.data.action.size() > 0
                     && request.resource.data.action.size() < 80;
@@ -389,7 +400,7 @@ service cloud.firestore {
     // Write: apenas outro admin pode adicionar/remover.
     // ────────────────────────────────────────────────────────────────────────
     match /adminUids/{uid} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: checagem do próprio UID só pós-login
       // Bootstrap único do primeiro admin (dono do projeto). UID hardcoded
       // pra evitar que qualquer Firebase Auth user vire admin sozinho.
       // Após o primeiro doc existir, só admin existente pode adicionar outros.
