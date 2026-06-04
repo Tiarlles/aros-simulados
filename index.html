@@ -4380,7 +4380,7 @@ body.pro-rt-fs-on{overflow:hidden}
       <!-- Schedule -->
       <div class="card" id="co-sched" style="display:none">
         <div class="ch"><h3 class="ct">📋 Escala</h3>
-          <div style="display:flex;gap:7px">
+          <div style="display:flex;gap:7px" id="co-sched-tools">
             <button class="btn btn-g btn-sm" onclick="openAddAluno()">+ Aluno</button>
             <button class="btn btn-g btn-sm" onclick="openEditRodadas()">⏰ Configurar Rodadas</button>
           </div>
@@ -8258,6 +8258,82 @@ body.pro-rt-fs-on{overflow:hidden}
   </div>
 </div>
 
+<!-- ══ MODAL: Painel do Dia (Simulado Presencial · rodízio/grade/estações) ══ -->
+<style id="pd-style">
+#modal-painel .md,#modal-pd-est .md{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Plus Jakarta Sans',system-ui,sans-serif}
+#modal-painel{backdrop-filter:saturate(140%) blur(8px);-webkit-backdrop-filter:saturate(140%) blur(8px)}
+.pd-seg{display:inline-flex;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:4px;gap:4px;width:100%}
+.pd-seg button{flex:1;border:none;background:transparent;color:var(--t2);font-weight:600;font-size:14px;padding:9px 14px;border-radius:9px;cursor:pointer;transition:all .18s ease;font-family:inherit}
+.pd-seg button.on{background:var(--bg);color:var(--t1);box-shadow:0 1px 3px rgba(0,0,0,.18),0 0 0 .5px rgba(0,0,0,.04)}
+.pd-mono{font-family:'JetBrains Mono','SF Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.pd-card{border:1px solid var(--border);border-radius:16px;background:var(--bg2);margin-bottom:12px;overflow:hidden}
+.pd-acc-h{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none;transition:background .15s}
+.pd-acc-h:hover{background:var(--bg3)}
+.pd-acc-h .pd-chev{margin-left:auto;transition:transform .2s ease;color:var(--t3);font-size:13px}
+.pd-acc-h.open .pd-chev{transform:rotate(90deg)}
+.pd-acc-t{font-weight:650;font-size:15px;letter-spacing:-.01em}
+.pd-acc-b{padding:4px 16px 16px}
+.pd-row{display:flex;gap:8px;align-items:center;padding:9px 12px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;background:var(--bg);flex-wrap:wrap;transition:border-color .15s}
+.pd-row:hover{border-color:color-mix(in srgb,var(--accent,#2f81f7) 35%,var(--border))}
+#modal-painel input.fc,#modal-painel select.fc{border-radius:10px}
+.pd-tip{font-size:11.5px;color:var(--t3);margin-top:6px;line-height:1.5}
+.pd-time-in{background:var(--bg3);border:1px solid var(--border);border-radius:9px;color:var(--t1);font-size:12.5px;padding:4px 7px;cursor:pointer;font-family:'JetBrains Mono','SF Mono',monospace;transition:border-color .15s}
+.pd-time-in:hover,.pd-time-in:focus{border-color:color-mix(in srgb,#2f81f7 50%,var(--border));outline:none}
+.pd-cell{padding:13px 10px;text-align:center;font-weight:600;border-radius:13px;transition:transform .12s ease,filter .15s ease;font-size:14px}
+.pd-cell.clk{cursor:pointer}
+.pd-cell.clk:hover{transform:translateY(-1px);filter:brightness(1.08)}
+.pd-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:var(--bg);font-size:13px}
+#modal-painel .m-title,#modal-pd-est .m-title{font-family:'Space Grotesk','SF Pro Display',-apple-system,system-ui,sans-serif;font-weight:600;letter-spacing:-.02em}
+#modal-painel .m-sub,#modal-pd-est .m-sub,#modal-painel .pd-mono,#modal-pd-est .pd-mono{font-family:'JetBrains Mono','SF Mono',ui-monospace,monospace}
+#modal-painel .pd-acc-t{font-family:'Space Grotesk',-apple-system,system-ui,sans-serif}
+.pd-ico{width:15px;height:15px;vertical-align:-2.5px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;display:inline-block;flex:none}
+.pd-acc-t .pd-ico,.pd-seg button .pd-ico{margin-right:7px}
+.pd-cell .pd-ico{stroke-width:1.6}
+</style>
+<div class="mo hidden" id="modal-painel">
+  <div class="md" style="max-width:1280px;width:96vw">
+    <div class="mh">
+      <div><div class="m-title" id="pd-title">Painel do Dia</div><div class="m-sub" id="pd-sub"></div></div>
+      <button class="m-close" onclick="CM('modal-painel')">✕</button>
+    </div>
+    <div class="m-body">
+      <div class="pd-seg" style="margin-bottom:18px">
+        <button id="pd-tab-grade" class="on" onclick="pdSwitchTab('grade')"><svg class="pd-ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Grade do dia</button>
+        <button id="pd-tab-conf" onclick="pdSwitchTab('conf')"><svg class="pd-ico" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="var(--bg)"/><circle cx="15" cy="12" r="2" fill="var(--bg)"/><circle cx="8" cy="18" r="2" fill="var(--bg)"/></svg>Configurar</button>
+      </div>
+
+      <!-- Pane: Grade -->
+      <div id="pd-pane-grade">
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-s btn-sm" onclick="pdPrint()"><svg class="pd-ico" viewBox="0 0 24 24" style="margin-right:5px"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>Imprimir / Projetar</button>
+          <span class="pd-mono" style="font-size:12px;color:var(--t2);margin-left:auto" id="pd-grade-stats"></span>
+        </div>
+        <div id="pd-grade" style="overflow-x:auto"></div>
+      </div>
+
+      <!-- Pane: Configurar -->
+      <div id="pd-conf" class="hidden"></div>
+
+      <div id="pd-msg" class="hidden" style="margin-top:10px"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-painel')">Fechar</button>
+      <button class="btn btn-p" onclick="pdSaveConf(this)"><svg class="pd-ico" viewBox="0 0 24 24" style="margin-right:5px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>Salvar configuração</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Estação aberta sobre o Painel (Simulado/Oficina) ══ -->
+<div class="mo hidden" id="modal-pd-est" style="z-index:1200;backdrop-filter:saturate(140%) blur(10px);-webkit-backdrop-filter:saturate(140%) blur(10px)">
+  <div class="md" style="max-width:1120px;width:94vw">
+    <div class="mh">
+      <div><div class="m-title" id="pde-title">Estação</div><div class="m-sub" id="pde-sub"></div></div>
+      <button class="m-close" onclick="CM('modal-pd-est')">✕</button>
+    </div>
+    <div class="m-body" id="pde-body"></div>
+  </div>
+</div>
+
 <!-- ══ MODAL: Cadastros financeiro (profs + tipos atividade) ══ -->
 <div class="mo hidden" id="modal-fin-cadastros">
   <div class="md" style="max-width:780px">
@@ -9668,7 +9744,7 @@ function subStudents(id){
   unsub=onSnapshot(collection(db,`simulados/${id}/alunos`),snap=>{
     S.students=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderEscala();
-    if(S.unlocked){renderCoSched();updateStats();renderSwapPanel();}
+    if(S.unlocked){renderCoSched();updateStats();renderSwapPanel();try{if(typeof pdLiveRefresh==='function')pdLiveRefresh();}catch(_){}}
     // Re-assina projeção ao vivo dos alunos sempre que a lista muda
     subLiveStudents(id);
   });
@@ -25729,7 +25805,10 @@ function _coStatusSel(a){
   </select>`;
 }
 
+window.renderCoSched=()=>renderCoSched();
 function renderCoSched(){
+  const _tools=document.getElementById('co-sched-tools');
+  if(_tools)_tools.style.display=S.curSim?.presencial?'none':'flex';
   if(S.curSim?.presencial){return renderCoSchedPres();}
   // Dispara auto-absent se prazo encerrou (não bloqueia render)
   try{_autoAbsentPostDeadline();}catch(_){}
@@ -25852,7 +25931,7 @@ function renderCoSchedPres(){
     const head=`<div class="rc${_rcPresCol}" id="${_rcPresId}"><div class="rh" onclick="if(event.target.closest('button'))return;toggleRoundCard(this.parentElement)">
       <span class="r-time"><span class="rh-toggle">▾</span>📅 ${dia==='sabado'?'Sábado':'Domingo'}${data?' · '+fD(data):''}</span>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-        <button class="btn btn-s btn-sm" onclick="openEstacoesPres('${dia}')">🎯 Configurar Estações</button>
+        <button class="btn btn-p btn-sm" onclick="openPainelDia('${dia}')">📅 Painel do Dia</button>
         <button class="btn btn-s btn-sm" onclick="openAddPresAluno('${dia}')">+ Aluno</button>
       </div>
     </div>`;
@@ -25864,13 +25943,14 @@ function renderCoSchedPres(){
         <option value="presente" ${s.presenca==='presente'?'selected':''}>✅ Presente</option>
         <option value="ausente" ${s.presenca==='ausente'?'selected':''}>❌ Ausente</option>
       </select>`;
-      return`<div class="aluno-row ${s.status==='confirmed'?'status-confirmed':s.status==='swap'?'status-swap':''}">
-        <div class="aluno-name">${s.nome}${swapLbl}</div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${_coStatusSel(s)}${presSel}
-          <button class="btn btn-s btn-sm" onclick="moverDiaPres('${s.id}')" title="Trocar dia">↔️ Mover</button>
-          <button class="btn btn-g btn-sm" onclick="confirmResetStPres('${s.id}')" title="Resetar">↺</button>
-          <button class="btn btn-d btn-sm" onclick="rmSt('${s.id}')" title="Remover aluno">✕</button>
-        </div>
+      const _cls=s.presenca==='ausente'?'status-absent':(s.status==='confirmed'?'status-confirmed':s.status==='swap'?'status-swap':'');
+      return`<div class="aluno-row ${_cls}" style="flex-wrap:nowrap">
+        <div class="aluno-name" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.nome}${swapLbl}</div>
+        <span style="width:170px;flex:none;display:inline-flex">${_coStatusSel(s)}</span>
+        <span style="flex:none">${presSel}</span>
+        <button class="btn btn-s btn-sm" onclick="moverDiaPres('${s.id}')" title="Trocar dia" style="flex:none;white-space:nowrap">↔️ Mover</button>
+        <button class="btn btn-g btn-sm" onclick="confirmResetStPres('${s.id}')" title="Resetar" style="flex:none">↺</button>
+        <button class="btn btn-d btn-sm" onclick="rmSt('${s.id}')" title="Remover aluno" style="flex:none">✕</button>
       </div>`;
     }).join('');
     con.innerHTML=head+`<div class="cb">${rows}</div></div>`;
@@ -26152,6 +26232,495 @@ window.mepLimparAlocacoes=async()=>{
   afetados.forEach(s=>s.alocacao=null);
   mepRenderDist();
 };
+
+// ════════════════════════════════════════════════════════════════════════════
+// PAINEL DO DIA (Simulado Presencial · grade/rodízio/estações · controle ao vivo)
+// ════════════════════════════════════════════════════════════════════════════
+window._pd={dia:null,cfg:null,tab:'grade',est:null,simBloco:0,open:new Set(),openG:new Set(),alunoQ:''};
+// Busca de alunos (ignora acento/maiúscula) — esconde quem não bate, sem re-renderizar
+window.pdFilterAlunos=(q)=>{
+  const n=_pdNorm(q);
+  document.querySelectorAll('#pd-conf .pd-stud').forEach(el=>{el.style.display=(!n||(el.dataset.n||'').includes(n))?'':'none';});
+};
+
+// Paleta theme-safe via color-mix (lê hue base, mistura com tokens do tema)
+const _pdHues=['138,99,210','47,160,90','200,90,82','190,140,45','47,120,210','200,70,140','120,120,120','40,160,160'];
+function _pdCor(i){const h=_pdHues[i%_pdHues.length];return{bg:`color-mix(in srgb, rgb(${h}) 16%, var(--bg2))`,fg:`color-mix(in srgb, rgb(${h}) 62%, var(--t1))`,bd:`color-mix(in srgb, rgb(${h}) 32%, var(--border))`};}
+
+// Ícones SVG de traço (estilo SF Symbols/Lucide) — substituem emojis
+const _PD_ICONS={
+  calendar:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
+  settings:'<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="var(--bg)"/><circle cx="15" cy="12" r="2" fill="var(--bg)"/><circle cx="8" cy="18" r="2" fill="var(--bg)"/>',
+  target:'<circle cx="12" cy="12" r="9"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/><circle cx="12" cy="12" r="3"/>',
+  layers:'<path d="M12 2 2 7l10 5 10-5-10-5zM2 12l10 5 10-5M2 17l10 5 10-5"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  shuffle:'<path d="M16 3h5v5M21 3l-7 7M16 21h5v-5M21 21l-7-7M3 3l7 7M3 21l5-5"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/>',
+  trash:'<path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+  timer:'<circle cx="12" cy="13" r="8"/><path d="M9 2h6M19 6l1.5-1.5M12 9v4"/>',
+  swap:'<path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',
+  arrowUR:'<path d="M7 17 17 7M8 7h9v9"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+};
+function _pdIco(n,sz){const p=_PD_ICONS[n]||'';return`<svg class="pd-ico" viewBox="0 0 24 24"${sz?` style="width:${sz}px;height:${sz}px"`:''}>${p}</svg>`;}
+
+const _pdRid=(p)=>p+'_'+Math.random().toString(36).slice(2,8);
+// normaliza pra busca: sem acentos, minúsculo, sem espaços nas pontas
+const _pdNorm=(s)=>String(s==null?'':s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+function _pdDefaults(){
+  const spb=4;
+  return{
+    inicio:'08:00',casoMin:7,gapMin:1,trocaMin:6,salasPorBloco:spb,
+    estacoes:[
+      {id:_pdRid('est'),tipo:'simulado',nome:'Simulado',prof:''},
+      {id:_pdRid('est'),tipo:'oficina',nome:'Pediatria',prof:''},
+      {id:_pdRid('est'),tipo:'oficina',nome:'Eco',prof:''},
+      {id:_pdRid('est'),tipo:'oficina',nome:'Neuro',prof:''},
+    ],
+    salas:Array.from({length:12},(_,i)=>({id:_pdRid('sl'),nome:'Sala '+(i+1),prof:''})),
+    // casos: lista plana (2 por sala, na ordem) — IGUAIS em todos os blocos. Plano pq Firestore não aceita array aninhado.
+    casos:Array.from({length:spb*2},(_,i)=>'Caso '+(i+1)),
+    grupos:Array.from({length:4},(_,i)=>({id:_pdRid('grp'),nome:'Grupo '+(i+1)})),
+    timeline:[
+      {kind:'rotacao',dur:85},
+      {kind:'evento',nome:'Intervalo para troca de salas',dur:10,icon:'⏱️'},
+      {kind:'rotacao',dur:85},
+      {kind:'evento',nome:'Intervalo para troca de salas',dur:10,icon:'⏱️'},
+      {kind:'rotacao',dur:85},
+      {kind:'evento',nome:'Almoço',dur:85,icon:'🍽️'},
+      {kind:'rotacao',dur:85},
+      {kind:'evento',nome:'Deslocamento / água / café / banheiro',dur:20,icon:'🚶'},
+      {kind:'evento',nome:'Devolutiva do simulado',dur:45,icon:'📋'},
+      {kind:'evento',nome:'Intervalo para café',dur:30,icon:'☕'},
+      {kind:'evento',nome:'Habilidades não técnicas e soft-skills',dur:30,icon:'🎓'},
+      {kind:'evento',nome:'Encerramento',dur:10,icon:'✅'},
+    ],
+  };
+}
+function _pdNormalize(c){
+  const d=_pdDefaults();c=c||{};
+  const spb=+c.salasPorBloco||d.salasPorBloco;
+  // casos: lista PLANA de nomes (2 por sala). Aceita formato novo (flat) ou legado (pares) e converte.
+  const _target=spb*2;
+  let casos;
+  if(Array.isArray(c.casos)&&c.casos.length){
+    casos=Array.isArray(c.casos[0])?c.casos.flatMap(p=>[(p&&p[0])||'',(p&&p[1])||'']):c.casos.map(x=>String(x==null?'':x));
+  }else if(c.salas&&c.salas.length&&c.salas[0]&&c.salas[0].casos){
+    casos=c.salas.slice(0,spb).flatMap(s=>[(s.casos&&s.casos[0])||'',(s.casos&&s.casos[1])||'']);
+  }else casos=d.casos.slice();
+  while(casos.length<_target)casos.push('Caso '+(casos.length+1));
+  casos=casos.slice(0,_target);
+  const n={
+    inicio:c.inicio||d.inicio,
+    casoMin:+c.casoMin||d.casoMin,
+    gapMin:c.gapMin==null?d.gapMin:+c.gapMin,
+    trocaMin:c.trocaMin==null?d.trocaMin:+c.trocaMin,
+    salasPorBloco:spb,
+    estacoes:(c.estacoes&&c.estacoes.length?c.estacoes:d.estacoes).map(e=>({id:e.id||_pdRid('est'),tipo:e.tipo==='simulado'?'simulado':'oficina',nome:e.nome||'Estação',prof:e.prof||''})),
+    salas:(c.salas&&c.salas.length?c.salas:d.salas).map((s,i)=>({id:s.id||_pdRid('sl'),nome:s.nome||('Sala '+(i+1)),prof:s.prof||''})),
+    casos,
+    grupos:(c.grupos&&c.grupos.length?c.grupos:d.grupos).map((g,i)=>({id:g.id||_pdRid('grp'),nome:g.nome||('Grupo '+(i+1))})),
+    timeline:(c.timeline&&c.timeline.length?c.timeline:d.timeline).map(t=>t.kind==='rotacao'?{kind:'rotacao',dur:+t.dur||+c.blocoDur||85}:{kind:'evento',nome:t.nome||'Evento',dur:+t.dur||0,icon:t.icon||'•'}),
+  };
+  if(!n.estacoes.some(e=>e.tipo==='simulado'))n.estacoes[0].tipo='simulado';
+  return n;
+}
+const _pdM2S=m=>{m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');};
+const _pdS2M=s=>{const[h,mi]=String(s||'0:0').split(':').map(Number);return(h||0)*60+(mi||0);};
+const _pdNumBlocos=c=>Math.max(1,Math.ceil(c.salas.length/Math.max(1,c.salasPorBloco)));
+// casos de uma sala (pela posição dentro do bloco — iguais em todos os blocos)
+function _pdCasoDe(c,salaIdx){const p=salaIdx%Math.max(1,c.salasPorBloco);return [c.casos[p*2]||'',c.casos[p*2+1]||''];}
+function _pdTimeline(c){
+  let t=_pdS2M(c.inicio),ord=0;
+  return c.timeline.map(it=>{
+    const dur=it.kind==='rotacao'?(it.dur||85):(it.dur||0);
+    const row={item:it,start:t,end:t+dur,blocoOrd:it.kind==='rotacao'?ord:-1};
+    if(it.kind==='rotacao')ord++;
+    t+=dur;return row;
+  });
+}
+// estação de um grupo num bloco do rodízio (round-robin no sentido da imagem)
+function _pdEstacaoDe(c,grupoIdx,blocoOrd){
+  const n=c.estacoes.length;if(!n)return null;
+  return c.estacoes[(((grupoIdx-blocoOrd)%n)+n)%n];
+}
+
+window.openPainelDia=(dia)=>{
+  if(!S.curSim||!S.curSim.presencial){alert('Apenas para simulados presenciais.');return;}
+  window._pd.dia=dia;
+  const stored=(S.curSim.painel||{})[dia];
+  window._pd.cfg=_pdNormalize(stored?JSON.parse(JSON.stringify(stored)):null);
+  window._pd.est=null;window._pd.simBloco=0;
+  document.getElementById('pd-title').textContent=`Painel do Dia · ${dia==='sabado'?'Sábado':'Domingo'}`;
+  const data=dia==='sabado'?S.curSim.dataSab:S.curSim.dataDom;
+  document.getElementById('pd-sub').textContent=`${S.curSim.nome}${data?' · '+fD(data):''}`;
+  pdSwitchTab('grade');
+  document.getElementById('modal-painel').classList.remove('hidden');
+};
+
+window.pdSwitchTab=(tab)=>{
+  window._pd.tab=tab;
+  document.getElementById('pd-pane-grade').classList.toggle('hidden',tab!=='grade');
+  document.getElementById('pd-conf').classList.toggle('hidden',tab!=='conf');
+  document.getElementById('pd-tab-grade').classList.toggle('on',tab==='grade');
+  document.getElementById('pd-tab-conf').classList.toggle('on',tab==='conf');
+  if(tab==='grade')pdRenderGrade();else pdRenderConf();
+};
+
+// ── Grade do dia (a "imagem") ───────────────────────────────────────────────
+function pdRenderGrade(){
+  const c=window._pd.cfg,dia=window._pd.dia;if(!c)return;
+  const tl=_pdTimeline(c),grupos=c.grupos;
+  const colW=Math.max(120,Math.floor(880/Math.max(1,grupos.length)));
+  const th=`<thead><tr>
+    <th style="text-align:left;padding:8px 12px;font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--t2);width:120px">Horário</th>
+    ${grupos.map(g=>`<th style="padding:8px 12px;font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--t1);min-width:${colW}px">${_esc(g.nome)}</th>`).join('')}
+  </tr></thead>`;
+  const body=tl.map((r,ri)=>{
+    const time=`<td style="padding:8px 10px;white-space:nowrap"><input type="time" value="${_pdM2S(r.start)}" onchange="pdGradeStart(${ri},this.value)" title="Editar início — os horários abaixo se ajustam" class="pd-time-in"/><span class="pd-mono" style="font-size:12px;color:var(--t3)"> – ${_pdM2S(r.end)}</span></td>`;
+    if(r.item.kind==='evento'){
+      const en=_pdNorm(r.item.nome);
+      let bg='var(--bg3)',fg='var(--t2)',extra='';
+      if(en.includes('devolutiva')){bg='color-mix(in srgb,#2f81f7 16%,var(--bg2))';fg='color-mix(in srgb,#2f81f7 72%,var(--t1))';extra='font-weight:700;';}
+      else if(en.includes('habilidade')||en.includes('soft')){bg='color-mix(in srgb,#a855f7 18%,var(--bg2))';fg='color-mix(in srgb,#a855f7 72%,var(--t1))';extra='font-weight:700;';}
+      else if(en.includes('almoco')){extra='text-transform:uppercase;font-weight:700;letter-spacing:.04em;';}
+      return`<tr>${time}<td colspan="${grupos.length}" style="padding:11px 14px;text-align:center;border-radius:12px;font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:600;background:${bg};color:${fg};${extra}">${r.item.icon||''} ${_esc(r.item.nome)}</td></tr>`;
+    }
+    const cells=grupos.map((g,gi)=>{
+      const est=_pdEstacaoDe(c,gi,r.blocoOrd);
+      if(!est)return`<td></td>`;
+      const ei=c.estacoes.findIndex(e=>e.id===est.id);
+      const cor=_pdCor(ei);
+      const isSim=est.tipo==='simulado';
+      const prof=isSim?`<div style="font-size:10.5px;font-weight:500;opacity:.8;margin-top:2px">${c.salas.length} salas · ${c.salas.filter(s=>s.prof).length} profs</div>`:(est.prof?`<div style="font-size:11px;font-weight:500;opacity:.85;margin-top:3px;display:flex;align-items:center;justify-content:center;gap:4px">${_pdIco('user',12)}${_esc(est.prof)}</div>`:`<div style="font-size:10.5px;font-style:italic;opacity:.6;margin-top:2px">sem prof</div>`);
+      return`<td class="pd-cell clk" onclick="pdOpenEstacao('${g.id}',${r.blocoOrd},${r.start},'${est.id}')" title="Abrir ${_escA(est.nome)}" style="background:${cor.bg};color:${cor.fg};border:1px solid ${cor.bd}">${_esc(est.nome)} <span style="opacity:.55">${_pdIco('arrowUR',11)}</span>${prof}</td>`;
+    }).join('');
+    return`<tr>${time}${cells}</tr>`;
+  }).join('');
+  document.getElementById('pd-grade').innerHTML=`<table style="border-collapse:separate;border-spacing:6px;width:100%;min-width:680px">${th}<tbody>${body}</tbody></table>`;
+  // stats
+  const total=S.students.filter(s=>s.dia===dia&&s.status!=='absent').length;
+  const aloc=S.students.filter(s=>s.dia===dia&&s.status!=='absent'&&s.grupoPainel).length;
+  const aus=S.students.filter(s=>s.dia===dia&&s.presenca==='ausente').length;
+  document.getElementById('pd-grade-stats').textContent=`${aloc}/${total} alunos na grade${aus?` · ${aus} ausente(s)`:''}`;
+}
+
+// ── Estação aberta sobre o painel (Simulado com abas · Oficina com alunos) ───
+window.pdOpenEstacao=(grupoId,blocoOrd,startMin,estId)=>{
+  const c=window._pd.cfg;
+  const est=c.estacoes.find(e=>e.id===estId);if(!est)return;
+  const g=c.grupos.find(x=>x.id===grupoId);
+  window._pd.est={grupoId,grupoNome:g?g.nome:'',startMin,estId,tipo:est.tipo,blocoOrd};
+  window._pd.simBloco=0;
+  document.getElementById('pde-title').innerHTML=`${est.tipo==='simulado'?_pdIco('target'):_pdIco('layers')} ${_esc(est.nome)} · ${_esc(g?g.nome:'')}`;
+  const data=window._pd.dia==='sabado'?S.curSim.dataSab:S.curSim.dataDom;
+  document.getElementById('pde-sub').textContent=`${_pdM2S(startMin)}${data?' · '+fD(data):''}`;
+  pdRenderEstacao();
+  document.getElementById('modal-pd-est').classList.remove('hidden');
+};
+window.pdSimBloco=(b)=>{window._pd.simBloco=b;pdRenderEstacao();};
+
+function pdRenderEstacao(){
+  const e=window._pd.est;if(!e)return;
+  const est=window._pd.cfg.estacoes.find(x=>x.id===e.estId);if(!est)return;
+  if(est.tipo==='simulado')pdRenderEstSim(est);else pdRenderEstOficina(est);
+}
+
+function pdRenderEstSim(est){
+  const c=window._pd.cfg,e=window._pd.est,dia=window._pd.dia;
+  const nb=_pdNumBlocos(c),spb=c.salasPorBloco;
+  let b=window._pd.simBloco;if(b>=nb)b=window._pd.simBloco=0;
+  const tabs=Array.from({length:nb},(_,i)=>`<button class="${i===b?'on':''}" onclick="pdSimBloco(${i})">Bloco ${i+1}</button>`).join('');
+  const salas=c.salas.slice(b*spb,b*spb+spb);const n=salas.length;
+  // horários das rodadas: dividem igualmente o bloco (controle só inline no painel)
+  const _blk=_pdTimeline(c).find(rw=>rw.item.kind==='rotacao'&&rw.blocoOrd===e.blocoOrd);
+  const blkDur=_blk?(_blk.end-_blk.start):0;
+  const bounds=Array.from({length:n+1},(_,r)=>e.startMin+(n?Math.round(r*blkDur/n):0));
+  const membros=S.students.filter(s=>s.dia===dia&&s.status!=='absent'&&s.grupoPainel===e.grupoId&&(s.blocoPainel||0)===b).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  const head=`<div class="pd-seg" style="margin-bottom:16px">${tabs}</div>`;
+  if(!n){document.getElementById('pde-body').innerHTML=head+`<div class="es" style="padding:20px"><p>Este bloco não tem salas.</p></div>`;return;}
+  if(!membros.length){document.getElementById('pde-body').innerHTML=head+`<div class="es" style="padding:24px"><p>Nenhum aluno neste bloco ainda.</p><p style="font-size:12px">Vá em Configurar → Configurar Alunos → Auto-distribuir.</p></div>`;return;}
+  const thS=salas.map((sl,j)=>{
+    const cor=_pdCor(j),casos=_pdCasoDe(c,b*spb+j);
+    return`<th style="padding:9px 10px;background:${cor.bg};border:1px solid ${cor.bd};border-radius:12px;min-width:130px;text-align:center;vertical-align:top">
+      <div style="font-weight:700;color:${cor.fg};font-size:13px">${_esc(sl.nome)}</div>
+      <div style="font-size:11px;color:var(--t2);display:flex;align-items:center;justify-content:center;gap:4px">${_pdIco('user',12)}${sl.prof?_esc(sl.prof):'<span style="opacity:.6">sem prof</span>'}</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:3px;line-height:1.35">${_esc(casos[0]||'Caso 1')}<br>${_esc(casos[1]||'Caso 2')}</div>
+    </th>`;
+  }).join('');
+  const rows=Array.from({length:n},(_,r)=>{
+    const tcell=`<td style="padding:10px 8px;white-space:nowrap"><div style="font-weight:700;font-size:13px">Rodada ${r+1}</div><div class="pd-mono" style="font-size:11px;color:var(--t2)">${_pdM2S(bounds[r])}–${_pdM2S(bounds[r+1])}</div></td>`;
+    const cells=salas.map((sl,j)=>{
+      const idx=(((j-r)%n)+n)%n,al=membros[idx];
+      if(!al)return`<td style="padding:11px;text-align:center;color:var(--t3);font-size:12px;border:1px dashed var(--border);border-radius:11px">— vago —</td>`;
+      if(al.presenca==='ausente')return`<td style="padding:11px;text-align:center;border:1px dashed var(--border);border-radius:11px;font-size:12px"><span style="text-decoration:line-through;color:var(--t3)">${_esc(al.nome)}</span><br><span style="color:var(--red);font-size:10px;font-weight:700">AUSENTE</span></td>`;
+      return`<td style="padding:11px;text-align:center;border:1px solid var(--border);border-radius:11px;font-size:13px;background:var(--bg)">${_esc(al.nome)}</td>`;
+    }).join('');
+    return`<tr>${tcell}${cells}</tr>`;
+  }).join('');
+  document.getElementById('pde-body').innerHTML=head+`<div style="overflow-x:auto"><table style="border-collapse:separate;border-spacing:6px;width:100%">
+    <thead><tr><th style="text-align:left;padding:8px;color:var(--t2);font-size:12px;width:120px">Rodada</th>${thS}</tr></thead>
+    <tbody>${rows}</tbody></table></div>
+    <div class="pd-tip">${membros.filter(m=>m.presenca!=='ausente').length} presente(s) de ${membros.length} neste bloco · cada um passa por todas as ${n} salas (${2*n} casos). Ausentes viram vaga sem mexer no caminho dos demais.</div>`;
+}
+
+function pdRenderEstOficina(est){
+  const e=window._pd.est,dia=window._pd.dia;
+  const alunos=S.students.filter(s=>s.dia===dia&&s.status!=='absent'&&s.grupoPainel===e.grupoId).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  const pres=alunos.filter(a=>a.presenca!=='ausente').length;
+  const lista=alunos.length?alunos.map((a,idx)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);font-size:13px">
+      <span class="pd-mono" style="color:var(--t3);font-size:11px;width:20px;text-align:right;flex:none">${idx+1}</span>
+      <span style="flex:1;min-width:0">${a.presenca==='ausente'?`<span style="text-decoration:line-through;color:var(--t3)">${_esc(a.nome)}</span> <span style="color:var(--red);font-size:10px;font-weight:700">AUSENTE</span>`:_esc(a.nome)}</span>
+    </div>`).join(''):'<span style="color:var(--t3);font-size:13px">Nenhum aluno neste grupo. Use Configurar → Configurar Alunos → Auto-distribuir.</span>';
+  document.getElementById('pde-body').innerHTML=`
+    <div class="pd-row" style="margin-bottom:14px"><span style="font-weight:600;display:inline-flex;align-items:center;gap:6px">${_pdIco('user',15)} Professor</span><span style="font-size:14px">${est.prof?_esc(est.prof):'<span style="color:var(--t3)">não definido</span>'}</span><span class="pd-tip" style="margin:0 0 0 auto">edite em Configurar</span></div>
+    <div style="display:flex;flex-direction:column;gap:6px">${lista}</div>
+    <div class="pd-tip">${pres} presente(s) de ${alunos.length} aluno(s). A oficina recebe o grupo inteiro (sem rodízio interno).</div>`;
+}
+
+// ── Configuração (accordion) ─────────────────────────────────────────────────
+function _pdProfOpts(sel){
+  const list=(S.profs||[]).map(p=>typeof p==='string'?p:(p&&p.nome)||'').filter(Boolean);
+  return'<option value="">— professor —</option>'+list.map(p=>`<option value="${_escA(p)}" ${sel===p?'selected':''}>${_esc(p)}</option>`).join('');
+}
+window.pdToggleSection=(k)=>{const o=window._pd.open;o.has(k)?o.delete(k):o.add(k);pdRenderConf();};
+window.pdRenderConf=pdRenderConf; // expõe pro escopo global (inline onclick/oninput só enxergam window.*)
+window.pdToggleGrupo=(gid)=>{const o=window._pd.openG;o.has(gid)?o.delete(gid):o.add(gid);pdRenderConf();};
+window.pdSalvarCasos=()=>{pdRenderConf();_pdToast('Nomes dos casos aplicados às salas');};
+function _pdAcc(key,icon,title,badge,bodyHtml,headExtra){
+  const open=window._pd.open.has(key);
+  return`<div class="pd-card">
+    <div class="pd-acc-h ${open?'open':''}" onclick="if(event.target.closest('button,select,input'))return;pdToggleSection('${key}')">
+      <span class="pd-acc-t">${icon} ${title}</span>
+      ${badge?`<span class="pd-mono" style="font-size:11px;color:var(--t3);background:var(--bg3);padding:2px 8px;border-radius:999px">${badge}</span>`:''}
+      ${headExtra||''}
+      <span class="pd-chev">▶</span>
+    </div>
+    ${open?`<div class="pd-acc-b">${bodyHtml}</div>`:''}
+  </div>`;
+}
+function pdRenderConf(){
+  const c=window._pd.cfg;if(!c)return;
+  const nb=_pdNumBlocos(c);
+  // ── Estações
+  const estBody=`${window._pd._addEst
+      ? `<div style="display:flex;gap:6px;align-items:center;margin-bottom:12px"><span style="font-size:12px;color:var(--t2)">Adicionar:</span>
+          <button class="btn btn-s btn-sm" onclick="pdAddEstacao('oficina')">🛠️ Oficina</button>
+          <button class="btn btn-s btn-sm" onclick="pdAddEstacao('simulado')">🎯 Simulado</button>
+          <button class="btn btn-g btn-sm" onclick="window._pd._addEst=false;pdRenderConf()">cancelar</button></div>`
+      : `<button class="btn btn-p btn-sm" onclick="window._pd._addEst=true;pdRenderConf()" style="margin-bottom:12px">+ Estação</button>`}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px">
+      ${c.estacoes.map((e,i)=>{const cor=_pdCor(i);const isSim=e.tipo==='simulado';
+        return`<div style="border:1px solid ${cor.bd};border-radius:11px;background:var(--bg2);padding:9px">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:7px">
+            <span style="width:9px;height:9px;border-radius:3px;background:${cor.fg};flex:none"></span>
+            <input value="${_escA(e.nome)}" oninput="_pd.cfg.estacoes[${i}].nome=this.value" placeholder="Nome" title="Nome da estação" style="flex:1;min-width:0;font-size:12.5px;font-weight:650;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--t1);padding:2px 4px" onfocus="this.style.borderColor='var(--border)';this.style.background='var(--bg)'" onblur="this.style.borderColor='transparent';this.style.background='transparent'"/>
+            <button class="btn btn-d btn-sm" onclick="pdRmEstacao(${i})" title="Remover" style="padding:2px 6px">${_pdIco('trash',12)}</button>
+          </div>
+          ${isSim?`<div style="font-size:10.5px;color:var(--t3);padding:2px 2px">configure o prof nas salas</div>`:`<select class="fc" onchange="_pd.cfg.estacoes[${i}].prof=this.value" title="Professor da oficina" style="width:100%;font-size:12px;padding:4px 6px">${_pdProfOpts(e.prof)}</select>`}
+        </div>`;}).join('')}
+    </div>
+    <div class="pd-tip">${c.grupos.length} grupos × ${c.estacoes.length} estações. Cada grupo passa por todas as estações ao longo dos blocos.</div>`;
+  // ── Configurar Salas (nomear casos em dropdown + lista de salas)
+  const casosOpen=window._pd.open.has('casos');
+  const casosBody=`
+    <div class="pd-card" style="margin-bottom:14px">
+      <div class="pd-acc-h ${casosOpen?'open':''}" onclick="if(event.target.closest('button,input'))return;pdToggleSection('casos')">
+        <span class="pd-acc-t" style="font-size:14px">Nomear casos das salas</span>
+        <span class="pd-chev">▶</span>
+      </div>
+      ${casosOpen?`<div class="pd-acc-b">
+        <div class="pd-tip" style="margin-top:0;margin-bottom:10px">Os mesmos nomes valem em todos os ${nb} blocos (2 casos por sala, na ordem).</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-bottom:12px">
+          ${c.casos.map((nome,idx)=>`<div class="pd-row" style="gap:10px">
+            <span style="font-size:12px;color:var(--t2);white-space:nowrap;min-width:54px">Caso ${idx+1}</span>
+            <input class="fc" value="${_escA(nome)}" oninput="_pd.cfg.casos[${idx}]=this.value" placeholder="Caso ${idx+1}" style="flex:1;min-width:0"/>
+          </div>`).join('')}
+        </div>
+        <button class="btn btn-p btn-sm" onclick="pdSalvarCasos()">${_pdIco('save',13)} Salvar nomes</button>
+      </div>`:''}
+    </div>
+    <div style="font-size:12px;font-weight:650;color:var(--t2);margin-bottom:8px">🚪 Salas e professores</div>
+    ${Array.from({length:nb},(_,bi)=>{
+      const slc=c.salas.slice(bi*c.salasPorBloco,bi*c.salasPorBloco+c.salasPorBloco);
+      return`<div style="margin-bottom:20px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:11px">
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:var(--t1);letter-spacing:-.01em">Bloco ${bi+1}</span>
+          <span class="pd-mono" style="font-size:10px;color:var(--t3);background:var(--bg3);padding:2px 8px;border-radius:999px">${slc.length} sala${slc.length!==1?'s':''}</span>
+          <span style="flex:1;height:1px;background:linear-gradient(to right,var(--border),transparent)"></span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px">
+        ${slc.map((sl)=>{const i=c.salas.indexOf(sl);const pos=i%c.salasPorBloco;const cor=_pdCor(pos);const cs=_pdCasoDe(c,i);
+          return`<div style="border:1px solid ${cor.bd};border-radius:11px;background:var(--bg2);padding:9px">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px">
+              <span style="width:9px;height:9px;border-radius:3px;background:${cor.fg};flex:none"></span>
+              <input value="${_escA(sl.nome)}" oninput="_pd.cfg.salas[${i}].nome=this.value" placeholder="Sala" title="Nome da sala" style="flex:1;min-width:0;font-size:12.5px;font-weight:650;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--t1);padding:2px 4px" onfocus="this.style.borderColor='var(--border)';this.style.background='var(--bg)'" onblur="this.style.borderColor='transparent';this.style.background='transparent'"/>
+              <button class="btn btn-d btn-sm" onclick="pdRmSala(${i})" title="Remover" style="padding:2px 6px">${_pdIco('trash',12)}</button>
+            </div>
+            <select class="fc" onchange="_pd.cfg.salas[${i}].prof=this.value" title="Professor" style="width:100%;font-size:12px;padding:4px 6px;margin-bottom:6px">${_pdProfOpts(sl.prof)}</select>
+            <div style="font-size:10px;color:var(--t3);padding:0 2px">${_esc(cs[0]||'Caso')} · ${_esc(cs[1]||'Caso')}</div>
+          </div>`;}).join('')}
+        </div>
+      </div>`;
+    }).join('')}`;
+  // ── Grupos
+  const semGrupo=S.students.filter(s=>s.dia===window._pd.dia&&s.status!=='absent'&&!s.grupoPainel).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  const grpOpts=(cur)=>'<option value="">sem grupo</option>'+c.grupos.map(g=>`<option value="${g.id}" ${cur===g.id?'selected':''}>${_esc(g.nome)}</option>`).join('');
+  // linha discreta de aluno: nome + select compacto pra mover
+  const studRow=(s)=>`<div class="pd-stud" data-n="${_escA(_pdNorm(s.nome))}" style="display:flex;align-items:center;gap:5px;padding:2px 3px;border-radius:6px">
+      <span style="flex:1;min-width:0;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.presenca==='ausente'?`<span style="text-decoration:line-through;color:var(--t3)">${_esc(s.nome)}</span>`:_esc(s.nome)}</span>
+      <select onchange="pdMoveAluno('${s.id}',this.value)" title="Mover de grupo" style="width:56px;flex:none;font-size:10px;padding:1px 2px;border-radius:5px;background:var(--bg3);color:var(--t2);border:1px solid var(--border)">${grpOpts(s.grupoPainel)}</select>
+    </div>`;
+  const grpBody=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"><button class="btn btn-s btn-sm" onclick="pdAutoDist()">${_pdIco('shuffle',13)} Auto-distribuir alunos</button><button class="btn btn-p btn-sm" onclick="pdAddGrupo()">+ Grupo</button></div>
+    <div style="position:relative;margin-bottom:12px">
+      <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none;display:inline-flex">${_pdIco('search',14)}</span>
+      <input class="fc" value="${_escA(window._pd.alunoQ||'')}" oninput="window._pd.alunoQ=this.value;pdFilterAlunos(this.value)" placeholder="Buscar aluno…" style="width:100%;padding-left:34px"/>
+    </div>
+    ${semGrupo.length?`<div style="border:1px solid color-mix(in srgb,#d29922 45%,var(--border));border-radius:10px;padding:8px 10px;margin-bottom:12px;background:color-mix(in srgb,#d29922 7%,var(--bg2))">
+      <div style="font-size:11px;font-weight:700;color:#d29922;margin-bottom:6px">⚠ Sem grupo · ${semGrupo.length}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:2px 10px">${semGrupo.map(studRow).join('')}</div>
+    </div>`:''}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
+      ${c.grupos.map((g,i)=>{
+        const als=S.students.filter(s=>s.dia===window._pd.dia&&s.status!=='absent'&&s.grupoPainel===g.id).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+        return`<div style="border:1px solid var(--border);border-radius:11px;background:var(--bg2);padding:9px 9px 10px">
+          <div style="display:flex;align-items:center;gap:3px;margin-bottom:2px">
+            <input value="${_escA(g.nome)}" oninput="_pd.cfg.grupos[${i}].nome=this.value" title="Nome do grupo" style="flex:1;min-width:0;font-size:12.5px;font-weight:650;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--t1);padding:2px 4px" onfocus="this.style.borderColor='var(--border)';this.style.background='var(--bg)'" onblur="this.style.borderColor='transparent';this.style.background='transparent'"/>
+            <button class="btn btn-d btn-sm" onclick="pdRmGrupo(${i})" title="Remover grupo" style="padding:2px 6px">${_pdIco('trash',12)}</button>
+          </div>
+          <div style="font-size:10px;color:var(--t3);margin:0 0 7px 5px">${als.length} aluno(s)</div>
+          <div style="display:flex;flex-direction:column;gap:1px">
+            ${als.length?als.map(studRow).join(''):'<span style="font-size:11px;color:var(--t3);padding:2px 5px">—</span>'}
+          </div>
+        </div>`;}).join('')}
+    </div>
+    <div class="pd-tip">Mover um aluno só troca o grupo dele (ninguém é excluído). Salve a configuração depois.</div>`;
+  // ── Linha do tempo
+  const tl=_pdTimeline(c);
+  const tlBody=`<div style="display:flex;gap:6px;margin-bottom:10px"><button class="btn btn-s btn-sm" onclick="pdAddTL('rotacao')">+ Bloco de rodízio</button><button class="btn btn-p btn-sm" onclick="pdAddTL('evento')">+ Evento</button></div>
+    ${tl.map((r,i)=>{
+      const it=r.item;const time=`<span class="pd-mono" style="font-size:11px;color:var(--t2);white-space:nowrap;width:104px;display:inline-block">${_pdM2S(r.start)}–${_pdM2S(r.end)}</span>`;
+      const mv=`<button class="btn btn-g btn-sm" onclick="pdMoveTL(${i},-1)" ${i===0?'disabled':''}>↑</button><button class="btn btn-g btn-sm" onclick="pdMoveTL(${i},1)" ${i===tl.length-1?'disabled':''}>↓</button>`;
+      if(it.kind==='rotacao'){
+        return`<div class="pd-row" style="border-style:dashed">${time}<span style="flex:1;font-weight:600;display:inline-flex;align-items:center;gap:6px">${_pdIco('shuffle',13)} Rodízio (bloco ${r.blocoOrd+1})</span>
+          <input class="fc" type="number" min="1" value="${it.dur||85}" oninput="_pd.cfg.timeline[${i}].dur=+this.value;pdRenderConf()" style="width:78px" title="duração em minutos"/>${mv}
+          <button class="btn btn-d btn-sm" onclick="pdRmTL(${i})">${_pdIco('trash',13)}</button></div>`;
+      }
+      return`<div class="pd-row">${time}<input class="fc" value="${_escA(it.icon)}" oninput="_pd.cfg.timeline[${i}].icon=this.value" style="width:48px;text-align:center"/>
+        <input class="fc" value="${_escA(it.nome)}" oninput="_pd.cfg.timeline[${i}].nome=this.value" placeholder="Nome do evento" style="flex:1;min-width:150px"/>
+        <input class="fc" type="number" min="0" value="${it.dur}" oninput="_pd.cfg.timeline[${i}].dur=+this.value;pdRenderConf()" style="width:78px" title="minutos"/>
+        ${mv}<button class="btn btn-d btn-sm" onclick="pdRmTL(${i})">${_pdIco('trash',13)}</button></div>`;
+    }).join('')}`;
+  document.getElementById('pd-conf').innerHTML=
+    _pdAcc('estacoes',_pdIco('shuffle'),'Estações',c.estacoes.length,estBody)+
+    _pdAcc('salas',_pdIco('grid'),'Configurar Salas',`${c.salas.length} salas · ${nb} blocos`,casosBody)+
+    _pdAcc('grupos',_pdIco('users'),'Configurar Alunos',c.grupos.length,grpBody)+
+    _pdAcc('timeline',_pdIco('clock'),'Linha do tempo do dia',tl.length+' itens',tlBody);
+  if(window._pd.alunoQ)pdFilterAlunos(window._pd.alunoQ);
+}
+// Edição inline do início de uma linha: tudo abaixo se ajusta (mantém durações)
+window.pdGradeStart=(i,val)=>{
+  const c=window._pd.cfg;const tl=_pdTimeline(c);
+  const nv=_pdS2M(val),delta=nv-tl[i].start;
+  if(!delta)return;
+  if(i===0){c.inicio=_pdM2S(_pdS2M(c.inicio)+delta);}
+  else{const prev=c.timeline[i-1];prev.dur=Math.max(0,(prev.dur||0)+delta);}
+  pdRenderGrade();
+};
+window.pdAddEstacao=(tipo)=>{tipo=tipo==='simulado'?'simulado':'oficina';window._pd.cfg.estacoes.push({id:_pdRid('est'),tipo,nome:tipo==='simulado'?'Simulado':'Oficina',prof:''});window._pd._addEst=false;pdRenderConf();};
+window.pdRmEstacao=(i)=>{if(window._pd.cfg.estacoes.length<=1)return alert('Deixe ao menos 1 estação.');window._pd.cfg.estacoes.splice(i,1);if(!window._pd.cfg.estacoes.some(e=>e.tipo==='simulado'))window._pd.cfg.estacoes[0].tipo='simulado';pdRenderConf();};
+window.pdAddSala=()=>{const i=window._pd.cfg.salas.length;window._pd.cfg.salas.push({id:_pdRid('sl'),nome:'Sala '+(i+1),prof:''});window._pd.open.add('salas');pdRenderConf();};
+window.pdRmSala=(i)=>{window._pd.cfg.salas.splice(i,1);pdRenderConf();};
+window.pdAddGrupo=()=>{const i=window._pd.cfg.grupos.length;window._pd.cfg.grupos.push({id:_pdRid('grp'),nome:'Grupo '+(i+1)});window._pd.open.add('grupos');pdRenderConf();};
+window.pdRmGrupo=(i)=>{if(!confirm('Remover este grupo? (os alunos dele ficam sem grupo, não são excluídos)'))return;const gid=window._pd.cfg.grupos[i].id;S.students.forEach(s=>{if(s.grupoPainel===gid)s.grupoPainel=null;});window._pd.cfg.grupos.splice(i,1);pdRenderConf();};
+window.pdAddTL=(kind)=>{window._pd.cfg.timeline.push(kind==='rotacao'?{kind:'rotacao',dur:85}:{kind:'evento',nome:'Novo evento',dur:10,icon:'•'});window._pd.open.add('timeline');pdRenderConf();};
+window.pdRmTL=(i)=>{window._pd.cfg.timeline.splice(i,1);pdRenderConf();};
+window.pdMoveTL=(i,dir)=>{const a=window._pd.cfg.timeline;const j=i+dir;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];pdRenderConf();};
+
+// Mover aluno entre grupos (só troca, não exclui) — vai pro bloco menos cheio do destino
+window.pdMoveAluno=async(sid,gid)=>{
+  const s=S.students.find(x=>x.id===sid);if(!s)return;
+  const c=window._pd.cfg,nb=_pdNumBlocos(c);
+  let bloco=0;
+  if(gid){const counts=Array.from({length:nb},(_,b)=>S.students.filter(x=>x.id!==sid&&x.grupoPainel===gid&&(x.blocoPainel||0)===b&&x.dia===window._pd.dia).length);let min=Infinity;counts.forEach((ct,b)=>{if(ct<min){min=ct;bloco=b;}});}
+  await updateDoc(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),{grupoPainel:gid||null,blocoPainel:bloco});
+  s.grupoPainel=gid||null;s.blocoPainel=bloco;
+  pdRenderConf();
+};
+
+window.pdAutoDist=async()=>{
+  const c=window._pd.cfg,dia=window._pd.dia;
+  if(!c.grupos.length)return alert('Cadastre ao menos 1 grupo.');
+  const pool=S.students.filter(s=>s.dia===dia&&s.status!=='absent').slice().sort(()=>Math.random()-0.5);
+  if(!pool.length)return alert('Nenhum aluno confirmado neste dia para distribuir.');
+  if(!confirm(`Distribuir ${pool.length} aluno(s) em ${c.grupos.length} grupo(s)? Isso sobrescreve a distribuição atual do dia.`))return;
+  const nb=_pdNumBlocos(c);
+  const updates={};
+  const perGrupo=c.grupos.map(()=>[]);
+  pool.forEach((s,i)=>perGrupo[i%c.grupos.length].push(s));
+  perGrupo.forEach((arr,gi)=>{arr.forEach((s,k)=>{updates[s.id]={grupoPainel:c.grupos[gi].id,blocoPainel:k%nb};});});
+  const batch=writeBatch(db);
+  Object.entries(updates).forEach(([sid,u])=>batch.update(doc(db,`simulados/${S.curSim.id}/alunos/${sid}`),u));
+  await batch.commit();
+  S.students.forEach(s=>{if(updates[s.id]){s.grupoPainel=updates[s.id].grupoPainel;s.blocoPainel=updates[s.id].blocoPainel;}});
+  pdRenderConf();
+  _pdToast(`${pool.length} aluno(s) distribuído(s)`);
+};
+
+// Toast flutuante (sempre visível, acima dos modais)
+function _pdToast(text,ok){
+  let t=document.getElementById('pd-toast');
+  if(!t){t=document.createElement('div');t.id='pd-toast';document.body.appendChild(t);}
+  t.textContent=(ok===false?'⚠️ ':'✅ ')+text;
+  t.style.cssText='position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(8px);z-index:3000;padding:12px 22px;border-radius:12px;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;font-size:14px;font-weight:600;color:#fff;box-shadow:0 10px 34px rgba(0,0,0,.38);background:'+(ok===false?'#c14242':'#2f9e57')+';opacity:0;transition:opacity .2s ease,transform .2s ease;pointer-events:none';
+  requestAnimationFrame(()=>{t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';});
+  clearTimeout(t._h);t._h=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)';},2600);
+}
+
+window.pdSaveConf=async(btn)=>{
+  const dia=window._pd.dia,cfg=window._pd.cfg;
+  const orig=btn?btn.innerHTML:null;
+  if(btn){btn.disabled=true;btn.style.opacity='.7';btn.textContent='Salvando…';}
+  try{
+    S.curSim.painel=S.curSim.painel||{};
+    S.curSim.painel[dia]=cfg;
+    await setDoc(doc(db,'simulados',S.curSim.id),{painel:S.curSim.painel},{merge:true});
+    const idx=S.sims.findIndex(s=>s.id===S.curSim.id);if(idx>=0)S.sims[idx]=S.curSim;
+    if(window._pd.tab==='grade')pdRenderGrade();
+    _pdToast('Configuração salva');
+    if(btn){btn.innerHTML='✓ Salvo!';setTimeout(()=>{btn.innerHTML=orig;btn.disabled=false;btn.style.opacity='';},1800);}
+  }catch(err){
+    console.error('[pdSaveConf]',err);
+    _pdToast('Erro ao salvar: '+((err&&err.message)||err),false);
+    if(btn){btn.innerHTML=orig;btn.disabled=false;btn.style.opacity='';}
+  }
+};
+
+window.pdPrint=()=>{
+  const w=window.open('','_blank');if(!w)return alert('Permita pop-ups para imprimir.');
+  const dia=window._pd.dia;const data=dia==='sabado'?S.curSim.dataSab:S.curSim.dataDom;
+  w.document.write(`<html><head><title>Painel do Dia · ${_esc(S.curSim.nome)}</title>
+    <style>body{font-family:system-ui,Arial,sans-serif;padding:20px;color:#111}
+    table{border-collapse:separate;border-spacing:5px;width:100%}
+    th,td{padding:8px 10px;text-align:center;border:1px solid #ccc;border-radius:6px}
+    input{border:none;font:inherit;background:transparent;width:auto}
+    h2{font-family:Arial}</style></head><body>
+    <h2>${_esc(S.curSim.nome)} · ${dia==='sabado'?'Sábado':'Domingo'}${data?' · '+fD(data):''}</h2>
+    ${document.getElementById('pd-grade').innerHTML}
+    </body></html>`);
+  w.document.close();w.focus();setTimeout(()=>w.print(),300);
+};
+
+// Atualização ao vivo: chamado quando S.students muda (presença etc.)
+function pdLiveRefresh(){
+  if(document.getElementById('modal-painel')?.classList.contains('hidden'))return;
+  if(window._pd.tab==='grade')pdRenderGrade();else pdRenderConf();
+  if(window._pd.est&&!document.getElementById('modal-pd-est')?.classList.contains('hidden'))pdRenderEstacao();
+}
+// helpers de escape locais (compat se _esc/_escAttr não existirem globalmente)
+const _esc=(typeof window._escHtml==='function')?window._escHtml:(s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])));
+const _escA=(typeof window._escAttr==='function')?window._escAttr:(s=>String(s==null?'':s).replace(/"/g,'&quot;'));
 
 window.confirmResetStPres=(sid)=>{
   const s=S.students.find(x=>x.id===sid);if(!s)return;
@@ -28354,6 +28923,14 @@ function _applyPresVisual(sel,presenca,status){
   if(row){
     const bg=presenca==='ausente'?'var(--rl)':status==='swap'?'var(--yl)':status==='confirmed'?'var(--gl)':status==='absent'?'var(--rl)':'';
     if(bg)row.style.setProperty('--row-bg',bg);else row.style.removeProperty('--row-bg');
+  }
+  // Presencial: linha (.aluno-row) fica vermelha na hora ao marcar ausente
+  const ar=sel.closest('.aluno-row');
+  if(ar){
+    ar.classList.remove('status-absent','status-confirmed','status-swap');
+    if(presenca==='ausente')ar.classList.add('status-absent');
+    else if(status==='confirmed')ar.classList.add('status-confirmed');
+    else if(status==='swap')ar.classList.add('status-swap');
   }
 }
 

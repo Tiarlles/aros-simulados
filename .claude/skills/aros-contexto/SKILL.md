@@ -1687,7 +1687,7 @@ Refinamento UX completo da aba Gerenciamento (visão coord do simulado **online*
 **Rodadas colapsáveis (dropdown):**
 - `.rc` ganha classe `collapsed` que esconde `.pos-tbl`/`.cb` via `.rc.collapsed .pos-tbl,.rc.collapsed .cb{display:none}`. Default: **todas colapsadas** ao render.
 - Chevron `▾` no header (`.rh-toggle`) gira -90° via `transform` quando collapsed.
-- `.rh` ganha `onclick` que chama `toggleRoundCard(this.parentElement)`. Guard `if(event.target.closest('button'))return;` permite que botões dentro do header (presencial: "🎯 Configurar Estações", "+ Aluno") continuem funcionando sem disparar o collapse.
+- `.rh` ganha `onclick` que chama `toggleRoundCard(this.parentElement)`. Guard `if(event.target.closest('button'))return;` permite que botões dentro do header (presencial: "📅 Painel do Dia" [ex-"🎯 Configurar Estações", ver seção Painel do Dia], "+ Aluno") continuem funcionando sem disparar o collapse.
 - **Estado persistido em `S.coRoundsExpanded` (Set)** para sobreviver a re-renders do `onSnapshot` (que dispara em qualquer mudança de aluno). Cards têm `id` (`rc-{dia}-{rn}` online, `rc-pres-{dia}` presencial); render checa se o id está no Set pra decidir se aplica `collapsed`.
 - Botão **⊞ Expandir todos / ⊟ Recolher todos** na barra de filtros (id `btn-toggle-all-rounds`). Texto muda dinamicamente via `updateAllRoundsBtn()` baseado em quantos cards estão colapsados.
 - **Auto-expand quando filtra**: `applyCoFilters` automaticamente desmarca `collapsed` (e adiciona ao Set) em qualquer card que tenha pelo menos uma row visível após o filtro.
@@ -2515,3 +2515,48 @@ Polimento mobile (2026-05-20, mesmo dia):
 - **Cards mobile com `!important`**: o `width:100%` original do `.home-card-cover` (desktop) ganhava do `flex-basis` no override mobile, fazendo cover ocupar 100% e body sumir. Solução: usar `!important` em todas as propriedades de flex do override mobile.
 - **Fonte dos card titles** trocada de Fraunces (serif) pra Space Grotesk (consistente com o hero).
 - **Servidor local pra testar mobile**: `python3 -m http.server 8080` + IP via `ipconfig getifaddr en0` + iPhone no mesmo Wi-Fi acessa `http://<ip>:8080`. Iteração ao vivo com pull-to-refresh.
+
+---
+
+## Painel do Dia — Simulado Presencial (grade/rodízio/estações · controle ao vivo) (2026-06-04)
+
+Substitui o antigo modal "🎯 Configurar Estações" (`openEstacoesPres`/`mep*`, que continua no código como legado, **não apagar** — compat) por um **Painel do Dia** completo. Botão **📅 Painel do Dia** no header de cada dia em `renderCoSchedPres`. Modal `#modal-painel` (+ modal secundário `#modal-pd-est` que abre POR CIMA, z-index 1200).
+
+**Conceitos (terminologia):** a *turma* é dividida em N **grupos**; ao longo do dia os grupos fazem rodízio entre **estações** (1 Simulado + oficinas). Quando um grupo está no **Simulado**, ele se reparte em **blocos** de **salas**; dentro de um bloco os 4 alunos **rodam** pelas salas (rodízio rodada×sala), 2 casos por sala. Oficinas = grupo inteiro, sem rodízio interno.
+
+**Modelo de dados** — `S.curSim.painel[dia]` (dia = `sabado`|`domingo`):
+```
+{
+  inicio:'08:00', casoMin, gapMin, trocaMin, salasPorBloco,   // casoMin/gap/troca: legado, NÃO mais usados (horários derivam do inline)
+  estacoes:[ {id, tipo:'simulado'|'oficina', nome, prof} ],     // prof só p/ oficina
+  salas:[ {id, nome, prof} ],                                   // 12 salas; SEM casos aqui
+  casos:[ 'Caso 1','Caso 2', ... ],                             // LISTA PLANA (2 por sala, na ordem), compartilhada em todos os blocos
+  grupos:[ {id, nome} ],
+  timeline:[ {kind:'rotacao', dur} | {kind:'evento', nome, dur, icon} ]
+}
+```
+Campos no doc do aluno (`simulados/{id}/alunos/{aId}`): **`grupoPainel`** (id do grupo) + **`blocoPainel`** (índice 0-based do bloco). Setados por `pdAutoDist` (auto-distribuição balanceada) e `pdMoveAluno` (mover entre grupos sem excluir — vai pro bloco menos cheio do destino).
+
+**⚠️ GOTCHA Firestore — nada de array aninhado:** `casos` TEM que ser lista plana de strings. Já foi array de pares `[[c1,c2],...]` e quebrou o save (`Function setDoc() called with invalid data. Nested arrays are not supported`). `_pdNormalize` converte formatos legados (pares, ou `salas[].casos` antigo) → plano. `_pdCasoDe(c,salaIdx)` = `[casos[pos*2], casos[pos*2+1]]` onde `pos = salaIdx % salasPorBloco`.
+
+**Rodízio (round-robin no sentido da imagem):** `_pdEstacaoDe(c,grupoIdx,blocoOrd)` = `estacoes[((grupoIdx-blocoOrd)%n+n)%n]`. Dentro do bloco, célula sala `j` na rodada `r` = `membros[((j-r)%n+n)%n]` (Latin square; ordem ESTÁVEL por nome pra ausente não recompactar).
+
+**Horários:** controlados SÓ inline na grade. `pdGradeStart(i,val)` edita o início de uma linha → ajusta a `dur` do item ANTERIOR da timeline (tudo abaixo desliza, durações preservadas; linha 0 = `inicio`). Cada `rotacao` tem `dur` própria (default 85). As rodadas do Simulado **dividem o bloco igualmente** (`blkDur/n`), sem controle de tempo separado.
+
+**Funções (todas `pd*`):** `openPainelDia(dia)` · `pdSwitchTab` (segmented control Grade/Configurar) · `pdRenderGrade` (tabela Horário×Grupo estilo "imagem", células clicáveis) · `pdOpenEstacao(grupoId,blocoOrd,startMin,estId)` → `pdRenderEstacao` → `pdRenderEstSim` (abas de bloco + rodada×sala) | `pdRenderEstOficina` (lista de alunos 1-por-linha, alfabética, prof SÓ leitura — edita em Configurar) · `pdRenderConf` (accordion) · `pdAutoDist` · `pdMoveAluno` · `pdSaveConf` · `pdFilterAlunos` (busca ignora acento/maiúsc via `_pdNorm`) · `pdSalvarCasos` · `pdPrint`.
+
+**Config (accordion `_pdAcc`, seções colapsáveis, estado em `_pd.open`/`_pd.openG`):** "Estações" (cartões lado a lado; "+ Estação" pergunta Oficina/Simulado inline via `_pd._addEst`, sem seletor de tipo no cartão), "Configurar Salas" (dropdown "Nomear casos das salas" plano Caso 1..8 + botão Salvar; salas em cartões lado a lado por bloco; títulos **Bloco N** destacados com divisória), "Configurar Alunos" (4 grupos lado a lado em colunas, nomes abertos embaixo, busca no topo, mover via select compacto), "Linha do tempo" (rotacao/evento, dur editável, reordenar).
+
+**⚠️ GOTCHA escopo de módulo:** o `<script>` é **module** → `onclick`/`oninput` inline só enxergam `window.*`. Funções declaradas (`function pdRenderConf(){}`, `renderCoSched`) NÃO são globais. Por isso expus **`window.pdRenderConf`** e **`window.renderCoSched`**. Se um handler inline novo chamar função interna, ele falha SILENCIOSO (foi o bug do "+ Estação não faz nada"). Regra: handler inline → sempre `window.*`.
+
+**Estética:** ícones SVG de traço (`_pdIco` + `_PD_ICONS`, estilo SF Symbols/Lucide, monocromático currentColor) no lugar de emoji de chrome; títulos em Space Grotesk, números em JetBrains Mono; paleta theme-safe via `color-mix` (`_pdCor`). CSS escopado em `<style id="pd-style">`. Toast flutuante `_pdToast(texto, ok)` (fixed bottom-center, z-3000) pro feedback de salvar/distribuir.
+
+**Eventos da grade (`pdRenderGrade`):** sem itálico, fonte Space Grotesk; "Almoço" em MAIÚSCULAS, "Devolutiva" linha azul, "Habilidades/soft-skills" linha roxa (detecção por `_pdNorm(nome).includes(...)`).
+
+**Ausência (live):** lê o status de **presença** (campo `presenca`). Marcou `ausente` → no Simulado a vaga vira "AUSENTE" riscado SEM recompactar (mantém o caminho dos demais). `pdLiveRefresh()` re-renderiza grade/estação aberta quando `S.students` muda (gancho no `subStudents`).
+
+### Tela de gerenciamento (renderCoSchedPres) — ajustes presencial (2026-06-04)
+- **Topo limpo no presencial:** "+ Aluno" e "⏰ Configurar Rodadas" (`#co-sched-tools`) ficam `display:none` quando `S.curSim.presencial` (são funções de simulado online). O "+ Aluno" do header do dia permanece. Toggle no início de `renderCoSched`.
+- **Linha do aluno em 1 linha só** (`flex-wrap:nowrap`): nome (encolhe c/ ellipsis) · status select (170px) · presença · ↔️ Mover · ↺ · ✕.
+- **Ausente = linha vermelha na hora:** classe `status-absent` aplicada quando `presenca==='ausente'` (render) + `_applyPresVisual` agora também pinta a `.aluno-row` (feedback instantâneo otimista, antes do snapshot).
+- **No-show 30 min (já existia):** `togglePresBtn` carimba `presencaAusenteAt`; `_noShowSweep` (interval 60s, `NO_SHOW_MIN=30`) move quem está ausente há ≥30min pra `status:'absent'` → cai no painel de ausentes do rodapé (`renderNotGoingPanel` → `#co-not-going`). Não puxa fila de espera (não faz sentido no meio da rodada).
