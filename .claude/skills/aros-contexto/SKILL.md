@@ -223,9 +223,9 @@ config/{cfgId}
   │   coloca tabs novas (TAB_GROUPS adicionadas no código) no grupo original ou no último.
   ├ simExtra                        — { linkPagoAluno, linkPagoExterno, linkGratuito,
   │                                      slackWebhook, listaVigenteId, alunosGratuitos[] }
-  ├ catalogoConfig                  — listas mestre do Catálogo de Produtos (multi-select)
+  ├ catalogoConfig[_{vertical}]     — listas mestre do Catálogo POR VERTICAL (multi-select)
   │                                    { publicosAlvo:[str], provasAlvo:[str] }
-  │                                    Seed automático na primeira abertura da aba (presets).
+  │                                    Seed (presets anest) SÓ na anestreview; outras começam vazias.
   ├ datasImportantes[_{vertical}]   — Calendário de eventos da vertical (ver §"Datas Importantes")
   │                                    { lista:[{id,tipo,titulo,modo,dataISO,horario,dataInicioISO,
   │                                              dataFimISO,descricao,link,escopoId,updatedAt,updatedBy}],
@@ -997,12 +997,14 @@ Aba `tab-orcamento` em Admin → Orçamento (ADMIN_ONLY_TABS). Controle de despe
 
 **Coleções:**
 - `produtos/{produtoId}` — produtos cadastrados (shape acima em Modelo de Dados).
-- `config/catalogoConfig` — listas mestre compartilhadas (`publicosAlvo`, `provasAlvo`). Seed automático na primeira abertura por quem tem `gerenciarCatalogo`/adm.
+- `config/catalogoConfig[_{vertical}]` — listas mestre **POR VERTICAL** (`publicosAlvo`, `provasAlvo`). Doc legado sem sufixo = anestreview; outras verticais usam `catalogoConfig_{vertical}` (via `_verticalDocId`).
 
-**Presets seed `publicosAlvo`** (9 opções iniciais):
+**Seed POR VERTICAL (corrigido 2026-06-05):** o `PRO_CATALOGO_SEED` (9 públicos + 7 provas, tudo de anest — ver abaixo) só é gravado na vertical **anestreview**. Outras verticais (oftreview/ortopreview/medreview) começam com público/provas **VAZIOS** — cada uma cadastra os seus. **Bug antigo:** `_proSeedCatalogoConfigIfNeeded` e `_proAddCatalogoOption` gravavam o seed da anest em QUALQUER vertical → oftalmologia aparecia com público da anest. Fix: ambos gateiam por `S.verticalAtual==='anestreview'`; e o `onSnapshot` do catalogoConfig, pra verticais ≠ anest, **remove do display E do doc** (arrayRemove, idempotente) quaisquer entradas que batam exatamente com `PRO_CATALOGO_SEED` — limpeza automática quando um editor abre a vertical. Opções próprias da vertical são preservadas.
+
+**Presets seed `publicosAlvo`** (9 opções iniciais — SÓ anestreview):
 "Residentes e Anestesiologistas em geral", "ME1/ME2/ME3", "Anestesiologistas que farão TEA 1ª/2ª Fase", "Anestesiologistas que farão TSA 1ª/2ª Fase", "Anestesiologistas que buscam atualização".
 
-**Presets seed `provasAlvo`** (7 opções iniciais):
+**Presets seed `provasAlvo`** (7 opções iniciais — SÓ anestreview):
 "TEA 1ª Fase", "TEA 2ª Fase", "TSA 1ª Fase", "TSA 2ª Fase", "Quadrimestrais / Anuais SBA", "Concurso", "Atualização".
 
 **Views (estado `S.produtosView`):**
@@ -1021,8 +1023,9 @@ Aba `tab-orcamento` em Admin → Orçamento (ADMIN_ONLY_TABS). Controle de despe
 - "Adicionar feature" anexa direto um cartão em branco (sem picker de tipo) com autofocus no título. Mesmo handler `_proFeatAdd(source)` pra features principais e features da mentoria.
 
 **Multi-select com presets + cadastrar/remover:**
-- Picker `#pro-picker-pop` (genérico) lista opções do `config/catalogoConfig` + botão "+ Cadastrar novo" no rodapé.
-- Cada item tem botão `×` (só pra quem edita) que remove do catálogo global via `arrayRemove`. Se a opção está em uso em N produtos, confirm avisa "Está em uso em N produto(s)" — os produtos mantêm a tag órfã.
+- Picker `#pro-picker-pop` (genérico) lista opções do `config/catalogoConfig[_{vertical}]` da vertical atual + botão "+ Cadastrar novo" no rodapé.
+- **Posicionamento (2026-06-05):** `_proPositionPicker` agora **CENTRALIZA na viewport** (`left/top:50%` + `transform:translate(-50%,-50%)`), em vez de ancorar abaixo do botão. Antes (`top=rect.bottom+8` com estimativa fixa de 360px) estourava pra fora da tela quando o botão estava na parte de baixo do form. O picker é reparentado pro `<body>` ao abrir (escapa ancestral com transform) e tem `max-height:70vh; overflow-y:auto` (rola internamente se a lista for grande).
+- Cada item tem botão `×` (só pra quem edita) que remove do catálogo da vertical via `arrayRemove`. Se a opção está em uso em N produtos, confirm avisa "Está em uso em N produto(s)" — os produtos mantêm a tag órfã.
 - Audit: `CATALOGO_OPCAO_ADICIONADA` / `CATALOGO_OPCAO_REMOVIDA`.
 
 **Anexos:**

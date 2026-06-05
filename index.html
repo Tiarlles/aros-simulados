@@ -35497,8 +35497,27 @@ function _proRebindVerticalListeners(){
   _proCatUnsub=onSnapshot(doc(db,'config',_verticalDocId('catalogoConfig')),snap=>{
     if(snap.exists()){
       const d=snap.data()||{};
-      S.catalogoConfig.publicosAlvo=Array.isArray(d.publicosAlvo)?d.publicosAlvo.filter(Boolean):[];
-      S.catalogoConfig.provasAlvo=Array.isArray(d.provasAlvo)?d.provasAlvo.filter(Boolean):[];
+      let _pubs=Array.isArray(d.publicosAlvo)?d.publicosAlvo.filter(Boolean):[];
+      let _provs=Array.isArray(d.provasAlvo)?d.provasAlvo.filter(Boolean):[];
+      // Verticais != anestreview não devem herdar o seed da anest. Um bug antigo
+      // gravava o seed em qualquer vertical — aqui limpamos (no display e no doc,
+      // uma vez; idempotente: o próximo snapshot já vem limpo e não regrava).
+      if(v!=='anestreview'){
+        const _seedP=new Set(PRO_CATALOGO_SEED.publicosAlvo);
+        const _seedQ=new Set(PRO_CATALOGO_SEED.provasAlvo);
+        const _rmP=_pubs.filter(x=>_seedP.has(x));
+        const _rmQ=_provs.filter(x=>_seedQ.has(x));
+        if((_rmP.length||_rmQ.length)&&_proCanEdit()){
+          const _upd={};
+          if(_rmP.length)_upd.publicosAlvo=arrayRemove(..._rmP);
+          if(_rmQ.length)_upd.provasAlvo=arrayRemove(..._rmQ);
+          updateDoc(doc(db,'config',_verticalDocId('catalogoConfig',v)),_upd).catch(e=>console.warn('limpeza seed herdado:',e));
+        }
+        _pubs=_pubs.filter(x=>!_seedP.has(x));
+        _provs=_provs.filter(x=>!_seedQ.has(x));
+      }
+      S.catalogoConfig.publicosAlvo=_pubs;
+      S.catalogoConfig.provasAlvo=_provs;
       S.catalogoConfig.loaded=true;
     }else{
       S.catalogoConfig.publicosAlvo=[];S.catalogoConfig.provasAlvo=[];S.catalogoConfig.loaded=true;
@@ -35619,8 +35638,11 @@ window.initProdutos=function(){
 };
 
 async function _proSeedCatalogoConfigIfNeeded(){
-  if(_proCatSeeded)return;
   if(!_proCanEdit())return;
+  // Só a vertical legada (anestreview) recebe o seed padrão. Outras verticais
+  // começam VAZIAS — cada uma cadastra o próprio público-alvo e provas-alvo.
+  if((S.verticalAtual||'anestreview')!=='anestreview')return;
+  if(_proCatSeeded)return;
   _proCatSeeded=true;
   try{
     const ref=doc(db,'config',_verticalDocId('catalogoConfig'));
@@ -35644,9 +35666,11 @@ async function _proAddCatalogoOption(tipo,valor){
   const ref=doc(db,'config',_verticalDocId('catalogoConfig'));
   const snap=await getDoc(ref);
   if(!snap.exists()){
+    // Só anestreview nasce com o seed; outras verticais começam vazias.
+    const _isAnest=(S.verticalAtual||'anestreview')==='anestreview';
     await setDoc(ref,{
-      publicosAlvo:PRO_CATALOGO_SEED.publicosAlvo.slice(),
-      provasAlvo:PRO_CATALOGO_SEED.provasAlvo.slice(),
+      publicosAlvo:_isAnest?PRO_CATALOGO_SEED.publicosAlvo.slice():[],
+      provasAlvo:_isAnest?PRO_CATALOGO_SEED.provasAlvo.slice():[],
       seededAt:serverTimestamp(),
       seededBy:S.currentUser?.username||'?'
     });
@@ -42171,12 +42195,14 @@ function _proRefreshPickerIfOpen(){
 }
 
 function _proPositionPicker(pop,anchor){
-  const rect=anchor.getBoundingClientRect();
-  let top=rect.bottom+8, left=rect.left;
-  const pw=pop.offsetWidth||340;
-  if(left+pw>window.innerWidth-12)left=window.innerWidth-pw-12;
-  if(top+360>window.innerHeight)top=Math.max(12,rect.top-360);
-  pop.style.top=top+'px';pop.style.left=Math.max(12,left)+'px';
+  // Picker flutuante CENTRALIZADO na viewport — fica 100% visível independente de
+  // onde está o botão. Antes ancorava abaixo do botão (top=rect.bottom+8) e, quando
+  // o botão estava na parte de baixo do formulário, estourava pra fora da tela.
+  pop.style.left='50%';
+  pop.style.top='50%';
+  pop.style.right='auto';
+  pop.style.bottom='auto';
+  pop.style.transform='translate(-50%,-50%)';
 }
 
 // Icon popover (só pra features `livre`)
