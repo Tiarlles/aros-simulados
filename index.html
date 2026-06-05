@@ -33299,37 +33299,6 @@ window.testAiConnection=async()=>{
 // Current preview data (used by Flow B preview/PDF)
 let _previewData=null;
 
-function buildReportEmailBody(d){
-  const simNome=d.simAtual?.nome||'Simulado';
-  const fmt=v=>v!=null&&!isNaN(v)?parseFloat(v).toFixed(1):'—';
-  const habNames=['Domínio do Conteúdo','Raciocínio Lógico','Estruturação da Resposta','Controle Emocional','Gestão de Tempo'];
-  const lines=[];
-  lines.push(`Olá ${d.student.nome},`,'');
-  lines.push(`Segue o feedback do seu desempenho no simulado ${simNome}.`,'');
-  lines.push('📊 RESULTADO DO SIMULADO');
-  lines.push(`• CRIAR / Simulação: ${fmt(d.notaCriar)}`);
-  lines.push(`• Oral Online: ${fmt(d.notaOral)}`);
-  lines.push(`• Nota Geral: ${fmt(d.notaFinal)}`);
-  if(d.mediaTurma!=null&&!d.isExtra)lines.push(`• Média da Turma: ${fmt(d.mediaTurma)}`);
-  lines.push('');
-  // Como feedback agora pode ser HTML (contenteditable), tira as tags pro corpo do email
-  const stripHTML=(s)=>{const t=document.createElement('div');t.innerHTML=String(s||'');return (t.textContent||'').replace(/\s+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();};
-  const casos=(d.feedbacksCasosRevisados||[]).filter(c=>(c.feedback||'').trim());
-  if(casos.length){
-    lines.push('📝 FEEDBACK POR CASO','');
-    casos.forEach(c=>{lines.push(c.nome);lines.push(stripHTML(c.feedback));lines.push('');});
-  }
-  if((d.feedbackGeralRevisado||'').trim()){
-    lines.push('💬 FEEDBACK GERAL');
-    lines.push(stripHTML(d.feedbackGeralRevisado));
-    lines.push('');
-  }
-  lines.push('📊 AVALIAÇÃO DE HABILIDADES (média)');
-  (d.habMedias||[]).forEach((v,i)=>{lines.push(`• ${habNames[i]}: ${v>0?v.toFixed(1)+'/5':'—'}`);});
-  lines.push('','Atenciosamente,','Equipe AnestReview · AROS');
-  return lines.join('\n');
-}
-
 window.confirmarGerarPDF=async()=>{
   if(!_previewData)return;
   const firstData=_previewData[0];
@@ -33341,42 +33310,12 @@ window.confirmarGerarPDF=async()=>{
   });
   const fgEl=document.getElementById('prev-feedback-geral');
   firstData.feedbackGeralRevisado=fgEl?_gabSanitize(fgEl.innerHTML||''):'';
-  // Build HTML for print/PDF
+  // Build HTML for print/PDF — abre o relatório e dispara o "Salvar como PDF" automaticamente.
+  // O auto-print fica embutido no HTML (montarHTMLRelatorio) pra rodar após o load das imagens.
   const w=window.open('','_blank');
   if(!w){alert('Permita popups para gerar o PDF.');return;}
   w.document.write(montarHTMLRelatorio(firstData));
   w.document.close();
-  // Wire email buttons (topo + rodapé) — auto-send via EmailJS
-  const sendEmailHandler=async(ev)=>{
-    const btn=ev.currentTarget;
-    const email=firstData.email||'';
-    if(!email){w.alert('Email do aluno não encontrado na lista de alunos.');return;}
-    if(!w.confirm(`Enviar relatório por email para ${firstData.student.nome}\n(${email})?`))return;
-    const orig=btn.innerHTML;btn.innerHTML='⏳ Enviando...';btn.disabled=true;
-    try{
-      const simNome=firstData.simAtual?.nome||'Simulado';
-      await emailjs.send('service_exyoa4r','template_r0vjejs',{
-        to_email:email,
-        nome:firstData.student.nome,
-        assunto:`Feedback do Simulado — ${simNome}`,
-        mensagem:buildReportEmailBody(firstData),
-        simulado:simNome,
-        dia:'',
-        horario:''
-      });
-      w.alert('✅ Email enviado para '+email);
-      // Atualiza AMBOS os botões (topo + rodapé) pra mostrar "enviado"
-      [w.document.getElementById('btn-email'),w.document.getElementById('btn-email-top')].forEach(b=>{
-        if(b){b.innerHTML='✅ Email enviado';b.style.background='#1a7f37';b.disabled=true;}
-      });
-    }catch(err){
-      console.error('EmailJS error:',err);
-      w.alert('❌ Erro ao enviar email: '+(err?.text||err?.message||err));
-      btn.innerHTML=orig;btn.disabled=false;
-    }
-  };
-  w.document.getElementById('btn-email')?.addEventListener('click',sendEmailHandler);
-  w.document.getElementById('btn-email-top')?.addEventListener('click',sendEmailHandler);
   setTimeout(()=>w.focus(),300);
 };
 
@@ -33507,7 +33446,6 @@ table{width:100%;border-collapse:collapse;font-size:10px}
 </head><body>
 <!-- Barra superior — replicada do rodapé. Esconde ao imprimir. -->
 <div class="top-bar no-print">
-  <button id="btn-email-top" style="background:#059669;color:white;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer">📧 Enviar relatório por email</button>
   <button onclick="window.print()" style="background:#2563eb;color:white;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer">🖨️ Salvar como PDF</button>
 </div>
 <div class="header"><h1>${d.student.nome}</h1><p>Matrícula: ${d.mat} &nbsp;|&nbsp; AROS · Treinamento TSA Oral &nbsp;|&nbsp; ${simNome}</p></div>
@@ -33515,7 +33453,6 @@ table{width:100%;border-collapse:collapse;font-size:10px}
 ${d.notaFinal!==undefined?`<div class="nota-card main"><div class="valor">${d.notaFinal.toFixed(1)}</div><div class="label">Nota Geral</div></div>`:''}
 ${d.notaCriar!==undefined?`<div class="nota-card"><div class="valor" style="font-size:14px">${d.notaCriar.toFixed(1)}</div><div class="label">CRIAR / Simulação</div></div>`:''}
 ${d.notaOral!==undefined?`<div class="nota-card"><div class="valor" style="font-size:14px">${d.notaOral.toFixed(1)}</div><div class="label">Oral Online</div></div>`:''}
-${(d.mediaTurma&&!d.isExtra)?`<div class="nota-card"><div class="valor" style="font-size:14px">${d.mediaTurma.toFixed(1)}</div><div class="label">Média Turma</div></div>`:''}
 </div>
 <div class="section"><h2>📊 Histórico de Simulados</h2>
 ${histChartSVG(d.historico,simNome)}
@@ -33536,9 +33473,9 @@ ${d.habMedias.map((v,i)=>`<tr><td style="padding:2px 16px 2px 0;color:#374151;wh
 ${d.isExtra?_montarHTMLExtraCasesPDF(d):''}
 <div class="footer">AROS · AnestReview</div>
 <div class="no-print">
-  <button id="btn-email" style="background:#059669;color:white;border:none;border-radius:6px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer">📧 Enviar relatório por email</button>
   <button onclick="window.print()" style="background:#2563eb;color:white;border:none;border-radius:6px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer">🖨️ Salvar como PDF</button>
 </div>
+<scr`+`ipt>window.addEventListener('load',()=>setTimeout(()=>window.print(),400));</scr`+`ipt>
 </body></html>`;
 }
 
@@ -34538,6 +34475,39 @@ function uiConfirm(message,opts={}){
 }
 
 // ── Gerar Feedback via nova estrutura de blocos ────────────────────────────────
+// ── Overlay de progresso da geração de feedback ──────────────────────────────
+// A etapa de revisão com IA chama a API uma vez por caso e leva alguns segundos.
+// Sem isso a tela fica "parada" e parece travada. Mostra spinner + barra de progresso.
+window._fbGenShow=(msg)=>{
+  _fbGenHide();
+  const ov=document.createElement('div');
+  ov.id='fbgen-overlay';
+  ov.style.cssText='position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(8,12,20,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)';
+  ov.innerHTML=`
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:34px 40px;width:min(420px,90vw);box-shadow:0 30px 90px rgba(0,0,0,.5);text-align:center">
+      <div style="width:54px;height:54px;margin:0 auto 22px;border-radius:50%;border:4px solid color-mix(in srgb,#2563eb 22%,transparent);border-top-color:#2563eb;animation:imp-spin .8s linear infinite;box-shadow:0 0 22px rgba(37,99,235,.3)"></div>
+      <div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:7px;letter-spacing:-.2px">🤖 Gerando feedback com IA</div>
+      <div id="fbgen-msg" style="font-size:13.5px;color:var(--t2);line-height:1.5;min-height:20px">${msg||'Preparando…'}</div>
+      <div id="fbgen-barwrap" style="display:none;margin-top:20px">
+        <div style="height:8px;border-radius:99px;background:var(--bg3);overflow:hidden">
+          <div id="fbgen-bar" style="height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#1e3a5f,#2563eb);transition:width .4s ease"></div>
+        </div>
+        <div id="fbgen-count" style="font-size:11.5px;color:var(--t3);margin-top:9px;font-weight:700;letter-spacing:.2px"></div>
+      </div>
+      <div style="font-size:11px;color:var(--t3);margin-top:20px;opacity:.85">Isso pode levar alguns segundos · não feche esta janela</div>
+    </div>`;
+  document.body.appendChild(ov);
+};
+window._fbGenMsg=(msg)=>{const e=document.getElementById('fbgen-msg');if(e)e.textContent=msg;};
+window._fbGenProgress=(cur,total)=>{
+  const wrap=document.getElementById('fbgen-barwrap');if(wrap)wrap.style.display='block';
+  const bar=document.getElementById('fbgen-bar');const cnt=document.getElementById('fbgen-count');
+  const pct=total>0?Math.round(cur/total*100):0;
+  if(bar)bar.style.width=pct+'%';
+  if(cnt)cnt.textContent=`Revisando feedbacks com IA · ${cur} de ${total}`;
+};
+window._fbGenHide=()=>{document.getElementById('fbgen-overlay')?.remove();};
+
 window.gerarFeedbackAluno=async(studentId)=>{
   const simId=_ckSimId||document.getElementById('ck-sim-sel')?.value;
   if(!simId){alert('Selecione um simulado primeiro.');return;}
@@ -34557,6 +34527,7 @@ window.gerarFeedbackAluno=async(studentId)=>{
   if(!student){alert('Aluno não encontrado.');return;}
   const btn=event?.target;const orig=btn?.innerHTML;
   if(btn){btn.innerHTML='⏳ Preparando...';btn.disabled=true;}
+  _fbGenShow('Carregando dados do aluno…');
   try{
     // Load checklist resp (new bloco format)
     let ckResp=_ckRespostas[studentId]||null;
@@ -34573,7 +34544,7 @@ window.gerarFeedbackAluno=async(studentId)=>{
         }
       }catch(e){}
     }
-    if(!ckResp){alert('Checklist não encontrado para este aluno.');if(btn){btn.innerHTML=orig;btn.disabled=false;}return;}
+    if(!ckResp){_fbGenHide();alert('Checklist não encontrado para este aluno.');if(btn){btn.innerHTML=orig;btn.disabled=false;}return;}
 
     // Load templates (new bloco format)
     let tplCriar={casos:[]},tplOral={casos:[]};
@@ -34615,27 +34586,32 @@ window.gerarFeedbackAluno=async(studentId)=>{
       if(fgSnap.exists())fgTexto=fgSnap.data().textoFinal||'';
     }catch(e){}
 
-    // Media da turma (from notas)
-    const simNotas=[];
-    try{const nAll=await getDocs(collection(db,`notas/${simId}/alunos`));nAll.docs.forEach(d=>{const n=d.data();const v=n.criar!==undefined&&n.oral!==undefined?(n.criar+n.oral)/2:n.criar||n.oral;if(v!==undefined)simNotas.push(v);});}catch(e){}
-    const mediaTurma=simNotas.length?simNotas.reduce((a,b)=>a+b,0)/simNotas.length:null;
-
     // Build feedbacks per case for both blocos.
     // Inclui bloco+ci pra que o botão "Salvar" do preview possa persistir
     // de volta em respostas/{studentId}.{bloco}.casos[ci].feedback.
     const feedbacksCasos=[];
+    // Conta só os casos que de fato vão à IA (com feedback preenchido) pra a barra ter total real.
+    const _aiTotal=[
+      ...(tplCriar.casos||[]).map((_,ci)=>(ckResp.criar?.casos?.[ci]?.feedback||'').trim()),
+      ...(tplOral.casos||[]).map((_,ci)=>(ckResp.oral?.casos?.[ci]?.feedback||'').trim())
+    ].filter(Boolean).length;
+    let _aiDone=0;
+    const _aiProg=()=>{_aiDone++;_fbGenProgress(_aiDone,_aiTotal);};
+    _fbGenMsg(_aiTotal>0?'Revisando feedbacks com IA…':'Montando relatório…');
+    if(_aiTotal>0)_fbGenProgress(0,_aiTotal);
     for(let ci=0;ci<(tplCriar.casos||[]).length;ci++){
       const caso=tplCriar.casos[ci];const cr=ckResp.criar?.casos?.[ci]||{};
       const fbRaw=(cr.feedback||'').trim()||'sem feedback específico';
-      const rev=await applyAIPrompt(fbRaw);
+      const rev=await applyAIPrompt(fbRaw,_aiProg);
       feedbacksCasos.push({nome:'[CRIAR] '+(caso.nome||'Caso '+(ci+1)),feedback:rev,prof:cr.prof||'',bloco:'criar',ci});
     }
     for(let ci=0;ci<(tplOral.casos||[]).length;ci++){
       const caso=tplOral.casos[ci];const cr=ckResp.oral?.casos?.[ci]||{};
       const fbRaw=(cr.feedback||'').trim()||'sem feedback específico';
-      const rev=await applyAIPrompt(fbRaw);
+      const rev=await applyAIPrompt(fbRaw,_aiProg);
       feedbacksCasos.push({nome:'[ORAL] '+(caso.nome||'Caso '+(ci+1)),feedback:rev,prof:cr.prof||'',bloco:'oral',ci});
     }
+    _fbGenMsg('Montando relatório…');
 
     const fgRev=fgTexto;
     const notaC=ckResp.criar?.notaCriar;const notaO=ckResp.oral?.notaOral;
@@ -34644,7 +34620,7 @@ window.gerarFeedbackAluno=async(studentId)=>{
     const simAtual=S.sims.find(s=>s.id===simId)||{nome:'Simulado',id:simId};
     const data={
       student,mat,email,historico,
-      ckResp,habMedias,mediaTurma,
+      ckResp,habMedias,
       simAtual,
       isExtra:!!simAtual.isExtra,
       tplCriar,tplOral,
@@ -34658,7 +34634,7 @@ window.gerarFeedbackAluno=async(studentId)=>{
     _ckSimId=simId;
     abrirPreviewV2(data);
   }catch(err){alert('Erro: '+err.message);console.error(err);}
-  finally{if(btn){btn.innerHTML=orig;btn.disabled=false;}}
+  finally{_fbGenHide();if(btn){btn.innerHTML=orig;btn.disabled=false;}}
 };
 
 // ── Editor rico dos feedbacks do preview ─────────────────────────────────────
@@ -34782,10 +34758,7 @@ function abrirPreviewV2(data){
 
   // Notas
   const notasEl=document.getElementById('prev-notas');notasEl.innerHTML='';
-  // Em Simulado Extra a turma é pequena demais pra média ser relevante — esconde o card.
   const _notasCards=[{l:'CRIAR',v:data.notaCriar},{l:'ORAL ONLINE',v:data.notaOral},{l:'NOTA GERAL',v:data.notaFinal}];
-  if(!data.isExtra)_notasCards.push({l:'MÉDIA TURMA',v:data.mediaTurma});
-  // Grid de 3 colunas (sem média) ou 4 (com média)
   notasEl.style.gridTemplateColumns=`repeat(${_notasCards.length},1fr)`;
   _notasCards.forEach(n=>{
     const cor=n.l==='NOTA GERAL'&&n.v!=null?(n.v>=60?'#1a6b3c':'#8b1a1a'):'#1a1714';
