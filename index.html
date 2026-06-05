@@ -8693,6 +8693,12 @@ const addMins=(h,m,mins)=>{const t=h*60+m+mins;return{h:Math.floor(t/60)%24,m:t%
 const fHM=(h,m)=>`${String(h).padStart(2,'0')}h${String(m).padStart(2,'0')}`;
 
 // boot
+// Sinaliza quando os dados base do painel (sims/profs/listas/menu/…) terminaram de
+// carregar no boot. onAuthStateChanged aguarda isto antes de montar o painel, pra não
+// renderizar selects vazios (ex: simulados) numa aba que restaura a sessão antes do
+// boot terminar. (Substitui a garantia de ordem que a antiga _restoreSession dava.)
+let _arosCoreReadyResolve;
+window._arosCoreReady=new Promise(r=>{_arosCoreReadyResolve=r;});
 async function boot(){
   const _bootParams=new URLSearchParams(window.location.search);
   if(_bootParams.get('modo')==='projecao'){
@@ -8716,7 +8722,10 @@ async function boot(){
   // Dados de COORDENAÇÃO (usuarios c/ senhas, financeiro, cofre de senhas) NÃO são
   // carregados aqui — senão desceriam pro navegador de todo visitante (inclusive alunos).
   // Eles carregam sob demanda: no login, no onAuthStateChanged e ao abrir a aba.
-  await Promise.all([loadSims(),loadProfs(),loadListas(),loadMenuLabels(),loadSimExtra(),loadMentorias(),loadBlocos(),loadClinicas(),loadRevisoes(),loadRecProvas(),loadComunicacaoCards(),loadConteudosLiberados()]);
+  try{
+    await Promise.all([loadSims(),loadProfs(),loadListas(),loadMenuLabels(),loadSimExtra(),loadMentorias(),loadBlocos(),loadClinicas(),loadRevisoes(),loadRecProvas(),loadComunicacaoCards(),loadConteudosLiberados()]);
+  }catch(e){console.error('boot core load:',e);}
+  _arosCoreReadyResolve();  // libera o onAuthStateChanged a montar o painel já com os dados carregados
   // Pre-carrega contagens de posts pra mostrar o badge "X avisos" nos cards da home
   try{await Promise.all(['tsa','tea','mes'].map(c=>loadComunicacaoPosts(c)));}catch(e){}
   renderSimCards();
@@ -23770,6 +23779,10 @@ onAuthStateChanged(auth,async(user)=>{
     try{await signOut(auth);}catch(e){}
     return;
   }
+  // Espera os dados base do painel (simulados/professores/listas/…) carregarem antes
+  // de montar — senão a aba que restaura a sessão antes do boot terminar mostra selects
+  // vazios (ex: simulados "não existem"). Teto de 5s pra nunca travar o login.
+  try{await Promise.race([window._arosCoreReady,new Promise(r=>setTimeout(r,5000))]);}catch(_){}
   _applyLocalSession(localUser);
   // Só audita LOGIN se for fresh sign-in (flag setada em loginGoogle/loginEmailFirebase).
   // Restore de sessão cacheada NÃO gera entrada — evita poluir log a cada page reload.
