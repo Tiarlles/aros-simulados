@@ -165,6 +165,13 @@ service cloud.firestore {
       allow read, create, update: if true;  // aluno salva próprio
       allow delete: if false;
     }
+    // Relatório final gerado (HTML do PDF aprovado pela coord). Contém histórico
+    // de notas → PROTEGIDO: só coord/prof logado lê e grava. Reaberto pelo link
+    // "Baixar PDF" na grade do checklist.
+    match /checklists/{simId}/relatorios/{studentId} {
+      allow read, create, update: if isAuth();
+      allow delete: if isAuth();
+    }
 
     // ────────────────────────────────────────────────────────────────────────
     // DISPONIBILIDADE — prof/coord registra disponibilidade. Exige auth.

@@ -30386,6 +30386,18 @@ function renderCkStudents(list){
     return;
   }
   const sorted=[...filtrada].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  // "Habilitar Simulado" libera a projeção remota — só faz sentido até o dia do simulado.
+  // No dia seguinte à última data (sáb/dom às 23:59:59) o botão de habilitar some.
+  // Mesma regra do renderSimCards. Sem datas definidas → não esconde (não dá pra saber).
+  const _curSimCk=S.sims.find(x=>x.id===_ckSimId);
+  const _simPassou=(()=>{
+    if(!_curSimCk)return false;
+    const _now=new Date();
+    const ds=_curSimCk.dataSab?new Date(_curSimCk.dataSab+'T23:59:59'):null;
+    const dd=_curSimCk.dataDom?new Date(_curSimCk.dataDom+'T23:59:59'):null;
+    if(!ds&&!dd)return false;
+    return !((ds&&ds>=_now)||(dd&&dd>=_now));
+  })();
   grid.innerHTML=sorted.map((s,idx)=>{
     const resp=_ckRespostas[s.id];
     const blocoSt=(b)=>getBlocoStatus(resp?.[b],_ckTemplate?.[b]);
@@ -30418,7 +30430,7 @@ function renderCkStudents(list){
     const liveAtivo=!!(_ckLiveStatus&&_ckLiveStatus[s.id]&&_ckLiveStatus[s.id].ativo);
     const btnHabilitar=liveAtivo
       ?`<button onclick="event.stopPropagation();desabilitarSimuladoAluno('${s.id}')" class="btn btn-s btn-sm" title="Desabilitar sessão remota deste aluno" style="font-size:11px;padding:3px 10px;background:rgba(63,185,80,.12);border-color:rgba(63,185,80,.45);color:#3fb950">✓ Habilitado</button>`
-      :`<button onclick="event.stopPropagation();habilitarSimuladoAluno('${s.id}')" class="btn btn-s btn-sm" title="Habilitar a sessão remota da projeção para este aluno (libera o botão 'Entrar na sala' na escala dele)" style="font-size:11px;padding:3px 10px;background:rgba(47,129,247,.1);border-color:rgba(47,129,247,.4);color:var(--accent)">▶️ Habilitar Simulado</button>`;
+      :(_simPassou?'':`<button onclick="event.stopPropagation();habilitarSimuladoAluno('${s.id}')" class="btn btn-s btn-sm" title="Habilitar a sessão remota da projeção para este aluno (libera o botão 'Entrar na sala' na escala dele)" style="font-size:11px;padding:3px 10px;background:rgba(47,129,247,.1);border-color:rgba(47,129,247,.4);color:var(--accent)">▶️ Habilitar Simulado</button>`);
     // Botão "Copiar link" — quando habilitado, copia o link direto da sala do aluno
     const btnCopyLink=liveAtivo
       ?`<button onclick="event.stopPropagation();copiarLinkSalaAluno('${s.id}',this)" class="btn btn-s btn-sm" title="Copia o link direto da sala deste aluno — útil pra Simulado Extra (manda por WhatsApp/email)" style="font-size:11px;padding:3px 10px;background:rgba(251,143,68,.1);border-color:rgba(251,143,68,.4);color:#fb8f44">📋 Link</button>`
@@ -30441,8 +30453,9 @@ function renderCkStudents(list){
       onmouseout="this.style.background='${rowBg}';this.style.borderColor='${borderColor}'">
       <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
         <span style="font-size:13px;font-weight:700;color:var(--t3);min-width:24px">${idx+1}.</span>
-        <div style="min-width:0;max-width:220px">
+        <div style="min-width:0;max-width:300px">
           <p style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.nome}</p>
+          ${resp?.feedbackGeradoEm?`<p style="font-size:10.5px;color:var(--t2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📄 Feedback gerado em ${new Date(resp.feedbackGeradoEm).toLocaleDateString('pt-BR')} · <span onclick="event.stopPropagation();baixarPDFFeedback('${s.id}')" style="color:var(--accent);font-weight:600;cursor:pointer;text-decoration:underline">Baixar PDF</span></p>`:''}
         </div>
         ${blockBtns}
       </div>
@@ -33312,11 +33325,42 @@ window.confirmarGerarPDF=async()=>{
   firstData.feedbackGeralRevisado=fgEl?_gabSanitize(fgEl.innerHTML||''):'';
   // Build HTML for print/PDF — abre o relatório e dispara o "Salvar como PDF" automaticamente.
   // O auto-print fica embutido no HTML (montarHTMLRelatorio) pra rodar após o load das imagens.
+  const reportHTML=montarHTMLRelatorio(firstData);
   const w=window.open('','_blank');
   if(!w){alert('Permita popups para gerar o PDF.');return;}
-  w.document.write(montarHTMLRelatorio(firstData));
+  w.document.write(reportHTML);
   w.document.close();
   setTimeout(()=>w.focus(),300);
+  // Registra a geração: data (no doc de respostas, p/ exibir na grade) + HTML final
+  // (subcoleção protegida, pro link "Baixar PDF" reabrir o relatório idêntico).
+  try{
+    const _genISO=new Date().toISOString();
+    const _sid=_ckStudentId||firstData.student?.id;
+    if(_sid&&_ckSimId){
+      // HTML primeiro (write maior, pode falhar). Só marca a data se ele salvou,
+      // pra o link "Baixar PDF" nunca aparecer sem o relatório por trás.
+      await setDoc(doc(db,`checklists/${_ckSimId}/relatorios/${_sid}`),{html:reportHTML,geradoEm:_genISO});
+      await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_sid}`),{feedbackGeradoEm:_genISO},{merge:true});
+      if(_ckRespostas[_sid])_ckRespostas[_sid].feedbackGeradoEm=_genISO;
+      if(typeof renderCkStudents==='function'&&Array.isArray(_ckStudents))renderCkStudents(_ckStudents);
+    }
+  }catch(e){console.warn('persist feedbackGeradoEm:',e.message);}
+};
+
+// Reabre o relatório final guardado (HTML) e dispara o "Salvar como PDF".
+// Usado pelo link "Baixar PDF" na grade do checklist (não re-roda a IA).
+window.baixarPDFFeedback=async(studentId)=>{
+  if(!_ckSimId){alert('Selecione um simulado primeiro.');return;}
+  try{
+    const snap=await getDoc(doc(db,`checklists/${_ckSimId}/relatorios/${studentId}`));
+    const html=snap.exists()?snap.data().html:'';
+    if(!html){alert('Relatório não encontrado. Gere o feedback novamente.');return;}
+    const w=window.open('','_blank');
+    if(!w){alert('Permita popups para baixar o PDF.');return;}
+    w.document.write(html);
+    w.document.close();
+    setTimeout(()=>w.focus(),300);
+  }catch(e){alert('Erro ao abrir o relatório: '+e.message);}
 };
 
 function histChartSVG(historico,currentSimNome){
