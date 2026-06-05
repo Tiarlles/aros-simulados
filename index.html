@@ -4677,7 +4677,7 @@ body.pro-rt-fs-on{overflow:hidden}
       <div id="ck-home">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:20px">
           <div style="flex:1;min-width:280px">
-            <h3 style="font-family:Fraunces,serif;font-size:17px;font-weight:700">📝 Checklist de Aplicação</h3>
+            <h3 style="font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-size:17px;font-weight:700;letter-spacing:-.3px">📝 Checklist de Aplicação</h3>
             <p style="font-size:13px;color:var(--t2);margin-bottom:14px">Selecione o simulado e o aluno para preencher o checklist.</p>
             <!-- Sim selector -->
             <div class="fg" style="margin-bottom:10px;max-width:400px">
@@ -4729,7 +4729,10 @@ body.pro-rt-fs-on{overflow:hidden}
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
           <button class="btn btn-s btn-sm" onclick="backToCkHome()">← Voltar</button>
           <div id="ck-blocos-header" style="flex:1"></div>
-          <button class="btn btn-p btn-sm hidden" id="btn-gerar-relatorio" onclick="gerarFeedbackAluno(_ckStudentId)" style="white-space:nowrap;background:linear-gradient(135deg,#1e3a5f,#2563eb)">🔖 Gerar Feedback</button>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+            <button class="btn btn-p btn-sm hidden" id="btn-gerar-relatorio" onclick="gerarFeedbackBoxBtn()" style="white-space:nowrap;background:linear-gradient(135deg,#1e3a5f,#2563eb)">🔖 Gerar Feedback</button>
+            <p id="ck-blocos-relatorio-info" class="hidden" style="font-size:11px;color:var(--t2);margin:0;white-space:nowrap"></p>
+          </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="ck-blocos-grid"></div>
       </div>
@@ -4786,7 +4789,7 @@ body.pro-rt-fs-on{overflow:hidden}
         <div style="position:sticky;top:78px;z-index:50;display:flex;align-items:center;gap:12px;margin:-4px -4px 16px;padding:12px 4px;background:var(--bg);border-bottom:1px solid var(--border);box-shadow:0 6px 14px -10px rgba(0,0,0,.45);flex-wrap:wrap">
           <button class="btn btn-s btn-sm" onclick="backToCkHome()">← Voltar</button>
           <div style="flex:1;min-width:160px">
-            <h3 style="font-family:Fraunces,serif;font-size:17px;font-weight:700;margin:0">✏️ Prévia Editável do Relatório</h3>
+            <h3 style="font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-size:17px;font-weight:700;letter-spacing:-.3px;margin:0">✏️ Prévia Editável do Relatório</h3>
             <p style="font-size:12px;color:var(--t2);margin:0">Revise e edite qualquer campo antes de gerar o PDF final.</p>
           </div>
           <button class="btn btn-p btn-sm" onclick="confirmarGerarPDF()" style="font-weight:700">📄 Gerar PDF Final</button>
@@ -33312,6 +33315,37 @@ window.testAiConnection=async()=>{
 // Current preview data (used by Flow B preview/PDF)
 let _previewData=null;
 
+// Imprime o relatório SEM abrir nova aba: escreve o HTML num iframe oculto e
+// chama print() só nele — o popup "Salvar como PDF" abre direto sobre a página.
+// Remove qualquer auto-print embutido no HTML pra não disparar duas vezes.
+function _imprimirRelatorioIframe(html){
+  if(!html){alert('Relatório vazio.');return;}
+  const limpo=String(html).replace(new RegExp('<scr'+'ipt[\\s\\S]*?<\\/scr'+'ipt>','gi'),'');
+  const ifr=document.createElement('iframe');
+  ifr.setAttribute('aria-hidden','true');
+  ifr.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+  const cleanup=()=>setTimeout(()=>{try{ifr.remove();}catch(e){}},800);
+  // O iframe dispara "load" 2×: primeiro o about:blank (vazio), depois o conteúdo.
+  // Só imprime UMA vez, e só quando o relatório já está no documento — senão o
+  // popup de salvar reabre sozinho (print disparado duas vezes).
+  let _impresso=false;
+  ifr.onload=()=>{
+    if(_impresso)return;
+    try{
+      const win=ifr.contentWindow;
+      const doc=win.document;
+      if(!doc||!doc.body||doc.body.children.length===0)return; // ignora o load do about:blank
+      _impresso=true;
+      win.focus();
+      if('onafterprint' in win)win.onafterprint=cleanup;
+      setTimeout(()=>{try{win.print();}catch(e){console.warn('print:',e);}if(!('onafterprint' in win))cleanup();},250);
+    }catch(e){console.warn('iframe print:',e);cleanup();}
+  };
+  document.body.appendChild(ifr);
+  const d=ifr.contentWindow.document;
+  d.open();d.write(limpo);d.close();
+}
+
 window.confirmarGerarPDF=async()=>{
   if(!_previewData)return;
   const firstData=_previewData[0];
@@ -33323,14 +33357,9 @@ window.confirmarGerarPDF=async()=>{
   });
   const fgEl=document.getElementById('prev-feedback-geral');
   firstData.feedbackGeralRevisado=fgEl?_gabSanitize(fgEl.innerHTML||''):'';
-  // Build HTML for print/PDF — abre o relatório e dispara o "Salvar como PDF" automaticamente.
-  // O auto-print fica embutido no HTML (montarHTMLRelatorio) pra rodar após o load das imagens.
+  // Gera o HTML do relatório e dispara o "Salvar como PDF" sem abrir nova aba (iframe oculto).
   const reportHTML=montarHTMLRelatorio(firstData);
-  const w=window.open('','_blank');
-  if(!w){alert('Permita popups para gerar o PDF.');return;}
-  w.document.write(reportHTML);
-  w.document.close();
-  setTimeout(()=>w.focus(),300);
+  _imprimirRelatorioIframe(reportHTML);
   // Registra a geração: data (no doc de respostas, p/ exibir na grade) + HTML final
   // (subcoleção protegida, pro link "Baixar PDF" reabrir o relatório idêntico).
   try{
@@ -33355,11 +33384,7 @@ window.baixarPDFFeedback=async(studentId)=>{
     const snap=await getDoc(doc(db,`checklists/${_ckSimId}/relatorios/${studentId}`));
     const html=snap.exists()?snap.data().html:'';
     if(!html){alert('Relatório não encontrado. Gere o feedback novamente.');return;}
-    const w=window.open('','_blank');
-    if(!w){alert('Permita popups para baixar o PDF.');return;}
-    w.document.write(html);
-    w.document.close();
-    setTimeout(()=>w.focus(),300);
+    _imprimirRelatorioIframe(html);
   }catch(e){alert('Erro ao abrir o relatório: '+e.message);}
 };
 
@@ -34318,7 +34343,19 @@ window.cfgToggle=(bodyId,arrId)=>{
 // RELATÓRIO PDF + FEEDBACK GERAL
 // ══════════════════════════════════════════════════════════════════════════════
 
-window.openFeedbackGeralModal=()=>{
+window.openFeedbackGeralModal=async()=>{
+  // Se o feedback geral consolidado já foi salvo (textoFinal), as contribuições
+  // ficam travadas — a coordenação já fechou o texto que vai pro PDF.
+  const simId=document.getElementById('ck-sim-sel')?.value||_ckSimId||S.curSim?.id;
+  if(simId){
+    try{
+      const snap=await getDoc(doc(db,`feedbackGeral/${simId}`));
+      if(snap.exists()&&(snap.data().textoFinal||'').trim()){
+        await uiAlert('O feedback geral já foi gerado, entre em contato com a coordenação.',{title:'💬 Feedback geral já gerado'});
+        return;
+      }
+    }catch(e){}
+  }
   const s=_ckStudents.find(x=>x.id===_ckStudentId);
   document.getElementById('fg-modal-sub').textContent=s?.nome||'';
   const sel=document.getElementById('fg-prof-sel');
@@ -34347,12 +34384,28 @@ window.salvarFeedbackGeral=async()=>{
   alert('✅ Contribuição enviada!');
 };
 
+// Wrapper do botão "Gerar Feedback" do box: o onclick inline não enxerga a
+// variável de módulo _ckStudentId (script é type="module"). Aqui ela é visível.
+window.gerarFeedbackBoxBtn=()=>{ if(_ckStudentId)gerarFeedbackAluno(_ckStudentId); };
+
 function updateRelatorioBtnVisibility(){
   const btn=document.getElementById('btn-gerar-relatorio');if(!btn)return;
-  const resp=_ckRespostas[_ckStudentId];if(!resp){btn.classList.add('hidden');return;}
+  const info=document.getElementById('ck-blocos-relatorio-info');
+  const resp=_ckRespostas[_ckStudentId];
+  if(!resp){btn.classList.add('hidden');if(info){info.classList.add('hidden');info.innerHTML='';}return;}
   const stCriar=getBlocoStatus(resp.criar,_ckTemplate?.criar);
   const stOral=getBlocoStatus(resp.oral,_ckTemplate?.oral);
   btn.classList.toggle('hidden',!(stCriar==='green'&&stOral==='green'));
+  // Abaixo do botão: "Relatório gerado em DD/MM/AAAA · Baixar PDF" (igual à linha da grade).
+  if(info){
+    if(resp.feedbackGeradoEm){
+      const dt=new Date(resp.feedbackGeradoEm).toLocaleDateString('pt-BR');
+      info.innerHTML=`📄 Relatório gerado em ${dt} · <span onclick="baixarPDFFeedback('${_ckStudentId}')" style="color:var(--accent);font-weight:600;cursor:pointer;text-decoration:underline">Baixar PDF</span>`;
+      info.classList.remove('hidden');
+    }else{
+      info.classList.add('hidden');info.innerHTML='';
+    }
+  }
 }
 
 // Endpoint da Cloud Function de IA dos feedbacks (chave Anthropic fica no servidor).
@@ -34515,6 +34568,29 @@ function uiConfirm(message,opts={}){
     md.querySelector('[data-no]').onclick=()=>done(false);
     ov.addEventListener('click',e=>{if(e.target===ov)done(false);});
     setTimeout(()=>{try{md.querySelector('[data-yes]').focus();}catch(_){}},30);
+  });
+}
+
+// Aviso customizado (um botão só) — mesmo visual do uiConfirm, no lugar do alert() nativo.
+function uiAlert(message,opts={}){
+  const {title='Aviso',okLabel='Entendi',okClass='btn-p'}=opts;
+  return new Promise(resolve=>{
+    const ov=document.createElement('div');
+    ov.className='mo';ov.style.zIndex='300';
+    const md=document.createElement('div');
+    md.className='md';md.style.maxWidth='440px';
+    md.innerHTML=`<div class="mh"><div><div class="m-title"></div></div></div>`+
+      `<div class="m-body"><p class="ui-confirm-msg" style="font-size:14px;line-height:1.55;color:var(--text);margin:0;white-space:pre-line"></p></div>`+
+      `<div class="m-foot"><button class="btn ${okClass}" data-ok></button></div>`;
+    md.querySelector('.m-title').textContent=title;
+    md.querySelector('.ui-confirm-msg').textContent=message;
+    md.querySelector('[data-ok]').textContent=okLabel;
+    ov.appendChild(md);
+    document.body.appendChild(ov);
+    const done=()=>{try{ov.remove();}catch(_){}resolve();};
+    md.querySelector('[data-ok]').onclick=done;
+    ov.addEventListener('click',e=>{if(e.target===ov)done();});
+    setTimeout(()=>{try{md.querySelector('[data-ok]').focus();}catch(_){}},30);
   });
 }
 
