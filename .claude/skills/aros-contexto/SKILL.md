@@ -2362,7 +2362,62 @@ Funcionalidades que estão **prontas no código** mas dependem de uma config ext
 
 **Status**: pendente. `sendParecerEmail` usa `template_r0vjejs` reciclado. Aguarda usuário criar template dedicado pra notificações de parecer finalizado.
 
+## PO MEDREVIEW — Coordenação de Produto (EM CONSTRUÇÃO · Fase 1 "shell", iniciado 2026-06-05)
+
+Área **interna** de gestão dos cursos (≠ Catálogo de Produtos, que é a vitrine pra vendas/marketing/suporte). É o "backstage" da produção das aulas — o que hoje o Tiarlles controla no **Monday**. Objetivo: centralizar produção das aulas (status, anexos, demandas do fórum) + uma **IA conhecedora do produto** que prioriza o que gravar/atualizar e analisa lotes de questões.
+
+**⚠️ ESTADO ATUAL: só o "shell" visual, com DADOS DE EXEMPLO EM MEMÓRIA — NÃO persiste em Firestore ainda.** Recarregar a página zera colunas novas, larguras e edições. A persistência + import são o próximo passo.
+
+### Onde está no código (index.html)
+- **Grupo de menu** `poMedreview` (label "PO MEDREVIEW") em `TAB_GROUPS`, com 1 aba `{id:'po', label:'🧭 Coordenação de Produto'}`. Aba `'po'` está em `ADMIN_ONLY_TABS` (só admin por enquanto; permissão de professor vem depois).
+- `switchCoTab`: `'po'` no array hardcoded + `if(tab==='po')initPO()`.
+- HTML: `<div id="tab-po">` com `<style>` inline (todo o CSS `#tab-po .po-*` + modal `#po-col-modal`) e `<div id="po-root">`. Fica logo depois de `#tab-produtos`.
+- JS: bloco isolado antes de `window.initProdutos`. Prefixos `_po*` / `po*` / `S.po*` / `PO_*`. Reusa `VERTICAIS`, `_verticalById`, `_arosBindTilt/_arosObserveReveal`, classes `home-card` (re-escopadas pra `#tab-po`).
+
+### Navegação (3 telas, roteadas por `S.poView`)
+`verticals` → cards das 4 verticais (reusa VERTICAIS: anestreview/oftreview/ortopreview/medreview) → `cursos` → cards dos cursos da vertical → `curso` → planilha de aulas + painel de IA (placeholder Fase 2). Handlers: `poSelectVertical`, `poAbrirCurso`, `poVoltarVerticais`, `poVoltarCursos`.
+
+### Planilha de aulas (o "Monday interno")
+- **Colunas configuráveis** em `S.poColunas` = array de `{id,label,type,w,opts?}`. `type`: `'texto'|'link'|'status'`. Status usa `opts:[{v,cor}]`. Render genérico por `_poColCell(a,col)` lendo `_poCellVal` (campo direto `a[col.id]` ou `a.dados[col.id]`).
+- **Criar coluna**: botão `＋` no fim do cabeçalho → modal (`poNovaColuna`/`_poColModalRender`) pergunta nome + tipo (texto/link/status); status tem editor de opções (rótulo+cor). Salva via `poColSalvar` (gera id slug). **Em memória** — não persiste.
+- **1ª coluna "Aula" fixa** (sticky left, classe `.po-col-aula`), rolagem horizontal, cabeçalho sticky top.
+- **Módulos/Pontos colapsáveis** (`_poGroupByMod` agrupa por `a.modulo`): linha-cabeçalho clicável (`poToggleMod`) com seta que gira + resumo "N aulas · X no ar · 🔔 atenção". Estado em `S.poModAbertos` (Set). Cabeçalho do módulo também é **sticky left** (acompanha ao rolar). Botão **único** "⊕ Expandir tudo / ⊖ Recolher tudo" (`poToggleAll` + `_poUpdateToggleBtn`). Busca ativa abre todos.
+- **Resize de colunas**: alça `.po-rsz` na borda direita de cada cabeçalho (`_poBindResize`), via `<colgroup><col>`. `S.poColAulaW` pra coluna fixa, `col.w` pras demais.
+- **Status com famílias de cor** (`PO_STATUS_FAM` → `_poStatusCor`): verde=no ar, azul=em produção, amarelo=agendado, vermelho=atenção (demanda/erro/atualizar), cinza=inexistente/removida. `_PO_ATENCAO` (Set) marca os que precisam de atenção. `_poIsPronta` conta as "no ar".
+
+### Modelo de dados real (do board Monday — export `ANEST_Aulas_*.xlsx`, 765 aulas reais)
+Mapeamento Monday → campo da aula:
+- **Nome** ("1 - O Sangue") → nº + título · **Status Aula** → status principal (16 estados, **já embute demandas/erros**) · **Produto** → **define a qual curso(s) a aula pertence** (many-to-many) · **Módulo** ("Ponto 10…", "M1…") → módulo · **Professor** (pode ter vários) · **ANO** (2023–2026) · **Link Drive (Revisão)** → na real é o **link do vídeo (Vimeo)** · **CATEGORIA** → tópico do edital (só **22 de 765** preenchidos!) · **Trilha Questões** / **Trilha Cards** → status Pendente/Lançada/Não se aplica.
+- **Cursos = valores distintos de "Produto"**: `Extensive Geral` (~400 aulas = **curso principal**), `Extensive ME1/ME2/ME3`, `ANEST-PED`, `Revisão Extrema`, `Mentoria TEA/TSA`. Aula com "Extensive Geral, ME1" entra nos 2.
+- Colunas **Apostila / Ficha Resumo / Slides / Livros** existem no board mas estão quase vazias.
+
+### Decisões travadas com o Tiarlles
+- **279 aulas sem "Produto"** → entram todas no **Extensive Geral** (decisão dele).
+- **Edital fica FORA da planilha** — entra só num lugar específico pra IA (cruzamento conteúdo × edital).
+- **Status (16 estados) importados como estão**, com as famílias de cor.
+- **Notas das aulas** virão do sistema dele (**Laravel**, via API — devs entregam). No MVP a nota é **manual**; integração automática depois.
+- **Aula reutilizável em vários cursos** (many-to-many confirmado).
+- **Botão "Publicar na Comunicação"** (joga a aula publicada pra aba Comunicação que o aluno vê) → Fase 3.
+- Verticais do Catálogo: **AnestReview, OftReview (OFT), OrtopReview (Ortop), MedReview (R1)**.
+
+### IA do produto (Fase 2 — ainda não construída)
+Dois recursos no painel `🤖 Inteligência do Produto` (hoje placeholder):
+1. **"Próxima prioridade do produto"** (1 botão): varre o curso (status + datas de prova do edital + notas + cobertura do edital) → relatório priorizado do que gravar/atualizar. **Sempre relatório — Tiarlles decide**, não age sozinho.
+2. **Análise de lote de questões (JSON)**: sobe arquivo → IA **classifica cada questão por tópico do edital** (questões NÃO trazem tema/edital) → cruza com aulas existentes → relatório "aulas a criar + raciocínios a cobrir".
+- **Formato do JSON** (confirmado com exemplo real `questoes-batch-*.json`): array de `{id:number, enunciado:string(texto puro), enunciado_html:string, gabarito:"A".."D", alternativas:[{letra,texto}]}`. **Sem** campo de tema/edital/tags. ⚠️ `enunciado_html` pode conter **imagem base64 gigante** (1 questão pesava 2,2 MB) — **remover imagens antes de enviar à IA**; usar `enunciado` (texto puro). Pra questões com gráfico/imagem, usar modelo com visão num 2º momento.
+- Implementação prevista: **nova Cloud Function no padrão do Dex** (`perguntarDex`/`dex.js`), **modelo forte** (Sonnet) nas análises profundas, barato no dia a dia. Base de conhecimento da IA a configurar depois.
+
+### Próximos passos (retomar aqui amanhã)
+1. **Ligar no Firestore** — definir schema (cursos / módulos / aulas many-to-many + schema de colunas configuráveis + larguras) e fazer tudo persistir (colunas novas, larguras, status, edições). *Schema ainda não finalizado com o user.*
+2. **Import das 765 aulas** do `ANEST_Aulas_*.xlsx`: script Node ad-hoc (Firebase JS SDK cliente). **Writes exigem auth desde 2026-05-21** → o script precisa `signInWithEmailAndPassword` (pedir acesso admin ao Tiarlles na hora).
+3. **Fase 2** (IA) e **Fase 3** (publicar-na-Comunicação + API Laravel das notas).
+
 ## Histórico recente (resumo cronológico)
+
+PO MEDREVIEW — Coordenação de Produto, Fase 1 "shell" (2026-06-05, branch `claude/charming-pascal-61d5b7`, **commit local, sem push**):
+- Nova área interna de gestão de cursos (ver seção dedicada acima). Grupo de menu `poMedreview` + aba `po` (admin-only), navegação verticais→cursos→curso, planilha de aulas com **colunas configuráveis** (texto/link/status), 1ª coluna fixa, módulos colapsáveis (dropdown), resize de colunas, status com famílias de cor.
+- **Tudo com dados de exemplo em memória** (tirados do board real do Monday) — ainda NÃO persiste. Objetivo da sessão foi alinhar requisitos + aprovar o visual antes de ligar no banco.
+- Decisões de produto/import travadas (ver seção). Próximo: Firestore + import das 765 aulas + IA.
 
 Catálogo Interno de Produtos (2026-05-22, em paralelo ao Financeiro RPA — branch separada que foi mergeada em 2026-05-23):
 - **Nova aba "Produtos"** no painel coord — catálogo descritivo dos produtos da AnestReview pra equipes internas (marketing/vendas/suporte). Não é catálogo de venda pra alunos.
