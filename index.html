@@ -34710,30 +34710,50 @@ async function applyAIPrompt(text,progressCallback){
   }catch(e){console.warn('applyAIPrompt:',e.message);return text;}
 }
 
-// Revisão em LOTE: manda TODOS os feedbacks de casos do aluno numa ÚNICA chamada,
-// com marcadores @@@CASO::<id>@@@, pra a IA enxergar o conjunto e NÃO repetir
-// recomendações entre casos. Retorna {id:textoRevisado} ou null → fallback por caso.
+// Remove um cabeçalho de caso que tenha vazado pro corpo do feedback
+// (===CASO X=== do formato de saída do prompt, ou [CASO X] do de entrada).
+function _stripCasoHeader(s){
+  return String(s==null?'':s).replace(/^\s*(?:===\s*CASO[^=]*===|\[CASO[^\]]*\])\s*\n?/i,'').trim();
+}
+
+// Revisão individual (fallback). Envia 1 caso JÁ no formato que o prompt espera
+// ([CASO 1]) e remove o cabeçalho ===CASO 1=== que ele devolve.
+async function _reviewFeedbackSingle(text){
+  const basePrompt=S.cfg.aiPrompt||S._aiPrompt||'';
+  if(!basePrompt||!text||text==='sem feedback específico')return text;
+  if(!window._fbAuth?.auth?.currentUser)return text;
+  try{
+    const data=await _callFeedbackIA({prompt:basePrompt,content:`[CASO 1]\n${text}`,maxTokens:1200,mode:'revisar'});
+    const raw=String(data?.texto||'').replace(/^\s*```[a-z]*\s*/i,'').replace(/\s*```\s*$/,'').trim();
+    return _stripCasoHeader(raw)||text;
+  }catch(e){console.warn('_reviewFeedbackSingle:',e.message);return text;}
+}
+
+// Revisão em LOTE: manda TODOS os feedbacks do aluno numa ÚNICA chamada, NO FORMATO
+// QUE O PRÓPRIO PROMPT DE REVISÃO JÁ ESPERA — entrada [CASO N], saída ===CASO N===.
+// Assim a IA enxerga o conjunto e evita repetir recomendações entre casos.
+// Retorna {key:textoRevisado} (sem cabeçalho) ou null → fallback por caso.
 async function _reviewFeedbacksLote(items){
   const basePrompt=S.cfg.aiPrompt||S._aiPrompt||'';
   if(!basePrompt||!Array.isArray(items)||!items.length)return null;
   if(!window._fbAuth?.auth?.currentUser)return null; // sem login a IA não responde
-  const content=items.map(it=>`@@@CASO::${it.key}@@@\n${it.texto}`).join('\n\n');
+  const content=items.map((it,idx)=>`[CASO ${idx+1}]\n${it.texto}`).join('\n\n');
   if(content.length>38000)return null; // acima do limite da função → fallback por caso
-  const loteInstr='\n\n---\nINSTRUÇÕES DESTA REVISÃO EM LOTE (siga à risca):\n'+
-    'Abaixo vêm VÁRIOS feedbacks de casos do MESMO aluno, em sequência, cada um precedido por uma linha marcadora no formato @@@CASO::<id>@@@.\n'+
-    '1) Revise CADA caso aplicando as regras acima.\n'+
-    '2) Os casos são sequenciais e do mesmo aluno: NÃO repita entre os casos as mesmas recomendações, conclusões, "recados" ou frases. Se um ponto já foi dito num caso anterior, não repita no seguinte — varie a abordagem e evite vícios de linguagem. Cada caso deve trazer algo próprio.\n'+
-    '3) Responda APENAS com os blocos revisados: cada bloco começa EXATAMENTE pela mesma linha marcadora @@@CASO::<id>@@@ que recebeu (mesmos ids), seguida do feedback revisado daquele caso. Devolva TODOS os casos recebidos, na mesma ordem. Não escreva nada fora dos blocos.';
-  const prompt=basePrompt+loteInstr;
-  const maxTokens=Math.min(8000,Math.max(1500,Math.round(content.length/3)+1000));
+  // O próprio prompt de revisão já trata anti-repetição entre casos — não injetamos nada aqui.
+  const prompt=basePrompt;
+  const maxTokens=Math.min(8000,Math.max(1500,Math.round(content.length/3)+1200));
   let data;
   try{data=await _callFeedbackIA({prompt,content,maxTokens,mode:'revisar-lote'});}
   catch(e){console.warn('_reviewFeedbacksLote:',e.message);return null;}
-  let texto=String(data?.texto||'').replace(/^```[a-z]*\n?/i,'').replace(/\n?```$/,'').trim();
-  const parts=texto.split(/@@@CASO::([^@\n]+)@@@/);
+  // Limpa eventuais code fences que a IA tenha embrulhado em volta da resposta.
+  const texto=String(data?.texto||'').replace(/^\s*```[a-z]*\s*/i,'').replace(/\s*```\s*$/,'').trim();
+  // Parseia os blocos ===CASO N=== (tolerante a espaços). O split já tira os cabeçalhos do corpo.
+  const parts=texto.split(/===\s*CASO\s*(\d+)\s*===/i);
+  const byNum={};
+  for(let i=1;i<parts.length;i+=2){const n=String(parts[i]||'').trim();const body=_stripCasoHeader(String(parts[i+1]||'').trim());if(n)byNum[n]=body;}
   const map={};
-  for(let i=1;i<parts.length;i+=2){const k=String(parts[i]||'').trim();const body=String(parts[i+1]||'').trim();if(k)map[k]=body;}
-  // Só usa o lote se TODOS os casos voltaram; senão devolve null → fallback por caso.
+  items.forEach((it,idx)=>{const b=byNum[String(idx+1)];if(b)map[it.key]=b;});
+  // Só usa o lote se TODOS os casos voltaram; senão null → fallback por caso.
   for(const it of items){if(!map[it.key])return null;}
   return map;
 }
@@ -35035,7 +35055,7 @@ window.gerarFeedbackAluno=async(studentId)=>{
       let rev;
       if(!c.fbRaw||c.fbRaw==='sem feedback específico'){rev=c.fbRaw||'sem feedback específico';}
       else if(_loteMap&&_loteMap[c.key]){rev=_loteMap[c.key];_aiProg();}
-      else{rev=await applyAIPrompt(c.fbRaw,_aiProg);} // fallback: revisão individual (comportamento antigo)
+      else{rev=await _reviewFeedbackSingle(c.fbRaw);_aiProg();} // fallback: revisão individual (1 caso por vez)
       feedbacksCasos.push({nome:c.nome,feedback:rev,prof:c.prof,bloco:c.bloco,ci:c.ci});
     }
     _fbGenMsg('Montando relatório…');
