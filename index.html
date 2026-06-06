@@ -4648,7 +4648,6 @@ body.pro-rt-fs-on{overflow:hidden}
           <p style="font-size:13px;color:var(--t2)">Notas, presenças e garantia de aprovação por simulado.</p>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-s btn-sm" onclick="openImportNotas()">📥 Importar Notas XLS</button>
           <button class="btn btn-s btn-sm" onclick="exportDesempenho()">📄 Exportar PDF</button>
         </div>
       </div>
@@ -29332,9 +29331,6 @@ window.renderDesempenho=async()=>{
 
   const tdS='padding:8px 12px;background:var(--bg3);border:1px solid var(--border);font-size:11px;font-weight:700;color:var(--t2);';
   wrap.innerHTML=`
-    <div style="font-size:12px;color:var(--t2);margin-bottom:10px;padding:8px 12px;background:var(--bg3);border-radius:var(--rs);border:1px solid var(--border)">
-      <strong>Criar</strong> = CRIAR/SIMULAÇÃO &nbsp;·&nbsp; <strong>Oral</strong> = ORAL ONLINE &nbsp;·&nbsp; ✏️ editar &nbsp;·&nbsp; 🗑️ zerar &nbsp;·&nbsp; clique no cabeçalho da coluna pra ordenar
-    </div>
     <div style="overflow-x:auto">
     <table style="border-collapse:collapse;min-width:100%;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px">
       <thead><tr>
@@ -34714,6 +34710,34 @@ async function applyAIPrompt(text,progressCallback){
   }catch(e){console.warn('applyAIPrompt:',e.message);return text;}
 }
 
+// Revisão em LOTE: manda TODOS os feedbacks de casos do aluno numa ÚNICA chamada,
+// com marcadores @@@CASO::<id>@@@, pra a IA enxergar o conjunto e NÃO repetir
+// recomendações entre casos. Retorna {id:textoRevisado} ou null → fallback por caso.
+async function _reviewFeedbacksLote(items){
+  const basePrompt=S.cfg.aiPrompt||S._aiPrompt||'';
+  if(!basePrompt||!Array.isArray(items)||!items.length)return null;
+  if(!window._fbAuth?.auth?.currentUser)return null; // sem login a IA não responde
+  const content=items.map(it=>`@@@CASO::${it.key}@@@\n${it.texto}`).join('\n\n');
+  if(content.length>38000)return null; // acima do limite da função → fallback por caso
+  const loteInstr='\n\n---\nINSTRUÇÕES DESTA REVISÃO EM LOTE (siga à risca):\n'+
+    'Abaixo vêm VÁRIOS feedbacks de casos do MESMO aluno, em sequência, cada um precedido por uma linha marcadora no formato @@@CASO::<id>@@@.\n'+
+    '1) Revise CADA caso aplicando as regras acima.\n'+
+    '2) Os casos são sequenciais e do mesmo aluno: NÃO repita entre os casos as mesmas recomendações, conclusões, "recados" ou frases. Se um ponto já foi dito num caso anterior, não repita no seguinte — varie a abordagem e evite vícios de linguagem. Cada caso deve trazer algo próprio.\n'+
+    '3) Responda APENAS com os blocos revisados: cada bloco começa EXATAMENTE pela mesma linha marcadora @@@CASO::<id>@@@ que recebeu (mesmos ids), seguida do feedback revisado daquele caso. Devolva TODOS os casos recebidos, na mesma ordem. Não escreva nada fora dos blocos.';
+  const prompt=basePrompt+loteInstr;
+  const maxTokens=Math.min(8000,Math.max(1500,Math.round(content.length/3)+1000));
+  let data;
+  try{data=await _callFeedbackIA({prompt,content,maxTokens,mode:'revisar-lote'});}
+  catch(e){console.warn('_reviewFeedbacksLote:',e.message);return null;}
+  let texto=String(data?.texto||'').replace(/^```[a-z]*\n?/i,'').replace(/\n?```$/,'').trim();
+  const parts=texto.split(/@@@CASO::([^@\n]+)@@@/);
+  const map={};
+  for(let i=1;i<parts.length;i+=2){const k=String(parts[i]||'').trim();const body=String(parts[i+1]||'').trim();if(k)map[k]=body;}
+  // Só usa o lote se TODOS os casos voltaram; senão devolve null → fallback por caso.
+  for(const it of items){if(!map[it.key])return null;}
+  return map;
+}
+
 // ── Config: Feedback Geral dos professores ────────────────────────────────────
 window.loadFeedbackGeralConfig=async()=>{
   const simSel=document.getElementById('cfg-fg-sim');
@@ -34998,17 +35022,21 @@ window.gerarFeedbackAluno=async(studentId)=>{
     const _aiProg=()=>{_aiDone++;_fbGenProgress(_aiDone,_aiTotal);};
     _fbGenMsg(_aiTotal>0?'Revisando feedbacks com IA…':'Montando relatório…');
     if(_aiTotal>0)_fbGenProgress(0,_aiTotal);
-    if(!_naoFezCriar)for(let ci=0;ci<(tplCriar.casos||[]).length;ci++){
-      const caso=tplCriar.casos[ci];const cr=ckResp.criar?.casos?.[ci]||{};
-      const fbRaw=(cr.feedback||'').trim()||'sem feedback específico';
-      const rev=await applyAIPrompt(fbRaw,_aiProg);
-      feedbacksCasos.push({nome:'[CRIAR] '+(caso.nome||'Caso '+(ci+1)),feedback:rev,prof:cr.prof||'',bloco:'criar',ci});
-    }
-    if(!_naoFezOral)for(let ci=0;ci<(tplOral.casos||[]).length;ci++){
-      const caso=tplOral.casos[ci];const cr=ckResp.oral?.casos?.[ci]||{};
-      const fbRaw=(cr.feedback||'').trim()||'sem feedback específico';
-      const rev=await applyAIPrompt(fbRaw,_aiProg);
-      feedbacksCasos.push({nome:'[ORAL] '+(caso.nome||'Caso '+(ci+1)),feedback:rev,prof:cr.prof||'',bloco:'oral',ci});
+    // Monta a lista de casos (blocos não-"não fez"), ordem CRIAR depois ORAL.
+    const _casosLista=[];
+    if(!_naoFezCriar)(tplCriar.casos||[]).forEach((caso,ci)=>{const cr=ckResp.criar?.casos?.[ci]||{};_casosLista.push({key:'criar-'+ci,bloco:'criar',ci,nome:'[CRIAR] '+(caso.nome||'Caso '+(ci+1)),prof:cr.prof||'',fbRaw:(cr.feedback||'').trim()});});
+    if(!_naoFezOral)(tplOral.casos||[]).forEach((caso,ci)=>{const cr=ckResp.oral?.casos?.[ci]||{};_casosLista.push({key:'oral-'+ci,bloco:'oral',ci,nome:'[ORAL] '+(caso.nome||'Caso '+(ci+1)),prof:cr.prof||'',fbRaw:(cr.feedback||'').trim()});});
+    // Casos COM feedback vão pra revisão em LOTE (1 chamada → IA vê todos e evita
+    // repetir recomendações entre casos). Se o lote falhar/parsear errado, cai pra revisão por caso.
+    const _comFb=_casosLista.filter(c=>c.fbRaw&&c.fbRaw!=='sem feedback específico');
+    let _loteMap=null;
+    if(_comFb.length)_loteMap=await _reviewFeedbacksLote(_comFb.map(c=>({key:c.key,texto:c.fbRaw})));
+    for(const c of _casosLista){
+      let rev;
+      if(!c.fbRaw||c.fbRaw==='sem feedback específico'){rev=c.fbRaw||'sem feedback específico';}
+      else if(_loteMap&&_loteMap[c.key]){rev=_loteMap[c.key];_aiProg();}
+      else{rev=await applyAIPrompt(c.fbRaw,_aiProg);} // fallback: revisão individual (comportamento antigo)
+      feedbacksCasos.push({nome:c.nome,feedback:rev,prof:c.prof,bloco:c.bloco,ci:c.ci});
     }
     _fbGenMsg('Montando relatório…');
 

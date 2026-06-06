@@ -129,10 +129,11 @@ exports.gerarFeedbackIA = onRequest(
     // Resolve modelo (alias curto ou ID completo). Default Sonnet 4.6.
     const modeloRaw = String(req.body?.model || '').trim().toLowerCase();
     const modelo = MODEL_MAP[modeloRaw] || (modeloRaw.startsWith('claude-') ? modeloRaw : DEFAULT_MODEL);
-    // max_tokens entre 256 e 4096 (default 1500)
+    // max_tokens entre 256 e 8192 (default 1500). Teto 8192 acomoda a revisão em
+    // LOTE (vários feedbacks de casos do mesmo aluno numa resposta só).
     let maxTokens = parseInt(req.body?.maxTokens, 10);
     if (!Number.isFinite(maxTokens)) maxTokens = 1500;
-    maxTokens = Math.max(256, Math.min(4096, maxTokens));
+    maxTokens = Math.max(256, Math.min(8192, maxTokens));
 
     try {
       const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });

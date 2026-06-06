@@ -2418,6 +2418,12 @@ Dois recursos no painel `🤖 Inteligência do Produto` (hoje placeholder):
 
 ## Histórico recente (resumo cronológico)
 
+Feedback dos casos — revisão da IA em LOTE (2026-06-06, deployado: função + site):
+- **Problema**: a revisão de feedback por caso (`applyAIPrompt`) era **1 chamada isolada por caso** → a IA não via os outros casos e repetia recomendações/vícios entre eles. Era limitação de arquitetura, não de prompt.
+- **Fix (opção A)**: `gerarFeedbackAluno` agora faz **1 chamada única** com TODOS os casos do aluno (`_reviewFeedbacksLote`), marcados como `@@@CASO::<bloco-ci>@@@`, com instrução explícita de NÃO repetir recomendações/frases entre casos. Resposta é parseada de volta por caso. **Fallback** automático pro modo antigo (por caso) se o lote falhar/parsear errado → nunca quebra o feedback. Casos sem feedback e blocos "não fez" continuam ignorados.
+- **Cloud Function `feedback-ia.js`**: teto de `max_tokens` subiu 4096 → **8192** (cabe ~8 casos revisados numa resposta só). Precisou redeploy da function.
+- Agora ajustes no "Prompt de revisão — feedback por caso" (`S.cfg.aiPrompt`) finalmente fazem efeito entre casos, pois a IA vê o conjunto.
+
 Checklist — "Aluno não fez o bloco", filtro multi e médias por bloco (2026-06-06, deployado em produção):
 - **Botão "Aluno não fez o bloco"** em cada card de bloco (Criar / Oral) na tela de blocos do aluno. Confirmação via **popup customizado** (`ckConfirmZerar`/`ckZerarBloco`, modal `#ck-zero-modal` no estilo `.mo/.md`). Zera a nota (0) + `finalizado:true` + `naoFez:true`, sincroniza `notas/{simId}/alunos/{key}` (criar/oral=0, recalcula notaFinal) e audita como `CK_BLOCO_FINALIZADO` (motivo `aluno-nao-fez`). Botão discreto: transparente, verde-escuro `#1c6b2e`.
 - **"Não fez" conta como FINALIZADO**: status na linha do aluno fica verde-escuro "Finalizado · não fez" (`_blocoStatusBtn`), `done` destrava o **Gerar Feedback**, e o **filtro por bloco** trata como `finalizado` (fix em `_ckStatusBloco`).
