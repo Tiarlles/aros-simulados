@@ -109,6 +109,10 @@ checklists/{simId}/
   ├ meta/templateCriar              — template do bloco Criar/Simulação (casos com slides)
   ├ meta/templateOral               — template do bloco Oral Online
   ├ respostas/{studentId}           — respostas (+ feedbackGeradoEm: data do último PDF gerado)
+  │   └ shape: {criar:{casos{},finalizado,notaCriar,naoFez?}, oral:{casos{},finalizado,notaOral,naoFez?}, updatedAt}
+  │   └ naoFez:true = coord marcou "Aluno não fez o bloco" → nota 0 + finalizado. Conta como
+  │     FINALIZADO (status/filtro/feedback), mas seus casos são IGNORADOS no feedback e na
+  │     média da turma do bloco. Visual: card vermelho; selo na linha verde-escuro "Finalizado · não fez".
   └ relatorios/{studentId}          — {html, geradoEm}: HTML do PDF aprovado (PROTEGIDO isAuth — tem notas)
 
 disponibilidade/{simId}/profs/{key} — disponibilidade de profs
@@ -2414,7 +2418,15 @@ Dois recursos no painel `🤖 Inteligência do Produto` (hoje placeholder):
 
 ## Histórico recente (resumo cronológico)
 
-PO MEDREVIEW — Coordenação de Produto, Fase 1 "shell" (2026-06-05, branch `claude/charming-pascal-61d5b7`, **commit local, sem push**):
+Checklist — "Aluno não fez o bloco", filtro multi e médias por bloco (2026-06-06, deployado em produção):
+- **Botão "Aluno não fez o bloco"** em cada card de bloco (Criar / Oral) na tela de blocos do aluno. Confirmação via **popup customizado** (`ckConfirmZerar`/`ckZerarBloco`, modal `#ck-zero-modal` no estilo `.mo/.md`). Zera a nota (0) + `finalizado:true` + `naoFez:true`, sincroniza `notas/{simId}/alunos/{key}` (criar/oral=0, recalcula notaFinal) e audita como `CK_BLOCO_FINALIZADO` (motivo `aluno-nao-fez`). Botão discreto: transparente, verde-escuro `#1c6b2e`.
+- **"Não fez" conta como FINALIZADO**: status na linha do aluno fica verde-escuro "Finalizado · não fez" (`_blocoStatusBtn`), `done` destrava o **Gerar Feedback**, e o **filtro por bloco** trata como `finalizado` (fix em `_ckStatusBloco`).
+- **Feedback ignora os casos do bloco "não fez"**: `gerarFeedbackAluno` pula os casos/habilidades desse bloco (flags `_naoFezCriar`/`_naoFezOral` passadas em `data`); `_renderExtraCasesPreview` também omite o bloco. A nota 0 do bloco ainda entra na nota final.
+- **Filtro por bloco virou multi-seleção**: chips (`ckToggleBlocoFilter`) em vez de `<select>` — vários status por bloco (OR interno). Toggle **E/OU** (`ckSetFiltroModo`) pra combinar os dois blocos (aparece só quando há seleção nos dois). Estado `S.ckFiltroBloco={criar:[],oral:[],modo}`.
+- **Média da turma POR BLOCO** na aba Desempenho (grade + PDF export): cabeçalho de cada simulado mostra "Média turma — Criar X · Oral Y · Final Z". Cada média de bloco conta só quem fez (**nota > 0**; nota 0 sai); a final segue exigindo os dois blocos > 0. Helper `_avgPos`; `mediasTurma[simId]` virou `{criar,oral,final}`.
+- **NÃO há** mais "média da turma" no relatório de feedback (removida pelo Tiarlles antes).
+
+PO MEDREVIEW — Coordenação de Produto, Fase 1 "shell" (2026-06-05, deployado em produção em 2026-06-06):
 - Nova área interna de gestão de cursos (ver seção dedicada acima). Grupo de menu `poMedreview` + aba `po` (admin-only), navegação verticais→cursos→curso, planilha de aulas com **colunas configuráveis** (texto/link/status), 1ª coluna fixa, módulos colapsáveis (dropdown), resize de colunas, status com famílias de cor.
 - **Tudo com dados de exemplo em memória** (tirados do board real do Monday) — ainda NÃO persiste. Objetivo da sessão foi alinhar requisitos + aprovar o visual antes de ligar no banco.
 - Decisões de produto/import travadas (ver seção). Próximo: Firestore + import das 765 aulas + IA.

@@ -4705,6 +4705,19 @@ body.pro-rt-fs-on{overflow:hidden}
         .ck-bfilter select{border:1px solid var(--border);background:var(--bg3);color:var(--text);font:inherit;font-weight:600;cursor:pointer;outline:none;padding:3px 6px;border-radius:7px}
         .ck-bfilter.active{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--bg2))}
         .ck-bfilter.active select{border-color:var(--accent);color:var(--accent);font-weight:700}
+        /* Filtro por bloco — chips multi-seleção */
+        .ck-bfgrp{display:inline-flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:999px;padding:4px 6px 4px 12px;flex-wrap:wrap}
+        .ck-bfgrp .ck-bf-lbl{font-weight:700;color:var(--text);white-space:nowrap;font-size:12px}
+        .ck-chip{border:1px solid var(--border);background:var(--bg3);color:var(--t2);font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;padding:3px 10px;border-radius:999px;transition:all .15s}
+        .ck-chip:hover{border-color:var(--accent);color:var(--text)}
+        .ck-chip.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,var(--bg2));color:var(--accent);font-weight:700}
+        .ck-chip.on[data-st="andamento"]{border-color:#d29922;background:rgba(210,153,34,.16);color:#d29922}
+        .ck-chip.on[data-st="finalizado"]{border-color:#3fb950;background:rgba(63,185,80,.16);color:#3fb950}
+        .ck-modo{display:inline-flex;align-items:center;gap:4px;font-size:11.5px}
+        .ck-modo-lbl{color:var(--t2);font-weight:600}
+        .ck-modo-btn{border:1px solid var(--border);background:var(--bg2);color:var(--t2);font:inherit;font-size:11px;font-weight:700;cursor:pointer;padding:3px 9px;border-radius:7px;transition:all .15s}
+        .ck-modo-btn:hover{border-color:var(--accent);color:var(--text)}
+        .ck-modo-btn.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--bg2));color:var(--accent)}
         </style>
         <div id="ck-student-list" class="hidden">
           <div class="search-wrap" style="margin-bottom:10px">
@@ -4713,8 +4726,21 @@ body.pro-rt-fs-on{overflow:hidden}
           </div>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px">
             <span style="font-family:'JetBrains Mono','SF Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t2)">Filtrar bloco:</span>
-            <label class="ck-bfilter" id="ck-bf-criar"><span class="ck-bf-lbl">📋 Criar</span><select id="ck-filter-criar" onchange="ckSetBlocoFilter('criar',this.value)"><option value="">Todos</option><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="finalizado">Finalizado</option></select></label>
-            <label class="ck-bfilter" id="ck-bf-oral"><span class="ck-bf-lbl">🎙️ Oral Online</span><select id="ck-filter-oral" onchange="ckSetBlocoFilter('oral',this.value)"><option value="">Todos</option><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="finalizado">Finalizado</option></select></label>
+            <div class="ck-bfgrp" id="ck-bf-criar"><span class="ck-bf-lbl">📋 Criar</span>
+              <button type="button" class="ck-chip" id="ck-chip-criar-pendente" data-st="pendente" onclick="ckToggleBlocoFilter('criar','pendente')">Pendente</button>
+              <button type="button" class="ck-chip" id="ck-chip-criar-andamento" data-st="andamento" onclick="ckToggleBlocoFilter('criar','andamento')">Em andamento</button>
+              <button type="button" class="ck-chip" id="ck-chip-criar-finalizado" data-st="finalizado" onclick="ckToggleBlocoFilter('criar','finalizado')">Finalizado</button>
+            </div>
+            <div class="ck-bfgrp" id="ck-bf-oral"><span class="ck-bf-lbl">🎙️ Oral Online</span>
+              <button type="button" class="ck-chip" id="ck-chip-oral-pendente" data-st="pendente" onclick="ckToggleBlocoFilter('oral','pendente')">Pendente</button>
+              <button type="button" class="ck-chip" id="ck-chip-oral-andamento" data-st="andamento" onclick="ckToggleBlocoFilter('oral','andamento')">Em andamento</button>
+              <button type="button" class="ck-chip" id="ck-chip-oral-finalizado" data-st="finalizado" onclick="ckToggleBlocoFilter('oral','finalizado')">Finalizado</button>
+            </div>
+            <div class="ck-modo" id="ck-modo" style="display:none" title="Como combinar os filtros dos dois blocos: E (ambos) ou OU (qualquer um)">
+              <span class="ck-modo-lbl">Blocos:</span>
+              <button type="button" class="ck-modo-btn on" id="ck-modo-e" onclick="ckSetFiltroModo('e')" title="Aluno precisa bater nos DOIS blocos">E</button>
+              <button type="button" class="ck-modo-btn" id="ck-modo-ou" onclick="ckSetFiltroModo('ou')" title="Aluno que bate em QUALQUER um dos blocos">OU</button>
+            </div>
             <button id="ck-filter-clear" onclick="ckLimparFiltroBloco()" style="display:none;background:none;border:none;color:var(--t2);font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit">✕ Limpar</button>
           </div>
           <div id="ck-students-grid" style="display:flex;flex-direction:column;gap:6px"></div>
@@ -29159,15 +29185,18 @@ window.renderDesempenho=async()=>{
 
   const thStyle='padding:8px 12px;background:var(--bg3);border:1px solid var(--border);font-size:11px;font-weight:700;color:var(--t2);text-align:center;white-space:nowrap;';
 
-  // Compute class average per sim — apenas alunos com criar > 0 E oral > 0
-  // (alunos que zeraram em algum bloco ou não participaram são excluídos)
+  // Média da turma POR BLOCO: cada bloco conta SÓ quem fez (nota > 0). Nota 0 — inclusive
+  // a de quem foi marcado "não fez o bloco" — é desconsiderada na média daquele bloco.
+  // A média final segue exigindo os dois blocos > 0 (só quem completou os dois).
+  const _avgPos=arr=>{const f=arr.filter(v=>!isNaN(v)&&v>0);return f.length?f.reduce((a,b)=>a+b,0)/f.length:null;};
   const mediasTurma={};
   sims.forEach(sim=>{
-    const notasSim=Object.values(allNotas[sim.id]||{})
-      .filter(n=>parseFloat(n.criar)>0&&parseFloat(n.oral)>0)
-      .map(n=>parseFloat(n.notaFinal))
-      .filter(n=>!isNaN(n));
-    mediasTurma[sim.id]=notasSim.length?(notasSim.reduce((a,b)=>a+b,0)/notasSim.length):null;
+    const vals=Object.values(allNotas[sim.id]||{});
+    const mc=_avgPos(vals.map(n=>parseFloat(n.criar)));
+    const mo=_avgPos(vals.map(n=>parseFloat(n.oral)));
+    const nf=vals.filter(n=>parseFloat(n.criar)>0&&parseFloat(n.oral)>0).map(n=>parseFloat(n.notaFinal)).filter(n=>!isNaN(n));
+    const mf=nf.length?(nf.reduce((a,b)=>a+b,0)/nf.length):null;
+    mediasTurma[sim.id]={criar:mc,oral:mo,final:mf};
   });
 
   // Sims "aplicados" = oficiais (não-extras) com data já passada.
@@ -29231,14 +29260,17 @@ window.renderDesempenho=async()=>{
     alunos.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
   }
 
+  const _mbSpan=(label,v)=>`${label} <b style="color:${v==null?'var(--t3)':(v>=60?'var(--green)':'var(--red)')}">${v==null?'—':v.toFixed(1)}</b>`;
   const thSims=sims.length?sims.map(s=>{
-    const mt=mediasTurma[s.id];
+    const mt=mediasTurma[s.id]||{};
+    const labO=s.presencial?'Pres.':'Oral';
+    const anyM=(mt.criar!=null||mt.oral!=null||mt.final!=null);
     const isSorted=_desempSort.col===s.id?_desempSort.dir:null;
     const sortIcon=isSorted==='desc'?' ↓':isSorted==='asc'?' ↑':'';
     const sortColor=isSorted?'var(--accent)':'var(--t3)';
-    return`<th style="${thStyle}min-width:150px;cursor:pointer;user-select:none" onclick="toggleDesempSort('${s.id}')" title="Ordenar por nota">
+    return`<th style="${thStyle}min-width:178px;cursor:pointer;user-select:none" onclick="toggleDesempSort('${s.id}')" title="Ordenar por nota · cada média de bloco conta só quem fez (nota > 0)">
       ${s.nome}<span style="color:${sortColor};font-weight:800;margin-left:3px">${sortIcon||' ⇅'}</span>
-      ${mt!==null?`<br><span style="font-size:11px;font-weight:600;color:${mt>=60?'var(--green)':'var(--red)'}">Média turma: ${mt.toFixed(1)}</span>`:''}
+      ${anyM?`<br><span style="font-size:10px;font-weight:600;color:var(--t2);text-transform:none;letter-spacing:0">Média turma — ${_mbSpan('Criar',mt.criar)} · ${_mbSpan(labO,mt.oral)} · ${_mbSpan('Final',mt.final)}</span>`:''}
     </th>`;
   }).join(''):'<th style="'+thStyle+'min-width:200px">Nenhum simulado criado</th>';
 
@@ -29482,14 +29514,16 @@ window.doExportDesempenhoPDF=async()=>{
   const _todayISO=new Date().toISOString().slice(0,10);
   const simsAplicados=sims.filter(s=>{if(s.isExtra)return false;const u=s.dataDom||s.dataSab;return u&&u<_todayISO;});
 
-  // Média da turma por simulado (mesma regra: criar > 0 E oral > 0)
+  // Média da turma POR BLOCO (cada bloco só com quem fez, nota > 0) + final (dois blocos > 0).
+  const _avgPos=arr=>{const f=arr.filter(v=>!isNaN(v)&&v>0);return f.length?f.reduce((a,b)=>a+b,0)/f.length:null;};
   const mediasTurma={};
   sims.forEach(sim=>{
-    const ns=Object.values(allNotas[sim.id]||{})
-      .filter(n=>parseFloat(n.criar)>0&&parseFloat(n.oral)>0)
-      .map(n=>parseFloat(n.notaFinal))
-      .filter(n=>!isNaN(n));
-    mediasTurma[sim.id]=ns.length?(ns.reduce((a,b)=>a+b,0)/ns.length):null;
+    const vals=Object.values(allNotas[sim.id]||{});
+    const mc=_avgPos(vals.map(n=>parseFloat(n.criar)));
+    const mo=_avgPos(vals.map(n=>parseFloat(n.oral)));
+    const nf=vals.filter(n=>parseFloat(n.criar)>0&&parseFloat(n.oral)>0).map(n=>parseFloat(n.notaFinal)).filter(n=>!isNaN(n));
+    const mf=nf.length?(nf.reduce((a,b)=>a+b,0)/nf.length):null;
+    mediasTurma[sim.id]={criar:mc,oral:mo,final:mf};
   });
 
   // Elegibilidade por aluno
@@ -29605,8 +29639,10 @@ tbody tr:nth-child(odd){background:#f6f8fa}
 <thead><tr>${colDefs.map(c=>{
   let extra='';
   if(c.sim){
-    const mt=mediasTurma[c.sim.id];
-    if(mt!==null)extra=`<span class="media-turma">Média turma: ${mt.toFixed(1)}</span>`;
+    const mt=mediasTurma[c.sim.id]||{};
+    const labO=c.sim.presencial?'Pres.':'Oral';
+    const f=v=>v==null?'—':v.toFixed(1);
+    if(mt.criar!=null||mt.oral!=null||mt.final!=null)extra=`<span class="media-turma">Média turma · Criar ${f(mt.criar)} · ${labO} ${f(mt.oral)} · Final ${f(mt.final)}</span>`;
   }
   const isCenter=c.key.startsWith('sim:')||c.key==='garantia';
   return`<th${isCenter?' class="center"':''}>${escapeHtml(c.label)}${extra}</th>`;
@@ -30280,9 +30316,12 @@ window.loadCkSim=async()=>{
   }catch(e){_ckRespostas={};}
 
   studentList?.classList.remove('hidden');
-  // Reseta o filtro por bloco ao (re)carregar o simulado (estado + selects + chip Limpar).
-  S.ckFiltroBloco={criar:'',oral:''};
-  ['criar','oral'].forEach(b=>{const _s=document.getElementById('ck-filter-'+b);if(_s)_s.value='';const _l=document.getElementById('ck-bf-'+b);if(_l)_l.classList.remove('active');});
+  // Reseta o filtro por bloco ao (re)carregar o simulado (estado + chips + modo + Limpar).
+  S.ckFiltroBloco={criar:[],oral:[],modo:'e'};
+  document.querySelectorAll('#ck-student-list .ck-chip.on').forEach(c=>c.classList.remove('on'));
+  document.getElementById('ck-modo-e')?.classList.add('on');
+  document.getElementById('ck-modo-ou')?.classList.remove('on');
+  if(typeof _ckUpdateFiltroUI==='function')_ckUpdateFiltroUI();
   const _ckClr=document.getElementById('ck-filter-clear');if(_ckClr)_ckClr.style.display='none';
   renderCkStudents(_ckStudents);
   // Assina o status da projeção ao vivo de cada aluno deste simulado
@@ -30469,32 +30508,64 @@ async function reloadRespostasAndRender(){
 // Status de um bloco (criar/oral) de um aluno: 'finalizado' | 'andamento' | 'pendente'.
 function _ckStatusBloco(s,bloco){
   const resp=_ckRespostas[s.id];
+  // "Aluno não fez o bloco" conta como FINALIZADO no filtro (mesmo com nota 0).
+  if(resp&&resp[bloco]&&resp[bloco].naoFez)return 'finalizado';
   const st=resp?getBlocoStatus(resp[bloco],_ckTemplate?.[bloco]):'red';
   return st==='green'?'finalizado':st==='yellow'?'andamento':'pendente';
 }
 // Aplica busca por nome (tolerante a acento) + filtros por bloco (Criar/Oral) à lista.
+// Cada bloco aceita VÁRIOS status (OR interno). Entre os dois blocos, o modo 'e' exige
+// bater nos dois; o modo 'ou' basta bater em qualquer um. Blocos sem seleção não contam.
 function _ckApplyFilters(list){
   const q=_proNormBusca(document.getElementById('ck-search')?.value||'');
   const fb=S.ckFiltroBloco||{};
+  const fc=Array.isArray(fb.criar)?fb.criar:(fb.criar?[fb.criar]:[]);
+  const fo=Array.isArray(fb.oral)?fb.oral:(fb.oral?[fb.oral]:[]);
+  const modo=fb.modo==='ou'?'ou':'e';
   return (list||[]).filter(s=>{
     if(q&&!_proNormBusca(s.nome).includes(q))return false;
-    if(fb.criar&&_ckStatusBloco(s,'criar')!==fb.criar)return false;
-    if(fb.oral&&_ckStatusBloco(s,'oral')!==fb.oral)return false;
+    const conds=[];
+    if(fc.length)conds.push(fc.includes(_ckStatusBloco(s,'criar')));
+    if(fo.length)conds.push(fo.includes(_ckStatusBloco(s,'oral')));
+    if(conds.length){
+      const pass=modo==='ou'?conds.some(Boolean):conds.every(Boolean);
+      if(!pass)return false;
+    }
     return true;
   });
 }
 window.filterCkStudents=()=>renderCkStudents(_ckStudents);
-window.ckSetBlocoFilter=(bloco,val)=>{
-  S.ckFiltroBloco=S.ckFiltroBloco||{criar:'',oral:''};
-  S.ckFiltroBloco[bloco]=val;
-  const lbl=document.getElementById('ck-bf-'+bloco);if(lbl)lbl.classList.toggle('active',!!val);
-  const clr=document.getElementById('ck-filter-clear');if(clr)clr.style.display=(S.ckFiltroBloco.criar||S.ckFiltroBloco.oral)?'':'none';
+function _ckUpdateFiltroUI(){
+  const fb=S.ckFiltroBloco||{};
+  const nc=(Array.isArray(fb.criar)?fb.criar:[]).length;
+  const no=(Array.isArray(fb.oral)?fb.oral:[]).length;
+  const clr=document.getElementById('ck-filter-clear');if(clr)clr.style.display=(nc||no)?'':'none';
+  // O seletor E/OU só importa quando os DOIS blocos têm seleção
+  const modoEl=document.getElementById('ck-modo');if(modoEl)modoEl.style.display=(nc&&no)?'inline-flex':'none';
+}
+window.ckToggleBlocoFilter=(bloco,status)=>{
+  S.ckFiltroBloco=S.ckFiltroBloco||{criar:[],oral:[],modo:'e'};
+  if(!Array.isArray(S.ckFiltroBloco[bloco]))S.ckFiltroBloco[bloco]=S.ckFiltroBloco[bloco]?[S.ckFiltroBloco[bloco]]:[];
+  const arr=S.ckFiltroBloco[bloco];
+  const i=arr.indexOf(status);
+  if(i>=0)arr.splice(i,1);else arr.push(status);
+  const chip=document.getElementById('ck-chip-'+bloco+'-'+status);if(chip)chip.classList.toggle('on',arr.includes(status));
+  _ckUpdateFiltroUI();
+  renderCkStudents(_ckStudents);
+};
+window.ckSetFiltroModo=(modo)=>{
+  S.ckFiltroBloco=S.ckFiltroBloco||{criar:[],oral:[],modo:'e'};
+  S.ckFiltroBloco.modo=(modo==='ou')?'ou':'e';
+  document.getElementById('ck-modo-e')?.classList.toggle('on',S.ckFiltroBloco.modo==='e');
+  document.getElementById('ck-modo-ou')?.classList.toggle('on',S.ckFiltroBloco.modo==='ou');
   renderCkStudents(_ckStudents);
 };
 window.ckLimparFiltroBloco=()=>{
-  S.ckFiltroBloco={criar:'',oral:''};
-  ['criar','oral'].forEach(b=>{const sel=document.getElementById('ck-filter-'+b);if(sel)sel.value='';const lbl=document.getElementById('ck-bf-'+b);if(lbl)lbl.classList.remove('active');});
-  const clr=document.getElementById('ck-filter-clear');if(clr)clr.style.display='none';
+  S.ckFiltroBloco={criar:[],oral:[],modo:'e'};
+  document.querySelectorAll('#ck-student-list .ck-chip.on').forEach(c=>c.classList.remove('on'));
+  document.getElementById('ck-modo-e')?.classList.add('on');
+  document.getElementById('ck-modo-ou')?.classList.remove('on');
+  _ckUpdateFiltroUI();
   renderCkStudents(_ckStudents);
 };
 
@@ -30520,7 +30591,12 @@ function renderCkStudents(list){
   })();
   grid.innerHTML=sorted.map((s,idx)=>{
     const resp=_ckRespostas[s.id];
-    const blocoSt=(b)=>getBlocoStatus(resp?.[b],_ckTemplate?.[b]);
+    const naoFezB=(b)=>!!(resp&&resp[b]&&resp[b].naoFez);
+    const naoFezCriar=naoFezB('criar');
+    const naoFezOral=naoFezB('oral');
+    // "Aluno não fez o bloco" conta como FINALIZADO (verde) — destrava o feedback.
+    // A cor mais escura (no selo) distingue de um bloco realmente avaliado.
+    const blocoSt=(b)=>naoFezB(b)?'green':getBlocoStatus(resp?.[b],_ckTemplate?.[b]);
     const stCriar=resp?blocoSt('criar'):'red';
     const stOral=resp?blocoSt('oral'):'red';
     const done=stCriar==='green'&&stOral==='green';
@@ -30562,8 +30638,9 @@ function renderCkStudents(list){
       const hasTpl=((tplB&&tplB.casos)||[]).length>0;
       const st=key==='criar'?stCriar:stOral;
       const M={green:{t:'Finalizado',c:'#3fb950',bg:'rgba(63,185,80,.13)',bd:'rgba(63,185,80,.4)'},yellow:{t:'Em andamento',c:'#d29922',bg:'rgba(210,153,34,.13)',bd:'rgba(210,153,34,.4)'},red:{t:'Pendente',c:'var(--t2)',bg:'var(--bg3)',bd:'var(--border)'}};
-      const m=M[st]||M.red;
-      if(!hasTpl)return `<span title="Bloco ${label} sem template configurado" style="display:inline-flex;align-items:center;gap:5px;background:var(--bg3);color:var(--t3);border:1px solid var(--border);border-radius:999px;padding:4px 11px;font-size:11px;font-weight:600;white-space:nowrap;opacity:.6">${emoji} ${label} · —</span>`;
+      const naoFez=key==='criar'?naoFezCriar:naoFezOral;
+      const m=naoFez?{t:'Finalizado · não fez',c:'#eafff0',bg:'rgba(28,107,46,.92)',bd:'#1c6b2e'}:(M[st]||M.red);
+      if(!hasTpl&&!naoFez)return `<span title="Bloco ${label} sem template configurado" style="display:inline-flex;align-items:center;gap:5px;background:var(--bg3);color:var(--t3);border:1px solid var(--border);border-radius:999px;padding:4px 11px;font-size:11px;font-weight:600;white-space:nowrap;opacity:.6">${emoji} ${label} · —</span>`;
       return `<button onclick="event.stopPropagation();ckGoBloco('${s.id}','${key}')" title="Abrir o bloco ${label} de ${_nomeEsc}" style="display:inline-flex;align-items:center;gap:6px;background:${m.bg};color:${m.c};border:1px solid ${m.bd};border-radius:999px;padding:4px 11px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:filter .15s,transform .15s" onmouseover="this.style.filter='brightness(1.12)';this.style.transform='translateY(-1px)'" onmouseout="this.style.filter='';this.style.transform=''"><span style="font-weight:800">${emoji} ${label}</span><span style="opacity:.5">·</span><span>${m.t}</span></button>`;
     };
     const blockBtns=`<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap">${_blocoStatusBtn('criar','Criar','📋')}${_blocoStatusBtn('oral','Oral Online','🎙️')}</div>`;
@@ -30671,24 +30748,30 @@ function renderBlocoCards(studentId){
     const casos=(b.tpl?.casos||[]);
     const totalCasos=casos.length;
     const nota=b.key==='criar'?r.notaCriar:r.notaOral;
+    const naoFez=!!r.naoFez;            // aluno marcado como "não fez o bloco"
+    const isFinal=!!r.finalizado;
     const bSt=totalCasos?getBlocoStatus(r,b.tpl):'red';
-    const status=bSt==='green'?'✅ Finalizado':bSt==='red'?'Não iniciado':'⏳ Em andamento';
-    const borderColor=statusColor(bSt);
+    const effSt=naoFez?'red':bSt;       // estado efetivo pra cor/borda
+    const status=naoFez?'🚫 Aluno não fez o bloco':(bSt==='green'?'✅ Finalizado':bSt==='red'?'Não iniciado':'⏳ Em andamento');
+    const borderColor=statusColor(effSt);
     const disabled=!totalCasos;
     const clickAttr=disabled?'':('onclick="openCkBloco(\''+b.key+'\')"');
     const hoverAttr=disabled?'':('onmouseover="this.style.borderColor=\''+b.color+'\'" onmouseout="this.style.borderColor=\''+borderColor+'\'"');
     const blocoLabelShort=b.key==='criar'?'Criar':'Oral';
     // Botão Backup PDF acima de cada card — exporta só esse bloco em branco pro prof imprimir
     const btnBackup=disabled?'':`<button onclick="event.stopPropagation();exportCkTemplatePDF('${b.key}')" title="Imprime o checklist em branco do bloco ${blocoLabelShort} pro prof aplicador" style="white-space:nowrap;background:var(--bg2);color:var(--t2);border:1px dashed var(--border);padding:7px 14px;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;transition:all .15s;align-self:flex-start" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)';this.style.borderStyle='solid'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--border)';this.style.borderStyle='dashed'">📄 Backup PDF · ${blocoLabelShort}</button>`;
+    const btnNaoFez=`<button onclick="ckConfirmZerar('${studentId}','${b.key}')" title="Marca que o aluno não fez este bloco: zera a nota (0) e finaliza" style="white-space:nowrap;background:transparent;color:#1c6b2e;border:1px solid rgba(28,107,46,.4);padding:8px 14px;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;transition:all .15s;align-self:flex-start" onmouseover="this.style.background='rgba(28,107,46,.1)';this.style.borderColor='#1c6b2e'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(28,107,46,.4)'">Aluno não fez o bloco</button>`;
+    const showNota=isFinal&&nota!=null;
     return`<div style="display:flex;flex-direction:column;gap:10px">
       ${btnBackup}
       <div ${clickAttr} ${hoverAttr}
-      style="border:2px solid ${borderColor};border-radius:var(--r);padding:24px;cursor:${disabled?'default':'pointer'};transition:all .2s;opacity:${disabled?'.5':'1'};background:${statusBg(bSt)}">
+      style="border:2px solid ${borderColor};border-radius:var(--r);padding:24px;cursor:${disabled?'default':'pointer'};transition:all .2s;opacity:${disabled?'.5':'1'};background:${statusBg(effSt)}">
       <p style="font-size:17px;font-weight:800;margin-bottom:8px">${b.label}</p>
       <p style="font-size:13px;color:var(--t2);margin-bottom:12px">${totalCasos} caso${totalCasos!==1?'s':''} · ${disabled?'Sem template configurado':status}</p>
-      ${bSt==='green'&&nota!==undefined?`<p style="font-size:24px;font-weight:800;color:var(--green)">${nota.toFixed(1)} pts</p>`:''}
-      ${(!disabled&&bSt!=='green')?`<p style="font-size:12px;color:${statusColor(bSt)}">Status: ${status}</p>`:''}
+      ${showNota?`<p style="font-size:24px;font-weight:800;color:${naoFez?'var(--red)':'var(--green)'}">${nota.toFixed(1)} pts${naoFez?' · não fez':''}</p>`:''}
+      ${(!disabled&&!isFinal&&bSt!=='green')?`<p style="font-size:12px;color:${statusColor(bSt)}">Status: ${status}</p>`:''}
       </div>
+      ${btnNaoFez}
     </div>`;
   }).join('');
 }
@@ -31680,6 +31763,82 @@ window.finalizarChecklist=async(silent=false)=>{
   if(!silent){
     const blocoLabel=blocoKey==='criar'?'CRIAR':'Oral Online';
     alert('✅ Nota '+blocoLabel+' lançada: '+nota.toFixed(1)+' pontos');
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+// "Aluno não fez o bloco" — zera a nota e finaliza (com confirmação custom)
+// ══════════════════════════════════════════════════════════════
+const _ckEsc=(s)=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const _ckBlocoLabel=(k)=>k==='criar'?'CRIAR / Simulação':'Oral Online';
+
+window.ckConfirmZerar=(studentId,blocoKey)=>{
+  const s=(_ckStudents||[]).find(x=>x.id===studentId);
+  const nome=s?.nome||'este aluno';
+  const blocoLabel=_ckBlocoLabel(blocoKey);
+  let host=document.getElementById('ck-zero-modal');
+  if(!host){host=document.createElement('div');host.id='ck-zero-modal';document.body.appendChild(host);}
+  host.className='mo';
+  host.innerHTML=`
+    <div class="md" style="max-width:440px">
+      <div class="mh">
+        <div><p class="m-title">Zerar a nota deste bloco?</p><p class="m-sub">Bloco ${_ckEsc(blocoLabel)}</p></div>
+        <button class="m-close" onclick="ckCloseZerar()" aria-label="Fechar">✕</button>
+      </div>
+      <div class="m-body">
+        <div style="display:flex;gap:12px;align-items:flex-start;background:var(--rl);border:1px solid rgba(248,81,73,.25);border-radius:12px;padding:14px 16px">
+          <span style="font-size:22px;line-height:1.1">⚠️</span>
+          <p style="font-size:14px;line-height:1.55;margin:0">Confirma que <strong>${_ckEsc(nome)}</strong> <strong>NÃO fez</strong> o bloco <strong>${_ckEsc(blocoLabel)}</strong>?<br><br>A nota deste bloco será <strong>zerada (0)</strong> e o bloco <strong>finalizado</strong>. Isso entra no cálculo da nota final — mas pode ser revertido recomeçando a avaliação.</p>
+        </div>
+      </div>
+      <div class="m-foot">
+        <button class="btn btn-s" onclick="ckCloseZerar()">Cancelar</button>
+        <button class="btn btn-d" id="ck-zero-confirm" onclick="ckZerarBloco('${studentId}','${blocoKey}')">🚫 Zerar e finalizar</button>
+      </div>
+    </div>`;
+  host.classList.remove('hidden');
+};
+window.ckCloseZerar=()=>{const h=document.getElementById('ck-zero-modal');if(h){h.classList.add('hidden');h.innerHTML='';}};
+
+window.ckZerarBloco=async(studentId,blocoKey)=>{
+  const btn=document.getElementById('ck-zero-confirm');
+  if(btn){btn.disabled=true;btn.textContent='Salvando…';}
+  try{
+    if(!_ckSimId){alert('Selecione um simulado primeiro.');return;}
+    const resp=_ckRespostas[studentId]||{};
+    if(!resp[blocoKey])resp[blocoKey]={casos:{}};
+    const blocoResp=resp[blocoKey];
+    const _auditBefore={finalizado:blocoResp.finalizado,nota:blocoKey==='criar'?blocoResp.notaCriar:blocoResp.notaOral,naoFez:blocoResp.naoFez||false};
+    if(blocoKey==='criar')blocoResp.notaCriar=0;else blocoResp.notaOral=0;
+    blocoResp.finalizado=true;
+    blocoResp.naoFez=true;
+    resp.updatedAt=new Date().toISOString();
+    // Salva nas respostas do checklist
+    await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${studentId}`),removeUndefined(resp),{merge:true});
+    _ckRespostas[studentId]=resp;
+    try{audit('CK_BLOCO_FINALIZADO',{collection:'checklists/respostas',simId:_ckSimId,studentId,bloco:blocoKey},{before:_auditBefore,after:{nota:0,finalizado:true,naoFez:true},meta:{nomeAluno:((_ckStudents||[]).find(x=>x.id===studentId)||{}).nome||'',motivo:'aluno-nao-fez'}});}catch(_){}
+    // Sincroniza com notas/desempenho (mesma lógica do finalizarChecklist)
+    const student=(_ckStudents||[]).find(s=>s.id===studentId);
+    if(student){
+      const lista=S.listas.find(l=>(l.alunos||[]).some(a=>(typeof a==='object'?a.nome:a).toLowerCase().trim()===student.nome.toLowerCase().trim()));
+      const alunoData=lista?(lista.alunos||[]).find(a=>(typeof a==='object'?a.nome:a).toLowerCase().trim()===student.nome.toLowerCase().trim()):null;
+      const mat=typeof alunoData==='object'?alunoData?.matricula||'':'';
+      const key=mat||student.nome.toLowerCase().trim();
+      const notaRef=doc(db,`notas/${_ckSimId}/alunos/${key}`);
+      let outro=null;
+      try{const cur=await getDoc(notaRef);if(cur.exists()){const d=cur.data();outro=blocoKey==='criar'?(d.oral!=null?parseFloat(d.oral):null):(d.criar!=null?parseFloat(d.criar):null);}}catch(e){console.warn('read nota:',e);}
+      const payload={updatedAt:new Date().toISOString()};
+      if(blocoKey==='criar')payload.criar=0;else payload.oral=0;
+      if(outro!=null&&!isNaN(outro))payload.notaFinal=parseFloat(((0+outro)/2).toFixed(1));
+      await setDoc(notaRef,payload,{merge:true});
+    }
+    ckCloseZerar();
+    if(typeof reloadRespostasAndRender==='function'){try{await reloadRespostasAndRender();}catch(_){}}
+    renderBlocoCards(studentId);
+  }catch(err){
+    console.error('ckZerarBloco:',err);
+    if(btn){btn.disabled=false;btn.textContent='🚫 Zerar e finalizar';}
+    alert('Erro ao zerar o bloco: '+(err.message||err));
   }
 };
 
@@ -34810,10 +34969,13 @@ window.gerarFeedbackAluno=async(studentId)=>{
       }catch(e){historico.push({simNome:sim.nome,criar:null,oral:null,notaFinal:null});}
     }
 
-    // Habilidades average from both blocos
+    // Bloco marcado como "não fez" → ignora as habilidades/casos desse bloco no feedback.
+    const _naoFezCriar=!!ckResp.criar?.naoFez, _naoFezOral=!!ckResp.oral?.naoFez;
+    const _casosFb=[...(_naoFezCriar?[]:Object.values(ckResp.criar?.casos||{})),...(_naoFezOral?[]:Object.values(ckResp.oral?.casos||{}))];
+    // Habilidades average dos blocos efetivamente realizados
     const habMedias=Array(HABILIDADES.length).fill(0).map((_,hi)=>{
       const vals=[];
-      [...Object.values(ckResp.criar?.casos||{}),...Object.values(ckResp.oral?.casos||{})].forEach(cr=>{const v=cr.habilidades?.[hi];if(v>0)vals.push(v);});
+      _casosFb.forEach(cr=>{const v=cr.habilidades?.[hi];if(v>0)vals.push(v);});
       return vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):0;
     });
 
@@ -34829,20 +34991,20 @@ window.gerarFeedbackAluno=async(studentId)=>{
     const feedbacksCasos=[];
     // Conta só os casos que de fato vão à IA (com feedback preenchido) pra a barra ter total real.
     const _aiTotal=[
-      ...(tplCriar.casos||[]).map((_,ci)=>(ckResp.criar?.casos?.[ci]?.feedback||'').trim()),
-      ...(tplOral.casos||[]).map((_,ci)=>(ckResp.oral?.casos?.[ci]?.feedback||'').trim())
+      ...(_naoFezCriar?[]:(tplCriar.casos||[]).map((_,ci)=>(ckResp.criar?.casos?.[ci]?.feedback||'').trim())),
+      ...(_naoFezOral?[]:(tplOral.casos||[]).map((_,ci)=>(ckResp.oral?.casos?.[ci]?.feedback||'').trim()))
     ].filter(Boolean).length;
     let _aiDone=0;
     const _aiProg=()=>{_aiDone++;_fbGenProgress(_aiDone,_aiTotal);};
     _fbGenMsg(_aiTotal>0?'Revisando feedbacks com IA…':'Montando relatório…');
     if(_aiTotal>0)_fbGenProgress(0,_aiTotal);
-    for(let ci=0;ci<(tplCriar.casos||[]).length;ci++){
+    if(!_naoFezCriar)for(let ci=0;ci<(tplCriar.casos||[]).length;ci++){
       const caso=tplCriar.casos[ci];const cr=ckResp.criar?.casos?.[ci]||{};
       const fbRaw=(cr.feedback||'').trim()||'sem feedback específico';
       const rev=await applyAIPrompt(fbRaw,_aiProg);
       feedbacksCasos.push({nome:'[CRIAR] '+(caso.nome||'Caso '+(ci+1)),feedback:rev,prof:cr.prof||'',bloco:'criar',ci});
     }
-    for(let ci=0;ci<(tplOral.casos||[]).length;ci++){
+    if(!_naoFezOral)for(let ci=0;ci<(tplOral.casos||[]).length;ci++){
       const caso=tplOral.casos[ci];const cr=ckResp.oral?.casos?.[ci]||{};
       const fbRaw=(cr.feedback||'').trim()||'sem feedback específico';
       const rev=await applyAIPrompt(fbRaw,_aiProg);
@@ -34861,6 +35023,7 @@ window.gerarFeedbackAluno=async(studentId)=>{
       simAtual,
       isExtra:!!simAtual.isExtra,
       tplCriar,tplOral,
+      naoFezCriar:_naoFezCriar,naoFezOral:_naoFezOral,
       feedbacksCasosRevisados:feedbacksCasos,
       feedbackGeralRevisado:fgRev,
       notaCriar:notaC,notaOral:notaO,notaFinal
@@ -35115,7 +35278,7 @@ function _renderExtraCasesPreview(data){
       }).join('')}
     </div>`;
   };
-  const html=renderBloco('🩺 Bloco Criar / Simulação','#2f81f7',data.tplCriar)+renderBloco('🎙️ Bloco Oral Online','#fb8f44',data.tplOral);
+  const html=(data.naoFezCriar?'':renderBloco('🩺 Bloco Criar / Simulação','#2f81f7',data.tplCriar))+(data.naoFezOral?'':renderBloco('🎙️ Bloco Oral Online','#fb8f44',data.tplOral));
   if(!html)return '';
   return `<div style="border-top:2px dashed #d0d7de;padding-top:16px;margin-top:6px">
     <p style="font-size:11px;font-weight:700;color:#1a1714;letter-spacing:.6px;text-transform:uppercase;margin-bottom:14px">📚 Casos, checklist e gabarito (Simulado Extra)</p>
