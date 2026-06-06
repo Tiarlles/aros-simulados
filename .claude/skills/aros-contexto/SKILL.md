@@ -2418,6 +2418,10 @@ Dois recursos no painel `🤖 Inteligência do Produto` (hoje placeholder):
 
 ## Histórico recente (resumo cronológico)
 
+Checklist — ajustes de UI da tela de aplicação (2026-06-06, deployado):
+- Rótulo da nota do bloco: "NOTA CRIAR / SIMULAÇÃO" → **"NOTA FINAL DO BLOCO"** (elemento `#ck-nota-resultado`/`#ck-nota-val`, único, vale pros dois blocos).
+- Fontes da tela de avaliação do bloco saíram do **Fraunces** (legado serifado) pra fontes técnicas: títulos (nome do aluno, título do bloco, "Caso N: …") em **Space Grotesk**; a nota grande (`#ck-nota-val`) em **JetBrains Mono** (cara de métrica). Pedido do Tiarlles: visual mais sério/tecnológico, menos "infantil".
+
 Feedback dos casos — revisão da IA em LOTE (2026-06-06, deployado: função + site):
 - **Problema**: a revisão de feedback por caso (`applyAIPrompt`) era **1 chamada isolada por caso** → a IA não via os outros casos e repetia recomendações/vícios entre eles. Era limitação de arquitetura, não de prompt.
 - **Fix (opção A)**: `gerarFeedbackAluno` agora faz **1 chamada única** com TODOS os casos do aluno (`_reviewFeedbacksLote`). **Formato casado com o próprio prompt de revisão** (`config/aiPrompt.prompt`): entrada `[CASO N]` (N sequencial 1..K na ordem CRIAR→ORAL), saída `===CASO N===`. O parser faz split em `/===\s*CASO\s*(\d+)\s*===/i` (tolerante a espaços) e mapeia por número; `_stripCasoHeader` tira cabeçalhos vazados; limpa code fences. **Fallback** `_reviewFeedbackSingle` (1 caso por vez, também no formato `[CASO 1]`/strip) se o lote falhar/parsear errado → nunca quebra o feedback. Casos sem feedback e blocos "não fez" continuam ignorados.

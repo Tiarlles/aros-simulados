@@ -4778,8 +4778,8 @@ body.pro-rt-fs-on{overflow:hidden}
         <div id="ck-nota-resultado" class="hidden" style="margin-top:16px">
           <div class="card" style="border:2px solid var(--accent)">
             <div class="cb" style="text-align:center;padding:24px">
-              <p style="font-size:13px;color:var(--t2);margin-bottom:6px">NOTA CRIAR / SIMULAÇÃO</p>
-              <p id="ck-nota-val" style="font-family:Fraunces,serif;font-size:48px;font-weight:800;color:var(--accent)">—</p>
+              <p style="font-size:13px;color:var(--t2);margin-bottom:6px">NOTA FINAL DO BLOCO</p>
+              <p id="ck-nota-val" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:46px;font-weight:800;letter-spacing:-1px;color:var(--accent)">—</p>
               <p style="font-size:12px;color:var(--t2);margin-top:4px">Enviada automaticamente para o painel de Desempenho</p>
             </div>
           </div>
@@ -30725,7 +30725,7 @@ window.openCkFill=async(studentId)=>{
   document.getElementById('ck-blocos-header').innerHTML=`
     <div>
       <p style="font-size:11px;color:var(--t2);margin-bottom:2px">CHECKLIST DE</p>
-      <p style="font-family:Fraunces,serif;font-size:18px;font-weight:700">${s.nome}</p>
+      <p style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.3px">${s.nome}</p>
     </div>`;
   renderBlocoCards(studentId);
   showCkView('ck-blocos');
@@ -30788,7 +30788,7 @@ window.openCkBloco=(bloco)=>{
   if(!window._ckTemplateCurrent)window._ckTemplateCurrent={casos:[]};
   document.getElementById('ck-fill-header').innerHTML=
     '<div><p style="font-size:11px;color:var(--t2);margin-bottom:2px">'+(bloco==='criar'?'📋 BLOCO CRIAR':'🎙️ BLOCO ORAL')+' — '+(s?.nome||'')+'</p>'+
-    '<p style="font-family:Fraunces,serif;font-size:16px;font-weight:700">'+(bloco==='criar'?'CRIAR / Simulação':'Oral Online')+'</p></div>';
+    '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:16px;font-weight:700;letter-spacing:-.3px">'+(bloco==='criar'?'CRIAR / Simulação':'Oral Online')+'</p></div>';
   renderCkCasos(blocoResp);
   document.getElementById('ck-nota-resultado')?.classList.toggle('hidden',!blocoResp.finalizado);
   if(blocoResp.finalizado){
@@ -31093,7 +31093,7 @@ function renderCkCasos(resp){
         <span style="font-size:20px;line-height:1.2;flex-shrink:0">${statusIcon}</span>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">
-            <p style="font-family:Fraunces,serif;font-size:15px;font-weight:700;color:${statusColor(casoSt)};margin:0">Caso ${ci+1}: ${caso.nome||'Caso Clínico'}</p>
+            <p style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;letter-spacing:-.2px;color:${statusColor(casoSt)};margin:0">Caso ${ci+1}: ${caso.nome||'Caso Clínico'}</p>
             ${statusChip}
           </div>
           <p style="font-size:13px;font-weight:800;color:var(--accent);letter-spacing:-.2px;margin:0">Pontuação: <span id="ck-score-${ci}">${_calcCasoScore(casoResp,caso,ptsPorCaso).toFixed(1)}</span> / ${ptsPorCaso.toFixed(1)} pts</p>
