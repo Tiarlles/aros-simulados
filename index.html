@@ -11277,7 +11277,10 @@ window.renderMural=async(cat)=>{
 };
 
 // ── Apple-like interactions: tilt 3D + glow follow-cursor + reveal-on-scroll ──
-const _arosPrefersReduced=()=>window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Declaração de função (hoisted) em vez de const arrow: renderHomeCards pode chamar
+// _arosObserveReveal/_arosBindTilt antes desta linha rodar na partida — com const dava
+// TDZ ("Cannot access '_arosPrefersReduced' before initialization").
+function _arosPrefersReduced(){return window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;}
 let _arosRevealObs=null;
 function _arosObserveReveal(){
   if(_arosPrefersReduced()||!('IntersectionObserver' in window)){
