@@ -109,10 +109,17 @@ checklists/{simId}/
   ├ meta/templateCriar              — template do bloco Criar/Simulação (casos com slides)
   ├ meta/templateOral               — template do bloco Oral Online
   ├ respostas/{studentId}           — respostas (+ feedbackGeradoEm: data do último PDF gerado)
-  │   └ shape: {criar:{casos{},finalizado,notaCriar,naoFez?}, oral:{casos{},finalizado,notaOral,naoFez?}, updatedAt}
-  │   └ naoFez:true = coord marcou "Aluno não fez o bloco" → nota 0 + finalizado. Conta como
+  │   └ shape: {criar:{casos{},finalizado,notaCriar,naoFez?,parcialNaoFez?}, oral:{...,notaOral,...}, updatedAt}
+  │   └ naoFez:true (NÍVEL BLOCO) = coord marcou "Aluno não fez o bloco" → nota 0 + finalizado. Conta como
   │     FINALIZADO (status/filtro/feedback), mas seus casos são IGNORADOS no feedback e na
   │     média da turma do bloco. Visual: card vermelho; selo na linha verde-escuro "Finalizado · não fez".
+  │   └ casos[ci].naoFez:true (NÍVEL CASO, 2026-06-08) = "Aluno não fez ESTE caso" → caso pontua 0
+  │     e conta como verde/finalizado (getCasoStatus/_calcCasoScore/casoSalvo tratam no topo). Permite
+  │     finalizar o bloco com casos feitos + zerados. Caso naoFez fica fora do feedback/PDF do aluno.
+  │   └ parcialNaoFez:true = bloco tem ≥1 caso zerado → flags criarParcial/oralParcial são gravados em
+  │     notas/{simId}/alunos/{key} e EXCLUEM o aluno da média da turma (bloco e final). A nota individual
+  │     dele soma tudo (casos zerados = 0). naoFez de BLOCO e de CASO são mutuamente exclusivos: qualquer
+  │     atividade por caso (zerar caso / salvar caso / finalizar) limpa o flag de bloco (cura dado legado).
   └ relatorios/{studentId}          — {html, geradoEm}: HTML do PDF aprovado (PROTEGIDO isAuth — tem notas)
 
 disponibilidade/{simId}/profs/{key} — disponibilidade de profs
@@ -630,6 +637,13 @@ Detalhes técnicos:
 - **Apagar comentário/resposta próprios**: botão 🗑 só pra autor (`profNome === S._revProfNome`) e não-readonly. Top-level apaga também as respostas filhas (`parentId`). Rules `comentarios` permitem `delete: true`.
 - **Imagens em observações** uploadadas pra `revisaoCasos/{revId}/{casoId}/obs_{itemId}/{filename}` (Storage).
 - **Importação em massa** via textarea (parser `_parseImportCasos`).
+
+**Refinos do editor de Revisão (coord) — 2026-06-08:**
+- **Reordenar casos por drag** dentro do MESMO bloco: card do caso tem alça ⠿ no header (`_revCasoDragStart/Over/Drop/End`), splice no `S._revEdit.casos`. Drop entre blocos é barrado (pra trocar de bloco usa o select 🩺/🎙️). Itens do checklist já tinham drag análogo (`_revItemDrag*`).
+- **Penalidade já na revisão**: cada item tem botão "⚠ Penalidade?" (`toggleItemNegativoRev`) que liga `it.negativo`. Renumeração (`_revRenumerarItens`): positivos = A,B,C limpos; penalidade = ⚠. **`stripPrivate` (exportarRevisao) e o seed de import agora carregam `negativo` (+obs)** → a penalidade chega no checklist oficial. Revisor (prof) vê selo PENALIDADE no item.
+- **Perguntas em dropdown** (`togglePerguntaRev`, flag `p._aberto`): header clicável com prévia do enunciado + contagem de itens; **fechadas por padrão**; pergunta nova (`addPerguntaRev`) abre expandida.
+- **Nome do caso inline** no header do box (`editCasoRev(ci,'nome',...)` com stopPropagation); campo "Nome do caso" do corpo foi removido.
+- **Fontes**: títulos da Revisão migraram Fraunces → **Space Grotesk** (com letter-spacing negativo). Box de comentários renomeado "Revisão dos professores" (antes "FEEDBACK DOS PROFS"), tom discreto (`--t2`), amarelo só quando há item não resolvido.
 
 ### Slides de Projeção (bloco Criar) — refatorado em 2026-05-15 pra modo remoto
 Sistema agora sincroniza prof + aluno(s) via **Firestore** (substitui o BroadcastChannel antigo, que era local-only). Funciona com prof e alunos em máquinas/redes diferentes. Disponível **apenas para casos do bloco Criar/Simulação**.
@@ -2436,6 +2450,14 @@ Checklist — "Aluno não fez o bloco", filtro multi e médias por bloco (2026-0
 - **Filtro por bloco virou multi-seleção**: chips (`ckToggleBlocoFilter`) em vez de `<select>` — vários status por bloco (OR interno). Toggle **E/OU** (`ckSetFiltroModo`) pra combinar os dois blocos (aparece só quando há seleção nos dois). Estado `S.ckFiltroBloco={criar:[],oral:[],modo}`.
 - **Média da turma POR BLOCO** na aba Desempenho (grade + PDF export): cabeçalho de cada simulado mostra "Média turma — Criar X · Oral Y · Final Z". Cada média de bloco conta só quem fez (**nota > 0**; nota 0 sai); a final segue exigindo os dois blocos > 0. Helper `_avgPos`; `mediasTurma[simId]` virou `{criar,oral,final}`.
 - **NÃO há** mais "média da turma" no relatório de feedback (removida pelo Tiarlles antes).
+
+Checklist — "Aluno não fez ESTE caso" (por caso) + média parcial + feedback IA resiliente (2026-06-08, deployado em produção, commits `f6e8abe`+`cd534d6`):
+- **"🚫 Aluno não fez ESTE caso"** (granular, complementa o "não fez o BLOCO"): botão no header do card do caso (compacto "🚫 Não fez", `event.stopPropagation`) E no rodapé do caso aberto. `ckConfirmZerarCaso`/`ckZerarCaso`/`ckDesfazerNaoFezCaso` (modal `#ck-zero-caso-modal`). Liga `casos[ci].naoFez` → caso pontua 0 e vira verde. Tratado no TOPO de `getCasoStatus`/`_calcCasoScore`/`casoSalvo`, e o loop do botão Finalizar pula casos `naoFez`. Header mostra selo "🚫 Não fez · 0 pts"; corpo vira banner + "Desfazer" (early-return no forEach de `renderCkCasos`). Audit `CK_CASO_NAO_FEZ`/`..._DESFEITO`. Reversível.
+- **Nota do aluno**: zerados contam 0 (escolha do Tiarlles — fiel a "zerar o caso"; bloco soma na escala 0–100, casos zerados = 0). Bloco finaliza com feitos + zerados.
+- **Bloco parcial sai da média da turma**: `finalizarChecklist` calcula `_parcial=casos.some(naoFez)`, grava `blocoResp.parcialNaoFez` + `payload.criarParcial/oralParcial` em `notas`. As DUAS `mediasTurma` (Desempenho ~L29275 e export ~L29599) excluem blocos parciais: `n.criarParcial?NaN:parseFloat(n.criar)` etc, e a média final filtra `!criarParcial&&!oralParcial`. Regras confirmadas: turma só com quem fez bloco COMPLETO; nota individual considera tudo; parcial fora da média; casos feitos destravam feedback; só casos feitos entram no feedback.
+- **naoFez de BLOCO × de CASO mutuamente exclusivos**: `ckZerarCaso`, `saveCkCaso` e `finalizarChecklist` setam `blocoResp.naoFez=false` (atividade por caso ⇒ não é "não fez o bloco inteiro"). `ckZerarBloco` grava `criarParcial/oralParcial=false`.
+- **Feedback IA — exclusão por caso + cura de flag legado**: `gerarFeedbackAluno` agora pula casos `cr.naoFez` na montagem de `_casosLista` (antes só pulava bloco inteiro). E `_naoFezCriar/_naoFezOral` só valem se o bloco NÃO tem nenhum caso feito (`_blocoFeito(b)`) — assim um aluno com flag de bloco legado/stale + caso feito **mostra os casos feitos** (cura sem refazer nada). **Bug que isso resolveu**: caso feito sumia do feedback porque um flag de bloco antigo excluía o oral inteiro.
+- **Feedback IA — resiliência do lote** (`_reviewFeedbacksLote`): deixou de ser tudo-ou-nada → retorna **parcial** (casos faltantes caem pra `_reviewFeedbackSingle`). No loop, **detecção de eco**: se o lote devolveu texto ≡ ao cru (IA "preguiçou" nos últimos), refaz individual. `_callFeedbackIA` ganhou **retry** (2×, espera 900ms) em erro de rede / 429 / 5xx. **Causa do "2 últimos casos sem tratamento da IA"**: lote truncava no limite de tokens (ou ecoava) e o tudo-ou-nada descartava tudo. **Nota de teste**: a IA é CORS-bloqueada em `localhost` — só dá pra validar tratamento no site publicado.
 
 PO MEDREVIEW — Coordenação de Produto, Fase 1 "shell" (2026-06-05, deployado em produção em 2026-06-06):
 - Nova área interna de gestão de cursos (ver seção dedicada acima). Grupo de menu `poMedreview` + aba `po` (admin-only), navegação verticais→cursos→curso, planilha de aulas com **colunas configuráveis** (texto/link/status), 1ª coluna fixa, módulos colapsáveis (dropdown), resize de colunas, status com famílias de cor.
