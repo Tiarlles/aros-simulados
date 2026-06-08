@@ -35265,18 +35265,15 @@ window.gerarFeedbackAluno=async(studentId)=>{
     const _comFb=_casosLista.filter(c=>c.fbRaw&&c.fbRaw!=='sem feedback específico');
     let _loteMap=null;
     if(_comFb.length)_loteMap=await _reviewFeedbacksLote(_comFb.map(c=>({key:c.key,texto:c.fbRaw})));
-    console.log('🔎 FB-DIAG: casos='+_casosLista.length+' | com feedback='+_comFb.length+' | lote retornou='+(_loteMap?Object.keys(_loteMap).length+' caso(s)':'NADA (null)'));
     for(const c of _casosLista){
-      let rev,_via;
+      let rev;
       const _loteRev=_loteMap&&_loteMap[c.key];
       // Usa o lote só se veio E foi de fato revisado (≠ texto cru). Se a IA só ecoou
       // o original (acontece nos últimos casos de lotes grandes), refaz individual.
       const _loteValido=_loteRev&&_loteRev.trim()&&_loteRev.trim()!==c.fbRaw.trim();
-      if(!c.fbRaw||c.fbRaw==='sem feedback específico'){rev=c.fbRaw||'sem feedback específico';_via='sem-feedback';}
-      else if(_loteValido){rev=_loteRev;_aiProg();_via='lote';}
-      else{rev=await _reviewFeedbackSingle(c.fbRaw);_aiProg();_via='individual';} // fallback: revisão individual (1 caso por vez)
-      const _tratado=!!c.fbRaw&&c.fbRaw!=='sem feedback específico'&&rev.trim()!==c.fbRaw.trim();
-      console.log('🔎 FB-DIAG '+c.key+' ('+c.nome+'): via='+_via+' | tratado pela IA='+(_tratado?'SIM':'NÃO')+(_loteRev&&!_loteValido?' [lote ecoou/vazio]':''));
+      if(!c.fbRaw||c.fbRaw==='sem feedback específico'){rev=c.fbRaw||'sem feedback específico';}
+      else if(_loteValido){rev=_loteRev;_aiProg();}
+      else{rev=await _reviewFeedbackSingle(c.fbRaw);_aiProg();} // fallback: revisão individual (1 caso por vez)
       feedbacksCasos.push({nome:c.nome,feedback:rev,prof:c.prof,bloco:c.bloco,ci:c.ci});
     }
     _fbGenMsg('Montando relatório…');
