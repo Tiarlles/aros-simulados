@@ -4991,7 +4991,7 @@ body.pro-rt-fs-on{overflow:hidden}
     <div id="tab-revisao" class="hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
         <div>
-          <h3 style="font-family:Fraunces,serif;font-size:17px;font-weight:700">🔍 Revisão de Casos</h3>
+          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;letter-spacing:-.3px">🔍 Revisão de Casos</h3>
           <p style="font-size:13px;color:var(--t2)">Revisão colaborativa de casos clínicos antes da aplicação no simulado.</p>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap" id="rev-admin-acts"></div>
@@ -19425,7 +19425,7 @@ function _revRenderProfPicker(c){
   const profs=(S.profs||[]).slice().sort((a,b)=>a.localeCompare(b,'pt-BR'));
   c.innerHTML=`<div style="max-width:560px;margin:20px auto;padding:24px;border:1.5px solid var(--border);border-radius:14px;background:linear-gradient(180deg,rgba(47,129,247,.05),var(--bg2));box-shadow:0 8px 32px -12px rgba(47,129,247,.35)">
     <div style="font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:10px">🔍 Identificação do revisor</div>
-    <h3 style="font-family:Fraunces,serif;font-size:20px;font-weight:700;margin-bottom:6px">Selecione seu nome</h3>
+    <h3 style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px">Selecione seu nome</h3>
     <p style="color:var(--t2);font-size:13px;margin-bottom:14px">Sua identificação fica vinculada a todos os votos e comentários que você fizer nesta sessão.</p>
     <div class="search-wrap" style="margin-bottom:12px">
       <span class="search-icon">🔍</span>
@@ -19476,7 +19476,7 @@ window.finalizarRevisaoProf=async()=>{
   el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px';
   el.innerHTML=`<div onclick="event.stopPropagation()" style="max-width:480px;width:100%;background:var(--bg2);border:2px solid var(--green);border-radius:14px;padding:28px;box-shadow:0 16px 64px rgba(0,0,0,.5);text-align:center">
     <div style="font-size:54px;margin-bottom:10px">🎉</div>
-    <h2 style="font-family:Fraunces,serif;font-size:22px;font-weight:800;margin-bottom:10px">Revisão finalizada!</h2>
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:10px">Revisão finalizada!</h2>
     <p style="font-size:14px;color:var(--t2);line-height:1.6;margin-bottom:20px">Muito obrigado pela sua contribuição.<br/>Sua revisão foi registrada com sucesso.<br/><br/>Você pode continuar navegando pelos casos pra ajustar votos, ver comentários dos outros revisores ou adicionar novos.</p>
     <button onclick="document.getElementById('rev-fin-modal').remove()" style="background:var(--green);color:#000;font-weight:700;border:none;padding:10px 28px;border-radius:8px;cursor:pointer;font-size:14px">Entendi</button>
   </div>`;
@@ -19526,7 +19526,7 @@ function _revRenderProfList(c){
   const abertas=(S.revisoes||[]).filter(r=>r.status==='aberta');
   c.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px">
     <div style="display:flex;align-items:center;gap:10px">
-      <div style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:Fraunces,serif">${(S._revProfNome||'?').charAt(0).toUpperCase()}</div>
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:'Space Grotesk',sans-serif">${(S._revProfNome||'?').charAt(0).toUpperCase()}</div>
       <div>
         <div style="font-size:11px;color:var(--t2);font-family:JetBrains Mono,monospace;letter-spacing:1px;text-transform:uppercase">Revisor</div>
         <div style="font-weight:700">${S._revProfNome}</div>
@@ -19626,7 +19626,7 @@ function _revRenderProfEditor(c){
     <div class="cb">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px">
         <div>
-          <div style="font-family:Fraunces,serif;font-size:18px;font-weight:700">${r.simNome}</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.3px">${r.simNome}</div>
           <div style="font-size:12px;color:var(--t2);margin-top:2px">📅 Limite: ${r.prazoRevisao?fDT(r.prazoRevisao):'—'}</div>
         </div>
         <div style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--t2)">CASO ${idx+1} / ${casos.length}</div>
@@ -19636,7 +19636,7 @@ function _revRenderProfEditor(c){
   </div>
   <div style="margin-bottom:18px;padding:16px;border:1.5px solid ${blocoCor.replace('var(--accent)','rgba(47,129,247,.45)').replace('var(--orange)','rgba(251,143,68,.45)')};border-radius:14px;background:linear-gradient(180deg,${co.bloco==='oral'?'rgba(251,143,68,.06)':'rgba(47,129,247,.06)'},rgba(0,0,0,.08));box-shadow:0 8px 32px -12px ${co.bloco==='oral'?'rgba(251,143,68,.35)':'rgba(47,129,247,.35)'}">
     <div style="font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;letter-spacing:1.5px;color:${blocoCor};text-transform:uppercase;margin-bottom:10px">${blocoLabel}</div>
-    <h2 style="font-family:Fraunces,serif;font-size:20px;font-weight:700;margin-bottom:14px">📋 ${co.nome||'(caso sem nome)'}</h2>
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:14px">📋 ${co.nome||'(caso sem nome)'}</h2>
     ${finalizado?'<div style="background:rgba(255,193,7,.15);border:1px solid var(--yellow);color:var(--yellow);padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:13px;font-weight:600">🔒 Caso finalizado pela coordenação. Somente leitura — votos e comentários estão desabilitados.</div>':''}
     <div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px dashed var(--border);flex-wrap:wrap">
       ${navButtons}
@@ -19673,10 +19673,10 @@ function _revProfRenderPergunta(revId,co,p,pi,casoFinalizado){
       <span style="font-size:11px;color:var(--t2);font-family:JetBrains Mono,monospace">${itensAbertos?'recolher':'expandir'}</span>
     </div>
     <div class="${itensAbertos?'':'hidden'}">
-      ${(p.itens||[]).map((it)=>`<div style="margin-bottom:10px;padding:8px 10px;background:rgba(0,0,0,.15);border:1px solid var(--border);border-radius:8px">
+      ${(p.itens||[]).map((it)=>`<div style="margin-bottom:10px;padding:8px 10px;background:${it.negativo?'rgba(207,34,46,.08)':'rgba(0,0,0,.15)'};border:1px solid ${it.negativo?'rgba(207,34,46,.4)':'var(--border)'};border-radius:8px">
         <div style="display:flex;gap:10px;align-items:flex-start">
-          <div style="flex:0 0 36px;font-size:13px;font-weight:700;color:var(--accent);font-family:JetBrains Mono,monospace;text-align:center;padding:6px 0;background:var(--bg3);border:1px solid var(--border);border-radius:6px">${it.label||''}</div>
-          <div style="flex:1;font-size:13px;line-height:1.5">${it.descricao||''}</div>
+          <div style="flex:0 0 36px;font-size:13px;font-weight:700;color:${it.negativo?'var(--red)':'var(--accent)'};font-family:JetBrains Mono,monospace;text-align:center;padding:6px 0;background:${it.negativo?'var(--rl)':'var(--bg3)'};border:1px solid ${it.negativo?'var(--red)':'var(--border)'};border-radius:6px">${it.label||(it.negativo?'⚠':'')}</div>
+          <div style="flex:1;font-size:13px;line-height:1.5">${it.negativo?'<span style="font-size:9.5px;font-weight:800;color:var(--red);background:var(--rl);padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.5px;font-family:JetBrains Mono,monospace;margin-right:6px;vertical-align:middle">Penalidade</span>':''}${it.descricao||''}</div>
           ${(it.obs||(it.obsImagens||[]).length)?`<button onclick="event.stopPropagation();showObsCk(this)" data-obs="${(it.obs||'').replace(/"/g,'&quot;').replace(/</g,'&lt;')}" data-obs-imgs="${JSON.stringify(it.obsImagens||[]).replace(/"/g,'&quot;')}" title="${(it.obs||'').replace(/"/g,'&quot;')}" style="background:var(--yellow);color:#000;border:1.5px solid var(--yellow);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:800;letter-spacing:.5px;flex-shrink:0;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px -2px rgba(255,193,7,.55);text-transform:uppercase">💡${(it.obsImagens||[]).length?'📷':''} Observação · confira!</button>`:''}
         </div>
         ${_revProfRenderTarget(revId,'item',it.id,casoFinalizado)}
@@ -20018,7 +20018,7 @@ window.saveNovaRevisao=async()=>{
               id:_revUid('perg'),
               titulo:p.titulo||'',
               perguntaImagens:Array.isArray(p.perguntaImagens)?p.perguntaImagens:[],
-              itens:(p.itens||[]).map(it=>({id:_revUid('item'),label:it.label||'',descricao:it.descricao||''}))
+              itens:(p.itens||[]).map(it=>({id:_revUid('item'),label:it.label||'',descricao:it.descricao||'',...(it.negativo?{negativo:true}:{}),...(it.obs?{obs:it.obs}:{}),...(Array.isArray(it.obsImagens)&&it.obsImagens.length?{obsImagens:[...it.obsImagens]}:{})}))
             }))
           });
         });
@@ -20138,8 +20138,8 @@ function _revEditRenderComments(targetType,targetId){
   const showAberto=aberto||(hasUnresolved&&!S._revEditCommentsAbertos.has('__closed_'+key));
   return`<div style="margin-top:8px;padding:10px;background:rgba(0,0,0,.25);border:1px solid ${hasUnresolved?'var(--yellow)':'var(--border)'};border-radius:8px">
     <div onclick="toggleEditComments('${key}')" style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;flex-wrap:wrap">
-      <span style="font-size:11px;color:var(--accent);transition:transform .15s;display:inline-block;width:14px;${showAberto?'transform:rotate(90deg)':''}">▶</span>
-      <span style="font-size:11px;font-family:JetBrains Mono,monospace;font-weight:700;letter-spacing:1px;color:${hasUnresolved?'var(--yellow)':'var(--accent)'}">${hasUnresolved?'⚠ ':'💬 '}FEEDBACK DOS PROFS</span>
+      <span style="font-size:10px;color:var(--t2);transition:transform .15s;display:inline-block;width:14px;${showAberto?'transform:rotate(90deg)':''}">▶</span>
+      <span style="font-size:10px;font-family:JetBrains Mono,monospace;font-weight:600;letter-spacing:.4px;color:${hasUnresolved?'var(--yellow)':'var(--t2)'}">${hasUnresolved?'⚠ ':'💬 '}Revisão dos professores</span>
       ${concordo?`<span style="font-size:11px;color:var(--green);font-weight:700">👍 ${concordo}</span>`:''}
       ${discordo?`<span style="font-size:11px;color:var(--red);font-weight:700">👎 ${discordo}</span>`:''}
       ${topLevel.length?`<span style="font-size:11px;color:var(--t2)">${topLevel.length} comentário${topLevel.length!==1?'s':''}${totUnresolved&&totUnresolved!==topLevel.length?` (${totUnresolved} aberto${totUnresolved!==1?'s':''})`:''}</span>`:''}
@@ -20220,7 +20220,7 @@ function _revRenderEditor(c){
     <div class="card">
       <div class="cb" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
         <div>
-          <div style="font-family:Fraunces,serif;font-size:18px;font-weight:700">${simNome}</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.3px">${simNome}</div>
           <div style="font-size:12px;color:var(--t2);margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             <span class="badge" style="background:transparent;border:1px solid ${cor};color:${cor};font-size:10px;letter-spacing:1px">${_REV_STATUS_LABEL[r.status]?.toUpperCase()}</span>
             <span>· Limite:</span>
@@ -20266,14 +20266,17 @@ function _revRenderCaso(co,ci){
   const exportada=r.status==='exportada';
   const editavel=r.status==='rascunho'||r.status==='aberta';
   const finalizado=co.casoFinalizado||exportada;
+  const podeReordenar=editavel;
   const blocoCor=co.bloco==='oral'?'var(--orange)':'var(--accent)';
-  return`<div class="card" style="margin-bottom:12px;border-left:4px solid ${blocoCor};${finalizado?'border-top:1px solid var(--green);border-right:1px solid var(--green);border-bottom:1px solid var(--green);box-shadow:0 0 0 1px rgba(63,185,80,.15),0 4px 16px -4px rgba(63,185,80,.25)':''}">
-    <div class="ch" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px" onclick="toggleCasoRev(${ci})">
+  return`<div id="rev-caso-${ci}" class="card" style="margin-bottom:12px;border-left:4px solid ${blocoCor};transition:opacity .15s,box-shadow .15s;${finalizado?'border-top:1px solid var(--green);border-right:1px solid var(--green);border-bottom:1px solid var(--green);box-shadow:0 0 0 1px rgba(63,185,80,.15),0 4px 16px -4px rgba(63,185,80,.25)':''}">
+    <div class="ch"${podeReordenar?` draggable="true" ondragstart="_revCasoDragStart(event,${ci})" ondragover="_revCasoDragOver(event,${ci})" ondragleave="_revCasoDragLeave(event)" ondrop="_revCasoDrop(event,${ci})" ondragend="_revCasoDragEnd(event)"`:''} style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px" onclick="toggleCasoRev(${ci})">
       <div style="display:flex;align-items:center;gap:10px;flex:1">
+        ${podeReordenar?`<span title="Arraste para reordenar o caso dentro do bloco" onclick="event.stopPropagation()" style="cursor:grab;color:var(--t2);font-size:15px;user-select:none;line-height:1;flex-shrink:0">⠿</span>`:''}
         <span id="rev-chev-${ci}" style="font-size:12px;color:var(--accent);transition:transform .15s;display:inline-block;width:14px;${co._aberto?'transform:rotate(90deg)':''}">▶</span>
-        <div class="ct" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span style="font-family:Fraunces,serif">📋 ${co.nome||'(caso sem nome)'}</span>
-          ${finalizado?'<span style="background:var(--green);color:#000;font-family:\'Plus Jakarta Sans\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;padding:4px 10px;border-radius:6px;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px -2px rgba(63,185,80,.5)">✓ Finalizado</span>':''}
+        <div class="ct" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;min-width:0">
+          <span style="flex-shrink:0">📋</span>
+          <input value="${(co.nome||'').replace(/"/g,'&quot;')}" onclick="event.stopPropagation()" oninput="editCasoRev(${ci},'nome',this.value)" ${finalizado?'disabled':''} placeholder="(caso sem nome)" title="Nome do caso — clique para editar" style="flex:1;min-width:140px;max-width:420px;font-family:'Space Grotesk',sans-serif;letter-spacing:-.3px;font-size:15px;font-weight:600;color:var(--text);background:transparent;border:1px solid transparent;border-radius:6px;padding:3px 8px;outline:none;transition:border-color .15s,background .15s" onfocus="this.style.borderColor='var(--accent)';this.style.background='var(--bg2)'" onblur="this.style.borderColor='transparent';this.style.background='transparent'"/>
+          ${finalizado?'<span style="background:var(--green);color:#000;font-family:\'Plus Jakarta Sans\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;padding:4px 10px;border-radius:6px;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px -2px rgba(63,185,80,.5);flex-shrink:0">✓ Finalizado</span>':''}
         </div>
       </div>
       <div onclick="event.stopPropagation()" style="display:flex;gap:6px;align-items:center">
@@ -20285,9 +20288,6 @@ function _revRenderCaso(co,ci){
       </div>
     </div>
     <div id="rev-caso-body-${ci}" class="cb ${co._aberto?'':'hidden'}">
-      <div class="fg"><label class="fl">Nome do caso</label>
-        <input class="fc" value="${(co.nome||'').replace(/"/g,'&quot;')}" oninput="editCasoRev(${ci},'nome',this.value)" ${finalizado?'disabled':''}/>
-      </div>
       <div class="fg"><label class="fl">Enunciado</label>
         <textarea class="fc" rows="6" oninput="editCasoRev(${ci},'enunciado',this.value)" ${finalizado?'disabled':''} style="font-family:inherit;line-height:1.5;resize:vertical">${co.enunciado||''}</textarea>
         ${_revRenderImagens(co.enunciadoImagens||[],ci,null,finalizado)}
@@ -20309,22 +20309,32 @@ function _revRenderCaso(co,ci){
 
 function _revRenderPergunta(p,ci,pi,casoFinalizado){
   const cor='var(--accent)';
-  return`<div style="border:1.5px solid rgba(47,129,247,.45);border-radius:10px;padding:14px;margin-bottom:12px;background:linear-gradient(180deg,rgba(47,129,247,.05),var(--bg2));box-shadow:0 0 0 1px rgba(47,129,247,.08),0 4px 16px -4px rgba(47,129,247,.18)">
+  const _tit=(p.titulo||'').trim();
+  const _prev=_tit?_tit.replace(/</g,'&lt;').replace(/\s+/g,' ').slice(0,90)+(_tit.length>90?'…':''):'<em style="color:var(--t2)">(sem texto)</em>';
+  const _nIt=(p.itens||[]).length;
+  return`<div style="border:1.5px solid rgba(47,129,247,.45);border-radius:10px;margin-bottom:12px;background:linear-gradient(180deg,rgba(47,129,247,.05),var(--bg2));box-shadow:0 0 0 1px rgba(47,129,247,.08),0 4px 16px -4px rgba(47,129,247,.18);overflow:hidden">
+    <div onclick="togglePerguntaRev(${ci},${pi})" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:11px 14px;user-select:none">
+      <span id="rev-perg-chev-${ci}-${pi}" style="font-size:11px;color:${cor};transition:transform .15s;display:inline-block;width:11px;flex-shrink:0;${p._aberto?'transform:rotate(90deg)':''}">▶</span>
+      <strong style="font-size:13px;color:${cor};font-family:JetBrains Mono,monospace;letter-spacing:.5px;flex-shrink:0">P${pi+1}.</strong>
+      <span style="flex:1;min-width:0;font-size:13px;color:var(--text);line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_prev}</span>
+      <span style="font-size:10px;color:var(--t2);font-family:JetBrains Mono,monospace;flex-shrink:0;background:var(--bg3);border:1px solid var(--border);padding:2px 7px;border-radius:5px">${_nIt} ${_nIt===1?'item':'itens'}</span>
+      ${!casoFinalizado?`<button class="btn btn-d btn-sm" onclick="event.stopPropagation();rmPerguntaRev(${ci},${pi})" title="Remover pergunta" style="flex-shrink:0">🗑️</button>`:''}
+    </div>
+    <div id="rev-perg-body-${ci}-${pi}" class="${p._aberto?'':'hidden'}" style="padding:0 14px 14px">
     <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">
-      <strong style="font-size:13px;color:${cor};min-width:60px;font-family:JetBrains Mono,monospace;letter-spacing:.5px;padding-top:10px">P${pi+1}.</strong>
       <textarea class="fc" rows="4" oninput="editPerguntaRev(${ci},${pi},'titulo',this.value)" placeholder="Texto da pergunta" ${casoFinalizado?'disabled':''} style="flex:1;font-family:inherit;line-height:1.5;resize:vertical;min-height:90px">${(p.titulo||'').replace(/</g,'&lt;')}</textarea>
-      ${!casoFinalizado?`<button class="btn btn-d btn-sm" onclick="rmPerguntaRev(${ci},${pi})" title="Remover" style="align-self:flex-start">🗑️</button>`:''}
     </div>
     ${_revRenderImagens(p.perguntaImagens||[],ci,pi,casoFinalizado)}
     ${!casoFinalizado?`<button class="btn btn-s btn-sm" onclick="document.getElementById('rev-img-input-${ci}-${pi}').click()" style="margin:4px 0 10px">📎 Imagem na pergunta</button>
     <input id="rev-img-input-${ci}-${pi}" type="file" accept="image/*" style="display:none" onchange="uploadImgRev(event,${ci},${pi})"/>`:''}
     ${_revEditRenderComments('pergunta',p.id)}
     <div style="font-size:11px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;margin:8px 0 6px">Itens do checklist</div>
-    ${(p.itens||[]).map((it,ii)=>`<div id="rev-item-${ci}-${pi}-${ii}"${!casoFinalizado?` draggable="true" ondragstart="_revItemDragStart(event,${ci},${pi},${ii})" ondragover="_revItemDragOver(event,${ci},${pi},${ii})" ondragleave="_revItemDragLeave(event)" ondrop="_revItemDrop(event,${ci},${pi},${ii})" ondragend="_revItemDragEnd(event)"`:''} style="transition:opacity .15s,box-shadow .15s">
+    ${(p.itens||[]).map((it,ii)=>`<div id="rev-item-${ci}-${pi}-${ii}"${!casoFinalizado?` draggable="true" ondragstart="_revItemDragStart(event,${ci},${pi},${ii})" ondragover="_revItemDragOver(event,${ci},${pi},${ii})" ondragleave="_revItemDragLeave(event)" ondrop="_revItemDrop(event,${ci},${pi},${ii})" ondragend="_revItemDragEnd(event)"`:''} style="transition:opacity .15s,box-shadow .15s;${it.negativo?'background:rgba(207,34,46,.06);border:1px solid rgba(207,34,46,.35);border-radius:8px;padding:6px 8px':''}">
       <div style="display:flex;gap:6px;margin-bottom:6px;align-items:flex-start">
         ${!casoFinalizado?`<div title="Arrastar para reordenar este item" style="cursor:grab;display:flex;align-items:center;padding:8px 4px;color:var(--t2);font-size:14px;user-select:none;flex-shrink:0;line-height:1">⠿</div>`:''}
-        <div style="flex:0 0 50px;font-size:13px;font-weight:700;color:${cor};font-family:JetBrains Mono,monospace;text-align:center;padding:8px 0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs)">${it.label||_revLabelSeq(ii)}</div>
-        <input class="fc" style="flex:1;font-size:12px" value="${(it.descricao||'').replace(/"/g,'&quot;')}" oninput="editItemRev(${ci},${pi},${ii},'descricao',this.value)" placeholder="Descrição do item" ${casoFinalizado?'disabled':''}/>
+        <div style="flex:0 0 50px;font-size:13px;font-weight:700;color:${it.negativo?'var(--red)':cor};font-family:JetBrains Mono,monospace;text-align:center;padding:8px 0;background:${it.negativo?'var(--rl)':'var(--bg3)'};border:1px solid ${it.negativo?'var(--red)':'var(--border)'};border-radius:var(--rs)">${it.label||_revLabelSeq(ii)}</div>
+        <input class="fc" style="flex:1;font-size:12px" value="${(it.descricao||'').replace(/"/g,'&quot;')}" oninput="editItemRev(${ci},${pi},${ii},'descricao',this.value)" placeholder="${it.negativo?'Descrição da penalidade (ex: mencionou contraindicação errada)':'Descrição do item'}" ${casoFinalizado?'disabled':''}/>
+        ${!casoFinalizado?`<button onclick="toggleItemNegativoRev(${ci},${pi},${ii})" title="${it.negativo?'Voltar a item normal (certo/parcial/errado)':'Marcar como penalidade — desconta 1 ponto se o aluno cair nela'}" style="background:${it.negativo?'var(--rl)':'transparent'};border:1px solid ${it.negativo?'var(--red)':'var(--border)'};color:${it.negativo?'var(--red)':'var(--t2)'};padding:4px 8px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0">⚠ ${it.negativo?'Penalidade':'Penalidade?'}</button>`:(it.negativo?`<span style="background:var(--rl);border:1px solid var(--red);color:var(--red);padding:4px 8px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:.5px;flex-shrink:0;white-space:nowrap">⚠ PENALIDADE</span>`:'')}
         ${(()=>{const hasObs=!!(it.obs||(it.obsImagens||[]).length);return !casoFinalizado?`<button onclick="toggleObsRev(${ci},${pi},${ii})" title="${hasObs?'Editar observação':'Adicionar observação'}" style="background:${hasObs?'rgba(255,193,7,.15)':'transparent'};border:1px solid ${hasObs?'var(--yellow)':'var(--border)'};color:${hasObs?'var(--yellow)':'var(--t2)'};padding:4px 8px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">💡${(it.obsImagens||[]).length?'📷':''}</button>`:(hasObs?`<span title="${(it.obs||'').replace(/"/g,'&quot;')}" style="background:rgba(255,193,7,.15);border:1px solid var(--yellow);color:var(--yellow);padding:4px 8px;border-radius:6px;font-size:12px;cursor:help">💡${(it.obsImagens||[]).length?'📷':''}</span>`:'')})()}
         ${!casoFinalizado?`<button class="btn btn-d btn-sm" onclick="rmItemRev(${ci},${pi},${ii})" style="font-size:11px">✕</button>`:''}
       </div>
@@ -20359,6 +20369,7 @@ function _revRenderPergunta(p,ci,pi,casoFinalizado){
         <button class="btn btn-s btn-sm" onclick="toggleBulkRev(${ci},${pi})" style="font-size:11px">Cancelar</button>
       </div>
     </div>`:''}
+    </div>
   </div>`;
 }
 
@@ -20450,6 +20461,13 @@ window.toggleCasoRev=(ci)=>{
   const ch=document.getElementById(`rev-chev-${ci}`);if(ch)ch.style.transform=co._aberto?'rotate(90deg)':'rotate(0deg)';
 };
 
+window.togglePerguntaRev=(ci,pi)=>{
+  const p=S._revEdit?.casos?.[ci]?.perguntas?.[pi];if(!p)return;
+  p._aberto=!p._aberto;
+  const body=document.getElementById(`rev-perg-body-${ci}-${pi}`);if(body)body.classList.toggle('hidden');
+  const ch=document.getElementById(`rev-perg-chev-${ci}-${pi}`);if(ch)ch.style.transform=p._aberto?'rotate(90deg)':'rotate(0deg)';
+};
+
 window.addCasoRev=(bloco)=>{
   bloco=bloco==='oral'?'oral':'criar';
   S._revEdit.casos=S._revEdit.casos||[];
@@ -20514,7 +20532,7 @@ function _revShowToast(msg,cor){
 }
 window.addPerguntaRev=(ci)=>{
   const co=S._revEdit.casos[ci];co.perguntas=co.perguntas||[];
-  co.perguntas.push({id:_revUid('perg'),titulo:'',perguntaImagens:[],itens:[]});
+  co.perguntas.push({id:_revUid('perg'),titulo:'',perguntaImagens:[],itens:[],_aberto:true});
   _revRenderCasos();_revScheduleSave();
 };
 
@@ -20814,8 +20832,21 @@ window.rmPerguntaRev=async(ci,pi)=>{
 window.editPerguntaRev=(ci,pi,field,val)=>{S._revEdit.casos[ci].perguntas[pi][field]=val;_revScheduleSave();};
 function _revRenumerarItens(p){
   if(!p||!Array.isArray(p.itens))return;
-  p.itens.forEach((it,i)=>{it.label=_revLabelSeq(i);});
+  let seq=0;
+  p.itens.forEach(it=>{
+    if(it.negativo){it.label='⚠';}
+    else{it.label=_revLabelSeq(seq);seq++;}
+  });
 }
+// Alterna um item da revisão entre normal e penalidade (campo `negativo`).
+// Penalidade vira ⚠ e, ao exportar, é marcada no checklist oficial (desconta ponto).
+window.toggleItemNegativoRev=(ci,pi,ii)=>{
+  const p=S._revEdit?.casos?.[ci]?.perguntas?.[pi];
+  const it=p?.itens?.[ii];if(!it)return;
+  it.negativo=!it.negativo;
+  _revRenumerarItens(p);
+  _revRenderCasos();_revFlushSave();
+};
 window.addItemRev=(ci,pi)=>{
   const p=S._revEdit.casos[ci].perguntas[pi];p.itens=p.itens||[];
   p.itens.push({id:_revUid('item'),label:'',descricao:''});
@@ -20882,6 +20913,55 @@ window._revItemDrop=(e,ci,pi,toII)=>{
 window._revItemDragEnd=(e)=>{
   document.querySelectorAll('[id^="rev-item-"]').forEach(el=>{el.style.opacity='';el.style.boxShadow='';});
   S._revDragging=null;
+};
+
+// ─── Drag-and-drop: reordenar CASOS dentro do mesmo bloco ───
+window._revCasoDragStart=(e,ci)=>{
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(['input','textarea','button','select','img','a','option'].includes(tag)){e.preventDefault();return;}
+  const co=S._revEdit.casos[ci];if(!co){e.preventDefault();return;}
+  S._revCasoDragging={ci,bloco:co.bloco};
+  try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','caso_'+ci);}catch(_){}
+  setTimeout(()=>{const el=document.getElementById('rev-caso-'+ci);if(el)el.style.opacity='0.4';},0);
+};
+window._revCasoDragOver=(e,ci)=>{
+  const d=S._revCasoDragging;if(!d)return;
+  const co=S._revEdit.casos[ci];if(!co||co.bloco!==d.bloco)return; // só mesmo bloco
+  if(d.ci===ci){e.preventDefault();return;}
+  e.preventDefault();
+  try{e.dataTransfer.dropEffect='move';}catch(_){}
+  const el=document.getElementById('rev-caso-'+ci);
+  if(el){
+    const rect=el.getBoundingClientRect();
+    const isBelow=e.clientY>(rect.top+rect.height/2);
+    el.style.boxShadow=isBelow?'inset 0 -3px 0 var(--accent)':'inset 0 3px 0 var(--accent)';
+  }
+};
+window._revCasoDragLeave=(e)=>{
+  const el=e.currentTarget;if(el&&el.style)el.style.boxShadow='';
+};
+window._revCasoDrop=(e,toCi)=>{
+  e.preventDefault();
+  const d=S._revCasoDragging;
+  const el=document.getElementById('rev-caso-'+toCi);
+  if(el&&el.style)el.style.boxShadow='';
+  const target=S._revEdit.casos[toCi];
+  if(!d||!target||target.bloco!==d.bloco){S._revCasoDragging=null;return;}
+  const fromCi=d.ci;
+  if(fromCi===toCi){S._revCasoDragging=null;return;}
+  let insertAfter=false;
+  if(el){const rect=el.getBoundingClientRect();insertAfter=e.clientY>(rect.top+rect.height/2);}
+  let targetCi=toCi+(insertAfter?1:0);
+  if(fromCi<targetCi)targetCi--;
+  if(fromCi===targetCi){S._revCasoDragging=null;return;}
+  const [moved]=S._revEdit.casos.splice(fromCi,1);
+  S._revEdit.casos.splice(targetCi,0,moved);
+  S._revCasoDragging=null;
+  _revRenderCasos();_revFlushSave();
+};
+window._revCasoDragEnd=(e)=>{
+  document.querySelectorAll('[id^="rev-caso-"]').forEach(el=>{el.style.opacity='';el.style.boxShadow='';});
+  S._revCasoDragging=null;
 };
 
 // ─── Modal "Ver quem revisou" (admin) ───
@@ -21160,6 +21240,7 @@ window.exportarRevisao=async()=>{
       itens:(p.itens||[]).map(it=>({
         label:it.label||'',
         descricao:it.descricao||'',
+        ...(it.negativo?{negativo:true}:{}),
         ...(it.obs?{obs:it.obs}:{}),
         ...(Array.isArray(it.obsImagens)&&it.obsImagens.length?{obsImagens:[...it.obsImagens]}:{})
       }))
@@ -29186,14 +29267,16 @@ window.renderDesempenho=async()=>{
 
   // Média da turma POR BLOCO: cada bloco conta SÓ quem fez (nota > 0). Nota 0 — inclusive
   // a de quem foi marcado "não fez o bloco" — é desconsiderada na média daquele bloco.
-  // A média final segue exigindo os dois blocos > 0 (só quem completou os dois).
+  // Blocos PARCIAIS (com algum caso zerado via "aluno não fez este caso", flag criarParcial/
+  // oralParcial) também saem da média — a nota é parcial e não é comparável com quem fez tudo.
+  // A média final segue exigindo os dois blocos > 0 e não-parciais (só quem completou os dois).
   const _avgPos=arr=>{const f=arr.filter(v=>!isNaN(v)&&v>0);return f.length?f.reduce((a,b)=>a+b,0)/f.length:null;};
   const mediasTurma={};
   sims.forEach(sim=>{
     const vals=Object.values(allNotas[sim.id]||{});
-    const mc=_avgPos(vals.map(n=>parseFloat(n.criar)));
-    const mo=_avgPos(vals.map(n=>parseFloat(n.oral)));
-    const nf=vals.filter(n=>parseFloat(n.criar)>0&&parseFloat(n.oral)>0).map(n=>parseFloat(n.notaFinal)).filter(n=>!isNaN(n));
+    const mc=_avgPos(vals.map(n=>n.criarParcial?NaN:parseFloat(n.criar)));
+    const mo=_avgPos(vals.map(n=>n.oralParcial?NaN:parseFloat(n.oral)));
+    const nf=vals.filter(n=>!n.criarParcial&&!n.oralParcial&&parseFloat(n.criar)>0&&parseFloat(n.oral)>0).map(n=>parseFloat(n.notaFinal)).filter(n=>!isNaN(n));
     const mf=nf.length?(nf.reduce((a,b)=>a+b,0)/nf.length):null;
     mediasTurma[sim.id]={criar:mc,oral:mo,final:mf};
   });
@@ -29515,9 +29598,9 @@ window.doExportDesempenhoPDF=async()=>{
   const mediasTurma={};
   sims.forEach(sim=>{
     const vals=Object.values(allNotas[sim.id]||{});
-    const mc=_avgPos(vals.map(n=>parseFloat(n.criar)));
-    const mo=_avgPos(vals.map(n=>parseFloat(n.oral)));
-    const nf=vals.filter(n=>parseFloat(n.criar)>0&&parseFloat(n.oral)>0).map(n=>parseFloat(n.notaFinal)).filter(n=>!isNaN(n));
+    const mc=_avgPos(vals.map(n=>n.criarParcial?NaN:parseFloat(n.criar)));
+    const mo=_avgPos(vals.map(n=>n.oralParcial?NaN:parseFloat(n.oral)));
+    const nf=vals.filter(n=>!n.criarParcial&&!n.oralParcial&&parseFloat(n.criar)>0&&parseFloat(n.oral)>0).map(n=>parseFloat(n.notaFinal)).filter(n=>!isNaN(n));
     const mf=nf.length?(nf.reduce((a,b)=>a+b,0)/nf.length):null;
     mediasTurma[sim.id]={criar:mc,oral:mo,final:mf};
   });
@@ -30951,6 +31034,7 @@ function _renderCkPrintHTML(sim,blocoKey){
 }
 
 function _calcCasoScore(cr,caso,ptsPorCaso){
+  if(cr&&cr.naoFez)return 0; // caso zerado ("aluno não fez este caso") pontua 0
   const perguntas=caso?.perguntas||[];
   const ptsPorPergunta=perguntas.length?ptsPorCaso/perguntas.length:0;
   let score=0;
@@ -30980,6 +31064,7 @@ function getHabStatus(cr){
 }
 function getFbStatus(cr){return(cr.feedback||'').trim().length>0?'green':'red';}
 function getCasoStatus(cr,caso){
+  if(cr&&cr.naoFez)return 'green'; // caso zerado ("aluno não fez este caso") conta como finalizado
   if(!cr||!caso)return 'red';
   const pergs=(caso.perguntas||[]).map((p,pi)=>getPergStatus(cr,p,pi));
   const all=[...pergs,getHabStatus(cr),getFbStatus(cr)];
@@ -31007,6 +31092,7 @@ function casoItensCompletos(resp,ci,template){
 function casoSalvo(resp,ci){
   const cr=resp.casos?.[ci];
   if(!cr)return false;
+  if(cr.naoFez)return true; // caso zerado conta como "salvo/finalizado"
   const temItem=Object.keys(cr.itens||{}).length>0;
   const temHab=Object.values(cr.habilidades||{}).some(v=>v>0);
   const temFb=(cr.feedback||'').trim().length>0;
@@ -31036,6 +31122,7 @@ function renderCkCasos(resp){
     let allItemsFilled=true;
     casos.forEach((caso,ci)=>{
       const cr=resp.casos?.[ci]||{};
+      if(cr.naoFez)return; // caso zerado não exige itens preenchidos
       (caso.perguntas||[]).forEach((perg,pi)=>{
         (perg.itens||[]).forEach((it,ii)=>{
           if(it&&it.negativo)return;
@@ -31059,6 +31146,7 @@ function renderCkCasos(resp){
   casos.forEach((caso,ci)=>{
     const casoResp=resp.casos[ci]||{itens:{},habilidades:{},feedback:''};
     resp.casos[ci]=casoResp;
+    const casoNaoFez=!!casoResp.naoFez;
     const perguntas=caso.perguntas||[];
     const totalItens=perguntas.reduce((s,p)=>(s+(p.itens||[]).length),0);
     const ptsPorItem=totalItens>0?ptsPorCaso/totalItens:0;
@@ -31077,12 +31165,14 @@ function renderCkCasos(resp){
 
     const hdrBg=statusBg(casoSt);
     const profCaso=casoResp.prof||'';
-    const statusChip=casoSt==='green'
+    const statusChip=casoNaoFez
+      ? `<span id="ck-caso-status-${ci}" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--red);background:var(--rl);border:1px solid rgba(248,81,73,.4);padding:3px 9px;border-radius:999px;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap">🚫 Não fez · 0 pts</span>`
+      : casoSt==='green'
       ? `<span id="ck-caso-status-${ci}" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--green);background:var(--gl);border:1px solid rgba(63,185,80,.35);padding:3px 9px;border-radius:999px;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap">✓ Finalizado</span>`
       : casoSt==='yellow'
       ? `<span id="ck-caso-status-${ci}" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--yellow);background:var(--yl);border:1px solid rgba(210,153,34,.35);padding:3px 9px;border-radius:999px;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap">⏳ Em andamento</span>`
       : `<span id="ck-caso-status-${ci}" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--red);background:var(--rl);border:1px solid rgba(248,81,73,.35);padding:3px 9px;border-radius:999px;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap">● Pendente</span>`;
-    const statusIcon=casoSt==='green'?'✅':casoSt==='red'?'📋':'🟡';
+    const statusIcon=casoNaoFez?'🚫':casoSt==='green'?'✅':casoSt==='red'?'📋':'🟡';
     // Projeção embutida no cabeçalho (só bloco Criar)
     const showProj=_ckBloco==='criar';
     const numSlides=showProj?(caso.slides||[]).length:0;
@@ -31101,6 +31191,7 @@ function renderCkCasos(resp){
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+        ${casoNaoFez?'':`<button onclick="event.stopPropagation();ckConfirmZerarCaso(${ci})" title="Aluno não fez este caso: zera (0) e conta como finalizado" style="background:var(--rl);color:var(--red);border:1px solid rgba(248,81,73,.3);padding:6px 11px;border-radius:8px;font-weight:700;font-size:11.5px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s" onmouseover="this.style.background='var(--red)';this.style.color='#fff'" onmouseout="this.style.background='var(--rl)';this.style.color='var(--red)'">🚫 Não fez</button>`}
         ${showProj?`<div id="ck-proj-${ci}" onclick="event.stopPropagation()" style="flex-shrink:0">${renderProjPanel(ci,numSlides)}</div>`:''}
         <span id="ck-arr-${ci}" style="font-size:14px;color:var(--t2);transition:transform .2s;display:inline-block;flex-shrink:0;transform:${isOpen?'rotate(180deg)':'rotate(0)'}">▼</span>
       </div>
@@ -31111,6 +31202,22 @@ function renderCkCasos(resp){
 
     // Body (collapsible) — sem projeção
     let body=`<div id="ck-body-${ci}" style="display:${isOpen?'block':'none'};padding:16px 20px;background:var(--bg2)">`;
+
+    // Caso zerado ("aluno não fez este caso"): mostra só um aviso + botão desfazer.
+    if(casoNaoFez){
+      body+=`<div style="display:flex;gap:14px;align-items:flex-start;background:var(--rl);border:1px solid rgba(248,81,73,.3);border-radius:12px;padding:16px 18px">
+        <span style="font-size:24px;line-height:1.1">🚫</span>
+        <div style="flex:1">
+          <p style="font-size:14px;font-weight:700;color:var(--red);margin:0 0 4px">Aluno não fez este caso</p>
+          <p style="font-size:13px;line-height:1.5;color:var(--t2);margin:0 0 12px">Este caso está <strong>zerado (0 pts)</strong> e conta como finalizado, sem precisar preencher os itens. Por ter caso(s) zerado(s), a nota deste bloco <strong>não entra na média da turma</strong>.</p>
+          <button class="btn btn-s btn-sm" onclick="ckDesfazerNaoFezCaso(${ci})" style="font-size:12px">↩️ Desfazer — voltar a avaliar este caso</button>
+        </div>
+      </div>`;
+      body+='</div>';
+      card.innerHTML=hdr+body;
+      wrap.appendChild(card);
+      return;
+    }
 
     // Enunciado + imagens (se a revisão tiver exportado esses campos)
     if(caso.enunciado||(caso.enunciadoImagens||[]).length){
@@ -31268,8 +31375,11 @@ function renderCkCasos(resp){
     </div>`;
 
     // Save + Reset buttons
-    body+=`<div style="margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
-      <button class="btn btn-d btn-sm" onclick="resetCkCaso(${ci})" style="font-size:12px">🗑️ Resetar avaliação</button>
+    body+=`<div style="margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-d btn-sm" onclick="resetCkCaso(${ci})" style="font-size:12px">🗑️ Resetar avaliação</button>
+        <button onclick="ckConfirmZerarCaso(${ci})" title="Marca que o aluno não fez este caso: zera (0) e conta como finalizado" style="background:var(--rl);color:var(--red);border:1px solid rgba(248,81,73,.3);padding:7px 12px;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.background='var(--red)';this.style.color='#fff'" onmouseout="this.style.background='var(--rl)';this.style.color='var(--red)'">🚫 Aluno não fez este caso</button>
+      </div>
       <div style="display:flex;align-items:center;gap:10px">
         <span id="ck-save-msg-${ci}" style="font-size:13px;color:var(--green);display:none">✅ Caso salvo com sucesso!</span>
         <button class="btn btn-p btn-sm" onclick="saveCkCaso(${ci})">💾 Salvar Caso ${ci+1}</button>
@@ -31499,6 +31609,7 @@ function updateCasoStatusDom(ci){
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
   const blocoResp3=resp[_ckBloco||'criar'];if(!blocoResp3)return;
   const cr=blocoResp3.casos?.[ci]||{};
+  if(cr.naoFez)return; // caso zerado: chip "🚫 Não fez" é renderizado por renderCkCasos, não sobrescrever aqui
   const tpl=window._ckTemplateCurrent||_ckTemplate?.criar||_ckTemplate;
   const casoSt2=getCasoStatus(cr,tpl?.casos?.[ci]);
   const casoStatus=casoSt2==='green'?'finalizado':casoSt2==='red'?'naoAvaliado':'emAndamento';
@@ -31627,6 +31738,7 @@ window.saveCkCaso=async(ci)=>{
     // continuar verde, ou deixa não-finalizado se o user introduzir pendência.
     blocoResp.finalizado=false;
   }
+  blocoResp.naoFez=false; // salvou um caso de verdade → o bloco não é "não fez o bloco inteiro"
   // Garante que o caso existe (necessário pro auto-fill abaixo)
   if(!blocoResp.casos[ci])blocoResp.casos[ci]={itens:{},habilidades:{},feedback:'',prof:''};
   if(!blocoResp.casos[ci].itens)blocoResp.casos[ci].itens={};
@@ -31716,6 +31828,11 @@ window.finalizarChecklist=async(silent=false)=>{
   if(blocoKey==='criar')blocoResp.notaCriar=nota;
   else blocoResp.notaOral=nota;
   blocoResp.finalizado=true;
+  blocoResp.naoFez=false; // nota veio dos casos → não é "não fez o bloco inteiro" (limpa flag legado)
+  // Bloco "parcial": tem ao menos um caso zerado ("aluno não fez este caso").
+  // Nesse caso a nota do aluno é desconsiderada na média da turma deste bloco.
+  const _parcial=casos.some((_,ci)=>!!blocoResp.casos?.[ci]?.naoFez);
+  blocoResp.parcialNaoFez=_parcial;
   resp.updatedAt=new Date().toISOString();
 
   // Save to checklists
@@ -31744,6 +31861,7 @@ window.finalizarChecklist=async(silent=false)=>{
     }catch(e){console.warn('read nota:',e);}
     const payload={updatedAt:new Date().toISOString()};
     if(blocoKey==='criar')payload.criar=nota;else payload.oral=nota;
+    payload[blocoKey==='criar'?'criarParcial':'oralParcial']=_parcial;
     if(outro!=null&&!isNaN(outro)){
       payload.notaFinal=parseFloat(((nota+outro)/2).toFixed(1));
     }
@@ -31796,6 +31914,86 @@ window.ckConfirmZerar=(studentId,blocoKey)=>{
 };
 window.ckCloseZerar=()=>{const h=document.getElementById('ck-zero-modal');if(h){h.classList.add('hidden');h.innerHTML='';}};
 
+// ── "Aluno não fez ESTE caso" — zera um caso isolado dentro do bloco ──
+window.ckConfirmZerarCaso=(ci)=>{
+  const template=window._ckTemplateCurrent||_ckTemplate?.[_ckBloco]||_ckTemplate;
+  const caso=template?.casos?.[ci];
+  const nomeCaso=caso?.nome?('Caso '+(ci+1)+': '+caso.nome):('Caso '+(ci+1));
+  const s=(_ckStudents||[]).find(x=>x.id===_ckStudentId);
+  const nome=s?.nome||'este aluno';
+  let host=document.getElementById('ck-zero-caso-modal');
+  if(!host){host=document.createElement('div');host.id='ck-zero-caso-modal';document.body.appendChild(host);}
+  host.className='mo';
+  host.innerHTML=`
+    <div class="md" style="max-width:460px">
+      <div class="mh">
+        <div><p class="m-title">Zerar este caso?</p><p class="m-sub">${_ckEsc(nomeCaso)}</p></div>
+        <button class="m-close" onclick="ckCloseZerarCaso()" aria-label="Fechar">✕</button>
+      </div>
+      <div class="m-body">
+        <div style="display:flex;gap:12px;align-items:flex-start;background:var(--rl);border:1px solid rgba(248,81,73,.25);border-radius:12px;padding:14px 16px">
+          <span style="font-size:22px;line-height:1.1">🚫</span>
+          <p style="font-size:14px;line-height:1.55;margin:0">Confirma que <strong>${_ckEsc(nome)}</strong> <strong>NÃO fez</strong> este caso?<br><br>O caso será <strong>zerado (0 pts)</strong> e contará como finalizado, liberando o bloco mesmo sem preencher os itens.</p>
+        </div>
+      </div>
+      <div class="m-foot">
+        <button class="btn btn-s" onclick="ckCloseZerarCaso()">Cancelar</button>
+        <button class="btn btn-d" id="ck-zero-caso-confirm" onclick="ckZerarCaso(${ci})">🚫 Zerar este caso</button>
+      </div>
+    </div>`;
+  host.classList.remove('hidden');
+};
+window.ckCloseZerarCaso=()=>{const h=document.getElementById('ck-zero-caso-modal');if(h){h.classList.add('hidden');h.innerHTML='';}};
+
+window.ckZerarCaso=async(ci)=>{
+  const btn=document.getElementById('ck-zero-caso-confirm');
+  if(btn){btn.disabled=true;btn.textContent='Salvando…';}
+  try{
+    if(!_ckSimId||!_ckStudentId)return;
+    const resp=_ckRespostas[_ckStudentId];if(!resp)return;
+    const blocoKey=_ckBloco||'criar';
+    const blocoResp=resp[blocoKey];if(!blocoResp)return;
+    if(!blocoResp.casos[ci])blocoResp.casos[ci]={itens:{},habilidades:{},feedback:'',prof:''};
+    const cr=blocoResp.casos[ci];
+    const _auditBefore={caso:_ckSnapshot(cr),finalizado:blocoResp.finalizado};
+    cr.naoFez=true;
+    cr.savedAt=new Date().toISOString();
+    blocoResp.naoFez=false; // tratamento por caso → o bloco não é mais "não fez o bloco inteiro"
+    blocoResp.finalizado=false; // força recálculo da nota
+    resp.updatedAt=new Date().toISOString();
+    await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),removeUndefined(resp),{merge:true});
+    _ckRespostas[_ckStudentId]=resp;
+    try{audit('CK_CASO_NAO_FEZ',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey,ci},{before:_auditBefore,after:{naoFez:true},meta:{nomeAluno:((_ckStudents||[]).find(x=>x.id===_ckStudentId)||{}).nome||''}});}catch(_){}
+    ckCloseZerarCaso();
+    const tplNow=window._ckTemplateCurrent||_ckTemplate?.[blocoKey]||_ckTemplate;
+    renderCkCasos(blocoResp);
+    // Se todos os casos do bloco ficaram verdes (feitos ou zerados), finaliza e calcula a nota.
+    if(getBlocoStatus(blocoResp,tplNow)==='green'){try{await finalizarChecklist(true);}catch(_){}}
+    if(typeof reloadRespostasAndRender==='function'){try{await reloadRespostasAndRender();}catch(_){}}
+  }catch(err){
+    console.error('ckZerarCaso:',err);
+    if(btn){btn.disabled=false;btn.textContent='🚫 Zerar este caso';}
+    alert('Erro ao zerar o caso: '+(err.message||err));
+  }
+};
+
+window.ckDesfazerNaoFezCaso=async(ci)=>{
+  if(!_ckSimId||!_ckStudentId)return;
+  const resp=_ckRespostas[_ckStudentId];if(!resp)return;
+  const blocoKey=_ckBloco||'criar';
+  const blocoResp=resp[blocoKey];if(!blocoResp)return;
+  const cr=blocoResp.casos?.[ci];if(!cr)return;
+  const _auditBefore={caso:_ckSnapshot(cr),finalizado:blocoResp.finalizado};
+  cr.naoFez=false;
+  blocoResp.finalizado=false; // volta a exigir preenchimento do caso
+  resp.updatedAt=new Date().toISOString();
+  await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),removeUndefined(resp),{merge:true});
+  _ckRespostas[_ckStudentId]=resp;
+  try{audit('CK_CASO_NAO_FEZ_DESFEITO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey,ci},{before:_auditBefore,after:{naoFez:false},meta:{nomeAluno:((_ckStudents||[]).find(x=>x.id===_ckStudentId)||{}).nome||''}});}catch(_){}
+  renderCkCasos(blocoResp);
+  if(typeof reloadRespostasAndRender==='function'){try{await reloadRespostasAndRender();}catch(_){}}
+};
+
 window.ckZerarBloco=async(studentId,blocoKey)=>{
   const btn=document.getElementById('ck-zero-confirm');
   if(btn){btn.disabled=true;btn.textContent='Salvando…';}
@@ -31825,6 +32023,7 @@ window.ckZerarBloco=async(studentId,blocoKey)=>{
       try{const cur=await getDoc(notaRef);if(cur.exists()){const d=cur.data();outro=blocoKey==='criar'?(d.oral!=null?parseFloat(d.oral):null):(d.criar!=null?parseFloat(d.criar):null);}}catch(e){console.warn('read nota:',e);}
       const payload={updatedAt:new Date().toISOString()};
       if(blocoKey==='criar')payload.criar=0;else payload.oral=0;
+      payload[blocoKey==='criar'?'criarParcial':'oralParcial']=false; // bloco zerado total não é "parcial" (nota 0 já sai da média)
       if(outro!=null&&!isNaN(outro))payload.notaFinal=parseFloat(((0+outro)/2).toFixed(1));
       await setDoc(notaRef,payload,{merge:true});
     }
@@ -34684,17 +34883,28 @@ function updateRelatorioBtnVisibility(){
 const FEEDBACK_IA_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/gerarFeedbackIA';
 // Chama a IA dos feedbacks via Cloud Function. Retorna o objeto da resposta ({texto,usage} ou {texto,ms} no teste).
 // Lança Error em caso de falha — o caller decide como tratar. Exige Firebase Auth (Google/Email).
-async function _callFeedbackIA({prompt,content,maxTokens,mode}={}){
+async function _callFeedbackIA({prompt,content,maxTokens,mode}={},_retries=2){
   const user=window._fbAuth?.auth?.currentUser;
   if(!user)throw new Error('Faça login com Google ou Email para usar a IA (o login antigo só com senha não dá acesso).');
   const token=await user.getIdToken();
-  const resp=await fetch(FEEDBACK_IA_ENDPOINT,{
-    method:'POST',
-    headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
-    body:JSON.stringify({prompt:prompt||'',content:content||'',maxTokens:maxTokens||1500,mode:mode||'revisar'})
-  });
+  let resp;
+  try{
+    resp=await fetch(FEEDBACK_IA_ENDPOINT,{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+      body:JSON.stringify({prompt:prompt||'',content:content||'',maxTokens:maxTokens||1500,mode:mode||'revisar'})
+    });
+  }catch(netErr){
+    // Falha de rede: tenta de novo antes de desistir.
+    if(_retries>0){await new Promise(r=>setTimeout(r,900));return _callFeedbackIA({prompt,content,maxTokens,mode},_retries-1);}
+    throw netErr;
+  }
   let data={};try{data=await resp.json();}catch(_){}
-  if(!resp.ok)throw new Error(data.error||`Erro ${resp.status} na IA.`);
+  if(!resp.ok){
+    // Erros transitórios (rate limit / indisponível / timeout): retry com pequena espera.
+    if(_retries>0&&[429,500,502,503,504].includes(resp.status)){await new Promise(r=>setTimeout(r,900));return _callFeedbackIA({prompt,content,maxTokens,mode},_retries-1);}
+    throw new Error(data.error||`Erro ${resp.status} na IA.`);
+  }
   return data;
 }
 
@@ -34753,9 +34963,10 @@ async function _reviewFeedbacksLote(items){
   for(let i=1;i<parts.length;i+=2){const n=String(parts[i]||'').trim();const body=_stripCasoHeader(String(parts[i+1]||'').trim());if(n)byNum[n]=body;}
   const map={};
   items.forEach((it,idx)=>{const b=byNum[String(idx+1)];if(b)map[it.key]=b;});
-  // Só usa o lote se TODOS os casos voltaram; senão null → fallback por caso.
-  for(const it of items){if(!map[it.key])return null;}
-  return map;
+  // Retorna o que veio (PARCIAL). Casos que a IA não devolveu (ex: resposta truncada
+  // no limite de tokens, ou ela "preguiçou" nos últimos) caem pra revisão individual
+  // no chamador — antes o lote era tudo-ou-nada e os últimos casos ficavam crus.
+  return Object.keys(map).length?map:null;
 }
 
 // ── Config: Feedback Geral dos professores ────────────────────────────────────
@@ -35014,7 +35225,10 @@ window.gerarFeedbackAluno=async(studentId)=>{
     }
 
     // Bloco marcado como "não fez" → ignora as habilidades/casos desse bloco no feedback.
-    const _naoFezCriar=!!ckResp.criar?.naoFez, _naoFezOral=!!ckResp.oral?.naoFez;
+    // Mas só vale se o aluno realmente não fez NENHUM caso do bloco — se há caso feito
+    // (com flag de bloco legado/stale convivendo), os casos feitos entram no feedback.
+    const _blocoFeito=(b)=>Object.values(ckResp?.[b]?.casos||{}).some(cr=>cr&&!cr.naoFez&&(Object.keys(cr.itens||{}).length>0||(cr.feedback||'').trim()||Object.values(cr.habilidades||{}).some(v=>v>0)));
+    const _naoFezCriar=!!ckResp.criar?.naoFez&&!_blocoFeito('criar'), _naoFezOral=!!ckResp.oral?.naoFez&&!_blocoFeito('oral');
     const _casosFb=[...(_naoFezCriar?[]:Object.values(ckResp.criar?.casos||{})),...(_naoFezOral?[]:Object.values(ckResp.oral?.casos||{}))];
     // Habilidades average dos blocos efetivamente realizados
     const habMedias=Array(HABILIDADES.length).fill(0).map((_,hi)=>{
@@ -35044,18 +35258,25 @@ window.gerarFeedbackAluno=async(studentId)=>{
     if(_aiTotal>0)_fbGenProgress(0,_aiTotal);
     // Monta a lista de casos (blocos não-"não fez"), ordem CRIAR depois ORAL.
     const _casosLista=[];
-    if(!_naoFezCriar)(tplCriar.casos||[]).forEach((caso,ci)=>{const cr=ckResp.criar?.casos?.[ci]||{};_casosLista.push({key:'criar-'+ci,bloco:'criar',ci,nome:'[CRIAR] '+(caso.nome||'Caso '+(ci+1)),prof:cr.prof||'',fbRaw:(cr.feedback||'').trim()});});
-    if(!_naoFezOral)(tplOral.casos||[]).forEach((caso,ci)=>{const cr=ckResp.oral?.casos?.[ci]||{};_casosLista.push({key:'oral-'+ci,bloco:'oral',ci,nome:'[ORAL] '+(caso.nome||'Caso '+(ci+1)),prof:cr.prof||'',fbRaw:(cr.feedback||'').trim()});});
+    if(!_naoFezCriar)(tplCriar.casos||[]).forEach((caso,ci)=>{const cr=ckResp.criar?.casos?.[ci]||{};if(cr.naoFez)return;/* caso zerado: aluno não fez, fora do feedback */_casosLista.push({key:'criar-'+ci,bloco:'criar',ci,nome:'[CRIAR] '+(caso.nome||'Caso '+(ci+1)),prof:cr.prof||'',fbRaw:(cr.feedback||'').trim()});});
+    if(!_naoFezOral)(tplOral.casos||[]).forEach((caso,ci)=>{const cr=ckResp.oral?.casos?.[ci]||{};if(cr.naoFez)return;/* caso zerado: aluno não fez, fora do feedback */_casosLista.push({key:'oral-'+ci,bloco:'oral',ci,nome:'[ORAL] '+(caso.nome||'Caso '+(ci+1)),prof:cr.prof||'',fbRaw:(cr.feedback||'').trim()});});
     // Casos COM feedback vão pra revisão em LOTE (1 chamada → IA vê todos e evita
     // repetir recomendações entre casos). Se o lote falhar/parsear errado, cai pra revisão por caso.
     const _comFb=_casosLista.filter(c=>c.fbRaw&&c.fbRaw!=='sem feedback específico');
     let _loteMap=null;
     if(_comFb.length)_loteMap=await _reviewFeedbacksLote(_comFb.map(c=>({key:c.key,texto:c.fbRaw})));
+    console.log('🔎 FB-DIAG: casos='+_casosLista.length+' | com feedback='+_comFb.length+' | lote retornou='+(_loteMap?Object.keys(_loteMap).length+' caso(s)':'NADA (null)'));
     for(const c of _casosLista){
-      let rev;
-      if(!c.fbRaw||c.fbRaw==='sem feedback específico'){rev=c.fbRaw||'sem feedback específico';}
-      else if(_loteMap&&_loteMap[c.key]){rev=_loteMap[c.key];_aiProg();}
-      else{rev=await _reviewFeedbackSingle(c.fbRaw);_aiProg();} // fallback: revisão individual (1 caso por vez)
+      let rev,_via;
+      const _loteRev=_loteMap&&_loteMap[c.key];
+      // Usa o lote só se veio E foi de fato revisado (≠ texto cru). Se a IA só ecoou
+      // o original (acontece nos últimos casos de lotes grandes), refaz individual.
+      const _loteValido=_loteRev&&_loteRev.trim()&&_loteRev.trim()!==c.fbRaw.trim();
+      if(!c.fbRaw||c.fbRaw==='sem feedback específico'){rev=c.fbRaw||'sem feedback específico';_via='sem-feedback';}
+      else if(_loteValido){rev=_loteRev;_aiProg();_via='lote';}
+      else{rev=await _reviewFeedbackSingle(c.fbRaw);_aiProg();_via='individual';} // fallback: revisão individual (1 caso por vez)
+      const _tratado=!!c.fbRaw&&c.fbRaw!=='sem feedback específico'&&rev.trim()!==c.fbRaw.trim();
+      console.log('🔎 FB-DIAG '+c.key+' ('+c.nome+'): via='+_via+' | tratado pela IA='+(_tratado?'SIM':'NÃO')+(_loteRev&&!_loteValido?' [lote ecoou/vazio]':''));
       feedbacksCasos.push({nome:c.nome,feedback:rev,prof:c.prof,bloco:c.bloco,ci:c.ci});
     }
     _fbGenMsg('Montando relatório…');
