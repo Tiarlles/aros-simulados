@@ -32489,7 +32489,8 @@ window.slidesRegerarPadrao=()=>{
 window.previewSlides=()=>{
   if(!_slidesEditList.length){alert('Nenhum slide pra pré-visualizar. Adicione ou regenere primeiro.');return;}
   try{localStorage.setItem('aros_preview_slides',JSON.stringify(_slidesEditList));}catch(e){alert('Erro ao preparar preview: '+e.message);return;}
-  const url=window.location.pathname+'?modo=preview';
+  // Cache-buster (&t=): força reload mesmo se a janela de preview já estava aberta.
+  const url=window.location.pathname+'?modo=preview&t='+Date.now();
   const win=window.open(url,'aros_preview','width=1280,height=720');
   if(!win){alert('A janela foi bloqueada pelo navegador. Permita pop-ups e clique novamente.');}
 };
@@ -33094,7 +33095,9 @@ window.previewCasoSlides=(bloco,ci)=>{
   slides.forEach(s=>{if(!s.id)s.id=_slideUid();});
   if(!slides.length){alert('Nenhum slide pra pré-visualizar.');return;}
   try{localStorage.setItem('aros_preview_slides',JSON.stringify(slides));}catch(e){alert('Erro ao preparar preview: '+e.message);return;}
-  const url=window.location.pathname+'?modo=preview';
+  // Cache-buster (&t=): se a janela de preview já estava aberta, o browser reaprovaria
+  // o target sem recarregar — mostrando dados antigos. URL única força o reload.
+  const url=window.location.pathname+'?modo=preview&t='+Date.now();
   const win=window.open(url,'aros_preview_caso_'+bloco+'_'+ci,'width=1280,height=800');
   if(!win){alert('A janela foi bloqueada pelo navegador. Permita pop-ups e clique novamente.');}
 };
