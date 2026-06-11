@@ -10,6 +10,12 @@
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <script>if(window['pdfjsLib']){window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';}</script>
 <script>(function(){try{var t=localStorage.getItem('aros-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<!-- Anti-flash: janelas de projeção/sala/preview carregam o site inteiro antes de trocar
+     pela tela certa. Sem isto, a home pisca por um instante. Marca o <html> bem cedo (antes
+     do body pintar) e cobre tudo com uma tela preta até a projeção montar (que substitui o
+     body.innerHTML e leva a capa junto). -->
+<script>(function(){try{var m=new URLSearchParams(location.search).get('modo');if(m==='projecao'||m==='projecao-live'||m==='preview'){document.documentElement.setAttribute('data-proj-boot','1');}}catch(e){}})();</script>
+<style>#proj-boot-cover{display:none}html[data-proj-boot]{background:#000}html[data-proj-boot] #proj-boot-cover{display:flex;position:fixed;inset:0;z-index:2147483647;background:#000;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:#666;font-family:-apple-system,Segoe UI,Roboto,sans-serif}#proj-boot-cover .pbc-spin{width:34px;height:34px;border:3px solid #333;border-top-color:#888;border-radius:50%;animation:pbc-rot .8s linear infinite}@keyframes pbc-rot{to{transform:rotate(360deg)}}</style>
 <script>emailjs.init({publicKey:"yJVcUeU6K6jelWbtl"});</script>
 <style>
 /* ═══ THEME VARIABLES ═══ */
@@ -936,6 +942,8 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 </style>
 </head>
 <body>
+<!-- Capa anti-flash (só visível em modo projeção/sala/preview; some quando a tela certa monta) -->
+<div id="proj-boot-cover"><div class="pbc-spin"></div><div style="font-size:13px">Abrindo a sala…</div></div>
 
 <header>
   <div class="hi">
@@ -25333,7 +25341,10 @@ function presAlunoRow(s,exp){
     acts=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${sbadge(s.status)}${swapInfo}${s.respondedAt?`<span style="font-size:11px;color:var(--t2)">${fDT(s.respondedAt)}</span>`:''}${alterarBtn}</div>`;
   }
   const liveAtivo=!!(_alunoLiveStatus[s.id]&&_alunoLiveStatus[s.id].ativo);
-  const btnSala=liveAtivo?_alunoBtnEntrarSala(s):'';
+  // simId precisa ir junto — senão o link da sala sai com sim=undefined e o aluno
+  // fica preso em "Sala ainda não iniciada" (doc projecaoLive/undefined__alunoId não existe).
+  const simId=S.curSim&&S.curSim.id;
+  const btnSala=(liveAtivo&&simId)?_alunoBtnEntrarSala(s,simId):'';
   return`<div class="aluno-row ${cls}"><div class="aluno-name">${s.nome}</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">${btnSala}${acts}</div></div>`;
 }
 
