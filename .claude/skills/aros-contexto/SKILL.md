@@ -694,8 +694,13 @@ Sistema agora sincroniza prof + aluno(s) via **Firestore** (substitui o Broadcas
 **Aluno entra na sala**:
 - Botão `🎬 Entrar na sala` aparece na linha do aluno na escala-view (`alunoRowHTML` e `presAlunoRow`) quando `projecaoLive.ativo:true`.
 - Cor: gradient accent azul com `animation: btn-pulse` pra chamar atenção.
-- Clique abre popup `?modo=projecao-live&...&role=aluno`.
+- Clique chama `abrirSalaAluno(simId, alunoId)` → abre `?modo=projecao-live&...&role=aluno`.
 - Pra Simulado Extra (que não tem card na home): prof envia o link copiado por WhatsApp/email.
+- **GOTCHA (corrigido 2026-06-11):** `_alunoBtnEntrarSala(s, simId)` PRECISA do 2º arg `simId`. `presAlunoRow` (presencial) chamava só `_alunoBtnEntrarSala(s)` → link saía com `sim=undefined` → aluno preso em **"Sala ainda não iniciada"** (escuta `projecaoLive/undefined__alunoId`, que nunca existe). `simId` vem de `S.curSim.id`. Se mexer no botão da sala, conferir os DOIS renderers (`alunoRowHTML` normal/oral E `presAlunoRow` presencial).
+
+**Anti-flash da home em janelas de projeção/sala/preview** (2026-06-11):
+- Toda janela `?modo=projecao|projecao-live|preview` carrega o `index.html` inteiro (com a home) e só depois `_init*` substitui `document.body.innerHTML`. Isso causava um "pisca" da home.
+- Fix: script inline no `<head>` (cedo, antes do body pintar) marca `data-proj-boot="1"` no `<html>` quando o `modo` é um desses; CSS revela a capa `#proj-boot-cover` (preta, spinner, "Abrindo a sala…"). A capa vive no início do `<body>` e some quando `_init*` reescreve o body. Atributo leftover é inofensivo (CSS só mira `#proj-boot-cover`, que já não existe).
 
 **Canvas de desenho sincronizado** (Fase 2):
 - Sobreposto à projeção (`#proj-canvas`, position:fixed, z-index:5).
