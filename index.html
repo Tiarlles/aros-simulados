@@ -4775,6 +4775,11 @@ body.pro-rt-fs-on{overflow:hidden}
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
           <button class="btn btn-s btn-sm" onclick="backFromCkFill()">← Voltar</button>
           <div id="ck-fill-header" style="flex:1"></div>
+          <div id="ck-parcial" style="display:none;text-align:right;line-height:1.2">
+            <span style="font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px">Parcial</span><br>
+            <span id="ck-parcial-val" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:20px;font-weight:800;color:var(--accent)">—</span>
+            <span id="ck-parcial-sub" style="font-size:10.5px;color:var(--t2)"></span>
+          </div>
           <button class="btn btn-p btn-sm" onclick="finalizarChecklist()" id="btn-finalizar-ck" style="display:none">🔄 Recalcular Nota</button>
         </div>
         <div id="ck-casos-wrap"></div>
@@ -29279,6 +29284,9 @@ window.renderDesempenho=async()=>{
   // Load notas per sim
   const allNotas={};
   try{await Promise.all(sims.map(async sim=>{allNotas[sim.id]=await loadNotas(sim.id);}));}catch(e){console.warn('notas err',e);}
+  // Presencial só tem CRIAR (não tem Oral) → a nota FINAL é a própria nota do CRIAR.
+  // Corrige na exibição inclusive pros lançamentos antigos (que não gravaram notaFinal).
+  sims.forEach(sim=>{if(sim.presencial)Object.values(allNotas[sim.id]||{}).forEach(n=>{if(n){const c=parseFloat(n.criar);if(!isNaN(c))n.notaFinal=c;}});});
 
   // Build map: simId -> { key -> {presenca, studentId} }
   // Key: nome lower (NFKC) e/ou "mat:<matricula>"
@@ -29301,6 +29309,35 @@ window.renderDesempenho=async()=>{
     }));
   }catch(e){console.warn('students err',e);}
 
+  // ── Cruzamento TOLERANTE a variação de nome ────────────────────────────────────
+  // O presencial costuma ter o aluno com NOME CURTO e SEM matrícula (ex: "Valéria Karine"),
+  // enquanto a lista oficial tem o NOME COMPLETO com matrícula ("Valéria Karine de Azevedo
+  // Ferreira"). Sem isso, a nota (gravada pela chave do nome curto) e a presença não casam
+  // com a lista → o aluno aparece sem nota. Aqui criamos aliases (por matrícula e nome da
+  // lista) apontando pra mesma nota/presença quando os 2+ primeiros nomes batem.
+  {
+    const _nrm=s=>(s||'').toString().normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[()]/g,' ').replace(/\s+/g,' ').trim();
+    // Casa SÓ quando um nome é prefixo EXATO do outro (token a token, ≥2 tokens) — evita casar
+    // pessoas diferentes que só dividem os 2 primeiros nomes (ex: dois "João Pedro" distintos).
+    const _tok=(ka,kb)=>{const A=_nrm(ka).split(' ').filter(Boolean),B=_nrm(kb).split(' ').filter(Boolean);const m=Math.min(A.length,B.length);return m>=2&&A.slice(0,m).join(' ')===B.slice(0,m).join(' ');};
+    sims.forEach(sim=>{
+      const nmap=allNotas[sim.id]||(allNotas[sim.id]={});
+      const smap=allSimStudents[sim.id]||(allSimStudents[sim.id]={});
+      alunos.forEach(a=>{
+        const mat=(a.matricula||'').toString().trim();
+        const nk=a.nome.toLowerCase().trim();
+        if(!(nmap[mat]||nmap[nk])){
+          const hit=Object.keys(nmap).find(k=>!k.startsWith('mat:')&&_tok(k,a.nome));
+          if(hit){if(mat)nmap[mat]=nmap[hit];nmap[nk]=nmap[hit];}
+        }
+        if(!(smap[nk]||(mat&&smap['mat:'+mat]))){
+          const hit=Object.keys(smap).find(k=>!k.startsWith('mat:')&&_tok(k,a.nome));
+          if(hit){smap[nk]=smap[hit];if(mat)smap['mat:'+mat]=smap[hit];}
+        }
+      });
+    });
+  }
+
   // (Desabilitado: lógica de "extras" causava falsos positivos. Só lista oficial entra no Desempenho.)
 
   if(!alunos.length){
@@ -29318,11 +29355,16 @@ window.renderDesempenho=async()=>{
   const _avgPos=arr=>{const f=arr.filter(v=>!isNaN(v)&&v>0);return f.length?f.reduce((a,b)=>a+b,0)/f.length:null;};
   const mediasTurma={};
   sims.forEach(sim=>{
-    const vals=Object.values(allNotas[sim.id]||{});
+    const vals=[...new Set(Object.values(allNotas[sim.id]||{}))];
     const mc=_avgPos(vals.map(n=>n.criarParcial?NaN:parseFloat(n.criar)));
     const mo=_avgPos(vals.map(n=>n.oralParcial?NaN:parseFloat(n.oral)));
-    const nf=vals.filter(n=>!n.criarParcial&&!n.oralParcial&&parseFloat(n.criar)>0&&parseFloat(n.oral)>0).map(n=>parseFloat(n.notaFinal)).filter(n=>!isNaN(n));
-    const mf=nf.length?(nf.reduce((a,b)=>a+b,0)/nf.length):null;
+    let mf;
+    if(sim.presencial){
+      mf=mc; // presencial: nota final da turma = média do CRIAR (não há Oral)
+    }else{
+      const nf=vals.filter(n=>!n.criarParcial&&!n.oralParcial&&parseFloat(n.criar)>0&&parseFloat(n.oral)>0).map(n=>parseFloat(n.notaFinal)).filter(n=>!isNaN(n));
+      mf=nf.length?(nf.reduce((a,b)=>a+b,0)/nf.length):null;
+    }
     mediasTurma[sim.id]={criar:mc,oral:mo,final:mf};
   });
 
@@ -29635,6 +29677,8 @@ window.doExportDesempenhoPDF=async()=>{
   const sims=[..._of2,..._ex2];
   const allNotas={};
   await Promise.all(sims.map(async s=>{allNotas[s.id]=await loadNotas(s.id);}));
+  // Presencial: nota final = nota do CRIAR (não há Oral).
+  sims.forEach(s=>{if(s.presencial)Object.values(allNotas[s.id]||{}).forEach(n=>{if(n){const c=parseFloat(n.criar);if(!isNaN(c))n.notaFinal=c;}});});
   const _todayISO=new Date().toISOString().slice(0,10);
   const simsAplicados=sims.filter(s=>{if(s.isExtra)return false;const u=s.dataDom||s.dataSab;return u&&u<_todayISO;});
 
@@ -29642,11 +29686,16 @@ window.doExportDesempenhoPDF=async()=>{
   const _avgPos=arr=>{const f=arr.filter(v=>!isNaN(v)&&v>0);return f.length?f.reduce((a,b)=>a+b,0)/f.length:null;};
   const mediasTurma={};
   sims.forEach(sim=>{
-    const vals=Object.values(allNotas[sim.id]||{});
+    const vals=[...new Set(Object.values(allNotas[sim.id]||{}))];
     const mc=_avgPos(vals.map(n=>n.criarParcial?NaN:parseFloat(n.criar)));
     const mo=_avgPos(vals.map(n=>n.oralParcial?NaN:parseFloat(n.oral)));
-    const nf=vals.filter(n=>!n.criarParcial&&!n.oralParcial&&parseFloat(n.criar)>0&&parseFloat(n.oral)>0).map(n=>parseFloat(n.notaFinal)).filter(n=>!isNaN(n));
-    const mf=nf.length?(nf.reduce((a,b)=>a+b,0)/nf.length):null;
+    let mf;
+    if(sim.presencial){
+      mf=mc; // presencial: nota final da turma = média do CRIAR (não há Oral)
+    }else{
+      const nf=vals.filter(n=>!n.criarParcial&&!n.oralParcial&&parseFloat(n.criar)>0&&parseFloat(n.oral)>0).map(n=>parseFloat(n.notaFinal)).filter(n=>!isNaN(n));
+      mf=nf.length?(nf.reduce((a,b)=>a+b,0)/nf.length):null;
+    }
     mediasTurma[sim.id]={criar:mc,oral:mo,final:mf};
   });
 
@@ -29791,6 +29840,7 @@ window._exportDesempenhoCSV_legacy=async()=>{
   const sims=[...S.sims].sort((a,b)=>(a.dataSab||a.dataDom||'').localeCompare(b.dataSab||b.dataDom||''));
   const allNotas={};
   await Promise.all(sims.map(async s=>{allNotas[s.id]=await loadNotas(s.id);}));
+  sims.forEach(s=>{if(s.presencial)Object.values(allNotas[s.id]||{}).forEach(n=>{if(n){const c=parseFloat(n.criar);if(!isNaN(c))n.notaFinal=c;}});});
   const headers=['Matrícula','Nome',...sims.flatMap(s=>[s.nome+' (Nota Final)',s.nome+' (CRIAR)',s.nome+' (ORAL)']),'Média Geral','Garantia'];
   const rows=alunos.map(a=>{
     const mat=a.matricula||'';
@@ -30624,10 +30674,37 @@ async function reloadRespostasAndRender(){
       _ckRespostas[d.id]=data;
     });
   }catch(e){}
-  // Preserva a cópia local INTEIRA do aluno aberto (acabou de salvar — o Firebase pode
-  // estar atrasado e devolver uma versão velha/vazia). Comportamento conservador e conhecido:
-  // a tela do examinador nunca regride pro que veio atrasado do servidor.
-  if(currentId&&currentResp)_ckRespostas[currentId]=currentResp;
+  // Reconciliação POR CASO do aluno aberto: adota a versão FRESCA do servidor (pra ver os
+  // casos que o OUTRO examinador gravou no mesmo aluno), MAS preserva localmente:
+  //  (a) o caso aberto sendo editado agora (não perde edição não-salva),
+  //  (b) casos cujo save local é MAIS NOVO que o do servidor (Firebase pode atrasar no que
+  //      você acabou de salvar),
+  //  (c) casos que o servidor ainda não devolveu.
+  // Assim 2 profs no mesmo aluno se enxergam, sem "salva mas some".
+  if(currentId&&currentResp){
+    const fresh=_ckRespostas[currentId];
+    if(!fresh){
+      _ckRespostas[currentId]=currentResp; // servidor não devolveu o doc → mantém local inteiro
+    }else{
+      const openSet=new Set((window._openCkCasos||[]).map(Number));
+      const blocoAtual=_ckBloco||'criar';
+      for(const bl of ['criar','oral']){
+        if(!fresh[bl])fresh[bl]={casos:{}};
+        if(!fresh[bl].casos)fresh[bl].casos={};
+        const lb=currentResp[bl];
+        if(!lb||!lb.casos)continue;
+        for(const ci of Object.keys(lb.casos)){
+          const localCaso=lb.casos[ci], freshCaso=fresh[bl].casos[ci];
+          const editandoAgora=(bl===blocoAtual)&&openSet.has(+ci);
+          const lts=localCaso?.savedAt||'', fts=freshCaso?.savedAt||'';
+          if(editandoAgora || !freshCaso || lts>fts){
+            fresh[bl].casos[ci]=localCaso; // mantém o local nesses casos
+          }
+        }
+      }
+      _ckRespostas[currentId]=fresh;
+    }
+  }
   renderCkStudents(_ckStudents);
 }
 
@@ -30888,6 +30965,8 @@ function renderBlocoCards(studentId){
     const btnBackup=disabled?'':`<button onclick="event.stopPropagation();exportCkTemplatePDF('${b.key}')" title="Imprime o checklist em branco do bloco ${blocoLabelShort} pro prof aplicador" style="white-space:nowrap;background:var(--bg2);color:var(--t2);border:1px dashed var(--border);padding:7px 14px;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;transition:all .15s;align-self:flex-start" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)';this.style.borderStyle='solid'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--border)';this.style.borderStyle='dashed'">📄 Backup PDF · ${blocoLabelShort}</button>`;
     const btnNaoFez=`<button onclick="ckConfirmZerar('${studentId}','${b.key}')" title="Marca que o aluno não fez este bloco: zera a nota (0) e finaliza" style="white-space:nowrap;background:var(--rl);color:var(--red);border:1px solid rgba(248,81,73,.3);padding:9px 14px;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;transition:all .15s" onmouseover="this.style.background='var(--red)';this.style.color='#fff'" onmouseout="this.style.background='var(--rl)';this.style.color='var(--red)'">🚫 Aluno não fez o bloco</button>`;
     const showNota=isFinal&&nota!=null;
+    // Nota PARCIAL (casos já salvos) — mostra durante o andamento, sem precisar finalizar.
+    const par=(!disabled&&!isFinal&&!naoFez)?_ckCalcParcial(r,b.tpl):null;
     return`<div style="display:flex;flex-direction:column;gap:10px">
       ${btnBackup}
       <div ${clickAttr} ${hoverAttr}
@@ -30895,6 +30974,7 @@ function renderBlocoCards(studentId){
       <p style="font-size:17px;font-weight:800;margin-bottom:8px">${b.label}</p>
       <p style="font-size:13px;color:var(--t2);margin-bottom:12px">${totalCasos} caso${totalCasos!==1?'s':''} · ${disabled?'Sem template configurado':status}</p>
       ${showNota?`<p style="font-size:24px;font-weight:800;color:${naoFez?'var(--red)':'var(--green)'}">${nota.toFixed(1)} pts${naoFez?' · não fez':''}</p>`:''}
+      ${(par&&par.salvos>0)?`<p style="font-size:22px;font-weight:800;color:var(--accent)">${par.nota.toFixed(1)} <span style="font-size:13px;font-weight:600;color:var(--t2)">pts parcial · ${par.salvos}/${par.total} casos</span></p>`:''}
       ${(!disabled&&!isFinal&&bSt!=='green')?`<p style="font-size:12px;color:${statusColor(bSt)}">Status: ${status}</p>`:''}
       </div>
       ${btnNaoFez}
@@ -31082,6 +31162,10 @@ function _renderCkPrintHTML(sim,blocoKey){
 
 function _calcCasoScore(cr,caso,ptsPorCaso){
   if(cr&&cr.naoFez)return 0; // caso zerado ("aluno não fez este caso") pontua 0
+  // Nota MANUAL: substitui a soma dos itens (limitada entre 0 e o máximo do caso).
+  if(cr&&cr.modoManual&&cr.notaManual!=null){
+    return Math.max(0,Math.min(ptsPorCaso,Number(cr.notaManual)||0));
+  }
   const perguntas=caso?.perguntas||[];
   const ptsPorPergunta=perguntas.length?ptsPorCaso/perguntas.length:0;
   let score=0;
@@ -31102,6 +31186,21 @@ function _calcCasoScore(cr,caso,ptsPorCaso){
   });
   return Math.max(0,score);
 }
+// Nota PARCIAL do bloco: soma a pontuação dos casos JÁ SALVOS até agora (ignora pendentes).
+// Permite ver a nota em ANDAMENTO sem precisar finalizar 100% do bloco.
+function _ckCalcParcial(blocoResp,template){
+  const casos=template?.casos||[];
+  if(!casos.length||!blocoResp)return {nota:0,salvos:0,total:0};
+  const ptsPorCaso=100/casos.length;
+  let nota=0,salvos=0;
+  casos.forEach((caso,ci)=>{
+    if(casoSalvo(blocoResp,ci)){
+      nota+=_calcCasoScore(blocoResp.casos?.[ci]||{itens:{}},caso,ptsPorCaso);
+      salvos++;
+    }
+  });
+  return {nota:Math.round(nota*10)/10,salvos,total:casos.length};
+}
 function getHabStatus(cr){
   const total=HABILIDADES.length;
   const filled=Object.values(cr.habilidades||{}).filter(v=>v>0).length;
@@ -31112,6 +31211,7 @@ function getHabStatus(cr){
 function getFbStatus(cr){return(cr.feedback||'').trim().length>0?'green':'red';}
 function getCasoStatus(cr,caso){
   if(cr&&cr.naoFez)return 'green'; // caso zerado ("aluno não fez este caso") conta como finalizado
+  if(cr&&cr.modoManual)return cr.notaManual!=null?'green':'red'; // nota manual: completo quando preenchida
   if(!cr||!caso)return 'red';
   const pergs=(caso.perguntas||[]).map((p,pi)=>getPergStatus(cr,p,pi));
   const all=[...pergs,getHabStatus(cr),getFbStatus(cr)];
@@ -31140,6 +31240,7 @@ function casoSalvo(resp,ci){
   const cr=resp.casos?.[ci];
   if(!cr)return false;
   if(cr.naoFez)return true; // caso zerado conta como "salvo/finalizado"
+  if(cr.modoManual&&cr.notaManual!=null)return !!cr.savedAt; // nota manual salva conta como completo
   const temItem=Object.keys(cr.itens||{}).length>0;
   const temHab=Object.values(cr.habilidades||{}).some(v=>v>0);
   const temFb=(cr.feedback||'').trim().length>0;
@@ -31160,6 +31261,18 @@ function renderCkCasos(resp){
 
   // Update finalizar button: only enable when all cases complete AND all items filled
   setTimeout(()=>{
+    // Nota PARCIAL (casos já salvos) — atualiza a cada render, inclusive após salvar um caso.
+    try{
+      const _par=_ckCalcParcial(resp,template);
+      const _pEl=document.getElementById('ck-parcial');
+      if(_pEl){
+        if(_par.salvos>0&&!resp.finalizado){
+          _pEl.style.display='';
+          const _v=document.getElementById('ck-parcial-val');if(_v)_v.textContent=_par.nota.toFixed(1);
+          const _s=document.getElementById('ck-parcial-sub');if(_s)_s.textContent=' pts · '+_par.salvos+'/'+_par.total+' casos';
+        }else _pEl.style.display='none';
+      }
+    }catch(_){}
     const btnF=document.getElementById('btn-finalizar-ck');
     if(!btnF)return;
     const totalCasos=casos.length;
@@ -31170,6 +31283,7 @@ function renderCkCasos(resp){
     casos.forEach((caso,ci)=>{
       const cr=resp.casos?.[ci]||{};
       if(cr.naoFez)return; // caso zerado não exige itens preenchidos
+      if(cr.modoManual)return; // nota manual não exige itens preenchidos
       (caso.perguntas||[]).forEach((perg,pi)=>{
         (perg.itens||[]).forEach((it,ii)=>{
           if(it&&it.negativo)return;
@@ -31275,15 +31389,36 @@ function renderCkCasos(resp){
       </div>`;
     }
 
-    perguntas.forEach((perg,pi)=>{
+    // ── Nota manual do caso (alternativa ao checklist) ──────────────────────────
+    const _isManual=!!casoResp.modoManual;
+    body+=`<div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+      <button onclick="ckToggleNotaManual(${ci})" title="Definir a nota deste caso sem marcar o checklist" style="background:${_isManual?'var(--accent)':'var(--bg)'};color:${_isManual?'#fff':'var(--t2)'};border:1px solid ${_isManual?'var(--accent)':'var(--border)'};padding:6px 12px;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;transition:all .15s">✏️ Nota manual${_isManual?' ✓':''}</button>
+    </div>`;
+    if(_isManual){
+      const _nm=casoResp.notaManual!=null?casoResp.notaManual:'';
+      body+=`<div style="background:var(--bl);border:1px solid var(--accent);border-radius:12px;padding:16px 18px;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px">✏️ Nota manual deste caso</div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.5">O checklist deste caso está <strong>desativado</strong>. A nota do caso é o valor que você digitar (0 a ${ptsPorCaso.toFixed(1)} pts). Habilidades e feedback continuam opcionais. Pra voltar ao checklist, é só desligar o botão acima.</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input id="ck-notamanual-${ci}" type="number" min="0" max="${ptsPorCaso}" step="0.1" value="${_nm}" placeholder="0 – ${ptsPorCaso.toFixed(1)}"
+            oninput="setCkNotaManual(${ci},this.value)" onfocus="requireProfForCaso(${ci},()=>{})"
+            style="width:140px;font-size:22px;font-weight:800;text-align:center;padding:10px;border:2px solid var(--accent);border-radius:8px;background:var(--bg);color:var(--text)">
+          <span style="font-size:15px;color:var(--t2)">/ ${ptsPorCaso.toFixed(1)} pts</span>
+        </div>
+      </div>`;
+    }
+    if(!_isManual)perguntas.forEach((perg,pi)=>{
       const itens=perg.itens||[];
       const pergId=`ck-perg-${ci}-${pi}`;
-      const itensMarcados=itens.filter((_,ii)=>casoResp.itens[`${pi}_${ii}`]).length;
-      const pergCompleta=itens.length>0&&itensMarcados===itens.length;
-      const pergParcial=itensMarcados>0&&itensMarcados<itens.length;
+      // Penalidades (itens negativos) são OPCIONAIS → não contam no X/Y da pergunta.
+      const _posIdx=itens.map((it,ii)=>({it,ii})).filter(x=>!x.it?.negativo);
+      const itensMarcados=_posIdx.filter(x=>casoResp.itens[`${pi}_${x.ii}`]).length;
+      const itensTotal=_posIdx.length;
+      const pergCompleta=itensTotal===0||itensMarcados===itensTotal;
+      const pergParcial=itensMarcados>0&&itensMarcados<itensTotal;
       const pergSt=getPergStatus(casoResp,perg,pi);
       const pergStatusLabel=`<span id="perg-st-${ci}-${pi}" style="font-size:11px;font-weight:600;color:${statusColor(pergSt)}">`+
-        (pergSt==='green'?'✓ Preenchido':pergSt==='yellow'?`⚠ Parcial (${itensMarcados}/${itens.length})`:'● Pendente')+'</span>';
+        (pergSt==='green'?'✓ Preenchido':pergSt==='yellow'?`⚠ Parcial (${itensMarcados}/${itensTotal})`:'● Pendente')+'</span>';
       const pergBorder=pergCompleta?'var(--green)':pergParcial?'var(--yellow)':'var(--border)';
       const pergIsOpen=window._openCkPerguntas?.has(pergId);
       body+=`<div style="margin-bottom:10px;border:1.5px solid ${pergBorder};border-radius:var(--rs);overflow:hidden;transition:border-color .3s">
@@ -31291,7 +31426,7 @@ function renderCkCasos(resp){
           onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
           <span style="font-size:13px;font-weight:700;color:var(--text);flex:1;min-width:0;text-align:justify;hyphens:none;-webkit-hyphens:none;display:block">Pergunta ${pi+1}${perg.titulo?': '+perg.titulo:''}</span>
           <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;white-space:nowrap">
-            <span id="perg-st-${ci}-${pi}" class="perg-status-lbl" style="font-size:11px;font-weight:600;color:${pergCompleta?'var(--green)':pergParcial?'var(--yellow)':'var(--red)'};white-space:nowrap">${pergCompleta?'✓ Preenchido':pergParcial?`⚠ Parcial (${itensMarcados}/${itens.length})`:'● Pendente'}</span>
+            <span id="perg-st-${ci}-${pi}" class="perg-status-lbl" style="font-size:11px;font-weight:600;color:${pergCompleta?'var(--green)':pergParcial?'var(--yellow)':'var(--red)'};white-space:nowrap">${pergCompleta?'✓ Preenchido':pergParcial?`⚠ Parcial (${itensMarcados}/${itensTotal})`:'● Pendente'}</span>
             <span id="arr-${pergId}" style="font-size:12px;color:var(--t2);transition:transform .2s;display:inline-block;transform:${pergIsOpen?'rotate(180deg)':'rotate(0)'}">▼</span>
           </div>
         </div>
@@ -31421,10 +31556,6 @@ function renderCkCasos(resp){
       </div>
     </div>`;
 
-    // Slot do botão "Restaurar versão salva" — preenchido async por _ckApplyBackupButtons
-    // só quando o histórico (auditLog) tiver versão mais completa que a atual (= houve perda).
-    body+=`<div id="ck-restore-slot-${ci}" style="margin-top:12px"></div>`;
-
     // Save + Reset buttons
     body+=`<div style="margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
@@ -31441,90 +31572,7 @@ function renderCkCasos(resp){
     card.innerHTML=hdr+body;
     wrap.appendChild(card);
   });
-  // Detecta perdas vs histórico e injeta o botão "Restaurar versão salva" onde fizer sentido.
-  _ckApplyBackupButtons(resp);
 }
-
-// ── Backup/restore por caso a partir do histórico (auditLog) ───────────────────
-// Só aparece quando o histórico tem uma versão MAIS COMPLETA do caso que a atual.
-let _ckBackupMap=null;       // {criar:{ci:{caso,ts,actor}}, oral:{...}}
-let _ckBackupStudent=null;   // studentId já carregado (cache)
-function _ckRich(c){
-  if(!c||typeof c!=='object')return 0;
-  const it=c.itens&&typeof c.itens==='object'?Object.keys(c.itens).length:0;
-  const hb=c.habilidades&&typeof c.habilidades==='object'?Object.values(c.habilidades).filter(v=>v>0).length:0;
-  const fb=(c.feedback&&String(c.feedback).trim().length)?1:0;
-  return it+hb+fb*5+(c.naoFez?3:0);
-}
-async function _ckLoadBackup(studentId){
-  if(_ckBackupStudent===studentId&&_ckBackupMap)return _ckBackupMap;
-  _ckBackupStudent=studentId;_ckBackupMap={criar:{},oral:{}};
-  try{
-    // target.studentId é auto-indexado (equality em campo aninhado, sem índice manual).
-    const snap=await getDocs(query(collection(db,'auditLog'),where('target.studentId','==',studentId)));
-    const evs=snap.docs.map(d=>d.data())
-      .filter(e=>e.target&&e.target.simId===_ckSimId&&(e.target.bloco==='criar'||e.target.bloco==='oral')&&e.target.ci!=null)
-      .sort((a,b)=>(a.ts?.seconds||0)-(b.ts?.seconds||0)); // cronológico → último vence
-    for(const e of evs){
-      const bl=e.target.bloco,ci=e.target.ci;
-      const ts=e.ts?.seconds?new Date(e.ts.seconds*1000).toISOString():'';
-      const actor=e.actor?.nome||e.actor?.email||'?';
-      if(e.action==='CK_CASO_SALVO')_ckBackupMap[bl][ci]={caso:e.after?.caso||null,ts,actor};
-      else if(e.action==='CK_CASO_NAO_FEZ'){const base=(_ckBackupMap[bl][ci]&&_ckBackupMap[bl][ci].caso)||e.before?.caso||{};_ckBackupMap[bl][ci]={caso:{...base,naoFez:true},ts,actor};}
-      else if(e.action==='CK_PERGUNTA_RESETADA')_ckBackupMap[bl][ci]={caso:e.after?.caso||null,ts,actor};
-      else if(e.action==='CK_CASO_RESETADO')_ckBackupMap[bl][ci]={caso:null,ts,actor};   // reset legítimo → sem backup
-    }
-  }catch(err){console.warn('backup auditLog indisponível:',err.code||err.message);_ckBackupMap=null;}
-  return _ckBackupMap;
-}
-async function _ckApplyBackupButtons(resp){
-  const bl=_ckBloco||'criar';
-  const studentId=_ckStudentId;
-  const map=await _ckLoadBackup(studentId);
-  if(!map||studentId!==_ckStudentId)return; // trocou de aluno no meio → aborta
-  const blk=map[bl]||{};
-  Object.keys(blk).forEach(ciS=>{
-    const ci=+ciS;const bk=blk[ci];if(!bk||!bk.caso)return;
-    const live=resp.casos?.[ci]||null;
-    if(_ckRich(bk.caso)<=_ckRich(live))return; // atual já está igual/melhor → sem botão
-    const slot=document.getElementById('ck-restore-slot-'+ci);if(!slot)return;
-    const quando=bk.ts?new Date(bk.ts).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}):'';
-    const nItens=bk.caso.itens?Object.keys(bk.caso.itens).length:0;
-    slot.innerHTML=`<div style="background:var(--yl);border:1px solid rgba(210,153,34,.4);border-radius:10px;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-      <div style="font-size:12.5px;line-height:1.4"><b>⚠️ Há uma versão salva mais completa deste caso no histórico.</b><br>
-        <span style="color:var(--t2)">${nItens} item(ns) avaliados${bk.caso.feedback?.trim()?' + feedback':''} · salvo por ${_ckEsc(bk.actor||'?')}${quando?' · '+_ckEsc(quando):''}</span></div>
-      <button onclick="ckRestaurarBackup(${ci})" style="background:var(--yellow,#d29922);color:#000;border:0;padding:8px 14px;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap">↩️ Restaurar versão salva</button>
-    </div>`;
-  });
-}
-window.ckRestaurarBackup=async(ci)=>{
-  const bl=_ckBloco||'criar';
-  const bk=_ckBackupMap?.[bl]?.[ci];
-  if(!bk||!bk.caso){alert('Não há versão no histórico para restaurar.');return;}
-  const quando=bk.ts?new Date(bk.ts).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}):'';
-  if(!confirm(`Restaurar a versão salva deste caso?\n\nOrigem: histórico (salvo por ${bk.actor||'?'}${quando?' em '+quando:''}).\nO conteúdo atual deste caso será substituído pelo do histórico.`))return;
-  const resp=_ckRespostas[_ckStudentId];if(!resp)return;
-  const blk=resp[bl];if(!blk)return;
-  if(!blk.casos)blk.casos={};
-  const _auditBefore={caso:_ckSnapshot(blk.casos?.[ci])};
-  blk.casos[ci]=JSON.parse(JSON.stringify(bk.caso));
-  blk.finalizado=false; // restaurou → bloco volta a exigir recálculo
-  try{
-    await updateDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),{
-      [`${bl}.casos.${ci}`]:blk.casos[ci],
-      [`${bl}.finalizado`]:false,
-      updatedAt:new Date().toISOString(),_ckv:CK_WRITE_VERSION,_ckwTs:serverTimestamp()
-    });
-    try{audit('CK_CASO_RESTAURADO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:bl,ci},{before:_auditBefore,after:{caso:_ckSnapshot(blk.casos[ci])},meta:{origem:'auditLog',salvoPor:bk.actor||'',quando}});}catch(_){}
-    _ckBackupStudent=null; // invalida cache → reflete o estado novo
-    renderCkCasos(blk);
-    if(typeof reloadRespostasAndRender==='function')reloadRespostasAndRender();
-  }catch(e){console.error('restaurar backup:',e);
-    // doc pode não existir → cria via merge
-    try{await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),_ckStamp(removeUndefined({[bl]:{casos:{[ci]:blk.casos[ci]},finalizado:false},updatedAt:new Date().toISOString()})),{merge:true});_ckBackupStudent=null;renderCkCasos(blk);}
-    catch(e2){alert('Erro ao restaurar: '+(e2.message||e2));}
-  }
-};
 
 window._openCkCasos=[];
 
@@ -31668,6 +31716,38 @@ window.setCkHab=(ci,hi,val)=>{
   });
 };
 
+// ── Nota manual do caso ────────────────────────────────────────────────────────
+function _ckMaxPtsCaso(){
+  const template=window._ckTemplateCurrent||_ckTemplate?.[_ckBloco||'criar']||_ckTemplate;
+  const n=template?.casos?.length||1;
+  return 100/n;
+}
+window.ckToggleNotaManual=(ci)=>{
+  requireProfForCaso(ci,()=>{
+    const resp=_ckRespostas[_ckStudentId];if(!resp)return;
+    const blocoResp=resp[_ckBloco||'criar'];if(!blocoResp)return;
+    if(!blocoResp.casos[ci])blocoResp.casos[ci]={itens:{},habilidades:{},feedback:''};
+    const cr=blocoResp.casos[ci];
+    cr.modoManual=!cr.modoManual; // ao desligar, notaManual fica guardada (só não é usada)
+    if(!window._openCkCasos.includes(ci))window._openCkCasos.push(ci);
+    renderCkCasos(blocoResp);
+    updateFinalizarBtn();
+  });
+};
+window.setCkNotaManual=(ci,val)=>{
+  const resp=_ckRespostas[_ckStudentId];if(!resp)return;
+  const blocoResp=resp[_ckBloco||'criar'];if(!blocoResp)return;
+  if(!blocoResp.casos[ci])blocoResp.casos[ci]={itens:{},habilidades:{},feedback:''};
+  const cr=blocoResp.casos[ci];
+  const max=_ckMaxPtsCaso();
+  let n=(val===''||val==null)?null:Number(val);
+  if(n!=null&&isNaN(n))n=null;
+  if(n!=null)n=Math.max(0,Math.min(max,n));
+  cr.notaManual=n;
+  updateCasoScoreDom(ci);
+  updateCasoStatusDom(ci);
+  updateFinalizarBtn();
+};
 function updateHabStatus(ci,resp){
   const statusSpan=document.getElementById('ck-hab-status-'+ci);
   if(!statusSpan)return;
@@ -31786,9 +31866,11 @@ function updatePergStatus(ci,pi){
   const perg=template?.casos?.[ci]?.perguntas?.[pi];if(!perg)return;
   const itens=perg.itens||[];
   const cr=blocoResp.casos?.[ci]||{};
-  const marcados=itens.filter((_,ii)=>cr.itens?.[`${pi}_${ii}`]).length;
-  const total=itens.length;
-  const completa=total>0&&marcados===total;
+  // Penalidades (negativos) são opcionais → não entram no X/Y. Conta só positivos.
+  const _posIdx=itens.map((it,ii)=>({it,ii})).filter(x=>!x.it?.negativo);
+  const marcados=_posIdx.filter(x=>cr.itens?.[`${pi}_${x.ii}`]).length;
+  const total=_posIdx.length;
+  const completa=total===0||marcados===total;
   const parcial=marcados>0&&marcados<total;
 
   // Find the pergunta container in the DOM
@@ -31824,6 +31906,16 @@ function updateFinalizarBtn(){
   const template=window._ckTemplateCurrent||_ckTemplate?.criar||_ckTemplate;
   const casos=template?.casos||[];
   if(!casos.length)return;
+  // ── Nota PARCIAL (soma dos casos já salvos) — visível durante o andamento ──
+  const par=_ckCalcParcial(blocoResp,template);
+  const pEl=document.getElementById('ck-parcial');
+  if(pEl){
+    if(par.salvos>0&&!blocoResp.finalizado){
+      pEl.style.display='';
+      const v=document.getElementById('ck-parcial-val');if(v)v.textContent=par.nota.toFixed(1);
+      const s=document.getElementById('ck-parcial-sub');if(s)s.textContent=' pts · '+par.salvos+'/'+par.total+' casos';
+    }else pEl.style.display='none';
+  }
   const bSt=getBlocoStatus(blocoResp,template);
   // Always show button, enable when all cases are green
   btnF.style.display='';
@@ -31901,7 +31993,7 @@ window.saveCkCaso=async(ci)=>{
   const template=window._ckTemplateCurrent||_ckTemplate?.criar||_ckTemplate;const caso=template?.casos?.[ci];
   const perguntas=caso?.perguntas||[];
   let autoFillCount=0;
-  perguntas.forEach((perg,pi)=>{
+  if(!cr.modoManual)perguntas.forEach((perg,pi)=>{
     (perg.itens||[]).forEach((it,ii)=>{
       if(it.negativo)return; // negativos: missing = sem penalidade (mantém)
       const k=`${pi}_${ii}`;
@@ -31944,7 +32036,6 @@ window.saveCkCaso=async(ci)=>{
     });
     // AUDIT — rede de segurança pra recuperar caso some/sobreescrever
     try{audit('CK_CASO_SALVO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey,ci},{before:_auditBefore,after:{caso:_ckSnapshot(blocoResp.casos?.[ci]),finalizado:blocoResp.finalizado},meta:{nomeAluno:(_ckStudents.find(x=>x.id===_ckStudentId)||{}).nome||'',autoFillErrado:autoFillCount}});}catch(_){}
-    _ckBackupStudent=null; // novo save entrou no histórico → invalida cache de backup
     // Show success message, close caso, re-render
     const msgEl=document.getElementById(`ck-save-msg-${ci}`);
     if(msgEl){msgEl.style.display='inline';setTimeout(()=>{msgEl.style.display='none';},2000);}
@@ -32025,10 +32116,13 @@ window.finalizarChecklist=async(silent=false)=>{
         outro=blocoKey==='criar'?(d.oral!=null?parseFloat(d.oral):null):(d.criar!=null?parseFloat(d.criar):null);
       }
     }catch(e){console.warn('read nota:',e);}
+    const _isPres=!!S.sims?.find(s=>s.id===_ckSimId)?.presencial;
     const payload={updatedAt:new Date().toISOString()};
     if(blocoKey==='criar')payload.criar=nota;else payload.oral=nota;
     payload[blocoKey==='criar'?'criarParcial':'oralParcial']=_parcial;
-    if(outro!=null&&!isNaN(outro)){
+    if(_isPres){
+      payload.notaFinal=nota; // presencial só tem CRIAR → nota final = nota deste bloco
+    }else if(outro!=null&&!isNaN(outro)){
       payload.notaFinal=parseFloat(((nota+outro)/2).toFixed(1));
     }
     await setDoc(notaRef,payload,{merge:true});
@@ -32198,10 +32292,12 @@ window.ckZerarBloco=async(studentId,blocoKey)=>{
       const notaRef=doc(db,`notas/${_ckSimId}/alunos/${key}`);
       let outro=null;
       try{const cur=await getDoc(notaRef);if(cur.exists()){const d=cur.data();outro=blocoKey==='criar'?(d.oral!=null?parseFloat(d.oral):null):(d.criar!=null?parseFloat(d.criar):null);}}catch(e){console.warn('read nota:',e);}
+      const _isPres=!!S.sims?.find(s=>s.id===_ckSimId)?.presencial;
       const payload={updatedAt:new Date().toISOString()};
       if(blocoKey==='criar')payload.criar=0;else payload.oral=0;
       payload[blocoKey==='criar'?'criarParcial':'oralParcial']=false; // bloco zerado total não é "parcial" (nota 0 já sai da média)
-      if(outro!=null&&!isNaN(outro))payload.notaFinal=parseFloat(((0+outro)/2).toFixed(1));
+      if(_isPres)payload.notaFinal=0; // presencial só tem CRIAR → zerou o bloco = nota final 0
+      else if(outro!=null&&!isNaN(outro))payload.notaFinal=parseFloat(((0+outro)/2).toFixed(1));
       await setDoc(notaRef,payload,{merge:true});
     }
     ckCloseZerar();

@@ -1769,6 +1769,27 @@ Refinamento UX completo da aba Gerenciamento (visão coord do simulado **online*
 - IDs preservados (`s-t`, `s-c`, `s-a`, `s-s`) — toda lógica JS de update segue funcionando sem mudança.
 - CSS antigo `.sg/.sc/.s-icon/...` mantido (dead code) para evitar alterar outros lugares; só a markup foi trocada.
 
+### Checklist — incidente de lost-update + features (2026-06-13)
+
+**INCIDENTE GRAVE (presencial 26.1):** durante a aplicação, ~32 casos foram zerados. Causa: abas rodando versão ANTIGA do `index.html` (abertas antes do conserto) regravavam o aluno INTEIRO em memória → a foto velha sobrescrevia o trabalho dos outros examinadores. Assinatura do clobber: caso com `savedAt`+`prof` preenchidos MAS `itens:{}`. Conserto em JS não alcança aba já carregada.
+
+**Gravação CIRÚRGICA (a correção central, NO AR):** toda ação do checklist grava só o pedaço que mudou, nunca o doc inteiro.
+- Helper `_ckWriteBlocoParcial(studentId,blocoKey,partial)` → `setDoc({[blocoKey]:partial,updatedAt},{merge:true})`. Usado em saveCkCaso, finalizarChecklist, ckZerarCaso, ckDesfazerNaoFezCaso, ckZerarBloco.
+- resetCkCaso/resetCkPergunta/ckRestaurar → `updateDoc` com caminho de campo `${bloco}.casos.${ci}` + `deleteField()` pra nota. **NUNCA passar serverTimestamp/deleteField por removeUndefined** (corrompe o sentinel — adicionar depois).
+- `reloadRespostasAndRender` faz reconciliação POR CASO: adota o fresco do servidor (pra ver o que o OUTRO prof gravou no mesmo aluno) mas preserva o caso aberto em edição e o que tem savedAt mais novo (Firebase pode atrasar). Permite 2 profs no mesmo aluno em casos diferentes sem perda.
+
+**TRAVA DE VERSÃO (serverTimestamp) — código NO AR, regra DESLIGADA:** `_ckStamp()` carimba todo write de respostas com `_ckwTs=serverTimestamp()`. Regra (em firestore.rules, comentada/permissiva agora): `allow create,update: if request.resource.data.keys().hasAll(['_ckwTs']) && request.resource.data._ckwTs == request.time`. Só código novo passa; aba antiga é recusada. **LIÇÃO: só ligar a regra no INÍCIO de uma aplicação (todos carregam fresco) — ligar no meio bloqueia quem não recarregou.** Auto-reload: heartbeat `onSnapshot(config/appVersion)` vs `APP_BUILD` → bumpar o doc força todas as abas a recarregar.
+
+**BACKUP automático (launchd na máquina do Tiarlles):** `~/AROS-Backups/snapshot.mjs` roda a cada 2min (StartInterval 120, `com.aros.backup.plist`), lê respostas (coleção aberta, SEM login), salva snapshot JSON timestampado só quando muda (hash estável), mantém 7 dias. Recuperação: `~/AROS-Backups/recuperar.mjs "Nome"` (dry-run) / `APPLY=1 ...`. **Backup sob demanda (foto pontual) NÃO protege contra clobber contínuo — só a trava de versão + este snapshot frequente.** O auditLog (read exige isAuth) também é backup per-save, mas abas antigas não o gravavam.
+
+**Features novas (NO AR):**
+- **Nota PARCIAL do bloco:** `_ckCalcParcial(blocoResp,template)` soma os casos JÁ SALVOS. Aparece no topo da avaliação (`#ck-parcial`) e nos cards de bloco, em andamento — sem precisar finalizar 100%.
+- **Nota MANUAL por caso:** botão "✏️ Nota manual" → esconde o checklist do caso e mostra input de pontos brutos (0 a `100/nºcasos`). `caso.modoManual` + `caso.notaManual`. `_calcCasoScore` retorna a nota manual quando ativo. Habilidades/feedback seguem opcionais (nunca pontuaram). Reversível (desliga → volta pro checklist, nota manual fica guardada).
+- **Contador X/Y da pergunta ignora PENALIDADES** (itens `negativo`) — conta só positivos (updatePergStatus + render).
+- **Botão "Restaurar versão salva" REMOVIDO** (existia por ~1 dia, lia auditLog; o Tiarlles não quis).
+
+**Desempenho — presencial (`sim.presencial`):** o presencial só tem bloco CRIAR (sem Oral). Correções: notaFinal = nota do CRIAR (no finalizar, no zerar-bloco, e na exibição/média/export — pós-processa allNotas pra derivar notaFinal=criar inclusive nos lançamentos antigos). **Cruzamento tolerante de nome:** alunos do presencial costumam ter nome curto/sem matrícula ("Valéria Karine") vs lista completa ("Valéria Karine de Azevedo Ferreira") → notas/presença não casavam. Fix: alias por **prefixo EXATO de tokens** (≥2, ignora acento/parênteses) — casa "Gabriel Regueira (Dutra)"↔"Gabriel Regueira Dutra" mas REJEITA dois "João Pedro" distintos. Media da turma dedupa com `[...new Set(Object.values(...))]` pra não contar o alias 2×. Raiz real seria preencher matrícula nos alunos do presencial (write em `simulados/alunos` exige login — único write trancado relevante).
+
 ### Checklist de Aplicação — refinos UX + cronômetro embutido + projeção em tempo real (2026-05-26)
 
 Sessão completa de refinos no Checklist de Aplicação (`tab-checklist`, função `renderCkCasos` e adjacências). Tudo entregue no mesmo dia, deploy completo (commits `c638edb` + rules deployadas).
