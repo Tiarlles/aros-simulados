@@ -170,7 +170,8 @@ service cloud.firestore {
       // depender de refresh. ⚠️ DEPLOYAR ESTA REGRA SÓ DEPOIS do index.html novo estar no
       // ar (senão a produção atual, sem carimbo, para de salvar). Scripts de recuperação
       // precisam mandar _ckwTs:serverTimestamp() também.
-      allow create, update: if request.resource.data.get('_ckwTs', null) == request.time;
+      allow create, update: if request.resource.data.keys().hasAll(['_ckwTs'])
+                            && request.resource.data._ckwTs == request.time;
       allow delete: if false;
     }
     // Relatório final gerado (HTML do PDF aprovado pela coord). Contém histórico
