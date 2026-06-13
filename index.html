@@ -8798,6 +8798,25 @@ async function audit(action,target,payload){
   }catch(e){console.warn('audit() failed:',action,e);}
 }
 window._audit=audit;
+
+// ── AUTO-RELOAD: aba se atualiza sozinha quando publico uma versão nova ──────────
+// Cada aba carrega com um APP_BUILD fixo. O servidor guarda config/appVersion.build.
+// Ao publicar, eu mudo esse build → toda aba aberta detecta a diferença e recarrega
+// sozinha (com atraso aleatório pra não recarregarem todas no mesmo instante).
+// Isso garante que abas antigas não fiquem rodando código velho por horas.
+const APP_BUILD='2026-06-13-ckv2';
+window.APP_BUILD=APP_BUILD;
+try{
+  onSnapshot(doc(db,'config','appVersion'),snap=>{
+    const srv=snap.exists()?snap.data().build:null;
+    if(srv&&srv!==APP_BUILD){
+      console.warn('[AROS] Nova versão publicada ('+srv+' ≠ '+APP_BUILD+') — recarregando…');
+      const wait=1000+Math.floor(((Date.now()%9000)));
+      setTimeout(()=>{try{location.reload();}catch(_){}},wait);
+    }
+  },err=>console.warn('[AROS] appVersion watch indisponível:',err.code||err.message));
+}catch(_){}
+
 // Lista canônica de ações — também usada como popular do filtro na aba Auditoria.
 const AUDIT_ACTIONS=[
   'LOGIN_CUSTOM','LOGIN_FIREBASE','LOGIN_GOOGLE','LOGOUT','USUARIO_MIGRADO_AUTH',
@@ -8820,7 +8839,7 @@ const AUDIT_ACTIONS=[
   'RESULTADO_APROVADOS_CRIADO','RESULTADO_APROVADOS_EDITADO','RESULTADO_APROVADOS_REMOVIDO',
   'CONFIG_ALTERADA',
   // Checklist — rede de segurança pra recuperar dados perdidos
-  'CK_CASO_SALVO','CK_BLOCO_FINALIZADO','CK_CASO_RESETADO','CK_PERGUNTA_RESETADA','CK_ALUNO_RESETADO',
+  'CK_CASO_SALVO','CK_BLOCO_FINALIZADO','CK_CASO_RESETADO','CK_PERGUNTA_RESETADA','CK_ALUNO_RESETADO','CK_CASO_RESTAURADO',
   'PROVA_STATUS_TOGGLE','AUTO_AUSENTES_POS_PRAZO','NO_SHOW_AUTO_AUSENTE'
 ];
 window.AUDIT_ACTIONS=AUDIT_ACTIONS;
@@ -30798,7 +30817,7 @@ window.resetarSimuladoAluno=async(studentId)=>{
     await deleteDoc(doc(db,`checklists/${_ckSimId}/respostas/${studentId}`)).catch(e=>{
       // Se delete falhar (rule), zera os campos via setDoc merge
       console.warn('delete respostas falhou, fazendo reset por merge:',e.code||e.message);
-      return setDoc(doc(db,`checklists/${_ckSimId}/respostas/${studentId}`),{criar:{casos:{},finalizado:false,notaCriar:null},oral:{casos:{},finalizado:false,notaOral:null},updatedAt:new Date().toISOString()},{merge:false});
+      return setDoc(doc(db,`checklists/${_ckSimId}/respostas/${studentId}`),{criar:{casos:{},finalizado:false,notaCriar:null},oral:{casos:{},finalizado:false,notaOral:null},updatedAt:new Date().toISOString(),_ckv:CK_WRITE_VERSION,_ckwTs:serverTimestamp()},{merge:false});
     });
     // Zera notas no Desempenho (merge:true preserva o doc, só limpa os campos da avaliação)
     await setDoc(doc(db,`notas/${_ckSimId}/alunos/${key}`),{criar:null,oral:null,notaFinal:null,updatedAt:new Date().toISOString()},{merge:true}).catch(e=>console.warn('reset notas falhou:',e.code||e.message));
@@ -31402,6 +31421,10 @@ function renderCkCasos(resp){
       </div>
     </div>`;
 
+    // Slot do botão "Restaurar versão salva" — preenchido async por _ckApplyBackupButtons
+    // só quando o histórico (auditLog) tiver versão mais completa que a atual (= houve perda).
+    body+=`<div id="ck-restore-slot-${ci}" style="margin-top:12px"></div>`;
+
     // Save + Reset buttons
     body+=`<div style="margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
@@ -31418,7 +31441,90 @@ function renderCkCasos(resp){
     card.innerHTML=hdr+body;
     wrap.appendChild(card);
   });
+  // Detecta perdas vs histórico e injeta o botão "Restaurar versão salva" onde fizer sentido.
+  _ckApplyBackupButtons(resp);
 }
+
+// ── Backup/restore por caso a partir do histórico (auditLog) ───────────────────
+// Só aparece quando o histórico tem uma versão MAIS COMPLETA do caso que a atual.
+let _ckBackupMap=null;       // {criar:{ci:{caso,ts,actor}}, oral:{...}}
+let _ckBackupStudent=null;   // studentId já carregado (cache)
+function _ckRich(c){
+  if(!c||typeof c!=='object')return 0;
+  const it=c.itens&&typeof c.itens==='object'?Object.keys(c.itens).length:0;
+  const hb=c.habilidades&&typeof c.habilidades==='object'?Object.values(c.habilidades).filter(v=>v>0).length:0;
+  const fb=(c.feedback&&String(c.feedback).trim().length)?1:0;
+  return it+hb+fb*5+(c.naoFez?3:0);
+}
+async function _ckLoadBackup(studentId){
+  if(_ckBackupStudent===studentId&&_ckBackupMap)return _ckBackupMap;
+  _ckBackupStudent=studentId;_ckBackupMap={criar:{},oral:{}};
+  try{
+    // target.studentId é auto-indexado (equality em campo aninhado, sem índice manual).
+    const snap=await getDocs(query(collection(db,'auditLog'),where('target.studentId','==',studentId)));
+    const evs=snap.docs.map(d=>d.data())
+      .filter(e=>e.target&&e.target.simId===_ckSimId&&(e.target.bloco==='criar'||e.target.bloco==='oral')&&e.target.ci!=null)
+      .sort((a,b)=>(a.ts?.seconds||0)-(b.ts?.seconds||0)); // cronológico → último vence
+    for(const e of evs){
+      const bl=e.target.bloco,ci=e.target.ci;
+      const ts=e.ts?.seconds?new Date(e.ts.seconds*1000).toISOString():'';
+      const actor=e.actor?.nome||e.actor?.email||'?';
+      if(e.action==='CK_CASO_SALVO')_ckBackupMap[bl][ci]={caso:e.after?.caso||null,ts,actor};
+      else if(e.action==='CK_CASO_NAO_FEZ'){const base=(_ckBackupMap[bl][ci]&&_ckBackupMap[bl][ci].caso)||e.before?.caso||{};_ckBackupMap[bl][ci]={caso:{...base,naoFez:true},ts,actor};}
+      else if(e.action==='CK_PERGUNTA_RESETADA')_ckBackupMap[bl][ci]={caso:e.after?.caso||null,ts,actor};
+      else if(e.action==='CK_CASO_RESETADO')_ckBackupMap[bl][ci]={caso:null,ts,actor};   // reset legítimo → sem backup
+    }
+  }catch(err){console.warn('backup auditLog indisponível:',err.code||err.message);_ckBackupMap=null;}
+  return _ckBackupMap;
+}
+async function _ckApplyBackupButtons(resp){
+  const bl=_ckBloco||'criar';
+  const studentId=_ckStudentId;
+  const map=await _ckLoadBackup(studentId);
+  if(!map||studentId!==_ckStudentId)return; // trocou de aluno no meio → aborta
+  const blk=map[bl]||{};
+  Object.keys(blk).forEach(ciS=>{
+    const ci=+ciS;const bk=blk[ci];if(!bk||!bk.caso)return;
+    const live=resp.casos?.[ci]||null;
+    if(_ckRich(bk.caso)<=_ckRich(live))return; // atual já está igual/melhor → sem botão
+    const slot=document.getElementById('ck-restore-slot-'+ci);if(!slot)return;
+    const quando=bk.ts?new Date(bk.ts).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}):'';
+    const nItens=bk.caso.itens?Object.keys(bk.caso.itens).length:0;
+    slot.innerHTML=`<div style="background:var(--yl);border:1px solid rgba(210,153,34,.4);border-radius:10px;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div style="font-size:12.5px;line-height:1.4"><b>⚠️ Há uma versão salva mais completa deste caso no histórico.</b><br>
+        <span style="color:var(--t2)">${nItens} item(ns) avaliados${bk.caso.feedback?.trim()?' + feedback':''} · salvo por ${_ckEsc(bk.actor||'?')}${quando?' · '+_ckEsc(quando):''}</span></div>
+      <button onclick="ckRestaurarBackup(${ci})" style="background:var(--yellow,#d29922);color:#000;border:0;padding:8px 14px;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap">↩️ Restaurar versão salva</button>
+    </div>`;
+  });
+}
+window.ckRestaurarBackup=async(ci)=>{
+  const bl=_ckBloco||'criar';
+  const bk=_ckBackupMap?.[bl]?.[ci];
+  if(!bk||!bk.caso){alert('Não há versão no histórico para restaurar.');return;}
+  const quando=bk.ts?new Date(bk.ts).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}):'';
+  if(!confirm(`Restaurar a versão salva deste caso?\n\nOrigem: histórico (salvo por ${bk.actor||'?'}${quando?' em '+quando:''}).\nO conteúdo atual deste caso será substituído pelo do histórico.`))return;
+  const resp=_ckRespostas[_ckStudentId];if(!resp)return;
+  const blk=resp[bl];if(!blk)return;
+  if(!blk.casos)blk.casos={};
+  const _auditBefore={caso:_ckSnapshot(blk.casos?.[ci])};
+  blk.casos[ci]=JSON.parse(JSON.stringify(bk.caso));
+  blk.finalizado=false; // restaurou → bloco volta a exigir recálculo
+  try{
+    await updateDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),{
+      [`${bl}.casos.${ci}`]:blk.casos[ci],
+      [`${bl}.finalizado`]:false,
+      updatedAt:new Date().toISOString(),_ckv:CK_WRITE_VERSION,_ckwTs:serverTimestamp()
+    });
+    try{audit('CK_CASO_RESTAURADO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:bl,ci},{before:_auditBefore,after:{caso:_ckSnapshot(blk.casos[ci])},meta:{origem:'auditLog',salvoPor:bk.actor||'',quando}});}catch(_){}
+    _ckBackupStudent=null; // invalida cache → reflete o estado novo
+    renderCkCasos(blk);
+    if(typeof reloadRespostasAndRender==='function')reloadRespostasAndRender();
+  }catch(e){console.error('restaurar backup:',e);
+    // doc pode não existir → cria via merge
+    try{await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),_ckStamp(removeUndefined({[bl]:{casos:{[ci]:blk.casos[ci]},finalizado:false},updatedAt:new Date().toISOString()})),{merge:true});_ckBackupStudent=null;renderCkCasos(blk);}
+    catch(e2){alert('Erro ao restaurar: '+(e2.message||e2));}
+  }
+};
 
 window._openCkCasos=[];
 
@@ -31751,14 +31857,22 @@ window.autoSaveFeedbackGeral=()=>{
 // Helper: deep clone seguro pra snapshot de audit (JSON safe — só dados, sem refs).
 function _ckSnapshot(v){try{return JSON.parse(JSON.stringify(v));}catch(_){return null;}}
 
+// CARIMBO DE VERSÃO — toda gravação de checklist leva _ckv (informativo) e _ckwTs
+// (= serverTimestamp). A regra do Firestore vai EXIGIR que _ckwTs == request.time, o que
+// SÓ acontece quando quem grava usa serverTimestamp() (código novo). Aba ANTIGA devolve
+// um valor velho/ausente → o servidor RECUSA a gravação. Para o clobber sem depender de
+// refresh. _ckwTs é FieldValue (sentinel) — adicione SEMPRE depois de removeUndefined.
+const CK_WRITE_VERSION=2;
+const _ckStamp=o=>{o._ckv=CK_WRITE_VERSION;o._ckwTs=serverTimestamp();return o;};
+
 // Gravação CIRÚRGICA: persiste só os campos de UM bloco (criar/oral), sem reenviar o
 // documento inteiro do aluno. Evita lost-update entre examinadores que avaliam o MESMO
 // aluno ao mesmo tempo (ex: prof do CRIAR e prof do Oral) — cada um só toca o seu bloco.
 // merge:true cria o doc se ainda não existir. NÃO passe FieldValue (deleteField) aqui:
 // removeUndefined corromperia o sentinel — pra apagar campo use updateDoc direto.
 async function _ckWriteBlocoParcial(studentId,blocoKey,partial){
-  const payload={[blocoKey]:partial,updatedAt:new Date().toISOString()};
-  await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${studentId}`),removeUndefined(payload),{merge:true});
+  const payload=_ckStamp(removeUndefined({[blocoKey]:partial,updatedAt:new Date().toISOString()}));
+  await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${studentId}`),payload,{merge:true});
 }
 
 window.saveCkCaso=async(ci)=>{
@@ -31830,6 +31944,7 @@ window.saveCkCaso=async(ci)=>{
     });
     // AUDIT — rede de segurança pra recuperar caso some/sobreescrever
     try{audit('CK_CASO_SALVO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey,ci},{before:_auditBefore,after:{caso:_ckSnapshot(blocoResp.casos?.[ci]),finalizado:blocoResp.finalizado},meta:{nomeAluno:(_ckStudents.find(x=>x.id===_ckStudentId)||{}).nome||'',autoFillErrado:autoFillCount}});}catch(_){}
+    _ckBackupStudent=null; // novo save entrou no histórico → invalida cache de backup
     // Show success message, close caso, re-render
     const msgEl=document.getElementById(`ck-save-msg-${ci}`);
     if(msgEl){msgEl.style.display='inline';setTimeout(()=>{msgEl.style.display='none';},2000);}
@@ -33905,7 +34020,7 @@ window.confirmarGerarPDF=async()=>{
       // HTML primeiro (write maior, pode falhar). Só marca a data se ele salvou,
       // pra o link "Baixar PDF" nunca aparecer sem o relatório por trás.
       await setDoc(doc(db,`checklists/${_ckSimId}/relatorios/${_sid}`),{html:reportHTML,geradoEm:_genISO});
-      await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_sid}`),{feedbackGeradoEm:_genISO},{merge:true});
+      await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_sid}`),{feedbackGeradoEm:_genISO,_ckv:CK_WRITE_VERSION,_ckwTs:serverTimestamp()},{merge:true});
       if(_ckRespostas[_sid])_ckRespostas[_sid].feedbackGeradoEm=_genISO;
       if(typeof renderCkStudents==='function'&&Array.isArray(_ckStudents))renderCkStudents(_ckStudents);
     }
@@ -34559,11 +34674,11 @@ window.resetCkCaso=async(ci)=>{
     [`${blocoKey2}.casos.${ci}`]:{itens:{},habilidades:{},feedback:'',prof:''},
     [`${blocoKey2}.finalizado`]:false,
     [`${blocoKey2}.${blocoKey2==='criar'?'notaCriar':'notaOral'}`]:deleteField(),
-    updatedAt:new Date().toISOString()
+    updatedAt:new Date().toISOString(),_ckv:CK_WRITE_VERSION,_ckwTs:serverTimestamp()
   };
   orfaos.forEach(k=>{_upd[`${blocoKey2}.casos.${k}`]=deleteField();});
   try{await updateDoc(_ckRef,_upd);}
-  catch(_e){await setDoc(_ckRef,removeUndefined(resp),{merge:true});} // doc inexistente → cria limpo
+  catch(_e){await setDoc(_ckRef,_ckStamp(removeUndefined({...resp})),{merge:true});} // doc inexistente → cria limpo
   _ckRespostas[_ckStudentId]=resp;
   try{audit('CK_CASO_RESETADO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey2,ci},{before:_auditBefore,after:{caso:{itens:{},habilidades:{},feedback:'',prof:''}},meta:{nomeAluno}});}catch(_){}
   window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
@@ -34624,10 +34739,10 @@ window.resetCkPergunta=async(ci,pi)=>{
     [`${blocoKey3}.casos.${ci}`]:blocoResp3.casos[ci],
     [`${blocoKey3}.finalizado`]:false,
     [`${blocoKey3}.${blocoKey3==='criar'?'notaCriar':'notaOral'}`]:deleteField(),
-    updatedAt:new Date().toISOString()
+    updatedAt:new Date().toISOString(),_ckv:CK_WRITE_VERSION,_ckwTs:serverTimestamp()
   };
   try{await updateDoc(_ckRef3,_upd3);}
-  catch(_e){await setDoc(_ckRef3,removeUndefined(resp),{merge:true});}
+  catch(_e){await setDoc(_ckRef3,_ckStamp(removeUndefined({...resp})),{merge:true});}
   _ckRespostas[_ckStudentId]=resp;
   try{audit('CK_PERGUNTA_RESETADA',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey3,ci,pi},{before:_auditBefore,after:{caso:_ckSnapshot(blocoResp3.casos[ci])},meta:{nomePergunta:nomePerg}});}catch(_){}
   window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
@@ -35483,6 +35598,7 @@ window._prevSalvarFbCaso=async(idx,editorId)=>{
     if(!cur[bloco].casos[fc.ci])cur[bloco].casos[fc.ci]={};
     cur[bloco].casos[fc.ci].feedback=html;
     cur.updatedAt=new Date().toISOString();
+    cur._ckv=CK_WRITE_VERSION;cur._ckwTs=serverTimestamp();
     await setDoc(ref,cur,{merge:true});
     if(typeof _revShowToast==='function')_revShowToast(`✓ Feedback de "${fc.nome}" salvo`,'var(--green)');
     if(btn){

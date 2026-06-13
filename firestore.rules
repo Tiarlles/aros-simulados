@@ -162,7 +162,15 @@ service cloud.firestore {
       allow delete: if false;
     }
     match /checklists/{simId}/respostas/{studentId} {
-      allow read, create, update: if true;  // aluno salva próprio
+      allow read: if true;
+      // TRAVA DE VERSÃO (anti-clobber de aba antiga): só aceita gravação carimbada com o
+      // serverTimestamp DESTA requisição (_ckwTs == request.time). Apenas o código novo
+      // (que usa serverTimestamp()) produz isso; aba antiga devolve valor velho/ausente e
+      // é RECUSADA pelo servidor — não consegue mais zerar o trabalho dos outros, sem
+      // depender de refresh. ⚠️ DEPLOYAR ESTA REGRA SÓ DEPOIS do index.html novo estar no
+      // ar (senão a produção atual, sem carimbo, para de salvar). Scripts de recuperação
+      // precisam mandar _ckwTs:serverTimestamp() também.
+      allow create, update: if request.resource.data.get('_ckwTs', null) == request.time;
       allow delete: if false;
     }
     // Relatório final gerado (HTML do PDF aprovado pela coord). Contém histórico
