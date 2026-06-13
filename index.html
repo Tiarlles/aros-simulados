@@ -30605,18 +30605,10 @@ async function reloadRespostasAndRender(){
       _ckRespostas[d.id]=data;
     });
   }catch(e){}
-  // Reconcilia o aluno aberto: mantém em memória SÓ o bloco que está sendo editado agora
-  // (acabou de ser salvo — Firebase pode estar atrasado), mas adota a versão FRESCA do
-  // bloco irmão. Assim, o que outro examinador gravou no outro bloco aparece de imediato e
-  // não é mascarado por uma foto velha. (Antes: descartava o doc fresco inteiro.)
-  if(currentId&&currentResp){
-    const fresh=_ckRespostas[currentId]||{criar:{casos:{},finalizado:false},oral:{casos:{},finalizado:false}};
-    const editando=_ckBloco||'criar';
-    fresh[editando]=currentResp[editando]||fresh[editando];
-    // preserva flags de topo que só existem em memória durante a sessão
-    if(currentResp.updatedAt)fresh.updatedAt=currentResp.updatedAt;
-    _ckRespostas[currentId]=fresh;
-  }
+  // Preserva a cópia local INTEIRA do aluno aberto (acabou de salvar — o Firebase pode
+  // estar atrasado e devolver uma versão velha/vazia). Comportamento conservador e conhecido:
+  // a tela do examinador nunca regride pro que veio atrasado do servidor.
+  if(currentId&&currentResp)_ckRespostas[currentId]=currentResp;
   renderCkStudents(_ckStudents);
 }
 
