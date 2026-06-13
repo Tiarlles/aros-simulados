@@ -26478,6 +26478,9 @@ window.pdFilterAlunos=(q)=>{
 // Paleta theme-safe via color-mix (lê hue base, mistura com tokens do tema)
 const _pdHues=['138,99,210','47,160,90','200,90,82','190,140,45','47,120,210','200,70,140','120,120,120','40,160,160'];
 function _pdCor(i){const h=_pdHues[i%_pdHues.length];return{bg:`color-mix(in srgb, rgb(${h}) 16%, var(--bg2))`,fg:`color-mix(in srgb, rgb(${h}) 62%, var(--t1))`,bd:`color-mix(in srgb, rgb(${h}) 32%, var(--border))`};}
+// Paleta por GRUPO (coluna) — alinhada aos nomes: 1 Azul · 2 Rosa · 3 Vermelho · 4 Amarelo (extras: roxo, verde, laranja, ciano)
+const _pdGrupoHues=['52,120,246','236,72,153','239,68,68','217,170,30','168,85,247','34,160,94','249,115,22','20,180,190'];
+function _pdCorGrupo(i){const h=_pdGrupoHues[i%_pdGrupoHues.length];return{bg:`color-mix(in srgb, rgb(${h}) 15%, var(--bg2))`,fg:`color-mix(in srgb, rgb(${h}) 62%, var(--t1))`,bd:`color-mix(in srgb, rgb(${h}) 30%, var(--border))`};}
 
 // Ícones SVG de traço (estilo SF Symbols/Lucide) — substituem emojis
 const _PD_ICONS={
@@ -26608,7 +26611,7 @@ function pdRenderGrade(){
   const colW=Math.max(120,Math.floor(880/Math.max(1,grupos.length)));
   const th=`<thead><tr>
     <th style="text-align:left;padding:8px 12px;font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--t2);width:120px">Horário</th>
-    ${grupos.map(g=>`<th style="padding:8px 12px;font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--t1);min-width:${colW}px">${_esc(g.nome)}</th>`).join('')}
+    ${grupos.map((g,gi)=>{const cor=_pdCorGrupo(gi);return`<th style="padding:8px 12px;font-family:'Space Grotesk',sans-serif;font-size:14px;color:${cor.fg};min-width:${colW}px">${_esc(g.nome)}</th>`;}).join('')}
   </tr></thead>`;
   const body=tl.map((r,ri)=>{
     const time=`<td style="padding:8px 10px;white-space:nowrap"><input type="time" value="${_pdM2S(r.start)}" onchange="pdGradeStart(${ri},this.value)" title="Editar início — os horários abaixo se ajustam" class="pd-time-in"/><span class="pd-mono" style="font-size:12px;color:var(--t3)"> – ${_pdM2S(r.end)}</span></td>`;
@@ -26623,8 +26626,7 @@ function pdRenderGrade(){
     const cells=grupos.map((g,gi)=>{
       const est=_pdEstacaoDe(c,gi,r.blocoOrd);
       if(!est)return`<td></td>`;
-      const ei=c.estacoes.findIndex(e=>e.id===est.id);
-      const cor=_pdCor(ei);
+      const cor=_pdCorGrupo(gi);
       const isSim=est.tipo==='simulado';
       const prof=isSim?`<div style="font-size:10.5px;font-weight:500;opacity:.8;margin-top:2px">${c.salas.length} salas · ${c.salas.filter(s=>s.prof).length} profs</div>`:(est.prof?`<div style="font-size:11px;font-weight:500;opacity:.85;margin-top:3px;display:flex;align-items:center;justify-content:center;gap:4px">${_pdIco('user',12)}${_esc(est.prof)}</div>`:`<div style="font-size:10.5px;font-style:italic;opacity:.6;margin-top:2px">sem prof</div>`);
       return`<td class="pd-cell clk" onclick="pdOpenEstacao('${g.id}',${r.blocoOrd},${r.start},'${est.id}')" title="Abrir ${_escA(est.nome)}" style="background:${cor.bg};color:${cor.fg};border:1px solid ${cor.bd}">${_esc(est.nome)} <span style="opacity:.55">${_pdIco('arrowUR',11)}</span>${prof}</td>`;
@@ -26669,23 +26671,33 @@ function pdRenderEstSim(est){
   // horários das rodadas: dividem igualmente o bloco (controle só inline no painel)
   const _blk=_pdTimeline(c).find(rw=>rw.item.kind==='rotacao'&&rw.blocoOrd===e.blocoOrd);
   const blkDur=_blk?(_blk.end-_blk.start):0;
-  const bounds=Array.from({length:n+1},(_,r)=>e.startMin+(n?Math.round(r*blkDur/n):0));
-  const membros=S.students.filter(s=>s.dia===dia&&s.status!=='absent'&&s.grupoPainel===e.grupoId&&(s.blocoPainel||0)===b).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  // bloco efetivo: clampa blocoPainel fora de faixa (config antiga c/ mais blocos) pra dentro do último bloco
+  const _eb=s=>Math.min(Math.max(0,s.blocoPainel||0),nb-1);
+  const membros=S.students.filter(s=>s.dia===dia&&s.status!=='absent'&&s.grupoPainel===e.grupoId&&_eb(s)===b).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  const M=membros.length;
+  // Esquema de troca em pares para 4 salas (pedido do coord): pos1↔pos2 e pos3↔pos4 / pos1↔pos3 e pos2↔pos4 / pos1↔pos2 e pos3↔pos4.
+  // Cada matriz = qual índice de aluno ocupa cada posição naquela rodada. Garante que cada aluno passe 1× por todas as 4 salas.
+  const _SWAP4=[[0,1,2,3],[1,0,3,2],[3,2,1,0],[2,3,0,1]];
+  const usaSwap=(n===4&&M<=4);
+  // base do giro = max(salas, alunos): garante que ninguém suma quando o bloco tem mais alunos que salas (fallback cíclico)
+  const R=usaSwap?4:Math.max(n,M);
+  const _occ=(r,j)=>usaSwap?_SWAP4[r][j]:(((j-r)%R)+R)%R;
+  const bounds=Array.from({length:R+1},(_,r)=>e.startMin+(R?Math.round(r*blkDur/R):0));
   const head=`<div class="pd-seg" style="margin-bottom:16px">${tabs}</div>`;
   if(!n){document.getElementById('pde-body').innerHTML=head+`<div class="es" style="padding:20px"><p>Este bloco não tem salas.</p></div>`;return;}
   if(!membros.length){document.getElementById('pde-body').innerHTML=head+`<div class="es" style="padding:24px"><p>Nenhum aluno neste bloco ainda.</p><p style="font-size:12px">Vá em Configurar → Configurar Alunos → Auto-distribuir.</p></div>`;return;}
   const thS=salas.map((sl,j)=>{
-    const cor=_pdCor(j),casos=_pdCasoDe(c,b*spb+j);
-    return`<th style="padding:9px 10px;background:${cor.bg};border:1px solid ${cor.bd};border-radius:12px;min-width:130px;text-align:center;vertical-align:top">
-      <div style="font-weight:700;color:${cor.fg};font-size:13px">${_esc(sl.nome)}</div>
+    const casos=_pdCasoDe(c,b*spb+j);
+    return`<th style="padding:9px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;min-width:130px;text-align:center;vertical-align:top">
+      <div style="font-weight:700;color:var(--t1);font-size:13px">${_esc(sl.nome)}</div>
       <div style="font-size:11px;color:var(--t2);display:flex;align-items:center;justify-content:center;gap:4px">${_pdIco('user',12)}${sl.prof?_esc(sl.prof):'<span style="opacity:.6">sem prof</span>'}</div>
       <div style="font-size:10px;color:var(--t3);margin-top:3px;line-height:1.35">${_esc(casos[0]||'Caso 1')}<br>${_esc(casos[1]||'Caso 2')}</div>
     </th>`;
   }).join('');
-  const rows=Array.from({length:n},(_,r)=>{
+  const rows=Array.from({length:R},(_,r)=>{
     const tcell=`<td style="padding:10px 8px;white-space:nowrap"><div style="font-weight:700;font-size:13px">Rodada ${r+1}</div><div class="pd-mono" style="font-size:11px;color:var(--t2)">${_pdM2S(bounds[r])}–${_pdM2S(bounds[r+1])}</div></td>`;
     const cells=salas.map((sl,j)=>{
-      const idx=(((j-r)%n)+n)%n,al=membros[idx];
+      const idx=_occ(r,j),al=membros[idx];
       if(!al)return`<td style="padding:11px;text-align:center;color:var(--t3);font-size:12px;border:1px dashed var(--border);border-radius:11px">— vago —</td>`;
       if(al.presenca==='ausente')return`<td style="padding:11px;text-align:center;border:1px dashed var(--border);border-radius:11px;font-size:12px"><span style="text-decoration:line-through;color:var(--t3)">${_esc(al.nome)}</span><br><span style="color:var(--red);font-size:10px;font-weight:700">AUSENTE</span></td>`;
       return`<td style="padding:11px;text-align:center;border:1px solid var(--border);border-radius:11px;font-size:13px;background:var(--bg)">${_esc(al.nome)}</td>`;
