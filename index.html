@@ -30605,8 +30605,18 @@ async function reloadRespostasAndRender(){
       _ckRespostas[d.id]=data;
     });
   }catch(e){}
-  // Restore current student's fresh in-memory data (overrides potentially stale Firebase read)
-  if(currentId&&currentResp)_ckRespostas[currentId]=currentResp;
+  // Reconcilia o aluno aberto: mantém em memória SÓ o bloco que está sendo editado agora
+  // (acabou de ser salvo — Firebase pode estar atrasado), mas adota a versão FRESCA do
+  // bloco irmão. Assim, o que outro examinador gravou no outro bloco aparece de imediato e
+  // não é mascarado por uma foto velha. (Antes: descartava o doc fresco inteiro.)
+  if(currentId&&currentResp){
+    const fresh=_ckRespostas[currentId]||{criar:{casos:{},finalizado:false},oral:{casos:{},finalizado:false}};
+    const editando=_ckBloco||'criar';
+    fresh[editando]=currentResp[editando]||fresh[editando];
+    // preserva flags de topo que só existem em memória durante a sessão
+    if(currentResp.updatedAt)fresh.updatedAt=currentResp.updatedAt;
+    _ckRespostas[currentId]=fresh;
+  }
   renderCkStudents(_ckStudents);
 }
 
@@ -31749,6 +31759,16 @@ window.autoSaveFeedbackGeral=()=>{
 // Helper: deep clone seguro pra snapshot de audit (JSON safe — só dados, sem refs).
 function _ckSnapshot(v){try{return JSON.parse(JSON.stringify(v));}catch(_){return null;}}
 
+// Gravação CIRÚRGICA: persiste só os campos de UM bloco (criar/oral), sem reenviar o
+// documento inteiro do aluno. Evita lost-update entre examinadores que avaliam o MESMO
+// aluno ao mesmo tempo (ex: prof do CRIAR e prof do Oral) — cada um só toca o seu bloco.
+// merge:true cria o doc se ainda não existir. NÃO passe FieldValue (deleteField) aqui:
+// removeUndefined corromperia o sentinel — pra apagar campo use updateDoc direto.
+async function _ckWriteBlocoParcial(studentId,blocoKey,partial){
+  const payload={[blocoKey]:partial,updatedAt:new Date().toISOString()};
+  await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${studentId}`),removeUndefined(payload),{merge:true});
+}
+
 window.saveCkCaso=async(ci)=>{
   if(!_ckSimId||!_ckStudentId)return;
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
@@ -31808,7 +31828,14 @@ window.saveCkCaso=async(ci)=>{
   blocoResp.casos[ci].temPendencia=temPendencia;
 
   try{
-    await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),removeUndefined(resp),{merge:true});
+    // Grava só ESTE caso + flags do bloco — não reenvia o doc inteiro (protege o bloco irmão
+    // e os outros casos de serem sobrescritos por uma foto velha em sessões simultâneas).
+    await _ckWriteBlocoParcial(_ckStudentId,blocoKey,{
+      casos:{[ci]:blocoResp.casos[ci]},
+      naoFez:false,
+      finalizado:blocoResp.finalizado,
+      prof:blocoResp.prof
+    });
     // AUDIT — rede de segurança pra recuperar caso some/sobreescrever
     try{audit('CK_CASO_SALVO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey,ci},{before:_auditBefore,after:{caso:_ckSnapshot(blocoResp.casos?.[ci]),finalizado:blocoResp.finalizado},meta:{nomeAluno:(_ckStudents.find(x=>x.id===_ckStudentId)||{}).nome||'',autoFillErrado:autoFillCount}});}catch(_){}
     // Show success message, close caso, re-render
@@ -31861,8 +31888,14 @@ window.finalizarChecklist=async(silent=false)=>{
   blocoResp.parcialNaoFez=_parcial;
   resp.updatedAt=new Date().toISOString();
 
-  // Save to checklists
-  await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),removeUndefined(resp),{merge:true});
+  // Save to checklists — só as flags/nota DESTE bloco (os casos já foram gravados em saveCkCaso).
+  // Não reenvia o doc inteiro, então não reverte o que o examinador do bloco irmão fez.
+  await _ckWriteBlocoParcial(_ckStudentId,blocoKey,{
+    finalizado:true,
+    naoFez:false,
+    parcialNaoFez:_parcial,
+    [blocoKey==='criar'?'notaCriar':'notaOral']:nota
+  });
   _ckRespostas[_ckStudentId]=resp;
   // AUDIT — rede de segurança pra recuperar nota anterior
   try{audit('CK_BLOCO_FINALIZADO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey},{before:_auditBefore,after:{nota,finalizado:true},meta:{nomeAluno:(_ckStudents.find(x=>x.id===_ckStudentId)||{}).nome||''}});}catch(_){}
@@ -31987,7 +32020,11 @@ window.ckZerarCaso=async(ci)=>{
     blocoResp.naoFez=false; // tratamento por caso → o bloco não é mais "não fez o bloco inteiro"
     blocoResp.finalizado=false; // força recálculo da nota
     resp.updatedAt=new Date().toISOString();
-    await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),removeUndefined(resp),{merge:true});
+    await _ckWriteBlocoParcial(_ckStudentId,blocoKey,{
+      casos:{[ci]:cr},
+      naoFez:false,
+      finalizado:false
+    });
     _ckRespostas[_ckStudentId]=resp;
     try{audit('CK_CASO_NAO_FEZ',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey,ci},{before:_auditBefore,after:{naoFez:true},meta:{nomeAluno:((_ckStudents||[]).find(x=>x.id===_ckStudentId)||{}).nome||''}});}catch(_){}
     ckCloseZerarCaso();
@@ -32013,7 +32050,10 @@ window.ckDesfazerNaoFezCaso=async(ci)=>{
   cr.naoFez=false;
   blocoResp.finalizado=false; // volta a exigir preenchimento do caso
   resp.updatedAt=new Date().toISOString();
-  await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${_ckStudentId}`),removeUndefined(resp),{merge:true});
+  await _ckWriteBlocoParcial(_ckStudentId,blocoKey,{
+    casos:{[ci]:cr},
+    finalizado:false
+  });
   _ckRespostas[_ckStudentId]=resp;
   try{audit('CK_CASO_NAO_FEZ_DESFEITO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey,ci},{before:_auditBefore,after:{naoFez:false},meta:{nomeAluno:((_ckStudents||[]).find(x=>x.id===_ckStudentId)||{}).nome||''}});}catch(_){}
   renderCkCasos(blocoResp);
@@ -32033,8 +32073,12 @@ window.ckZerarBloco=async(studentId,blocoKey)=>{
     blocoResp.finalizado=true;
     blocoResp.naoFez=true;
     resp.updatedAt=new Date().toISOString();
-    // Salva nas respostas do checklist
-    await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${studentId}`),removeUndefined(resp),{merge:true});
+    // Salva nas respostas do checklist — só as flags DESTE bloco (não toca o bloco irmão).
+    await _ckWriteBlocoParcial(studentId,blocoKey,{
+      [blocoKey==='criar'?'notaCriar':'notaOral']:0,
+      finalizado:true,
+      naoFez:true
+    });
     _ckRespostas[studentId]=resp;
     try{audit('CK_BLOCO_FINALIZADO',{collection:'checklists/respostas',simId:_ckSimId,studentId,bloco:blocoKey},{before:_auditBefore,after:{nota:0,finalizado:true,naoFez:true},meta:{nomeAluno:((_ckStudents||[]).find(x=>x.id===studentId)||{}).nome||'',motivo:'aluno-nao-fez'}});}catch(_){}
     // Sincroniza com notas/desempenho (mesma lógica do finalizarChecklist)
@@ -34509,13 +34553,25 @@ window.resetCkCaso=async(ci)=>{
   const blocoResp2=resp[blocoKey2];if(!blocoResp2)return;
   // SNAPSHOT BEFORE — destrutivo, audit é a única chance de recuperar
   const _auditBefore={caso:_ckSnapshot(blocoResp2.casos?.[ci]),finalizado:blocoResp2.finalizado,nota:blocoKey2==='criar'?blocoResp2.notaCriar:blocoResp2.notaOral};
+  // Casos órfãos (índice >= template) — capturados ANTES de mexer no objeto em memória.
+  const tplLen=(window._ckTemplateCurrent?.casos||[]).length;
+  const orfaos=Object.keys(blocoResp2.casos||{}).filter(k=>parseInt(k)>=tplLen);
   blocoResp2.casos[ci]={itens:{},habilidades:{},feedback:'',prof:''};
   blocoResp2.finalizado=false;
   if(blocoKey2==='criar')delete blocoResp2.notaCriar;else delete blocoResp2.notaOral;
-  // Clean orphaned cases
-  const tplLen=(window._ckTemplateCurrent?.casos||[]).length;
-  Object.keys(blocoResp2.casos||{}).forEach(k=>{if(parseInt(k)>=tplLen)delete blocoResp2.casos[k];});
-  await setDoc(doc(db,'checklists/'+_ckSimId+'/respostas/'+_ckStudentId),removeUndefined(resp));
+  orfaos.forEach(k=>delete blocoResp2.casos[k]);
+  // Gravação cirúrgica: zera SÓ este caso (substitui de fato, sem merge aditivo) e a flag/nota
+  // do bloco — sem reenviar o doc inteiro, então não apaga o trabalho do bloco irmão.
+  const _ckRef=doc(db,'checklists/'+_ckSimId+'/respostas/'+_ckStudentId);
+  const _upd={
+    [`${blocoKey2}.casos.${ci}`]:{itens:{},habilidades:{},feedback:'',prof:''},
+    [`${blocoKey2}.finalizado`]:false,
+    [`${blocoKey2}.${blocoKey2==='criar'?'notaCriar':'notaOral'}`]:deleteField(),
+    updatedAt:new Date().toISOString()
+  };
+  orfaos.forEach(k=>{_upd[`${blocoKey2}.casos.${k}`]=deleteField();});
+  try{await updateDoc(_ckRef,_upd);}
+  catch(_e){await setDoc(_ckRef,removeUndefined(resp),{merge:true});} // doc inexistente → cria limpo
   _ckRespostas[_ckStudentId]=resp;
   try{audit('CK_CASO_RESETADO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey2,ci},{before:_auditBefore,after:{caso:{itens:{},habilidades:{},feedback:'',prof:''}},meta:{nomeAluno}});}catch(_){}
   window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
@@ -34568,7 +34624,18 @@ window.resetCkPergunta=async(ci,pi)=>{
   blocoResp3.casos[ci].prof='';
   blocoResp3.finalizado=false;
   if(blocoKey3==='criar')delete blocoResp3.notaCriar;else delete blocoResp3.notaOral;
-  await setDoc(doc(db,'checklists/'+_ckSimId+'/respostas/'+_ckStudentId),removeUndefined(resp));
+  // Gravação cirúrgica: substitui SÓ este caso (já limpo em memória) e a flag/nota do bloco.
+  // updateDoc com caminho de campo SUBSTITUI o caso (remove os itens apagados), sem reenviar
+  // o doc inteiro — preserva o bloco irmão e os demais casos de sessões simultâneas.
+  const _ckRef3=doc(db,'checklists/'+_ckSimId+'/respostas/'+_ckStudentId);
+  const _upd3={
+    [`${blocoKey3}.casos.${ci}`]:blocoResp3.casos[ci],
+    [`${blocoKey3}.finalizado`]:false,
+    [`${blocoKey3}.${blocoKey3==='criar'?'notaCriar':'notaOral'}`]:deleteField(),
+    updatedAt:new Date().toISOString()
+  };
+  try{await updateDoc(_ckRef3,_upd3);}
+  catch(_e){await setDoc(_ckRef3,removeUndefined(resp),{merge:true});}
   _ckRespostas[_ckStudentId]=resp;
   try{audit('CK_PERGUNTA_RESETADA',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey3,ci,pi},{before:_auditBefore,after:{caso:_ckSnapshot(blocoResp3.casos[ci])},meta:{nomePergunta:nomePerg}});}catch(_){}
   window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
