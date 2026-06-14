@@ -8844,7 +8844,7 @@ const AUDIT_ACTIONS=[
   'RESULTADO_APROVADOS_CRIADO','RESULTADO_APROVADOS_EDITADO','RESULTADO_APROVADOS_REMOVIDO',
   'CONFIG_ALTERADA',
   // Checklist — rede de segurança pra recuperar dados perdidos
-  'CK_CASO_SALVO','CK_BLOCO_FINALIZADO','CK_CASO_RESETADO','CK_PERGUNTA_RESETADA','CK_ALUNO_RESETADO','CK_CASO_RESTAURADO',
+  'CK_CASO_SALVO','CK_BLOCO_FINALIZADO','CK_CASO_RESETADO','CK_PERGUNTA_RESETADA','CK_ALUNO_RESETADO','CK_CASO_RESTAURADO','CK_SAVE_BLOQUEADO_SEM_GABARITO',
   'PROVA_STATUS_TOGGLE','AUTO_AUSENTES_POS_PRAZO','NO_SHOW_AUTO_AUSENTE'
 ];
 window.AUDIT_ACTIONS=AUDIT_ACTIONS;
@@ -29291,19 +29291,23 @@ window.renderDesempenho=async()=>{
   // Build map: simId -> { key -> {presenca, studentId} }
   // Key: nome lower (NFKC) e/ou "mat:<matricula>"
   const allSimStudents={};
+  const simStudentByEmail={}; // simId -> { emailNorm -> {nk, mt} } — casamento por e-mail (confiável)
   const seenNomes=new Map();
   const _norm=s=>(s||'').toString().normalize('NFKC').toLowerCase().trim();
   try{
     await Promise.all(sims.map(async sim=>{
       const snap=await getDocs(collection(db,`simulados/${sim.id}/alunos`));
       allSimStudents[sim.id]={};
+      simStudentByEmail[sim.id]={};
       snap.docs.forEach(d=>{
         const data=d.data();
         const nk=_norm(data.nome);
         const mt=(data.matricula||data.matriculaRef||'').toString().trim();
+        const ek=_norm(data.email);
         const v={presenca:data.presenca||null,id:d.id};
         if(nk)allSimStudents[sim.id][nk]=v;
         if(mt)allSimStudents[sim.id]['mat:'+mt]=v;
+        if(ek)simStudentByEmail[sim.id][ek]={nk,mt};
         if(nk&&!seenNomes.has(nk))seenNomes.set(nk,{nome:data.nome,matricula:mt});
       });
     }));
@@ -29323,15 +29327,24 @@ window.renderDesempenho=async()=>{
     sims.forEach(sim=>{
       const nmap=allNotas[sim.id]||(allNotas[sim.id]={});
       const smap=allSimStudents[sim.id]||(allSimStudents[sim.id]={});
+      const emap=simStudentByEmail[sim.id]||{};
       alunos.forEach(a=>{
         const mat=(a.matricula||'').toString().trim();
         const nk=a.nome.toLowerCase().trim();
+        // Casamento por E-MAIL: resolve casos onde o nome do checklist difere do nome da lista
+        // sem ser prefixo (nome do meio extra, grafia trocada — ex: "Guilherme Nogueira Santana"
+        // vs "Guilherme Santana", "Filipe" vs "Felipe"). E-mail é chave confiável e única.
+        const byEmail=emap[_norm(a.email)]||null;
         if(!(nmap[mat]||nmap[nk])){
-          const hit=Object.keys(nmap).find(k=>!k.startsWith('mat:')&&_tok(k,a.nome));
+          let hit=null;
+          if(byEmail){ if(byEmail.mt&&nmap[byEmail.mt])hit=byEmail.mt; else if(nmap[byEmail.nk])hit=byEmail.nk; }
+          if(!hit)hit=Object.keys(nmap).find(k=>!k.startsWith('mat:')&&_tok(k,a.nome));
           if(hit){if(mat)nmap[mat]=nmap[hit];nmap[nk]=nmap[hit];}
         }
         if(!(smap[nk]||(mat&&smap['mat:'+mat]))){
-          const hit=Object.keys(smap).find(k=>!k.startsWith('mat:')&&_tok(k,a.nome));
+          let hit=null;
+          if(byEmail){ if(smap[byEmail.nk])hit=byEmail.nk; else if(byEmail.mt&&smap['mat:'+byEmail.mt])hit='mat:'+byEmail.mt; }
+          if(!hit)hit=Object.keys(smap).find(k=>!k.startsWith('mat:')&&_tok(k,a.nome));
           if(hit){smap[nk]=smap[hit];if(mat)smap['mat:'+mat]=smap[hit];}
         }
       });
@@ -31992,6 +32005,26 @@ window.saveCkCaso=async(ci)=>{
   // Negativos ficam intocados — só aplicam penalidade quando o prof marcar explicitamente.
   const template=window._ckTemplateCurrent||_ckTemplate?.criar||_ckTemplate;const caso=template?.casos?.[ci];
   const perguntas=caso?.perguntas||[];
+  // === TRAVA ANTI-CASCA-VAZIA (bug do presencial 14/06) =======================
+  // Sintoma: o caso era salvo só com nome do prof + horário, SEM itens/habilidades.
+  // Causa provada: no instante do save, o gabarito (template) deste caso NÃO estava
+  // carregado — então o auto-preenchimento não rodava e gravava uma casca vazia por
+  // cima da avaliação. Aqui: se o gabarito do caso não está disponível (e não é nota
+  // manual), RECUSA salvar, avisa o prof pra recarregar e REGISTRA o flagrante no
+  // log (pra pegar recorrência em qualquer aluno, mesmo sem ninguém com console aberto).
+  if(!cr.modoManual && perguntas.length===0){
+    try{audit('CK_SAVE_BLOQUEADO_SEM_GABARITO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey,ci},{meta:{
+      nomeAluno:(_ckStudents.find(x=>x.id===_ckStudentId)||{}).nome||'',
+      itensNaMemoria:Object.keys(cr.itens||{}).length,
+      habNaMemoria:Object.values(cr.habilidades||{}).filter(v=>v>0).length,
+      templateCurrentCasos:(window._ckTemplateCurrent&&window._ckTemplateCurrent.casos)?window._ckTemplateCurrent.casos.length:null,
+      ckTemplateCriarCasos:(_ckTemplate&&_ckTemplate.criar&&_ckTemplate.criar.casos)?_ckTemplate.criar.casos.length:null,
+      ckTemplateOralCasos:(_ckTemplate&&_ckTemplate.oral&&_ckTemplate.oral.casos)?_ckTemplate.oral.casos.length:null
+    }});}catch(_){}
+    try{console.error('[CK-GUARD] Save BLOQUEADO — gabarito do caso',ci,'não carregado. _ckTemplateCurrent=',window._ckTemplateCurrent,'| _ckTemplate=',_ckTemplate);}catch(_){}
+    alert('⚠️ Não dá pra salvar agora: o gabarito deste caso não terminou de carregar (ou a página precisa ser atualizada).\n\nAtualize a página (Ctrl+Shift+R) e lance a avaliação de novo. Nada do que você marcou foi perdido — só não foi gravado ainda.');
+    return;
+  }
   let autoFillCount=0;
   if(!cr.modoManual)perguntas.forEach((perg,pi)=>{
     (perg.itens||[]).forEach((it,ii)=>{
@@ -36331,6 +36364,11 @@ function _proRebindVerticalListeners(){
   // Reseta estado pra evitar mostrar dados de vertical anterior por um instante
   S.catalogoConfig.publicosAlvo=[];S.catalogoConfig.provasAlvo=[];S.catalogoConfig.loaded=false;
   S.jornadaCliente.texto='';S.jornadaCliente.videoUrl='';S.jornadaCliente.imagemUrl='';S.jornadaCliente.imagemPath='';S.jornadaCliente.updatedAt=null;S.jornadaCliente.updatedBy='';S.jornadaCliente.loaded=false;
+  // Zera tb o 'editado' e o banner de rascunho ao trocar de vertical. Sem isso, se você
+  // saísse de uma vertical com edição não-salva, a outra travava em "Carregando…" (o
+  // listener não re-renderiza enquanto está 'dirty'). O texto não-salvo não some: fica no
+  // rascunho local por vertical e o banner "Restaurar" reaparece ao voltar.
+  S._jornadaDirty=false;S._jornadaDraft=null;
   S.editais.lista=[];S.editais.updatedAt=null;S.editais.updatedBy='';S.editais.loaded=false;
   S.dores.lista=[];S.dores.updatedAt=null;S.dores.updatedBy='';S.dores.loaded=false;
   S.datasImp.lista=[];S.datasImp.updatedAt=null;S.datasImp.updatedBy='';S.datasImp.loaded=false;
@@ -39379,7 +39417,13 @@ window._proJornadaSetVideo=(url)=>{
 // ── Auto-save em rascunho (localStorage) ──────────────────────────────────
 // Sobrevive a reload/crash do navegador. Não vai pro Firestore — só local.
 // Limpo automaticamente após salvar com sucesso no Firestore.
-const _proJornadaDraftKey='aros.jornadaCliente.draft.v1';
+// Gaveta do rascunho local — SEPARADA por vertical. Antes era uma chave única
+// pra todas as verticais (aros.jornadaCliente.draft.v1), o que misturava o
+// rascunho de uma vertical com a outra. Agora cada catálogo tem a sua.
+function _proJornadaDraftKeyFor(){
+  const v=S.verticalAtual||'anestreview';
+  return `aros.jornadaCliente.draft.${v}.v1`;
+}
 let _proJornadaDraftTimer=null;
 function _proJornadaDraftScheduleSave(){
   clearTimeout(_proJornadaDraftTimer);
@@ -39394,14 +39438,16 @@ function _proJornadaDraftSave(){
       imagemPath:String(S.jornadaCliente.imagemPath||''),
       savedAt:Date.now()
     };
-    localStorage.setItem(_proJornadaDraftKey,JSON.stringify(payload));
+    localStorage.setItem(_proJornadaDraftKeyFor(),JSON.stringify(payload));
   }catch(e){console.warn('jornadaDraftSave:',e);}
 }
 function _proJornadaDraftClear(){
-  try{localStorage.removeItem(_proJornadaDraftKey);}catch(e){}
+  try{localStorage.removeItem(_proJornadaDraftKeyFor());}catch(e){}
+  // Limpeza da gaveta única legada (compartilhada entre verticais)
+  try{localStorage.removeItem('aros.jornadaCliente.draft.v1');}catch(e){}
 }
 function _proJornadaDraftLoad(){
-  try{const raw=localStorage.getItem(_proJornadaDraftKey);if(!raw)return null;return JSON.parse(raw);}catch(e){return null;}
+  try{const raw=localStorage.getItem(_proJornadaDraftKeyFor());if(!raw)return null;return JSON.parse(raw);}catch(e){return null;}
 }
 // Compara rascunho local com Firestore. Se rascunho tem conteúdo diferente
 // E é "razoavelmente recente" (até 30 dias), sinaliza banner pra restaurar.
@@ -39484,20 +39530,32 @@ window._proJornadaRemoverImagem=async()=>{
 
 window._proJornadaSalvar=async()=>{
   if(!_proCanEdit())return alert('Sem permissão.');
+  // Trava anti-apagão #1: não salvar antes do conteúdo terminar de carregar do
+  // servidor. Ao trocar de vertical o texto é zerado e recarregado com atraso —
+  // salvar nesse intervalo gravava VAZIO por cima do conteúdo real.
+  if(!S.jornadaCliente.loaded)return alert('Aguarde o conteúdo da jornada terminar de carregar antes de salvar.');
+  const texto=_proSanitizeResp(S.jornadaCliente.texto);
+  const videoUrl=String(S.jornadaCliente.videoUrl||'').trim();
+  const imagemUrl=String(S.jornadaCliente.imagemUrl||'').trim();
+  // Trava anti-apagão #2: se vai salvar tudo vazio, confirma antes (evita
+  // apagar o conteúdo sem querer).
+  if(!String(texto||'').trim()&&!videoUrl&&!imagemUrl){
+    if(!confirm('Você está salvando a Jornada do Cliente VAZIA.\n\nIsso vai APAGAR todo o conteúdo atual desta vertical. Tem certeza?'))return;
+  }
   const btn=document.getElementById('pro-jornada-save-btn');
   if(btn){btn.disabled=true;btn.textContent='Salvando…';}
   try{
     const user=S.currentUser?.username||'?';
     const payload={
-      texto:_proSanitizeResp(S.jornadaCliente.texto),
-      videoUrl:String(S.jornadaCliente.videoUrl||'').trim(),
-      imagemUrl:String(S.jornadaCliente.imagemUrl||'').trim(),
+      texto,
+      videoUrl,
+      imagemUrl,
       imagemPath:String(S.jornadaCliente.imagemPath||'').trim(),
       updatedAt:serverTimestamp(),
       updatedBy:user
     };
     await setDoc(doc(db,'config',_verticalDocId('jornadaCliente')),payload,{merge:true});
-    if(typeof audit==='function')audit('JORNADA_CLIENTE_SALVA',{collection:'config',id:'jornadaCliente'},{after:{hasTexto:!!payload.texto,hasVideo:!!payload.videoUrl,hasImagem:!!payload.imagemUrl}});
+    if(typeof audit==='function')audit('JORNADA_CLIENTE_SALVA',{collection:'config',id:_verticalDocId('jornadaCliente')},{after:{hasTexto:!!payload.texto,hasVideo:!!payload.videoUrl,hasImagem:!!payload.imagemUrl}});
     S._jornadaDirty=false;
     // Limpa rascunho local — agora está oficialmente salvo no servidor
     _proJornadaDraftClear();
