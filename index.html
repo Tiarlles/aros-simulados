@@ -29442,7 +29442,7 @@ window.renderDesempenho=async()=>{
     alunos.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
   }
 
-  const _mbSpan=(label,v)=>`${label} <b style="color:${v==null?'var(--t3)':(v>=60?'var(--green)':'var(--red)')}">${v==null?'—':v.toFixed(1)}</b>`;
+  const _mbSpan=(label,v)=>`${label?label+' ':''}<b style="color:${v==null?'var(--t3)':(v>=60?'var(--green)':'var(--red)')}">${v==null?'—':v.toFixed(1)}</b>`;
   const thSims=sims.length?sims.map(s=>{
     const mt=mediasTurma[s.id]||{};
     const labO=s.presencial?'Pres.':'Oral';
@@ -29452,7 +29452,7 @@ window.renderDesempenho=async()=>{
     const sortColor=isSorted?'var(--accent)':'var(--t3)';
     return`<th style="${thStyle}min-width:178px;cursor:pointer;user-select:none" onclick="toggleDesempSort('${s.id}')" title="Ordenar por nota · cada média de bloco conta só quem fez (nota > 0)">
       ${s.nome}<span style="color:${sortColor};font-weight:800;margin-left:3px">${sortIcon||' ⇅'}</span>
-      ${anyM?`<br><span style="font-size:10px;font-weight:600;color:var(--t2);text-transform:none;letter-spacing:0">Média turma — ${_mbSpan('Criar',mt.criar)} · ${_mbSpan(labO,mt.oral)} · ${_mbSpan('Final',mt.final)}</span>`:''}
+      ${anyM?`<br><span style="font-size:10px;font-weight:600;color:var(--t2);text-transform:none;letter-spacing:0">Média turma — ${s.presencial?_mbSpan('',mt.criar):`${_mbSpan('Criar',mt.criar)} · ${_mbSpan(labO,mt.oral)} · ${_mbSpan('Final',mt.final)}`}</span>`:''}
     </th>`;
   }).join(''):'<th style="'+thStyle+'min-width:200px">Nenhum simulado criado</th>';
 
@@ -29723,6 +29723,37 @@ window.doExportDesempenhoPDF=async()=>{
 
   let alunos=(lista.alunos||[]).map(a=>typeof a==='object'?a:{nome:a,matricula:''});
 
+  // Cruzamento tolerante nota<->aluno — MESMA lógica da grade (renderDesempenho): por
+  // matrícula direto, senão por PREFIXO de nome, senão por E-MAIL. Sem isto o PDF buscava
+  // só por matrícula e SUMIA com quem tem nota sob chave-nome (Valéria Karine, Guilherme…),
+  // divergindo da tela. Muta allNotas adicionando aliases (mat/nome) -> mesma nota.
+  {
+    const _norm=s=>(s||'').toString().normalize('NFKC').toLowerCase().trim();
+    const _nrm=s=>(s||'').toString().normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[()]/g,' ').replace(/\s+/g,' ').trim();
+    const _tok=(ka,kb)=>{const A=_nrm(ka).split(' ').filter(Boolean),B=_nrm(kb).split(' ').filter(Boolean);const m=Math.min(A.length,B.length);return m>=2&&A.slice(0,m).join(' ')===B.slice(0,m).join(' ');};
+    const simStudentByEmail={};
+    await Promise.all(sims.map(async sim=>{
+      simStudentByEmail[sim.id]={};
+      try{const snap=await getDocs(collection(db,`simulados/${sim.id}/alunos`));
+        snap.docs.forEach(d=>{const data=d.data();const ek=_norm(data.email);const nk=_norm(data.nome);const mt=(data.matricula||data.matriculaRef||'').toString().trim();if(ek)simStudentByEmail[sim.id][ek]={nk,mt};});
+      }catch(e){}
+    }));
+    sims.forEach(sim=>{
+      const nmap=allNotas[sim.id]||(allNotas[sim.id]={});
+      const emap=simStudentByEmail[sim.id]||{};
+      alunos.forEach(a=>{
+        const mat=(a.matricula||'').toString().trim();
+        const nk=a.nome.toLowerCase().trim();
+        if(nmap[mat]||nmap[nk])return;
+        const byEmail=emap[_norm(a.email)]||null;
+        let hit=null;
+        if(byEmail){ if(byEmail.mt&&nmap[byEmail.mt])hit=byEmail.mt; else if(nmap[byEmail.nk])hit=byEmail.nk; }
+        if(!hit)hit=Object.keys(nmap).find(k=>!k.startsWith('mat:')&&_tok(k,a.nome));
+        if(hit){if(mat)nmap[mat]=nmap[hit];nmap[nk]=nmap[hit];}
+      });
+    });
+  }
+
   // Aplica MESMA ordenação ativa na grade (_desempSort)
   if(_desempSort.col&&_desempSort.dir){
     if(_desempSort.col==='matricula'||_desempSort.col==='nome'){
@@ -29798,7 +29829,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1f2328;backg
 table{width:100%;border-collapse:collapse;font-size:11px}
 thead th{background:#1f2328;color:#fff;padding:8px 10px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.4px;vertical-align:bottom}
 thead th.center{text-align:center}
-thead th .media-turma{display:block;font-size:9px;font-weight:600;text-transform:none;letter-spacing:0;color:#9ba1a8;margin-top:3px}
+thead th .media-turma{display:block;font-size:11px;font-weight:600;text-transform:none;letter-spacing:0;color:#9ba1a8;margin-top:3px}
 tbody td{padding:7px 10px;border-bottom:1px solid #d0d7de;vertical-align:middle}
 tbody tr:nth-child(odd){background:#f6f8fa}
 .td-mat{font-weight:700;color:#0969da;white-space:nowrap}
@@ -29819,7 +29850,6 @@ tbody tr:nth-child(odd){background:#f6f8fa}
 <body>
 <div class="header">
 <div class="title">Desempenho · ${escapeHtml(lista.nome)}</div>
-<div class="subtitle">${alunos.length} alunos · ${simsAplicados.length} simulado${simsAplicados.length===1?'':'s'} aplicado${simsAplicados.length===1?'':'s'}</div>
 </div>
 <table>
 <thead><tr>${colDefs.map(c=>{
@@ -29828,7 +29858,7 @@ tbody tr:nth-child(odd){background:#f6f8fa}
     const mt=mediasTurma[c.sim.id]||{};
     const labO=c.sim.presencial?'Pres.':'Oral';
     const f=v=>v==null?'—':v.toFixed(1);
-    if(mt.criar!=null||mt.oral!=null||mt.final!=null)extra=`<span class="media-turma">Média turma · Criar ${f(mt.criar)} · ${labO} ${f(mt.oral)} · Final ${f(mt.final)}</span>`;
+    if(mt.criar!=null||mt.oral!=null||mt.final!=null)extra=`<span class="media-turma">Média turma · ${c.sim.presencial?f(mt.criar):`Criar ${f(mt.criar)} · ${labO} ${f(mt.oral)} · Final ${f(mt.final)}`}</span>`;
   }
   const isCenter=c.key.startsWith('sim:')||c.key==='garantia';
   return`<th${isCenter?' class="center"':''}>${escapeHtml(c.label)}${extra}</th>`;
