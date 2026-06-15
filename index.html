@@ -30835,7 +30835,41 @@ function renderCkStudents(list){
     if(!ds&&!dd)return false;
     return !((ds&&ds>=_now)||(dd&&dd>=_now));
   })();
-  grid.innerHTML=sorted.map((s,idx)=>{
+  // ── REDE DE SEGURANÇA: alunos avaliados (bloco completo) mas NÃO finalizados ──
+  // Cenário do presencial: 8/8 casos verdes porém criar.finalizado=false e sem nota em
+  // `notas` → some do Desempenho. Detecta e oferece reenvio em 1 clique.
+  const _simPresBanner=!!_curSimCk?.presencial;
+  const _pendentesEnvio=[];
+  sorted.forEach(s=>{
+    const resp=_ckRespostas[s.id];
+    if(!resp)return;
+    const naoFezB=(b)=>!!(resp&&resp[b]&&resp[b].naoFez);
+    const blocoCompletoNaoFinal=(b)=>{
+      const br=resp[b];
+      if(!br)return false;
+      if(naoFezB(b))return false; // "não fez o bloco" já finaliza de propósito
+      return getBlocoStatus(br,_ckTemplate?.[b])==='green' && !br.finalizado;
+    };
+    const blocos=[];
+    if(blocoCompletoNaoFinal('criar'))blocos.push('criar');
+    if(!_simPresBanner&&blocoCompletoNaoFinal('oral'))blocos.push('oral');
+    if(blocos.length)_pendentesEnvio.push({id:s.id,nome:s.nome,blocos});
+  });
+  const _bannerPendentes=(()=>{
+    if(!_pendentesEnvio.length)return '';
+    const nomes=_pendentesEnvio.slice(0,6).map(p=>_comEsc?_comEsc(p.nome):p.nome).join(', ');
+    const resto=_pendentesEnvio.length>6?` e mais ${_pendentesEnvio.length-6}`:'';
+    const n=_pendentesEnvio.length;
+    return `<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:color-mix(in srgb,#d29922 14%,var(--bg2));border:1px solid color-mix(in srgb,#d29922 45%,var(--border));border-radius:var(--rs);padding:13px 16px;margin-bottom:14px">
+      <span style="font-size:20px;line-height:1">⚠️</span>
+      <div style="flex:1;min-width:200px">
+        <p style="font-weight:700;font-size:13.5px;color:var(--text);margin:0">${n} aluno${n>1?'s':''} com avaliação completa mas <span style="color:#d29922">NÃO enviada</span> ao Desempenho</p>
+        <p style="font-size:11.5px;color:var(--t2);margin:3px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nomes}${resto}</p>
+      </div>
+      <button onclick="event.stopPropagation();_ckFinalizarPendentes()" class="btn btn-p btn-sm" style="font-size:12px;padding:6px 14px;white-space:nowrap;background:linear-gradient(135deg,#b8860b,#d29922);flex-shrink:0">✅ Finalizar e enviar tod${n>1?'os':'o'}</button>
+    </div>`;
+  })();
+  grid.innerHTML=_bannerPendentes+sorted.map((s,idx)=>{
     const resp=_ckRespostas[s.id];
     const naoFezB=(b)=>!!(resp&&resp[b]&&resp[b].naoFez);
     const naoFezCriar=naoFezB('criar');
@@ -30845,7 +30879,9 @@ function renderCkStudents(list){
     const blocoSt=(b)=>naoFezB(b)?'green':getBlocoStatus(resp?.[b],_ckTemplate?.[b]);
     const stCriar=resp?blocoSt('criar'):'red';
     const stOral=resp?blocoSt('oral'):'red';
-    const done=stCriar==='green'&&stOral==='green';
+    // Presencial só tem bloco CRIAR (sem Oral Online) → "done" não pode exigir oral verde.
+    const _isPres=!!_curSimCk?.presencial;
+    const done=_isPres?(stCriar==='green'):(stCriar==='green'&&stOral==='green');
     const nota=resp?.criar?.notaCriar;
     // Check if any caso has real data
     const emAndamento=resp&&!done&&(stCriar!=='red'||stOral!=='red');
@@ -32010,6 +32046,24 @@ async function _ckWriteBlocoParcial(studentId,blocoKey,partial){
   await setDoc(doc(db,`checklists/${_ckSimId}/respostas/${studentId}`),payload,{merge:true});
 }
 
+// Recarrega o template (criar+oral) do Firestore e ressincroniza _ckTemplate e
+// window._ckTemplateCurrent (bloco ativo). Usado como rede de segurança quando o
+// gabarito não está em memória no instante do auto-finalizar (bug presencial 14/06).
+async function _ckReloadTemplate(){
+  if(!_ckSimId)return _ckTemplate;
+  const [snapCriar,snapOral]=await Promise.all([
+    getDoc(doc(db,`checklists/${_ckSimId}/meta/templateCriar`)),
+    getDoc(doc(db,`checklists/${_ckSimId}/meta/templateOral`))
+  ]);
+  _ckTemplate={
+    criar: snapCriar.exists()?snapCriar.data():{casos:[]},
+    oral: snapOral.exists()?snapOral.data():{casos:[]}
+  };
+  const bloco=_ckBloco||'criar';
+  window._ckTemplateCurrent=bloco==='oral'?_ckTemplate.oral:_ckTemplate.criar;
+  return _ckTemplate;
+}
+
 window.saveCkCaso=async(ci)=>{
   if(!_ckSimId||!_ckStudentId)return;
   const resp=_ckRespostas[_ckStudentId];if(!resp)return;
@@ -32107,8 +32161,16 @@ window.saveCkCaso=async(ci)=>{
       window._openCkCasos=window._openCkCasos.filter(x=>x!==ci);
       renderCkCasos(blocoResp);
       // Auto-calculate if all cases in bloco are now green
-      const tplNow=window._ckTemplateCurrent||_ckTemplate?.[_ckBloco||'criar']||{casos:[]};
-      if(getBlocoStatus(blocoResp,tplNow)==='green'){
+      let tplNow=window._ckTemplateCurrent||_ckTemplate?.[_ckBloco||'criar']||{casos:[]};
+      // ROBUSTEZ (bug presencial 14/06): se o template não está carregado neste instante,
+      // getBlocoStatus retorna 'red' e a finalização é PULADA EM SILÊNCIO — o aluno fica
+      // 8/8 verde mas sem nota no Desempenho. Recarrega o template antes de decidir; só
+      // desiste se MESMO recarregado continuar sem casos (template realmente inexistente).
+      if(!(tplNow?.casos||[]).length){
+        try{await _ckReloadTemplate();}catch(_){}
+        tplNow=window._ckTemplateCurrent||_ckTemplate?.[_ckBloco||'criar']||{casos:[]};
+      }
+      if((tplNow?.casos||[]).length && getBlocoStatus(blocoResp,tplNow)==='green'){
         await finalizarChecklist(true); // silent=true → no alert
       }
       reloadRespostasAndRender();
@@ -32116,61 +32178,47 @@ window.saveCkCaso=async(ci)=>{
   }catch(e){console.error('Save caso error:',e);alert('Erro ao salvar: '+e.message);}
 };
 
-// ── Calculate & finalize ──────────────────────────────────────────────────────
-window.finalizarChecklist=async(silent=false)=>{
-  if(!_ckSimId||!_ckStudentId||!_ckBloco)return;
-  const resp=_ckRespostas[_ckStudentId];if(!resp)return;
-  const blocoKey=_ckBloco;
-  const blocoResp=resp[blocoKey];if(!blocoResp)return;
-  // SNAPSHOT BEFORE — pra audit
-  const _auditBefore={casos:_ckSnapshot(blocoResp.casos),finalizado:blocoResp.finalizado,nota:blocoKey==='criar'?blocoResp.notaCriar:blocoResp.notaOral};
-  const template=window._ckTemplateCurrent||_ckTemplate?.[blocoKey];
+// ── NÚCLEO de finalização (sem globals nem DOM) ───────────────────────────────
+// Calcula a nota do bloco, grava o checklist (flags/nota) e a nota na coleção `notas`.
+// MUTA `resp[blocoKey]` em memória (mesmas flags do fluxo interativo). Retorna a nota.
+// Compartilhado entre finalizarChecklist (interativo) e _ckFinalizarPendentes (lote)
+// pra a nota e o payload baterem exatamente — sem duplicação/divergência.
+async function _ckFinalizarBlocoCore(simId,studentId,blocoKey,resp,template,students){
+  const blocoResp=resp[blocoKey];if(!blocoResp)return null;
   const casos=template?.casos||[];
   const ptsPorCaso=casos.length?100/casos.length:0;
-
-  // (Button only enabled when all cases are green — no extra check needed)
-
-  // Soma a pontuação de cada caso usando a mesma lógica do display em tempo real
-  // (_calcCasoScore — respeita itens negativos como penalidade e não desce abaixo de 0).
+  // Soma a pontuação de cada caso (mesma lógica do display em tempo real).
   let totalPts=0;
   casos.forEach((caso,ci)=>{
     const casoResp=blocoResp.casos[ci]||{itens:{}};
     totalPts+=_calcCasoScore(casoResp,caso,ptsPorCaso);
   });
-
   const nota=Math.round(totalPts*10)/10;
   if(blocoKey==='criar')blocoResp.notaCriar=nota;
   else blocoResp.notaOral=nota;
   blocoResp.finalizado=true;
-  blocoResp.naoFez=false; // nota veio dos casos → não é "não fez o bloco inteiro" (limpa flag legado)
-  // Bloco "parcial": tem ao menos um caso zerado ("aluno não fez este caso").
-  // Nesse caso a nota do aluno é desconsiderada na média da turma deste bloco.
+  blocoResp.naoFez=false;
   const _parcial=casos.some((_,ci)=>!!blocoResp.casos?.[ci]?.naoFez);
   blocoResp.parcialNaoFez=_parcial;
   resp.updatedAt=new Date().toISOString();
-
-  // Save to checklists — só as flags/nota DESTE bloco (os casos já foram gravados em saveCkCaso).
-  // Não reenvia o doc inteiro, então não reverte o que o examinador do bloco irmão fez.
-  await _ckWriteBlocoParcial(_ckStudentId,blocoKey,{
-    finalizado:true,
-    naoFez:false,
-    parcialNaoFez:_parcial,
-    [blocoKey==='criar'?'notaCriar':'notaOral']:nota
-  });
-  _ckRespostas[_ckStudentId]=resp;
-  // AUDIT — rede de segurança pra recuperar nota anterior
-  try{audit('CK_BLOCO_FINALIZADO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey},{before:_auditBefore,after:{nota,finalizado:true},meta:{nomeAluno:(_ckStudents.find(x=>x.id===_ckStudentId)||{}).nome||''}});}catch(_){}
-
-  // Save nota to desempenho. Após gravar o bloco atual, verifica se o OUTRO bloco já tem nota:
-  // se sim, calcula notaFinal = (criar + oral) / 2 e grava no mesmo doc.
-  const student=_ckStudents.find(s=>s.id===_ckStudentId);
+  // Grava só as flags/nota DESTE bloco (os casos já foram gravados em saveCkCaso).
+  const _origSim=_ckSimId; _ckSimId=simId;
+  try{
+    await _ckWriteBlocoParcial(studentId,blocoKey,{
+      finalizado:true,
+      naoFez:false,
+      parcialNaoFez:_parcial,
+      [blocoKey==='criar'?'notaCriar':'notaOral']:nota
+    });
+  }finally{_ckSimId=_origSim;}
+  // Save nota to desempenho.
+  const student=(students||[]).find(s=>s.id===studentId);
   if(student){
     const lista=S.listas.find(l=>(l.alunos||[]).some(a=>(typeof a==='object'?a.nome:a).toLowerCase().trim()===student.nome.toLowerCase().trim()));
     const alunoData=lista?(lista.alunos||[]).find(a=>(typeof a==='object'?a.nome:a).toLowerCase().trim()===student.nome.toLowerCase().trim()):null;
     const mat=typeof alunoData==='object'?alunoData?.matricula||'':'' ;
     const key=mat||student.nome.toLowerCase().trim();
-    const notaRef=doc(db,`notas/${_ckSimId}/alunos/${key}`);
-    // Lê o doc atual pra pegar o valor do OUTRO bloco (se já existir)
+    const notaRef=doc(db,`notas/${simId}/alunos/${key}`);
     let outro=null;
     try{
       const cur=await getDoc(notaRef);
@@ -32179,7 +32227,7 @@ window.finalizarChecklist=async(silent=false)=>{
         outro=blocoKey==='criar'?(d.oral!=null?parseFloat(d.oral):null):(d.criar!=null?parseFloat(d.criar):null);
       }
     }catch(e){console.warn('read nota:',e);}
-    const _isPres=!!S.sims?.find(s=>s.id===_ckSimId)?.presencial;
+    const _isPres=!!S.sims?.find(s=>s.id===simId)?.presencial;
     const payload={updatedAt:new Date().toISOString()};
     if(blocoKey==='criar')payload.criar=nota;else payload.oral=nota;
     payload[blocoKey==='criar'?'criarParcial':'oralParcial']=_parcial;
@@ -32190,6 +32238,26 @@ window.finalizarChecklist=async(silent=false)=>{
     }
     await setDoc(notaRef,payload,{merge:true});
   }
+  return nota;
+}
+
+// ── Calculate & finalize ──────────────────────────────────────────────────────
+window.finalizarChecklist=async(silent=false)=>{
+  if(!_ckSimId||!_ckStudentId||!_ckBloco)return;
+  const resp=_ckRespostas[_ckStudentId];if(!resp)return;
+  const blocoKey=_ckBloco;
+  const blocoResp=resp[blocoKey];if(!blocoResp)return;
+  // SNAPSHOT BEFORE — pra audit
+  const _auditBefore={casos:_ckSnapshot(blocoResp.casos),finalizado:blocoResp.finalizado,nota:blocoKey==='criar'?blocoResp.notaCriar:blocoResp.notaOral};
+  const template=window._ckTemplateCurrent||_ckTemplate?.[blocoKey];
+
+  // (Button only enabled when all cases are green — no extra check needed)
+  // Miolo (compute + writes) compartilhado com _ckFinalizarPendentes.
+  const nota=await _ckFinalizarBlocoCore(_ckSimId,_ckStudentId,blocoKey,resp,template,_ckStudents);
+  if(nota==null)return;
+  _ckRespostas[_ckStudentId]=resp;
+  // AUDIT — rede de segurança pra recuperar nota anterior
+  try{audit('CK_BLOCO_FINALIZADO',{collection:'checklists/respostas',simId:_ckSimId,studentId:_ckStudentId,bloco:blocoKey},{before:_auditBefore,after:{nota,finalizado:true},meta:{nomeAluno:(_ckStudents.find(x=>x.id===_ckStudentId)||{}).nome||''}});}catch(_){}
 
   // Update UI
   document.getElementById('ck-nota-resultado').classList.remove('hidden');
@@ -32201,6 +32269,54 @@ window.finalizarChecklist=async(silent=false)=>{
     const blocoLabel=blocoKey==='criar'?'CRIAR':'Oral Online';
     alert('✅ Nota '+blocoLabel+' lançada: '+nota.toFixed(1)+' pontos');
   }
+};
+
+// ── REDE DE SEGURANÇA: finaliza em lote os alunos avaliados-mas-não-enviados ──
+// Acionado pelo banner de alerta no topo da lista de alunos. Recalcula a nota e a
+// grava no Desempenho usando EXATAMENTE o mesmo núcleo do botão Finalizar.
+let _ckFinalizandoPendentes=false;
+window._ckFinalizarPendentes=async()=>{
+  if(!_ckSimId)return;
+  if(_ckFinalizandoPendentes)return; // trava anti-duplo-clique (evita rodar o lote 2×)
+  _ckFinalizandoPendentes=true;
+  try{
+  // Garante template carregado (o auto-finalizar pode ter pulado justamente por falta dele).
+  if(!(_ckTemplate?.criar?.casos||[]).length&&!(_ckTemplate?.oral?.casos||[]).length){
+    try{await _ckReloadTemplate();}catch(_){}
+  }
+  const _simPres=!!S.sims?.find(s=>s.id===_ckSimId)?.presencial;
+  const pend=[];
+  Object.entries(_ckRespostas).forEach(([sid,resp])=>{
+    if(!resp)return;
+    const naoFezB=(b)=>!!(resp&&resp[b]&&resp[b].naoFez);
+    const completoNaoFinal=(b)=>{
+      const br=resp[b];
+      if(!br||naoFezB(b))return false;
+      return getBlocoStatus(br,_ckTemplate?.[b])==='green'&&!br.finalizado;
+    };
+    const blocos=[];
+    if(completoNaoFinal('criar'))blocos.push('criar');
+    if(!_simPres&&completoNaoFinal('oral'))blocos.push('oral');
+    if(blocos.length)pend.push({id:sid,resp,blocos});
+  });
+  if(!pend.length){alert('Nenhum aluno pendente de envio.');return;}
+  let ok=0;
+  for(const p of pend){
+    for(const blocoKey of p.blocos){
+      try{
+        const _auditBefore={casos:_ckSnapshot(p.resp[blocoKey]?.casos),finalizado:p.resp[blocoKey]?.finalizado};
+        const tpl=_ckTemplate?.[blocoKey];
+        const nota=await _ckFinalizarBlocoCore(_ckSimId,p.id,blocoKey,p.resp,tpl,_ckStudents);
+        if(nota!=null){
+          ok++;
+          try{audit('CK_BLOCO_FINALIZADO',{collection:'checklists/respostas',simId:_ckSimId,studentId:p.id,bloco:blocoKey},{before:_auditBefore,after:{nota,finalizado:true,viaReenvioLote:true},meta:{nomeAluno:(_ckStudents.find(x=>x.id===p.id)||{}).nome||''}});}catch(_){}
+        }
+      }catch(e){console.error('[CK] reenvio pendente falhou',p.id,blocoKey,e);}
+    }
+  }
+  await reloadRespostasAndRender();
+  alert('✅ '+ok+' '+(ok===1?'avaliação finalizada e enviada':'avaliações finalizadas e enviadas')+' ao Desempenho.');
+  }finally{_ckFinalizandoPendentes=false;}
 };
 
 // ══════════════════════════════════════════════════════════════
