@@ -2268,6 +2268,8 @@ Em pedidos simples (ajuste de texto, cor, micro-fix) você pode pular agentes �
 - Cada card tem header com contador de casos + dois botões: **+ Adicionar Manualmente** (cheio, cor do bloco) e **+ Adicionar em Bloco** (outline).
 - Casos de cada bloco ficam dentro do seu card, com `border-left` colorido.
 
+- **(2026-06-14) Reordenar ITENS por drag** dentro da MESMA pergunta: cada item tem alça ⠿ (`_renderTplItem` agora com `id=tpl-item-{bloco}-{ci}-{pi}-{ii}` + `draggable`; container dos itens com `id=tpl-itens-{bloco}-{ci}-{pi}`). Handlers `_tplItemDragStart/Over/Leave/Drop/DragEnd` + `_tplRerenderItens` (re-render SÓ do container da pergunta) — espelham os `_revItemDrag*` da Revisão de Casos (mesma estrutura casos→perguntas→itens). A LETRA (A,B,C…) é `String.fromCharCode(65+ii)` = POSICIONAL, então reordenar o array re-mapeia as letras sozinho: a sequência fica fixa por posição, só o item muda de lugar. `autoSaveCkTemplate()` ao soltar. Penalidades (`⚠`) também são arrastáveis e ocupam posição (não consomem letra, mas o índice conta).
+
 **Bloco-aware refactor**:
 - IDs prefixados por bloco: `tpl-criar-hdr-caso-0`, `ck-oral-obs-1-0-2`, etc. — sem colisões de índice.
 - `_tplOpen = {criar: {casos: Set, perguntas: Set}, oral: {...}}` — estado de abertura por bloco.
