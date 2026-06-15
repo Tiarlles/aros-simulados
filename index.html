@@ -33584,7 +33584,7 @@ function _renderTplPergunta(bloco,ci,perg,pi){
           </div>
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">`;
+      <div id="tpl-itens-${bloco}-${ci}-${pi}" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">`;
   itens.forEach((item,ii)=>{
     html+=_renderTplItem(bloco,ci,pi,item,ii);
   });
@@ -33622,8 +33622,15 @@ function _renderTplItem(bloco,ci,pi,item,ii){
   const lbl=isNeg?'⚠':String.fromCharCode(65+ii);
   const obsImgs=item.obsImagens||[];
   const temObs=!!(item.obs||obsImgs.length);
-  return`<div style="${isNeg?'background:rgba(207,34,46,.06);border:1px solid rgba(207,34,46,.35);border-radius:6px;padding:6px 8px':''}">
+  return`<div id="tpl-item-${bloco}-${ci}-${pi}-${ii}" draggable="true"
+    ondragstart="_tplItemDragStart(event,'${bloco}',${ci},${pi},${ii})"
+    ondragover="_tplItemDragOver(event,'${bloco}',${ci},${pi},${ii})"
+    ondragleave="_tplItemDragLeave(event)"
+    ondrop="_tplItemDrop(event,'${bloco}',${ci},${pi},${ii})"
+    ondragend="_tplItemDragEnd(event)"
+    style="transition:opacity .12s,box-shadow .12s;border-radius:6px;${isNeg?'background:rgba(207,34,46,.06);border:1px solid rgba(207,34,46,.35);padding:6px 8px':''}">
     <div style="display:flex;gap:8px;align-items:center">
+      <span class="drag-h" title="Arraste para reordenar (a letra fica fixa por posição)" style="cursor:grab">⠿</span>
       <span style="font-size:12px;font-weight:800;color:${isNeg?'var(--red)':'var(--accent)'};min-width:20px;text-align:center">${lbl}</span>
       <input value="${(item.descricao||'').replace(/"/g,'&quot;')}" placeholder="${isNeg?'Descrição da penalidade (ex: "Mencionou contraindicação relativa errada")':'Descrição do item'}"
         oninput="${tplVar}.casos[${ci}].perguntas[${pi}].itens[${ii}].descricao=this.value"
@@ -33650,6 +33657,61 @@ function _renderTplItem(bloco,ci,pi,item,ii){
     </div>
   </div>`;
 }
+
+// ─── Drag-and-drop: reordenar ITENS dentro da mesma pergunta no editor de template ───
+// A letra (A,B,C…) é sempre gerada pela POSIÇÃO (String.fromCharCode(65+ii)), então ao
+// reordenar o array de itens as letras se reorganizam sozinhas — a sequência fica fixa.
+function _tplRerenderItens(bloco,ci,pi){
+  const cont=document.getElementById(`tpl-itens-${bloco}-${ci}-${pi}`);
+  if(!cont)return;
+  const itens=_tplBlocoObj(bloco).casos?.[ci]?.perguntas?.[pi]?.itens||[];
+  cont.innerHTML=itens.map((item,ii)=>_renderTplItem(bloco,ci,pi,item,ii)).join('');
+}
+window._tplItemDragStart=(e,bloco,ci,pi,ii)=>{
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(['input','textarea','button','select','img','a'].includes(tag)){e.preventDefault();return;}
+  S._tplDragging={bloco,ci,pi,ii};
+  try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',`${bloco}_${ci}_${pi}_${ii}`);}catch(_){}
+  setTimeout(()=>{const el=document.getElementById(`tpl-item-${bloco}-${ci}-${pi}-${ii}`);if(el)el.style.opacity='0.4';},0);
+};
+window._tplItemDragOver=(e,bloco,ci,pi,ii)=>{
+  const d=S._tplDragging;if(!d)return;
+  if(d.bloco!==bloco||d.ci!==ci||d.pi!==pi)return; // só dentro da mesma pergunta
+  e.preventDefault();
+  try{e.dataTransfer.dropEffect='move';}catch(_){}
+  if(d.ii===ii)return;
+  const el=document.getElementById(`tpl-item-${bloco}-${ci}-${pi}-${ii}`);
+  if(el){
+    const rect=el.getBoundingClientRect();
+    const isBelow=e.clientY>(rect.top+rect.height/2);
+    el.style.boxShadow=isBelow?'inset 0 -3px 0 var(--accent)':'inset 0 3px 0 var(--accent)';
+  }
+};
+window._tplItemDragLeave=(e)=>{const el=e.currentTarget;if(el&&el.style)el.style.boxShadow='';};
+window._tplItemDrop=(e,bloco,ci,pi,toII)=>{
+  e.preventDefault();
+  const d=S._tplDragging;
+  const el=document.getElementById(`tpl-item-${bloco}-${ci}-${pi}-${toII}`);
+  if(el&&el.style)el.style.boxShadow='';
+  if(!d||d.bloco!==bloco||d.ci!==ci||d.pi!==pi){S._tplDragging=null;return;}
+  const fromII=d.ii;
+  let insertAfter=false;
+  if(el){const rect=el.getBoundingClientRect();insertAfter=e.clientY>(rect.top+rect.height/2);}
+  let targetII=toII+(insertAfter?1:0);
+  if(fromII<targetII)targetII--;
+  if(fromII===targetII){S._tplDragging=null;return;}
+  const arr=_tplBlocoObj(bloco).casos?.[ci]?.perguntas?.[pi]?.itens;
+  if(!Array.isArray(arr)){S._tplDragging=null;return;}
+  const [moved]=arr.splice(fromII,1);
+  arr.splice(targetII,0,moved);
+  S._tplDragging=null;
+  _tplRerenderItens(bloco,ci,pi);
+  autoSaveCkTemplate();
+};
+window._tplItemDragEnd=(e)=>{
+  document.querySelectorAll('[id^="tpl-item-"]').forEach(el=>{el.style.opacity='';el.style.boxShadow='';});
+  S._tplDragging=null;
+};
 
 window.tplToggleCaso=(bloco,ci)=>{
   const body=document.getElementById(`tpl-${bloco}-caso-${ci}`);
