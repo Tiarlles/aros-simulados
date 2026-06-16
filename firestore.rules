@@ -217,7 +217,7 @@ service cloud.firestore {
     match /mentorias/{mentoriaId} {
       allow read: if true;
       allow create, update: if isAuth()
-                            && request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
+                            && request.resource.data.tipo in ['TEA','TSA','TSA Oral','ME1','ME2','ME3']
                             && request.resource.data.mentorNome is string
                             && request.resource.data.mentorNome.size() > 0;
       allow delete: if isAuth();
@@ -227,7 +227,7 @@ service cloud.firestore {
     match /blocosClinica/{blocoId} {
       allow read: if true;
       allow create, update: if isAuth()
-                            && request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
+                            && request.resource.data.tipo in ['TEA','TSA','TSA Oral','ME1','ME2','ME3']
                             && request.resource.data.titulo is string
                             && request.resource.data.titulo.size() > 0
                             && request.resource.data.tema is string;
@@ -238,7 +238,7 @@ service cloud.firestore {
     match /clinicas/{clinicaId} {
       allow read: if true;
       allow create, update: if isAuth()
-                            && request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
+                            && request.resource.data.tipo in ['TEA','TSA','TSA Oral','ME1','ME2','ME3']
                             && request.resource.data.mentorNome is string
                             && request.resource.data.dataHora is string;
       allow delete: if isAuth();

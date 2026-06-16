@@ -5070,6 +5070,27 @@ body.pro-rt-fs-on{overflow:hidden}
       </div>
     </div>
 
+    <!-- TAB: Mentorias · 2ª fase (somente TSA Oral) -->
+    <div id="tab-mentoriasF2" class="hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-spacing:-.3px;line-height:1.15">Mentorias · 2ª fase</h3>
+          <p style="font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;color:var(--accent);font-size:10.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:4px">TSA Oral · Apenas grupo e mentores</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-p btn-sm" onclick="openMentorGrupo(null,'TSA Oral')">+ Novo grupo</button>
+        </div>
+      </div>
+
+      <!-- Grupos -->
+      <div class="card">
+        <div class="ch">
+          <div class="ct" style="display:flex;align-items:center;gap:10px">👥 Grupos e Mentores</div>
+        </div>
+        <div class="cb" id="mentF2-grupos-list"></div>
+      </div>
+    </div>
+
     <!-- ═══════════════════════════════════════════════════════════════════
          GRUPO RECURSOS — sistema de recursos/contestações de provas
          ═══════════════════════════════════════════════════════════════════ -->
@@ -5169,6 +5190,15 @@ body.pro-rt-fs-on{overflow:hidden}
     </div>
 
     <!-- TAB: Financeiro -->
+    <style id="fin-plano-styles">
+      .fin-plano-wrap{display:inline-flex;align-items:center;gap:3px;background:color-mix(in srgb, var(--red) 7%, transparent);border:1px solid color-mix(in srgb, var(--red) 22%, transparent);border-radius:9px;padding:3px 9px;transition:border-color .18s var(--ease-out-soft,ease), box-shadow .18s var(--ease-out-soft,ease), background .18s}
+      .fin-plano-wrap:hover{border-color:color-mix(in srgb, var(--red) 38%, transparent);background:color-mix(in srgb, var(--red) 11%, transparent)}
+      .fin-plano-wrap:focus-within{border-color:var(--red);background:color-mix(in srgb, var(--red) 13%, transparent);box-shadow:0 0 0 3px color-mix(in srgb, var(--red) 20%, transparent)}
+      .fin-plano-wrap .fin-plano-pre{font-size:9.5px;font-weight:800;letter-spacing:.4px;color:var(--red);opacity:.65;font-family:'JetBrains Mono','SF Mono',monospace;pointer-events:none}
+      .fin-plano-wrap input{width:62px;border:none;background:transparent;outline:none;text-align:right;color:var(--red);font-weight:800;font-size:12px;padding:0;margin:0;font-family:'JetBrains Mono','SF Mono',monospace;-moz-appearance:textfield}
+      .fin-plano-wrap input::-webkit-outer-spin-button,.fin-plano-wrap input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+      .fin-plano-wrap input::placeholder{color:var(--red);opacity:.35;font-weight:700}
+    </style>
     <div id="tab-financeiro" class="hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
         <div>
@@ -8085,6 +8115,7 @@ body.pro-rt-fs-on{overflow:hidden}
           <select class="fc" id="mmg-tipo">
             <option value="TEA">🟦 TEA</option>
             <option value="TSA">🟧 TSA</option>
+            <option value="TSA Oral">🟨 TSA Oral</option>
             <option value="ME1">🟪 ME1</option>
             <option value="ME2">🟩 ME2</option>
             <option value="ME3">🟥 ME3</option>
@@ -8102,6 +8133,7 @@ body.pro-rt-fs-on{overflow:hidden}
           <input class="fc" id="mmg-fim" type="date"/>
         </div>
       </div>
+      <p id="mmg-datas-hint" style="font-size:11px;color:var(--accent);margin:-6px 0 8px;display:none">📊 Início e fim são obrigatórios — definem o período em que o mentor entra automaticamente no Financeiro (proporcional aos dias).</p>
       <div class="fg"><label class="fl">Valor mensal do mentor (R$)</label>
         <input class="fc" id="mmg-valor" type="number" min="0" step="0.01" value="6000" style="max-width:240px"/>
         <p style="font-size:11px;color:var(--t2);margin-top:4px">Valor pago ao mentor por mês cheio dentro do período. Meses parciais (início ou fim no meio do mês) são calculados <strong>proporcionalmente aos dias trabalhados</strong>.</p>
@@ -11874,7 +11906,8 @@ const TAB_GROUPS=[
     {id:'senhasPublicas',label:'🔓 Senhas Públicas'}
   ]},
   {id:'mentorias',label:'Mentorias',tabs:[
-    {id:'mentorias',label:'🎓 Mentorias'}
+    {id:'mentorias',label:'🎓 Coord. 1ª fase'},
+    {id:'mentoriasF2',label:'🟨 Coord. 2ª fase'}
   ]},
   {id:'produtos',label:'Produtos',tabs:[
     {id:'produtos',label:'🛍️ Catálogo de Produtos'}
@@ -16447,7 +16480,7 @@ window.deleteProvaDireto=async(provaId)=>{
 // === Tipos de prova (built-in + customizados via recursosConfig.tiposCustom) ===
 // Tipos built-in usam _MENTORIA_CORES. Customizados ficam em S.recursos.config.tiposCustom = [{key, cor}].
 // _mpvAllTipos() combina os dois pra render no grid e em outras telas.
-const _MPV_BUILTIN_TIPOS=['TSA','TEA','ME1','ME2','ME3'];
+const _MPV_BUILTIN_TIPOS=['TSA','TSA Oral','TEA','ME1','ME2','ME3'];
 const _MPV_PALETTE=['#fb8f44','#2f81f7','#a371f7','#26d3c0','#f778ba','#3fb950','#d29922','#f85149','#5b9eff','#bd93f9'];
 function _mpvAllTipos(){
   const builtIn=_MPV_BUILTIN_TIPOS.map(k=>({key:k,cor:(_MENTORIA_CORES[k]||{}).fg||'#8b949e',custom:false}));
@@ -18551,10 +18584,11 @@ async function _sincronizarAlunosMentoria(grupoId){
 }
 
 // === Helpers ===
-const MENTORIA_TIPOS=['TEA','TSA','ME1','ME2','ME3'];
+const MENTORIA_TIPOS=['TEA','TSA','TSA Oral','ME1','ME2','ME3'];
 const _MENTORIA_CORES={
   TEA:{bg:'rgba(47,129,247,.14)',fg:'#2f81f7',bd:'rgba(47,129,247,.35)'},
   TSA:{bg:'rgba(251,143,68,.14)',fg:'#fb8f44',bd:'rgba(251,143,68,.35)'},
+  'TSA Oral':{bg:'rgba(227,179,65,.14)',fg:'#e3b341',bd:'rgba(227,179,65,.35)'},
   ME1:{bg:'rgba(163,113,247,.14)',fg:'#a371f7',bd:'rgba(163,113,247,.35)'},
   ME2:{bg:'rgba(38,211,192,.14)',fg:'#26d3c0',bd:'rgba(38,211,192,.35)'},
   ME3:{bg:'rgba(247,120,186,.14)',fg:'#f778ba',bd:'rgba(247,120,186,.35)'},
@@ -18633,15 +18667,21 @@ window.renderMentorias=async()=>{
     elC.innerHTML=blocosHtml+avulsasHtml;
   }
 
-  // === Grupos ===
-  const grpFilt=f==='todos'?S.mentorias:S.mentorias.filter(g=>g.tipo===f);
+  // === Grupos (exclui TSA Oral — pertence à 2ª fase) ===
+  const _base=f==='todos'?S.mentorias:S.mentorias.filter(g=>g.tipo===f);
+  const grpFilt=_base.filter(g=>g.tipo!=='TSA Oral');
   const elG=document.getElementById('ment-grupos-list');
   if(!grpFilt.length){elG.innerHTML='<p style="color:var(--t2);font-size:13px;padding:8px">Nenhum grupo cadastrado.</p>';}
   else{
-    elG.innerHTML=grpFilt.map(g=>{
-      const cnt=(g.alunos||[]).length;
-      const st=_mentStatus(g);
-      return`<div class="aluno-row" style="align-items:flex-start;flex-direction:column;gap:8px;padding:0;border-left:4px solid ${st.cor};background:linear-gradient(90deg, color-mix(in srgb, ${st.cor} 8%, transparent) 0%, transparent 40%)">
+    elG.innerHTML=grpFilt.map(g=>_mentGrupoCardHTML(g)).join('');
+  }
+};
+
+function _mentGrupoCardHTML(g){
+  const cnt=(g.alunos||[]).length;
+  const st=_mentStatus(g);
+  const editCall=g.tipo==='TSA Oral'?`openMentorGrupo('${g.id}','TSA Oral')`:`openMentorGrupo('${g.id}')`;
+  return`<div class="aluno-row" style="align-items:flex-start;flex-direction:column;gap:8px;padding:0;border-left:4px solid ${st.cor};background:linear-gradient(90deg, color-mix(in srgb, ${st.cor} 8%, transparent) 0%, transparent 40%)">
         <div onclick="toggleGrupoAlunos('${g.id}')" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='transparent'" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;flex-wrap:wrap;cursor:pointer;user-select:none;padding:12px;border-radius:var(--rs);transition:background .15s">
           <div style="flex:1;min-width:200px;display:flex;align-items:center;gap:10px">
             <span id="grp-chev-${g.id}" style="font-size:12px;color:var(--accent);transition:transform .15s;display:inline-block;width:14px">▶</span>
@@ -18655,15 +18695,20 @@ window.renderMentorias=async()=>{
           </div>
           <div class="aluno-acts" onclick="event.stopPropagation()">
             <button class="btn btn-s btn-sm" onclick="toggleGrupoAlunos('${g.id}')">👥 Ver alunos</button>
-            <button class="btn btn-s btn-sm" onclick="openMentorGrupo('${g.id}')">✏️ Editar</button>
+            <button class="btn btn-s btn-sm" onclick="${editCall}">✏️ Editar</button>
           </div>
         </div>
         <div id="grp-alunos-${g.id}" class="hidden" style="width:100%;border-top:1px dashed var(--border);padding-top:10px;margin-top:4px">
           ${(g.alunos||[]).length?'<div style="display:flex;flex-direction:column;gap:4px">'+(g.alunos||[]).map((a,i)=>`<div class="ment-aluno-row" data-grp="${g.id}" data-idx="${i}" style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:var(--rs);background:var(--bg2);border:1px solid var(--border)"><span class="ment-aluno-nome" onclick="editGrupoAlunoNome('${g.id}',${i})" style="flex:1;font-size:13px;cursor:text;padding:2px 4px;border-radius:4px" title="Clique para editar">${a.nome}</span><button class="btn btn-s btn-sm" onclick="moveGrupoAluno('${g.id}',${i})" style="font-size:11px;padding:3px 8px" title="Mover para outro mentor">↔️</button><button class="btn btn-d btn-sm" onclick="rmGrupoAluno('${g.id}',${i})" style="font-size:11px;padding:3px 8px" title="Excluir">✕</button></div>`).join('')+'</div>':'<p style="color:var(--t2);font-size:12px">Nenhum aluno.</p>'}
         </div>
       </div>`;
-    }).join('');
-  }
+}
+
+window.renderMentoriasF2=async()=>{
+  const grupos=(S.mentorias||[]).filter(g=>g.tipo==='TSA Oral');
+  const el=document.getElementById('mentF2-grupos-list');
+  if(!el)return;
+  el.innerHTML=grupos.length?grupos.map(g=>_mentGrupoCardHTML(g)).join(''):'<p style="color:var(--t2);font-size:13px;padding:8px">Nenhum grupo TSA Oral cadastrado. Clique em <strong>+ Novo grupo</strong>.</p>';
 };
 
 window.toggleClinicaAlunos=(id)=>{
@@ -18956,10 +19001,18 @@ window.resetClinicaAluno=async(clinicaId,alunoId)=>{
 };
 
 // === CRUD Grupo (mentor + alunos) ===
-window.openMentorGrupo=(id)=>{
+window.openMentorGrupo=(id,fixedTipo)=>{
   const g=id?S.mentorias.find(x=>x.id===id):null;
+  const isF2=fixedTipo==='TSA Oral'||(g&&g.tipo==='TSA Oral');
   document.getElementById('mmg-title').textContent=id?'Editar grupo':'Novo grupo';
-  document.getElementById('mmg-tipo').value=g?.tipo||'TEA';
+  const tipoSel=document.getElementById('mmg-tipo');
+  Array.from(tipoSel.options).forEach(o=>{
+    if(o.value==='TSA Oral')o.hidden=!isF2;
+    else o.hidden=isF2;
+  });
+  tipoSel.value=isF2?'TSA Oral':(g?.tipo||'TEA');
+  tipoSel.disabled=isF2;
+  const _datasHint=document.getElementById('mmg-datas-hint');if(_datasHint)_datasHint.style.display=isF2?'block':'none';
   const sel=document.getElementById('mmg-mentor');
   sel.innerHTML='<option value="">— escolha —</option>'+(S.profs||[]).map(p=>`<option value="${p}" ${g?.mentorNome===p?'selected':''}>${p}</option>`).join('');
   document.getElementById('mmg-inicio').value=g?.inicio||'';
@@ -19028,6 +19081,7 @@ window.saveMentorGrupo=async()=>{
   const txt=document.getElementById('mmg-alunos').value;
   const err=document.getElementById('mmg-err');
   if(!mentorNome){err.textContent='Escolha o mentor.';err.classList.remove('hidden');return;}
+  if(tipo==='TSA Oral'&&(!inicio||!fim)){err.textContent='Informe a data de início e de fim — é o que faz o mentor cair automaticamente no Financeiro.';err.classList.remove('hidden');return;}
   if(inicio&&fim&&fim<inicio){err.textContent='A data de fim não pode ser antes da data de início.';err.classList.remove('hidden');return;}
   // Parse linhas
   const alunos=[];
@@ -19065,6 +19119,7 @@ window.saveMentorGrupo=async()=>{
   CM('modal-ment-grupo');
   const sync=await _sincronizarAlunosMentoria(id);
   renderMentorias();
+  if(typeof renderMentoriasF2==='function')renderMentoriasF2();
   if(sync.added||sync.removed||sync.renamed)console.log(`[sync] grupo ${id}: +${sync.added} -${sync.removed} ~${sync.renamed} alunos nas clínicas`);
 };
 
@@ -19079,6 +19134,7 @@ window.deleteMentorGrupo=async()=>{
   await loadMentorias();
   CM('modal-ment-grupo');
   renderMentorias();
+  if(typeof renderMentoriasF2==='function')renderMentoriasF2();
 };
 
 // === CRUD Clínica (sessão dentro de bloco) ===
@@ -21806,6 +21862,7 @@ async function calcFinanceiroMes(anoMes){
   const profs=S.profs||[];
   const profsFin=S.financeiro.profsFin||{};
   const mesData=(S.financeiro.meses||{})[anoMes]||{};
+  const descontoPlanoMap=mesData.descontoPlano||{};
   const lancamentos=mesData.lancamentos||[];
   // 1. Rodadas oficiais: filtra sims oficiais cujo mês == anoMes (usa dataSab||dataDom)
   const simsOf=S.sims.filter(s=>{
@@ -21863,7 +21920,8 @@ async function calcFinanceiroMes(anoMes){
     const manuaisDet=lancamentos.filter(l=>l.profNome===nome);
     const totalManuais=manuaisDet.reduce((sum,l)=>sum+(Number(l.valor)||0)*(Number(l.qtd)||1),0);
     // Mentorias: grupos onde mentorNome === nome e cobrem o mês (com pro-rata)
-    const mentoriasDet=mentoriasNoMes.filter(x=>x.grupo.mentorNome===nome).map(({grupo:g,ov})=>({
+    // Genéricas: todos os tipos EXCETO 'TSA Oral'
+    const mentoriasDet=mentoriasNoMes.filter(x=>x.grupo.mentorNome===nome&&x.grupo.tipo!=='TSA Oral').map(({grupo:g,ov})=>({
       grupoId:g.id,tipo:g.tipo,inicio:g.inicio,fim:g.fim,
       valorCheio:Number(g.valorMensal||0),
       valor:Number(ov.valorProporcional)||0,
@@ -21871,6 +21929,20 @@ async function calcFinanceiroMes(anoMes){
       alunosQtd:(g.alunos||[]).length,
     }));
     const totalMentorias=mentoriasDet.reduce((sum,m)=>sum+(Number(m.valor)||0),0);
+    // TSA Oral: bucket próprio
+    const mentoriasTsaOralDet=mentoriasNoMes.filter(x=>x.grupo.mentorNome===nome&&x.grupo.tipo==='TSA Oral').map(({grupo:g,ov})=>({
+      grupoId:g.id,tipo:g.tipo,inicio:g.inicio,fim:g.fim,
+      valorCheio:Number(g.valorMensal||0),
+      valor:Number(ov.valorProporcional)||0,
+      dias:ov.dias,diasMes:ov.diasMes,parcial:ov.parcial,
+      alunosQtd:(g.alunos||[]).length,
+    }));
+    const totalMentoriasTsaOral=mentoriasTsaOralDet.reduce((sum,m)=>sum+(Number(m.valor)||0),0);
+    const totalBruto=fixo+totalRodadas+totalSimExtras+totalManuais+totalMentorias+totalMentoriasTsaOral;
+    // Desconto de plano de saúde só vale pra profs marcados no cadastro (temPlanoSaude).
+    // Se o prof não tem plano, ignora qualquer valor lançado (não subtrai do total).
+    const temPlanoSaude=!!cfg.temPlanoSaude;
+    const descontoPlano=temPlanoSaude?(Number(descontoPlanoMap[nome])||0):0;
     return{
       nome,
       fixo,valRod,valExt,
@@ -21878,9 +21950,10 @@ async function calcFinanceiroMes(anoMes){
       simExtrasQtd:simExtrasDet.length,simExtrasDet,totalSimExtras,
       manuaisQtd:manuaisDet.length,manuaisDet,totalManuais,
       mentoriasQtd:mentoriasDet.length,mentoriasDet,totalMentorias,
-      total:fixo+totalRodadas+totalSimExtras+totalManuais+totalMentorias,
+      mentoriasTsaOralQtd:mentoriasTsaOralDet.length,mentoriasTsaOralDet,totalMentoriasTsaOral,
+      temPlanoSaude,descontoPlano,totalBruto,total:totalBruto-descontoPlano,
     };
-  }).filter(p=>p.fixo>0||p.totalRodadas>0||p.totalSimExtras>0||p.totalManuais>0||p.totalMentorias>0);
+  }).filter(p=>p.fixo>0||p.totalRodadas>0||p.totalSimExtras>0||p.totalManuais>0||p.totalMentorias>0||p.totalMentoriasTsaOral>0);
   return result;
 }
 
@@ -21950,20 +22023,23 @@ window.renderFinanceiro=async()=>{
   // total deste mês — esse valor já foi movido pra frente.
   const rolloverParaResumo=mesData.rolloverPara||{};
   const totalGeral=dados.reduce((s,p)=>s+(rolloverParaResumo[p.nome]?0:p.total),0);
+  const totalGeralBruto=dados.reduce((s,p)=>s+(rolloverParaResumo[p.nome]?0:(p.totalBruto??p.total)),0);
+  const totalDescontoPlano=dados.reduce((s,p)=>s+(rolloverParaResumo[p.nome]?0:(p.descontoPlano||0)),0);
   const totalFixo=dados.reduce((s,p)=>s+(rolloverParaResumo[p.nome]?0:p.fixo),0);
   const totalMent=dados.reduce((s,p)=>s+(rolloverParaResumo[p.nome]?0:(p.totalMentorias||0)),0);
+  const totalMentTsaOral=dados.reduce((s,p)=>s+(rolloverParaResumo[p.nome]?0:(p.totalMentoriasTsaOral||0)),0);
   // Pendências de meses anteriores também entram no total geral (são pagas neste mês)
   const totalPendencias=(mesData.pendencias||[]).reduce((s,x)=>s+(Number(x.valor)||0),0);
   const totalComPend=totalGeral+totalPendencias;
-  const totalVar=totalGeral-totalFixo-totalMent;
+  const totalVar=totalGeralBruto-totalFixo-totalMent-totalMentTsaOral;
   // 4 cards compactos sempre em 1 linha (grid 4 colunas, padding reduzido, fontes -20%).
   const fin=document.getElementById('fin-resumo');
   if(fin)fin.style.gridTemplateColumns='repeat(4,1fr)';
   const cardCss='background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px';
   fin.innerHTML=`
-    <div style="${cardCss}"><div style="font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;font-weight:700">Total geral</div><div style="font-size:17.6px;font-weight:800;color:var(--accent);margin-top:3px;line-height:1.15">${_BRL(totalComPend)}</div><div style="font-size:10px;color:var(--t2);margin-top:2px">${dados.length} professor${dados.length===1?'':'es'}${totalPendencias>0?` · inclui ${_BRL(totalPendencias)} em pendências`:''}</div></div>
+    <div style="${cardCss}"><div style="font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;font-weight:700">Total geral</div><div style="font-size:17.6px;font-weight:800;color:var(--accent);margin-top:3px;line-height:1.15">${_BRL(totalComPend)}</div><div style="font-size:10px;color:var(--t2);margin-top:2px">${dados.length} professor${dados.length===1?'':'es'}${totalPendencias>0?` · inclui ${_BRL(totalPendencias)} em pendências`:''}${totalDescontoPlano>0?` · <span style="color:var(--red);font-weight:700">− ${_BRL(totalDescontoPlano)} plano de saúde</span>`:''}</div></div>
     <div style="${cardCss}"><div style="font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;font-weight:700">Salários fixos</div><div style="font-size:17.6px;font-weight:800;color:var(--text);margin-top:3px;line-height:1.15">${_BRL(totalFixo)}</div></div>
-    <div style="${cardCss}"><div style="font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;font-weight:700">Mentoria</div><div style="font-size:17.6px;font-weight:800;color:var(--text);margin-top:3px;line-height:1.15">${_BRL(totalMent)}</div></div>
+    <div style="${cardCss}"><div style="font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;font-weight:700">Mentoria</div><div style="font-size:17.6px;font-weight:800;color:var(--text);margin-top:3px;line-height:1.15">${_BRL(totalMent+totalMentTsaOral)}</div></div>
     <div style="${cardCss}"><div style="font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;font-weight:700">Variáveis${totalPendencias>0?' + Pend.':''}</div><div style="font-size:17.6px;font-weight:800;color:var(--text);margin-top:3px;line-height:1.15">${_BRL(totalVar+totalPendencias)}</div>${totalPendencias>0?`<div style="font-size:9.5px;color:#e46d0a;margin-top:2px;font-weight:700">+${_BRL(totalPendencias)} pendência${(mesData.pendencias||[]).length>1?'s':''}</div>`:''}</div>
   `;
 
@@ -22051,7 +22127,9 @@ window.renderFinanceiro=async()=>{
         <th style="${thS};text-align:right">Rodadas Sim Oficial</th>
         <th style="${thS};text-align:right">Sim. Extras</th>
         <th style="${thS};text-align:right">Mentoria</th>
+        <th style="${thS};text-align:right">Mentoria TSA Oral</th>
         <th style="${thS};text-align:right">Atividades extras</th>
+        <th style="${thS};text-align:right" title="Desconto de plano de saúde do mês — subtraído do total. Só aparece pra profs marcados no Cadastro. Editável no mês aberto.">Plano de saúde</th>
         <th style="${thS};text-align:right">Total</th>
         <th style="${thS};text-align:center" title="Controle de solicitação de nota fiscal pro professor">Solicitar Nota</th>
         <th style="${thS};text-align:center" title="Status do controle da nota fiscal. Muda automaticamente ao clicar Solicitar Nota, ou manualmente pelo dropdown.">Controle</th>
@@ -22100,14 +22178,21 @@ window.renderFinanceiro=async()=>{
               <span style="text-decoration:line-through;color:var(--t3);font-weight:700;font-size:12px">${_BRL(p.total)}</span>
               <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;background:rgba(228,109,10,.18);color:#e46d0a;padding:2px 6px;border-radius:4px;font-weight:700;letter-spacing:.3px">🔄 ${_mesNome(rolledTo).toUpperCase()}</span>
             </div>`
-          :`<span style="font-weight:800;color:var(--accent);font-size:12px">${_BRL(p.total)}</span>`;
+          :`<div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px"><span style="font-weight:800;color:var(--accent);font-size:12px">${_BRL(p.total)}</span>${(p.descontoPlano||0)>0?`<span style="font-size:8.5px;color:var(--t2)">bruto ${_BRL(p.totalBruto)}</span>`:''}</div>`;
         return `<tr data-prof-nome="${dataAttr}" data-ctrl-status="${ctrlAtual}" data-regime="${regime}"${rolledTo?' style="opacity:.78"':''}>
           <td style="${tdProf}">${p.nome}${regimeBadge}</td>
           <td style="${tdS};text-align:right;${tdNumStyle}">${p.fixo>0?_BRL(p.fixo):'—'}</td>
           <td style="${tdS};text-align:right;${tdNumStyle}">${p.rodadasQtd>0?`${p.rodadasQtd} × ${_BRL(p.valRod)}<br><span style="${subNumStyle}">${_BRL(p.totalRodadas)}</span>`:'—'}</td>
           <td style="${tdS};text-align:right;${tdNumStyle}">${p.simExtrasQtd>0?`${p.simExtrasQtd} × ${_BRL(p.valExt)}<br><span style="${subNumStyle}">${_BRL(p.totalSimExtras)}</span>`:'—'}</td>
           <td style="${tdS};text-align:right;${tdNumStyle}">${(p.mentoriasQtd||0)>0?`${p.mentoriasQtd} grupo${p.mentoriasQtd>1?'s':''}${(p.mentoriasDet||[]).some(m=>m.parcial)?' <span style="font-family:\'JetBrains Mono\',monospace;font-size:8.5px;background:var(--yl);color:var(--yellow);padding:1px 5px;border-radius:4px;font-weight:700">PARCIAL</span>':''}<br><span style="${subNumStyle}">${_BRL(p.totalMentorias||0)}</span>`:'—'}</td>
+          <td style="${tdS};text-align:right;${tdNumStyle}">${(p.mentoriasTsaOralQtd||0)>0?`${p.mentoriasTsaOralQtd} grupo${p.mentoriasTsaOralQtd>1?'s':''}${(p.mentoriasTsaOralDet||[]).some(m=>m.parcial)?' <span style="font-family:\'JetBrains Mono\',monospace;font-size:8.5px;background:var(--yl);color:var(--yellow);padding:1px 5px;border-radius:4px;font-weight:700">PARCIAL</span>':''}<br><span style="${subNumStyle}">${_BRL(p.totalMentoriasTsaOral||0)}</span>`:'—'}</td>
           <td style="${tdS};text-align:right;${tdNumStyle}">${p.manuaisQtd>0?`${p.manuaisQtd} ${p.manuaisQtd>1?'itens':'item'}<br><span style="${subNumStyle}">${_BRL(p.totalManuais)}</span>`:'—'}</td>
+          <td style="${tdS};text-align:right;${tdNumStyle}">${!p.temPlanoSaude
+            ? '<span style="color:var(--t3)">—</span>'
+            : ((isAdmin&&!fechado)
+              ? `<span class="fin-plano-wrap" title="Desconto plano de saúde (R$). Subtrai do total."><span class="fin-plano-pre">R$</span><input type="number" min="0" step="0.01" value="${(p.descontoPlano||0)||''}" placeholder="0,00" onchange="_finSetDescontoPlano('${safeNome}','${anoMes}',this.value)" onclick="event.stopPropagation()"/></span>`
+              : ((p.descontoPlano||0)>0 ? `<span style="color:var(--red);font-weight:700">− ${_BRL(p.descontoPlano)}</span>` : '—'))
+          }</td>
           <td style="${tdS};text-align:right">${totalDisplay}</td>
           <td style="${tdS};text-align:center">${solicCell}</td>
           <td style="${tdS};text-align:center">${_ctrlCell(p.nome)}</td>
@@ -22461,6 +22546,17 @@ async function _finEnviarNotaInterno(profNome,anoMes,opts){
       linhas.push(`    - ${m.tipo||'—'} · ${iniFmt} → ${fimFmt} · ${m.alunosQtd||0} aluno${(m.alunosQtd||0)===1?'':'s'} · ${dias} · ${_BRL(m.valor)}`);
     });
   }
+  if((p.totalMentoriasTsaOral||0)>0){
+    linhas.push(`• Mentoria TSA Oral — ${p.mentoriasTsaOralQtd} grupo${p.mentoriasTsaOralQtd===1?'':'s'} = ${_BRL(p.totalMentoriasTsaOral)}`);
+    (p.mentoriasTsaOralDet||[]).forEach(m=>{
+      const iniN=_mentNormData?_mentNormData(m.inicio,'ini'):m.inicio;
+      const fimN=_mentNormData?_mentNormData(m.fim,'fim'):m.fim;
+      const iniFmt=iniN?fD(iniN):'—';
+      const fimFmt=fimN?fD(fimN):'—';
+      const dias=m.parcial?`${m.dias} de ${m.diasMes} dias (parcial · valor cheio ${_BRL(m.valorCheio)})`:`mês cheio (${m.diasMes} dias)`;
+      linhas.push(`    - ${m.tipo||'—'} · ${iniFmt} → ${fimFmt} · ${m.alunosQtd||0} aluno${(m.alunosQtd||0)===1?'':'s'} · ${dias} · ${_BRL(m.valor)}`);
+    });
+  }
   if(p.totalManuais>0){
     linhas.push(`• Atividades extras — ${p.manuaisQtd} ${p.manuaisQtd===1?'item':'itens'} = ${_BRL(p.totalManuais)}`);
     (p.manuaisDet||[]).forEach(l=>{
@@ -22471,6 +22567,7 @@ async function _finEnviarNotaInterno(profNome,anoMes,opts){
       linhas.push(`    - ${nomeT}${desc?': '+desc:''} · ${qtdLbl}`);
     });
   }
+  if((p.descontoPlano||0)>0)linhas.push(`• Desconto plano de saúde: − ${_BRL(p.descontoPlano)}`);
   const detalhamento=linhas.length?linhas.join('\n'):'(sem detalhamento — total zerado)';
   const mesNomeStr=_mesNome(anoMes);
   const fmtTotal=_BRL(p.total);
@@ -22605,6 +22702,17 @@ window._finSolicitarNota=async(profNome,anoMes,regimeArg)=>{
       linhas.push(`    - ${m.tipo||'—'} · ${iniFmt} → ${fimFmt} · ${m.alunosQtd||0} aluno${(m.alunosQtd||0)===1?'':'s'} · ${dias} · ${_BRL(m.valor)}`);
     });
   }
+  if((p.totalMentoriasTsaOral||0)>0){
+    linhas.push(`• Mentoria TSA Oral — ${p.mentoriasTsaOralQtd} grupo${p.mentoriasTsaOralQtd===1?'':'s'} = ${_BRL(p.totalMentoriasTsaOral)}`);
+    (p.mentoriasTsaOralDet||[]).forEach(m=>{
+      const iniN=_mentNormData?_mentNormData(m.inicio,'ini'):m.inicio;
+      const fimN=_mentNormData?_mentNormData(m.fim,'fim'):m.fim;
+      const iniFmt=iniN?fD(iniN):'—';
+      const fimFmt=fimN?fD(fimN):'—';
+      const dias=m.parcial?`${m.dias} de ${m.diasMes} dias (parcial · valor cheio ${_BRL(m.valorCheio)})`:`mês cheio (${m.diasMes} dias)`;
+      linhas.push(`    - ${m.tipo||'—'} · ${iniFmt} → ${fimFmt} · ${m.alunosQtd||0} aluno${(m.alunosQtd||0)===1?'':'s'} · ${dias} · ${_BRL(m.valor)}`);
+    });
+  }
   if(p.totalManuais>0){
     linhas.push(`• Atividades extras — ${p.manuaisQtd} ${p.manuaisQtd===1?'item':'itens'} = ${_BRL(p.totalManuais)}`);
     (p.manuaisDet||[]).forEach(l=>{
@@ -22615,6 +22723,7 @@ window._finSolicitarNota=async(profNome,anoMes,regimeArg)=>{
       linhas.push(`    - ${nomeT}${desc?': '+desc:''} · ${qtdLbl}`);
     });
   }
+  if((p.descontoPlano||0)>0)linhas.push(`• Desconto plano de saúde: − ${_BRL(p.descontoPlano)}`);
   const detalhamento=linhas.length?linhas.join('\n'):'(sem detalhamento — total zerado)';
   const assunto=regime==='rpa'
     ?`Solicitação de RPA — ${mesNomeStr}`
@@ -22845,6 +22954,17 @@ window._finSolicitarNotaPendencia=async(destMes,pendId)=>{
         linhas.push(`    - ${m.tipo||'—'} · ${iniFmt} → ${fimFmt} · ${dias} · ${_BRL(m.valor)}`);
       });
     }
+    if((p.totalMentoriasTsaOral||0)>0){
+      linhas.push(`• Mentoria TSA Oral — ${p.mentoriasTsaOralQtd} grupo${p.mentoriasTsaOralQtd===1?'':'s'} = ${_BRL(p.totalMentoriasTsaOral)}`);
+      (p.mentoriasTsaOralDet||[]).forEach(m=>{
+        const iniN=_mentNormData?_mentNormData(m.inicio,'ini'):m.inicio;
+        const fimN=_mentNormData?_mentNormData(m.fim,'fim'):m.fim;
+        const iniFmt=iniN?fD(iniN):'—';
+        const fimFmt=fimN?fD(fimN):'—';
+        const dias=m.parcial?`${m.dias} de ${m.diasMes} dias (parcial)`:`mês cheio (${m.diasMes} dias)`;
+        linhas.push(`    - ${m.tipo||'—'} · ${iniFmt} → ${fimFmt} · ${dias} · ${_BRL(m.valor)}`);
+      });
+    }
     if(p.totalManuais>0){
       linhas.push(`• Atividades extras — ${p.manuaisQtd} ${p.manuaisQtd===1?'item':'itens'} = ${_BRL(p.totalManuais)}`);
       (p.manuaisDet||[]).forEach(l=>{
@@ -22951,6 +23071,7 @@ function renderFinCadProfs(){
       <th style="padding:8px;text-align:left">Professor</th>
       <th style="padding:8px;text-align:left" title="Email cadastrado em Professores. Pra editar, vá em Configurações → Professores.">Email (somente leitura)</th>
       <th style="padding:8px;text-align:center" title="Regime de pagamento: PJ (Pessoa Jurídica — emite NF) ou RPA (Recibo de Pagamento Autônomo).">Regime</th>
+      <th style="padding:8px;text-align:center" title="Marque os professores que têm plano de saúde. Só os marcados terão o campo de desconto na tabela do Financeiro; os demais aparecem com '—'.">Plano de saúde</th>
       <th style="padding:8px;text-align:right">Salário fixo mensal (R$)</th>
       <th style="padding:8px;text-align:center" title="Primeiro mês em que recebe o salário fixo (deixe vazio se indeterminado)">Início</th>
       <th style="padding:8px;text-align:center" title="Último mês em que recebe o salário fixo (deixe vazio se indeterminado)">Fim</th>
@@ -22969,6 +23090,7 @@ function renderFinCadProfs(){
         <td style="padding:6px 8px;border-top:1px solid var(--border);font-weight:600">${nome}</td>
         <td style="padding:6px 8px;border-top:1px solid var(--border)">${emailDisplay}</td>
         <td style="padding:6px 8px;border-top:1px solid var(--border);text-align:center"><select class="fc fc-prof-regime" data-prof="${safe}" style="width:90px;padding:4px 8px;font-weight:600"><option value="pj"${regime==='pj'?' selected':''}>PJ</option><option value="rpa"${regime==='rpa'?' selected':''}>RPA</option></select></td>
+        <td style="padding:6px 8px;border-top:1px solid var(--border);text-align:center"><input type="checkbox" class="fc-prof-plano" data-prof="${safe}" ${c.temPlanoSaude?'checked':''} style="width:16px;height:16px;cursor:pointer" title="Tem plano de saúde"/></td>
         <td style="padding:6px 8px;border-top:1px solid var(--border);text-align:right"><input type="number" step="0.01" min="0" class="fc fc-prof-fix" data-prof="${safe}" value="${Number(c.salarioFixo)||0}" style="width:140px;text-align:right;padding:4px 8px"/></td>
         <td style="padding:6px 8px;border-top:1px solid var(--border);text-align:center"><input type="month" class="fc fc-prof-ini" data-prof="${safe}" value="${ini}" style="width:140px;padding:4px 8px" title="Primeiro mês com salário fixo (formato YYYY-MM)"/></td>
         <td style="padding:6px 8px;border-top:1px solid var(--border);text-align:center"><input type="month" class="fc fc-prof-fim" data-prof="${safe}" value="${fim}" style="width:140px;padding:4px 8px" title="Último mês com salário fixo (formato YYYY-MM)"/></td>
@@ -23043,14 +23165,15 @@ window.saveFinCadastros=async(ev)=>{
   // Coleta inputs profs: salário fixo + período opcional (inicio/fim em YYYY-MM).
   // O email do prof NÃO é editado aqui — vive em config/professores.emails,
   // editado na aba Professores das Configurações (fonte única de verdade).
-  const iniMap=new Map(),fimMap=new Map(),regMap=new Map();
+  const iniMap=new Map(),fimMap=new Map(),regMap=new Map(),planoMap=new Map();
   document.querySelectorAll('.fc-prof-ini').forEach(el=>iniMap.set(el.dataset.prof,(el.value||'').trim()));
   document.querySelectorAll('.fc-prof-fim').forEach(el=>fimMap.set(el.dataset.prof,(el.value||'').trim()));
   document.querySelectorAll('.fc-prof-regime').forEach(el=>regMap.set(el.dataset.prof,el.value==='rpa'?'rpa':'pj'));
+  document.querySelectorAll('.fc-prof-plano').forEach(el=>planoMap.set(el.dataset.prof,!!el.checked));
   const pf={};
   document.querySelectorAll('.fc-prof-fix').forEach(inp=>{
     const n=inp.dataset.prof;
-    pf[n]={salarioFixo:Number(inp.value)||0,inicio:iniMap.get(n)||'',fim:fimMap.get(n)||'',regime:regMap.get(n)||'pj'};
+    pf[n]={salarioFixo:Number(inp.value)||0,inicio:iniMap.get(n)||'',fim:fimMap.get(n)||'',regime:regMap.get(n)||'pj',temPlanoSaude:planoMap.get(n)||false};
   });
   // Coleta tipos (mantém system mesmo que nome esteja vazio no DOM)
   const tipos=(S.financeiro.tipos||[]).map((t,i)=>{
@@ -23212,6 +23335,16 @@ window.fecharMesFin=async(anoMes)=>{
   await saveFinanceiroDoc();
   renderFinanceiro();
 };
+window._finSetDescontoPlano=async(profNome,anoMes,val)=>{
+  if(!_isAdminEm('financeiro')){alert('Apenas administradores podem lançar desconto.');return;}
+  const m=S.financeiro.meses[anoMes]=S.financeiro.meses[anoMes]||{};
+  if(m.status==='fechado'){alert('Mês fechado — reabra para editar o desconto.');return;}
+  m.descontoPlano=m.descontoPlano||{};
+  const n=Number(val)||0;
+  if(n>0)m.descontoPlano[profNome]=n; else delete m.descontoPlano[profNome];
+  try{await saveFinanceiroDoc();}catch(e){console.error('descontoPlano save:',e);}
+  renderFinanceiro();
+};
 window.reabrirMesFin=async(anoMes)=>{
   if(!_isAdminEm('financeiro'))return;
   if(!confirm(`Reabrir o mês de ${_mesNome(anoMes)}?\n\nO snapshot será descartado e os valores voltam a recalcular.`))return;
@@ -23261,25 +23394,35 @@ window.openFinRelatorio=async(profNome,anoMes)=>{
     const valorTxt=m.parcial?`${_BRL(m.valor)} <span style="color:var(--t2);font-size:11px">(de ${_BRL(m.valorCheio)})</span>`:_BRL(m.valor);
     return[m.tipo||'—',`${iniFmt} → ${fimFmt}`,m.alunosQtd||0,diasTxt,valorTxt];
   });
+  const menTsaOralRows=(p.mentoriasTsaOralDet||[]).map(m=>{
+    const iniFmt=m.inicio?fD(_mentNormData(m.inicio,'ini')):'—';
+    const fimFmt=m.fim?fD(_mentNormData(m.fim,'fim')):'—';
+    const diasTxt=m.parcial?`<span style="color:var(--yellow);font-weight:700">${m.dias} de ${m.diasMes} dias</span>`:`mês cheio (${m.diasMes} dias)`;
+    const valorTxt=m.parcial?`${_BRL(m.valor)} <span style="color:var(--t2);font-size:11px">(de ${_BRL(m.valorCheio)})</span>`:_BRL(m.valor);
+    return[m.tipo||'—',`${iniFmt} → ${fimFmt}`,m.alunosQtd||0,diasTxt,valorTxt];
+  });
   // Resumo: lista apenas atividades em que o prof TEM valor > 0 (esconde zerados)
   const resumoLinhas=[];
   if(p.fixo>0)resumoLinhas.push(`<div><strong>Salário fixo:</strong> ${_BRL(p.fixo)}</div>`);
   if(p.totalRodadas>0)resumoLinhas.push(`<div><strong>Rodadas Sim Oficial:</strong> ${p.rodadasQtd} × ${_BRL(p.valRod)} = ${_BRL(p.totalRodadas)}</div>`);
   if(p.totalSimExtras>0)resumoLinhas.push(`<div><strong>Sim. Extras:</strong> ${p.simExtrasQtd} × ${_BRL(p.valExt)} = ${_BRL(p.totalSimExtras)}</div>`);
   if((p.totalMentorias||0)>0)resumoLinhas.push(`<div><strong>Mentoria:</strong> ${(p.mentoriasQtd||0)} grupo${(p.mentoriasQtd||0)===1?'':'s'} = ${_BRL(p.totalMentorias||0)}</div>`);
+  if((p.totalMentoriasTsaOral||0)>0)resumoLinhas.push(`<div><strong>Mentoria TSA Oral:</strong> ${(p.mentoriasTsaOralQtd||0)} grupo${(p.mentoriasTsaOralQtd||0)===1?'':'s'} = ${_BRL(p.totalMentoriasTsaOral||0)}</div>`);
   if(p.totalManuais>0)resumoLinhas.push(`<div><strong>Atividades extras:</strong> ${_BRL(p.totalManuais)}</div>`);
+  if((p.descontoPlano||0)>0)resumoLinhas.push(`<div style="color:var(--red)"><strong>Desconto plano de saúde:</strong> − ${_BRL(p.descontoPlano)}</div>`);
   // Seções detalhadas: só renderiza as que têm registros
   const secoesDet=[];
   if(rodRows.length)secoesDet.push(sec('Rodadas Sim Oficial',detTab(rodRows,['Simulado','Rodada','Data','Valor'])));
   if(extRows.length)secoesDet.push(sec('Simulados extras',detTab(extRows,['Simulado','Aluno','Data/Hora','Valor'])));
   if(menRows.length)secoesDet.push(sec('Mentoria',detTab(menRows,['Tipo','Período','Alunos','Dias trabalhados no mês','Valor'])));
+  if(menTsaOralRows.length)secoesDet.push(sec('Mentoria TSA Oral',detTab(menTsaOralRows,['Tipo','Período','Alunos','Dias trabalhados no mês','Valor'])));
   if(manRows.length)secoesDet.push(sec('Atividades extras',detTab(manRows,_relAtivAcoes?['Tipo','Descrição','Qtd','Unitário','Total','Ações']:['Tipo','Descrição','Qtd','Unitário','Total'])));
   document.getElementById('fr-body').innerHTML=`
     <div style="background:var(--bg3);padding:14px;border-radius:var(--rs);margin-bottom:14px">
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:13px">
         ${resumoLinhas.join('')||'<div style="color:var(--t2)">Nenhuma atividade neste mês.</div>'}
       </div>
-      <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;font-size:18px;font-weight:800;color:var(--accent)">TOTAL: ${_BRL(p.total)}</div>
+      <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;font-size:18px;font-weight:800;color:var(--accent)">TOTAL${(p.descontoPlano||0)>0?' LÍQUIDO':''}: ${_BRL(p.total)}${(p.descontoPlano||0)>0?` <span style="font-size:12px;color:var(--t2);font-weight:600">(bruto ${_BRL(p.totalBruto)} − ${_BRL(p.descontoPlano)} plano)</span>`:''}</div>
     </div>
     ${secoesDet.join('')}
   `;
@@ -23301,15 +23444,15 @@ window.exportFinExcel=async(anoMes)=>{
     ['Controle Financeiro · '+_mesNome(anoMes)],
     ['Status',mesData.status==='fechado'?'Fechado em '+(mesData.fechadoEm?fDT(mesData.fechadoEm):''):'Aberto'],
     [],
-    ['Professor','Salário fixo','Rodadas (qtd)','Valor/rodada','Total rodadas','Sim. Extras (qtd)','Valor/aluno','Total sim. extras','Mentoria (grupos)','Total mentoria','Atividades extras','Total geral'],
-    ...dados.map(p=>[p.nome,p.fixo,p.rodadasQtd,p.valRod,p.totalRodadas,p.simExtrasQtd,p.valExt,p.totalSimExtras,(p.mentoriasQtd||0),(p.totalMentorias||0),p.totalManuais,p.total]),
+    ['Professor','Salário fixo','Rodadas (qtd)','Valor/rodada','Total rodadas','Sim. Extras (qtd)','Valor/aluno','Total sim. extras','Mentoria (grupos)','Total mentoria','Mentoria TSA Oral (grupos)','Total mentoria TSA Oral','Atividades extras','Desconto plano saúde','Total geral'],
+    ...dados.map(p=>[p.nome,p.fixo,p.rodadasQtd,p.valRod,p.totalRodadas,p.simExtrasQtd,p.valExt,p.totalSimExtras,(p.mentoriasQtd||0),(p.totalMentorias||0),(p.mentoriasTsaOralQtd||0),(p.totalMentoriasTsaOral||0),p.totalManuais,(p.descontoPlano||0),p.total]),
     [],
-    ['TOTAL GERAL','','','','','','','','','','',dados.reduce((s,p)=>s+p.total,0)],
+    ['TOTAL GERAL','','','','','','','','','','','','','',dados.reduce((s,p)=>s+p.total,0)],
   ];
   const sheets=[{name:'Resumo',data:resumo}];
-  // Sheet detalhada de mentorias
+  // Sheet detalhada de mentorias (genéricas + TSA Oral; coluna Tipo distingue)
   const mentoriasAll=[];
-  dados.forEach(p=>(p.mentoriasDet||[]).forEach(m=>{
+  dados.forEach(p=>[...(p.mentoriasDet||[]),...(p.mentoriasTsaOralDet||[])].forEach(m=>{
     mentoriasAll.push([p.nome,m.tipo||'',m.inicio||'',m.fim||'',m.alunosQtd||0,m.dias||0,m.diasMes||0,m.parcial?'Parcial':'Mês cheio',m.valorCheio||0,m.valor]);
   }));
   if(mentoriasAll.length)sheets.push({name:'Mentoria',data:[['Professor','Tipo','Início','Fim','Alunos','Dias no mês','Dias do mês','Tipo de mês','Valor cheio','Valor pago'],...mentoriasAll]});
@@ -23331,12 +23474,14 @@ window.exportFinRelatorioProf=()=>{
       ['Rodadas oficiais',p.rodadasQtd,p.valRod,p.totalRodadas],
       ['Sim. Extras',p.simExtrasQtd,p.valExt,p.totalSimExtras],
       ['Mentoria',(p.mentoriasQtd||0),'—',(p.totalMentorias||0)],
+      ['Mentoria TSA Oral',(p.mentoriasTsaOralQtd||0),'—',(p.totalMentoriasTsaOral||0)],
       ['Atividades extras',p.manuaisQtd,'—',p.totalManuais],
+      ['Desconto plano de saúde','—','—',-(p.descontoPlano||0)],
       [],['TOTAL','','',p.total],
     ]},
     {name:'Rodadas',data:[['Simulado','Dia','Rodada','Data','Valor'],...p.rodadasDet.map(r=>[r.simNome,r.dia,r.rodada,r.data||'',p.valRod])]},
     {name:'Sim Extras',data:[['Simulado','Aluno','Data','Horário','Valor'],...p.simExtrasDet.map(s=>[s.simNome,s.aluno,s.data,s.horario||'',p.valExt])]},
-    {name:'Mentoria',data:[['Tipo','Início','Fim','Alunos','Dias no mês','Dias do mês','Tipo de mês','Valor cheio','Valor pago'],...(p.mentoriasDet||[]).map(m=>[m.tipo||'',m.inicio||'',m.fim||'',m.alunosQtd||0,m.dias||0,m.diasMes||0,m.parcial?'Parcial':'Mês cheio',m.valorCheio||0,m.valor])]},
+    {name:'Mentoria',data:[['Tipo','Início','Fim','Alunos','Dias no mês','Dias do mês','Tipo de mês','Valor cheio','Valor pago'],...[...(p.mentoriasDet||[]),...(p.mentoriasTsaOralDet||[])].map(m=>[m.tipo||'',m.inicio||'',m.fim||'',m.alunosQtd||0,m.dias||0,m.diasMes||0,m.parcial?'Parcial':'Mês cheio',m.valorCheio||0,m.valor])]},
     {name:'Atividades extras',data:[['Tipo','Descrição','Qtd','Unitário','Total'],...p.manuaisDet.map(l=>{const t=tipos.find(x=>x.id===l.tipoId);return[t?t.nome:'Livre',l.descricao||'',l.qtd,l.valor,l.valor*l.qtd];})]},
   ];
   _xlsxDownload(`financeiro_${profNome.replace(/\s+/g,'_')}_${anoMes}.xlsx`,sheets);
@@ -25196,7 +25341,7 @@ window.deleteUser=async()=>{
 
 // co tabs
 window.switchCoTab=(tab,btn)=>{
-  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','orcamento','mentorias','features','recProvas','recGestao','recFontes','recMetricas','comunicacao','senhasAcessos','senhasPublicas','auditoria','produtos','cruzarLista','po'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
+  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','orcamento','mentorias','mentoriasF2','features','recProvas','recGestao','recFontes','recMetricas','comunicacao','senhasAcessos','senhasPublicas','auditoria','produtos','cruzarLista','po'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
   document.querySelectorAll('.co-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   // Show "Novo Simulado" only on simulados tab
@@ -29140,6 +29285,7 @@ window.switchCoTab = (tab, btn) => {
   if(tab==='simExtras') renderSimuladosExtras();
   if(tab==='financeiro'){_ensureFinanceiroListener();renderFinanceiro();}
   if(tab==='mentorias') renderMentorias();
+  if(tab==='mentoriasF2') renderMentoriasF2();
   if(tab==='revisao') renderRevisaoTab();
   if(tab==='features') renderFeatures();
   if(tab==='recProvas') renderRecProvas();
