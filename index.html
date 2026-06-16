@@ -22162,11 +22162,15 @@ window.renderFinanceiro=async()=>{
           ?'font-size:10.5px;padding:3px 8px;background:rgba(228,109,10,.18);color:#e46d0a;border-color:rgba(228,109,10,.4);font-weight:700'
           :'font-size:10.5px;padding:3px 8px';
         const reenviarLabel=regimeMudou?'⚠️ Reenviar como '+(regimeAtual==='rpa'?'RPA':'NF'):'🔁 Reenviar';
-        const solicCell=solic
-          ?`<div style="display:flex;flex-direction:column;align-items:center;gap:4px">
-              <span style="font-size:10.5px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:center">✓ ${fmtSolic(solic)} ${_regimeBadgeSolic(regimeEnviado)}</span>
-              ${vencidoChip}
+        // Prof agregado: não tem botão próprio — selo indicando que entra na nota do titular.
+        const juntoTit=_notaJuntoDe(p.nome);
+        const solicCell=juntoTit
+          ?`<span style="display:inline-block;font-size:10.5px;color:var(--t2);font-style:italic;line-height:1.45" title="Os valores deste professor entram, discriminados, na nota de ${juntoTit.replace(/"/g,'&quot;')}. Ele não recebe email próprio.">↳ entra na nota de<br><strong style="color:var(--accent);font-style:normal">${juntoTit.replace(/</g,'&lt;')}</strong></span>`
+          :solic
+          ?`<div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap">
+              <span style="font-size:10.5px;color:var(--green);font-weight:800;letter-spacing:.3px;white-space:nowrap" title="Solicitado em ${fmtSolic(solic)} · ${regimeEnviado==='rpa'?'RPA':'NF'}">✓ SOLICITADO</span>
               <button class="btn btn-s btn-sm" onclick="_finSolicitarNota('${safeNome}','${anoMes}','${regimeAtual}')" title="${reenviarTitle}" style="${reenviarStyle}">${reenviarLabel}</button>
+              ${vencidoChip}
             </div>`
           :(isRPA
             ?`<button class="btn btn-s btn-sm" onclick="_finSolicitarRPA('${safeNome}','${anoMes}')" style="font-size:11px;padding:5px 12px;font-weight:700;background:rgba(228,109,10,.15);color:#e46d0a;border-color:rgba(228,109,10,.4)" title="Prof em regime RPA — fluxo de email separado">📋 Solicitar RPA</button>`
@@ -22496,27 +22500,33 @@ window._finFilterProfs=()=>{
   if(c)c.textContent=term?`${vis} de ${total} mostrad${vis===1?'o':'os'}`:`${total} professor${total!==1?'es':''}`;
 };
 
-// Helper INTERNO (sem popups) que dispara o email de cobrança de UM prof e atualiza
-// timestamp + controleStatus. Reutilizado pelo botão individual e pelo bulk.
-// opts.regime: 'pj' (default) usa templateId; 'rpa' usa templateIdRpa.
-// Retorna {ok:bool, sent:number, total:number, falhas:[{email,erro}], skipReason?}
-async function _finEnviarNotaInterno(profNome,anoMes,opts){
-  opts=opts||{};
-  const regime=opts.regime==='rpa'?'rpa':'pj';
-  const cfg=S.financeiro.notaFiscalCfg||{};
-  const templateId=(regime==='rpa'?(cfg.templateIdRpa||''):(cfg.templateId||'')).trim();
-  const emailCoord=(cfg.emailCoord||'').trim();
-  const serviceId=(cfg.serviceId||'').trim()||'service_exyoa4r';
-  if(!templateId)return{ok:false,sent:0,total:0,falhas:[],skipReason:regime==='rpa'?'sem-template-rpa':'sem-template'};
-  const emailsProf=(typeof _profEmails==='function'?_profEmails(profNome):[((S.profsEmail||{})[profNome]||'').trim()].filter(Boolean));
-  if(!emailsProf.length)return{ok:false,sent:0,total:0,falhas:[],skipReason:'sem-email'};
-  // Dados do prof
+// ── Agrupamento de notas ──────────────────────────────────────────────────
+// Um prof pode emitir a nota JUNTO com outro (o "titular"): ele não recebe email
+// próprio; seus valores entram, discriminados, na nota do titular. Config em
+// Cadastros → Professores (campo "Nota junto com"). Guardado em profsFin[nome].notaJunto.
+
+// Nome do titular com quem este prof emite junto, ou '' se emite a própria nota.
+const _notaJuntoDe=(nome)=>{
+  const c=(S.financeiro?.profsFin||{})[nome];
+  const t=(c?.notaJunto||'').trim();
+  return (t&&t!==nome)?t:'';
+};
+// Profs agregados a um titular (emitem a nota junto com ele), em ordem alfabética.
+const _finAgregadosDe=(titular)=>{
+  const pf=S.financeiro?.profsFin||{};
+  return Object.keys(pf).filter(n=>n!==titular&&((pf[n]?.notaJunto||'').trim()===titular)).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+};
+// Dados (p) de um prof pro mês — usa snapshot se o mês está fechado, senão calcula.
+async function _finDadosProf(nome,anoMes){
   const mesData=(S.financeiro.meses||{})[anoMes]||{};
   let p;
-  if(mesData.status==='fechado'&&mesData.snapshot)p=mesData.snapshot.find(x=>x.nome===profNome);
-  if(!p){const dados=await calcFinanceiroMes(anoMes);p=dados.find(x=>x.nome===profNome);}
-  if(!p)return{ok:false,sent:0,total:0,falhas:[],skipReason:'sem-dados'};
-  // Monta detalhamento line-by-line (mesmo formato do email individual)
+  if(mesData.status==='fechado'&&mesData.snapshot)p=mesData.snapshot.find(x=>x.nome===nome);
+  if(!p){const dados=await calcFinanceiroMes(anoMes);p=dados.find(x=>x.nome===nome);}
+  return p||null;
+}
+// Constrói as linhas de detalhamento de UM prof (categoria + itens indentados).
+// Categorias zeradas são omitidas. Não inclui cabeçalho de nome nem subtotal.
+function _finBuildLinhas(p){
   const tipos=S.financeiro.tipos||[];
   const linhas=[];
   if(p.fixo>0)linhas.push(`• Salário fixo: ${_BRL(p.fixo)}`);
@@ -22568,9 +22578,60 @@ async function _finEnviarNotaInterno(profNome,anoMes,opts){
     });
   }
   if((p.descontoPlano||0)>0)linhas.push(`• Desconto plano de saúde: − ${_BRL(p.descontoPlano)}`);
+  return linhas;
+}
+// Monta o detalhamento + total de um titular, incorporando os profs agregados.
+// Respeita os profs excluídos do mês. Sem agregados, é o detalhamento simples do prof.
+// Retorna {detalhamento, total, fmtTotal, agregados:[nomes]}.
+async function _finMontaNotaTitular(titular,anoMes,pTitular){
+  const mesData=(S.financeiro.meses||{})[anoMes]||{};
+  const excl=new Set(mesData.profsExcluidos||[]);
+  const agreg=_finAgregadosDe(titular).filter(a=>!excl.has(a));
+  let linhas=_finBuildLinhas(pTitular);
+  let total=pTitular.total||0;
+  if(agreg.length){
+    // Com agregados: separa cada pessoa por cabeçalho + subtotal, e fecha com TOTAL GERAL.
+    linhas=[`━━ ${titular} ━━`,...(linhas.length?linhas:['(sem lançamentos)']),`   Subtotal ${titular}: ${_BRL(pTitular.total||0)}`];
+    for(const nomeA of agreg){
+      const pa=await _finDadosProf(nomeA,anoMes);
+      const la=pa?_finBuildLinhas(pa):[];
+      const subA=pa?(pa.total||0):0;
+      linhas.push('',`━━ ${nomeA} ━━`,...(la.length?la:['(sem lançamentos)']),`   Subtotal ${nomeA}: ${_BRL(subA)}`);
+      total+=subA;
+    }
+    linhas.push('',`TOTAL GERAL: ${_BRL(total)}`);
+  }
   const detalhamento=linhas.length?linhas.join('\n'):'(sem detalhamento — total zerado)';
+  return {detalhamento,total,fmtTotal:_BRL(total),agregados:agreg};
+}
+
+// Helper INTERNO (sem popups) que dispara o email de cobrança de UM prof e atualiza
+// timestamp + controleStatus. Reutilizado pelo botão individual e pelo bulk.
+// opts.regime: 'pj' (default) usa templateId; 'rpa' usa templateIdRpa.
+// Retorna {ok:bool, sent:number, total:number, falhas:[{email,erro}], skipReason?}
+async function _finEnviarNotaInterno(profNome,anoMes,opts){
+  opts=opts||{};
+  // Prof agregado não recebe email próprio — seus valores entram na nota do titular.
+  if(_notaJuntoDe(profNome))return{ok:false,sent:0,total:0,falhas:[],skipReason:'agregado'};
+  const regime=opts.regime==='rpa'?'rpa':'pj';
+  const cfg=S.financeiro.notaFiscalCfg||{};
+  const templateId=(regime==='rpa'?(cfg.templateIdRpa||''):(cfg.templateId||'')).trim();
+  const emailCoord=(cfg.emailCoord||'').trim();
+  const serviceId=(cfg.serviceId||'').trim()||'service_exyoa4r';
+  if(!templateId)return{ok:false,sent:0,total:0,falhas:[],skipReason:regime==='rpa'?'sem-template-rpa':'sem-template'};
+  const emailsProf=(typeof _profEmails==='function'?_profEmails(profNome):[((S.profsEmail||{})[profNome]||'').trim()].filter(Boolean));
+  if(!emailsProf.length)return{ok:false,sent:0,total:0,falhas:[],skipReason:'sem-email'};
+  // Dados do prof
+  const mesData=(S.financeiro.meses||{})[anoMes]||{};
+  let p;
+  if(mesData.status==='fechado'&&mesData.snapshot)p=mesData.snapshot.find(x=>x.nome===profNome);
+  if(!p){const dados=await calcFinanceiroMes(anoMes);p=dados.find(x=>x.nome===profNome);}
+  if(!p)return{ok:false,sent:0,total:0,falhas:[],skipReason:'sem-dados'};
+  // Monta detalhamento — incorpora os profs agregados (emitem junto) se houver.
+  const nota=await _finMontaNotaTitular(profNome,anoMes,p);
+  const detalhamento=nota.detalhamento;
   const mesNomeStr=_mesNome(anoMes);
-  const fmtTotal=_BRL(p.total);
+  const fmtTotal=nota.fmtTotal;
   const assunto=regime==='rpa'
     ?`Solicitação de RPA — ${mesNomeStr}`
     :`Solicitação de Nota Fiscal — ${mesNomeStr}`;
@@ -22596,10 +22657,13 @@ async function _finEnviarNotaInterno(profNome,anoMes,opts){
   const mes=S.financeiro.meses[anoMes];
   if(!mes.notasSolicitadas)mes.notasSolicitadas={};
   if(!mes.notasSolicitadasRegime)mes.notasSolicitadasRegime={};
-  mes.notasSolicitadas[profNome]=new Date().toISOString();
+  const agora=new Date().toISOString();
+  mes.notasSolicitadas[profNome]=agora;
   mes.notasSolicitadasRegime[profNome]=regime;
   if(!mes.controleStatus)mes.controleStatus={};
   mes.controleStatus[profNome]=regime==='rpa'?'rpa-solicitada':'nf-solicitada';
+  // Registra os agregados (entraram na nota do titular) pra trilha de auditoria.
+  (nota.agregados||[]).forEach(a=>{mes.notasSolicitadas[a]=agora;mes.notasSolicitadasRegime[a]=regime;});
   if(!opts.skipSave){
     try{await saveFinanceiroDoc();}catch(e){console.error('_finEnviarNotaInterno save:',e);}
   }
@@ -22628,6 +22692,12 @@ window._finSolicitarRPA=async(profNome,anoMes)=>{
 // Cada regime usa um Template ID diferente configurado em Cadastros → 📧 Configurar e-Mail.
 window._finSolicitarNota=async(profNome,anoMes,regimeArg)=>{
   if(!_isAdminEm('financeiro')){alert('Apenas administradores podem solicitar.');return;}
+  // Prof agregado emite junto com o titular — redireciona pra solicitar a nota dele.
+  const titularDe=_notaJuntoDe(profNome);
+  if(titularDe){
+    alert(`${profNome} emite a nota JUNTO com ${titularDe}.\n\nOs valores de ${profNome} já entram na nota de ${titularDe} — solicite a nota de ${titularDe}.`);
+    return;
+  }
   const regime=regimeArg==='rpa'?'rpa':'pj';
   const tipoDocLabel=regime==='rpa'?'RPA':'nota fiscal';
   // 1. Valida config e email(s) do prof
@@ -22651,9 +22721,13 @@ window._finSolicitarNota=async(profNome,anoMes,regimeArg)=>{
   if(mesData.status==='fechado'&&mesData.snapshot){p=mesData.snapshot.find(x=>x.nome===profNome);}
   if(!p){const dados=await calcFinanceiroMes(anoMes);p=dados.find(x=>x.nome===profNome);}
   if(!p){alert('Sem dados pra este professor neste mês — nada a solicitar.');return;}
+  // Monta detalhamento + total já incorporando os profs agregados (emitem junto).
+  const nota=await _finMontaNotaTitular(profNome,anoMes,p);
+  const detalhamento=nota.detalhamento;
+  const avisoAgregados=(nota.agregados||[]).length?`\n👥 Inclui na mesma nota: ${nota.agregados.join(', ')}`:'';
   // 3. Confirma envio (texto diferente pra primeira vez vs reenvio)
   const ja=(mesData.notasSolicitadas||{})[profNome];
-  const fmtTotal=_BRL(p.total);
+  const fmtTotal=nota.fmtTotal;
   const mesNomeStr=_mesNome(anoMes);
   const emailsLabel=emailsProf.length>1?`${emailsProf.length} emails`:emailsProf[0];
   const emailsLista=emailsProf.map(e=>'   • '+e).join('\n');
@@ -22669,62 +22743,9 @@ window._finSolicitarNota=async(profNome,anoMes,regimeArg)=>{
       if(!confirm(`Já foi solicitada uma ${tipoDocLabel} pra ${profNome} em ${txt}.\n\nReenviar pra ${emailsLabel}?\n${emailsLista}\nValor: ${fmtTotal}\n\nA data registrada será atualizada.`))return;
     }
   }else{
-    if(!confirm(`Enviar solicitação de ${tipoDocLabel} pra ${profNome}?\n\n📧 Para (${emailsLabel}):\n${emailsLista}\n${emailCoord?'📋 Cópia: '+emailCoord+'\n':''}💰 Valor: ${fmtTotal}\n🗓️ Mês de referência: ${mesNomeStr}\n\n${emailsProf.length>1?'Será disparado UM email por destinatário.':'O email será disparado agora.'}`))return;
+    if(!confirm(`Enviar solicitação de ${tipoDocLabel} pra ${profNome}?\n\n📧 Para (${emailsLabel}):\n${emailsLista}\n${emailCoord?'📋 Cópia: '+emailCoord+'\n':''}💰 Valor: ${fmtTotal}${avisoAgregados}\n🗓️ Mês de referência: ${mesNomeStr}\n\n${emailsProf.length>1?'Será disparado UM email por destinatário.':'O email será disparado agora.'}`))return;
   }
-  // 4. Monta detalhamento linha-a-linha (resumo da categoria + cada item).
-  // Categorias com valor zero são omitidas. Cada item vira uma linha indentada.
-  const linhas=[];
-  const tipos=S.financeiro.tipos||[];
-  if(p.fixo>0)linhas.push(`• Salário fixo: ${_BRL(p.fixo)}`);
-  if(p.totalRodadas>0){
-    linhas.push(`• Rodadas Sim Oficial — ${p.rodadasQtd} × ${_BRL(p.valRod)} = ${_BRL(p.totalRodadas)}`);
-    (p.rodadasDet||[]).forEach(r=>{
-      const dataFmt=r.data?fD(r.data):'';
-      const diaLbl=r.dia==='sabado'?'Sábado':(r.dia==='domingo'?'Domingo':r.dia);
-      linhas.push(`    - ${r.simNome} · ${diaLbl} rodada ${r.rodada}${dataFmt?' · '+dataFmt:''}`);
-    });
-  }
-  if(p.totalSimExtras>0){
-    linhas.push(`• Simulados Extras — ${p.simExtrasQtd} × ${_BRL(p.valExt)} = ${_BRL(p.totalSimExtras)}`);
-    (p.simExtrasDet||[]).forEach(s=>{
-      const dataFmt=s.data?fD(s.data):'';
-      linhas.push(`    - ${s.simNome} · ${s.aluno}${dataFmt?' · '+dataFmt:''}${s.horario?' '+s.horario:''}`);
-    });
-  }
-  if((p.totalMentorias||0)>0){
-    linhas.push(`• Mentoria — ${p.mentoriasQtd} grupo${p.mentoriasQtd===1?'':'s'} = ${_BRL(p.totalMentorias)}`);
-    (p.mentoriasDet||[]).forEach(m=>{
-      const iniN=_mentNormData?_mentNormData(m.inicio,'ini'):m.inicio;
-      const fimN=_mentNormData?_mentNormData(m.fim,'fim'):m.fim;
-      const iniFmt=iniN?fD(iniN):'—';
-      const fimFmt=fimN?fD(fimN):'—';
-      const dias=m.parcial?`${m.dias} de ${m.diasMes} dias (parcial · valor cheio ${_BRL(m.valorCheio)})`:`mês cheio (${m.diasMes} dias)`;
-      linhas.push(`    - ${m.tipo||'—'} · ${iniFmt} → ${fimFmt} · ${m.alunosQtd||0} aluno${(m.alunosQtd||0)===1?'':'s'} · ${dias} · ${_BRL(m.valor)}`);
-    });
-  }
-  if((p.totalMentoriasTsaOral||0)>0){
-    linhas.push(`• Mentoria TSA Oral — ${p.mentoriasTsaOralQtd} grupo${p.mentoriasTsaOralQtd===1?'':'s'} = ${_BRL(p.totalMentoriasTsaOral)}`);
-    (p.mentoriasTsaOralDet||[]).forEach(m=>{
-      const iniN=_mentNormData?_mentNormData(m.inicio,'ini'):m.inicio;
-      const fimN=_mentNormData?_mentNormData(m.fim,'fim'):m.fim;
-      const iniFmt=iniN?fD(iniN):'—';
-      const fimFmt=fimN?fD(fimN):'—';
-      const dias=m.parcial?`${m.dias} de ${m.diasMes} dias (parcial · valor cheio ${_BRL(m.valorCheio)})`:`mês cheio (${m.diasMes} dias)`;
-      linhas.push(`    - ${m.tipo||'—'} · ${iniFmt} → ${fimFmt} · ${m.alunosQtd||0} aluno${(m.alunosQtd||0)===1?'':'s'} · ${dias} · ${_BRL(m.valor)}`);
-    });
-  }
-  if(p.totalManuais>0){
-    linhas.push(`• Atividades extras — ${p.manuaisQtd} ${p.manuaisQtd===1?'item':'itens'} = ${_BRL(p.totalManuais)}`);
-    (p.manuaisDet||[]).forEach(l=>{
-      const t=tipos.find(x=>x.id===l.tipoId);
-      const nomeT=t?t.nome:'Livre';
-      const desc=l.descricao||'';
-      const qtdLbl=(l.qtd||1)>1?`${l.qtd} × ${_BRL(l.valor)} = ${_BRL((l.valor||0)*(l.qtd||1))}`:_BRL(l.valor);
-      linhas.push(`    - ${nomeT}${desc?': '+desc:''} · ${qtdLbl}`);
-    });
-  }
-  if((p.descontoPlano||0)>0)linhas.push(`• Desconto plano de saúde: − ${_BRL(p.descontoPlano)}`);
-  const detalhamento=linhas.length?linhas.join('\n'):'(sem detalhamento — total zerado)';
+  // 4. (detalhamento já montado acima via _finMontaNotaTitular, com agregados)
   const assunto=regime==='rpa'
     ?`Solicitação de RPA — ${mesNomeStr}`
     :`Solicitação de Nota Fiscal — ${mesNomeStr}`;
@@ -22759,11 +22780,14 @@ window._finSolicitarNota=async(profNome,anoMes,regimeArg)=>{
   const mes=S.financeiro.meses[anoMes];
   if(!mes.notasSolicitadas)mes.notasSolicitadas={};
   if(!mes.notasSolicitadasRegime)mes.notasSolicitadasRegime={};
-  mes.notasSolicitadas[profNome]=new Date().toISOString();
+  const agora=new Date().toISOString();
+  mes.notasSolicitadas[profNome]=agora;
   mes.notasSolicitadasRegime[profNome]=regime;
   // Auto-muda o status de controle: 'rpa-solicitada' pra RPA, 'nf-solicitada' pra PJ
   if(!mes.controleStatus)mes.controleStatus={};
   mes.controleStatus[profNome]=regime==='rpa'?'rpa-solicitada':'nf-solicitada';
+  // Registra os agregados (entraram na nota do titular) pra trilha de auditoria.
+  (nota.agregados||[]).forEach(a=>{mes.notasSolicitadas[a]=agora;mes.notasSolicitadasRegime[a]=regime;});
   try{
     await saveFinanceiroDoc();
     const msg=falhas.length
@@ -22795,8 +22819,18 @@ window._finSolicitarTodasNotas=async(anoMes)=>{
   const mesData=(S.financeiro.meses||{})[anoMes]||{};
   const dados=mesData.snapshot||await calcFinanceiroMes(anoMes);
   const excluidos=new Set(mesData.profsExcluidos||[]);
-  // Elegíveis: total > 0, não excluído. Separa por regime.
-  const elegiveis=dados.filter(p=>p.total>0&&!excluidos.has(p.nome)).map(p=>({...p,emails:_profEmails(p.nome),regime:_regimeOf(p.nome)}));
+  // Total por prof (pra somar os agregados no titular).
+  const totalDe=new Map(dados.map(p=>[p.nome,p.total||0]));
+  // Elegíveis: não excluído, NÃO agregado (agregados entram na nota do titular),
+  // e total COMBINADO (próprio + agregados não-excluídos) > 0. Separa por regime.
+  const elegiveis=dados
+    .filter(p=>!excluidos.has(p.nome)&&!_notaJuntoDe(p.nome))
+    .map(p=>{
+      const agreg=_finAgregadosDe(p.nome).filter(a=>!excluidos.has(a));
+      const totalComb=(p.total||0)+agreg.reduce((s,a)=>s+(totalDe.get(a)||0),0);
+      return{...p,total:totalComb,emails:_profEmails(p.nome),regime:_regimeOf(p.nome)};
+    })
+    .filter(x=>x.total>0);
   const pjAll=elegiveis.filter(x=>x.regime!=='rpa');
   const rpaAll=elegiveis.filter(x=>x.regime==='rpa');
   const pjComEmail=pjAll.filter(x=>x.emails.length>0);
@@ -23071,6 +23105,7 @@ function renderFinCadProfs(){
       <th style="padding:8px;text-align:left">Professor</th>
       <th style="padding:8px;text-align:left" title="Email cadastrado em Professores. Pra editar, vá em Configurações → Professores.">Email (somente leitura)</th>
       <th style="padding:8px;text-align:center" title="Regime de pagamento: PJ (Pessoa Jurídica — emite NF) ou RPA (Recibo de Pagamento Autônomo).">Regime</th>
+      <th style="padding:8px;text-align:center" title="Junte a nota deste professor com outro: ele NÃO recebe email próprio; os valores dele entram, discriminados, na nota do titular escolhido. A nota sai no regime do titular.">Nota junto com</th>
       <th style="padding:8px;text-align:center" title="Marque os professores que têm plano de saúde. Só os marcados terão o campo de desconto na tabela do Financeiro; os demais aparecem com '—'.">Plano de saúde</th>
       <th style="padding:8px;text-align:right">Salário fixo mensal (R$)</th>
       <th style="padding:8px;text-align:center" title="Primeiro mês em que recebe o salário fixo (deixe vazio se indeterminado)">Início</th>
@@ -23082,6 +23117,10 @@ function renderFinCadProfs(){
       const ini=(c.inicio||'').replace(/"/g,'&quot;');
       const fim=(c.fim||'').replace(/"/g,'&quot;');
       const regime=c.regime==='rpa'?'rpa':'pj';
+      // "Nota junto com": só pode apontar pra um titular que emite a própria nota
+      // (não pode encadear). Sempre inclui o titular já escolhido, mesmo que filtrado.
+      const junto=(c.notaJunto||'').trim();
+      const juntoOpts=profs.filter(o=>o!==nome&&(!(((pf[o]||{}).notaJunto||'').trim())||o===junto));
       const emailsArr=(typeof _profEmails==='function'?_profEmails(nome):[((S.profsEmail||{})[nome]||'').trim()].filter(Boolean));
       const emailDisplay=emailsArr.length
         ?emailsArr.map(em=>`<div style="font-size:12px;color:var(--text);line-height:1.4">${em.replace(/</g,'&lt;')}</div>`).join('')
@@ -23090,6 +23129,7 @@ function renderFinCadProfs(){
         <td style="padding:6px 8px;border-top:1px solid var(--border);font-weight:600">${nome}</td>
         <td style="padding:6px 8px;border-top:1px solid var(--border)">${emailDisplay}</td>
         <td style="padding:6px 8px;border-top:1px solid var(--border);text-align:center"><select class="fc fc-prof-regime" data-prof="${safe}" style="width:90px;padding:4px 8px;font-weight:600"><option value="pj"${regime==='pj'?' selected':''}>PJ</option><option value="rpa"${regime==='rpa'?' selected':''}>RPA</option></select></td>
+        <td style="padding:6px 8px;border-top:1px solid var(--border);text-align:center"><select class="fc fc-prof-junto" data-prof="${safe}" style="width:160px;padding:4px 8px" title="Se preenchido, este professor não recebe email próprio: os valores dele entram na nota do titular escolhido."><option value="">— emite a própria —</option>${juntoOpts.map(o=>`<option value="${o.replace(/"/g,'&quot;')}"${o===junto?' selected':''}>${o.replace(/</g,'&lt;')}</option>`).join('')}</select></td>
         <td style="padding:6px 8px;border-top:1px solid var(--border);text-align:center"><input type="checkbox" class="fc-prof-plano" data-prof="${safe}" ${c.temPlanoSaude?'checked':''} style="width:16px;height:16px;cursor:pointer" title="Tem plano de saúde"/></td>
         <td style="padding:6px 8px;border-top:1px solid var(--border);text-align:right"><input type="number" step="0.01" min="0" class="fc fc-prof-fix" data-prof="${safe}" value="${Number(c.salarioFixo)||0}" style="width:140px;text-align:right;padding:4px 8px"/></td>
         <td style="padding:6px 8px;border-top:1px solid var(--border);text-align:center"><input type="month" class="fc fc-prof-ini" data-prof="${safe}" value="${ini}" style="width:140px;padding:4px 8px" title="Primeiro mês com salário fixo (formato YYYY-MM)"/></td>
@@ -23165,15 +23205,19 @@ window.saveFinCadastros=async(ev)=>{
   // Coleta inputs profs: salário fixo + período opcional (inicio/fim em YYYY-MM).
   // O email do prof NÃO é editado aqui — vive em config/professores.emails,
   // editado na aba Professores das Configurações (fonte única de verdade).
-  const iniMap=new Map(),fimMap=new Map(),regMap=new Map(),planoMap=new Map();
+  const iniMap=new Map(),fimMap=new Map(),regMap=new Map(),planoMap=new Map(),juntoMap=new Map();
   document.querySelectorAll('.fc-prof-ini').forEach(el=>iniMap.set(el.dataset.prof,(el.value||'').trim()));
   document.querySelectorAll('.fc-prof-fim').forEach(el=>fimMap.set(el.dataset.prof,(el.value||'').trim()));
   document.querySelectorAll('.fc-prof-regime').forEach(el=>regMap.set(el.dataset.prof,el.value==='rpa'?'rpa':'pj'));
   document.querySelectorAll('.fc-prof-plano').forEach(el=>planoMap.set(el.dataset.prof,!!el.checked));
+  document.querySelectorAll('.fc-prof-junto').forEach(el=>juntoMap.set(el.dataset.prof,(el.value||'').trim()));
   const pf={};
   document.querySelectorAll('.fc-prof-fix').forEach(inp=>{
     const n=inp.dataset.prof;
-    pf[n]={salarioFixo:Number(inp.value)||0,inicio:iniMap.get(n)||'',fim:fimMap.get(n)||'',regime:regMap.get(n)||'pj',temPlanoSaude:planoMap.get(n)||false};
+    // notaJunto: nome do titular com quem emite a nota junto. '' = emite a própria.
+    // Ignora auto-referência (não pode emitir junto consigo mesmo).
+    const junto=juntoMap.get(n)||'';
+    pf[n]={salarioFixo:Number(inp.value)||0,inicio:iniMap.get(n)||'',fim:fimMap.get(n)||'',regime:regMap.get(n)||'pj',temPlanoSaude:planoMap.get(n)||false,notaJunto:(junto&&junto!==n)?junto:''};
   });
   // Coleta tipos (mantém system mesmo que nome esteja vazio no DOM)
   const tipos=(S.financeiro.tipos||[]).map((t,i)=>{
