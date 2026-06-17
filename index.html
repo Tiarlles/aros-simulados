@@ -5680,11 +5680,26 @@ body.pro-rt-fs-on{overflow:hidden}
         /* Alça de redimensionar coluna */
         #tab-po .po-rsz{position:absolute;top:0;right:0;width:8px;height:100%;cursor:col-resize;z-index:6}
         #tab-po .po-rsz:hover{background:var(--accent)}
-        /* Cabeçalho do módulo (dropdown) fixo ao rolar lateralmente */
-        #tab-po .po-mod-cell{position:sticky;left:0;z-index:2}
+        /* Cabeçalho: linha do título + botão excluir, e linha do filtro por coluna */
+        #tab-po .po-th-top{display:flex;align-items:center;gap:6px;justify-content:space-between;padding-right:6px}
+        #tab-po .po-th-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+        #tab-po .po-col-del{flex:none;border:none;background:transparent;color:var(--t2);cursor:pointer;font-size:11px;line-height:1;padding:1px 4px;border-radius:5px;opacity:0;transition:opacity .15s,background .15s,color .15s}
+        #tab-po thead th:hover .po-col-del{opacity:.65}
+        #tab-po .po-col-del:hover{opacity:1;background:color-mix(in srgb,var(--red) 18%,transparent);color:var(--red)}
+        #tab-po .po-th-filtro{display:block;margin-top:5px;width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:10.5px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;text-transform:none;letter-spacing:0;padding:3px 6px}
+        #tab-po .po-th-filtro::placeholder{color:var(--t3);text-transform:none}
+        #tab-po .po-th-filtro:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 18%,transparent)}
+        #tab-po .po-th-filtro.on{border-color:var(--accent);color:var(--accent)}
+        /* Cabeçalho do módulo (dropdown): a barra ocupa a linha toda, mas o conteúdo
+           (seta + nome do Ponto) fica travado na coluna 1 ao rolar lateralmente. */
+        #tab-po .po-mod-cell{padding:0 !important;overflow:visible !important}
+        #tab-po .po-mod-inner{position:sticky;left:0;z-index:2;display:inline-flex;align-items:center;padding:9px 12px;white-space:nowrap}
         body.po-resizing{user-select:none;cursor:col-resize}
         /* Coluna ＋ (nova coluna) */
         #tab-po .po-col-add{text-align:center;padding:4px !important}
+        #tab-po .po-addaula-row td{background:transparent;border-bottom:1px solid color-mix(in srgb,var(--border) 55%,transparent);padding:0}
+        #tab-po .po-addaula-btn{display:inline-flex;align-items:center;gap:5px;margin:3px 0 3px 26px;padding:2px 9px;border:1px dashed color-mix(in srgb,var(--accent) 40%,var(--border));background:transparent;color:var(--accent);font-family:'Plus Jakarta Sans',sans-serif;font-size:10.5px;font-weight:600;border-radius:7px;cursor:pointer;opacity:.85;transition:background .15s,border-color .15s,opacity .15s}
+        #tab-po .po-addaula-btn:hover{background:var(--accent-dim);border-color:var(--accent)}
         #tab-po .po-add-col{width:24px;height:24px;border-radius:7px;border:1px dashed var(--border2);background:transparent;color:var(--t2);cursor:pointer;font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
         #tab-po .po-add-col:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
         /* Modal de nova coluna (renderizado no body, escopo global por id) */
@@ -5711,13 +5726,107 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-col-modal .po-opt-del{background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px;flex:none}
         #po-col-modal .po-opt-del:hover{color:#f85149}
         #po-col-modal .po-modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        /* Edição inline de células / nomes */
+        #tab-po .po-cel-inp,#tab-po .po-cel-sel{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--accent);border-radius:6px;color:var(--text);font-size:11.5px;font-family:'Plus Jakarta Sans',sans-serif;padding:2px 5px;line-height:1.3}
+        #tab-po .po-cel-inp:focus,#tab-po .po-cel-sel:focus{outline:none;box-shadow:0 0 0 2px var(--accent-dim)}
+        #tab-po .po-aula-row td[data-aula]{cursor:text}
+        #tab-po .po-aula-nome,#tab-po .po-mod-nome{cursor:text}
+        #tab-po .po-th-label{cursor:text}
+        #tab-po .po-col-cfg{flex:none;border:none;background:transparent;color:var(--t2);cursor:pointer;font-size:11px;line-height:1;padding:1px 4px;border-radius:5px;opacity:0;transition:opacity .15s,background .15s,color .15s}
+        #tab-po thead th:hover .po-col-cfg{opacity:.65}
+        #tab-po .po-col-cfg:hover{opacity:1;background:var(--accent-dim);color:var(--accent)}
+        /* Modal de gerenciar opções de tag (reusa visual do #po-col-modal) */
+        #po-opts-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-opts-modal.show{display:block}
+        #po-opts-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-opts-modal .po-modal{position:relative;max-width:440px;margin:12vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-opts-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-opts-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text)}
+        #po-opts-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-opts-modal .po-modal-x:hover{color:var(--text)}
+        #po-opts-modal .po-modal-body{padding:18px 20px;max-height:62vh;overflow:auto}
+        #po-opts-modal .po-modal-label{font-size:12px;font-weight:600;color:var(--t2);margin:0 0 6px}
+        #po-opts-modal .po-inp{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:14px;font-family:inherit;box-sizing:border-box}
+        #po-opts-modal .po-inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+        #po-opts-modal .po-modal-hint{font-size:12.5px;color:var(--t2);margin:10px 0 0}
+        #po-opts-modal .po-opt-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+        #po-opts-modal .po-opt-row input[type=color]{width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:none;cursor:pointer;padding:2px;flex:none}
+        #po-opts-modal .po-opt-del{background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px;flex:none}
+        #po-opts-modal .po-opt-del:hover{color:#f85149}
+        #po-opts-modal .po-modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        /* Modal Nova aula (reusa visual do #po-col-modal) */
+        #po-aula-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-aula-modal.show{display:block}
+        #po-aula-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-aula-modal .po-modal{position:relative;max-width:460px;margin:11vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-aula-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-aula-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text)}
+        #po-aula-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-aula-modal .po-modal-x:hover{color:var(--text)}
+        #po-aula-modal .po-modal-body{padding:18px 20px;max-height:64vh;overflow:auto}
+        #po-aula-modal .po-modal-label{font-size:12px;font-weight:600;color:var(--t2);margin:0 0 6px}
+        #po-aula-modal .po-modal-label:not(:first-child){margin-top:16px}
+        #po-aula-modal .po-inp{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:14px;font-family:inherit;box-sizing:border-box}
+        #po-aula-modal .po-inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+        #po-aula-modal select.po-inp{cursor:pointer}
+        #po-aula-modal .po-inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+        #po-aula-modal .po-modal-head{align-items:flex-start}
+        #po-aula-modal .po-na-sub{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--accent);margin-top:3px;letter-spacing:.3px}
+        #po-aula-modal .po-na-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-dim);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:999px;padding:5px 12px;margin-bottom:4px}
+        #po-aula-modal .po-na-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+        #po-aula-modal .po-na-grid .po-modal-label:not(:first-child){margin-top:16px}
+        /* Modal: novo módulo */
+        #po-novomod-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-novomod-modal.show{display:block}
+        #po-novomod-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-novomod-modal .po-modal{position:relative;max-width:440px;margin:13vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-novomod-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-novomod-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text)}
+        #po-novomod-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-novomod-modal .po-modal-x:hover{color:var(--text)}
+        #po-novomod-modal .po-modal-body{padding:18px 20px}
+        #po-novomod-modal .po-modal-label{font-size:12px;font-weight:600;color:var(--t2);margin:0 0 6px}
+        #po-novomod-modal .po-inp{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;box-sizing:border-box}
+        #po-novomod-modal .po-inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+        #po-novomod-modal .po-modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        #po-aula-modal .po-modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
         #tab-po .po-mod-row{cursor:pointer;user-select:none}
+        #tab-po .po-aula-row[draggable="true"]{cursor:grab}
+        #tab-po .po-aula-row[draggable="true"]:active{cursor:grabbing}
+        #tab-po .po-mod-row[draggable="true"]:active{cursor:grabbing}
+        #tab-po tr.po-drop-target td{box-shadow:inset 0 2px 0 0 var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)!important}
+        #tab-po tr.po-drop-target.po-aula-row .po-col-aula{box-shadow:inset 0 2px 0 0 var(--accent),1px 0 0 var(--border)}
         #tab-po .po-mod-row td{background:color-mix(in srgb,var(--accent) 7%,transparent);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text);font-weight:600;padding:9px 12px}
         #tab-po .po-mod-row:hover td{background:color-mix(in srgb,var(--accent) 13%,transparent)}
         #tab-po .po-chev{display:inline-block;margin-right:9px;color:var(--accent);font-size:10px;transition:transform .18s ease}
         #tab-po .po-mod-row.open .po-chev{transform:rotate(90deg)}
         #tab-po .po-mod-meta{font-weight:500;text-transform:none;letter-spacing:0;color:var(--t2);margin-left:10px;font-size:10.5px}
         #tab-po .po-mod-at{margin-left:8px;color:#f0883e;text-transform:none;letter-spacing:0;font-size:10.5px}
+        #tab-po .po-mod-qbadge{margin-left:10px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-dim);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:6px;padding:1px 6px;text-transform:none;letter-spacing:0}
+        #tab-po .po-mod-analisar{margin-left:12px;border:1px solid color-mix(in srgb,var(--accent) 40%,var(--border));background:var(--bg2);color:var(--accent);font-family:'Plus Jakarta Sans',sans-serif;font-size:10.5px;font-weight:700;text-transform:none;letter-spacing:0;padding:3px 9px;border-radius:7px;cursor:pointer;transition:background .15s,border-color .15s}
+        #tab-po .po-mod-analisar:hover{background:var(--accent-dim);border-color:var(--accent)}
+        #tab-po .po-mod-del{margin-left:8px;border:1px solid color-mix(in srgb,var(--red) 35%,var(--border));background:transparent;color:var(--red);font-size:11px;line-height:1;padding:3px 7px;border-radius:7px;cursor:pointer;opacity:.55;transition:opacity .15s,background .15s}
+        #tab-po .po-mod-del:hover{opacity:1;background:color-mix(in srgb,var(--red) 16%,transparent)}
+        #tab-po .po-col-aula{position:relative}
+        #tab-po .po-aula-del{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:none;background:transparent;color:var(--red);font-size:12px;line-height:1;padding:2px 4px;border-radius:5px;cursor:pointer;opacity:0;transition:opacity .15s,background .15s}
+        #tab-po tr.po-aula-row:hover .po-aula-del{opacity:.7}
+        #tab-po .po-aula-del:hover{opacity:1;background:color-mix(in srgb,var(--red) 16%,transparent)}
+        #tab-po .po-sel-aula,#tab-po .po-sel-mod{accent-color:var(--accent);margin-right:7px;cursor:pointer;vertical-align:middle;width:12px;height:12px;flex:none}
+        #tab-po .po-grip{display:inline-block;margin-right:6px;color:var(--t3);cursor:grab;font-size:12px;line-height:1;vertical-align:middle;user-select:none}
+        #tab-po .po-grip:hover{color:var(--accent)}
+        #tab-po .po-grip:active{cursor:grabbing}
+        #tab-po .po-sel-bar{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:14px;margin-top:14px;padding:11px 16px;background:var(--bg2);border:1px solid var(--accent);border-radius:12px;box-shadow:0 8px 26px rgba(0,0,0,.28)}
+        #tab-po .po-sel-bar .po-sel-count{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13.5px;color:var(--text)}
+        #tab-po .po-sel-bar .po-sel-grow{flex:1}
+        #tab-po .po-sel-bar .po-sel-del{border:1px solid color-mix(in srgb,var(--red) 45%,var(--border));background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red);font-weight:700;font-size:13px;padding:7px 14px;border-radius:9px;cursor:pointer}
+        #tab-po .po-sel-bar .po-sel-del:hover{background:color-mix(in srgb,var(--red) 20%,transparent)}
+        #tab-po .po-sel-bar .po-sel-clear{border:1px solid var(--border);background:transparent;color:var(--t2);font-size:12.5px;padding:7px 12px;border-radius:9px;cursor:pointer}
+        #tab-po .po-sel-bar .po-sel-clear:hover{color:var(--text);border-color:var(--border2)}
+        #tab-po .po-curso-card{position:relative}
+        #tab-po .po-cc-del{position:absolute;top:8px;right:8px;font-size:13px;line-height:1;padding:4px 6px;border-radius:7px;border:1px solid color-mix(in srgb,var(--red) 30%,transparent);background:color-mix(in srgb,var(--bg) 70%,transparent);color:var(--red);opacity:0;transition:opacity .15s,background .15s}
+        #tab-po .po-curso-card:hover .po-cc-del{opacity:.75}
+        #tab-po .po-cc-del:hover{opacity:1;background:color-mix(in srgb,var(--red) 18%,transparent)}
+        #tab-po .po-ia-hint{font-size:12px;color:var(--t2)}
         #tab-po .po-aula-nome{font-weight:600;color:var(--text)}
         #tab-po .po-num{font-family:'JetBrains Mono',monospace;color:var(--t3);font-size:12px}
         #tab-po .po-pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;color:var(--pc);background:color-mix(in srgb,var(--pc) 14%,transparent);border:1px solid color-mix(in srgb,var(--pc) 35%,transparent);white-space:nowrap}
@@ -5732,10 +5841,78 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-po .po-ia p{color:var(--t2);font-size:13px;margin:0 0 14px}
         #tab-po .po-ia-btns{display:flex;gap:10px;flex-wrap:wrap}
         #tab-po .po-ia-btn{display:inline-flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-weight:600;font-size:13px;cursor:not-allowed;opacity:.7}
+        #tab-po .po-ia-btn.po-ia-on{cursor:pointer;opacity:1;border-color:color-mix(in srgb,var(--accent) 45%,var(--border));transition:border-color .15s,background .15s,transform .12s}
+        #tab-po .po-ia-btn.po-ia-on:hover{border-color:var(--accent);background:var(--accent-dim);transform:translateY(-1px)}
         #tab-po .po-soon{font-size:10px;font-family:'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-dim);padding:1px 6px;border-radius:5px}
+        /* Modal: analisar módulo (lotes TEA/TSA/MEs) */
+        #po-mod-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-mod-modal.show{display:block}
+        #po-mod-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-mod-modal .po-modal{position:relative;max-width:660px;margin:9vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-mod-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-mod-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text)}
+        #po-mod-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-mod-modal .po-modal-x:hover{color:var(--text)}
+        #po-mod-modal .po-modal-body{padding:18px 20px;max-height:66vh;overflow:auto}
+        #po-mod-modal .po-modal-label{font-size:12px;font-weight:600;color:var(--t2);margin:0 0 6px}
+        #po-mod-modal .po-modal-label:not(:first-child){margin-top:16px}
+        #po-mod-modal .po-drop{display:block;border:1.5px dashed color-mix(in srgb,var(--accent) 40%,var(--border));border-radius:12px;padding:18px;text-align:center;background:color-mix(in srgb,var(--accent) 5%,transparent);cursor:pointer;transition:border-color .15s,background .15s}
+        #po-mod-modal .po-drop:hover{border-color:var(--accent);background:var(--accent-dim)}
+        #po-mod-modal .po-drop .po-drop-ico{font-size:26px}
+        #po-mod-modal .po-drop .po-drop-t{font-weight:700;font-size:13.5px;color:var(--text);margin-top:4px}
+        #po-mod-modal .po-drop .po-drop-s{font-size:11.5px;color:var(--t2);margin-top:2px}
+        #po-mod-modal textarea.po-inp{width:100%;min-height:120px;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:12px;font-family:'JetBrains Mono',monospace;box-sizing:border-box;resize:vertical}
+        #po-mod-modal textarea.po-inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+        #po-mod-modal .po-q-erro{margin-top:12px;padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 35%,transparent);color:#f85149;font-size:12.5px}
+        #po-mod-modal .po-q-ok{margin-top:12px;padding:12px 14px;border-radius:10px;background:color-mix(in srgb,var(--green,#3fb950) 10%,transparent);border:1px solid color-mix(in srgb,var(--green,#3fb950) 32%,transparent)}
+        #po-mod-modal .po-q-ok .po-q-ok-t{font-weight:700;color:var(--text);font-size:13.5px}
+        #po-mod-modal .po-q-ok .po-q-ok-s{font-size:11.5px;color:var(--t2);margin-top:2px}
+        #po-mod-modal .po-q-list{margin-top:10px;display:flex;flex-direction:column;gap:6px;max-height:200px;overflow:auto}
+        #po-mod-modal .po-q-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;color:var(--text)}
+        #po-mod-modal .po-q-item .po-q-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);display:flex;gap:8px;margin-bottom:2px}
+        #po-mod-modal .po-q-item .po-q-en{color:var(--t2);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+        #po-mod-modal .po-q-mock{margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--accent-dim);border:1px solid color-mix(in srgb,var(--accent) 32%,transparent);font-size:12.5px;color:var(--text)}
+        #po-mod-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        #po-mod-modal .po-mod-sub{font-size:12px;color:var(--t2);margin-top:2px;font-family:'JetBrains Mono',monospace}
+        #po-mod-modal .po-mod-resumo{font-size:12.5px;color:var(--text);margin-bottom:8px}
+        #po-mod-modal .po-mod-aviso{margin-bottom:12px;padding:9px 12px;border-radius:9px;background:color-mix(in srgb,#f0883e 12%,transparent);border:1px solid color-mix(in srgb,#f0883e 32%,transparent);color:#f0883e;font-size:12px}
+        #po-mod-modal .po-mod-blocos{display:flex;flex-direction:column;gap:14px}
+        #po-mod-modal .po-mod-bloco{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--bg)}
+        #po-mod-modal .po-mod-bloco-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+        #po-mod-modal .po-mod-bloco-t{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;letter-spacing:.06em;color:var(--accent)}
+        #po-mod-modal .po-mod-bloco-c{font-size:11.5px;color:var(--t2)}
+        #po-mod-modal .po-mod-limpar{margin-left:auto;background:none;border:1px solid var(--border);color:var(--t2);font-size:10.5px;padding:2px 8px;border-radius:6px;cursor:pointer}
+        #po-mod-modal .po-mod-limpar:hover{border-color:#f85149;color:#f85149}
+        #po-mod-modal .po-drop.po-drop-sm{padding:10px}
+        #po-mod-modal .po-mod-bloco textarea.po-inp{min-height:80px;margin-top:8px}
         #tab-po .po-empty{text-align:center;padding:60px 20px;color:var(--t2)}
         #tab-po .po-empty .po-ei{font-size:40px;margin-bottom:10px}
+        #tab-po .po-demo-aviso{margin:0 0 14px;padding:9px 13px;border-radius:9px;background:color-mix(in srgb,#d29922 12%,transparent);border:1px solid color-mix(in srgb,#d29922 35%,transparent);color:#d29922;font-size:12.5px;font-family:'Plus Jakarta Sans',sans-serif}
         @media(max-width:640px){#tab-po .po-title{font-size:22px}}
+        /* Modal Importar do Monday — reusa o visual do #po-mod-modal */
+        #po-import-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-import-modal.show{display:block}
+        #po-import-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-import-modal .po-modal{position:relative;max-width:620px;margin:8vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-import-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-import-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text)}
+        #po-import-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-import-modal .po-modal-x:hover{color:var(--text)}
+        #po-import-modal .po-modal-body{padding:18px 20px;max-height:66vh;overflow:auto}
+        #po-import-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        #po-import-modal .po-imp-instr{font-size:12.5px;color:var(--t2);margin:0 0 14px;line-height:1.5}
+        #po-import-modal .po-imp-file{display:block;width:100%;font-size:12.5px;color:var(--text);padding:14px;border:1.5px dashed color-mix(in srgb,var(--accent) 40%,var(--border));border-radius:12px;background:color-mix(in srgb,var(--accent) 5%,transparent);cursor:pointer;box-sizing:border-box}
+        #po-import-modal .po-imp-erro{margin-top:14px;padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 35%,transparent);color:#f85149;font-size:12.5px}
+        #po-import-modal .po-imp-prev{margin-top:14px;padding:13px 15px;border-radius:10px;background:var(--bg);border:1px solid var(--border)}
+        #po-import-modal .po-imp-prev h4{margin:0 0 8px;font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--text)}
+        #po-import-modal .po-imp-stats{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px}
+        #po-import-modal .po-imp-stat{font-size:12px;color:var(--t2)}
+        #po-import-modal .po-imp-stat b{color:var(--text);font-size:17px;display:block;font-family:'Space Grotesk',sans-serif}
+        #po-import-modal .po-imp-cursos{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow:auto}
+        #po-import-modal .po-imp-cur-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text);padding:4px 8px;border-radius:6px;background:var(--bg2)}
+        #po-import-modal .po-imp-cur-row span:last-child{color:var(--t2);font-family:'JetBrains Mono',monospace}
+        #po-import-modal .po-imp-prog{margin-top:14px;font-size:12.5px;color:var(--accent);font-family:'JetBrains Mono',monospace}
+        #po-import-modal .po-imp-done{margin-top:14px;padding:12px 14px;border-radius:10px;background:color-mix(in srgb,#3fb950 10%,transparent);border:1px solid color-mix(in srgb,#3fb950 32%,transparent);color:var(--text);font-size:12.5px}
       </style>
       <div id="po-root"></div>
     </div>
@@ -36928,7 +37105,7 @@ const _PO_STATUS_OPTS=PO_STATUS_FAM.flatMap(f=>f.vals.map(v=>({v,cor:f.cor})));
 function _poCellVal(a,col){if(a&&col.id in a)return a[col.id];return (a&&a.dados&&col.id in a.dados)?a.dados[col.id]:'';}
 function _poColCell(a,col){
   const val=_poCellVal(a,col);
-  if(col.type==='link'){const u=String(val||'').trim();const ico=col.id==='video'?'▶':'🔗';return u?`<a class="po-vid" href="${_poEsc(u)}" target="_blank" rel="noopener" title="Abrir">${ico}</a>`:'<span class="po-mut">—</span>';}
+  if(col.type==='link'){const u=String(val||'').trim();const ico=col.id==='video'?'▶':'🔗';return u?`<a class="po-vid" href="${_poEsc(u)}" target="_blank" rel="noopener" title="Abrir" onclick="event.stopPropagation()">${ico}</a>`:'<span class="po-mut">—</span>';}
   if(col.type==='status'){const s=String(val||'').trim();if(!s)return '<span class="po-mut">—</span>';const o=(col.opts||[]).find(x=>String(x.v).toLowerCase()===s.toLowerCase());return _poPill(o?o.cor:'#8b949e',s);}
   const t=String(val==null?'':val).trim();return t?_poEsc(t):'<span class="po-mut">—</span>';
 }
@@ -36938,7 +37115,11 @@ S.poView='verticals';     // 'verticals' | 'cursos' | 'curso'
 S.poVertical=null;        // id da vertical selecionada (anestreview|oftreview|...)
 S.poCursoAtual=null;      // id do curso aberto
 S.poBusca='';
+S.poColFiltros={};        // filtro por coluna: { [colId|'__aula']: termo }
 S.poModAbertos=new Set(); // módulos/pontos expandidos na visão do curso
+S.poSel={aulas:new Set()}; // seleção (checkbox) para exclusão em lote
+S.poModOrdem={};          // ordem manual de módulos por curso: { [cursoId]: [nome,...] }
+S.poModExtra={};          // módulos criados manualmente (podem estar sem aula): { [cursoId]: [nome,...] }
 S.poColAulaW=300;         // largura (px) da 1ª coluna fixa (Aula)
 // Colunas configuráveis da planilha. type: 'texto' | 'link' | 'status'.
 // Status usa opts:[{v,cor}]. Largura w em px (redimensionável). Reflete o board real.
@@ -36946,6 +37127,8 @@ S.poColunas=[
   {id:'prof',label:'Prof.',type:'texto',w:150},
   {id:'ano',label:'Ano',type:'texto',w:64},
   {id:'status',label:'Status Aula',type:'status',w:185,opts:_PO_STATUS_OPTS},
+  {id:'conteudo',label:'Conteúdo da aula',type:'texto',w:220},
+  {id:'avaliacao',label:'Avaliação da aula',type:'texto',w:150},
   {id:'questoes',label:'Questões',type:'status',w:118,opts:_PO_TRILHA3},
   {id:'cards',label:'Flashcards',type:'status',w:118,opts:_PO_TRILHA3},
   {id:'video',label:'Vídeo',type:'link',w:58},
@@ -36960,65 +37143,781 @@ S._poColOpts=[];          // opções (rótulo+cor) sendo montadas pra coluna st
 
 // ── DADOS DE EXEMPLO (em memória, tirados do board real) — trocados por Firestore depois ──
 S.poCursos=[
-  {id:'extensive-geral',vertical:'anestreview',nome:'Extensive Geral',produtoId:'Extensive',descricao:'Curso teórico principal — base para o TSA',totalAulas:418},
+  {id:'extensive-geral',vertical:'anestreview',nome:'Extensive Geral',produtoId:'Extensive',descricao:'',totalAulas:418},
   {id:'extensive-me1',vertical:'anestreview',nome:'Extensive ME1',produtoId:null,descricao:'Trilha complementar ME1',totalAulas:53},
   {id:'anest-ped',vertical:'anestreview',nome:'ANEST-PED',produtoId:null,descricao:'Anestesia em pediatria',totalAulas:13},
 ];
 S.poAulas={
   'extensive-geral':[
-    {ordem:1,titulo:'O Sangue',modulo:'Ponto 10 – Resp Fisio/Farmaco',edital:'',prof:'Davi Brasil Khouri',ano:'2023',video:'https://vimeo.com/907515199',status:'Visão do aluno validada',questoes:'Lançada',cards:'Pendente',demandas:0},
-    {ordem:3,titulo:'pH e pKa',modulo:'Ponto 11 – Farmacologia Geral',edital:'',prof:'Tiarlles Miller',ano:'2023',video:'https://vimeo.com/907525972',status:'Demanda de Aluno',questoes:'Lançada',cards:'Pendente',demandas:1},
-    {ordem:1,titulo:'Cardio: PANI',modulo:'Ponto 21 – Monitorização',edital:'',prof:'Tiarlles Miller',ano:'2023',video:'',status:'!! Prof - Aula com erro. Revise!',questoes:'Lançada',cards:'Pendente',demandas:1},
-    {ordem:null,titulo:'Cronograma - Racional das Recomendações',modulo:'Introdutório',edital:'',prof:'',ano:'2025',video:'',status:'Gravação Agendada',questoes:'Pendente',cards:'Pendente',demandas:0},
-    {ordem:null,titulo:'Bloqueio de neuroeixo guiada por USG',modulo:'Ponto 17 – Bloqueios Subaracnóideo e Peridural',edital:'',prof:'Davi Brasil Khouri',ano:'2023',video:'https://vimeo.com/907536562',status:'Ainda não existe',questoes:'Pendente',cards:'Pendente',demandas:0},
+    {ordem:1,titulo:'O Sangue',modulo:'Ponto 10 – Resp Fisio/Farmaco',edital:'',prof:'Davi Brasil Khouri',ano:'2023',video:'https://vimeo.com/907515199',status:'Visão do aluno validada',conteudo:'Transporte de O2/CO2, curva de dissociação, efeito Bohr/Haldane',avaliacao:'Boa',questoes:'Lançada',cards:'Pendente',demandas:0},
+    {ordem:3,titulo:'pH e pKa',modulo:'Ponto 11 – Farmacologia Geral',edital:'',prof:'Tiarlles Miller',ano:'2023',video:'https://vimeo.com/907525972',status:'Demanda de Aluno',conteudo:'Equação de Henderson-Hasselbalch, ionização de fármacos',avaliacao:'Revisar',questoes:'Lançada',cards:'Pendente',demandas:1},
+    {ordem:1,titulo:'Cardio: PANI',modulo:'Ponto 21 – Monitorização',edital:'',prof:'Tiarlles Miller',ano:'2023',video:'',status:'!! Prof - Aula com erro. Revise!',conteudo:'Pressão arterial não invasiva, oscilometria, fontes de erro',avaliacao:'Revisar',questoes:'Lançada',cards:'Pendente',demandas:1},
+    {ordem:null,titulo:'Cronograma - Racional das Recomendações',modulo:'Introdutório',edital:'',prof:'',ano:'2025',video:'',status:'Gravação Agendada',conteudo:'',avaliacao:'Sem avaliação',questoes:'Pendente',cards:'Pendente',demandas:0},
+    {ordem:null,titulo:'Bloqueio de neuroeixo guiada por USG',modulo:'Ponto 17 – Bloqueios Subaracnóideo e Peridural',edital:'',prof:'Davi Brasil Khouri',ano:'2023',video:'https://vimeo.com/907536562',status:'Ainda não existe',conteudo:'Anatomia ultrassonográfica do neuroeixo, marcos, técnica',avaliacao:'Boa',questoes:'Pendente',cards:'Pendente',demandas:0},
   ],
+};
+
+// Guarda os defaults demo (colunas/cursos/aulas) pra fallback quando o Firestore
+// estiver vazio ou sem login. Snapshot raso o bastante pro nosso uso.
+const _PO_DEMO_COLUNAS=S.poColunas.map(c=>({...c}));
+const _PO_DEMO_CURSOS=S.poCursos.map(c=>({...c}));
+const _PO_DEMO_AULAS=JSON.parse(JSON.stringify(S.poAulas));
+S._poLoaded=false;
+S._poAvisoDemo=''; // aviso discreto quando caiu no fallback demo
+
+// slug estável p/ ids de doc no Firestore (cursoId+modulo, ou nome de curso).
+function _poSlug(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||'_';}
+
+async function _poSaveConfig(){
+  await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,colAulaW:S.poColAulaW,cursos:S.poCursos,modOrdem:S.poModOrdem||{},modExtra:S.poModExtra||{}},{merge:true});
+}
+
+// Carrega tudo do Firestore. Mantém o demo se a coleção estiver vazia ou sem auth.
+async function loadPO(){
+  // 1) config (colunas + cursos)
+  try{
+    const cfgSnap=await getDoc(doc(db,'config','poConfig'));
+    if(cfgSnap.exists()){
+      const d=cfgSnap.data()||{};
+      if(Array.isArray(d.colunas)&&d.colunas.length)S.poColunas=d.colunas;
+      if(typeof d.colAulaW==='number')S.poColAulaW=d.colAulaW;
+      if(Array.isArray(d.cursos)&&d.cursos.length)S.poCursos=d.cursos;
+      if(d.modOrdem&&typeof d.modOrdem==='object')S.poModOrdem=d.modOrdem;
+      if(d.modExtra&&typeof d.modExtra==='object')S.poModExtra=d.modExtra;
+    }
+  }catch(e){ /* sem permissão de leitura: segue com defaults */ }
+
+  // 2) aulas
+  let aulasDocs=null;
+  try{
+    const snap=await getDocs(collection(db,'poAulas'));
+    aulasDocs=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){
+    S._poAvisoDemo='Mostrando dados de exemplo — faça login (Google) para ver os dados reais.';
+  }
+
+  if(aulasDocs&&aulasDocs.length){
+    // Agrupa por curso (many-to-many via nomes em a.cursos)
+    const map={};
+    S.poCursos.forEach(c=>{map[c.id]=aulasDocs.filter(a=>(a.cursos||[]).includes(c.nome));});
+    S.poAulas=map;
+    S._poAvisoDemo='';
+  }else if(aulasDocs&&!aulasDocs.length){
+    // coleção existe e está VAZIA → mantém demo
+    S.poColunas=_PO_DEMO_COLUNAS.map(c=>({...c}));
+    S.poCursos=_PO_DEMO_CURSOS.map(c=>({...c}));
+    S.poAulas=JSON.parse(JSON.stringify(_PO_DEMO_AULAS));
+    S._poAvisoDemo='Nenhuma aula importada ainda — mostrando dados de exemplo. Use “Importar do Monday”.';
+  }else{
+    // erro de leitura → demo
+    S.poColunas=_PO_DEMO_COLUNAS.map(c=>({...c}));
+    S.poCursos=_PO_DEMO_CURSOS.map(c=>({...c}));
+    S.poAulas=JSON.parse(JSON.stringify(_PO_DEMO_AULAS));
+  }
+
+  // 3) questões por módulo
+  try{
+    const qSnap=await getDocs(collection(db,'poModQuestoes'));
+    const mq={};
+    qSnap.docs.forEach(d=>{
+      const x=d.data()||{};
+      if(!x.cursoId||x.modulo==null)return;
+      const key=_poModKey(x.cursoId,x.modulo);
+      mq[key]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[]};
+    });
+    S.poModQuestoes=mq;
+  }catch(e){ /* mantém o que tem */ }
+
+  _poEnsureIds();
+  S._poLoaded=true;
+}
+// Garante um id em toda aula (Firestore traz; no demo gera um id sintético 'tmp_').
+let _poTmpIdSeq=0;
+function _poEnsureIds(){for(const cid in S.poAulas){(S.poAulas[cid]||[]).forEach(a=>{if(!a.id)a.id='tmp_'+(++_poTmpIdSeq);});}}
+function _poFindAulaById(id){for(const cid in S.poAulas){const a=(S.poAulas[cid]||[]).find(x=>x.id===id);if(a)return a;}return null;}
+// Grava patch numa aula. Demo (id tmp_*) → só memória. Real → updateDoc best-effort.
+async function _poSaveAula(a,patch){
+  if(!a)return;
+  Object.assign(a,patch);
+  if(a.id&&!String(a.id).startsWith('tmp_')){
+    try{await updateDoc(doc(db,'poAulas',a.id),{...patch,updatedAt:new Date().toISOString()});}
+    catch(e){console.warn('saveAula:',e);}
+  }
+}
+// Paleta pra cores automáticas de novas opções de tag.
+const _PO_OPT_PALETA=['#2f81f7','#3fb950','#f0883e','#a371f7','#db61a2','#1f6feb','#e3b341','#8b949e'];
+let _poOptCorSeq=0;
+function _poNextOptCor(){return _PO_OPT_PALETA[(_poOptCorSeq++)%_PO_OPT_PALETA.length];}
+// ── Edição inline de célula (texto/link/status) ──
+window.poCelEditar=(aulaId,ci,td)=>{
+  if(td.querySelector('input,select'))return; // já editando
+  const col=S.poColunas[ci];const a=_poFindAulaById(aulaId);if(!col||!a)return;
+  const atual=String(_poCellVal(a,col)==null?'':_poCellVal(a,col));
+  if(col.type==='status'){
+    const opts=(col.opts||[]).map(o=>`<option value="${_poEsc(o.v)}"${String(o.v).toLowerCase()===atual.toLowerCase()?' selected':''}>${_poEsc(o.v)}</option>`).join('');
+    td.innerHTML=`<select class="po-cel-sel"><option value=""${atual?'':' selected'}>—</option>${opts}<option value="__nova__">➕ Nova opção…</option></select>`;
+    const sel=td.querySelector('select');
+    sel.addEventListener('change',async()=>{
+      const v=sel.value;
+      if(v==='__nova__'){
+        const lbl=(prompt('Nome da nova opção:')||'').trim();
+        if(!lbl){_poRefreshTabela();return;}
+        col.opts=col.opts||[];col.opts.push({v:lbl,cor:_poNextOptCor()});
+        _poSaveConfig().catch(e=>console.warn('poConfig save',e));
+        await _poSaveAula(a,{[col.id]:lbl});_poRefreshTabela();return;
+      }
+      await _poSaveAula(a,{[col.id]:v});_poRefreshTabela();
+    });
+    sel.focus();
+    return;
+  }
+  // texto / link
+  const inp=document.createElement('input');
+  inp.className='po-cel-inp';inp.type='text';inp.value=atual;
+  td.innerHTML='';td.appendChild(inp);
+  inp.focus();inp.select();
+  let done=false;
+  const salvar=async()=>{if(done)return;done=true;await _poSaveAula(a,{[col.id]:inp.value.trim()});_poRefreshTabela();};
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();salvar();}
+    else if(e.key==='Escape'){done=true;_poRefreshTabela();}
+  });
+  inp.addEventListener('blur',salvar);
+};
+// ── Nome da AULA inline ──
+window.poEditarNomeAula=(aulaId,span)=>{
+  const a=_poFindAulaById(aulaId);if(!a)return;
+  if(span.querySelector('input'))return;
+  const inp=document.createElement('input');
+  inp.className='po-cel-inp';inp.type='text';inp.value=a.titulo||'';inp.style.width='230px';inp.style.minWidth='160px';
+  span.style.display='inline-block';span.innerHTML='';span.appendChild(inp);
+  inp.focus();inp.select();
+  let done=false;
+  const salvar=async()=>{if(done)return;done=true;const v=inp.value.trim();if(v)await _poSaveAula(a,{titulo:v});_poRefreshTabela();};
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();salvar();}
+    else if(e.key==='Escape'){done=true;_poRefreshTabela();}
+  });
+  inp.addEventListener('blur',salvar);
+};
+// ── Nome do MÓDULO inline (renomeia em TODOS os cursos) ──
+window.poEditarNomeModulo=(modEnc,span)=>{
+  const antigo=decodeURIComponent(modEnc);
+  if(span.querySelector('input'))return;
+  const inp=document.createElement('input');
+  inp.className='po-cel-inp';inp.type='text';inp.value=antigo;inp.style.width='320px';inp.style.minWidth='180px';
+  span.style.display='inline-block';span.innerHTML='';span.appendChild(inp);
+  inp.focus();inp.select();
+  let done=false;
+  const salvar=async()=>{
+    if(done)return;done=true;
+    const novo=inp.value.trim();
+    if(!novo||novo===antigo){_poRefreshTabela();return;}
+    const alvo=[];const vistos=new Set();
+    for(const cid in S.poAulas){(S.poAulas[cid]||[]).forEach(a=>{if((a.modulo||'')===antigo&&!vistos.has(a.id)){vistos.add(a.id);alvo.push(a);a.modulo=novo;}});}
+    const reais=alvo.filter(a=>a.id&&!String(a.id).startsWith('tmp_'));
+    try{
+      let b=writeBatch(db),n=0;
+      for(const a of reais){b.update(doc(db,'poAulas',a.id),{modulo:novo,updatedAt:new Date().toISOString()});if(++n>=450){await b.commit();b=writeBatch(db);n=0;}}
+      if(n>0)await b.commit();
+    }catch(e){console.warn('renameModulo:',e);}
+    if(S.poModAbertos&&S.poModAbertos.has(antigo)){S.poModAbertos.delete(antigo);S.poModAbertos.add(novo);}
+    _poRefreshTabela();
+  };
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();salvar();}
+    else if(e.key==='Escape'){done=true;_poRefreshTabela();}
+  });
+  inp.addEventListener('blur',salvar);
+};
+// ── Nome da COLUNA inline (duplo-clique no cabeçalho) — atualiza in-place, sem re-render total ──
+window.poEditarNomeColuna=(ci,span)=>{
+  const col=S.poColunas[ci];if(!col)return;
+  if(span.querySelector('input'))return;
+  const inp=document.createElement('input');
+  inp.className='po-cel-inp';inp.type='text';inp.value=col.label||'';
+  span.innerHTML='';span.appendChild(inp);
+  inp.focus();inp.select();
+  let done=false;
+  const salvar=()=>{
+    if(done)return;done=true;
+    const v=inp.value.trim();
+    if(v&&v!==col.label){col.label=v;_poSaveConfig().catch(e=>console.warn('poConfig save',e));}
+    span.textContent=col.label;span.title=col.label;
+  };
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();salvar();}
+    else if(e.key==='Escape'){done=true;span.textContent=col.label;span.title=col.label;}
+  });
+  inp.addEventListener('blur',salvar);
+};
+// ── Modal: gerenciar opções de uma coluna status ──
+window.poGerenciarOpcoes=(ci)=>{
+  const col=S.poColunas[ci];if(!col||col.type!=='status')return;
+  S._poOptsCi=ci;
+  S._poOptsDraft=(col.opts||[]).map(o=>({v:o.v,cor:o.cor||'#8b949e'}));
+  _poOptsModalRender();
+};
+window.poOptsModalClose=()=>{S._poOptsCi=null;S._poOptsDraft=null;const h=document.getElementById('po-opts-modal');if(h){h.classList.remove('show');h.innerHTML='';}};
+window.poOptsAdd=()=>{S._poOptsDraft.push({v:'',cor:_poNextOptCor()});_poOptsModalRender();};
+window.poOptsDel=(i)=>{S._poOptsDraft.splice(i,1);_poOptsModalRender();};
+window.poOptsLabel=(i,v)=>{if(S._poOptsDraft[i])S._poOptsDraft[i].v=v;};
+window.poOptsCor=(i,v)=>{if(S._poOptsDraft[i])S._poOptsDraft[i].cor=v;};
+window.poOptsSalvar=()=>{
+  const col=S.poColunas[S._poOptsCi];if(!col){poOptsModalClose();return;}
+  col.opts=(S._poOptsDraft||[]).filter(o=>(o.v||'').trim()).map(o=>({v:o.v.trim(),cor:o.cor||'#8b949e'}));
+  _poSaveConfig().catch(e=>console.warn('poConfig save',e));
+  poOptsModalClose();
+  _poRefreshTabela();
+};
+function _poOptsModalRender(){
+  let host=document.getElementById('po-opts-modal');
+  if(!host){host=document.createElement('div');host.id='po-opts-modal';document.body.appendChild(host);}
+  const col=S.poColunas[S._poOptsCi]||{label:''};
+  const rows=(S._poOptsDraft||[]).map((o,i)=>`<div class="po-opt-row"><input type="color" value="${_poEsc(o.cor||'#8b949e')}" oninput="poOptsCor(${i},this.value)"><input type="text" class="po-inp" placeholder="Ex.: Pendente" value="${_poEsc(o.v||'')}" oninput="poOptsLabel(${i},this.value)"><button type="button" class="po-opt-del" onclick="poOptsDel(${i})" title="Remover">✕</button></div>`).join('');
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poOptsModalClose()"></div>
+    <div class="po-modal" role="dialog">
+      <div class="po-modal-head"><h3>Opções · ${_poEsc(col.label)}</h3><button type="button" class="po-modal-x" onclick="poOptsModalClose()">✕</button></div>
+      <div class="po-modal-body">
+        <div class="po-modal-label">Opções (rótulo + cor)</div>
+        <div id="po-opts-list">${rows||'<p class="po-modal-hint">Nenhuma opção ainda.</p>'}</div>
+        <button type="button" class="btn btn-g" onclick="poOptsAdd()" style="margin-top:6px">＋ Adicionar opção</button>
+        <p class="po-modal-hint">Remover uma opção não altera células já marcadas com ela.</p>
+      </div>
+      <div class="po-modal-foot">
+        <button type="button" class="btn btn-g" onclick="poOptsModalClose()">Cancelar</button>
+        <button type="button" class="btn btn-p" onclick="poOptsSalvar()">Salvar</button>
+      </div>
+    </div>`;
+  host.classList.add('show');
+}
+// Excluir AULA (apaga de TODOS os cursos) — dupla confirmação.
+window.poExcluirAula=async(id)=>{
+  const a=_poFindAulaById(id);if(!a)return;
+  const nome=a.titulo||a.nomeOriginal||'(sem título)';
+  if(!confirm(`Excluir a aula "${nome}"?\n\nEla é apagada de TODOS os cursos.`))return;
+  if(!confirm(`Confirmar de novo: excluir definitivamente a aula "${nome}"?`))return;
+  try{if(id&&!String(id).startsWith('tmp_'))await deleteDoc(doc(db,'poAulas',id));}
+  catch(e){alert('Erro ao excluir: '+((e&&e.message)||e));return;}
+  for(const c in S.poAulas){S.poAulas[c]=(S.poAulas[c]||[]).filter(x=>x.id!==id);}
+  _poRefreshTabela();
+};
+// Excluir MÓDULO e todas as suas aulas (de TODOS os cursos) — dupla confirmação.
+window.poExcluirModulo=async(cid,modEnc)=>{
+  const modulo=decodeURIComponent(modEnc);
+  const aulas=(S.poAulas[cid]||[]).filter(a=>(a.modulo||'')===modulo);
+  if(!aulas.length)return;
+  if(!confirm(`Excluir o módulo "${modulo}" e suas ${aulas.length} aula(s)?\n\nAs aulas são apagadas de TODOS os cursos.`))return;
+  if(!confirm(`Confirmar de novo: excluir o módulo "${modulo}" (${aulas.length} aula(s))?`))return;
+  const ids=aulas.map(a=>a.id).filter(Boolean);
+  try{
+    const reais=ids.filter(x=>!String(x).startsWith('tmp_'));
+    let b=writeBatch(db),n=0;
+    for(const id of reais){b.delete(doc(db,'poAulas',id));if(++n>=450){await b.commit();b=writeBatch(db);n=0;}}
+    if(n>0)await b.commit();
+  }catch(e){alert('Erro ao excluir módulo: '+((e&&e.message)||e));return;}
+  const idset=new Set(ids);
+  for(const c in S.poAulas){S.poAulas[c]=(S.poAulas[c]||[]).filter(x=>!idset.has(x.id));}
+  _poRefreshTabela();
+};
+// ── Seleção por checkbox (exclusão em lote) ──
+window.poToggleSelAula=(id,ch)=>{
+  if(!S.poSel)S.poSel={aulas:new Set()};
+  if(ch)S.poSel.aulas.add(id);else S.poSel.aulas.delete(id);
+  _poUpdateModIndeterminate();_poUpdateSelBar();
+};
+window.poToggleSelModulo=(modEnc,ch)=>{
+  if(!S.poSel)S.poSel={aulas:new Set()};
+  const modulo=decodeURIComponent(modEnc);
+  const aulas=_poAulasDoCurso(S.poCursoAtual).filter(a=>String(a.modulo||'')===modulo);
+  aulas.forEach(a=>{if(ch)S.poSel.aulas.add(a.id);else S.poSel.aulas.delete(a.id);});
+  // re-renderiza pra refletir os checkboxes das aulas do módulo
+  _poRefreshTabela();
+};
+window.poLimparSelecao=()=>{
+  if(S.poSel)S.poSel.aulas.clear();else S.poSel={aulas:new Set()};
+  _poRefreshTabela();
+};
+// Excluir TODAS as aulas selecionadas (de TODOS os cursos) — dupla confirmação.
+window.poExcluirSelecionadas=async()=>{
+  if(!S.poSel||!S.poSel.aulas.size)return;
+  const ids=Array.from(S.poSel.aulas);
+  const n=ids.length;
+  if(!confirm(`Excluir ${n} aula${n===1?'':'s'} selecionada${n===1?'':'s'}?\n\nElas são apagadas de TODOS os cursos.`))return;
+  if(!confirm(`Confirmar de novo: excluir definitivamente ${n} aula${n===1?'':'s'}?`))return;
+  try{
+    const reais=ids.filter(x=>x&&!String(x).startsWith('tmp_'));
+    let b=writeBatch(db),k=0;
+    for(const id of reais){b.delete(doc(db,'poAulas',id));if(++k>=450){await b.commit();b=writeBatch(db);k=0;}}
+    if(k>0)await b.commit();
+  }catch(e){alert('Erro ao excluir: '+((e&&e.message)||e));return;}
+  const idset=new Set(ids);
+  for(const c in S.poAulas){S.poAulas[c]=(S.poAulas[c]||[]).filter(x=>!idset.has(x.id));}
+  S.poSel.aulas.clear();
+  _poRefreshTabela();
+};
+// ── Novo módulo (pode nascer vazio; recebe aulas pelo "+ Nova aula" interno) ──
+window.poNovoModulo=()=>{
+  if(!S.poCursoAtual){alert('Abra um curso primeiro.');return;}
+  let host=document.getElementById('po-novomod-modal');
+  if(!host){host=document.createElement('div');host.id='po-novomod-modal';document.body.appendChild(host);}
+  const errCss='display:none;margin-top:14px;padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 35%,transparent);color:#f85149;font-size:12.5px';
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poNovoModuloClose()"></div>
+    <div class="po-modal" role="dialog">
+      <div class="po-modal-head"><h3>Novo módulo</h3><button type="button" class="po-modal-x" onclick="poNovoModuloClose()">✕</button></div>
+      <div class="po-modal-body">
+        <div class="po-modal-label">Nome do módulo (Ponto)</div>
+        <input type="text" id="po-nm-nome" class="po-inp" placeholder="Ex.: Ponto 30 – Anestesia Pediátrica" onkeydown="if(event.key==='Enter')poNovoModuloSalvar()">
+        <div id="po-nm-err" style="${errCss}"></div>
+      </div>
+      <div class="po-modal-foot">
+        <button type="button" class="btn btn-g" onclick="poNovoModuloClose()">Cancelar</button>
+        <button type="button" class="btn btn-p" onclick="poNovoModuloSalvar()">Criar módulo</button>
+      </div>
+    </div>`;
+  host.classList.add('show');
+  setTimeout(()=>{const i=document.getElementById('po-nm-nome');if(i)i.focus();},20);
+};
+window.poNovoModuloClose=()=>{const h=document.getElementById('po-novomod-modal');if(h){h.classList.remove('show');h.innerHTML='';}};
+window.poNovoModuloSalvar=()=>{
+  const nome=(document.getElementById('po-nm-nome')?.value||'').trim();
+  const err=document.getElementById('po-nm-err');
+  const fail=(m)=>{if(err){err.textContent=m;err.style.display='block';}};
+  if(!nome)return fail('Digite o nome do módulo.');
+  const existentes=new Set(_poGroupByMod(_poAulasDoCurso(S.poCursoAtual)).map(g=>g.modulo));
+  if(existentes.has(nome))return fail('Já existe um módulo com esse nome.');
+  if(!S.poModExtra)S.poModExtra={};
+  S.poModExtra[S.poCursoAtual]=(S.poModExtra[S.poCursoAtual]||[]).concat(nome);
+  if(!S.poModAbertos)S.poModAbertos=new Set();
+  S.poModAbertos.add(nome);
+  _poSaveConfig().catch(e=>console.warn('poConfig save',e));
+  poNovoModuloClose();
+  _poRefreshTabela();try{_poUpdateToggleBtn();}catch(e){}
+};
+// ── Nova aula (opcionalmente já vinculada a um módulo) ──
+window.poNovaAula=(moduloEnc)=>{
+  if(!S.poCursoAtual){alert('Abra um curso primeiro.');return;}
+  const mod=moduloEnc?decodeURIComponent(moduloEnc):'';
+  S._poNA={modulo:mod,fixo:!!mod,novoMod:false};
+  _poNovaAulaRender();
+};
+window.poNovaAulaModalClose=()=>{const h=document.getElementById('po-aula-modal');if(h){h.classList.remove('show');h.innerHTML='';}S._poNA=null;};
+window.poNAModuloChange=(v)=>{if(!S._poNA)S._poNA={};S._poNA.novoMod=(v==='__novo__');S._poNA.modulo=v;S._poNA._titulo=(document.getElementById('po-na-titulo')||{}).value||S._poNA._titulo||'';_poNovaAulaRender();};
+function _poNovaAulaRender(){
+  let host=document.getElementById('po-aula-modal');
+  if(!host){host=document.createElement('div');host.id='po-aula-modal';document.body.appendChild(host);}
+  const mods=_poGroupByMod(_poAulasDoCurso(S.poCursoAtual)).map(g=>g.modulo).filter(Boolean);
+  const stCol=S.poColunas.find(c=>c.id==='status');
+  const stOpts=(stCol&&stCol.type==='status')?(stCol.opts||[]):[];
+  const na=S._poNA||{};
+  const optsMod=mods.map(m=>`<option value="${_poEsc(m)}"${na.modulo===m?' selected':''}>${_poEsc(m)}</option>`).join('');
+  const errCss='display:none;margin-top:14px;padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 35%,transparent);color:#f85149;font-size:12.5px';
+  // Quando a aula nasce dentro de um módulo (botão "+ Nova aula neste módulo"),
+  // o módulo já está fixado → não mostra o seletor, só um chip informativo.
+  const moduloBloco=na.fixo
+    ? `<div class="po-na-chip">📍 Módulo · ${_poEsc(na.modulo||'')}</div>`
+    : `<div class="po-modal-label">Módulo (Ponto) *</div>
+       <select id="po-na-modulo" class="po-inp" onchange="poNAModuloChange(this.value)">
+         <option value="">— escolha —</option>${optsMod}
+         <option value="__novo__"${na.novoMod?' selected':''}>➕ Novo módulo…</option>
+       </select>
+       ${na.novoMod?`<input type="text" id="po-na-novomod" class="po-inp" style="margin-top:8px" placeholder="Nome do novo módulo">`:''}`;
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poNovaAulaModalClose()"></div>
+    <div class="po-modal" role="dialog">
+      <div class="po-modal-head"><div><h3>Nova aula</h3>${na.fixo?`<div class="po-na-sub">em ${_poEsc(na.modulo||'')}</div>`:''}</div><button type="button" class="po-modal-x" onclick="poNovaAulaModalClose()">✕</button></div>
+      <div class="po-modal-body">
+        ${moduloBloco}
+        <div class="po-modal-label">Título da aula *</div>
+        <input type="text" id="po-na-titulo" class="po-inp" placeholder="Ex.: Farmacocinética dos opioides" value="${_poEsc(na._titulo||'')}">
+        <div class="po-na-grid">
+          <div><div class="po-modal-label">Professor</div><input type="text" id="po-na-prof" class="po-inp" placeholder="(opcional)"></div>
+          ${stOpts.length?`<div><div class="po-modal-label">Status</div><select id="po-na-status" class="po-inp"><option value="">—</option>${stOpts.map(o=>`<option value="${_poEsc(o.v)}">${_poEsc(o.v)}</option>`).join('')}</select></div>`:''}
+        </div>
+        <div id="po-na-err" style="${errCss}"></div>
+      </div>
+      <div class="po-modal-foot">
+        <button type="button" class="btn btn-g" onclick="poNovaAulaModalClose()">Cancelar</button>
+        <button type="button" class="btn btn-p" onclick="poNovaAulaSalvar()">Criar aula</button>
+      </div>
+    </div>`;
+  host.classList.add('show');
+  const t=document.getElementById('po-na-titulo');if(t)setTimeout(()=>{t.focus();t.setSelectionRange(t.value.length,t.value.length);},20);
+}
+window.poNovaAulaSalvar=async()=>{
+  const cid=S.poCursoAtual;const curso=(S.poCursos||[]).find(c=>c.id===cid);if(!curso)return;
+  const titulo=(document.getElementById('po-na-titulo')?.value||'').trim();
+  let modulo=(S._poNA&&S._poNA.fixo)?(S._poNA.modulo||''):(document.getElementById('po-na-modulo')?.value||'');
+  if(modulo==='__novo__')modulo=(document.getElementById('po-na-novomod')?.value||'').trim();
+  const prof=(document.getElementById('po-na-prof')?.value||'').trim();
+  const status=(document.getElementById('po-na-status')?.value||'');
+  const err=document.getElementById('po-na-err');
+  const fail=(m)=>{if(err){err.textContent=m;err.style.display='block';}};
+  if(!titulo)return fail('Informe o título da aula.');
+  if(!modulo)return fail('Escolha ou crie um módulo.');
+  const noMod=_poAulasDoCurso(cid).filter(a=>String(a.modulo||'')===modulo);
+  const maxOrd=noMod.reduce((mx,a)=>Math.max(mx,(a.ordemPO!=null?a.ordemPO:(a.ordem!=null?a.ordem:0))),-1);
+  const nowIso=new Date().toISOString();
+  const novo={titulo,nomeOriginal:titulo,ordem:null,ordemPO:maxOrd+1,status:status||'',ano:'',prof:prof||'',cursos:[curso.nome],modulo,video:'',categoria:'',questoes:'',cards:'',livros:'',fichaResumo:'',slides:'',conteudo:'',avaliacao:'',dados:{},criadoEm:nowIso,updatedAt:nowIso};
+  try{const ref=await addDoc(collection(db,'poAulas'),novo);novo.id=ref.id;}
+  catch(e){novo.id='tmp_'+(++_poTmpIdSeq);}
+  S.poAulas[cid]=S.poAulas[cid]||[];
+  S.poAulas[cid].push(novo);
+  if(!S.poModAbertos)S.poModAbertos=new Set();
+  S.poModAbertos.add(modulo);
+  poNovaAulaModalClose();
+  _poRefreshTabela();
+};
+// Excluir PRODUTO (curso): apaga as aulas exclusivas dele; aulas em outros cursos só desvincula. Dupla confirmação.
+window.poExcluirProduto=async(cursoId)=>{
+  const curso=(S.poCursos||[]).find(c=>c.id===cursoId);if(!curso)return;
+  const nome=curso.nome;
+  const aulas=(S.poAulas[cursoId]||[]);
+  const soDesse=aulas.filter(a=>(a.cursos||[]).filter(Boolean).length<=1); // exclusivas → apaga
+  const compart=aulas.filter(a=>(a.cursos||[]).filter(Boolean).length>1);  // em outros tb → desvincula
+  if(!confirm(`Excluir o produto "${nome}"?\n\n• ${soDesse.length} aula(s) exclusiva(s) serão APAGADAS.\n• ${compart.length} aula(s) que estão em outros cursos serão só desvinculadas.`))return;
+  if(!confirm(`Confirmar de novo: excluir o produto "${nome}"?`))return;
+  try{
+    let b=writeBatch(db),n=0;
+    const flush=async()=>{if(n>0){await b.commit();b=writeBatch(db);n=0;}};
+    for(const a of soDesse){if(a.id&&!String(a.id).startsWith('tmp_')){b.delete(doc(db,'poAulas',a.id));if(++n>=450)await flush();}}
+    for(const a of compart){const novos=(a.cursos||[]).filter(x=>x&&x!==nome);if(a.id&&!String(a.id).startsWith('tmp_')){b.update(doc(db,'poAulas',a.id),{cursos:novos,updatedAt:new Date().toISOString()});if(++n>=450)await flush();}a.cursos=novos;}
+    await flush();
+  }catch(e){alert('Erro ao excluir produto: '+((e&&e.message)||e));return;}
+  // Aulas tratadas com sucesso → atualiza estado e persiste a config (best-effort, não bloqueia a tela).
+  S.poCursos=(S.poCursos||[]).filter(c=>c.id!==cursoId);
+  _poSaveConfig().catch(e=>console.warn('poConfig save:',e));
+  const apagados=new Set(soDesse.map(a=>a.id));
+  for(const c in S.poAulas){S.poAulas[c]=(S.poAulas[c]||[]).filter(x=>!apagados.has(x.id));}
+  delete S.poAulas[cursoId];
+  if(S.poCursoAtual===cursoId){S.poCursoAtual=null;}
+  S.poView='cursos';
+  _poRender();
 };
 
 const _poCursosDaVertical=(vid)=>S.poCursos.filter(c=>c.vertical===vid);
 const _poAulasDoCurso=(cid)=>S.poAulas[cid]||[];
 
+// ── Importador do Monday (.xlsx) ──────────────────────────────────────────────
+// Parser PURO: recebe a matriz de linhas (sheet_to_json header:1) e devolve
+// {erro, aulas, cursos}. Não toca DOM nem estado — testável isoladamente.
+function _poParseMondayXlsx(rows){
+  const out={erro:'',aulas:[],cursos:[]};
+  if(!Array.isArray(rows)||!rows.length){out.erro='Planilha vazia.';return out;}
+  // 1) acha a linha de cabeçalho: row[0]==='Nome' e a linha contém 'Produto'
+  let hi=-1;
+  for(let i=0;i<rows.length;i++){
+    const r=rows[i]||[];
+    if(String(r[0]||'').trim()==='Nome'&&r.some(c=>String(c||'').trim()==='Produto')){hi=i;break;}
+  }
+  if(hi<0){out.erro='Não encontrei o cabeçalho (linha com “Nome” e “Produto”). Confira se é o export certo do Monday.';return out;}
+  const head=(rows[hi]||[]).map(c=>String(c||'').trim());
+  const col=(nome)=>head.indexOf(nome);
+  const idx={
+    nome:col('Nome'),
+    status:col('Status Aula'),
+    ano:col('ANO'),
+    prof:col('Professor'),
+    produto:col('Produto'),
+    modulo:col('Módulo'),
+    video:col('Link Drive (Revisão)'),
+    categoria:col('CATEGORIA'),
+    questoes:col('Trilha Questões'),
+    cards:col('Trilha Cards'),
+    livros:col('Livros'),
+    fichaResumo:col('Ficha Resumo'),
+    slides:col('Slides'),
+  };
+  const get=(r,k)=>idx[k]>=0?String(r[idx[k]]==null?'':r[idx[k]]).trim():'';
+  const aulas=[];
+  const cursosSet=new Map(); // nome → true (preserva ordem de aparição)
+  for(let i=hi+1;i<rows.length;i++){
+    const r=rows[i]||[];
+    const nome=String(r[idx.nome]==null?'':r[idx.nome]).trim();
+    if(!nome)continue;
+    if(nome==='Nome')continue; // repetição de cabeçalho
+    const status=get(r,'status'),produto=get(r,'produto'),modulo=get(r,'modulo');
+    if(!status&&!produto&&!modulo)continue; // linha de grupo do Monday
+    // ordem + título de "N - Título"
+    let ordem=null,titulo=nome;
+    const m=nome.match(/^\s*(\d+)\s*[-–]\s*(.+)$/);
+    if(m){ordem=parseInt(m[1],10);titulo=m[2].trim();}
+    // cursos a partir de Produto (split por vírgula); vazio → Extensive Geral
+    let cursos=produto.split(',').map(x=>x.trim()).filter(Boolean);
+    if(!cursos.length)cursos=['Extensive Geral'];
+    cursos.forEach(nm=>{if(!cursosSet.has(nm))cursosSet.set(nm,true);});
+    aulas.push({
+      ordem,titulo,nomeOriginal:nome,
+      status,ano:get(r,'ano'),prof:get(r,'prof'),cursos,modulo,
+      video:get(r,'video'),categoria:get(r,'categoria'),
+      questoes:get(r,'questoes'),cards:get(r,'cards'),livros:get(r,'livros'),
+      fichaResumo:get(r,'fichaResumo'),slides:get(r,'slides'),
+      conteudo:'',avaliacao:'',dados:{},
+    });
+  }
+  if(!aulas.length){out.erro='Cabeçalho encontrado, mas nenhuma linha de aula válida.';return out;}
+  out.aulas=aulas;
+  out.cursos=Array.from(cursosSet.keys()).map(nome=>({id:_poSlug(nome),nome,vertical:'anestreview'}));
+  return out;
+}
+
+// expõe o parser pra teste manual no console (parser puro)
+window._poParseMondayXlsx=_poParseMondayXlsx;
+
+// estado efêmero do modal de import
+S._poImp=null; // {parsed, fileName, importando}
+
+window.poAbrirImport=()=>{
+  S._poImp={parsed:null,fileName:'',importando:false,prog:'',done:''};
+  _poImportModalRender();
+};
+window.poImportModalClose=()=>{
+  S._poImp=null;
+  const h=document.getElementById('po-import-modal');
+  if(h){h.classList.remove('show');h.innerHTML='';}
+};
+window.poImportFile=(ev)=>{
+  const f=ev&&ev.target&&ev.target.files&&ev.target.files[0];if(!f)return;
+  if(!S._poImp)S._poImp={};
+  S._poImp.fileName=f.name;S._poImp.parsed=null;S._poImp.done='';
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      S._poImp.parsed=_poParseMondayXlsx(rows);
+    }catch(err){
+      S._poImp.parsed={erro:'Não consegui ler o arquivo: '+(err.message||err),aulas:[],cursos:[]};
+    }
+    _poImportModalRender();
+  };
+  r.onerror=()=>{S._poImp.parsed={erro:'Falha ao ler o arquivo.',aulas:[],cursos:[]};_poImportModalRender();};
+  r.readAsArrayBuffer(f);
+};
+
+window.poImportConfirmar=async()=>{
+  const imp=S._poImp;if(!imp||!imp.parsed||imp.parsed.erro||!imp.parsed.aulas.length)return;
+  if(imp.importando)return;
+  if(!confirm(`Isso vai SUBSTITUIR todas as aulas atuais por ${imp.parsed.aulas.length} aula(s) da planilha.\n\nContinuar?`))return;
+  imp.importando=true;imp.prog='Preparando…';imp.done='';_poImportModalRender();
+  const aulas=imp.parsed.aulas,cursos=imp.parsed.cursos;
+  try{
+    // 1) deleta as aulas existentes em lotes de 450
+    imp.prog='Lendo aulas existentes…';_poImportProg();
+    const exist=await getDocs(collection(db,'poAulas'));
+    const existDocs=exist.docs;
+    let op=0,batch=writeBatch(db);
+    const flush=async()=>{await batch.commit();batch=writeBatch(db);op=0;};
+    for(let i=0;i<existDocs.length;i++){
+      batch.delete(doc(db,'poAulas',existDocs[i].id));op++;
+      if(op>=450){imp.prog=`Limpando ${i+1}/${existDocs.length}…`;_poImportProg();await flush();}
+    }
+    if(op>0){await flush();}
+    // 2) grava as novas em lotes de 450
+    op=0;batch=writeBatch(db);
+    const nowIso=new Date().toISOString();
+    for(let i=0;i<aulas.length;i++){
+      const ref=doc(collection(db,'poAulas'));
+      batch.set(ref,{...aulas[i],criadoEm:nowIso,updatedAt:nowIso});op++;
+      if(op>=450){imp.prog=`Gravando ${i+1}/${aulas.length}…`;_poImportProg();await flush();}
+    }
+    if(op>0){imp.prog=`Gravando ${aulas.length}/${aulas.length}…`;_poImportProg();await flush();}
+    // 3) salva o config (colunas/largura atuais + cursos derivados)
+    imp.prog='Salvando configuração…';_poImportProg();
+    await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,colAulaW:S.poColAulaW,cursos},{merge:true});
+    // 4) recarrega do banco
+    imp.prog='Recarregando…';_poImportProg();
+    S._poLoaded=false;
+    await loadPO();
+    imp.done=`Importadas ${aulas.length} aulas em ${cursos.length} curso(s).`;
+    poImportModalClose();
+    poVoltarVerticais();
+    _poRender();
+  }catch(err){
+    imp.importando=false;
+    const perm=/permission|insufficient|PERMISSION_DENIED/i.test(String(err&&err.message||err));
+    imp.parsed.erro=perm?'Faça login (Google) antes de importar.':'Erro ao importar: '+(err.message||err);
+    _poImportModalRender();
+  }
+};
+// atualiza só o texto de progresso sem re-render completo (evita perder o estado do input)
+function _poImportProg(){
+  const el=document.getElementById('po-imp-prog');
+  if(el&&S._poImp)el.textContent=S._poImp.prog||'';
+}
+
+function _poImportModalRender(){
+  let host=document.getElementById('po-import-modal');
+  if(!host){host=document.createElement('div');host.id='po-import-modal';document.body.appendChild(host);}
+  const imp=S._poImp||{};
+  const p=imp.parsed;
+  let body='';
+  body+=`<p class="po-imp-instr">Exporte a planilha do board no Monday como <b>.xlsx</b> e selecione aqui. A importação <b>substitui</b> todas as aulas atuais pelos dados do arquivo.</p>`;
+  body+=`<input class="po-imp-file" type="file" accept=".xlsx,.xls" onchange="poImportFile(event)">`;
+  if(p&&p.erro){
+    body+=`<div class="po-imp-erro">⚠️ ${_poEsc(p.erro)}</div>`;
+  }else if(p&&p.aulas&&p.aulas.length){
+    const nMod=new Set(p.aulas.map(a=>a.modulo||'Sem módulo')).size;
+    const cont={};p.aulas.forEach(a=>(a.cursos||[]).forEach(nm=>{cont[nm]=(cont[nm]||0)+1;}));
+    const curRows=p.cursos.map(c=>`<div class="po-imp-cur-row"><span>${_poEsc(c.nome)}</span><span>${cont[c.nome]||0} aulas</span></div>`).join('');
+    body+=`<div class="po-imp-prev">
+      <h4>Prévia da importação</h4>
+      <div class="po-imp-stats">
+        <div class="po-imp-stat"><b>${p.aulas.length}</b> aulas</div>
+        <div class="po-imp-stat"><b>${p.cursos.length}</b> cursos</div>
+        <div class="po-imp-stat"><b>${nMod}</b> módulos</div>
+      </div>
+      <div class="po-imp-cursos">${curRows}</div>
+    </div>`;
+  }
+  if(imp.importando)body+=`<div class="po-imp-prog" id="po-imp-prog">${_poEsc(imp.prog||'')}</div>`;
+  if(imp.done)body+=`<div class="po-imp-done">✅ ${_poEsc(imp.done)}</div>`;
+  const podeImportar=p&&!p.erro&&p.aulas&&p.aulas.length&&!imp.importando;
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poImportModalClose()"></div>
+    <div class="po-modal" role="dialog">
+      <div class="po-modal-head"><h3>⬆ Importar do Monday</h3><button type="button" class="po-modal-x" onclick="poImportModalClose()">✕</button></div>
+      <div class="po-modal-body">${body}</div>
+      <div class="po-modal-foot">
+        <button type="button" class="btn btn-g" onclick="poImportModalClose()">${imp.done?'Fechar':'Cancelar'}</button>
+        <button type="button" class="btn btn-p" onclick="poImportConfirmar()" ${podeImportar?'':'disabled'}>${imp.importando?'Importando…':'Importar para o Firestore'}</button>
+      </div>
+    </div>`;
+  host.classList.add('show');
+}
+
+function _poTemFiltroColuna(){const f=S.poColFiltros||{};return Object.keys(f).some(k=>String(f[k]||'').trim());}
 function _poFiltraAulas(cid,q){
   let aulas=_poAulasDoCurso(cid).slice();
   const s=(q||'').trim().toLowerCase();
   if(s)aulas=aulas.filter(a=>[a.titulo,a.modulo,a.edital,a.prof,a.status,a.ano].some(x=>String(x||'').toLowerCase().includes(s)));
+  const f=S.poColFiltros||{};
+  Object.keys(f).forEach(colId=>{
+    const fv=String(f[colId]||'').trim().toLowerCase();if(!fv)return;
+    if(colId==='__aula'){aulas=aulas.filter(a=>String(a.modulo||'').toLowerCase().includes(fv));return;}
+    const col=S.poColunas.find(c=>c.id===colId);if(!col)return;
+    if(col.type==='status')aulas=aulas.filter(a=>String(_poCellVal(a,col)||'').trim().toLowerCase()===fv);
+    else aulas=aulas.filter(a=>String(_poCellVal(a,col)||'').toLowerCase().includes(fv));
+  });
   return aulas;
 }
+// Controle de filtro no cabeçalho: select pra colunas de status, input de texto pras demais.
+function _poColFiltroControl(col){
+  const cur=(S.poColFiltros||{})[col.id]||'';
+  const on=String(cur).trim()?' on':'';
+  if(col.type==='status'){
+    const opts=(col.opts||[]).map(o=>`<option value="${_poEsc(o.v)}"${String(cur)===String(o.v)?' selected':''}>${_poEsc(o.v)}</option>`).join('');
+    return `<select class="po-th-filtro${on}" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" onchange="poSetColFiltro('${col.id}',this.value)"><option value="">Todos</option>${opts}</select>`;
+  }
+  const ph=col.id==='__aula'?'filtrar ponto…':'filtrar…';
+  return `<input class="po-th-filtro${on}" type="text" placeholder="${ph}" value="${_poEsc(cur)}" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" oninput="poSetColFiltro('${col.id}',this.value)">`;
+}
+window.poSetColFiltro=(colId,val)=>{
+  if(!S.poColFiltros)S.poColFiltros={};
+  if(val&&String(val).trim())S.poColFiltros[colId]=val;else delete S.poColFiltros[colId];
+  // só re-renderiza o corpo (mantém foco/estado dos campos de filtro no cabeçalho)
+  _poRefreshTabela();
+  const inp=document.querySelector(`#po-root .po-th-filtro[onchange*="'${colId}'"],#po-root .po-th-filtro[oninput*="'${colId}'"]`);
+  if(inp)inp.classList.toggle('on',!!(val&&String(val).trim()));
+}
+// Excluir coluna — dupla confirmação. (Em memória por enquanto, como o resto do PO.)
+window.poExcluirColuna=(colId)=>{
+  const col=(S.poColunas||[]).find(c=>c.id===colId);if(!col)return;
+  if(!confirm(`Excluir a coluna "${col.label}"?\n\nA coluna some da planilha deste curso.`))return;
+  if(!confirm(`Confirmar de novo: excluir definitivamente a coluna "${col.label}"?`))return;
+  S.poColunas=S.poColunas.filter(c=>c.id!==colId);
+  if(S.poColFiltros)delete S.poColFiltros[colId];
+  _poSaveConfig().catch(e=>console.warn('poConfig save',e));
+  _poRender();
+};
 const _PO_ATENCAO=new Set(['Demanda de Aluno','!! Prof - Aula com erro. Revise!','!! Slides - Problema','!! Video - Problema com edição','PRECISA DE ATUALIZAÇÃO']);
+// Extrai o número de "Ponto N" (1,2,...10,11). Retorna null se não for um Ponto numerado.
+function _poPontoNum(m){const mt=String(m||'').match(/ponto\s*(\d+)/i);return mt?parseInt(mt[1],10):null;}
+// Ordenação default das aulas dentro de um módulo: ordemPO asc (fallback ordem importado), desempate por título.
+function _poOrdAula(a){return a.ordemPO!=null?a.ordemPO:(a.ordem!=null?a.ordem:9999);}
 function _poGroupByMod(aulas){
   const order=[],map=new Map();
   aulas.forEach(a=>{const m=a.modulo||'Sem módulo';if(!map.has(m)){map.set(m,[]);order.push(m);}map.get(m).push(a);});
-  return order.map(m=>({modulo:m,aulas:map.get(m)}));
+  // Módulos criados manualmente que ainda não têm aula (aparecem vazios pra receber aulas).
+  ((S.poModExtra||{})[S.poCursoAtual]||[]).forEach(m=>{if(m&&!map.has(m)){map.set(m,[]);order.push(m);}});
+  // Ordem manual (arrastando) tem prioridade; módulos não listados caem no default por Ponto.
+  const manual=(S.poModOrdem||{})[S.poCursoAtual];
+  const ord=order.map((m,i)=>({m,i,p:_poPontoNum(m)}));
+  if(Array.isArray(manual)&&manual.length){
+    const rank={};manual.forEach((m,i)=>{rank[m]=i;});
+    ord.sort((a,b)=>{
+      const ra=rank[a.m],rb=rank[b.m];
+      if(ra!=null&&rb!=null)return ra-rb;
+      if(ra!=null)return -1;
+      if(rb!=null)return 1;
+      // ambos fora da lista manual → default por Ponto
+      if(a.p!=null&&b.p!=null)return a.p-b.p||a.i-b.i;
+      if(a.p!=null)return -1;if(b.p!=null)return 1;return a.i-b.i;
+    });
+  }else{
+    // Ordem padrão: Pontos numerados crescente (1,2,…,10,11,…21), depois os demais na ordem original.
+    ord.sort((a,b)=>{
+      if(a.p!=null&&b.p!=null)return a.p-b.p||a.i-b.i;
+      if(a.p!=null)return -1;
+      if(b.p!=null)return 1;
+      return a.i-b.i;
+    });
+  }
+  return ord.map(x=>{
+    const list=map.get(x.m).slice().sort((a,b)=>(_poOrdAula(a)-_poOrdAula(b))||String(a.titulo||'').localeCompare(String(b.titulo||'')));
+    return {modulo:x.m,aulas:list};
+  });
 }
-function _poAulaRowHTML(a){
+function _poAulaRowHTML(a,pos){
   const dem=a.demandas>0?`<span class="po-dem">🔔 ${a.demandas}</span>`:'';
-  const cells=S.poColunas.map(col=>`<td>${_poColCell(a,col)}</td>`).join('');
-  return `<tr class="po-aula-row">
-    <td class="po-col-aula"><span class="po-num">${a.ordem!=null?a.ordem:''}</span><span class="po-aula-nome">${_poEsc(a.titulo)}</span> ${dem}</td>
+  const aid=_poEsc(String(a.id||''));
+  const mod=_poEsc(String(a.modulo||''));
+  const cells=S.poColunas.map((col,i)=>`<td data-aula="${aid}" data-ci="${i}" onclick="event.stopPropagation();poCelEditar('${aid}',${i},this)">${_poColCell(a,col)}</td>`).join('');
+  return `<tr class="po-aula-row" draggable="false" data-aula-id="${aid}" data-modulo="${mod}">
+    <td class="po-col-aula"><span class="po-grip" onmousedown="this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span><input type="checkbox" class="po-sel-aula"${S.poSel&&S.poSel.aulas.has(a.id)?' checked':''} onclick="event.stopPropagation();poToggleSelAula('${aid}',this.checked)"><span class="po-num">${pos!=null?pos:''}</span><span class="po-aula-nome" onclick="event.stopPropagation();poEditarNomeAula('${aid}',this)">${_poEsc(a.titulo)}</span> ${dem}</td>
     ${cells}
     <td class="po-col-add"></td>
   </tr>`;
 }
 function _poTableRowsHTML(aulas,q){
   const span=S.poColunas.length+2; // 1 (Aula fixa) + colunas + 1 (＋)
-  if(!aulas.length)return `<tr><td colspan="${span}"><div class="po-empty"><div class="po-ei">🔍</div><p>Nenhuma aula ${q?'encontrada para esta busca':'cadastrada'}.</p></div></td></tr>`;
   if(!S.poModAbertos)S.poModAbertos=new Set();
-  const forceOpen=!!q; // busca ativa abre todos os módulos pra mostrar os resultados
+  const grupos=_poGroupByMod(aulas);
+  if(!grupos.length)return `<tr><td colspan="${span}"><div class="po-empty"><div class="po-ei">🔍</div><p>Nenhuma aula ${q?'encontrada para esta busca':'cadastrada'}.</p></div></td></tr>`;
+  const forceOpen=!!q||_poTemFiltroColuna(); // busca/filtro ativo abre todos os módulos pra mostrar os resultados
   let out='';
-  _poGroupByMod(aulas).forEach(g=>{
+  grupos.forEach(g=>{
     const open=forceOpen||S.poModAbertos.has(g.modulo);
     const n=g.aulas.length;
     const noAr=g.aulas.filter(a=>_poIsPronta(a.status)).length;
     const atencao=g.aulas.filter(a=>_PO_ATENCAO.has(String(a.status||'').trim())).length;
     const at=atencao?`<span class="po-mod-at">🔔 ${atencao}</span>`:'';
-    out+=`<tr class="po-mod-row${open?' open':''}" onclick="poToggleMod('${encodeURIComponent(g.modulo)}')">
-      <td class="po-mod-cell" colspan="${span}"><span class="po-chev">▸</span><span class="po-mod-nome">${_poEsc(g.modulo)}</span><span class="po-mod-meta">${n} ${n===1?'aula':'aulas'} · ${noAr} no ar</span>${at}</td>
+    const qb=S.poCursoAtual?_poModQ(S.poCursoAtual,g.modulo):{TEA:[],TSA:[],MEs:[]};
+    const qTot=(qb.TEA||[]).length+(qb.TSA||[]).length+(qb.MEs||[]).length;
+    const qBadge=qTot?`<span class="po-mod-qbadge">Q: ${qTot}</span>`:'';
+    const btnAnalisar=`<button type="button" class="po-mod-analisar" onclick="event.stopPropagation();poAbrirAnaliseModulo('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="Analisar este módulo com a IA">🤖 Analisar módulo</button>`;
+    const modSelMarcado=g.aulas.length&&g.aulas.every(a=>S.poSel&&S.poSel.aulas.has(a.id));
+    const modChk=`<input type="checkbox" class="po-sel-mod"${modSelMarcado?' checked':''} data-modulo="${_poEsc(g.modulo)}" onclick="event.stopPropagation();poToggleSelModulo('${encodeURIComponent(g.modulo)}',this.checked)">`;
+    out+=`<tr class="po-mod-row${open?' open':''}" draggable="false" data-modulo="${_poEsc(g.modulo)}" onclick="poToggleMod('${encodeURIComponent(g.modulo)}')">
+      <td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><span class="po-grip" onmousedown="event.stopPropagation();this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span>${modChk}<span class="po-chev">▸</span><span class="po-mod-nome" ondblclick="event.stopPropagation();poEditarNomeModulo('${encodeURIComponent(g.modulo)}',this)" title="Duplo-clique pra renomear">${_poEsc(g.modulo)}</span>${at}${qBadge}${btnAnalisar}</span></td>
     </tr>`;
-    if(open)g.aulas.forEach(a=>{out+=_poAulaRowHTML(a);});
+    if(open){
+      g.aulas.forEach((a,idx)=>{out+=_poAulaRowHTML(a,idx+1);});
+      out+=`<tr class="po-addaula-row"><td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><button type="button" class="po-addaula-btn" onclick="poNovaAula('${encodeURIComponent(g.modulo)}')" title="Cadastrar uma aula neste módulo">＋ Nova aula neste módulo</button></span></td></tr>`;
+    }
   });
   return out;
 }
 
-window.initPO=function(){_poRender();};
+window.initPO=function(){
+  if(S._poLoaded){_poRender();return;}
+  const root=document.getElementById('po-root');
+  if(root)root.innerHTML='<div class="po-wrap"><div class="po-empty"><div class="po-ei">⏳</div><p>Carregando coordenação de produto…</p></div></div>';
+  loadPO().then(_poRender).catch(()=>{S._poLoaded=true;_poRender();});
+};
 
 function _poRender(){
   const root=document.getElementById('po-root');if(!root)return;
@@ -37058,8 +37957,8 @@ function _poRenderVerticals(root){
 
 window.poSelectVertical=(id)=>{if(!VERTICAIS.find(v=>v.id===id))return;S.poVertical=id;S.poView='cursos';_poRender();};
 window.poVoltarVerticais=()=>{S.poVertical=null;S.poCursoAtual=null;S.poView='verticals';_poRender();};
-window.poAbrirCurso=(id)=>{S.poCursoAtual=id;S.poView='curso';S.poBusca='';S.poModAbertos=new Set();_poRender();};
-window.poVoltarCursos=()=>{S.poCursoAtual=null;S.poView='cursos';_poRender();};
+window.poAbrirCurso=(id)=>{S.poCursoAtual=id;S.poView='curso';S.poBusca='';S.poModAbertos=new Set();if(S.poSel)S.poSel.aulas.clear();_poRender();};
+window.poVoltarCursos=()=>{S.poCursoAtual=null;S.poView='cursos';if(S.poSel)S.poSel.aulas.clear();_poRender();};
 
 // Tela 2 — cards dos cursos da vertical
 function _poRenderCursos(root){
@@ -37081,6 +37980,7 @@ function _poRenderCursos(root){
         <span class="po-cc-stat"><b>${pct}%</b> em produção</span>
         ${prodTag}
       </div>
+      <span class="po-cc-del" role="button" tabindex="0" onclick="event.stopPropagation();event.preventDefault();poExcluirProduto('${c.id}')" title="Excluir produto">🗑️</span>
     </button>`;
   }).join('');
   root.innerHTML=`
@@ -37110,14 +38010,15 @@ function _poRenderCurso(root){
       <div class="po-head">
         <p class="po-eyebrow">${v.ico} ${_poEsc(v.tag||v.nome.toUpperCase())}</p>
         <h2 class="po-title">${_poEsc(c.nome)} ${prodLink}</h2>
-        <p class="po-sub">${_poEsc(c.descricao||'')}</p>
+        ${c.descricao?`<p class="po-sub">${_poEsc(c.descricao)}</p>`:''}
       </div>
       <div class="po-toolbar">
         <input class="po-search" type="text" placeholder="Buscar aula, módulo, professor, status…" value="${_poEsc(S.poBusca||'')}" oninput="poSetBusca(this.value)">
         <button id="po-toggle-all" class="btn btn-g" type="button" onclick="poToggleAll()" title="Expandir / recolher todos os módulos">⊕ Expandir tudo</button>
-        <button class="btn btn-s" type="button" disabled title="Em breve">＋ Nova aula</button>
-        <button class="btn btn-s" type="button" disabled title="Em breve">⬆ Importar do Monday</button>
+        <button class="btn btn-s" type="button" onclick="poNovoModulo()" title="Criar um novo módulo (Ponto) neste curso">＋ Novo módulo</button>
+        <button class="btn btn-s" type="button" onclick="poAbrirImport()" title="Importar a planilha do Monday (.xlsx)">⬆ Importar do Monday</button>
       </div>
+      ${S._poAvisoDemo?`<div class="po-demo-aviso">⚠️ ${_poEsc(S._poAvisoDemo)}</div>`:''}
       <div class="po-table-wrap">
         <table class="po-table" id="po-table">
           <colgroup>
@@ -37126,32 +38027,169 @@ function _poRenderCurso(root){
             <col style="width:42px">
           </colgroup>
           <thead><tr>
-            <th class="po-col-aula">Aula<span class="po-rsz" data-ci="-1"></span></th>
-            ${S.poColunas.map((c,i)=>`<th data-ci="${i}" title="${_poEsc(c.label)}">${_poEsc(c.label)}<span class="po-rsz" data-ci="${i}"></span></th>`).join('')}
+            <th class="po-col-aula"><div class="po-th-top"><span class="po-th-label">Aula</span></div>${_poColFiltroControl({id:'__aula',type:'texto'})}<span class="po-rsz" data-ci="-1"></span></th>
+            ${S.poColunas.map((c,i)=>`<th data-ci="${i}"><div class="po-th-top"><span class="po-th-label" title="${_poEsc(c.label)}" ondblclick="event.stopPropagation();poEditarNomeColuna(${i},this)">${_poEsc(c.label)}</span>${c.type==='status'?`<button type="button" class="po-col-cfg" title="Gerenciar opções" onclick="event.stopPropagation();poGerenciarOpcoes(${i})">⚙</button>`:''}<button type="button" class="po-col-del" title="Excluir coluna" onclick="poExcluirColuna('${c.id}')">✕</button></div>${_poColFiltroControl(c)}<span class="po-rsz" data-ci="${i}"></span></th>`).join('')}
             <th class="po-col-add"><button type="button" class="po-add-col" onclick="poNovaColuna()" title="Nova coluna">＋</button></th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
+      <div class="po-sel-bar" id="po-sel-bar" style="display:none">
+        <span class="po-sel-count">0 aula selecionada</span>
+        <span class="po-sel-grow"></span>
+        <button type="button" class="po-sel-del" onclick="poExcluirSelecionadas()">🗑️ Excluir selecionadas</button>
+        <button type="button" class="po-sel-clear" onclick="poLimparSelecao()">Limpar seleção</button>
+      </div>
       <div class="po-ia">
         <h3>🤖 Inteligência do Produto <span class="po-soon">Fase 2</span></h3>
         <p>A IA vai varrer o curso (status, datas de prova, edital e notas) e te dar a próxima prioridade — e analisar lotes de questões pra sugerir aulas a montar.</p>
         <div class="po-ia-btns">
-          <span class="po-ia-btn">⚡ Próxima prioridade do produto</span>
-          <span class="po-ia-btn">📥 Analisar lote de questões (JSON)</span>
+          <span class="po-ia-btn">⚡ Próxima prioridade do produto <span class="po-soon">Fase 2</span></span>
         </div>
+        <div class="po-ia-hint">📥 Para analisar questões, use o botão <strong>🤖 Analisar módulo</strong> em cada Ponto da planilha.</div>
       </div>
     </div>`;
   try{_poBindResize();}catch(e){}
+  try{_poBindDrag();}catch(e){}
+  _poUpdateModIndeterminate();
+  _poUpdateSelBar();
 }
 
 function _poRefreshTabela(){
   if(!S.poCursoAtual)return;
   const tbody=document.querySelector('#po-root .po-table tbody');if(!tbody)return;
   tbody.innerHTML=_poTableRowsHTML(_poFiltraAulas(S.poCursoAtual,S.poBusca),(S.poBusca||'').trim().toLowerCase());
+  try{_poBindDrag();}catch(e){}
+  _poUpdateModIndeterminate();
+  _poUpdateSelBar();
+}
+// Estado parcial (indeterminate) dos checkboxes de módulo: marcado se TODAS as aulas estão na seleção,
+// indeterminado se SÓ ALGUMAS. Roda depois de cada render do corpo da tabela.
+function _poUpdateModIndeterminate(){
+  if(!S.poSel)return;
+  const grupos=_poGroupByMod(_poAulasDoCurso(S.poCursoAtual));
+  const byMod={};grupos.forEach(g=>{byMod[g.modulo]=g.aulas;});
+  document.querySelectorAll('#po-root .po-sel-mod').forEach(chk=>{
+    const mod=chk.getAttribute('data-modulo')||'';
+    const aulas=byMod[mod]||[];
+    const marc=aulas.filter(a=>S.poSel.aulas.has(a.id)).length;
+    chk.checked=aulas.length>0&&marc===aulas.length;
+    chk.indeterminate=marc>0&&marc<aulas.length;
+  });
+}
+// Atualiza a barra de seleção (contagem) sem re-renderizar a tabela inteira.
+function _poUpdateSelBar(){
+  const bar=document.getElementById('po-sel-bar');if(!bar)return;
+  const n=S.poSel?S.poSel.aulas.size:0;
+  if(n<=0){bar.style.display='none';return;}
+  bar.style.display='';
+  const c=bar.querySelector('.po-sel-count');
+  if(c)c.textContent=`${n} aula${n===1?'':'s'} selecionada${n===1?'':'s'}`;
 }
 window.poSetBusca=(val)=>{S.poBusca=val;_poRefreshTabela();};
+
+// ── Arrastar pra reordenar (aulas dentro do módulo · módulos no curso) ──
+// Reordenar por posição só faz sentido com a lista "natural"; busca/filtro força tudo aberto
+// e bagunça as posições, então o drag fica desligado nesses casos.
+function _poDragAtivo(){return !((S.poBusca||'').trim()||_poTemFiltroColuna());}
+function _poClearDropMarks(){document.querySelectorAll('#po-root .po-drop-target').forEach(el=>el.classList.remove('po-drop-target'));}
+function _poBindDrag(){
+  if(!_poDragAtivo())return; // sem drag durante busca/filtro
+  const tbody=document.querySelector('#po-root .po-table tbody');if(!tbody)return;
+  // AULAS
+  tbody.querySelectorAll('tr.po-aula-row[draggable]').forEach(tr=>{
+    tr.addEventListener('dragstart',e=>{
+      S._poDrag={tipo:'aula',id:tr.dataset.aulaId,modulo:tr.dataset.modulo||''};
+      S._poDragging=true;
+      try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',tr.dataset.aulaId||'');}catch(_){}
+    });
+    tr.addEventListener('dragend',()=>{S._poDrag=null;tr.draggable=false;_poClearDropMarks();setTimeout(()=>{S._poDragging=false;},0);});
+    tr.addEventListener('dragover',e=>{
+      const d=S._poDrag;if(!d||d.tipo!=='aula')return;
+      if((tr.dataset.modulo||'')!==d.modulo)return; // só dentro do mesmo módulo
+      if(tr.dataset.aulaId===d.id)return;
+      e.preventDefault();try{e.dataTransfer.dropEffect='move';}catch(_){}
+      tr.classList.add('po-drop-target');
+    });
+    tr.addEventListener('dragleave',()=>{tr.classList.remove('po-drop-target');});
+    tr.addEventListener('drop',e=>{
+      const d=S._poDrag;if(!d||d.tipo!=='aula')return;
+      if((tr.dataset.modulo||'')!==d.modulo)return;
+      e.preventDefault();tr.classList.remove('po-drop-target');
+      const toId=tr.dataset.aulaId;if(toId&&d.id&&toId!==d.id)_poReordenarAulas(d.modulo,d.id,toId);
+      S._poDrag=null;
+    });
+  });
+  // MÓDULOS
+  tbody.querySelectorAll('tr.po-mod-row[draggable]').forEach(tr=>{
+    tr.addEventListener('dragstart',e=>{
+      S._poDrag={tipo:'modulo',modulo:tr.dataset.modulo||''};
+      S._poDragging=true;
+      try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',tr.dataset.modulo||'');}catch(_){}
+    });
+    tr.addEventListener('dragend',()=>{S._poDrag=null;tr.draggable=false;_poClearDropMarks();setTimeout(()=>{S._poDragging=false;},0);});
+    tr.addEventListener('dragover',e=>{
+      const d=S._poDrag;if(!d||d.tipo!=='modulo')return;
+      if((tr.dataset.modulo||'')===d.modulo)return;
+      e.preventDefault();try{e.dataTransfer.dropEffect='move';}catch(_){}
+      tr.classList.add('po-drop-target');
+    });
+    tr.addEventListener('dragleave',()=>{tr.classList.remove('po-drop-target');});
+    tr.addEventListener('drop',e=>{
+      const d=S._poDrag;if(!d||d.tipo!=='modulo')return;
+      const to=tr.dataset.modulo||'';if(!to||to===d.modulo)return;
+      e.preventDefault();tr.classList.remove('po-drop-target');
+      _poReordenarModulos(S.poCursoAtual,d.modulo,to);
+      S._poDrag=null;
+    });
+  });
+}
+
+// Reordena aulas de um módulo: move fromId pra antes de toId e regrava ordemPO 0..N-1.
+window._poReordenarAulas=function(modulo,fromId,toId){
+  if(!modulo||!fromId||!toId||fromId===toId)return;
+  const cid=S.poCursoAtual;if(!cid)return;
+  let lista=_poAulasDoCurso(cid).filter(a=>String(a.modulo||'')===String(modulo));
+  lista=lista.slice().sort((a,b)=>(_poOrdAula(a)-_poOrdAula(b))||String(a.titulo||'').localeCompare(String(b.titulo||'')));
+  const from=lista.find(a=>a.id===fromId),to=lista.find(a=>a.id===toId);
+  if(!from||!to)return; // ids de módulos diferentes / inválidos
+  lista=lista.filter(a=>a.id!==fromId);
+  const ti=lista.indexOf(to);
+  lista.splice(ti,0,from);
+  lista.forEach((a,i)=>{a.ordemPO=i;});
+  _poRefreshTabela();
+  _poPersistirOrdemAulas(lista);
+};
+
+// Persiste ordemPO nas aulas reais (id não-tmp) em writeBatch (chunks de 450), best-effort.
+async function _poPersistirOrdemAulas(lista){
+  const reais=lista.filter(a=>a.id&&!String(a.id).startsWith('tmp_'));
+  if(!reais.length)return;
+  try{
+    for(let i=0;i<reais.length;i+=450){
+      const chunk=reais.slice(i,i+450);
+      const batch=writeBatch(db);
+      chunk.forEach(a=>batch.update(doc(db,'poAulas',a.id),{ordemPO:a.ordemPO,updatedAt:new Date().toISOString()}));
+      await batch.commit();
+    }
+  }catch(e){console.warn('poReordenarAulas persist:',e);}
+}
+
+// Reordena módulos: move fromMod pra antes de toMod, grava a ordem manual em S.poModOrdem[cursoId].
+window._poReordenarModulos=function(cursoId,fromMod,toMod){
+  if(!cursoId||!fromMod||!toMod||fromMod===toMod)return;
+  let ordem=_poGroupByMod(_poAulasDoCurso(cursoId)).map(g=>g.modulo);
+  if(!ordem.includes(fromMod)||!ordem.includes(toMod))return;
+  ordem=ordem.filter(m=>m!==fromMod);
+  const ti=ordem.indexOf(toMod);
+  ordem.splice(ti,0,fromMod);
+  if(!S.poModOrdem)S.poModOrdem={};
+  S.poModOrdem[cursoId]=ordem;
+  _poRefreshTabela();
+  _poSaveConfig().catch(e=>console.warn('poConfig save (modOrdem):',e));
+};
 window.poToggleMod=(key)=>{
+  if(S._poDragging)return; // ignora o click sintético no fim de um drag
   const mod=decodeURIComponent(key);
   if(!S.poModAbertos)S.poModAbertos=new Set();
   if(S.poModAbertos.has(mod))S.poModAbertos.delete(mod);else S.poModAbertos.add(mod);
@@ -37184,7 +38222,7 @@ function _poBindResize(){
       const startX=e.clientX;const startW=colEl.getBoundingClientRect().width;
       document.body.style.cursor='col-resize';document.body.classList.add('po-resizing');
       const move=ev=>{const w=Math.max(48,Math.round(startW+(ev.clientX-startX)));colEl.style.width=w+'px';if(ci===-1)S.poColAulaW=w;else if(S.poColunas[ci])S.poColunas[ci].w=w;};
-      const up=()=>{document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);document.body.style.cursor='';document.body.classList.remove('po-resizing');};
+      const up=()=>{document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);document.body.style.cursor='';document.body.classList.remove('po-resizing');_poSaveConfig().catch(e=>console.warn('poConfig save',e));};
       document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
     });
   });
@@ -37207,6 +38245,7 @@ window.poColSalvar=()=>{
   const col={id:'c_'+(slug||'col')+'_'+(S.poColunas.length+1),label:nome,type:S._poColTipo,w:S._poColTipo==='status'?150:(S._poColTipo==='link'?80:130)};
   if(S._poColTipo==='status')col.opts=S._poColOpts.filter(o=>(o.label||'').trim()).map(o=>({v:o.label.trim(),cor:o.cor}));
   S.poColunas.push(col);
+  _poSaveConfig().catch(e=>console.warn('poConfig save',e));
   poColModalClose();
   _poRender();
 };
@@ -37239,6 +38278,182 @@ function _poColModalRender(){
     </div>`;
   host.classList.add('show');
   const inp=document.getElementById('po-col-nome');if(inp)setTimeout(()=>{inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);},20);
+}
+
+// ── Análise de lote de questões (JSON) — Fase 2 (frontend pronto; IA conectada após deploy) ──
+// Lote esperado: array de {id, enunciado, enunciado_html?, gabarito:"A".."D", alternativas:[{letra,texto}]}.
+// O enunciado_html pode trazer imagem base64 gigante → removida antes de qualquer uso.
+S.poQuestoesLote=null;   // array normalizado pronto pra mandar pra IA
+S._poQuestErro='';       // mensagem de erro de parse
+S._poQuestInfo=null;     // {total, comImagem, bytesAntes, bytesDepois}
+// Questões por módulo (em memória). Chave = cursoId::modulo. Valor = {TEA,TSA,MEs} de arrays normalizados.
+S.poModQuestoes={};
+S._poModAtual=null;      // {cid, modulo} do módulo aberto no modal
+S._poModErro={};         // erro de parse por tipo (TEA/TSA/MEs) no modal atual
+// slug estável (vira doc id em poModQuestoes). cid+'__'+modulo, não-alfanum→'_'.
+function _poModKey(cid,mod){return _poSlug(cid+'__'+mod);}
+// Persiste o bucket de questões de um módulo (fire-and-forget).
+function _poSaveModQuestoes(cid,mod){
+  const key=_poModKey(cid,mod);
+  const b=S.poModQuestoes[key]||{TEA:[],TSA:[],MEs:[]};
+  setDoc(doc(db,'poModQuestoes',key),{cursoId:cid,modulo:mod,TEA:b.TEA||[],TSA:b.TSA||[],MEs:b.MEs||[]},{merge:true}).catch(e=>console.warn('poModQuestoes save',e));
+}
+function _poModQ(cid,mod){const k=_poModKey(cid,mod);if(!S.poModQuestoes[k])S.poModQuestoes[k]={TEA:[],TSA:[],MEs:[]};return S.poModQuestoes[k];}
+// Remove <img>, data:image base64 e atributos src de imagem de um HTML/texto.
+function _poStripImagens(s){
+  let t=String(s||'');
+  let teveImg=/<img|data:image\//i.test(t);
+  t=t.replace(/<img\b[^>]*>/gi,' [imagem removida] ');
+  t=t.replace(/data:image\/[a-z+]+;base64,[A-Za-z0-9+/=\s]+/gi,'[imagem removida]');
+  return {txt:t,teveImg};
+}
+// Parser PURO: recebe texto, devolve {erro, lote, info}. Não toca estado global.
+function _poParseLoteQuestoes(text){
+  const out={erro:'',lote:[],info:{total:0,comImagem:0,bytesAntes:0,bytesDepois:0}};
+  const raw=String(text||'').trim();
+  if(!raw){out.erro='Cole o JSON ou escolha um arquivo .json.';return out;}
+  let data;
+  try{data=JSON.parse(raw);}catch(e){out.erro='JSON inválido: '+(e.message||e);return out;}
+  // aceita array direto, ou {questoes:[...]} / {questions:[...]}
+  if(!Array.isArray(data)){
+    if(data&&Array.isArray(data.questoes))data=data.questoes;
+    else if(data&&Array.isArray(data.questions))data=data.questions;
+    else{out.erro='Esperava uma lista de questões (array JSON).';return out;}
+  }
+  if(!data.length){out.erro='A lista está vazia — nenhuma questão encontrada.';return out;}
+  let comImagem=0;const bytesAntes=raw.length;
+  const norm=data.map((q,i)=>{
+    q=q||{};
+    const enunRaw=q.enunciado!=null?String(q.enunciado):'';
+    const htmlRaw=q.enunciado_html!=null?String(q.enunciado_html):'';
+    const sEn=_poStripImagens(enunRaw);
+    const sHtml=_poStripImagens(htmlRaw);
+    if(sEn.teveImg||sHtml.teveImg)comImagem++;
+    // enunciado pra IA: prioriza texto puro; se vazio, usa o html já sem imagem
+    const enunciado=(sEn.txt.trim()||sHtml.txt.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim());
+    const alternativas=Array.isArray(q.alternativas)?q.alternativas.map(a=>({letra:String(a&&a.letra||'').trim(),texto:_poStripImagens(String(a&&a.texto||'')).txt.trim()})):[];
+    return {id:q.id!=null?q.id:(i+1),enunciado,gabarito:String(q.gabarito||'').trim().toUpperCase(),alternativas};
+  });
+  out.lote=norm;
+  out.info={total:norm.length,comImagem,bytesAntes,bytesDepois:JSON.stringify(norm).length};
+  return out;
+}
+
+// ── Fluxo POR MÓDULO: 3 lotes (TEA/TSA/MEs) acumulados por módulo ──
+const _PO_MOD_TIPOS=['TEA','TSA','MEs'];
+window.poAbrirAnaliseModulo=(cid,modEnc)=>{
+  S._poModAtual={cid,modulo:decodeURIComponent(modEnc)};
+  S._poModErro={};
+  _poModModalRender();
+};
+window.poModModalClose=()=>{const h=document.getElementById('po-mod-modal');if(h){h.classList.remove('show');h.innerHTML='';}S._poModAtual=null;try{_poRefreshTabela();}catch(e){}};
+window.poModFileUpload=(tipo,ev)=>{
+  const f=ev&&ev.target&&ev.target.files&&ev.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{_poModAplicarLote(tipo,String(e.target.result||''));};
+  r.onerror=()=>{S._poModErro[tipo]='Não consegui ler o arquivo.';_poModModalRender();};
+  r.readAsText(f);
+  ev.target.value='';
+};
+window.poModColar=(tipo)=>{
+  const ta=document.getElementById('po-mod-ta-'+tipo);
+  _poModAplicarLote(tipo,ta?ta.value:'');
+};
+function _poModAplicarLote(tipo,text){
+  if(!S._poModAtual)return;
+  const res=_poParseLoteQuestoes(text);
+  if(res.erro){S._poModErro[tipo]=res.erro;return _poModModalRender();}
+  S._poModErro[tipo]='';
+  const bucket=_poModQ(S._poModAtual.cid,S._poModAtual.modulo);
+  bucket[tipo]=(bucket[tipo]||[]).concat(res.lote);
+  _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
+  _poModModalRender();
+}
+window.poModLimparTipo=(tipo)=>{
+  if(!S._poModAtual)return;
+  const bucket=_poModQ(S._poModAtual.cid,S._poModAtual.modulo);
+  bucket[tipo]=[];
+  S._poModErro[tipo]='';
+  _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
+  _poModModalRender();
+};
+// Mock por enquanto: a análise real entra quando a Cloud Function for publicada.
+window.poAnalisarModulo=()=>{
+  if(!S._poModAtual)return;
+  const {cid,modulo}=S._poModAtual;
+  const bucket=_poModQ(cid,modulo);
+  const a=(bucket.TEA||[]).length,b=(bucket.TSA||[]).length,m=(bucket.MEs||[]).length;
+  const qTotal=a+b+m;
+  const aulas=_poAulasDoCurso(cid).filter(x=>x.modulo===modulo);
+  const box=document.getElementById('po-mod-mock');
+  if(box){
+    box.style.display='block';
+    box.innerHTML=`🤖 <strong>Análise do módulo — em breve (Fase 2).</strong><br>
+      A IA receberia: <strong>${aulas.length} aula(s)</strong> do módulo (com Conteúdo, Avaliação, Status e Ano) + <strong>${qTotal} questão(ões)</strong> (TEA: ${a} · TSA: ${b} · MEs: ${m}), sem imagens.<br>
+      Ela cruzaria os temas das questões com o conteúdo das aulas e devolveria um <strong>relatório priorizado</strong>: aulas a gravar, aulas com avaliação baixa/problema (status) a revisar, e o que falta cobrir por tipo (TEA/TSA/MEs).<br>
+      <span style="color:var(--t2)">A conexão real é ativada quando a Cloud Function de análise for publicada.</span>`;
+    box.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+};
+function _poModModalRender(){
+  let host=document.getElementById('po-mod-modal');
+  if(!host){host=document.createElement('div');host.id='po-mod-modal';document.body.appendChild(host);}
+  if(!S._poModAtual){host.classList.remove('show');host.innerHTML='';return;}
+  const {cid,modulo}=S._poModAtual;
+  const aulas=_poAulasDoCurso(cid).filter(a=>a.modulo===modulo);
+  const semConteudo=aulas.filter(a=>!String(a.conteudo||'').trim()).length;
+  const semAval=aulas.filter(a=>!String(a.avaliacao||'').trim()).length;
+  const bucket=_poModQ(cid,modulo);
+  const avisos=[];
+  if(semConteudo)avisos.push(`${semConteudo} sem <strong>Conteúdo da aula</strong>`);
+  if(semAval)avisos.push(`${semAval} sem <strong>Avaliação da aula</strong>`);
+  const avisoHTML=avisos.length?`<div class="po-mod-aviso">⚠️ ${avisos.join(' · ')} — preencha pra IA analisar melhor.</div>`:'';
+  const blocos=_PO_MOD_TIPOS.map(tipo=>{
+    const lst=bucket[tipo]||[];
+    const erro=S._poModErro[tipo]||'';
+    return `
+      <div class="po-mod-bloco">
+        <div class="po-mod-bloco-head">
+          <span class="po-mod-bloco-t">${tipo}</span>
+          <span class="po-mod-bloco-c">${lst.length} questão(ões)</span>
+          ${lst.length?`<button type="button" class="po-mod-limpar" onclick="poModLimparTipo('${tipo}')">limpar</button>`:''}
+        </div>
+        <label class="po-drop po-drop-sm" for="po-mod-file-${tipo}">
+          <div class="po-drop-t">📄 Escolher .json (${tipo})</div>
+          <div class="po-drop-s">array de questões — vários lotes acumulam</div>
+        </label>
+        <input type="file" id="po-mod-file-${tipo}" accept=".json,application/json" style="display:none" onchange="poModFileUpload('${tipo}',event)">
+        <textarea id="po-mod-ta-${tipo}" class="po-inp" placeholder='[{"id":1,"enunciado":"...","gabarito":"A","alternativas":[...]}]'></textarea>
+        <button type="button" class="btn btn-g" style="margin-top:6px" onclick="poModColar('${tipo}')">Ler / Adicionar</button>
+        ${erro?`<div class="po-q-erro">⚠️ ${_poEsc(erro)}</div>`:''}
+      </div>`;
+  }).join('');
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poModModalClose()"></div>
+    <div class="po-modal" role="dialog">
+      <div class="po-modal-head">
+        <div>
+          <h3>🤖 Analisar módulo</h3>
+          <div class="po-mod-sub">${_poEsc(modulo)}</div>
+        </div>
+        <button type="button" class="po-modal-x" onclick="poModModalClose()">✕</button>
+      </div>
+      <div class="po-modal-body">
+        <div class="po-mod-resumo">${aulas.length} aula(s) neste módulo.</div>
+        ${avisoHTML}
+        <div class="po-modal-label">Envie as questões por tipo (cada lote é de um tipo só)</div>
+        <div class="po-mod-blocos">${blocos}</div>
+        <div id="po-mod-mock" class="po-q-mock" style="display:none"></div>
+      </div>
+      <div class="po-modal-foot">
+        <span style="font-size:11.5px;color:var(--t2)">As imagens são removidas automaticamente antes de enviar à IA.</span>
+        <div style="display:flex;gap:10px">
+          <button type="button" class="btn btn-g" onclick="poModModalClose()">Fechar</button>
+          <button type="button" class="btn btn-p" onclick="poAnalisarModulo()">🤖 Analisar módulo com a IA</button>
+        </div>
+      </div>
+    </div>`;
+  host.classList.add('show');
 }
 
 window.initProdutos=function(){

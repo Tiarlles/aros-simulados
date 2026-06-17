@@ -126,7 +126,7 @@ service cloud.firestore {
       // Leitura pública das configs que o front do aluno precisa (settings, menu,
       // simExtra, etc.). EXCETO docs sensíveis (senhasAcessos, financeiro), que
       // exigem login — protegidos por regras próprias logo abaixo.
-      allow read: if cfgId != 'senhasAcessos' && cfgId != 'financeiro';
+      allow read: if cfgId != 'senhasAcessos' && cfgId != 'financeiro' && cfgId != 'poConfig';
       // Write geral: exige auth (coord/admin editando configurações).
       // Exceção: config/simExtra pode receber update anônimo SE alterar somente
       // o campo `alunosGratuitos` (incremento de quotaUsada pelo aluno gratuito
@@ -143,6 +143,7 @@ service cloud.firestore {
     // cofre de senhas e o financeiro ficavam legíveis por qualquer um na internet.
     match /config/senhasAcessos { allow read: if isAuth(); }
     match /config/financeiro    { allow read: if isAuth(); }
+    match /config/poConfig      { allow read: if isAuth(); }  // PO MEDREVIEW (interno) — schema de colunas/cursos
 
     // ────────────────────────────────────────────────────────────────────────
     // NOTAS — coord/prof lançam. Escrita exige auth.
@@ -434,6 +435,20 @@ service cloud.firestore {
     match /alunosAprovados/{c}     { allow read, write: if isAdmin(); }
     match /provasAprovados/{p}     { allow read: if isAuth(); allow write: if isAdmin(); }
     match /resultadosAprovados/{r} { allow read: if isAuth(); allow write: if isAdmin(); }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // PO MEDREVIEW — Coordenação de Produto (gestão interna das aulas).
+    // Tudo exige login (dados internos de produção). Importação do Monday roda
+    // no app, gravando com a sessão logada do admin (Google/Email).
+    // ────────────────────────────────────────────────────────────────────────
+    match /poAulas/{aulaId} {
+      allow read: if isAuth();
+      allow create, update, delete: if isAuth();
+    }
+    match /poModQuestoes/{key} {
+      allow read: if isAuth();
+      allow create, update, delete: if isAuth();
+    }
 
     // ────────────────────────────────────────────────────────────────────────
     // DEFAULT DENY — qualquer coleção/path não listada acima é bloqueada.

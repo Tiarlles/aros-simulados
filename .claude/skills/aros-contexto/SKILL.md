@@ -2428,11 +2428,11 @@ Funcionalidades que estão **prontas no código** mas dependem de uma config ext
 
 **Status**: pendente. `sendParecerEmail` usa `template_r0vjejs` reciclado. Aguarda usuário criar template dedicado pra notificações de parecer finalizado.
 
-## PO MEDREVIEW — Coordenação de Produto (EM CONSTRUÇÃO · Fase 1 "shell", iniciado 2026-06-05)
+## PO MEDREVIEW — Coordenação de Produto (PERSISTE NO FIRESTORE · 2026-06-17)
 
-Área **interna** de gestão dos cursos (≠ Catálogo de Produtos, que é a vitrine pra vendas/marketing/suporte). É o "backstage" da produção das aulas — o que hoje o Tiarlles controla no **Monday**. Objetivo: centralizar produção das aulas (status, anexos, demandas do fórum) + uma **IA conhecedora do produto** que prioriza o que gravar/atualizar e analisa lotes de questões.
+Área **interna** de gestão dos cursos (≠ Catálogo de Produtos, que é a vitrine pra vendas/marketing/suporte). É o "backstage" da produção das aulas — o que hoje o Tiarlles controla no **Monday**. Objetivo: centralizar produção das aulas (status, anexos, demandas) + uma **IA conhecedora do produto** que prioriza o que gravar/atualizar e analisa lotes de questões.
 
-**⚠️ ESTADO ATUAL: só o "shell" visual, com DADOS DE EXEMPLO EM MEMÓRIA — NÃO persiste em Firestore ainda.** Recarregar a página zera colunas novas, larguras e edições. A persistência + import são o próximo passo.
+**ESTADO ATUAL (2026-06-17): persiste no Firestore e é editável.** O PO carrega de `poAulas` + `config/poConfig` + `poModQuestoes` (via `loadPO()` no `initPO`). Se a coleção `poAulas` estiver vazia OU o usuário não estiver logado, cai num **fallback de dados de exemplo em memória** (`_PO_DEMO_*`) com um aviso (`S._poAvisoDemo`). Edições/criações persistem **best-effort** (só pra `a.id` real; ids `tmp_*` do demo ficam só em memória). **Falta editar** ainda: integração das notas (API Laravel) e a IA real (hoje mockada). Ver [[project_aros_localhost_firestore]] (localhost grava no Firestore de produção).
 
 ### Onde está no código (index.html)
 - **Grupo de menu** `poMedreview` (label "PO MEDREVIEW") em `TAB_GROUPS`, com 1 aba `{id:'po', label:'🧭 Coordenação de Produto'}`. Aba `'po'` está em `ADMIN_ONLY_TABS` (só admin por enquanto; permissão de professor vem depois).
@@ -2445,13 +2445,20 @@ Funcionalidades que estão **prontas no código** mas dependem de uma config ext
 
 ### Planilha de aulas (o "Monday interno")
 - **Colunas configuráveis** em `S.poColunas` = array de `{id,label,type,w,opts?}`. `type`: `'texto'|'link'|'status'`. Status usa `opts:[{v,cor}]`. Render genérico por `_poColCell(a,col)` lendo `_poCellVal` (campo direto `a[col.id]` ou `a.dados[col.id]`).
-- **Criar coluna**: botão `＋` no fim do cabeçalho → modal (`poNovaColuna`/`_poColModalRender`) pergunta nome + tipo (texto/link/status); status tem editor de opções (rótulo+cor). Salva via `poColSalvar` (gera id slug). **Em memória** — não persiste.
-- **1ª coluna "Aula" fixa** (sticky left, classe `.po-col-aula`), rolagem horizontal, cabeçalho sticky top.
-- **Módulos/Pontos colapsáveis** (`_poGroupByMod` agrupa por `a.modulo`): linha-cabeçalho clicável (`poToggleMod`) com seta que gira + resumo "N aulas · X no ar · 🔔 atenção". Estado em `S.poModAbertos` (Set). Cabeçalho do módulo também é **sticky left** (acompanha ao rolar). Botão **único** "⊕ Expandir tudo / ⊖ Recolher tudo" (`poToggleAll` + `_poUpdateToggleBtn`). Busca ativa abre todos.
-- **Resize de colunas**: alça `.po-rsz` na borda direita de cada cabeçalho (`_poBindResize`), via `<colgroup><col>`. `S.poColAulaW` pra coluna fixa, `col.w` pras demais.
+- **Criar coluna**: botão `＋` no fim do cabeçalho → modal (`poNovaColuna`/`_poColModalRender`). **Excluir coluna**: ✕ no cabeçalho (dupla confirmação, `poExcluirColuna`). **Renomear coluna**: **duplo-clique** no `.po-th-label` (`poEditarNomeColuna`, atualiza in-place sem re-render). **Filtro por coluna**: campo no cabeçalho (`poSetColFiltro`, `S.poColFiltros` — efêmero); o filtro da coluna fixa "Aula" filtra pelo **Ponto/módulo** (não pelo nome). Colunas `status` têm ⚙ pra **gerenciar opções** (add/del/cor, `poGerenciarOpcoes`/`#po-opts-modal`).
+- **1ª coluna "Aula" fixa** (sticky left, `.po-col-aula`): tem alça de arrastar ⠿ + checkbox de seleção + nº **posicional** (1,2,3… pela ordem atual no módulo, NÃO o `ordem` importado) + nome editável.
+- **Módulos/Pontos** (`_poGroupByMod`): linha-cabeçalho. **Clique simples na linha abre/fecha** (`poToggleMod`); **duplo-clique no nome renomeia** (`poEditarNomeModulo`, propaga `a.modulo` em todas as aulas, batch). Estado em `S.poModAbertos`. Ordem **default por número do Ponto** (`_poPontoNum`: 1,2,…10,11,21); ordem manual (arrastar) em `S.poModOrdem[cursoId]`. Botão "⊕ Expandir/Recolher tudo". Última linha de cada módulo aberto = **"＋ Nova aula neste módulo"** (`.po-addaula-btn`).
+- **Resize de colunas**: alça `.po-rsz` (`_poBindResize`), `S.poColAulaW`/`col.w`. **Editar célula**: clicar (`poCelEditar`) → texto/link viram input, status vira select (com "➕ Nova opção"). **Status com famílias de cor** (`PO_STATUS_FAM`/`_poStatusCor`, `_PO_ATENCAO`, `_poIsPronta`).
 - **Status com famílias de cor** (`PO_STATUS_FAM` → `_poStatusCor`): verde=no ar, azul=em produção, amarelo=agendado, vermelho=atenção (demanda/erro/atualizar), cinza=inexistente/removida. `_PO_ATENCAO` (Set) marca os que precisam de atenção. `_poIsPronta` conta as "no ar".
 
-### Modelo de dados real (do board Monday — export `ANEST_Aulas_*.xlsx`, 765 aulas reais)
+### Persistência (Firestore) + import + CRUD (entregue 2026-06-17)
+- **Schema:** `poAulas/{autoId}` (1 doc por aula: `{ordem, ordemPO, titulo, nomeOriginal, status, ano, prof, cursos:[nomes], modulo, video, categoria, questoes, cards, livros, fichaResumo, slides, conteudo, avaliacao, dados:{}, criadoEm, updatedAt}`; `cursos` é array = many-to-many). `config/poConfig` (doc único: `{colunas, colAulaW, cursos:[{id,nome,vertical}], modOrdem, modExtra}`). `poModQuestoes/{slug(curso__modulo)}` (`{cursoId, modulo, TEA:[], TSA:[], MEs:[]}`).
+- **Rules:** `poAulas` e `poModQuestoes` exigem `isAuth()` (read+write); `config/poConfig` read só logado (excluído do wildcard público). Deploy feito 2026-06-17.
+- **Importador no app** (botão "⬆ Importar do Monday", `poAbrirImport`): sobe o `.xlsx`, parseia com `_poParseMondayXlsx` (puro — pula linhas de grupo/cabeçalho do Monday, extrai `ordem`+`titulo` de "N - Título", split de Produto, **vazio→Extensive Geral**), preview, e grava em `writeBatch` (chunks 450) — substitui as `poAulas` existentes. Roda com a sessão logada (Google) → **não precisa de senha/script Node**. Arquivo real: `~/Downloads/ANEST_Aulas_1780686227.xlsx` (~756 aulas, 9 cursos).
+- **Edição inline:** célula (`poCelEditar` → `_poSaveAula`=updateDoc), nome de aula/módulo/coluna, opções de tag. **Numeração posicional** + **arrastar** (alça ⠿; `_poReordenarAulas` grava `ordemPO`, `_poReordenarModulos` grava `S.poModOrdem`); drag desligado durante busca/filtro.
+- **CRUD:** **Nova aula** (`poNovaAula(modulo?)` → modal `#po-aula-modal`; quando criada por dentro do módulo, o módulo vem fixo via chip, sem seletor). **Novo módulo** (`poNovoModulo` → modal `#po-novomod-modal`; módulos vazios ficam em `S.poModExtra[cursoId]`). **Excluir**: por **checkbox** (seleção em `S.poSel.aulas` → barra `.po-sel-bar` → `poExcluirSelecionadas`, dupla confirmação, apaga de todos os cursos); excluir **módulo** (`poExcluirModulo`) e **produto/curso** (`poExcluirProduto` — apaga aulas exclusivas, desvincula as compartilhadas). Tudo dupla confirmação.
+
+### Modelo de dados real (do board Monday — export `ANEST_Aulas_*.xlsx`, ~756 aulas reais)
 Mapeamento Monday → campo da aula:
 - **Nome** ("1 - O Sangue") → nº + título · **Status Aula** → status principal (16 estados, **já embute demandas/erros**) · **Produto** → **define a qual curso(s) a aula pertence** (many-to-many) · **Módulo** ("Ponto 10…", "M1…") → módulo · **Professor** (pode ter vários) · **ANO** (2023–2026) · **Link Drive (Revisão)** → na real é o **link do vídeo (Vimeo)** · **CATEGORIA** → tópico do edital (só **22 de 765** preenchidos!) · **Trilha Questões** / **Trilha Cards** → status Pendente/Lançada/Não se aplica.
 - **Cursos = valores distintos de "Produto"**: `Extensive Geral` (~400 aulas = **curso principal**), `Extensive ME1/ME2/ME3`, `ANEST-PED`, `Revisão Extrema`, `Mentoria TEA/TSA`. Aula com "Extensive Geral, ME1" entra nos 2.
@@ -2466,17 +2473,17 @@ Mapeamento Monday → campo da aula:
 - **Botão "Publicar na Comunicação"** (joga a aula publicada pra aba Comunicação que o aluno vê) → Fase 3.
 - Verticais do Catálogo: **AnestReview, OftReview (OFT), OrtopReview (Ortop), MedReview (R1)**.
 
-### IA do produto (Fase 2 — ainda não construída)
-Dois recursos no painel `🤖 Inteligência do Produto` (hoje placeholder):
-1. **"Próxima prioridade do produto"** (1 botão): varre o curso (status + datas de prova do edital + notas + cobertura do edital) → relatório priorizado do que gravar/atualizar. **Sempre relatório — Tiarlles decide**, não age sozinho.
-2. **Análise de lote de questões (JSON)**: sobe arquivo → IA **classifica cada questão por tópico do edital** (questões NÃO trazem tema/edital) → cruza com aulas existentes → relatório "aulas a criar + raciocínios a cobrir".
-- **Formato do JSON** (confirmado com exemplo real `questoes-batch-*.json`): array de `{id:number, enunciado:string(texto puro), enunciado_html:string, gabarito:"A".."D", alternativas:[{letra,texto}]}`. **Sem** campo de tema/edital/tags. ⚠️ `enunciado_html` pode conter **imagem base64 gigante** (1 questão pesava 2,2 MB) — **remover imagens antes de enviar à IA**; usar `enunciado` (texto puro). Pra questões com gráfico/imagem, usar modelo com visão num 2º momento.
-- Implementação prevista: **nova Cloud Function no padrão do Dex** (`perguntarDex`/`dex.js`), **modelo forte** (Sonnet) nas análises profundas, barato no dia a dia. Base de conhecimento da IA a configurar depois.
+### IA do produto (Fase 2 — frontend pronto, IA real ainda MOCKADA)
+- **Análise por MÓDULO** (entregue 2026-06-17): cada Ponto tem botão "🤖 Analisar módulo" (`poAbrirAnaliseModulo` → `#po-mod-modal`). Sobe questões **por tipo (TEA/TSA/MEs)**, escolhido no upload (cada lote é de um tipo); acumulam em `S.poModQuestoes`. Parser puro `_poParseLoteQuestoes` (reusa `_poStripImagens` — **remove `<img>`/base64 antes da IA**). O "Analisar" hoje é **MOCK** (`poAnalisarModulo` mostra o que mandaria: N aulas com conteúdo/avaliação/status/ano + Q questões por tipo → relatório priorizado). A chamada real entra quando a Cloud Function for publicada.
+- **Formato do JSON** das questões: array de `{id, enunciado(texto puro), enunciado_html, gabarito:"A".."D", alternativas:[{letra,texto}]}`. **Sem** tema/edital/tags. ⚠️ `enunciado_html` pode ter **imagem base64 gigante** (uma pesava 2,2 MB) — removida automaticamente.
+- **Próxima prioridade do produto** (2º recurso): ainda placeholder (Fase 2).
+- Implementação da IA real prevista: **nova Cloud Function no padrão do Dex** (`dex.js`), **modelo forte** (Sonnet). A análise fica útil de verdade depois que o curso tiver as colunas **Conteúdo da aula** / **Avaliação da aula** preenchidas.
 
-### Próximos passos (retomar aqui amanhã)
-1. **Ligar no Firestore** — definir schema (cursos / módulos / aulas many-to-many + schema de colunas configuráveis + larguras) e fazer tudo persistir (colunas novas, larguras, status, edições). *Schema ainda não finalizado com o user.*
-2. **Import das 765 aulas** do `ANEST_Aulas_*.xlsx`: script Node ad-hoc (Firebase JS SDK cliente). **Writes exigem auth desde 2026-05-21** → o script precisa `signInWithEmailAndPassword` (pedir acesso admin ao Tiarlles na hora).
-3. **Fase 2** (IA) e **Fase 3** (publicar-na-Comunicação + API Laravel das notas).
+### Próximos passos
+1. **IA real**: criar a Cloud Function `analisarQuestoesPO` (padrão Dex/Sonnet) e trocar o mock de `poAnalisarModulo` pela chamada real (auth por Firebase token; CORS liberar o localhost). É CORS-bloqueada em localhost? testar no site publicado.
+2. **Notas das aulas** via API **Laravel** (devs entregam) — hoje a avaliação é manual (coluna "Avaliação da aula").
+3. **Fase 3**: botão "Publicar na Comunicação" (joga a aula pra aba Comunicação que o aluno vê).
+4. **Permissão**: aba `po` ainda é admin-only (`ADMIN_ONLY_TABS`); liberar pra professor depois.
 
 ## Histórico recente (resumo cronológico)
 
