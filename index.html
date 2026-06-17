@@ -5897,6 +5897,7 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-mod-modal .po-mod-bloco-head:hover .po-mod-bloco-t{color:var(--text)}
         #po-mod-modal .po-mod-chev{color:var(--t2);font-size:11px;width:12px;flex:none}
         #po-mod-modal .po-mod-bloco-body{margin-top:10px}
+        #po-mod-modal .po-mod-anexo{margin-top:8px;font-size:12px;color:#3fb950;font-weight:600}
         #po-mod-modal input.po-inp{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;box-sizing:border-box}
         #po-mod-modal input.po-inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
         #po-mod-modal .po-ped-tabela{width:100%;border-collapse:collapse;font-size:13px}
@@ -38926,6 +38927,7 @@ function _poParseLoteQuestoes(text){
 // ── Fluxo POR MÓDULO: 3 lotes (TEA/TSA/MEs) acumulados por módulo ──
 const _PO_MOD_TIPOS=['TEA','TSA','MEs','Outras'];
 S._poModSec={}; // accordions abertos no modal de módulo: {TEA:bool,...,pedidos:bool}
+S._poModFile={}; // nome do último arquivo anexado por tipo (feedback visual)
 window.poModToggleSec=(key)=>{ S._poModSec[key]=!S._poModSec[key]; _poModModalRender(); };
 // Pedidos de alunos = lista; cada linha salva na hora.
 window.poModAddPedido=()=>{
@@ -39056,7 +39058,7 @@ window.poAbrirAnaliseModulo=(cid,modEnc)=>{
   S._poModErro={};
   // abre por padrão os accordions que já têm conteúdo
   const b=_poModQ(cid,S._poModAtual.modulo);
-  S._poModSec={};
+  S._poModSec={};S._poModFile={};
   _PO_MOD_TIPOS.forEach(t=>{S._poModSec[t]=(b[t]||[]).length>0;});
   S._poModSec.pedidos=(b.pedidos||[]).length>0;
   _poModModalRender();
@@ -39064,6 +39066,7 @@ window.poAbrirAnaliseModulo=(cid,modEnc)=>{
 window.poModModalClose=()=>{const h=document.getElementById('po-mod-modal');if(h){h.classList.remove('show');h.innerHTML='';}S._poModAtual=null;try{_poRefreshTabela();}catch(e){}};
 window.poModFileUpload=(tipo,ev)=>{
   const f=ev&&ev.target&&ev.target.files&&ev.target.files[0];if(!f)return;
+  S._poModFile[tipo]=f.name;
   const r=new FileReader();
   r.onload=e=>{_poModAplicarLote(tipo,String(e.target.result||''));};
   r.onerror=()=>{S._poModErro[tipo]='Não consegui ler o arquivo.';_poModModalRender();};
@@ -39132,22 +39135,21 @@ function _poModModalRender(){
     const lst=bucket[tipo]||[];
     const erro=S._poModErro[tipo]||'';
     const open=!!S._poModSec[tipo];
+    const arq=S._poModFile[tipo]||'';
     return `
       <div class="po-mod-bloco">
         <div class="po-mod-bloco-head" onclick="poModToggleSec('${tipo}')">
           <span class="po-mod-chev">${chev(open)}</span>
           <span class="po-mod-bloco-t">${tipo}</span>
-          <span class="po-mod-bloco-c">${lst.length} questão(ões)</span>
+          <span class="po-mod-bloco-c">${lst.length} questões</span>
           ${lst.length?`<button type="button" class="po-mod-limpar" onclick="event.stopPropagation();poModLimparTipo('${tipo}')">limpar</button>`:''}
         </div>
         ${open?`<div class="po-mod-bloco-body">
           <label class="po-drop po-drop-sm" for="po-mod-file-${tipo}">
-            <div class="po-drop-t">📄 Escolher .json (${tipo})</div>
-            <div class="po-drop-s">array de questões — vários lotes acumulam</div>
+            <div class="po-drop-t">📎 Anexar .json (${tipo})</div>
           </label>
           <input type="file" id="po-mod-file-${tipo}" accept=".json,application/json" style="display:none" onchange="poModFileUpload('${tipo}',event)">
-          <textarea id="po-mod-ta-${tipo}" class="po-inp" placeholder='[{"id":1,"enunciado":"...","gabarito":"A","alternativas":[...]}]'></textarea>
-          <button type="button" class="btn btn-p" style="margin-top:6px" onclick="poModColar('${tipo}')">💾 Salvar questões (${tipo})</button>
+          ${arq?`<div class="po-mod-anexo">✓ ${_poEsc(arq)} anexado</div>`:''}
           ${erro?`<div class="po-q-erro">⚠️ ${_poEsc(erro)}</div>`:''}
         </div>`:''}
       </div>`;
@@ -39160,7 +39162,7 @@ function _poModModalRender(){
       <div class="po-mod-bloco-head" onclick="poModToggleSec('pedidos')">
         <span class="po-mod-chev">${chev(pedOpen)}</span>
         <span class="po-mod-bloco-t">🗣️ PEDIDOS</span>
-        <span class="po-mod-bloco-c">${peds.length} pedido(s)</span>
+        <span class="po-mod-bloco-c">${peds.length} pedidos</span>
       </div>
       ${pedOpen?`<div class="po-mod-bloco-body">
         <table class="po-ped-tabela"><tbody>${pedRows}</tbody></table>
@@ -39181,9 +39183,7 @@ function _poModModalRender(){
         <button type="button" class="po-modal-x" onclick="poModModalClose()">✕</button>
       </div>
       <div class="po-modal-body">
-        <div class="po-mod-resumo">${aulas.length} aula(s) neste módulo.</div>
         ${avisoHTML}
-        <div class="po-modal-label">Questões por tipo <span style="font-weight:400;color:var(--t2)">(clique pra abrir; cada lote tem seu Salvar)</span></div>
         <div class="po-mod-blocos">${blocos}${pedBloco}</div>
         <div id="po-mod-mock" class="po-q-mock" style="display:none"></div>
       </div>
