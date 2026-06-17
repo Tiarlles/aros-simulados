@@ -5926,6 +5926,34 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-mod-modal .po-mod-chev{color:var(--t2);font-size:11px;width:12px;flex:none}
         #po-mod-modal .po-mod-bloco-body{margin-top:10px}
         #po-mod-modal .po-mod-anexo{margin-top:8px;font-size:12px;color:#3fb950;font-weight:600}
+        /* Seção da API no modal de módulo + preview de questões */
+        #po-mod-modal .po-mod-apirow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 12px;border:1px solid color-mix(in srgb,var(--accent) 30%,var(--border));border-radius:10px;background:color-mix(in srgb,var(--accent) 6%,transparent);margin-bottom:12px}
+        #po-mod-modal .po-mod-apitemas{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--text)}
+        #po-mod-modal .po-q-prev{margin:0;padding-left:18px;font-size:11.5px;color:var(--t2);line-height:1.5;max-height:200px;overflow:auto}
+        #po-mod-modal .po-q-prev li{margin:3px 0}
+        #tab-po .po-tema-chip,#po-mapa-modal .po-tema-chip,#po-mod-modal .po-tema-chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);padding:2px 8px;border-radius:999px}
+        #po-mod-modal .po-tema-chip.sm{font-weight:500}
+        #po-mapa-modal .po-tema-chip button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;padding:0;line-height:1}
+        /* Modal do mapa de temas */
+        #po-mapa-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-mapa-modal.show{display:block}
+        #po-mapa-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-mapa-modal .po-modal{position:relative;max-width:620px;margin:7vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-mapa-modal .po-modal.po-modal-lg{max-width:780px}
+        #po-mapa-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-mapa-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text)}
+        #po-mapa-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-mapa-modal .po-modal-body{padding:18px 20px;max-height:72vh;overflow:auto}
+        #po-mapa-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        #po-mapa-modal .po-imp-instr{font-size:12.5px;color:var(--t2);margin:0 0 12px;line-height:1.5}
+        #po-mapa-modal .po-imp-prog{font-size:12.5px;color:var(--accent);font-family:'JetBrains Mono',monospace;padding:10px 0}
+        #po-mapa-modal .po-imp-erro{padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 35%,transparent);color:#f85149;font-size:12.5px}
+        #po-mapa-modal .po-mapa-tabela{width:100%;border-collapse:collapse;font-size:12.5px}
+        #po-mapa-modal .po-mapa-tabela th{text-align:left;color:var(--t2);font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:4px 8px;border-bottom:1px solid var(--border)}
+        #po-mapa-modal .po-mapa-tabela td{padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+        #po-mapa-modal .po-mapa-mod{font-weight:600;color:var(--text);max-width:200px}
+        #po-mapa-modal .po-mapa-add select{background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;padding:5px 8px;cursor:pointer;max-width:160px}
+        #po-mapa-modal .po-tema-chip{margin:2px 4px 2px 0}
         #po-mod-modal input.po-inp{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;box-sizing:border-box}
         #po-mod-modal input.po-inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
         #po-mod-modal .po-ped-tabela{width:100%;border-collapse:collapse;font-size:13px}
@@ -37339,6 +37367,7 @@ async function loadPO(){
       _apostilaColRemovida=!!d.apostilaColRemovida;
       if(d.poPesos&&typeof d.poPesos==='object')S.poPesos={...S.poPesos,...d.poPesos};
       if(d.editais&&typeof d.editais==='object')S.poEditais=d.editais;
+      if(d.temaModulo&&typeof d.temaModulo==='object')S.poTemaModulo=d.temaModulo;
     }
   }catch(e){ /* sem permissão de leitura: segue com defaults */ }
 
@@ -38634,6 +38663,7 @@ function _poRenderCurso(root){
         <h3>🤖 Inteligência do Produto</h3>
         <p>Configure o edital e os pesos, depois rode a análise pra ver a linha do tempo de prioridades do produto.</p>
         <div class="po-ia-btns">
+          <button type="button" class="po-ia-btn po-ia-on" onclick="poAbrirMapaTemas()">🧩 Temas dos módulos</button>
           <button type="button" class="po-ia-btn po-ia-on" onclick="poAbrirEdital()">📋 Edital do produto</button>
           <button type="button" class="po-ia-btn po-ia-on" onclick="poAbrirPesos()">⚖️ Pesos da priorização</button>
           <button type="button" class="po-ia-btn po-ia-on" onclick="poAnalisarProduto()">⚡ Analisar produto</button>
@@ -39080,6 +39110,128 @@ function _poApostModalRender(){
   host.classList.add('show');
 }
 
+// ===== Questões via API do Laravel (por TEMA, últimos 5 anos) =====
+const FILTROS_PO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/filtrosPO';
+const PUXAR_QUESTOES_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/puxarQuestoesPO';
+S.poTemaModulo={};   // {cursoId:{modulo:[catIds]}}
+S._poFiltros=null;   // cache de {categorias,tipos,anos}
+S._poMapaAtual=null; // estado do modal de mapeamento {cid}
+async function _poSaveTemaModulo(){ try{ await setDoc(doc(db,'config','poConfig'),{temaModulo:S.poTemaModulo},{merge:true}); }catch(e){console.warn('temaModulo save',e);} }
+async function _poApiPost(url,body){
+  const u=window._fbAuth?.auth?.currentUser; if(!u)throw new Error('Faça login (Google/Email).');
+  const token=await u.getIdToken();
+  const resp=await fetch(url,{method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify(body||{})});
+  let data={};try{data=await resp.json();}catch(_){}
+  if(!resp.ok)throw new Error(data.error||`Erro ${resp.status}`);
+  return data;
+}
+async function _poCarregarFiltros(force){
+  if(S._poFiltros&&!force)return S._poFiltros;
+  const d=await _poApiPost(FILTROS_PO_ENDPOINT,{});
+  S._poFiltros={categorias:d.categorias||[],tipos:d.tipos||[],anos:d.anos||[]};
+  return S._poFiltros;
+}
+// temas "pai" (P1, P2…) — é por eles que puxamos (o pai agrega os sub-temas)
+function _poCatsPais(){return (S._poFiltros?.categorias||[]).filter(c=>!c.parent_id);}
+function _poCatById(id){return (S._poFiltros?.categorias||[]).find(c=>String(c.id)===String(id));}
+// auto-match Ponto↔tema por número (P10 ↔ "Ponto 10" / "10 - …")
+function _poPontoNumDe(nome){const s=String(nome||'');let m=s.match(/ponto\s*(\d+)/i);if(m)return +m[1];m=s.match(/^\s*(\d+)\b/);if(m)return +m[1];return null;}
+function _poCatPNum(desc){const m=String(desc||'').match(/^\s*P(\d+)\b/i);return m?+m[1]:null;}
+function _poAutoMatchTema(modulo){const n=_poPontoNumDe(modulo);if(n==null)return [];return _poCatsPais().filter(c=>_poCatPNum(c.desc)===n).map(c=>c.id);}
+function _poTemasDoModulo(cid,mod){return (S.poTemaModulo[cid]&&S.poTemaModulo[cid][mod])||[];}
+function _poSetTemasModulo(cid,mod,arr){if(!S.poTemaModulo[cid])S.poTemaModulo[cid]={};S.poTemaModulo[cid][mod]=arr;}
+
+// ── Modal: mapear Temas dos módulos ──
+window.poAbrirMapaTemas=async()=>{
+  const cid=S.poCursoAtual; if(!cid)return;
+  S._poMapaAtual={cid,carregando:true,erro:''};
+  _poMapaRender();
+  try{ await _poCarregarFiltros(); S._poMapaAtual.carregando=false; }
+  catch(e){ S._poMapaAtual.carregando=false; S._poMapaAtual.erro=e.message||String(e); }
+  _poMapaRender();
+};
+window.poMapaClose=()=>{const h=document.getElementById('po-mapa-modal');if(h){h.classList.remove('show');h.innerHTML='';}S._poMapaAtual=null;try{_poRefreshTabela();}catch(e){}};
+window.poMapaAutoSugerir=()=>{
+  const cid=S._poMapaAtual?.cid; if(!cid)return;
+  const mods=_poGroupByMod(_poAulasDoCurso(cid)).map(g=>g.modulo);
+  let n=0;
+  mods.forEach(mod=>{ if(!_poTemasDoModulo(cid,mod).length){ const sug=_poAutoMatchTema(mod); if(sug.length){_poSetTemasModulo(cid,mod,sug);n++;} } });
+  _poSaveTemaModulo();
+  arosToast(`Sugeri tema para ${n} módulo(s)`,'success',2200);
+  _poMapaRender();
+};
+window.poMapaAddTema=(modEnc,catId)=>{
+  const cid=S._poMapaAtual?.cid; if(!cid||!catId)return;
+  const mod=decodeURIComponent(modEnc);
+  const cur=_poTemasDoModulo(cid,mod).slice();
+  if(!cur.map(String).includes(String(catId))){cur.push(Number(catId));_poSetTemasModulo(cid,mod,cur);_poSaveTemaModulo();}
+  _poMapaRender();
+};
+window.poMapaDelTema=(modEnc,catId)=>{
+  const cid=S._poMapaAtual?.cid; if(!cid)return;
+  const mod=decodeURIComponent(modEnc);
+  _poSetTemasModulo(cid,mod,_poTemasDoModulo(cid,mod).filter(x=>String(x)!==String(catId)));
+  _poSaveTemaModulo();
+  _poMapaRender();
+};
+function _poMapaRender(){
+  let host=document.getElementById('po-mapa-modal');
+  if(!host){host=document.createElement('div');host.id='po-mapa-modal';document.body.appendChild(host);}
+  const st=S._poMapaAtual; if(!st){host.classList.remove('show');host.innerHTML='';return;}
+  const cid=st.cid;
+  let body='';
+  if(st.carregando){ body=`<div class="po-imp-prog">⏳ Carregando temas da API…</div>`; }
+  else if(st.erro){ body=`<div class="po-imp-erro">⚠️ ${_poEsc(st.erro)}<br><span style="color:var(--t2)">A função de filtros precisa estar publicada pra carregar os temas.</span></div>`; }
+  else{
+    const pais=_poCatsPais();
+    const optTemas=pais.map(c=>`<option value="${c.id}">${_poEsc(c.desc)}</option>`).join('');
+    const mods=_poGroupByMod(_poAulasDoCurso(cid)).map(g=>g.modulo);
+    const linhas=mods.map(mod=>{
+      const sel=_poTemasDoModulo(cid,mod);
+      const chips=sel.map(id=>{const c=_poCatById(id);return `<span class="po-tema-chip">${_poEsc(c?c.desc:('#'+id))}<button type="button" onclick="poMapaDelTema('${encodeURIComponent(mod)}',${id})">✕</button></span>`;}).join('')||'<span class="po-mut">— sem tema</span>';
+      return `<tr>
+        <td class="po-mapa-mod">${_poEsc(mod)}</td>
+        <td>${chips}</td>
+        <td class="po-mapa-add"><select onchange="if(this.value){poMapaAddTema('${encodeURIComponent(mod)}',this.value);this.value='';}"><option value="">+ tema…</option>${optTemas}</select></td>
+      </tr>`;
+    }).join('');
+    body=`<p class="po-imp-instr">Ligue cada módulo (Ponto) ao(s) tema(s) da API. Use <b>Sugerir automático</b> pra casar por número (P10 ↔ Ponto 10) e ajuste o que precisar. Depois é só puxar as questões em cada módulo.</p>
+      <button type="button" class="btn btn-g" style="margin-bottom:10px" onclick="poMapaAutoSugerir()">✨ Sugerir automático (por número)</button>
+      <table class="po-mapa-tabela"><thead><tr><th>Módulo</th><th>Tema(s)</th><th></th></tr></thead><tbody>${linhas}</tbody></table>`;
+  }
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poMapaClose()"></div>
+    <div class="po-modal po-modal-lg" role="dialog">
+      <div class="po-modal-head"><h3>🧩 Temas dos módulos</h3><button type="button" class="po-modal-x" onclick="poMapaClose()">✕</button></div>
+      <div class="po-modal-body">${body}</div>
+      <div class="po-modal-foot"><span></span><button type="button" class="btn btn-p" onclick="poMapaClose()">Concluído</button></div>
+    </div>`;
+  host.classList.add('show');
+}
+
+// ── Puxar questões da API pra um módulo ──
+window.poPuxarQuestoesModulo=async()=>{
+  if(!S._poModAtual)return;
+  const {cid,modulo}=S._poModAtual;
+  const cats=_poTemasDoModulo(cid,modulo);
+  if(!cats.length){arosToast('Mapeie o tema deste módulo primeiro (🧩 Temas dos módulos).','err',3500);return;}
+  S._poModPuxando=true;_poModModalRender();
+  try{
+    const r=await _poApiPost(PUXAR_QUESTOES_ENDPOINT,{cursoId:cid,modulo,categorias:cats});
+    // recarrega o bucket do módulo do Firestore (a função gravou lá)
+    try{
+      const snap=await getDoc(doc(db,'poModQuestoes',_poModKey(cid,modulo)));
+      if(snap.exists()){const x=snap.data()||{};const k=_poModKey(cid,modulo);
+        S.poModQuestoes[k]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],pedidos:Array.isArray(x.pedidos)?x.pedidos:[],apostilas:Array.isArray(x.apostilas)?x.apostilas:[]};
+      }
+    }catch(_){}
+    S._poModPuxando=false;
+    const p=r.porTipo||{};
+    arosToast(`Puxei ${r.totalUnicas||0} questões (${p.TEA||0} TEA · ${p.TSA||0} TSA · ${p.MEs||0} MEs · ${p.Outras||0} Outras), anos ${(r.anos||[]).join('/')}.`,'success',4000);
+  }catch(e){ S._poModPuxando=false; arosToast('Erro ao puxar: '+(e.message||e),'err',4000); }
+  _poModModalRender();
+};
+
 // ===== IA de priorização: critérios, pesos e edital =====
 // A IA pontua cada critério de 0 a 1 por ação; o código aplica estes pesos.
 // Mudar um peso re-ordena a linha do tempo SEM chamar a IA de novo.
@@ -39256,27 +39408,27 @@ function _poModModalRender(){
   if(semAval)avisos.push(`${semAval} sem <strong>Avaliação da aula</strong>`);
   const avisoHTML=avisos.length?`<div class="po-mod-aviso">⚠️ ${avisos.join(' · ')} — preencha pra IA analisar melhor.</div>`:'';
   const chev=(open)=>open?'▾':'▸';
-  const blocos=_PO_MOD_TIPOS.map(tipo=>{
+  // Cabeçalho da API: tema(s) mapeado(s) + botão puxar (substitui o anexo manual)
+  const cats=_poTemasDoModulo(cid,modulo);
+  const catNomes=cats.map(id=>{const c=_poCatById(id);return c?c.desc:('tema #'+id);});
+  const apiHeader=`<div class="po-mod-apirow">
+    ${cats.length
+      ? `<div class="po-mod-apitemas">🧩 ${catNomes.map(n=>`<span class="po-tema-chip sm">${_poEsc(n)}</span>`).join('')}</div>
+         <button type="button" class="btn btn-p" onclick="poPuxarQuestoesModulo()" ${S._poModPuxando?'disabled':''}>${S._poModPuxando?'Puxando…':'🔄 Puxar questões da API'}</button>`
+      : `<span class="po-mut">Nenhum tema mapeado pra este módulo.</span>
+         <button type="button" class="btn btn-g" onclick="poAbrirMapaTemas()">🧩 Mapear tema</button>`}
+  </div>`;
+  const blocos=apiHeader+_PO_MOD_TIPOS.map(tipo=>{
     const lst=bucket[tipo]||[];
-    const erro=S._poModErro[tipo]||'';
     const open=!!S._poModSec[tipo];
-    const arq=S._poModFile[tipo]||'';
     return `
       <div class="po-mod-bloco">
         <div class="po-mod-bloco-head" onclick="poModToggleSec('${tipo}')">
           <span class="po-mod-chev">${chev(open)}</span>
           <span class="po-mod-bloco-t">${tipo}</span>
           <span class="po-mod-bloco-c">${lst.length} questões</span>
-          ${lst.length?`<button type="button" class="po-mod-limpar" onclick="event.stopPropagation();poModLimparTipo('${tipo}')">limpar</button>`:''}
         </div>
-        ${open?`<div class="po-mod-bloco-body">
-          <label class="po-drop po-drop-sm" for="po-mod-file-${tipo}">
-            <div class="po-drop-t">📎 Anexar .json (${tipo})</div>
-          </label>
-          <input type="file" id="po-mod-file-${tipo}" accept=".json,application/json" style="display:none" onchange="poModFileUpload('${tipo}',event)">
-          ${arq?`<div class="po-mod-anexo">✓ ${_poEsc(arq)} anexado</div>`:''}
-          ${erro?`<div class="po-q-erro">⚠️ ${_poEsc(erro)}</div>`:''}
-        </div>`:''}
+        ${open&&lst.length?`<div class="po-mod-bloco-body"><ol class="po-q-prev">${lst.slice(0,30).map(q=>`<li>${_poEsc(String(q.enunciado||'').slice(0,130))}…</li>`).join('')}${lst.length>30?`<li class="po-mut">… +${lst.length-30} questões</li>`:''}</ol></div>`:''}
       </div>`;
   }).join('');
   const peds=bucket.pedidos||[];
