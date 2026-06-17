@@ -5812,9 +5812,8 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-po .po-mod-qbadge{margin-left:10px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-dim);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:6px;padding:1px 6px;text-transform:none;letter-spacing:0}
         #tab-po .po-mod-analisar{margin-left:12px;border:1px solid color-mix(in srgb,var(--accent) 40%,var(--border));background:var(--bg2);color:var(--accent);font-family:'Plus Jakarta Sans',sans-serif;font-size:10.5px;font-weight:700;text-transform:none;letter-spacing:0;padding:3px 9px;border-radius:7px;cursor:pointer;transition:background .15s,border-color .15s}
         #tab-po .po-mod-analisar:hover{background:var(--accent-dim);border-color:var(--accent)}
-        #tab-po .po-mod-apost{margin-left:8px;border:1px solid var(--border);background:var(--bg2);color:var(--t2);font-family:'Plus Jakarta Sans',sans-serif;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:7px;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
-        #tab-po .po-mod-apost:hover{border-color:var(--accent);color:var(--accent)}
-        #tab-po .po-mod-apost.on{color:var(--ac,var(--accent));border-color:color-mix(in srgb,var(--ac,var(--accent)) 45%,var(--border));background:color-mix(in srgb,var(--ac,var(--accent)) 10%,transparent)}
+        #tab-po .po-mod-apost{margin-left:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:7px;cursor:pointer;transition:filter .15s;color:var(--ac,var(--t2));border:1px solid color-mix(in srgb,var(--ac,var(--border)) 45%,var(--border));background:color-mix(in srgb,var(--ac,transparent) 12%,var(--bg2))}
+        #tab-po .po-mod-apost:hover{filter:brightness(1.15)}
         /* Modal de apostilas do módulo */
         #po-apost-modal{position:fixed;inset:0;z-index:9999;display:none}
         #po-apost-modal.show{display:block}
@@ -38481,8 +38480,11 @@ function _poTableRowsHTML(aulas,q){
     const qTot=(qb.TEA||[]).length+(qb.TSA||[]).length+(qb.MEs||[]).length+(qb.Outras||[]).length;
     const qBadge=qTot?`<span class="po-mod-qbadge">Q: ${qTot}</span>`:'';
     const apos=qb.apostilas||[];
-    const apostCor=apos.length?_poApostCor(apos):'';
-    const apostBadge=`<button type="button" class="po-mod-apost${apos.length?' on':''}" ${apostCor?`style="--ac:${apostCor}"`:''} onclick="event.stopPropagation();poAbrirApostilas('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="Apostilas do módulo">📚 ${apos.length?apos.length:'+'}</button>`;
+    const apStatus=_poApostStatusModulo(apos);
+    const apCor=_poApostStatusCor(apStatus);
+    const apLabel=apos.length>1?`${apStatus} (${apos.length})`:apStatus;
+    const apTitle=apos.length?`Apostila do módulo: ${apStatus} — ${apos.length} cadastrada(s)`:'Sem apostila cadastrada (Pendente)';
+    const apostBadge=`<button type="button" class="po-mod-apost" style="--ac:${apCor}" onclick="event.stopPropagation();poAbrirApostilas('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="${apTitle}">📚 ${apLabel}</button>`;
     const btnAnalisar=`<button type="button" class="po-mod-analisar" onclick="event.stopPropagation();poAbrirAnaliseModulo('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="Analisar este módulo com a IA">🤖 Analisar módulo</button>`;
     const modSelMarcado=g.aulas.length&&g.aulas.every(a=>S.poSel&&S.poSel.aulas.has(a.id));
     const modChk=`<input type="checkbox" class="po-sel-mod"${modSelMarcado?' checked':''} data-modulo="${_poEsc(g.modulo)}" onclick="event.stopPropagation();poToggleSelModulo('${encodeURIComponent(g.modulo)}',this.checked)">`;
@@ -38999,12 +39001,16 @@ const PO_APOST_STATUS=[
   {v:'Finalizado',cor:'#3fb950'},
 ];
 function _poApostStatusCor(s){const f=PO_APOST_STATUS.find(x=>x.v===s);return f?f.cor:'#8b949e';}
-// Cor do badge do módulo = status "menos pronto" entre as apostilas (pra chamar atenção).
-function _poApostCor(apos){
+// Status efetivo da apostila DO MÓDULO (regra única, usada no badge E na IA):
+// sem nenhuma apostila cadastrada → "Pendente"; com apostilas → o status "menos pronto".
+function _poApostStatusModulo(apos){
+  apos=apos||[];
+  if(!apos.length)return 'Pendente';
   const ordem=['Pendente','Em produção','Parcial','Finalizado'];
   let pior=3;apos.forEach(a=>{const i=ordem.indexOf(a.status||'Pendente');if(i>=0&&i<pior)pior=i;});
-  return _poApostStatusCor(ordem[pior]);
+  return ordem[pior];
 }
+function _poApostCor(apos){return _poApostStatusCor(_poApostStatusModulo(apos));}
 S._poApostAtual=null; // {cid, modulo}
 window.poAbrirApostilas=(cid,modEnc)=>{
   S._poApostAtual={cid,modulo:decodeURIComponent(modEnc)};
