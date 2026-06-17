@@ -37324,7 +37324,7 @@ async function loadPO(){
       const x=d.data()||{};
       if(!x.cursoId||x.modulo==null)return;
       const key=_poModKey(x.cursoId,x.modulo);
-      mq[key]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[]};
+      mq[key]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],pedidos:x.pedidos||''};
     });
     S.poModQuestoes=mq;
   }catch(e){ /* mantém o que tem */ }
@@ -38835,10 +38835,10 @@ function _poModKey(cid,mod){return _poSlug(cid+'__'+mod);}
 // Persiste o bucket de questões de um módulo (fire-and-forget).
 function _poSaveModQuestoes(cid,mod){
   const key=_poModKey(cid,mod);
-  const b=S.poModQuestoes[key]||{TEA:[],TSA:[],MEs:[]};
-  setDoc(doc(db,'poModQuestoes',key),{cursoId:cid,modulo:mod,TEA:b.TEA||[],TSA:b.TSA||[],MEs:b.MEs||[]},{merge:true}).catch(e=>console.warn('poModQuestoes save',e));
+  const b=S.poModQuestoes[key]||{TEA:[],TSA:[],MEs:[],Outras:[],pedidos:''};
+  setDoc(doc(db,'poModQuestoes',key),{cursoId:cid,modulo:mod,TEA:b.TEA||[],TSA:b.TSA||[],MEs:b.MEs||[],Outras:b.Outras||[],pedidos:b.pedidos||''},{merge:true}).catch(e=>console.warn('poModQuestoes save',e));
 }
-function _poModQ(cid,mod){const k=_poModKey(cid,mod);if(!S.poModQuestoes[k])S.poModQuestoes[k]={TEA:[],TSA:[],MEs:[]};return S.poModQuestoes[k];}
+function _poModQ(cid,mod){const k=_poModKey(cid,mod);if(!S.poModQuestoes[k])S.poModQuestoes[k]={TEA:[],TSA:[],MEs:[],Outras:[],pedidos:''};const b=S.poModQuestoes[k];if(!b.Outras)b.Outras=[];if(b.pedidos==null)b.pedidos='';return b;}
 // Remove <img>, data:image base64 e atributos src de imagem de um HTML/texto.
 function _poStripImagens(s){
   let t=String(s||'');
@@ -38880,7 +38880,13 @@ function _poParseLoteQuestoes(text){
 }
 
 // ── Fluxo POR MÓDULO: 3 lotes (TEA/TSA/MEs) acumulados por módulo ──
-const _PO_MOD_TIPOS=['TEA','TSA','MEs'];
+const _PO_MOD_TIPOS=['TEA','TSA','MEs','Outras'];
+window.poModSetPedidos=(text)=>{
+  if(!S._poModAtual)return;
+  const b=_poModQ(S._poModAtual.cid,S._poModAtual.modulo);
+  b.pedidos=String(text||'');
+  _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
+};
 window.poAbrirAnaliseModulo=(cid,modEnc)=>{
   S._poModAtual={cid,modulo:decodeURIComponent(modEnc)};
   S._poModErro={};
@@ -38922,14 +38928,15 @@ window.poAnalisarModulo=()=>{
   if(!S._poModAtual)return;
   const {cid,modulo}=S._poModAtual;
   const bucket=_poModQ(cid,modulo);
-  const a=(bucket.TEA||[]).length,b=(bucket.TSA||[]).length,m=(bucket.MEs||[]).length;
-  const qTotal=a+b+m;
+  const a=(bucket.TEA||[]).length,b=(bucket.TSA||[]).length,m=(bucket.MEs||[]).length,o=(bucket.Outras||[]).length;
+  const qTotal=a+b+m+o;
+  const nPed=String(bucket.pedidos||'').split('\n').map(s=>s.trim()).filter(Boolean).length;
   const aulas=_poAulasDoCurso(cid).filter(x=>x.modulo===modulo);
   const box=document.getElementById('po-mod-mock');
   if(box){
     box.style.display='block';
     box.innerHTML=`🤖 <strong>Análise do módulo — em breve (Fase 2).</strong><br>
-      A IA receberia: <strong>${aulas.length} aula(s)</strong> do módulo (com Conteúdo, Avaliação, Status e Ano) + <strong>${qTotal} questão(ões)</strong> (TEA: ${a} · TSA: ${b} · MEs: ${m}), sem imagens.<br>
+      A IA receberia: <strong>${aulas.length} aula(s)</strong> do módulo (com Conteúdo, Avaliação, Status e Ano) + <strong>${qTotal} questão(ões)</strong> (TEA: ${a} · TSA: ${b} · MEs: ${m} · Outras: ${o}) + <strong>${nPed} pedido(s) de aluno</strong>, sem imagens.<br>
       Ela cruzaria os temas das questões com o conteúdo das aulas e devolveria um <strong>relatório priorizado</strong>: aulas a gravar, aulas com avaliação baixa/problema (status) a revisar, e o que falta cobrir por tipo (TEA/TSA/MEs).<br>
       <span style="color:var(--t2)">A conexão real é ativada quando a Cloud Function de análise for publicada.</span>`;
     box.scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -38983,6 +38990,8 @@ function _poModModalRender(){
         ${avisoHTML}
         <div class="po-modal-label">Envie as questões por tipo (cada lote é de um tipo só)</div>
         <div class="po-mod-blocos">${blocos}</div>
+        <div class="po-modal-label" style="margin-top:16px">🗣️ Pedidos de alunos <span style="font-weight:400;color:var(--t2)">(um por linha — entram na priorização)</span></div>
+        <textarea id="po-mod-pedidos" class="po-inp" style="min-height:70px" placeholder="Ex.: aula sobre bloqueio do plano transverso&#10;mais exemplos resolvidos de gasometria" onchange="poModSetPedidos(this.value)">${_poEsc(bucket.pedidos||'')}</textarea>
         <div id="po-mod-mock" class="po-q-mock" style="display:none"></div>
       </div>
       <div class="po-modal-foot">
