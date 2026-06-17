@@ -5913,6 +5913,30 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-import-modal .po-imp-cur-row span:last-child{color:var(--t2);font-family:'JetBrains Mono',monospace}
         #po-import-modal .po-imp-prog{margin-top:14px;font-size:12.5px;color:var(--accent);font-family:'JetBrains Mono',monospace}
         #po-import-modal .po-imp-done{margin-top:14px;padding:12px 14px;border-radius:10px;background:color-mix(in srgb,#3fb950 10%,transparent);border:1px solid color-mix(in srgb,#3fb950 32%,transparent);color:var(--text);font-size:12.5px}
+        /* Modal Importar do Laravel — herda o visual do #po-import-modal */
+        #po-laravel-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-laravel-modal.show{display:block}
+        #po-laravel-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-laravel-modal .po-modal{position:relative;max-width:620px;margin:8vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-laravel-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-laravel-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text)}
+        #po-laravel-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-laravel-modal .po-modal-x:hover{color:var(--text)}
+        #po-laravel-modal .po-modal-body{padding:18px 20px;max-height:66vh;overflow:auto}
+        #po-laravel-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        #po-laravel-modal .po-imp-instr{font-size:12.5px;color:var(--t2);margin:0 0 14px;line-height:1.5}
+        #po-laravel-modal .po-imp-file{display:block;width:100%;font-size:12.5px;color:var(--text);padding:14px;border:1.5px dashed color-mix(in srgb,var(--accent) 40%,var(--border));border-radius:12px;background:color-mix(in srgb,var(--accent) 5%,transparent);cursor:pointer;box-sizing:border-box}
+        #po-laravel-modal .po-imp-erro{margin-top:14px;padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 35%,transparent);color:#f85149;font-size:12.5px}
+        #po-laravel-modal .po-imp-prev{margin-top:14px;padding:13px 15px;border-radius:10px;background:var(--bg);border:1px solid var(--border)}
+        #po-laravel-modal .po-imp-prev h4{margin:0 0 8px;font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--text)}
+        #po-laravel-modal .po-imp-stats{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px}
+        #po-laravel-modal .po-imp-stat{font-size:12px;color:var(--t2)}
+        #po-laravel-modal .po-imp-stat b{color:var(--text);font-size:17px;display:block;font-family:'Space Grotesk',sans-serif}
+        #po-laravel-modal .po-imp-cursos{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow:auto}
+        #po-laravel-modal .po-imp-cur-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text);padding:4px 8px;border-radius:6px;background:var(--bg2)}
+        #po-laravel-modal .po-imp-cur-row span:last-child{color:var(--t2);font-family:'JetBrains Mono',monospace}
+        #po-laravel-modal .po-imp-prog{margin-top:14px;font-size:12.5px;color:var(--accent);font-family:'JetBrains Mono',monospace}
+        #po-laravel-modal .po-imp-done{margin-top:14px;padding:12px 14px;border-radius:10px;background:color-mix(in srgb,#3fb950 10%,transparent);border:1px solid color-mix(in srgb,#3fb950 32%,transparent);color:var(--text);font-size:12.5px}
       </style>
       <div id="po-root"></div>
     </div>
@@ -37129,6 +37153,7 @@ S.poColunas=[
   {id:'status',label:'Status Aula',type:'status',w:185,opts:_PO_STATUS_OPTS},
   {id:'conteudo',label:'Conteúdo da aula',type:'texto',w:220},
   {id:'avaliacao',label:'Avaliação da aula',type:'texto',w:150},
+  {id:'duracao',label:'Duração',type:'texto',w:90},
   {id:'questoes',label:'Questões',type:'status',w:118,opts:_PO_TRILHA3},
   {id:'cards',label:'Flashcards',type:'status',w:118,opts:_PO_TRILHA3},
   {id:'video',label:'Vídeo',type:'link',w:58},
@@ -37175,6 +37200,7 @@ async function _poSaveConfig(){
 // Carrega tudo do Firestore. Mantém o demo se a coleção estiver vazia ou sem auth.
 async function loadPO(){
   // 1) config (colunas + cursos)
+  let _duracaoInjetada=false;
   try{
     const cfgSnap=await getDoc(doc(db,'config','poConfig'));
     if(cfgSnap.exists()){
@@ -37184,6 +37210,7 @@ async function loadPO(){
       if(Array.isArray(d.cursos)&&d.cursos.length)S.poCursos=d.cursos;
       if(d.modOrdem&&typeof d.modOrdem==='object')S.poModOrdem=d.modOrdem;
       if(d.modExtra&&typeof d.modExtra==='object')S.poModExtra=d.modExtra;
+      _duracaoInjetada=!!d.duracaoColInjetada;
     }
   }catch(e){ /* sem permissão de leitura: segue com defaults */ }
 
@@ -37202,6 +37229,14 @@ async function loadPO(){
     S.poCursos.forEach(c=>{map[c.id]=aulasDocs.filter(a=>(a.cursos||[]).includes(c.nome));});
     S.poAulas=map;
     S._poAvisoDemo='';
+    // Migração one-time: insere a coluna "Duração" se as aulas têm `duracao` e a coluna ainda não existe.
+    // Flag `duracaoColInjetada` no poConfig garante que só roda uma vez (respeita exclusão posterior).
+    if(!_duracaoInjetada && !S.poColunas.some(c=>c.id==='duracao') && aulasDocs.some(a=>a.duracao)){
+      const iAval=S.poColunas.findIndex(c=>c.id==='avaliacao');
+      const colDur={id:'duracao',label:'Duração',type:'texto',w:90};
+      if(iAval>=0)S.poColunas.splice(iAval+1,0,colDur); else S.poColunas.push(colDur);
+      try{ await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,duracaoColInjetada:true},{merge:true}); }catch(e){ console.warn('migração duração:',e); }
+    }
   }else if(aulasDocs&&!aulasDocs.length){
     // coleção existe e está VAZIA → mantém demo
     S.poColunas=_PO_DEMO_COLUNAS.map(c=>({...c}));
@@ -37789,6 +37824,185 @@ function _poImportModalRender(){
   host.classList.add('show');
 }
 
+// ===== Importar do Laravel (JSON da API) ============================
+// Parser PURO: recebe o array exportado do Laravel, devolve {erro,aulas,cursos,modOrdem}.
+// Preserva a ordem dos módulos no array e a ordem dos conteúdos dentro de cada módulo.
+function _poParseLaravel(json){
+  const out={erro:'',aulas:[],cursos:[],modOrdem:{}};
+  if(!Array.isArray(json)||!json.length||!json.some(b=>b&&Array.isArray(b.conteudos))){
+    out.erro='JSON inválido — esperava um array de blocos com a chave "conteudos".';return out;
+  }
+  const aulas=[];
+  const cursosSet=new Map();   // nome → cursoId (preserva ordem de aparição)
+  const modOrdem={};           // cursoId → [module_name,...] na ordem do arquivo, sem repetir
+  for(let b=0;b<json.length;b++){
+    const bloco=json[b]||{};
+    const conteudos=Array.isArray(bloco.conteudos)?bloco.conteudos:[];
+    for(let j=0;j<conteudos.length;j++){
+      const c=conteudos[j]||{};
+      const title=String(c.title==null?'':c.title);
+      let ordem=null,titulo=title;
+      const m=title.match(/^\s*(\d+)\s*[-–]\s*(.+)$/);
+      if(m){ordem=Number(m[1]);titulo=m[2].trim();}
+      const cursoNome=c.course_name||'Extensive';
+      const cursoId=_poSlug(cursoNome);
+      if(!cursosSet.has(cursoNome))cursosSet.set(cursoNome,cursoId);
+      const modulo=c.module_name||'(sem módulo)';
+      if(!modOrdem[cursoId])modOrdem[cursoId]=[];
+      if(!modOrdem[cursoId].includes(modulo))modOrdem[cursoId].push(modulo);
+      const vimeoId=String(c.video_external_id==null?'':c.video_external_id);
+      const ratingNum=(c.rating!=null)?Number(c.rating):null;
+      const ratingTotal=c.total_ratings||0;
+      const avaliacao=(c.rating!=null&&c.rating!=='')?(String(c.rating)+(c.total_ratings?(' ('+c.total_ratings+')'):'')):'';
+      const publishedAt=c.published_at||'';
+      aulas.push({
+        laravelId:c.id,
+        nomeOriginal:title,
+        ordem,titulo,
+        modulo,
+        cursos:[cursoNome],
+        video:vimeoId?('https://vimeo.com/'+vimeoId):'',
+        vimeoId,
+        avaliacao,ratingNum,ratingTotal,
+        duracao:c.video_duration||'',
+        publishedAt,
+        ano:String(publishedAt).slice(0,4),
+        tipoLaravel:c.type||'',
+        ordemPO:j,
+        status:'',conteudo:'',prof:'',dados:{},
+      });
+    }
+  }
+  if(!aulas.length){out.erro='Nenhuma aula encontrada no JSON.';return out;}
+  out.aulas=aulas;
+  out.cursos=Array.from(cursosSet.keys()).map(nome=>({id:_poSlug(nome),nome,vertical:'anestreview'}));
+  out.modOrdem=modOrdem;
+  return out;
+}
+// expõe o parser pra teste manual no console (parser puro)
+window._poParseLaravel=_poParseLaravel;
+
+// estado efêmero do modal de import Laravel
+S._poImpL=null; // {parsed, fileName, importando, prog, done}
+
+window.poAbrirImportLaravel=()=>{
+  S._poImpL={parsed:null,fileName:'',importando:false,prog:'',done:''};
+  _poImportLaravelModalRender();
+};
+window.poImportLaravelModalClose=()=>{
+  S._poImpL=null;
+  const h=document.getElementById('po-laravel-modal');
+  if(h){h.classList.remove('show');h.innerHTML='';}
+};
+window.poImportLaravelFile=(ev)=>{
+  const f=ev&&ev.target&&ev.target.files&&ev.target.files[0];if(!f)return;
+  if(!S._poImpL)S._poImpL={};
+  S._poImpL.fileName=f.name;S._poImpL.parsed=null;S._poImpL.done='';
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const json=JSON.parse(e.target.result);
+      S._poImpL.parsed=_poParseLaravel(json);
+    }catch(err){
+      S._poImpL.parsed={erro:'Não consegui ler o JSON: '+(err.message||err),aulas:[],cursos:[],modOrdem:{}};
+    }
+    _poImportLaravelModalRender();
+  };
+  r.onerror=()=>{S._poImpL.parsed={erro:'Falha ao ler o arquivo.',aulas:[],cursos:[],modOrdem:{}};_poImportLaravelModalRender();};
+  r.readAsText(f);
+};
+
+window.poImportLaravelConfirmar=async()=>{
+  const imp=S._poImpL;if(!imp||!imp.parsed||imp.parsed.erro||!imp.parsed.aulas.length)return;
+  if(imp.importando)return;
+  if(!confirm(`Isso vai SUBSTITUIR todas as aulas atuais por ${imp.parsed.aulas.length} aula(s) do Laravel.\n\nContinuar?`))return;
+  imp.importando=true;imp.prog='Preparando…';imp.done='';_poImportLaravelModalRender();
+  const aulas=imp.parsed.aulas,cursos=imp.parsed.cursos,modOrdem=imp.parsed.modOrdem||{};
+  try{
+    // 1) deleta as aulas existentes em lotes de 450
+    imp.prog='Lendo aulas existentes…';_poImportLaravelProg();
+    const exist=await getDocs(collection(db,'poAulas'));
+    const existDocs=exist.docs;
+    let op=0,batch=writeBatch(db);
+    const flush=async()=>{await batch.commit();batch=writeBatch(db);op=0;};
+    for(let i=0;i<existDocs.length;i++){
+      batch.delete(doc(db,'poAulas',existDocs[i].id));op++;
+      if(op>=450){imp.prog=`Limpando ${i+1}/${existDocs.length}…`;_poImportLaravelProg();await flush();}
+    }
+    if(op>0){await flush();}
+    // 2) grava as novas em lotes de 450
+    op=0;batch=writeBatch(db);
+    const nowIso=new Date().toISOString();
+    for(let i=0;i<aulas.length;i++){
+      const ref=doc(collection(db,'poAulas'));
+      batch.set(ref,{...aulas[i],criadoEm:nowIso,updatedAt:nowIso});op++;
+      if(op>=450){imp.prog=`Gravando ${i+1}/${aulas.length}…`;_poImportLaravelProg();await flush();}
+    }
+    if(op>0){imp.prog=`Gravando ${aulas.length}/${aulas.length}…`;_poImportLaravelProg();await flush();}
+    // 3) salva o config (colunas/largura atuais + cursos e modOrdem derivados)
+    imp.prog='Salvando configuração…';_poImportLaravelProg();
+    await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,colAulaW:S.poColAulaW,cursos,modOrdem,modExtra:{}},{merge:true});
+    // 4) recarrega do banco
+    imp.prog='Recarregando…';_poImportLaravelProg();
+    S._poLoaded=false;
+    await loadPO();
+    imp.done=`Importadas ${aulas.length} aulas em ${cursos.length} curso(s).`;
+    poImportLaravelModalClose();
+    poVoltarVerticais();
+    _poRender();
+  }catch(err){
+    imp.importando=false;
+    const perm=/permission|insufficient|PERMISSION_DENIED/i.test(String(err&&err.message||err));
+    imp.parsed.erro=perm?'Faça login (Google) antes de importar.':'Erro ao importar: '+(err.message||err);
+    _poImportLaravelModalRender();
+  }
+};
+// atualiza só o texto de progresso sem re-render completo
+function _poImportLaravelProg(){
+  const el=document.getElementById('po-impl-prog');
+  if(el&&S._poImpL)el.textContent=S._poImpL.prog||'';
+}
+
+function _poImportLaravelModalRender(){
+  let host=document.getElementById('po-laravel-modal');
+  if(!host){host=document.createElement('div');host.id='po-laravel-modal';document.body.appendChild(host);}
+  const imp=S._poImpL||{};
+  const p=imp.parsed;
+  let body='';
+  body+=`<p class="po-imp-instr">Exporte o currículo da API do Laravel como <b>.json</b> e selecione aqui. A importação <b>substitui</b> todas as aulas atuais pelos dados do arquivo.</p>`;
+  body+=`<input class="po-imp-file" type="file" accept=".json,application/json" onchange="poImportLaravelFile(event)">`;
+  if(p&&p.erro){
+    body+=`<div class="po-imp-erro">⚠️ ${_poEsc(p.erro)}</div>`;
+  }else if(p&&p.aulas&&p.aulas.length){
+    const nMod=new Set(p.aulas.map(a=>a.modulo||'(sem módulo)')).size;
+    const cont={};p.aulas.forEach(a=>(a.cursos||[]).forEach(nm=>{cont[nm]=(cont[nm]||0)+1;}));
+    const curRows=p.cursos.map(c=>`<div class="po-imp-cur-row"><span>${_poEsc(c.nome)}</span><span>${cont[c.nome]||0} aulas</span></div>`).join('');
+    body+=`<div class="po-imp-prev">
+      <h4>Prévia da importação</h4>
+      <div class="po-imp-stats">
+        <div class="po-imp-stat"><b>${p.aulas.length}</b> aulas</div>
+        <div class="po-imp-stat"><b>${p.cursos.length}</b> cursos</div>
+        <div class="po-imp-stat"><b>${nMod}</b> módulos</div>
+      </div>
+      <div class="po-imp-cursos">${curRows}</div>
+    </div>`;
+  }
+  if(imp.importando)body+=`<div class="po-imp-prog" id="po-impl-prog">${_poEsc(imp.prog||'')}</div>`;
+  if(imp.done)body+=`<div class="po-imp-done">✅ ${_poEsc(imp.done)}</div>`;
+  const podeImportar=p&&!p.erro&&p.aulas&&p.aulas.length&&!imp.importando;
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poImportLaravelModalClose()"></div>
+    <div class="po-modal" role="dialog">
+      <div class="po-modal-head"><h3>⬆ Importar do Laravel</h3><button type="button" class="po-modal-x" onclick="poImportLaravelModalClose()">✕</button></div>
+      <div class="po-modal-body">${body}</div>
+      <div class="po-modal-foot">
+        <button type="button" class="btn btn-g" onclick="poImportLaravelModalClose()">${imp.done?'Fechar':'Cancelar'}</button>
+        <button type="button" class="btn btn-p" onclick="poImportLaravelConfirmar()" ${podeImportar?'':'disabled'}>${imp.importando?'Importando…':'Importar para o Firestore'}</button>
+      </div>
+    </div>`;
+  host.classList.add('show');
+}
+
 function _poTemFiltroColuna(){const f=S.poColFiltros||{};return Object.keys(f).some(k=>String(f[k]||'').trim());}
 function _poFiltraAulas(cid,q){
   let aulas=_poAulasDoCurso(cid).slice();
@@ -38017,6 +38231,7 @@ function _poRenderCurso(root){
         <button id="po-toggle-all" class="btn btn-g" type="button" onclick="poToggleAll()" title="Expandir / recolher todos os módulos">⊕ Expandir tudo</button>
         <button class="btn btn-s" type="button" onclick="poNovoModulo()" title="Criar um novo módulo (Ponto) neste curso">＋ Novo módulo</button>
         <button class="btn btn-s" type="button" onclick="poAbrirImport()" title="Importar a planilha do Monday (.xlsx)">⬆ Importar do Monday</button>
+        <button class="btn btn-s" type="button" onclick="poAbrirImportLaravel()" title="Importar o JSON exportado da API do Laravel (.json)">⬆ Importar do Laravel</button>
       </div>
       ${S._poAvisoDemo?`<div class="po-demo-aviso">⚠️ ${_poEsc(S._poAvisoDemo)}</div>`:''}
       <div class="po-table-wrap">

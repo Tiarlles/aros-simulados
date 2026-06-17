@@ -2457,6 +2457,15 @@ Funcionalidades que estão **prontas no código** mas dependem de uma config ext
 - **Importador no app** (botão "⬆ Importar do Monday", `poAbrirImport`): sobe o `.xlsx`, parseia com `_poParseMondayXlsx` (puro — pula linhas de grupo/cabeçalho do Monday, extrai `ordem`+`titulo` de "N - Título", split de Produto, **vazio→Extensive Geral**), preview, e grava em `writeBatch` (chunks 450) — substitui as `poAulas` existentes. Roda com a sessão logada (Google) → **não precisa de senha/script Node**. Arquivo real: `~/Downloads/ANEST_Aulas_1780686227.xlsx` (~756 aulas, 9 cursos).
 - **Edição inline:** célula (`poCelEditar` → `_poSaveAula`=updateDoc), nome de aula/módulo/coluna, opções de tag. **Numeração posicional** + **arrastar** (alça ⠿; `_poReordenarAulas` grava `ordemPO`, `_poReordenarModulos` grava `S.poModOrdem`); drag desligado durante busca/filtro.
 - **CRUD:** **Nova aula** (`poNovaAula(modulo?)` → modal `#po-aula-modal`; quando criada por dentro do módulo, o módulo vem fixo via chip, sem seletor). **Novo módulo** (`poNovoModulo` → modal `#po-novomod-modal`; módulos vazios ficam em `S.poModExtra[cursoId]`). **Excluir**: por **checkbox** (seleção em `S.poSel.aulas` → barra `.po-sel-bar` → `poExcluirSelecionadas`, dupla confirmação, apaga de todos os cursos); excluir **módulo** (`poExcluirModulo`) e **produto/curso** (`poExcluirProduto` — apaga aulas exclusivas, desvincula as compartilhadas). Tudo dupla confirmação.
+- **Coluna "Duração"** (id `duracao`, 2026-06-17): mostra `video_duration` do Laravel. Adicionada por **migração one-time** no `loadPO` (se as aulas têm `a.duracao` e a coluna não existe → insere + grava flag `duracaoColInjetada` no poConfig pra não voltar se excluída).
+
+### ⭐ FONTE = Laravel (integração iniciada 2026-06-17, EM ANDAMENTO)
+Decisão: o **Laravel** (produto real, onde os alunos assistem) é a **fonte de verdade** do PO, no lugar do Monday. A API é `https://api.grupomedreview.com.br/api`:
+- Endpoints (auth por **token Bearer Sanctum**, formato `123|abc…`; rotas protegidas → 401 sem token, e `/login` 302 sem cookie): `GET /api/producers` (verticais, **público**), `GET /api/curso/{id}/modulos` (lista de módulos `{id,nome}`), `GET /api/modulo/{id}/conteudos` (aulas do módulo). Frontend em `anestreview.medmembers.com.br`.
+- **Campos de cada conteúdo:** `id` (id estável Laravel), `title` ("N - Título"), `module_name`, `course_name` ("Extensive"), **`video_external_id`** (id do Vimeo), **`rating`**+`total_ratings`+`my_rating` (avaliação), `video_duration`, `published_at`, `type`.
+- **Como puxar (one-time, sem token gravado):** o token só fica na MEMÓRIA do app (não em localStorage/cookie). Capturado via patch de `fetch`/`XMLHttpRequest.setRequestHeader` no console enquanto o user clica num módulo. Script percorre os módulos e baixa um JSON `[{moduloId, conteudos:[...]}]`. Arquivo real obtido: `~/Downloads/aulas-laravel*.json` (Extensive = 436 aulas, 57 módulos).
+- **Importador do Laravel no PO** (botão "⬆ Importar do Laravel", `poAbrirImportLaravel`, modal `#po-laravel-modal`): parser puro `_poParseLaravel(json)` mapeia → `video:'https://vimeo.com/'+video_external_id`, `vimeoId`, `avaliacao:"4.87 (78)"` (+`ratingNum`/`ratingTotal`), `duracao`, `ano` (de published_at), `laravelId`, `publishedAt`, `tipoLaravel`. `modOrdem` = ordem dos módulos no arquivo. **CLEAR+INSERT** (substitui as poAulas). Globais: `poAbrirImportLaravel`/`poImportLaravelFile`/`poImportLaravelConfirmar`/`poImportLaravelModalClose`/`_poParseLaravel`. **Já importado em produção pelo Tiarlles.**
+- **Próximo:** transcrição via **Vimeo** (Cloud Function pega `vimeoId` → `GET /videos/{id}/texttracks` → VTT → texto puro na coluna **Conteúdo da aula**; guardar transcrição em **doc separado** `poTranscricoes/{aulaId}` carregado sob demanda, NÃO no doc da aula que é carregado em massa). Precisa de **token da API do Vimeo** (Tiarlles consegue). E **sincronização automática** Laravel→PO via Cloud Function quando o dev der um **token de API estável** (não usar login/senha; o token Sanctum capturado é pessoal/temporário). ⚠️ Tiarlles colou um token Sanctum no chat (`3044609|…`) — orientado a **regenerar**.
 
 ### Modelo de dados real (do board Monday — export `ANEST_Aulas_*.xlsx`, ~756 aulas reais)
 Mapeamento Monday → campo da aula:
@@ -2479,11 +2488,11 @@ Mapeamento Monday → campo da aula:
 - **Próxima prioridade do produto** (2º recurso): ainda placeholder (Fase 2).
 - Implementação da IA real prevista: **nova Cloud Function no padrão do Dex** (`dex.js`), **modelo forte** (Sonnet). A análise fica útil de verdade depois que o curso tiver as colunas **Conteúdo da aula** / **Avaliação da aula** preenchidas.
 
-### Próximos passos
-1. **IA real**: criar a Cloud Function `analisarQuestoesPO` (padrão Dex/Sonnet) e trocar o mock de `poAnalisarModulo` pela chamada real (auth por Firebase token; CORS liberar o localhost). É CORS-bloqueada em localhost? testar no site publicado.
-2. **Notas das aulas** via API **Laravel** (devs entregam) — hoje a avaliação é manual (coluna "Avaliação da aula").
-3. **Fase 3**: botão "Publicar na Comunicação" (joga a aula pra aba Comunicação que o aluno vê).
-4. **Permissão**: aba `po` ainda é admin-only (`ADMIN_ONLY_TABS`); liberar pra professor depois.
+### Próximos passos (retomar aqui)
+1. **Transcrição via Vimeo** (em foco): Cloud Function que pega `vimeoId` de cada aula → `GET https://api.vimeo.com/videos/{id}/texttracks` (token Vimeo no `.env`) → baixa o VTT → tira timestamps → texto puro. Guardar em **`poTranscricoes/{aulaId}`** (doc separado, sob demanda — NÃO no doc da aula). UI: clicar na célula "Conteúdo da aula" abre **editor grande** (textarea) + botão "🔄 Puxar do Vimeo"; célula mostra marcador "📝 ~N palavras". **Precisa do token da API do Vimeo** (Tiarlles consegue; escopo leitura/`video_files`).
+2. **IA real** de análise por módulo: Cloud Function (padrão Dex/Sonnet) que recebe transcrição + avaliação + questões e devolve relatório priorizado; trocar o mock de `poAnalisarModulo`. (IA é CORS-bloqueada em localhost — testar no site publicado.)
+3. **Sincronização automática Laravel→PO**: Cloud Function agendada + botão "🔄 Sincronizar", usando um **token de API estável** que o dev precisa liberar (não login/senha). Upsert por `laravelId` (preservar status/conteudo editados no PO).
+4. **Fase 3**: botão "Publicar na Comunicação"; e liberar a aba `po` pra professor (hoje admin-only).
 
 ## Histórico recente (resumo cronológico)
 
