@@ -5989,6 +5989,29 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-sync-modal .po-sync-curso h4{margin:0 0 6px;font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--text)}
         #po-sync-modal .po-sync-lista{margin:6px 0 0;padding-left:18px;font-size:12px;color:var(--t2);max-height:140px;overflow:auto}
         #po-sync-modal .po-sync-lista li{margin:2px 0}
+        /* Modais Edital + Pesos — reusam o visual dos modais do PO */
+        #po-edital-modal,#po-pesos-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-edital-modal.show,#po-pesos-modal.show{display:block}
+        #po-edital-modal .po-modal-back,#po-pesos-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-edital-modal .po-modal,#po-pesos-modal .po-modal{position:relative;max-width:620px;margin:7vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-edital-modal .po-modal.po-modal-lg,#po-pesos-modal .po-modal.po-modal-lg{max-width:720px}
+        #po-edital-modal .po-modal-head,#po-pesos-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-edital-modal .po-modal-head h3,#po-pesos-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text)}
+        #po-edital-modal .po-modal-x,#po-pesos-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-edital-modal .po-modal-x:hover,#po-pesos-modal .po-modal-x:hover{color:var(--text)}
+        #po-edital-modal .po-modal-body,#po-pesos-modal .po-modal-body{padding:18px 20px;max-height:72vh;overflow:auto}
+        #po-edital-modal .po-modal-foot,#po-pesos-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        #po-edital-modal .po-imp-instr,#po-pesos-modal .po-imp-instr{font-size:12.5px;color:var(--t2);margin:0 0 14px;line-height:1.5}
+        #po-edital-modal .po-inp{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;line-height:1.55;padding:10px 12px;resize:vertical}
+        #po-pesos-modal .po-peso-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border)}
+        #po-pesos-modal .po-peso-row:last-child{border-bottom:none}
+        #po-pesos-modal .po-peso-info{flex:1;min-width:0}
+        #po-pesos-modal .po-peso-label{font-size:13.5px;font-weight:600;color:var(--text)}
+        #po-pesos-modal .po-peso-desc{font-size:11.5px;color:var(--t2);margin-top:2px}
+        #po-pesos-modal .po-peso-ctrl{display:flex;align-items:center;gap:10px;flex:none;width:200px}
+        #po-pesos-modal .po-peso-ctrl input[type=range]{flex:1;accent-color:var(--accent)}
+        #po-pesos-modal .po-peso-val{width:26px;text-align:right;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:var(--accent)}
+        #tab-po .po-tl-empty{margin-top:14px;padding:14px 16px;border-radius:12px;background:var(--bg2);border:1px dashed color-mix(in srgb,var(--accent) 35%,var(--border));font-size:12.5px;color:var(--text);line-height:1.55}
       </style>
       <div id="po-root"></div>
     </div>
@@ -37270,6 +37293,8 @@ async function loadPO(){
       if(d.modExtra&&typeof d.modExtra==='object')S.poModExtra=d.modExtra;
       _duracaoInjetada=!!d.duracaoColInjetada;
       _trilhaRenamed=!!d.trilhaColsRenamed;
+      if(d.poPesos&&typeof d.poPesos==='object')S.poPesos={...S.poPesos,...d.poPesos};
+      if(d.editais&&typeof d.editais==='object')S.poEditais=d.editais;
     }
   }catch(e){ /* sem permissão de leitura: segue com defaults */ }
 
@@ -38549,12 +38574,15 @@ function _poRenderCurso(root){
         <button type="button" class="po-sel-clear" onclick="poLimparSelecao()">Limpar seleção</button>
       </div>
       <div class="po-ia">
-        <h3>🤖 Inteligência do Produto <span class="po-soon">Fase 2</span></h3>
-        <p>A IA vai varrer o curso (status, datas de prova, edital e notas) e te dar a próxima prioridade — e analisar lotes de questões pra sugerir aulas a montar.</p>
+        <h3>🤖 Inteligência do Produto</h3>
+        <p>Configure o edital e os pesos, depois rode a análise pra ver a linha do tempo de prioridades do produto.</p>
         <div class="po-ia-btns">
-          <span class="po-ia-btn">⚡ Próxima prioridade do produto <span class="po-soon">Fase 2</span></span>
+          <button type="button" class="po-ia-btn po-ia-on" onclick="poAbrirEdital()">📋 Edital do produto</button>
+          <button type="button" class="po-ia-btn po-ia-on" onclick="poAbrirPesos()">⚖️ Pesos da priorização</button>
+          <button type="button" class="po-ia-btn po-ia-on" onclick="poAnalisarProduto()">⚡ Analisar produto</button>
         </div>
-        <div class="po-ia-hint">📥 Para analisar questões, use o botão <strong>🤖 Analisar módulo</strong> em cada Ponto da planilha.</div>
+        <div id="po-prod-timeline"></div>
+        <div class="po-ia-hint">📥 As questões e os pedidos de alunos entram pelo botão <strong>🤖 Analisar módulo</strong> em cada Ponto.</div>
       </div>
     </div>`;
   try{_poBindResize();}catch(e){}
@@ -38886,6 +38914,105 @@ window.poModSetPedidos=(text)=>{
   const b=_poModQ(S._poModAtual.cid,S._poModAtual.modulo);
   b.pedidos=String(text||'');
   _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
+};
+
+// ===== IA de priorização: critérios, pesos e edital =====
+// A IA pontua cada critério de 0 a 1 por ação; o código aplica estes pesos.
+// Mudar um peso re-ordena a linha do tempo SEM chamar a IA de novo.
+const PO_CRITERIOS=[
+  {id:'lacuna',     label:'Lacuna de conteúdo',                 desc:'Tema cai na prova/edital e falta (ou está raso) na aula', peso:30},
+  {id:'frequencia', label:'Frequência do tema nas provas',      desc:'Quanto mais o tema é cobrado, mais urgente',              peso:20},
+  {id:'status',     label:'Aula inexistente / status crítico',  desc:'Não gravada, com erro, ou "precisa atualizar"',           peso:15},
+  {id:'avaliacao',  label:'Avaliação baixa dos alunos',         desc:'Aula mal avaliada',                                       peso:12},
+  {id:'pedidos',    label:'Pedidos de alunos',                  desc:'Demanda explícita registrada no módulo',                  peso:10},
+  {id:'idade',      label:'Idade da aula',                      desc:'Gravada há muito tempo / possivelmente desatualizada',    peso:8},
+  {id:'material',   label:'Falta de apostila/ficha/trilha',     desc:'Material de apoio ausente',                               peso:5},
+];
+S.poPesos=Object.fromEntries(PO_CRITERIOS.map(c=>[c.id,c.peso])); // default; sobrescrito pelo config
+S.poEditais={}; // {cursoId: textoDoEdital}
+
+async function _poSavePesos(){ try{ await setDoc(doc(db,'config','poConfig'),{poPesos:S.poPesos},{merge:true}); }catch(e){console.warn('poPesos save',e);} }
+async function _poSaveEditais(){ try{ await setDoc(doc(db,'config','poConfig'),{editais:S.poEditais},{merge:true}); }catch(e){console.warn('editais save',e);} }
+
+// ── Modal: Edital do produto ──
+window.poAbrirEdital=()=>{
+  const cid=S.poCursoAtual; if(!cid)return;
+  let host=document.getElementById('po-edital-modal');
+  if(!host){host=document.createElement('div');host.id='po-edital-modal';document.body.appendChild(host);}
+  const c=S.poCursos.find(x=>x.id===cid)||{nome:cid};
+  const txt=_poEsc(S.poEditais[cid]||'');
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poEditalClose()"></div>
+    <div class="po-modal po-modal-lg" role="dialog">
+      <div class="po-modal-head"><h3>📋 Edital — ${_poEsc(c.nome)}</h3><button type="button" class="po-modal-x" onclick="poEditalClose()">✕</button></div>
+      <div class="po-modal-body">
+        <p class="po-imp-instr">Cole aqui o <b>programa/edital</b> do produto (lista oficial de temas). A IA usa isso pra achar lacunas — temas que deveriam estar cobertos e ainda não estão. Cole uma vez; vale pro produto todo.</p>
+        <textarea id="po-edital-ta" class="po-inp" style="min-height:320px" placeholder="Cole o edital / programa de temas aqui…">${txt}</textarea>
+      </div>
+      <div class="po-modal-foot">
+        <span style="font-size:11.5px;color:var(--t2)" id="po-edital-info"></span>
+        <div style="display:flex;gap:10px">
+          <button type="button" class="btn btn-g" onclick="poEditalClose()">Fechar</button>
+          <button type="button" class="btn btn-p" onclick="poEditalSalvar()">💾 Salvar edital</button>
+        </div>
+      </div>
+    </div>`;
+  host.classList.add('show');
+};
+window.poEditalClose=()=>{const h=document.getElementById('po-edital-modal');if(h){h.classList.remove('show');h.innerHTML='';}};
+window.poEditalSalvar=()=>{
+  const cid=S.poCursoAtual; if(!cid)return;
+  const ta=document.getElementById('po-edital-ta');
+  S.poEditais[cid]=ta?ta.value:'';
+  _poSaveEditais();
+  arosToast('Edital salvo','success',1800);
+  poEditalClose();
+};
+
+// ── Modal: Pesos da priorização ──
+window.poAbrirPesos=()=>{
+  let host=document.getElementById('po-pesos-modal');
+  if(!host){host=document.createElement('div');host.id='po-pesos-modal';document.body.appendChild(host);}
+  const linhas=PO_CRITERIOS.map(c=>{
+    const v=Number(S.poPesos[c.id]!=null?S.poPesos[c.id]:c.peso);
+    return `<div class="po-peso-row">
+      <div class="po-peso-info"><div class="po-peso-label">${_poEsc(c.label)}</div><div class="po-peso-desc">${_poEsc(c.desc)}</div></div>
+      <div class="po-peso-ctrl">
+        <input type="range" min="0" max="50" step="1" value="${v}" oninput="poPesoSet('${c.id}',this.value)">
+        <span class="po-peso-val" id="po-peso-val-${c.id}">${v}</span>
+      </div>
+    </div>`;
+  }).join('');
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poPesosClose()"></div>
+    <div class="po-modal po-modal-lg" role="dialog">
+      <div class="po-modal-head"><h3>⚖️ Pesos da priorização</h3><button type="button" class="po-modal-x" onclick="poPesosClose()">✕</button></div>
+      <div class="po-modal-body">
+        <p class="po-imp-instr">Quanto cada critério "pesa" na nota final de prioridade. Mexa à vontade — a linha do tempo re-ordena na hora, <b>sem custo de IA</b> (a IA só avalia os fatos; estes pesos é que decidem a ordem).</p>
+        ${linhas}
+      </div>
+      <div class="po-modal-foot">
+        <button type="button" class="btn btn-g" onclick="poPesosRestaurar()">↺ Restaurar padrão</button>
+        <div style="display:flex;gap:10px">
+          <button type="button" class="btn btn-g" onclick="poPesosClose()">Fechar</button>
+          <button type="button" class="btn btn-p" onclick="poPesosSalvar()">💾 Salvar pesos</button>
+        </div>
+      </div>
+    </div>`;
+  host.classList.add('show');
+};
+window.poPesosClose=()=>{const h=document.getElementById('po-pesos-modal');if(h){h.classList.remove('show');h.innerHTML='';}};
+window.poPesoSet=(id,v)=>{ S.poPesos[id]=Number(v); const el=document.getElementById('po-peso-val-'+id); if(el)el.textContent=v; };
+window.poPesosRestaurar=()=>{ S.poPesos=Object.fromEntries(PO_CRITERIOS.map(c=>[c.id,c.peso])); poAbrirPesos(); };
+window.poPesosSalvar=()=>{ _poSavePesos(); arosToast('Pesos salvos','success',1800); poPesosClose(); };
+
+// Placeholder até a Cloud Function de análise (Fase 2) ser publicada.
+window.poAnalisarProduto=()=>{
+  const el=document.getElementById('po-prod-timeline'); if(!el)return;
+  el.innerHTML=`<div class="po-tl-empty">⚡ <b>Linha do tempo de prioridades — em breve (Fase 2).</b><br>
+    O motor de IA (que cruza edital × questões × transcrição e pontua cada critério) é ativado quando a Cloud Function de análise for publicada.<br>
+    <span style="color:var(--t2)">Por enquanto, já dá pra preencher o <b>edital</b>, ajustar os <b>pesos</b> e cadastrar <b>questões + pedidos</b> por módulo — tudo isso vira insumo da análise.</span></div>`;
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
 };
 window.poAbrirAnaliseModulo=(cid,modEnc)=>{
   S._poModAtual={cid,modulo:decodeURIComponent(modEnc)};
