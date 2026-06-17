@@ -37301,7 +37301,7 @@ async function loadPO(){
     S.poColunas=_PO_DEMO_COLUNAS.map(c=>({...c}));
     S.poCursos=_PO_DEMO_CURSOS.map(c=>({...c}));
     S.poAulas=JSON.parse(JSON.stringify(_PO_DEMO_AULAS));
-    S._poAvisoDemo='Nenhuma aula importada ainda — mostrando dados de exemplo. Use “Importar do Monday”.';
+    S._poAvisoDemo='Nenhuma aula ainda — mostrando dados de exemplo. Use “🔄 Sincronizar agora” para trazer do Laravel.';
   }else{
     // erro de leitura → demo
     S.poColunas=_PO_DEMO_COLUNAS.map(c=>({...c}));
@@ -38516,8 +38516,6 @@ function _poRenderCurso(root){
         <input class="po-search" type="text" placeholder="Buscar aula, módulo, professor, status…" value="${_poEsc(S.poBusca||'')}" oninput="poSetBusca(this.value)">
         <button id="po-toggle-all" class="btn btn-g" type="button" onclick="poToggleAll()" title="Expandir / recolher todos os módulos">⊕ Expandir tudo</button>
         <button class="btn btn-s" type="button" onclick="poNovoModulo()" title="Criar um novo módulo (Ponto) neste curso">＋ Novo módulo</button>
-        <button class="btn btn-s" type="button" onclick="poAbrirImport()" title="Importar a planilha do Monday (.xlsx)">⬆ Importar do Monday</button>
-        <button class="btn btn-s" type="button" onclick="poAbrirImportLaravel()" title="Importar o JSON exportado da API do Laravel (.json)">⬆ Importar do Laravel</button>
         <button class="btn btn-s" type="button" onclick="poAbrirTranscricoes()" title="Puxar a transcrição (legenda) dos vídeos do Vimeo pra coluna Conteúdo da aula">🎬 Puxar transcrições</button>
         <button class="btn btn-s" type="button" onclick="poAbrirSync()" title="Buscar aulas novas no Laravel e trazer pro PO (com pré-visualização antes de aplicar)">🔄 Sincronizar agora</button>
       </div>
