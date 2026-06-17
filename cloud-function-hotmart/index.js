@@ -23,6 +23,10 @@ exports.vimeoTranscricao = require('./vimeo-transcricao').vimeoTranscricao;
 exports.sincronizarLaravel = require('./sincronizar-laravel').sincronizarLaravel;
 exports.sincronizarLaravelAuto = require('./sincronizar-laravel').sincronizarLaravelAuto;
 
+// Re-exporta as functions de questões do PO via API (filtros + puxar por tema)
+exports.filtrosPO = require('./questoes-po').filtrosPO;
+exports.puxarQuestoesPO = require('./questoes-po').puxarQuestoesPO;
+
 // Helper que faz UPSERT em alunosAprovados (Cruzar Lista) a partir do webhook Hotmart
 const { upsertAluno } = require('./hotmart-alunos');
 
