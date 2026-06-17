@@ -5892,6 +5892,21 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-mod-modal .po-mod-limpar:hover{border-color:#f85149;color:#f85149}
         #po-mod-modal .po-drop.po-drop-sm{padding:10px}
         #po-mod-modal .po-mod-bloco textarea.po-inp{min-height:80px;margin-top:8px}
+        /* Accordion dos baldes de questões + pedidos */
+        #po-mod-modal .po-mod-bloco-head{cursor:pointer;user-select:none}
+        #po-mod-modal .po-mod-bloco-head:hover .po-mod-bloco-t{color:var(--text)}
+        #po-mod-modal .po-mod-chev{color:var(--t2);font-size:11px;width:12px;flex:none}
+        #po-mod-modal .po-mod-bloco-body{margin-top:10px}
+        #po-mod-modal input.po-inp{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;box-sizing:border-box}
+        #po-mod-modal input.po-inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+        #po-mod-modal .po-ped-tabela{width:100%;border-collapse:collapse;font-size:13px}
+        #po-mod-modal .po-ped-tabela td{padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+        #po-mod-modal .po-ped-del{width:34px;text-align:right}
+        #po-mod-modal .po-ped-del button{background:none;border:none;color:var(--t2);cursor:pointer;font-size:12px;padding:2px 6px;border-radius:5px}
+        #po-mod-modal .po-ped-del button:hover{color:#f85149;background:color-mix(in srgb,#f85149 15%,transparent)}
+        #po-mod-modal .po-ped-vazio{color:var(--t2);font-style:italic}
+        #po-mod-modal .po-ped-add{display:flex;gap:8px;margin-top:10px}
+        #po-mod-modal .po-ped-add .po-inp{flex:1}
         #tab-po .po-empty{text-align:center;padding:60px 20px;color:var(--t2)}
         #tab-po .po-empty .po-ei{font-size:40px;margin-bottom:10px}
         #tab-po .po-demo-aviso{margin:0 0 14px;padding:9px 13px;border-radius:9px;background:color-mix(in srgb,#d29922 12%,transparent);border:1px solid color-mix(in srgb,#d29922 35%,transparent);color:#d29922;font-size:12.5px;font-family:'Plus Jakarta Sans',sans-serif}
@@ -37349,7 +37364,8 @@ async function loadPO(){
       const x=d.data()||{};
       if(!x.cursoId||x.modulo==null)return;
       const key=_poModKey(x.cursoId,x.modulo);
-      mq[key]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],pedidos:x.pedidos||''};
+      const ped=Array.isArray(x.pedidos)?x.pedidos:(x.pedidos?String(x.pedidos).split('\n').map(s=>s.trim()).filter(Boolean):[]);
+      mq[key]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],pedidos:ped};
     });
     S.poModQuestoes=mq;
   }catch(e){ /* mantém o que tem */ }
@@ -38863,10 +38879,10 @@ function _poModKey(cid,mod){return _poSlug(cid+'__'+mod);}
 // Persiste o bucket de questões de um módulo (fire-and-forget).
 function _poSaveModQuestoes(cid,mod){
   const key=_poModKey(cid,mod);
-  const b=S.poModQuestoes[key]||{TEA:[],TSA:[],MEs:[],Outras:[],pedidos:''};
-  setDoc(doc(db,'poModQuestoes',key),{cursoId:cid,modulo:mod,TEA:b.TEA||[],TSA:b.TSA||[],MEs:b.MEs||[],Outras:b.Outras||[],pedidos:b.pedidos||''},{merge:true}).catch(e=>console.warn('poModQuestoes save',e));
+  const b=S.poModQuestoes[key]||{TEA:[],TSA:[],MEs:[],Outras:[],pedidos:[]};
+  setDoc(doc(db,'poModQuestoes',key),{cursoId:cid,modulo:mod,TEA:b.TEA||[],TSA:b.TSA||[],MEs:b.MEs||[],Outras:b.Outras||[],pedidos:Array.isArray(b.pedidos)?b.pedidos:[]},{merge:true}).catch(e=>console.warn('poModQuestoes save',e));
 }
-function _poModQ(cid,mod){const k=_poModKey(cid,mod);if(!S.poModQuestoes[k])S.poModQuestoes[k]={TEA:[],TSA:[],MEs:[],Outras:[],pedidos:''};const b=S.poModQuestoes[k];if(!b.Outras)b.Outras=[];if(b.pedidos==null)b.pedidos='';return b;}
+function _poModQ(cid,mod){const k=_poModKey(cid,mod);if(!S.poModQuestoes[k])S.poModQuestoes[k]={TEA:[],TSA:[],MEs:[],Outras:[],pedidos:[]};const b=S.poModQuestoes[k];if(!b.Outras)b.Outras=[];if(!Array.isArray(b.pedidos))b.pedidos=b.pedidos?String(b.pedidos).split('\n').map(s=>s.trim()).filter(Boolean):[];return b;}
 // Remove <img>, data:image base64 e atributos src de imagem de um HTML/texto.
 function _poStripImagens(s){
   let t=String(s||'');
@@ -38909,11 +38925,32 @@ function _poParseLoteQuestoes(text){
 
 // ── Fluxo POR MÓDULO: 3 lotes (TEA/TSA/MEs) acumulados por módulo ──
 const _PO_MOD_TIPOS=['TEA','TSA','MEs','Outras'];
-window.poModSetPedidos=(text)=>{
+S._poModSec={}; // accordions abertos no modal de módulo: {TEA:bool,...,pedidos:bool}
+window.poModToggleSec=(key)=>{ S._poModSec[key]=!S._poModSec[key]; _poModModalRender(); };
+// Pedidos de alunos = lista; cada linha salva na hora.
+window.poModAddPedido=()=>{
+  if(!S._poModAtual)return;
+  const inp=document.getElementById('po-ped-novo');
+  const v=(inp?inp.value:'').trim();
+  if(!v)return;
+  const b=_poModQ(S._poModAtual.cid,S._poModAtual.modulo);
+  b.pedidos.push(v);
+  S._poModSec.pedidos=true;
+  _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
+  _poModModalRender();
+};
+window.poModDelPedido=(i)=>{
   if(!S._poModAtual)return;
   const b=_poModQ(S._poModAtual.cid,S._poModAtual.modulo);
-  b.pedidos=String(text||'');
+  b.pedidos.splice(i,1);
   _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
+  _poModModalRender();
+};
+// Salva tudo (questões + pedidos) sem analisar — pra guardar pra análise futura.
+window.poModSalvarTudo=()=>{
+  if(!S._poModAtual)return;
+  _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
+  arosToast('Módulo salvo','success',1800);
 };
 
 // ===== IA de priorização: critérios, pesos e edital =====
@@ -39017,6 +39054,11 @@ window.poAnalisarProduto=()=>{
 window.poAbrirAnaliseModulo=(cid,modEnc)=>{
   S._poModAtual={cid,modulo:decodeURIComponent(modEnc)};
   S._poModErro={};
+  // abre por padrão os accordions que já têm conteúdo
+  const b=_poModQ(cid,S._poModAtual.modulo);
+  S._poModSec={};
+  _PO_MOD_TIPOS.forEach(t=>{S._poModSec[t]=(b[t]||[]).length>0;});
+  S._poModSec.pedidos=(b.pedidos||[]).length>0;
   _poModModalRender();
 };
 window.poModModalClose=()=>{const h=document.getElementById('po-mod-modal');if(h){h.classList.remove('show');h.innerHTML='';}S._poModAtual=null;try{_poRefreshTabela();}catch(e){}};
@@ -39034,6 +39076,7 @@ window.poModColar=(tipo)=>{
 };
 function _poModAplicarLote(tipo,text){
   if(!S._poModAtual)return;
+  S._poModSec[tipo]=true;
   const res=_poParseLoteQuestoes(text);
   if(res.erro){S._poModErro[tipo]=res.erro;return _poModModalRender();}
   S._poModErro[tipo]='';
@@ -39055,9 +39098,10 @@ window.poAnalisarModulo=()=>{
   if(!S._poModAtual)return;
   const {cid,modulo}=S._poModAtual;
   const bucket=_poModQ(cid,modulo);
+  _poSaveModQuestoes(cid,modulo); // analisar também salva
   const a=(bucket.TEA||[]).length,b=(bucket.TSA||[]).length,m=(bucket.MEs||[]).length,o=(bucket.Outras||[]).length;
   const qTotal=a+b+m+o;
-  const nPed=String(bucket.pedidos||'').split('\n').map(s=>s.trim()).filter(Boolean).length;
+  const nPed=(bucket.pedidos||[]).length;
   const aulas=_poAulasDoCurso(cid).filter(x=>x.modulo===modulo);
   const box=document.getElementById('po-mod-mock');
   if(box){
@@ -39075,33 +39119,57 @@ function _poModModalRender(){
   if(!S._poModAtual){host.classList.remove('show');host.innerHTML='';return;}
   const {cid,modulo}=S._poModAtual;
   const aulas=_poAulasDoCurso(cid).filter(a=>a.modulo===modulo);
-  const semConteudo=aulas.filter(a=>!String(a.conteudo||'').trim()).length;
+  // "tem conteúdo" = transcrição puxada (marcador) OU texto manual no campo conteudo
+  const semConteudo=aulas.filter(a=>!String(a.conteudo||'').trim() && !a.transcricaoPalavras).length;
   const semAval=aulas.filter(a=>!String(a.avaliacao||'').trim()).length;
   const bucket=_poModQ(cid,modulo);
   const avisos=[];
   if(semConteudo)avisos.push(`${semConteudo} sem <strong>Conteúdo da aula</strong>`);
   if(semAval)avisos.push(`${semAval} sem <strong>Avaliação da aula</strong>`);
   const avisoHTML=avisos.length?`<div class="po-mod-aviso">⚠️ ${avisos.join(' · ')} — preencha pra IA analisar melhor.</div>`:'';
+  const chev=(open)=>open?'▾':'▸';
   const blocos=_PO_MOD_TIPOS.map(tipo=>{
     const lst=bucket[tipo]||[];
     const erro=S._poModErro[tipo]||'';
+    const open=!!S._poModSec[tipo];
     return `
       <div class="po-mod-bloco">
-        <div class="po-mod-bloco-head">
+        <div class="po-mod-bloco-head" onclick="poModToggleSec('${tipo}')">
+          <span class="po-mod-chev">${chev(open)}</span>
           <span class="po-mod-bloco-t">${tipo}</span>
           <span class="po-mod-bloco-c">${lst.length} questão(ões)</span>
-          ${lst.length?`<button type="button" class="po-mod-limpar" onclick="poModLimparTipo('${tipo}')">limpar</button>`:''}
+          ${lst.length?`<button type="button" class="po-mod-limpar" onclick="event.stopPropagation();poModLimparTipo('${tipo}')">limpar</button>`:''}
         </div>
-        <label class="po-drop po-drop-sm" for="po-mod-file-${tipo}">
-          <div class="po-drop-t">📄 Escolher .json (${tipo})</div>
-          <div class="po-drop-s">array de questões — vários lotes acumulam</div>
-        </label>
-        <input type="file" id="po-mod-file-${tipo}" accept=".json,application/json" style="display:none" onchange="poModFileUpload('${tipo}',event)">
-        <textarea id="po-mod-ta-${tipo}" class="po-inp" placeholder='[{"id":1,"enunciado":"...","gabarito":"A","alternativas":[...]}]'></textarea>
-        <button type="button" class="btn btn-g" style="margin-top:6px" onclick="poModColar('${tipo}')">Ler / Adicionar</button>
-        ${erro?`<div class="po-q-erro">⚠️ ${_poEsc(erro)}</div>`:''}
+        ${open?`<div class="po-mod-bloco-body">
+          <label class="po-drop po-drop-sm" for="po-mod-file-${tipo}">
+            <div class="po-drop-t">📄 Escolher .json (${tipo})</div>
+            <div class="po-drop-s">array de questões — vários lotes acumulam</div>
+          </label>
+          <input type="file" id="po-mod-file-${tipo}" accept=".json,application/json" style="display:none" onchange="poModFileUpload('${tipo}',event)">
+          <textarea id="po-mod-ta-${tipo}" class="po-inp" placeholder='[{"id":1,"enunciado":"...","gabarito":"A","alternativas":[...]}]'></textarea>
+          <button type="button" class="btn btn-p" style="margin-top:6px" onclick="poModColar('${tipo}')">💾 Salvar questões (${tipo})</button>
+          ${erro?`<div class="po-q-erro">⚠️ ${_poEsc(erro)}</div>`:''}
+        </div>`:''}
       </div>`;
   }).join('');
+  const peds=bucket.pedidos||[];
+  const pedOpen=!!S._poModSec.pedidos;
+  const pedRows=peds.length?peds.map((p,i)=>`<tr><td>${_poEsc(p)}</td><td class="po-ped-del"><button type="button" onclick="poModDelPedido(${i})" title="Remover">✕</button></td></tr>`).join(''):`<tr><td colspan="2" class="po-ped-vazio">Nenhum pedido ainda.</td></tr>`;
+  const pedBloco=`
+    <div class="po-mod-bloco">
+      <div class="po-mod-bloco-head" onclick="poModToggleSec('pedidos')">
+        <span class="po-mod-chev">${chev(pedOpen)}</span>
+        <span class="po-mod-bloco-t">🗣️ PEDIDOS</span>
+        <span class="po-mod-bloco-c">${peds.length} pedido(s)</span>
+      </div>
+      ${pedOpen?`<div class="po-mod-bloco-body">
+        <table class="po-ped-tabela"><tbody>${pedRows}</tbody></table>
+        <div class="po-ped-add">
+          <input type="text" id="po-ped-novo" class="po-inp" placeholder="Novo pedido de aluno… (Enter pra adicionar)" onkeydown="if(event.key==='Enter'){event.preventDefault();poModAddPedido();}">
+          <button type="button" class="btn btn-g" onclick="poModAddPedido()">Adicionar</button>
+        </div>
+      </div>`:''}
+    </div>`;
   host.innerHTML=`
     <div class="po-modal-back" onclick="poModModalClose()"></div>
     <div class="po-modal" role="dialog">
@@ -39115,17 +39183,15 @@ function _poModModalRender(){
       <div class="po-modal-body">
         <div class="po-mod-resumo">${aulas.length} aula(s) neste módulo.</div>
         ${avisoHTML}
-        <div class="po-modal-label">Envie as questões por tipo (cada lote é de um tipo só)</div>
-        <div class="po-mod-blocos">${blocos}</div>
-        <div class="po-modal-label" style="margin-top:16px">🗣️ Pedidos de alunos <span style="font-weight:400;color:var(--t2)">(um por linha — entram na priorização)</span></div>
-        <textarea id="po-mod-pedidos" class="po-inp" style="min-height:70px" placeholder="Ex.: aula sobre bloqueio do plano transverso&#10;mais exemplos resolvidos de gasometria" onchange="poModSetPedidos(this.value)">${_poEsc(bucket.pedidos||'')}</textarea>
+        <div class="po-modal-label">Questões por tipo <span style="font-weight:400;color:var(--t2)">(clique pra abrir; cada lote tem seu Salvar)</span></div>
+        <div class="po-mod-blocos">${blocos}${pedBloco}</div>
         <div id="po-mod-mock" class="po-q-mock" style="display:none"></div>
       </div>
       <div class="po-modal-foot">
-        <span style="font-size:11.5px;color:var(--t2)">As imagens são removidas automaticamente antes de enviar à IA.</span>
+        <button type="button" class="btn btn-g" onclick="poModSalvarTudo()">💾 Salvar tudo</button>
         <div style="display:flex;gap:10px">
           <button type="button" class="btn btn-g" onclick="poModModalClose()">Fechar</button>
-          <button type="button" class="btn btn-p" onclick="poAnalisarModulo()">🤖 Analisar módulo com a IA</button>
+          <button type="button" class="btn btn-p" onclick="poAnalisarModulo()">🤖 Analisar módulo</button>
         </div>
       </div>
     </div>`;
