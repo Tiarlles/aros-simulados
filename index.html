@@ -5937,6 +5937,29 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-laravel-modal .po-imp-cur-row span:last-child{color:var(--t2);font-family:'JetBrains Mono',monospace}
         #po-laravel-modal .po-imp-prog{margin-top:14px;font-size:12.5px;color:var(--accent);font-family:'JetBrains Mono',monospace}
         #po-laravel-modal .po-imp-done{margin-top:14px;padding:12px 14px;border-radius:10px;background:color-mix(in srgb,#3fb950 10%,transparent);border:1px solid color-mix(in srgb,#3fb950 32%,transparent);color:var(--text);font-size:12.5px}
+        /* Modais de Transcrição (lote + visualizador) — reusam o visual do modal do Laravel */
+        #po-trans-modal,#po-transview-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-trans-modal.show,#po-transview-modal.show{display:block}
+        #po-trans-modal .po-modal-back,#po-transview-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-trans-modal .po-modal,#po-transview-modal .po-modal{position:relative;max-width:620px;margin:8vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-transview-modal .po-modal.po-transview{max-width:760px}
+        #po-trans-modal .po-modal-head,#po-transview-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-trans-modal .po-modal-head h3,#po-transview-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text)}
+        #po-trans-modal .po-modal-x,#po-transview-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-trans-modal .po-modal-x:hover,#po-transview-modal .po-modal-x:hover{color:var(--text)}
+        #po-trans-modal .po-modal-body,#po-transview-modal .po-modal-body{padding:18px 20px;max-height:70vh;overflow:auto}
+        #po-trans-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        #po-trans-modal .po-imp-instr{font-size:12.5px;color:var(--t2);margin:0 0 14px;line-height:1.5}
+        #po-trans-modal .po-imp-stats{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:6px}
+        #po-trans-modal .po-imp-stat{font-size:12px;color:var(--t2)}
+        #po-trans-modal .po-imp-stat b{color:var(--text);font-size:17px;display:block;font-family:'Space Grotesk',sans-serif}
+        #po-trans-modal .po-imp-prog{margin-top:14px;font-size:12.5px;color:var(--accent);font-family:'JetBrains Mono',monospace}
+        #po-trans-modal .po-imp-erro,#po-transview-modal .po-imp-erro{margin-top:6px;padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 35%,transparent);color:#f85149;font-size:12.5px}
+        #po-trans-modal .po-imp-done{margin-top:14px;padding:12px 14px;border-radius:10px;background:color-mix(in srgb,#3fb950 10%,transparent);border:1px solid color-mix(in srgb,#3fb950 32%,transparent);color:var(--text);font-size:12.5px}
+        #po-transview-modal .po-trans-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:var(--t2);margin-bottom:12px;font-family:'JetBrains Mono',monospace}
+        #po-transview-modal .po-trans-texto{font-size:14px;line-height:1.7;color:var(--text);text-align:justify;white-space:pre-wrap}
+        #tab-po .po-trans-chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);padding:2px 8px;border-radius:999px;cursor:pointer;white-space:nowrap}
+        #tab-po .po-trans-chip:hover{background:color-mix(in srgb,var(--accent) 20%,transparent)}
       </style>
       <div id="po-root"></div>
     </div>
@@ -37129,6 +37152,12 @@ const _PO_STATUS_OPTS=PO_STATUS_FAM.flatMap(f=>f.vals.map(v=>({v,cor:f.cor})));
 function _poCellVal(a,col){if(a&&col.id in a)return a[col.id];return (a&&a.dados&&col.id in a.dados)?a.dados[col.id]:'';}
 function _poColCell(a,col){
   const val=_poCellVal(a,col);
+  // Coluna "Conteúdo da aula": se já tem transcrição puxada do Vimeo, mostra um chip
+  // clicável (📄 N palavras) com prévia no title; o texto completo abre num visualizador.
+  if(col.id==='conteudo'&&a&&a.transcricaoPalavras){
+    const pv=_poEsc(String(a.conteudoPreview||'').slice(0,180));
+    return `<span class="po-trans-chip" title="${pv}…">📄 ${Number(a.transcricaoPalavras).toLocaleString('pt-BR')} palavras</span>`;
+  }
   if(col.type==='link'){const u=String(val||'').trim();const ico=col.id==='video'?'▶':'🔗';return u?`<a class="po-vid" href="${_poEsc(u)}" target="_blank" rel="noopener" title="Abrir" onclick="event.stopPropagation()">${ico}</a>`:'<span class="po-mut">—</span>';}
   if(col.type==='status'){const s=String(val||'').trim();if(!s)return '<span class="po-mut">—</span>';const o=(col.opts||[]).find(x=>String(x.v).toLowerCase()===s.toLowerCase());return _poPill(o?o.cor:'#8b949e',s);}
   const t=String(val==null?'':val).trim();return t?_poEsc(t):'<span class="po-mut">—</span>';
@@ -37154,8 +37183,8 @@ S.poColunas=[
   {id:'conteudo',label:'Conteúdo da aula',type:'texto',w:220},
   {id:'avaliacao',label:'Avaliação da aula',type:'texto',w:150},
   {id:'duracao',label:'Duração',type:'texto',w:90},
-  {id:'questoes',label:'Questões',type:'status',w:118,opts:_PO_TRILHA3},
-  {id:'cards',label:'Flashcards',type:'status',w:118,opts:_PO_TRILHA3},
+  {id:'questoes',label:'Trilha Questões',type:'status',w:140,opts:_PO_TRILHA3},
+  {id:'cards',label:'Trilha de Flashcards',type:'status',w:160,opts:_PO_TRILHA3},
   {id:'video',label:'Vídeo',type:'link',w:58},
   {id:'apostila',label:'Apostila',type:'link',w:78},
   {id:'fichaResumo',label:'Ficha Resumo',type:'link',w:104},
@@ -37200,7 +37229,7 @@ async function _poSaveConfig(){
 // Carrega tudo do Firestore. Mantém o demo se a coleção estiver vazia ou sem auth.
 async function loadPO(){
   // 1) config (colunas + cursos)
-  let _duracaoInjetada=false;
+  let _duracaoInjetada=false, _trilhaRenamed=false;
   try{
     const cfgSnap=await getDoc(doc(db,'config','poConfig'));
     if(cfgSnap.exists()){
@@ -37211,6 +37240,7 @@ async function loadPO(){
       if(d.modOrdem&&typeof d.modOrdem==='object')S.poModOrdem=d.modOrdem;
       if(d.modExtra&&typeof d.modExtra==='object')S.poModExtra=d.modExtra;
       _duracaoInjetada=!!d.duracaoColInjetada;
+      _trilhaRenamed=!!d.trilhaColsRenamed;
     }
   }catch(e){ /* sem permissão de leitura: segue com defaults */ }
 
@@ -37236,6 +37266,13 @@ async function loadPO(){
       const colDur={id:'duracao',label:'Duração',type:'texto',w:90};
       if(iAval>=0)S.poColunas.splice(iAval+1,0,colDur); else S.poColunas.push(colDur);
       try{ await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,duracaoColInjetada:true},{merge:true}); }catch(e){ console.warn('migração duração:',e); }
+    }
+    // Migração one-time: renomeia "Questões"→"Trilha Questões" e "Flashcards"→"Trilha de Flashcards".
+    if(!_trilhaRenamed){
+      let _ren=false;
+      const cq=S.poColunas.find(c=>c.id==='questoes'); if(cq&&cq.label!=='Trilha Questões'){cq.label='Trilha Questões';if((cq.w||0)<140)cq.w=140;_ren=true;}
+      const cc=S.poColunas.find(c=>c.id==='cards'); if(cc&&cc.label!=='Trilha de Flashcards'){cc.label='Trilha de Flashcards';if((cc.w||0)<160)cc.w=160;_ren=true;}
+      try{ await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,trilhaColsRenamed:true},{merge:true}); }catch(e){ console.warn('migração trilha:',e); }
     }
   }else if(aulasDocs&&!aulasDocs.length){
     // coleção existe e está VAZIA → mantém demo
@@ -37287,6 +37324,8 @@ function _poNextOptCor(){return _PO_OPT_PALETA[(_poOptCorSeq++)%_PO_OPT_PALETA.l
 window.poCelEditar=(aulaId,ci,td)=>{
   if(td.querySelector('input,select'))return; // já editando
   const col=S.poColunas[ci];const a=_poFindAulaById(aulaId);if(!col||!a)return;
+  // Conteúdo com transcrição → abre o visualizador (read-only) em vez de editar.
+  if(col.id==='conteudo'&&a.transcricaoPalavras){poVerTranscricao(aulaId);return;}
   const atual=String(_poCellVal(a,col)==null?'':_poCellVal(a,col));
   if(col.type==='status'){
     const opts=(col.opts||[]).map(o=>`<option value="${_poEsc(o.v)}"${String(o.v).toLowerCase()===atual.toLowerCase()?' selected':''}>${_poEsc(o.v)}</option>`).join('');
@@ -37855,6 +37894,10 @@ function _poParseLaravel(json){
       const ratingTotal=c.total_ratings||0;
       const avaliacao=(c.rating!=null&&c.rating!=='')?(String(c.rating)+(c.total_ratings?(' ('+c.total_ratings+')'):'')):'';
       const publishedAt=c.published_at||'';
+      // Trilha de questões / flashcards: o Laravel manda os arrays `trilhas` e `trilhasFlashcard`.
+      // Tem trilha vinculada → "Lançada"; vazio/ausente → "Pendente".
+      const temTrilhaQ=Array.isArray(c.trilhas)&&c.trilhas.length>0;
+      const temTrilhaFC=Array.isArray(c.trilhasFlashcard)&&c.trilhasFlashcard.length>0;
       aulas.push({
         laravelId:c.id,
         nomeOriginal:title,
@@ -37869,6 +37912,8 @@ function _poParseLaravel(json){
         ano:String(publishedAt).slice(0,4),
         tipoLaravel:c.type||'',
         ordemPO:j,
+        questoes:temTrilhaQ?'Lançada':'Pendente',
+        cards:temTrilhaFC?'Lançada':'Pendente',
         status:'',conteudo:'',prof:'',dados:{},
       });
     }
@@ -37923,6 +37968,11 @@ window.poImportLaravelConfirmar=async()=>{
     imp.prog='Lendo aulas existentes…';_poImportLaravelProg();
     const exist=await getDocs(collection(db,'poAulas'));
     const existDocs=exist.docs;
+    // Indexa o enriquecimento manual das aulas atuais por laravelId, pra preservar no re-import
+    // (o Laravel não manda esses campos — sem isso, re-importar zeraria Status Aula/Prof/Conteúdo).
+    const _PRESERVAR=['status','prof','conteudo','categoria','apostila','fichaResumo','slides','livros','transcricaoPalavras','transcricaoLang','conteudoPreview','transcricaoEm'];
+    const prevByLid={};
+    existDocs.forEach(dd=>{const a=dd.data()||{};if(a.laravelId!=null)prevByLid[a.laravelId]=a;});
     let op=0,batch=writeBatch(db);
     const flush=async()=>{await batch.commit();batch=writeBatch(db);op=0;};
     for(let i=0;i<existDocs.length;i++){
@@ -37935,7 +37985,14 @@ window.poImportLaravelConfirmar=async()=>{
     const nowIso=new Date().toISOString();
     for(let i=0;i<aulas.length;i++){
       const ref=doc(collection(db,'poAulas'));
-      batch.set(ref,{...aulas[i],criadoEm:nowIso,updatedAt:nowIso});op++;
+      const rec={...aulas[i]};
+      const prev=prevByLid[rec.laravelId];
+      if(prev){
+        // carrega de volta o que foi preenchido à mão e o Laravel não fornece
+        _PRESERVAR.forEach(k=>{if((prev[k]||'')!==''&&(rec[k]||'')==='')rec[k]=prev[k];});
+        if(prev.dados&&typeof prev.dados==='object')rec.dados={...prev.dados,...(rec.dados||{})};
+      }
+      batch.set(ref,{...rec,criadoEm:(prev&&prev.criadoEm)||nowIso,updatedAt:nowIso});op++;
       if(op>=450){imp.prog=`Gravando ${i+1}/${aulas.length}…`;_poImportLaravelProg();await flush();}
     }
     if(op>0){imp.prog=`Gravando ${aulas.length}/${aulas.length}…`;_poImportLaravelProg();await flush();}
@@ -38002,6 +38059,126 @@ function _poImportLaravelModalRender(){
     </div>`;
   host.classList.add('show');
 }
+
+// ===== Transcrição via Vimeo (legenda do vídeo → Conteúdo da aula) =====
+const VIMEO_TRANSCRICAO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/vimeoTranscricao';
+async function _poFetchTranscricao(vimeoId,aulaId){
+  const u=window._fbAuth?.auth?.currentUser;
+  if(!u)throw new Error('Faça login (Google/Email) pra puxar transcrições.');
+  const token=await u.getIdToken();
+  const resp=await fetch(VIMEO_TRANSCRICAO_ENDPOINT,{method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({vimeoId,aulaId})});
+  let data={};try{data=await resp.json();}catch(_){}
+  if(!resp.ok)throw new Error(data.error||`Erro ${resp.status}`);
+  return data; // {ok, chars, palavras, lang, preview, motivo?}
+}
+S._poTrans=null; // estado do modal de lote
+window.poAbrirTranscricoes=()=>{
+  const cid=S.poCursoAtual; if(!cid)return;
+  if(!window._fbAuth?.auth?.currentUser){arosToast('Faça login (Google/Email) pra puxar transcrições.','err',3500);return;}
+  const aulas=_poAulasDoCurso(cid).filter(a=>a.vimeoId);
+  const pendentes=aulas.filter(a=>!a.transcricaoPalavras);
+  S._poTrans={cid,aulas,pendentes,total:aulas.length,feitas:0,ok:0,semLegenda:0,erros:0,rodando:false,parar:false,prog:'',done:''};
+  _poTransModalRender();
+};
+window.poTransModalClose=()=>{
+  if(S._poTrans&&S._poTrans.rodando){S._poTrans.parar=true;return;}
+  const h=document.getElementById('po-trans-modal'); if(h)h.classList.remove('show');
+  S._poTrans=null;
+};
+window.poTransComecar=async(soPendentes)=>{
+  const t=S._poTrans; if(!t||t.rodando)return;
+  const fila=(soPendentes?t.pendentes:t.aulas).slice();
+  if(!fila.length)return;
+  t.rodando=true;t.parar=false;t.feitas=0;t.ok=0;t.semLegenda=0;t.erros=0;t.done='';t.prog='Preparando…';
+  _poTransModalRender();
+  let idx=0;
+  const worker=async()=>{
+    while(idx<fila.length&&!t.parar){
+      const a=fila[idx++];
+      try{
+        const r=await _poFetchTranscricao(a.vimeoId,a.id);
+        if(r&&r.ok){
+          t.ok++;
+          const patch={transcricaoPalavras:r.palavras,transcricaoLang:r.lang||'',conteudoPreview:r.preview||'',transcricaoEm:new Date().toISOString()};
+          Object.assign(a,patch);
+          await _poSaveAula(a,patch).catch(()=>{});
+        }else{ t.semLegenda++; }
+      }catch(e){ t.erros++; }
+      t.feitas++;
+      t.prog=`${t.feitas}/${fila.length} · ✅ ${t.ok} · sem legenda ${t.semLegenda} · erros ${t.erros}`;
+      _poTransProg();
+    }
+  };
+  const CONC=Math.min(3,fila.length);
+  await Promise.all(Array.from({length:CONC},()=>worker()));
+  t.rodando=false;
+  t.done=t.parar?`Parado. ${t.ok} transcrição(ões) puxada(s).`:`Concluído! ${t.ok} transcrição(ões)`+(t.semLegenda?`, ${t.semLegenda} sem legenda`:'')+(t.erros?`, ${t.erros} erro(s)`:'')+'.';
+  // atualiza a lista de pendentes pro modal refletir
+  t.pendentes=t.aulas.filter(a=>!a.transcricaoPalavras);
+  _poTransModalRender();
+  _poRefreshTabela();
+};
+function _poTransProg(){const el=document.getElementById('po-trans-prog');if(el&&S._poTrans)el.textContent=S._poTrans.prog||'';}
+function _poTransModalRender(){
+  let host=document.getElementById('po-trans-modal');
+  if(!host){host=document.createElement('div');host.id='po-trans-modal';document.body.appendChild(host);}
+  const t=S._poTrans||{};
+  const totalCurso=_poAulasDoCurso(t.cid).length;
+  const semVimeo=totalCurso-(t.total||0);
+  let body='';
+  body+=`<p class="po-imp-instr">Puxa a <b>legenda</b> de cada vídeo no Vimeo, limpa e guarda na coluna <b>Conteúdo da aula</b>. As que já têm são puladas (dá pra refazer todas se quiser).</p>`;
+  body+=`<div class="po-imp-stats">
+    <div class="po-imp-stat"><b>${t.total||0}</b> aulas com vídeo</div>
+    <div class="po-imp-stat"><b>${(t.pendentes||[]).length}</b> sem transcrição</div>
+    ${semVimeo>0?`<div class="po-imp-stat"><b>${semVimeo}</b> sem vídeo (ignoradas)</div>`:''}
+  </div>`;
+  if(t.rodando||t.feitas)body+=`<div class="po-imp-prog" id="po-trans-prog">${_poEsc(t.prog||'Preparando…')}</div>`;
+  if(t.done)body+=`<div class="po-imp-done">✅ ${_poEsc(t.done)}</div>`;
+  const podeRodar=!t.rodando&&((t.total||0)>0);
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poTransModalClose()"></div>
+    <div class="po-modal" role="dialog">
+      <div class="po-modal-head"><h3>🎬 Puxar transcrições do Vimeo</h3><button type="button" class="po-modal-x" onclick="poTransModalClose()">✕</button></div>
+      <div class="po-modal-body">${body}</div>
+      <div class="po-modal-foot">
+        <button type="button" class="btn btn-g" onclick="poTransModalClose()">${t.rodando?'Parar':'Fechar'}</button>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn btn-s" onclick="poTransComecar(false)" ${podeRodar?'':'disabled'} title="Refaz todas, inclusive as que já têm">↻ Refazer todas</button>
+          <button type="button" class="btn btn-p" onclick="poTransComecar(true)" ${podeRodar&&(t.pendentes||[]).length?'':'disabled'}>${t.rodando?'Puxando…':`Puxar ${(t.pendentes||[]).length} pendentes`}</button>
+        </div>
+      </div>
+    </div>`;
+  host.classList.add('show');
+}
+// ── Visualizador da transcrição (read-only, carrega sob demanda) ──
+window.poVerTranscricao=async(aulaId)=>{
+  const a=_poFindAulaById(aulaId); if(!a)return;
+  let host=document.getElementById('po-transview-modal');
+  if(!host){host=document.createElement('div');host.id='po-transview-modal';document.body.appendChild(host);}
+  const close=`document.getElementById('po-transview-modal').classList.remove('show')`;
+  const shell=(inner)=>`<div class="po-modal-back" onclick="${close}"></div>
+    <div class="po-modal po-transview" role="dialog">
+      <div class="po-modal-head"><h3>📄 ${_poEsc(a.titulo||'Transcrição')}</h3><button type="button" class="po-modal-x" onclick="${close}">✕</button></div>
+      <div class="po-modal-body">${inner}</div>
+    </div>`;
+  host.innerHTML=shell(`<div class="po-imp-prog">Carregando transcrição…</div>`);
+  host.classList.add('show');
+  try{
+    if(!a.vimeoId){host.innerHTML=shell(`<div class="po-imp-erro">Esta aula não tem vídeo do Vimeo.</div>`);return;}
+    const snap=await getDoc(doc(db,'poTranscricoes',String(a.vimeoId)));
+    if(!snap.exists()){host.innerHTML=shell(`<div class="po-imp-erro">Transcrição não encontrada — puxe de novo.</div>`);return;}
+    const d=snap.data()||{};
+    S._poTransTexto=d.texto||'';
+    const meta=`${Number(d.palavras||0).toLocaleString('pt-BR')} palavras · ${d.autogerada?'legenda automática':'legenda'} ${_poEsc(d.lang||'')}`;
+    host.innerHTML=shell(`
+      <div class="po-trans-meta"><span>${meta}</span><button type="button" class="btn btn-s btn-sm" onclick="poCopiarTranscricao()">📋 Copiar</button></div>
+      <div class="po-trans-texto">${_poEsc(d.texto||'')}</div>`);
+  }catch(e){host.innerHTML=shell(`<div class="po-imp-erro">Erro ao carregar: ${_poEsc(e.message||e)}</div>`);}
+};
+window.poCopiarTranscricao=()=>{
+  const txt=S._poTransTexto||''; if(!txt)return;
+  if(navigator.clipboard?.writeText){navigator.clipboard.writeText(txt).then(()=>arosToast('Transcrição copiada','success',1800),()=>arosToast('Não consegui copiar','err',2200));}
+};
 
 function _poTemFiltroColuna(){const f=S.poColFiltros||{};return Object.keys(f).some(k=>String(f[k]||'').trim());}
 function _poFiltraAulas(cid,q){
@@ -38232,6 +38409,7 @@ function _poRenderCurso(root){
         <button class="btn btn-s" type="button" onclick="poNovoModulo()" title="Criar um novo módulo (Ponto) neste curso">＋ Novo módulo</button>
         <button class="btn btn-s" type="button" onclick="poAbrirImport()" title="Importar a planilha do Monday (.xlsx)">⬆ Importar do Monday</button>
         <button class="btn btn-s" type="button" onclick="poAbrirImportLaravel()" title="Importar o JSON exportado da API do Laravel (.json)">⬆ Importar do Laravel</button>
+        <button class="btn btn-s" type="button" onclick="poAbrirTranscricoes()" title="Puxar a transcrição (legenda) dos vídeos do Vimeo pra coluna Conteúdo da aula">🎬 Puxar transcrições</button>
       </div>
       ${S._poAvisoDemo?`<div class="po-demo-aviso">⚠️ ${_poEsc(S._poAvisoDemo)}</div>`:''}
       <div class="po-table-wrap">

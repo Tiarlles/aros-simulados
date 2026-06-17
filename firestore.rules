@@ -449,6 +449,12 @@ service cloud.firestore {
       allow read: if isAuth();
       allow create, update, delete: if isAuth();
     }
+    // Transcrições das aulas (texto grande, carregado sob demanda; doc id = vimeoId).
+    // Gravadas só pela Cloud Function vimeoTranscricao (Admin SDK ignora rules); cliente só lê.
+    match /poTranscricoes/{vimeoId} {
+      allow read: if isAuth();
+      allow write: if false;
+    }
 
     // ────────────────────────────────────────────────────────────────────────
     // DEFAULT DENY — qualquer coleção/path não listada acima é bloqueada.

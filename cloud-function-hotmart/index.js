@@ -16,6 +16,9 @@ exports.gerarFeedbackIA = require('./feedback-ia').gerarFeedbackIA;
 // Re-exporta a function de convite de acesso (cria conta Auth + link de definição de senha)
 exports.criarAcessoConvite = require('./criar-acesso').criarAcessoConvite;
 
+// Re-exporta a function de transcrição via Vimeo (legenda do vídeo → texto no PO)
+exports.vimeoTranscricao = require('./vimeo-transcricao').vimeoTranscricao;
+
 // Helper que faz UPSERT em alunosAprovados (Cruzar Lista) a partir do webhook Hotmart
 const { upsertAluno } = require('./hotmart-alunos');
 
