@@ -19,6 +19,10 @@ exports.criarAcessoConvite = require('./criar-acesso').criarAcessoConvite;
 // Re-exporta a function de transcrição via Vimeo (legenda do vídeo → texto no PO)
 exports.vimeoTranscricao = require('./vimeo-transcricao').vimeoTranscricao;
 
+// Re-exporta a sincronização Laravel → PO (botão manual + rotina semanal)
+exports.sincronizarLaravel = require('./sincronizar-laravel').sincronizarLaravel;
+exports.sincronizarLaravelAuto = require('./sincronizar-laravel').sincronizarLaravelAuto;
+
 // Helper que faz UPSERT em alunosAprovados (Cruzar Lista) a partir do webhook Hotmart
 const { upsertAluno } = require('./hotmart-alunos');
 

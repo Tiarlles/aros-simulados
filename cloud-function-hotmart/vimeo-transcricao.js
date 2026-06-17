@@ -105,69 +105,54 @@ exports.vimeoTranscricao = onRequest(
     if (!vimeoId) { res.status(400).json({ error: 'vimeoId ausente' }); return; }
 
     try {
-      // 1) lista de faixas de legenda do vídeo
-      const ttResp = await fetch(`https://api.vimeo.com/videos/${vimeoId}/texttracks`, {
-        headers: { Authorization: `Bearer ${VIMEO_TOKEN}`, 'Content-Type': 'application/json' },
-      });
-      if (ttResp.status === 404) {
-        res.status(200).json({ ok: false, motivo: 'video_nao_encontrado' });
-        return;
-      }
-      if (!ttResp.ok) {
-        const txt = await ttResp.text();
-        console.warn('Vimeo texttracks falhou', vimeoId, ttResp.status, txt.slice(0, 200));
-        res.status(502).json({ ok: false, motivo: 'erro_vimeo', status: ttResp.status });
-        return;
-      }
-      const ttJson = await ttResp.json();
-      const faixa = escolherFaixa(ttJson.data);
-      if (!faixa) {
-        res.status(200).json({ ok: false, motivo: 'sem_legenda' });
-        return;
-      }
-
-      // 2) baixa o VTT da faixa escolhida (link assinado, válido na hora)
-      const vttResp = await fetch(faixa.link);
-      if (!vttResp.ok) {
-        res.status(502).json({ ok: false, motivo: 'erro_download_vtt', status: vttResp.status });
-        return;
-      }
-      const vtt = await vttResp.text();
-      const texto = vttParaTexto(vtt);
-      if (!texto) { res.status(200).json({ ok: false, motivo: 'legenda_vazia' }); return; }
-
-      const palavras = texto.split(/\s+/).filter(Boolean).length;
-      const lang = faixa.language || '';
-      const autogerada = /-x-autogen$/i.test(lang);
-
-      // 3) grava a transcrição completa em doc separado (carregado sob demanda),
-      //    chaveado pelo VIMEO ID (estável entre re-imports do Laravel, e
-      //    compartilhado quando o mesmo vídeo aparece em vários cursos).
-      //    Admin SDK ignora as rules — frontend só precisa de read.
-      await admin.firestore().collection('poTranscricoes').doc(vimeoId).set({
-        texto,
-        vimeoId,
-        aulaId: aulaId || '',
-        lang,
-        autogerada,
-        chars: texto.length,
-        palavras,
-        fonte: 'vimeo',
-        updatedAt: new Date().toISOString(),
-      });
-
-      res.status(200).json({
-        ok: true,
-        vimeoId,
-        lang,
-        autogerada,
-        chars: texto.length,
-        palavras,
-        preview: texto.slice(0, 160),
-      });
+      const r = await obterTranscricao(vimeoId, aulaId);
+      // motivos de "não deu" devolvem 200 com ok:false pra o lote continuar
+      res.status(200).json(r);
     } catch (err) {
       console.error('vimeoTranscricao erro:', err?.message || err);
       res.status(500).json({ error: 'Erro ao buscar transcrição', detail: String(err?.message || err) });
     }
   }
 );
+
+// Núcleo reutilizável: busca a legenda do vídeo no Vimeo, limpa e grava em
+// poTranscricoes/{vimeoId}. Usado pela function HTTP e pela sincronização Laravel.
+// Retorna {ok:true, palavras, chars, lang, autogerada, preview} ou {ok:false, motivo}.
+async function obterTranscricao(vimeoIdRaw, aulaId) {
+  const vimeoId = String(vimeoIdRaw || '').trim().replace(/\D/g, '');
+  if (!vimeoId) return { ok: false, motivo: 'sem_vimeo_id' };
+  if (!VIMEO_TOKEN) throw new Error('VIMEO_TOKEN ausente');
+
+  const ttResp = await fetch(`https://api.vimeo.com/videos/${vimeoId}/texttracks`, {
+    headers: { Authorization: `Bearer ${VIMEO_TOKEN}`, 'Content-Type': 'application/json' },
+  });
+  if (ttResp.status === 404) return { ok: false, motivo: 'video_nao_encontrado' };
+  if (!ttResp.ok) {
+    const txt = await ttResp.text();
+    console.warn('Vimeo texttracks falhou', vimeoId, ttResp.status, txt.slice(0, 200));
+    return { ok: false, motivo: 'erro_vimeo', status: ttResp.status };
+  }
+  const ttJson = await ttResp.json();
+  const faixa = escolherFaixa(ttJson.data);
+  if (!faixa) return { ok: false, motivo: 'sem_legenda' };
+
+  const vttResp = await fetch(faixa.link);
+  if (!vttResp.ok) return { ok: false, motivo: 'erro_download_vtt', status: vttResp.status };
+  const vtt = await vttResp.text();
+  const texto = vttParaTexto(vtt);
+  if (!texto) return { ok: false, motivo: 'legenda_vazia' };
+
+  const palavras = texto.split(/\s+/).filter(Boolean).length;
+  const lang = faixa.language || '';
+  const autogerada = /-x-autogen$/i.test(lang);
+
+  await admin.firestore().collection('poTranscricoes').doc(vimeoId).set({
+    texto, vimeoId, aulaId: aulaId || '', lang, autogerada,
+    chars: texto.length, palavras, fonte: 'vimeo',
+    updatedAt: new Date().toISOString(),
+  });
+
+  return { ok: true, vimeoId, lang, autogerada, chars: texto.length, palavras, preview: texto.slice(0, 160) };
+}
+
+exports.obterTranscricao = obterTranscricao;

@@ -5960,6 +5960,28 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-transview-modal .po-trans-texto{font-size:14px;line-height:1.7;color:var(--text);text-align:justify;white-space:pre-wrap}
         #tab-po .po-trans-chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);padding:2px 8px;border-radius:999px;cursor:pointer;white-space:nowrap}
         #tab-po .po-trans-chip:hover{background:color-mix(in srgb,var(--accent) 20%,transparent)}
+        /* Modal Sincronizar com Laravel — reusa o visual dos modais do PO */
+        #po-sync-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-sync-modal.show{display:block}
+        #po-sync-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-sync-modal .po-modal{position:relative;max-width:620px;margin:8vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-sync-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-sync-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text)}
+        #po-sync-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-sync-modal .po-modal-x:hover{color:var(--text)}
+        #po-sync-modal .po-modal-body{padding:18px 20px;max-height:70vh;overflow:auto}
+        #po-sync-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        #po-sync-modal .po-imp-instr{font-size:12.5px;color:var(--t2);margin:0 0 14px;line-height:1.5}
+        #po-sync-modal .po-imp-stats{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px}
+        #po-sync-modal .po-imp-stat{font-size:12px;color:var(--t2)}
+        #po-sync-modal .po-imp-stat b{color:var(--text);font-size:20px;display:block;font-family:'Space Grotesk',sans-serif}
+        #po-sync-modal .po-imp-prog{margin-top:6px;font-size:12.5px;color:var(--accent);font-family:'JetBrains Mono',monospace}
+        #po-sync-modal .po-imp-erro{margin-top:10px;padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 35%,transparent);color:#f85149;font-size:12.5px}
+        #po-sync-modal .po-imp-done{margin-top:12px;padding:12px 14px;border-radius:10px;background:color-mix(in srgb,#3fb950 10%,transparent);border:1px solid color-mix(in srgb,#3fb950 32%,transparent);color:var(--text);font-size:12.5px}
+        #po-sync-modal .po-sync-curso{margin-top:10px;padding:11px 13px;border-radius:10px;background:var(--bg);border:1px solid var(--border)}
+        #po-sync-modal .po-sync-curso h4{margin:0 0 6px;font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--text)}
+        #po-sync-modal .po-sync-lista{margin:6px 0 0;padding-left:18px;font-size:12px;color:var(--t2);max-height:140px;overflow:auto}
+        #po-sync-modal .po-sync-lista li{margin:2px 0}
       </style>
       <div id="po-root"></div>
     </div>
@@ -38180,6 +38202,92 @@ window.poCopiarTranscricao=()=>{
   if(navigator.clipboard?.writeText){navigator.clipboard.writeText(txt).then(()=>arosToast('Transcrição copiada','success',1800),()=>arosToast('Não consegui copiar','err',2200));}
 };
 
+// ===== Sincronizar com o Laravel (traz aulas novas) =====
+const SINCRONIZAR_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/sincronizarLaravel';
+S._poSync=null; // {fase:'loading'|'preview'|'aplicando'|'done'|'erro', resultados, erro}
+async function _poSyncCall(dryRun){
+  const u=window._fbAuth?.auth?.currentUser;
+  if(!u)throw new Error('Faça login (Google/Email) pra sincronizar.');
+  const token=await u.getIdToken();
+  const resp=await fetch(SINCRONIZAR_ENDPOINT,{method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({dryRun})});
+  let data={};try{data=await resp.json();}catch(_){}
+  if(!resp.ok)throw new Error(data.error||`Erro ${resp.status}`);
+  return data.resultados||[];
+}
+window.poAbrirSync=async()=>{
+  if(!window._fbAuth?.auth?.currentUser){arosToast('Faça login (Google/Email) pra sincronizar.','err',3500);return;}
+  S._poSync={fase:'loading',resultados:null,erro:''};
+  _poSyncModalRender();
+  try{ S._poSync.resultados=await _poSyncCall(true); S._poSync.fase='preview'; }
+  catch(e){ S._poSync.fase='erro'; S._poSync.erro=e.message||String(e); }
+  _poSyncModalRender();
+};
+window.poSyncAplicar=async()=>{
+  const s=S._poSync; if(!s||s.fase==='aplicando')return;
+  s.fase='aplicando'; _poSyncModalRender();
+  try{
+    s.resultados=await _poSyncCall(false);
+    s.fase='done';
+    _poSyncModalRender();
+    // recarrega o PO pra mostrar as aulas novas
+    S._poLoaded=false; await loadPO(); _poRender();
+  }catch(e){ s.fase='erro'; s.erro=e.message||String(e); _poSyncModalRender(); }
+};
+window.poSyncModalClose=()=>{
+  if(S._poSync&&(S._poSync.fase==='loading'||S._poSync.fase==='aplicando'))return; // não fecha no meio
+  const h=document.getElementById('po-sync-modal'); if(h)h.classList.remove('show');
+  S._poSync=null;
+};
+function _poSyncTotais(res){
+  return (res||[]).reduce((a,r)=>({novas:a.novas+(r.novas||0),atu:a.atu+(r.atualizadas||0),trans:a.trans+(r.transcricoesNovas||0),sem:a.sem+(r.semLegenda||0)}),{novas:0,atu:0,trans:0,sem:0});
+}
+function _poSyncModalRender(){
+  let host=document.getElementById('po-sync-modal');
+  if(!host){host=document.createElement('div');host.id='po-sync-modal';document.body.appendChild(host);}
+  const s=S._poSync||{};
+  let body='',foot='';
+  if(s.fase==='loading'){
+    body=`<p class="po-imp-instr">Sincronizar busca no Laravel as aulas do(s) curso(s) vigiado(s) e traz as <b>novas</b> pro PO, atualiza as que mudaram e <b>preserva</b> tudo que você editou à mão. A transcrição das aulas novas é puxada automaticamente.</p><div class="po-imp-prog">⏳ Conferindo o que tem de novo no Laravel… (pode levar ~20s)</div>`;
+    foot=`<button type="button" class="btn btn-g" disabled>Aguarde…</button>`;
+  }else if(s.fase==='erro'){
+    body=`<div class="po-imp-erro">⚠️ ${_poEsc(s.erro||'Erro')}</div>`;
+    foot=`<button type="button" class="btn btn-g" onclick="poSyncModalClose()">Fechar</button><button type="button" class="btn btn-p" onclick="poAbrirSync()">Tentar de novo</button>`;
+  }else if(s.fase==='preview'||s.fase==='aplicando'){
+    const t=_poSyncTotais(s.resultados);
+    body=`<p class="po-imp-instr">Isto é uma <b>pré-visualização</b> — nada foi alterado ainda.</p>
+      <div class="po-imp-stats">
+        <div class="po-imp-stat"><b>${t.novas}</b> aula(s) nova(s)</div>
+        <div class="po-imp-stat"><b>${t.atu}</b> atualizada(s)</div>
+      </div>`;
+    (s.resultados||[]).forEach(r=>{
+      const novas=(r.novasTitulos||[]);const atu=(r.atualizadasTitulos||[]);
+      if(r.novas||r.atualizadas){
+        body+=`<div class="po-sync-curso"><h4>${_poEsc(r.curso)} · ${r.novas} nova(s), ${r.atualizadas} atualizada(s)</h4>`;
+        if(novas.length)body+=`<div style="font-size:12px;color:var(--text);margin-top:4px">Novas:</div><ul class="po-sync-lista">${novas.map(x=>`<li>${_poEsc(x)}</li>`).join('')}${r.novas>novas.length?`<li>… +${r.novas-novas.length}</li>`:''}</ul>`;
+        if(atu.length)body+=`<div style="font-size:12px;color:var(--text);margin-top:6px">Atualizadas:</div><ul class="po-sync-lista">${atu.map(x=>`<li>${_poEsc(x)}</li>`).join('')}${r.atualizadas>atu.length?`<li>… +${r.atualizadas-atu.length}</li>`:''}</ul>`;
+        body+=`</div>`;
+      }
+    });
+    if(s.fase==='aplicando')body+=`<div class="po-imp-prog">⏳ Aplicando e puxando transcrições das novas…</div>`;
+    const nada=t.novas===0&&t.atu===0;
+    if(nada)body+=`<div class="po-imp-done">✅ Tudo já está em dia — nada novo no Laravel.</div>`;
+    foot=`<button type="button" class="btn btn-g" onclick="poSyncModalClose()">${nada?'Fechar':'Cancelar'}</button>
+      <button type="button" class="btn btn-p" onclick="poSyncAplicar()" ${(nada||s.fase==='aplicando')?'disabled':''}>${s.fase==='aplicando'?'Aplicando…':'Aplicar agora'}</button>`;
+  }else if(s.fase==='done'){
+    const t=_poSyncTotais(s.resultados);
+    body=`<div class="po-imp-done">✅ Pronto! <b>${t.novas}</b> aula(s) nova(s), <b>${t.atu}</b> atualizada(s), <b>${t.trans}</b> transcrição(ões) puxada(s)${t.sem?`, ${t.sem} sem legenda`:''}.</div>`;
+    foot=`<button type="button" class="btn btn-p" onclick="poSyncModalClose()">Fechar</button>`;
+  }
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poSyncModalClose()"></div>
+    <div class="po-modal" role="dialog">
+      <div class="po-modal-head"><h3>🔄 Sincronizar com o Laravel</h3><button type="button" class="po-modal-x" onclick="poSyncModalClose()">✕</button></div>
+      <div class="po-modal-body">${body}</div>
+      <div class="po-modal-foot">${foot}</div>
+    </div>`;
+  host.classList.add('show');
+}
+
 function _poTemFiltroColuna(){const f=S.poColFiltros||{};return Object.keys(f).some(k=>String(f[k]||'').trim());}
 function _poFiltraAulas(cid,q){
   let aulas=_poAulasDoCurso(cid).slice();
@@ -38410,6 +38518,7 @@ function _poRenderCurso(root){
         <button class="btn btn-s" type="button" onclick="poAbrirImport()" title="Importar a planilha do Monday (.xlsx)">⬆ Importar do Monday</button>
         <button class="btn btn-s" type="button" onclick="poAbrirImportLaravel()" title="Importar o JSON exportado da API do Laravel (.json)">⬆ Importar do Laravel</button>
         <button class="btn btn-s" type="button" onclick="poAbrirTranscricoes()" title="Puxar a transcrição (legenda) dos vídeos do Vimeo pra coluna Conteúdo da aula">🎬 Puxar transcrições</button>
+        <button class="btn btn-s" type="button" onclick="poAbrirSync()" title="Buscar aulas novas no Laravel e trazer pro PO (com pré-visualização antes de aplicar)">🔄 Sincronizar agora</button>
       </div>
       ${S._poAvisoDemo?`<div class="po-demo-aviso">⚠️ ${_poEsc(S._poAvisoDemo)}</div>`:''}
       <div class="po-table-wrap">
