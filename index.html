@@ -5683,6 +5683,13 @@ body.pro-rt-fs-on{overflow:hidden}
         /* Cabeçalho: linha do título + botão excluir, e linha do filtro por coluna */
         #tab-po .po-th-top{display:flex;align-items:center;gap:6px;justify-content:space-between;padding-right:6px}
         #tab-po .po-th-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+        /* Alça de arrastar coluna (reordenar lateral) */
+        #tab-po .po-col-grip{flex:none;cursor:grab;color:var(--t3);font-size:12px;line-height:1;padding:0 1px;opacity:0;transition:opacity .15s,color .15s;user-select:none}
+        #tab-po thead th:hover .po-col-grip{opacity:.5}
+        #tab-po .po-col-grip:hover{opacity:1;color:var(--accent)}
+        #tab-po .po-col-grip:active{cursor:grabbing}
+        #tab-po thead th.po-col-dragover{box-shadow:inset 3px 0 0 var(--accent)}
+        #tab-po thead th.po-col-dragging{opacity:.4}
         #tab-po .po-col-del{flex:none;border:none;background:transparent;color:var(--t2);cursor:pointer;font-size:11px;line-height:1;padding:1px 4px;border-radius:5px;opacity:0;transition:opacity .15s,background .15s,color .15s}
         #tab-po thead th:hover .po-col-del{opacity:.65}
         #tab-po .po-col-del:hover{opacity:1;background:color-mix(in srgb,var(--red) 18%,transparent);color:var(--red)}
@@ -38529,7 +38536,7 @@ function _poRenderCurso(root){
           </colgroup>
           <thead><tr>
             <th class="po-col-aula"><div class="po-th-top"><span class="po-th-label">Aula</span></div>${_poColFiltroControl({id:'__aula',type:'texto'})}<span class="po-rsz" data-ci="-1"></span></th>
-            ${S.poColunas.map((c,i)=>`<th data-ci="${i}"><div class="po-th-top"><span class="po-th-label" title="${_poEsc(c.label)}" ondblclick="event.stopPropagation();poEditarNomeColuna(${i},this)">${_poEsc(c.label)}</span>${c.type==='status'?`<button type="button" class="po-col-cfg" title="Gerenciar opções" onclick="event.stopPropagation();poGerenciarOpcoes(${i})">⚙</button>`:''}<button type="button" class="po-col-del" title="Excluir coluna" onclick="poExcluirColuna('${c.id}')">✕</button></div>${_poColFiltroControl(c)}<span class="po-rsz" data-ci="${i}"></span></th>`).join('')}
+            ${S.poColunas.map((c,i)=>`<th data-ci="${i}" ondragover="poColDragOver(event,${i})" ondragleave="poColDragLeave(event,${i})" ondrop="poColDrop(event,${i})"><div class="po-th-top"><span class="po-col-grip" draggable="true" title="Arraste para reordenar a coluna" ondragstart="poColDragStart(event,${i})" ondragend="poColDragEnd(event)">⠿</span><span class="po-th-label" title="${_poEsc(c.label)}" ondblclick="event.stopPropagation();poEditarNomeColuna(${i},this)">${_poEsc(c.label)}</span>${c.type==='status'?`<button type="button" class="po-col-cfg" title="Gerenciar opções" onclick="event.stopPropagation();poGerenciarOpcoes(${i})">⚙</button>`:''}<button type="button" class="po-col-del" title="Excluir coluna" onclick="poExcluirColuna('${c.id}')">✕</button></div>${_poColFiltroControl(c)}<span class="po-rsz" data-ci="${i}"></span></th>`).join('')}
             <th class="po-col-add"><button type="button" class="po-add-col" onclick="poNovaColuna()" title="Nova coluna">＋</button></th>
           </tr></thead>
           <tbody>${rows}</tbody>
@@ -38727,6 +38734,38 @@ function _poBindResize(){
       document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
     });
   });
+}
+
+// ── Reordenar colunas arrastando o cabeçalho (alça ⠿) ──
+let _poColDragSrc=null;
+function _poColLimparEstado(){
+  document.querySelectorAll('#po-table thead th.po-col-dragover,#po-table thead th.po-col-dragging').forEach(t=>t.classList.remove('po-col-dragover','po-col-dragging'));
+}
+window.poColDragStart=(e,ci)=>{
+  _poColDragSrc=ci;
+  try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(ci));}catch(_){}
+  const th=e.target.closest('th');if(th)th.classList.add('po-col-dragging');
+};
+window.poColDragOver=(e,ci)=>{
+  if(_poColDragSrc==null||_poColDragSrc===ci)return;
+  e.preventDefault();try{e.dataTransfer.dropEffect='move';}catch(_){}
+  if(e.currentTarget)e.currentTarget.classList.add('po-col-dragover');
+};
+window.poColDragLeave=(e,ci)=>{ if(e.currentTarget)e.currentTarget.classList.remove('po-col-dragover'); };
+window.poColDrop=(e,ci)=>{
+  e.preventDefault();
+  const from=_poColDragSrc;_poColDragSrc=null;_poColLimparEstado();
+  if(from==null||from===ci)return;
+  _poMoverColuna(from,ci);
+};
+window.poColDragEnd=()=>{ _poColDragSrc=null;_poColLimparEstado(); };
+function _poMoverColuna(from,to){
+  const cols=S.poColunas;
+  if(from<0||from>=cols.length||to<0||to>=cols.length)return;
+  const [m]=cols.splice(from,1);
+  cols.splice(to,0,m);
+  _poSaveConfig().catch(e=>console.warn('poConfig save',e));
+  _poRender();
 }
 
 // ── Modal: criar nova coluna ──
