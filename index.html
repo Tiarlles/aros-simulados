@@ -5812,6 +5812,34 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-po .po-mod-qbadge{margin-left:10px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-dim);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:6px;padding:1px 6px;text-transform:none;letter-spacing:0}
         #tab-po .po-mod-analisar{margin-left:12px;border:1px solid color-mix(in srgb,var(--accent) 40%,var(--border));background:var(--bg2);color:var(--accent);font-family:'Plus Jakarta Sans',sans-serif;font-size:10.5px;font-weight:700;text-transform:none;letter-spacing:0;padding:3px 9px;border-radius:7px;cursor:pointer;transition:background .15s,border-color .15s}
         #tab-po .po-mod-analisar:hover{background:var(--accent-dim);border-color:var(--accent)}
+        #tab-po .po-mod-apost{margin-left:8px;border:1px solid var(--border);background:var(--bg2);color:var(--t2);font-family:'Plus Jakarta Sans',sans-serif;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:7px;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+        #tab-po .po-mod-apost:hover{border-color:var(--accent);color:var(--accent)}
+        #tab-po .po-mod-apost.on{color:var(--ac,var(--accent));border-color:color-mix(in srgb,var(--ac,var(--accent)) 45%,var(--border));background:color-mix(in srgb,var(--ac,var(--accent)) 10%,transparent)}
+        /* Modal de apostilas do módulo */
+        #po-apost-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-apost-modal.show{display:block}
+        #po-apost-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-apost-modal .po-modal{position:relative;max-width:620px;margin:8vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-apost-modal .po-modal.po-modal-lg{max-width:720px}
+        #po-apost-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-apost-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text)}
+        #po-apost-modal .po-mod-sub{font-size:12px;color:var(--t2);margin-top:2px;font-family:'JetBrains Mono',monospace}
+        #po-apost-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-apost-modal .po-modal-x:hover{color:var(--text)}
+        #po-apost-modal .po-modal-body{padding:18px 20px;max-height:70vh;overflow:auto}
+        #po-apost-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        #po-apost-modal .po-imp-instr{font-size:12.5px;color:var(--t2);margin:0 0 14px;line-height:1.5}
+        #po-apost-modal .po-inp{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:8px 11px;color:var(--text);font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;box-sizing:border-box}
+        #po-apost-modal .po-inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+        #po-apost-modal .po-apost-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+        #po-apost-modal .po-apost-tit{width:150px;flex:none}
+        #po-apost-modal .po-apost-link{flex:1;min-width:0}
+        #po-apost-modal .po-apost-status{flex:none;width:130px;cursor:pointer;color:var(--sc,var(--text));font-weight:600}
+        #po-apost-modal .po-apost-abrir{flex:none;text-decoration:none;font-size:15px;opacity:.9}
+        #po-apost-modal .po-apost-abrir.off{opacity:.25;pointer-events:none}
+        #po-apost-modal .po-apost-del{flex:none;background:none;border:none;color:var(--t2);cursor:pointer;font-size:13px;padding:4px 7px;border-radius:6px}
+        #po-apost-modal .po-apost-del:hover{color:#f85149;background:color-mix(in srgb,#f85149 15%,transparent)}
+        #po-apost-modal .po-apost-vazio{color:var(--t2);font-style:italic;font-size:12.5px;padding:8px 0}
         #tab-po .po-mod-del{margin-left:8px;border:1px solid color-mix(in srgb,var(--red) 35%,var(--border));background:transparent;color:var(--red);font-size:11px;line-height:1;padding:3px 7px;border-radius:7px;cursor:pointer;opacity:.55;transition:opacity .15s,background .15s}
         #tab-po .po-mod-del:hover{opacity:1;background:color-mix(in srgb,var(--red) 16%,transparent)}
         #tab-po .po-col-aula{position:relative}
@@ -37254,7 +37282,6 @@ S.poColunas=[
   {id:'questoes',label:'Trilha Questões',type:'status',w:140,opts:_PO_TRILHA3},
   {id:'cards',label:'Trilha de Flashcards',type:'status',w:160,opts:_PO_TRILHA3},
   {id:'video',label:'Vídeo',type:'link',w:58},
-  {id:'apostila',label:'Apostila',type:'link',w:78},
   {id:'fichaResumo',label:'Ficha Resumo',type:'link',w:104},
   {id:'slides',label:'Slides',type:'link',w:72},
   {id:'livros',label:'Livros',type:'texto',w:110},
@@ -37297,7 +37324,7 @@ async function _poSaveConfig(){
 // Carrega tudo do Firestore. Mantém o demo se a coleção estiver vazia ou sem auth.
 async function loadPO(){
   // 1) config (colunas + cursos)
-  let _duracaoInjetada=false, _trilhaRenamed=false;
+  let _duracaoInjetada=false, _trilhaRenamed=false, _apostilaColRemovida=false;
   try{
     const cfgSnap=await getDoc(doc(db,'config','poConfig'));
     if(cfgSnap.exists()){
@@ -37309,6 +37336,7 @@ async function loadPO(){
       if(d.modExtra&&typeof d.modExtra==='object')S.poModExtra=d.modExtra;
       _duracaoInjetada=!!d.duracaoColInjetada;
       _trilhaRenamed=!!d.trilhaColsRenamed;
+      _apostilaColRemovida=!!d.apostilaColRemovida;
       if(d.poPesos&&typeof d.poPesos==='object')S.poPesos={...S.poPesos,...d.poPesos};
       if(d.editais&&typeof d.editais==='object')S.poEditais=d.editais;
     }
@@ -37344,6 +37372,11 @@ async function loadPO(){
       const cc=S.poColunas.find(c=>c.id==='cards'); if(cc&&cc.label!=='Trilha de Flashcards'){cc.label='Trilha de Flashcards';if((cc.w||0)<160)cc.w=160;_ren=true;}
       try{ await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,trilhaColsRenamed:true},{merge:true}); }catch(e){ console.warn('migração trilha:',e); }
     }
+    // Migração one-time: a apostila virou por módulo → remove a coluna "Apostila" por aula.
+    if(!_apostilaColRemovida && S.poColunas.some(c=>c.id==='apostila')){
+      S.poColunas=S.poColunas.filter(c=>c.id!=='apostila');
+      try{ await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,apostilaColRemovida:true},{merge:true}); }catch(e){ console.warn('migração apostila:',e); }
+    }
   }else if(aulasDocs&&!aulasDocs.length){
     // coleção existe e está VAZIA → mantém demo
     S.poColunas=_PO_DEMO_COLUNAS.map(c=>({...c}));
@@ -37366,7 +37399,7 @@ async function loadPO(){
       if(!x.cursoId||x.modulo==null)return;
       const key=_poModKey(x.cursoId,x.modulo);
       const ped=Array.isArray(x.pedidos)?x.pedidos:(x.pedidos?String(x.pedidos).split('\n').map(s=>s.trim()).filter(Boolean):[]);
-      mq[key]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],pedidos:ped};
+      mq[key]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],pedidos:ped,apostilas:Array.isArray(x.apostilas)?x.apostilas:[]};
     });
     S.poModQuestoes=mq;
   }catch(e){ /* mantém o que tem */ }
@@ -38444,14 +38477,17 @@ function _poTableRowsHTML(aulas,q){
     const noAr=g.aulas.filter(a=>_poIsPronta(a.status)).length;
     const atencao=g.aulas.filter(a=>_PO_ATENCAO.has(String(a.status||'').trim())).length;
     const at=atencao?`<span class="po-mod-at">🔔 ${atencao}</span>`:'';
-    const qb=S.poCursoAtual?_poModQ(S.poCursoAtual,g.modulo):{TEA:[],TSA:[],MEs:[]};
-    const qTot=(qb.TEA||[]).length+(qb.TSA||[]).length+(qb.MEs||[]).length;
+    const qb=S.poCursoAtual?_poModQ(S.poCursoAtual,g.modulo):{TEA:[],TSA:[],MEs:[],apostilas:[]};
+    const qTot=(qb.TEA||[]).length+(qb.TSA||[]).length+(qb.MEs||[]).length+(qb.Outras||[]).length;
     const qBadge=qTot?`<span class="po-mod-qbadge">Q: ${qTot}</span>`:'';
+    const apos=qb.apostilas||[];
+    const apostCor=apos.length?_poApostCor(apos):'';
+    const apostBadge=`<button type="button" class="po-mod-apost${apos.length?' on':''}" ${apostCor?`style="--ac:${apostCor}"`:''} onclick="event.stopPropagation();poAbrirApostilas('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="Apostilas do módulo">📚 ${apos.length?apos.length:'+'}</button>`;
     const btnAnalisar=`<button type="button" class="po-mod-analisar" onclick="event.stopPropagation();poAbrirAnaliseModulo('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="Analisar este módulo com a IA">🤖 Analisar módulo</button>`;
     const modSelMarcado=g.aulas.length&&g.aulas.every(a=>S.poSel&&S.poSel.aulas.has(a.id));
     const modChk=`<input type="checkbox" class="po-sel-mod"${modSelMarcado?' checked':''} data-modulo="${_poEsc(g.modulo)}" onclick="event.stopPropagation();poToggleSelModulo('${encodeURIComponent(g.modulo)}',this.checked)">`;
     out+=`<tr class="po-mod-row${open?' open':''}" draggable="false" data-modulo="${_poEsc(g.modulo)}" onclick="poToggleMod('${encodeURIComponent(g.modulo)}')">
-      <td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><span class="po-grip" onmousedown="event.stopPropagation();this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span>${modChk}<span class="po-chev">▸</span><span class="po-mod-nome" ondblclick="event.stopPropagation();poEditarNomeModulo('${encodeURIComponent(g.modulo)}',this)" title="Duplo-clique pra renomear">${_poEsc(g.modulo)}</span>${at}${qBadge}${btnAnalisar}</span></td>
+      <td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><span class="po-grip" onmousedown="event.stopPropagation();this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span>${modChk}<span class="po-chev">▸</span><span class="po-mod-nome" ondblclick="event.stopPropagation();poEditarNomeModulo('${encodeURIComponent(g.modulo)}',this)" title="Duplo-clique pra renomear">${_poEsc(g.modulo)}</span>${at}${qBadge}${apostBadge}${btnAnalisar}</span></td>
     </tr>`;
     if(open){
       g.aulas.forEach((a,idx)=>{out+=_poAulaRowHTML(a,idx+1);});
@@ -38880,10 +38916,10 @@ function _poModKey(cid,mod){return _poSlug(cid+'__'+mod);}
 // Persiste o bucket de questões de um módulo (fire-and-forget).
 function _poSaveModQuestoes(cid,mod){
   const key=_poModKey(cid,mod);
-  const b=S.poModQuestoes[key]||{TEA:[],TSA:[],MEs:[],Outras:[],pedidos:[]};
-  setDoc(doc(db,'poModQuestoes',key),{cursoId:cid,modulo:mod,TEA:b.TEA||[],TSA:b.TSA||[],MEs:b.MEs||[],Outras:b.Outras||[],pedidos:Array.isArray(b.pedidos)?b.pedidos:[]},{merge:true}).catch(e=>console.warn('poModQuestoes save',e));
+  const b=S.poModQuestoes[key]||{TEA:[],TSA:[],MEs:[],Outras:[],pedidos:[],apostilas:[]};
+  setDoc(doc(db,'poModQuestoes',key),{cursoId:cid,modulo:mod,TEA:b.TEA||[],TSA:b.TSA||[],MEs:b.MEs||[],Outras:b.Outras||[],pedidos:Array.isArray(b.pedidos)?b.pedidos:[],apostilas:Array.isArray(b.apostilas)?b.apostilas:[]},{merge:true}).catch(e=>console.warn('poModQuestoes save',e));
 }
-function _poModQ(cid,mod){const k=_poModKey(cid,mod);if(!S.poModQuestoes[k])S.poModQuestoes[k]={TEA:[],TSA:[],MEs:[],Outras:[],pedidos:[]};const b=S.poModQuestoes[k];if(!b.Outras)b.Outras=[];if(!Array.isArray(b.pedidos))b.pedidos=b.pedidos?String(b.pedidos).split('\n').map(s=>s.trim()).filter(Boolean):[];return b;}
+function _poModQ(cid,mod){const k=_poModKey(cid,mod);if(!S.poModQuestoes[k])S.poModQuestoes[k]={TEA:[],TSA:[],MEs:[],Outras:[],pedidos:[],apostilas:[]};const b=S.poModQuestoes[k];if(!b.Outras)b.Outras=[];if(!Array.isArray(b.pedidos))b.pedidos=b.pedidos?String(b.pedidos).split('\n').map(s=>s.trim()).filter(Boolean):[];if(!Array.isArray(b.apostilas))b.apostilas=[];return b;}
 // Remove <img>, data:image base64 e atributos src de imagem de um HTML/texto.
 function _poStripImagens(s){
   let t=String(s||'');
@@ -38954,6 +38990,83 @@ window.poModSalvarTudo=()=>{
   _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
   arosToast('Módulo salvo','success',1800);
 };
+
+// ── Apostilas POR MÓDULO (lista; cada uma com link + status) ──
+const PO_APOST_STATUS=[
+  {v:'Pendente',cor:'#8b949e'},
+  {v:'Em produção',cor:'#388bfd'},
+  {v:'Parcial',cor:'#d29922'},
+  {v:'Finalizado',cor:'#3fb950'},
+];
+function _poApostStatusCor(s){const f=PO_APOST_STATUS.find(x=>x.v===s);return f?f.cor:'#8b949e';}
+// Cor do badge do módulo = status "menos pronto" entre as apostilas (pra chamar atenção).
+function _poApostCor(apos){
+  const ordem=['Pendente','Em produção','Parcial','Finalizado'];
+  let pior=3;apos.forEach(a=>{const i=ordem.indexOf(a.status||'Pendente');if(i>=0&&i<pior)pior=i;});
+  return _poApostStatusCor(ordem[pior]);
+}
+S._poApostAtual=null; // {cid, modulo}
+window.poAbrirApostilas=(cid,modEnc)=>{
+  S._poApostAtual={cid,modulo:decodeURIComponent(modEnc)};
+  _poApostModalRender();
+};
+window.poApostClose=()=>{
+  const h=document.getElementById('po-apost-modal');if(h){h.classList.remove('show');h.innerHTML='';}
+  S._poApostAtual=null;
+  try{_poRefreshTabela();}catch(e){} // atualiza o badge no cabeçalho
+};
+function _poApostList(){ const a=S._poApostAtual; if(!a)return null; return _poModQ(a.cid,a.modulo).apostilas; }
+window.poApostAdd=()=>{
+  const lst=_poApostList(); if(!lst)return;
+  lst.push({titulo:'',link:'',status:'Pendente'});
+  _poSaveModQuestoes(S._poApostAtual.cid,S._poApostAtual.modulo);
+  _poApostModalRender();
+};
+window.poApostDel=(i)=>{
+  const lst=_poApostList(); if(!lst)return;
+  lst.splice(i,1);
+  _poSaveModQuestoes(S._poApostAtual.cid,S._poApostAtual.modulo);
+  _poApostModalRender();
+};
+window.poApostSet=(i,campo,val)=>{
+  const lst=_poApostList(); if(!lst||!lst[i])return;
+  lst[i][campo]=val;
+  _poSaveModQuestoes(S._poApostAtual.cid,S._poApostAtual.modulo);
+  if(campo==='status')_poApostModalRender(); // re-render pra atualizar a cor do status
+};
+function _poApostModalRender(){
+  let host=document.getElementById('po-apost-modal');
+  if(!host){host=document.createElement('div');host.id='po-apost-modal';document.body.appendChild(host);}
+  if(!S._poApostAtual){host.classList.remove('show');host.innerHTML='';return;}
+  const {modulo}=S._poApostAtual;
+  const lst=_poApostList()||[];
+  const rows=lst.length?lst.map((ap,i)=>{
+    const cor=_poApostStatusCor(ap.status||'Pendente');
+    const opts=PO_APOST_STATUS.map(s=>`<option value="${s.v}"${(ap.status||'Pendente')===s.v?' selected':''}>${s.v}</option>`).join('');
+    return `<div class="po-apost-row">
+      <input type="text" class="po-inp po-apost-tit" placeholder="Nome (opcional)" value="${_poEsc(ap.titulo||'')}" onchange="poApostSet(${i},'titulo',this.value)">
+      <input type="text" class="po-inp po-apost-link" placeholder="Cole o link da apostila…" value="${_poEsc(ap.link||'')}" onchange="poApostSet(${i},'link',this.value)">
+      <select class="po-inp po-apost-status" style="--sc:${cor}" onchange="poApostSet(${i},'status',this.value)">${opts}</select>
+      ${ap.link?`<a class="po-apost-abrir" href="${_poEsc(ap.link)}" target="_blank" rel="noopener" title="Abrir">🔗</a>`:'<span class="po-apost-abrir off">🔗</span>'}
+      <button type="button" class="po-apost-del" onclick="poApostDel(${i})" title="Excluir">✕</button>
+    </div>`;
+  }).join(''):`<div class="po-apost-vazio">Nenhuma apostila ainda. Adicione a primeira abaixo.</div>`;
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poApostClose()"></div>
+    <div class="po-modal po-modal-lg" role="dialog">
+      <div class="po-modal-head"><div><h3>📚 Apostilas do módulo</h3><div class="po-mod-sub">${_poEsc(modulo)}</div></div><button type="button" class="po-modal-x" onclick="poApostClose()">✕</button></div>
+      <div class="po-modal-body">
+        <p class="po-imp-instr">A apostila é por módulo (não por aula). Cadastre o link e o status de cada uma. Dá pra ter mais de uma por módulo. Tudo salva automaticamente.</p>
+        <div class="po-apost-lista">${rows}</div>
+        <button type="button" class="btn btn-g" style="margin-top:12px" onclick="poApostAdd()">＋ Adicionar apostila</button>
+      </div>
+      <div class="po-modal-foot">
+        <span style="font-size:11.5px;color:var(--t2)">Status: Pendente · Em produção · Parcial · Finalizado</span>
+        <button type="button" class="btn btn-p" onclick="poApostClose()">Concluído</button>
+      </div>
+    </div>`;
+  host.classList.add('show');
+}
 
 // ===== IA de priorização: critérios, pesos e edital =====
 // A IA pontua cada critério de 0 a 1 por ação; o código aplica estes pesos.
