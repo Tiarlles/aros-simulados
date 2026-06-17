@@ -39028,9 +39028,14 @@ window.poApostAdd=()=>{
   _poSaveModQuestoes(S._poApostAtual.cid,S._poApostAtual.modulo);
   _poApostModalRender();
 };
-window.poApostDel=(i)=>{
-  const lst=_poApostList(); if(!lst)return;
-  lst.splice(i,1);
+window.poApostDel=async(i)=>{
+  const lst=_poApostList(); if(!lst||!lst[i])return;
+  const ap=lst[i];
+  const desc=(ap.titulo||'').trim()||(ap.link||'').trim()||'esta apostila';
+  const ok=await arosConfirm({title:'Excluir apostila?',danger:true,icon:'🗑️',message:`Remover "${desc}" deste módulo? Esta ação não pode ser desfeita.`,confirmLabel:'🗑️ Excluir'});
+  if(!ok)return;
+  const lst2=_poApostList(); if(!lst2||!lst2[i])return; // revalida após o await
+  lst2.splice(i,1);
   _poSaveModQuestoes(S._poApostAtual.cid,S._poApostAtual.modulo);
   _poApostModalRender();
 };
@@ -39062,12 +39067,11 @@ function _poApostModalRender(){
     <div class="po-modal po-modal-lg" role="dialog">
       <div class="po-modal-head"><div><h3>📚 Apostilas do módulo</h3><div class="po-mod-sub">${_poEsc(modulo)}</div></div><button type="button" class="po-modal-x" onclick="poApostClose()">✕</button></div>
       <div class="po-modal-body">
-        <p class="po-imp-instr">A apostila é por módulo (não por aula). Cadastre o link e o status de cada uma. Dá pra ter mais de uma por módulo. Tudo salva automaticamente.</p>
         <div class="po-apost-lista">${rows}</div>
         <button type="button" class="btn btn-g" style="margin-top:12px" onclick="poApostAdd()">＋ Adicionar apostila</button>
       </div>
       <div class="po-modal-foot">
-        <span style="font-size:11.5px;color:var(--t2)">Status: Pendente · Em produção · Parcial · Finalizado</span>
+        <span></span>
         <button type="button" class="btn btn-p" onclick="poApostClose()">Concluído</button>
       </div>
     </div>`;
