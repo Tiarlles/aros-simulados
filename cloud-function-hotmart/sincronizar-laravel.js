@@ -144,6 +144,15 @@ async function sincronizarCurso(courseId, nome, { dryRun }) {
     if (Object.keys(patch).length) atualizadas.push({ id: prev.id, prev, patch });
   }
 
+  // aulas que ainda precisam de transcrição: tem vídeo e (é nova) OU (existe mas sem marcador).
+  // Isso faz a sync RE-tentar nas próximas rodadas as que falharam (ex.: legenda do Vimeo
+  // ainda não estava pronta) — não fica só nas "novas daquela rodada".
+  const faltamTranscricao = aulas.filter(a => {
+    if (!a.vimeoId) return false;
+    const prev = existByLid[a.laravelId];
+    return !prev || !prev.transcricaoPalavras;
+  }).length;
+
   const resumo = {
     curso: nome,
     totalLaravel: aulas.length,
@@ -151,6 +160,7 @@ async function sincronizarCurso(courseId, nome, { dryRun }) {
     atualizadas: atualizadas.length,
     novasTitulos: novas.slice(0, 50).map(a => a.nomeOriginal),
     atualizadasTitulos: atualizadas.slice(0, 50).map(x => x.prev.nomeOriginal || x.prev.titulo),
+    transcricoesPendentes: faltamTranscricao,
     transcricoesNovas: 0, semLegenda: 0, errosTranscricao: 0,
     dryRun: !!dryRun,
   };
@@ -185,23 +195,30 @@ async function sincronizarCurso(courseId, nome, { dryRun }) {
     if (merged.length !== atual.length) { mo[cursoId] = merged; await cfgRef.set({ modOrdem: mo }, { merge: true }); }
   } catch (e) { console.warn('modOrdem update falhou:', e?.message || e); }
 
-  // transcrição das aulas NOVAS com vídeo (pula as que já têm doc em poTranscricoes)
-  for (const { ref, a } of novasRefs) {
-    if (!a.vimeoId) continue;
+  // transcrição: TODA aula com vídeo que ainda não tem (novas + existentes sem marcador).
+  // Cada item salva na hora, então se o run estourar o tempo, o próximo continua de onde parou.
+  const aTranscrever = [];
+  for (const { ref, a } of novasRefs) { if (a.vimeoId) aTranscrever.push({ docId: ref.id, vimeoId: String(a.vimeoId) }); }
+  for (const a of aulas) {
+    const prev = existByLid[a.laravelId];
+    if (prev && a.vimeoId && !prev.transcricaoPalavras) aTranscrever.push({ docId: prev.id, vimeoId: String(a.vimeoId) });
+  }
+  for (const item of aTranscrever) {
+    const aulaRef = db.collection('poAulas').doc(item.docId);
     try {
-      const tdoc = await db.collection('poTranscricoes').doc(String(a.vimeoId)).get();
+      const tdoc = await db.collection('poTranscricoes').doc(item.vimeoId).get();
       if (tdoc.exists) {
         const td = tdoc.data() || {};
-        await ref.update({ transcricaoPalavras: td.palavras || 0, transcricaoLang: td.lang || '', conteudoPreview: (td.texto || '').slice(0, 160), transcricaoEm: nowIso });
+        await aulaRef.update({ transcricaoPalavras: td.palavras || 0, transcricaoLang: td.lang || '', conteudoPreview: (td.texto || '').slice(0, 160), transcricaoEm: nowIso });
         resumo.transcricoesNovas++;
         continue;
       }
-      const r = await obterTranscricao(a.vimeoId, ref.id);
+      const r = await obterTranscricao(item.vimeoId, item.docId);
       if (r && r.ok) {
-        await ref.update({ transcricaoPalavras: r.palavras, transcricaoLang: r.lang || '', conteudoPreview: r.preview || '', transcricaoEm: nowIso });
+        await aulaRef.update({ transcricaoPalavras: r.palavras, transcricaoLang: r.lang || '', conteudoPreview: r.preview || '', transcricaoEm: nowIso });
         resumo.transcricoesNovas++;
       } else { resumo.semLegenda++; }
-    } catch (e) { resumo.errosTranscricao++; console.warn('transcrição falhou', a.vimeoId, e?.message || e); }
+    } catch (e) { resumo.errosTranscricao++; console.warn('transcrição falhou', item.vimeoId, e?.message || e); }
   }
 
   return resumo;

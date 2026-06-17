@@ -38239,7 +38239,7 @@ window.poSyncModalClose=()=>{
   S._poSync=null;
 };
 function _poSyncTotais(res){
-  return (res||[]).reduce((a,r)=>({novas:a.novas+(r.novas||0),atu:a.atu+(r.atualizadas||0),trans:a.trans+(r.transcricoesNovas||0),sem:a.sem+(r.semLegenda||0)}),{novas:0,atu:0,trans:0,sem:0});
+  return (res||[]).reduce((a,r)=>({novas:a.novas+(r.novas||0),atu:a.atu+(r.atualizadas||0),trans:a.trans+(r.transcricoesNovas||0),sem:a.sem+(r.semLegenda||0),pend:a.pend+(r.transcricoesPendentes||0)}),{novas:0,atu:0,trans:0,sem:0,pend:0});
 }
 function _poSyncModalRender(){
   let host=document.getElementById('po-sync-modal');
@@ -38258,6 +38258,7 @@ function _poSyncModalRender(){
       <div class="po-imp-stats">
         <div class="po-imp-stat"><b>${t.novas}</b> aula(s) nova(s)</div>
         <div class="po-imp-stat"><b>${t.atu}</b> atualizada(s)</div>
+        <div class="po-imp-stat"><b>${t.pend}</b> transcrição(ões) a puxar</div>
       </div>`;
     (s.resultados||[]).forEach(r=>{
       const novas=(r.novasTitulos||[]);const atu=(r.atualizadasTitulos||[]);
@@ -38268,9 +38269,9 @@ function _poSyncModalRender(){
         body+=`</div>`;
       }
     });
-    if(s.fase==='aplicando')body+=`<div class="po-imp-prog">⏳ Aplicando e puxando transcrições das novas…</div>`;
-    const nada=t.novas===0&&t.atu===0;
-    if(nada)body+=`<div class="po-imp-done">✅ Tudo já está em dia — nada novo no Laravel.</div>`;
+    if(s.fase==='aplicando')body+=`<div class="po-imp-prog">⏳ Aplicando e puxando transcrições…</div>`;
+    const nada=t.novas===0&&t.atu===0&&t.pend===0;
+    if(nada)body+=`<div class="po-imp-done">✅ Tudo já está em dia — nada novo no Laravel e nenhuma transcrição faltando.</div>`;
     foot=`<button type="button" class="btn btn-g" onclick="poSyncModalClose()">${nada?'Fechar':'Cancelar'}</button>
       <button type="button" class="btn btn-p" onclick="poSyncAplicar()" ${(nada||s.fase==='aplicando')?'disabled':''}>${s.fase==='aplicando'?'Aplicando…':'Aplicar agora'}</button>`;
   }else if(s.fase==='done'){
