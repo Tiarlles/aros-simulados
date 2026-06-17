@@ -5812,8 +5812,9 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-po .po-mod-qbadge{margin-left:10px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-dim);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:6px;padding:1px 6px;text-transform:none;letter-spacing:0}
         #tab-po .po-mod-analisar{margin-left:12px;border:1px solid color-mix(in srgb,var(--accent) 40%,var(--border));background:var(--bg2);color:var(--accent);font-family:'Plus Jakarta Sans',sans-serif;font-size:10.5px;font-weight:700;text-transform:none;letter-spacing:0;padding:3px 9px;border-radius:7px;cursor:pointer;transition:background .15s,border-color .15s}
         #tab-po .po-mod-analisar:hover{background:var(--accent-dim);border-color:var(--accent)}
-        #tab-po .po-mod-apost{margin-left:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:7px;cursor:pointer;transition:filter .15s;color:var(--ac,var(--t2));border:1px solid color-mix(in srgb,var(--ac,var(--border)) 45%,var(--border));background:color-mix(in srgb,var(--ac,transparent) 12%,var(--bg2))}
-        #tab-po .po-mod-apost:hover{filter:brightness(1.15)}
+        #tab-po .po-apost-rowbtn{display:inline-flex;align-items:center;gap:6px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;padding:5px 12px;border-radius:8px;cursor:pointer;transition:filter .15s;color:var(--ac,var(--t2));border:1px solid color-mix(in srgb,var(--ac,var(--border)) 45%,var(--border));background:color-mix(in srgb,var(--ac,transparent) 12%,var(--bg2))}
+        #tab-po .po-apost-rowbtn:hover{filter:brightness(1.15)}
+        #tab-po .po-apost-row-tr .po-mod-cell{padding-top:8px;padding-bottom:4px}
         /* Modal de apostilas do módulo */
         #po-apost-modal{position:fixed;inset:0;z-index:9999;display:none}
         #po-apost-modal.show{display:block}
@@ -38484,14 +38485,15 @@ function _poTableRowsHTML(aulas,q){
     const apCor=_poApostStatusCor(apStatus);
     const apLabel=apos.length>1?`${apStatus} (${apos.length})`:apStatus;
     const apTitle=apos.length?`Apostila do módulo: ${apStatus} — ${apos.length} cadastrada(s)`:'Sem apostila cadastrada (Pendente)';
-    const apostBadge=`<button type="button" class="po-mod-apost" style="--ac:${apCor}" onclick="event.stopPropagation();poAbrirApostilas('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="${apTitle}">📚 ${apLabel}</button>`;
+    const apostRow=`<tr class="po-apost-row-tr"><td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><button type="button" class="po-apost-rowbtn" style="--ac:${apCor}" onclick="poAbrirApostilas('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="${apTitle}">📚 Apostila do módulo: ${apLabel}</button></span></td></tr>`;
     const btnAnalisar=`<button type="button" class="po-mod-analisar" onclick="event.stopPropagation();poAbrirAnaliseModulo('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="Analisar este módulo com a IA">🤖 Analisar módulo</button>`;
     const modSelMarcado=g.aulas.length&&g.aulas.every(a=>S.poSel&&S.poSel.aulas.has(a.id));
     const modChk=`<input type="checkbox" class="po-sel-mod"${modSelMarcado?' checked':''} data-modulo="${_poEsc(g.modulo)}" onclick="event.stopPropagation();poToggleSelModulo('${encodeURIComponent(g.modulo)}',this.checked)">`;
     out+=`<tr class="po-mod-row${open?' open':''}" draggable="false" data-modulo="${_poEsc(g.modulo)}" onclick="poToggleMod('${encodeURIComponent(g.modulo)}')">
-      <td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><span class="po-grip" onmousedown="event.stopPropagation();this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span>${modChk}<span class="po-chev">▸</span><span class="po-mod-nome" ondblclick="event.stopPropagation();poEditarNomeModulo('${encodeURIComponent(g.modulo)}',this)" title="Duplo-clique pra renomear">${_poEsc(g.modulo)}</span>${at}${qBadge}${apostBadge}${btnAnalisar}</span></td>
+      <td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><span class="po-grip" onmousedown="event.stopPropagation();this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span>${modChk}<span class="po-chev">▸</span><span class="po-mod-nome" ondblclick="event.stopPropagation();poEditarNomeModulo('${encodeURIComponent(g.modulo)}',this)" title="Duplo-clique pra renomear">${_poEsc(g.modulo)}</span>${at}${qBadge}${btnAnalisar}</span></td>
     </tr>`;
     if(open){
+      out+=apostRow;
       g.aulas.forEach((a,idx)=>{out+=_poAulaRowHTML(a,idx+1);});
       out+=`<tr class="po-addaula-row"><td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><button type="button" class="po-addaula-btn" onclick="poNovaAula('${encodeURIComponent(g.modulo)}')" title="Cadastrar uma aula neste módulo">＋ Nova aula neste módulo</button></span></td></tr>`;
     }
