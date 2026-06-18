@@ -110,7 +110,7 @@ Regras:
 7. O ALUNO TAMBÉM ESTUDA PELA QUESTÃO. Uma questão com gabarito já é material de estudo. Então, para um tema raro que já cai em questão, o normal é NÃO precisar de ação nenhuma. NÃO sugira "incluir o tema X na aula", "garantir um bom comentário na questão", "revisar o gabarito" ou coisas do tipo quando o tema é raro — a questão basta. Só proponha mexer numa aula (gravar/regravar/aprofundar/incluir) quando o tema for recorrente E o ganho de aprendizado justificar o esforço.
 8. Se uma transcrição vier marcada como "(truncada)", NÃO afirme que um tema está ausente só porque não apareceu — a parte cortada pode cobri-lo. Trate como incerto.
 9. Cite a aula concreta no campo "aula" sempre que a ação se referir a conteúdo que já existe (ou deveria existir) numa aula do módulo.
-10. APOSTILA e FICHA RESUMO são coisas DIFERENTES — gere ações SEPARADAS, nunca junte numa só ("apostila/ficha"). APOSTILA é material do MÓDULO inteiro: se faltar, a ação é "Criar apostila do módulo". FICHA RESUMO é POR AULA: se houver aulas sem ficha (marcadas "Ficha resumo: NÃO"), gere "Criar ficha resumo das aulas" e, no campo "porque", LISTE quais aulas estão sem. Se TODAS já têm ficha, não gere essa ação.
+10. APOSTILA e FICHA RESUMO são coisas DIFERENTES — gere ações SEPARADAS, nunca junte numa só ("apostila/ficha"). APOSTILA é material do MÓDULO inteiro: se faltar, a ação é "Criar apostila do módulo". FICHA RESUMO é POR AULA e vem com STATUS (Pendente = sem ficha · Lançada = já tem · Não se aplica). Se houver aulas com "Ficha resumo: Pendente", gere "Criar ficha resumo das aulas" e, no campo "porque", LISTE exatamente quais aulas estão Pendentes. Ignore as "Lançada" e "Não se aplica". Se nenhuma aula estiver Pendente, NÃO gere essa ação.
 11. Use a avaliação dos alunos e o status/ano das aulas para sinalizar regravação/atualização.
 12. Para CADA ação, pontue os 7 critérios de 0 a 1 (0 = irrelevante para esta ação, 1 = máximo). NÃO aplique pesos — só pontue. Os pesos são aplicados depois pelo sistema. Em especial, a nota "frequencia" deve ser PROPORCIONAL ao nº de questões que cobrem o tema (0 questões = 0; 1 questão isolada ≈ 0,1; tema dominante ≈ 1).
 13. Ordene as ações da mais para a menos relevante na sua visão, mas a ordenação final é feita pelo sistema via pesos.
@@ -157,7 +157,7 @@ function buildUserPrompt(ctx) {
   aulas.forEach((a, i) => {
     const av = a.aval.nota != null ? `${a.aval.nota}${a.aval.n ? ` (${a.aval.n} avaliações)` : ''}` : 'sem avaliação';
     linhas.push(`--- Aula ${i + 1}: ${a.titulo} ---`);
-    linhas.push(`Status: ${a.status || '(sem status)'} · Ano: ${a.ano || '?'} · Avaliação: ${av} · Trilha de questões: ${a.questoes || '?'} · Trilha de flashcards: ${a.cards || '?'} · Ficha resumo: ${a.fichaResumo ? 'sim' : 'NÃO'}`);
+    linhas.push(`Status: ${a.status || '(sem status)'} · Ano: ${a.ano || '?'} · Avaliação: ${av} · Trilha de questões: ${a.questoes || '?'} · Trilha de flashcards: ${a.cards || '?'} · Ficha resumo: ${a.fichaResumo}`);
     if (a.transcricao) {
       linhas.push(`Transcrição (${a.transChars} chars${a.transTrunc ? ', truncada' : ''}):`);
       linhas.push(a.transcricao);
@@ -256,7 +256,7 @@ exports.analisarModuloPO = onRequest(
           titulo: a.titulo || a.nomeOriginal || '(sem título)',
           status: a.status || '', ano: a.ano || '',
           questoes: a.questoes || '', cards: a.cards || '',
-          fichaResumo: !!String(a.fichaResumo || '').trim(),  // tem ficha resumo? (por aula)
+          fichaResumo: String(a.fichaResumo || '').trim() || 'Pendente',  // status da ficha resumo (por aula): Pendente/Lançada/Não se aplica
           aval: _parseAval(a),
           conteudo: String(a.conteudo || '').trim(),
           transcricao: trunc ? full.slice(0, capPorAula) : full,

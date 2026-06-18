@@ -37426,7 +37426,7 @@ S.poColunas=[
   {id:'questoes',label:'Trilha Questões',type:'status',w:140,opts:_PO_TRILHA3},
   {id:'cards',label:'Trilha de Flashcards',type:'status',w:160,opts:_PO_TRILHA3},
   {id:'video',label:'Vídeo',type:'link',w:58},
-  {id:'fichaResumo',label:'Ficha Resumo',type:'link',w:104},
+  {id:'fichaResumo',label:'Ficha Resumo',type:'status',w:140,opts:_PO_TRILHA3},
   {id:'slides',label:'Slides',type:'link',w:72},
   {id:'livros',label:'Livros',type:'texto',w:110},
 ];
@@ -37468,7 +37468,7 @@ async function _poSaveConfig(){
 // Carrega tudo do Firestore. Mantém o demo se a coleção estiver vazia ou sem auth.
 async function loadPO(){
   // 1) config (colunas + cursos)
-  let _duracaoInjetada=false, _trilhaRenamed=false, _apostilaColRemovida=false;
+  let _duracaoInjetada=false, _trilhaRenamed=false, _apostilaColRemovida=false, _fichaStatusMig=false;
   try{
     const cfgSnap=await getDoc(doc(db,'config','poConfig'));
     if(cfgSnap.exists()){
@@ -37481,6 +37481,7 @@ async function loadPO(){
       _duracaoInjetada=!!d.duracaoColInjetada;
       _trilhaRenamed=!!d.trilhaColsRenamed;
       _apostilaColRemovida=!!d.apostilaColRemovida;
+      _fichaStatusMig=!!d.fichaResumoStatusMigrada;
       if(d.poPesos&&typeof d.poPesos==='object')S.poPesos={...S.poPesos,...d.poPesos};
       if(d.editais&&typeof d.editais==='object')S.poEditais=d.editais;
       if(d.temaModulo&&typeof d.temaModulo==='object')S.poTemaModulo=d.temaModulo;
@@ -37523,6 +37524,23 @@ async function loadPO(){
     if(!_apostilaColRemovida && S.poColunas.some(c=>c.id==='apostila')){
       S.poColunas=S.poColunas.filter(c=>c.id!=='apostila');
       try{ await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,apostilaColRemovida:true},{merge:true}); }catch(e){ console.warn('migração apostila:',e); }
+    }
+    // Migração one-time: "Ficha Resumo" vira coluna de STATUS (igual à Trilha de Flashcards).
+    // Converte o tipo da coluna + os valores das aulas: vazio→Pendente, link/texto→Lançada (status já válido fica como está).
+    if(!_fichaStatusMig){
+      const cf=S.poColunas.find(c=>c.id==='fichaResumo');
+      if(cf&&cf.type!=='status'){ cf.type='status'; cf.opts=_PO_TRILHA3.map(o=>({...o})); if((cf.w||0)<140)cf.w=140; }
+      const _sv=new Set(_PO_TRILHA3.map(o=>o.v));
+      try{
+        let b=writeBatch(db),n=0;
+        for(const a of aulasDocs){
+          const cur=String(a.fichaResumo||'').trim();
+          const nv=!cur?'Pendente':(_sv.has(cur)?cur:'Lançada');
+          if(nv!==cur){ a.fichaResumo=nv; if(a.id&&!String(a.id).startsWith('tmp_')){ b.update(doc(db,'poAulas',a.id),{fichaResumo:nv}); if(++n>=450){await b.commit();b=writeBatch(db);n=0;} } }
+        }
+        if(n>0)await b.commit();
+      }catch(e){ console.warn('migração ficha (aulas):',e); }
+      try{ await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,fichaResumoStatusMigrada:true},{merge:true}); }catch(e){ console.warn('migração ficha (cfg):',e); }
     }
   }else if(aulasDocs&&!aulasDocs.length){
     // coleção existe e está VAZIA → mantém demo
