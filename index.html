@@ -5955,6 +5955,15 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-mod-modal .po-mod-sub{font-size:12px;color:var(--t2);margin-top:2px;font-family:'JetBrains Mono',monospace}
         #po-mod-modal .po-mod-resumo{font-size:12.5px;color:var(--text);margin-bottom:8px}
         #po-mod-modal .po-mod-aviso{margin-bottom:12px;padding:9px 12px;border-radius:9px;background:color-mix(in srgb,#f0883e 12%,transparent);border:1px solid color-mix(in srgb,#f0883e 32%,transparent);color:#f0883e;font-size:12px}
+        /* Dropdown maior que agrupa todos os inputs (TEA/TSA/MEs/Outras/Pedidos) */
+        #po-mod-modal .po-mod-inputs{border:1px solid var(--border);border-radius:14px;background:var(--bg2);overflow:hidden;margin-bottom:14px}
+        #po-mod-modal .po-mod-inputs-head{display:flex;align-items:center;gap:10px;padding:13px 15px;cursor:pointer;user-select:none}
+        #po-mod-modal .po-mod-inputs.open .po-mod-inputs-head{border-bottom:1px solid var(--border)}
+        #po-mod-modal .po-mod-inputs-head:hover{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+        #po-mod-modal .po-mod-inputs-t{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text)}
+        #po-mod-modal .po-mod-inputs-sub{font-size:11px;color:var(--t2)}
+        #po-mod-modal .po-mod-inputs-c{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);padding:2px 9px;border-radius:12px}
+        #po-mod-modal .po-mod-inputs-body{padding:14px 15px}
         #po-mod-modal .po-mod-blocos{display:flex;flex-direction:column;gap:14px}
         #po-mod-modal .po-mod-bloco{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--bg)}
         #po-mod-modal .po-mod-bloco-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
@@ -39143,7 +39152,9 @@ function _poParseLoteQuestoes(text){
 const _PO_MOD_TIPOS=['TEA','TSA','MEs','Outras'];
 S._poModSec={}; // accordions abertos no modal de módulo: {TEA:bool,...,pedidos:bool}
 S._poModFile={}; // nome do último arquivo anexado por tipo (feedback visual)
+S._poModInputsOpen=true; // dropdown maior "INPUTS ANÁLISE" (envolve TEA/TSA/MEs/Outras/Pedidos)
 window.poModToggleSec=(key)=>{ S._poModSec[key]=!S._poModSec[key]; _poModModalRender(); };
+window.poModToggleInputs=()=>{ S._poModInputsOpen=!(S._poModInputsOpen!==false); _poModModalRender(); };
 // Pedidos de alunos = lista; cada linha salva na hora.
 window.poModAddPedido=()=>{
   if(!S._poModAtual)return;
@@ -39526,11 +39537,14 @@ window.poAbrirAnaliseModulo=(cid,modEnc)=>{
   S._poModSec={};S._poModFile={};
   _PO_MOD_TIPOS.forEach(t=>{S._poModSec[t]=(b[t]||[]).length>0;});
   S._poModSec.pedidos=(b.pedidos||[]).length>0;
-  _poModModalRender();
-  // Restaura a última análise da IA (persistida em poModQuestoes.analise), se houver.
   const k=_poModKey(cid,S._poModAtual.modulo);
-  if(S._poAnalises[k]){_poRenderAnalise(S._poAnalises[k]);}
-  else{getDoc(doc(db,'poModQuestoes',k)).then(s=>{const an=s.exists()&&(s.data()||{}).analise;if(an&&S._poModAtual&&_poModKey(S._poModAtual.cid,S._poModAtual.modulo)===k){S._poAnalises[k]=an;_poRenderAnalise(an);}}).catch(()=>{});}
+  // Se já há análise salva, abre com os INPUTS dobrados (foco no resultado); senão, abertos.
+  S._poModInputsOpen=!S._poAnalises[k];
+  _poModModalRender(); // já re-pinta a análise em memória, se houver
+  // Restaura a última análise persistida (poModQuestoes.analise) quando não está em memória.
+  if(!S._poAnalises[k]){
+    getDoc(doc(db,'poModQuestoes',k)).then(s=>{const an=s.exists()&&(s.data()||{}).analise;if(an&&S._poModAtual&&_poModKey(S._poModAtual.cid,S._poModAtual.modulo)===k){S._poAnalises[k]=an;S._poModInputsOpen=false;_poModModalRender();}}).catch(()=>{});
+  }
 };
 window.poModModalClose=()=>{const h=document.getElementById('po-mod-modal');if(h){h.classList.remove('show');h.innerHTML='';}S._poModAtual=null;try{_poRefreshTabela();}catch(e){}};
 window.poModFileUpload=(tipo,ev)=>{
@@ -39595,12 +39609,14 @@ window.poAnalisarModulo=async()=>{
   try{
     const r=await _poApiPost(ANALISE_PO_ENDPOINT,{cursoId:cid,cursoNome:curso.nome,modulo});
     S._poAnalises[_poModKey(cid,modulo)]=r.analise;
-    _poRenderAnalise(r.analise);
+    S._poModInputsOpen=false;   // dobra os inputs e foca no resultado
+    S._poModAnalisando=false;   // libera a re-pintura dentro do render
+    _poModModalRender();        // re-renderiza (inputs dobrados) e re-pinta a análise
   }catch(e){
     if(box)box.innerHTML=`<div class="po-imp-erro">⚠️ ${_poEsc(e.message||String(e))}</div>`;
   }finally{
     S._poModAnalisando=false;
-    if(btn){btn.disabled=false;btn.textContent='🤖 Analisar módulo';}
+    const b=document.querySelector('#po-mod-modal .po-modal-foot .btn-p'); if(b){b.disabled=false;b.textContent='🤖 Analisar módulo';}
   }
 };
 window.poAnSetTab=(prova)=>{ S._poAnTab=prova; const an=S._poModAtual&&S._poAnalises[_poModKey(S._poModAtual.cid,S._poModAtual.modulo)]; if(an)_poRenderAnalise(an); };
@@ -39712,6 +39728,22 @@ function _poModModalRender(){
         </div>
       </div>`:''}
     </div>`;
+  // nº total de itens que alimentam a IA (mostrado no cabeçalho do dropdown maior)
+  const nInputs=_PO_MOD_TIPOS.reduce((s,t)=>s+((bucket[t]||[]).length),0)+peds.length;
+  const inputsOpen=S._poModInputsOpen!==false;
+  const inputsSection=`
+    <div class="po-mod-inputs${inputsOpen?' open':''}">
+      <div class="po-mod-inputs-head" onclick="poModToggleInputs()">
+        <span class="po-mod-chev">${chev(inputsOpen)}</span>
+        <span class="po-mod-inputs-t">📥 INPUTS ANÁLISE</span>
+        <span class="po-mod-inputs-sub">questões + pedidos que alimentam a IA</span>
+        <span class="po-mod-inputs-c">${nInputs}</span>
+      </div>
+      ${inputsOpen?`<div class="po-mod-inputs-body">
+        ${avisoHTML}
+        <div class="po-mod-blocos">${blocos}${pedBloco}</div>
+      </div>`:''}
+    </div>`;
   host.innerHTML=`
     <div class="po-modal-back" onclick="poModModalClose()"></div>
     <div class="po-modal" role="dialog">
@@ -39723,8 +39755,7 @@ function _poModModalRender(){
         <button type="button" class="po-modal-x" onclick="poModModalClose()">✕</button>
       </div>
       <div class="po-modal-body">
-        ${avisoHTML}
-        <div class="po-mod-blocos">${blocos}${pedBloco}</div>
+        ${inputsSection}
         <div id="po-mod-mock" class="po-q-mock" style="display:none"></div>
       </div>
       <div class="po-modal-foot">
@@ -39736,6 +39767,8 @@ function _poModModalRender(){
       </div>
     </div>`;
   host.classList.add('show');
+  // Re-pinta a análise salva (se houver) — assim abrir/fechar um dropdown NÃO some com o resultado.
+  if(!S._poModAnalisando){ const an=S._poAnalises[_poModKey(cid,modulo)]; if(an){try{_poRenderAnalise(an);}catch(e){}} }
 }
 
 window.initProdutos=function(){
