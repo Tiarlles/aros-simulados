@@ -39474,7 +39474,10 @@ const PO_CRITERIOS=[
   {id:'avaliacao',  label:'Avaliação baixa dos alunos',         desc:'Aula mal avaliada',                                       peso:12},
   {id:'pedidos',    label:'Pedidos de alunos',                  desc:'Demanda explícita registrada no módulo',                  peso:10},
   {id:'idade',      label:'Idade da aula',                      desc:'Gravada há muito tempo / possivelmente desatualizada',    peso:8},
-  {id:'material',   label:'Falta de apostila/ficha/trilha',     desc:'Material de apoio ausente',                               peso:5},
+  {id:'apostila',   label:'Falta de apostila',                  desc:'Módulo sem apostila cadastrada',                          peso:5},
+  {id:'fichaResumo',label:'Falta de ficha resumo',              desc:'Aulas sem ficha resumo (status Pendente)',                peso:5},
+  {id:'trilhaQuestoes',  label:'Falta de trilha de questões',   desc:'Aulas com trilha de questões Pendente',                   peso:5},
+  {id:'trilhaFlashcards',label:'Falta de trilha de flashcards', desc:'Aulas com trilha de flashcards Pendente',                 peso:5},
 ];
 S.poPesos=Object.fromEntries(PO_CRITERIOS.map(c=>[c.id,c.peso])); // default; sobrescrito pelo config
 S.poEditais={}; // {cursoId: textoDoEdital}

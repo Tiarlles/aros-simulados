@@ -34,7 +34,10 @@ const CRITERIOS = [
   { id: 'avaliacao',  label: 'Avaliação baixa dos alunos',        desc: 'Aula mal avaliada pelos alunos' },
   { id: 'pedidos',    label: 'Pedidos de alunos',                 desc: 'Demanda explícita registrada no módulo' },
   { id: 'idade',      label: 'Idade da aula',                     desc: 'Gravada há muito tempo / possivelmente desatualizada' },
-  { id: 'material',   label: 'Falta de apostila/ficha/trilha',    desc: 'Material de apoio ausente' },
+  { id: 'apostila',        label: 'Falta de apostila',              desc: 'Módulo sem apostila cadastrada' },
+  { id: 'fichaResumo',     label: 'Falta de ficha resumo',          desc: 'Aulas com ficha resumo Pendente' },
+  { id: 'trilhaQuestoes',  label: 'Falta de trilha de questões',    desc: 'Aulas com trilha de questões Pendente' },
+  { id: 'trilhaFlashcards', label: 'Falta de trilha de flashcards', desc: 'Aulas com trilha de flashcards Pendente' },
 ];
 const CRIT_IDS = CRITERIOS.map(c => c.id);
 
@@ -110,7 +113,12 @@ Regras:
 7. O ALUNO TAMBÉM ESTUDA PELA QUESTÃO. Uma questão com gabarito já é material de estudo. Então, para um tema raro que já cai em questão, o normal é NÃO precisar de ação nenhuma. NÃO sugira "incluir o tema X na aula", "garantir um bom comentário na questão", "revisar o gabarito" ou coisas do tipo quando o tema é raro — a questão basta. Só proponha mexer numa aula (gravar/regravar/aprofundar/incluir) quando o tema for recorrente E o ganho de aprendizado justificar o esforço.
 8. Se uma transcrição vier marcada como "(truncada)", NÃO afirme que um tema está ausente só porque não apareceu — a parte cortada pode cobri-lo. Trate como incerto.
 9. Cite a aula concreta no campo "aula" sempre que a ação se referir a conteúdo que já existe (ou deveria existir) numa aula do módulo.
-10. APOSTILA e FICHA RESUMO são coisas DIFERENTES — gere ações SEPARADAS, nunca junte numa só ("apostila/ficha"). APOSTILA é material do MÓDULO inteiro: se faltar, a ação é "Criar apostila do módulo". FICHA RESUMO é POR AULA e vem com STATUS (Pendente = sem ficha · Lançada = já tem · Não se aplica). Se houver aulas com "Ficha resumo: Pendente", gere "Criar ficha resumo das aulas" e, no campo "porque", LISTE exatamente quais aulas estão Pendentes. Ignore as "Lançada" e "Não se aplica". Se nenhuma aula estiver Pendente, NÃO gere essa ação.
+10. MATERIAL DE APOIO — são 4 coisas DIFERENTES, cada uma vira uma AÇÃO SEPARADA (nunca junte "apostila/ficha/trilha" numa só):
+   a) APOSTILA: material do MÓDULO inteiro. Se faltar (status do módulo Pendente/sem apostila), gere "Criar apostila do módulo" e pontue notas.apostila alto.
+   b) FICHA RESUMO: é POR AULA, com status (Pendente = falta · Lançada = tem · Não se aplica = ignore). Se houver aulas "Ficha resumo: Pendente", gere "Criar ficha resumo das aulas" listando no "porque" quais aulas; pontue notas.fichaResumo alto.
+   c) TRILHA DE QUESTÕES: é POR AULA, com status (Pendente = falta). Se houver aulas "Trilha de questões: Pendente", gere "Criar trilha de questões das aulas" listando quais; pontue notas.trilhaQuestoes alto.
+   d) TRILHA DE FLASHCARDS: é POR AULA, com status (Pendente = falta). Se houver aulas "Trilha de flashcards: Pendente", gere "Criar trilha de flashcards das aulas" listando quais; pontue notas.trilhaFlashcards alto.
+   Em TODAS: status "Lançada" = já existe (não gere) · "Não se aplica" = ignore. Se nada estiver Pendente naquele tipo, NÃO gere a ação dele. Cada uma dessas ações de material pontua SÓ o seu próprio critério (as outras notas ficam baixas).
 11. Use a avaliação dos alunos e o status/ano das aulas para sinalizar regravação/atualização.
 12. Para CADA ação, pontue os 7 critérios de 0 a 1 (0 = irrelevante para esta ação, 1 = máximo). NÃO aplique pesos — só pontue. Os pesos são aplicados depois pelo sistema. Em especial, a nota "frequencia" deve ser PROPORCIONAL ao nº de questões que cobrem o tema (0 questões = 0; 1 questão isolada ≈ 0,1; tema dominante ≈ 1).
 13. Ordene as ações da mais para a menos relevante na sua visão, mas a ordenação final é feita pelo sistema via pesos.
