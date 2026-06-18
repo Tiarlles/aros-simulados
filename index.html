@@ -39158,9 +39158,9 @@ function _poModKey(cid,mod){return _poSlug(cid+'__'+mod);}
 function _poSaveModQuestoes(cid,mod){
   const key=_poModKey(cid,mod);
   const b=S.poModQuestoes[key]||{TEA:[],TSA:[],MEs:[],Outras:[],pedidos:[],apostilas:[]};
-  setDoc(doc(db,'poModQuestoes',key),{cursoId:cid,modulo:mod,TEA:b.TEA||[],TSA:b.TSA||[],MEs:b.MEs||[],Outras:b.Outras||[],pedidos:Array.isArray(b.pedidos)?b.pedidos:[],apostilas:Array.isArray(b.apostilas)?b.apostilas:[]},{merge:true}).catch(e=>console.warn('poModQuestoes save',e));
+  setDoc(doc(db,'poModQuestoes',key),{cursoId:cid,modulo:mod,TEA:b.TEA||[],TSA:b.TSA||[],MEs:b.MEs||[],Outras:b.Outras||[],oralTemas:Array.isArray(b.oralTemas)?b.oralTemas:[],pedidos:Array.isArray(b.pedidos)?b.pedidos:[],apostilas:Array.isArray(b.apostilas)?b.apostilas:[]},{merge:true}).catch(e=>console.warn('poModQuestoes save',e));
 }
-function _poModQ(cid,mod){const k=_poModKey(cid,mod);if(!S.poModQuestoes[k])S.poModQuestoes[k]={TEA:[],TSA:[],MEs:[],Outras:[],pedidos:[],apostilas:[]};const b=S.poModQuestoes[k];if(!b.Outras)b.Outras=[];if(!Array.isArray(b.pedidos))b.pedidos=b.pedidos?String(b.pedidos).split('\n').map(s=>s.trim()).filter(Boolean):[];if(!Array.isArray(b.apostilas))b.apostilas=[];return b;}
+function _poModQ(cid,mod){const k=_poModKey(cid,mod);if(!S.poModQuestoes[k])S.poModQuestoes[k]={TEA:[],TSA:[],MEs:[],Outras:[],oralTemas:[],pedidos:[],apostilas:[]};const b=S.poModQuestoes[k];if(!b.Outras)b.Outras=[];if(!Array.isArray(b.oralTemas))b.oralTemas=[];if(!Array.isArray(b.pedidos))b.pedidos=b.pedidos?String(b.pedidos).split('\n').map(s=>s.trim()).filter(Boolean):[];if(!Array.isArray(b.apostilas))b.apostilas=[];return b;}
 // Remove <img>, data:image base64 e atributos src de imagem de um HTML/texto.
 function _poStripImagens(s){
   let t=String(s||'');
@@ -39201,8 +39201,9 @@ function _poParseLoteQuestoes(text){
   return out;
 }
 
-// ── Fluxo POR MÓDULO: 3 lotes (TEA/TSA/MEs) acumulados por módulo ──
-const _PO_MOD_TIPOS=['TEA','TSA','MEs','Outras'];
+// ── Fluxo POR MÓDULO: baldes de QUESTÕES acumulados por módulo (ordem ME, TEA, TSA 1ªF) ──
+const _PO_MOD_TIPOS=['MEs','TEA','TSA'];
+const _PO_TIPO_LBL={MEs:'ME',TEA:'TEA',TSA:'TSA 1ªF'};   // rótulos de exibição dos baldes
 S._poModSec={}; // accordions abertos no modal de módulo: {TEA:bool,...,pedidos:bool}
 S._poModFile={}; // nome do último arquivo anexado por tipo (feedback visual)
 S._poModInputsOpen=true; // dropdown maior "INPUTS ANÁLISE" (envolve TEA/TSA/MEs/Outras/Pedidos)
@@ -39224,6 +39225,26 @@ window.poModDelPedido=(i)=>{
   if(!S._poModAtual)return;
   const b=_poModQ(S._poModAtual.cid,S._poModAtual.modulo);
   b.pedidos.splice(i,1);
+  _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
+  _poModModalRender();
+};
+// TSA Oral — temas cobrados (lista de texto, igual aos pedidos)
+window.poModAddTema=()=>{
+  if(!S._poModAtual)return;
+  const inp=document.getElementById('po-oral-novo');
+  const v=(inp?inp.value:'').trim();
+  if(!v)return;
+  const b=_poModQ(S._poModAtual.cid,S._poModAtual.modulo);
+  if(!Array.isArray(b.oralTemas))b.oralTemas=[];
+  b.oralTemas.push(v);
+  S._poModSec.oral=true;
+  _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
+  _poModModalRender();
+};
+window.poModDelTema=(i)=>{
+  if(!S._poModAtual)return;
+  const b=_poModQ(S._poModAtual.cid,S._poModAtual.modulo);
+  if(Array.isArray(b.oralTemas))b.oralTemas.splice(i,1);
   _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
   _poModModalRender();
 };
@@ -39433,7 +39454,7 @@ window.poPuxarQuestoesModulo=async()=>{
     try{
       const snap=await getDoc(doc(db,'poModQuestoes',_poModKey(cid,modulo)));
       if(snap.exists()){const x=snap.data()||{};const k=_poModKey(cid,modulo);
-        S.poModQuestoes[k]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],pedidos:Array.isArray(x.pedidos)?x.pedidos:[],apostilas:Array.isArray(x.apostilas)?x.apostilas:[]};
+        S.poModQuestoes[k]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],oralTemas:Array.isArray(x.oralTemas)?x.oralTemas:[],pedidos:Array.isArray(x.pedidos)?x.pedidos:[],apostilas:Array.isArray(x.apostilas)?x.apostilas:[]};
       }
     }catch(_){}
     S._poModPuxando=false;
@@ -39650,6 +39671,7 @@ window.poAbrirAnaliseModulo=(cid,modEnc)=>{
   const b=_poModQ(cid,S._poModAtual.modulo);
   S._poModSec={};S._poModFile={};
   _PO_MOD_TIPOS.forEach(t=>{S._poModSec[t]=(b[t]||[]).length>0;});
+  S._poModSec.oral=(b.oralTemas||[]).length>0;
   S._poModSec.pedidos=(b.pedidos||[]).length>0;
   const k=_poModKey(cid,S._poModAtual.modulo);
   S._poAnInfo[k]=new Set(); // começa com todos os "porquês" recolhidos
@@ -39747,8 +39769,8 @@ const _PO_CAT_ICON={gravar:'🎬',regravar:'🔁',atualizar:'♻️',material:'�
 // 3 níveis de prioridade (cor) derivados da nota 0..1 ponderada pelos pesos.
 const _PO_NIVEL={alta:{lbl:'Alta',cor:'#f85149'},media:{lbl:'Média',cor:'#d29922'},baixa:{lbl:'Baixa',cor:'#3fb950'}};
 function _poNivelDe(p){ return p>=0.5?'alta':(p>=0.25?'media':'baixa'); }
-const _PO_PROVAS_ORDEM=['TEA','TSA','MEs','Geral'];
-const _PO_PROVA_LBL={TEA:'TEA',TSA:'TSA',MEs:'ME',Geral:'Geral'};
+const _PO_PROVAS_ORDEM=['MEs','TEA','TSA','TSAOral','Geral'];
+const _PO_PROVA_LBL={MEs:'ME',TEA:'TEA',TSA:'TSA 1ªF',TSAOral:'TSA Oral',Geral:'GERAL'};
 function _poDataFmt(iso){ try{ const d=new Date(iso); if(isNaN(d))return ''; return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }catch(_){return '';} }
 window.poAnalisarModulo=async()=>{
   if(!S._poModAtual||S._poModAnalisando)return;
@@ -39863,12 +39885,32 @@ function _poModModalRender(){
       <div class="po-mod-bloco">
         <div class="po-mod-bloco-head" onclick="poModToggleSec('${tipo}')">
           <span class="po-mod-chev">${chev(open)}</span>
-          <span class="po-mod-bloco-t">${tipo}</span>
+          <span class="po-mod-bloco-t">${_PO_TIPO_LBL[tipo]||tipo}</span>
           <span class="po-mod-bloco-c">${lst.length} questões</span>
         </div>
         ${open&&lst.length?`<div class="po-mod-bloco-body"><ol class="po-q-prev">${lst.slice(0,30).map(q=>`<li>${_poEsc(String(q.enunciado||'').slice(0,130))}…</li>`).join('')}${lst.length>30?`<li class="po-mut">… +${lst.length-30} questões</li>`:''}</ol></div>`:''}
       </div>`;
   }).join('');
+  // TSA Oral = lista de TEMAS cobrados (não questões) — funciona como os pedidos.
+  const temasOral=bucket.oralTemas||[];
+  const oralOpen=!!S._poModSec.oral;
+  const oralRows=temasOral.length?temasOral.map((t,i)=>`<tr><td>${_poEsc(t)}</td><td class="po-ped-del"><button type="button" onclick="poModDelTema(${i})" title="Remover">✕</button></td></tr>`).join(''):`<tr><td colspan="2" class="po-ped-vazio">Nenhum tema ainda.</td></tr>`;
+  const oralBloco=`
+    <div class="po-mod-bloco">
+      <div class="po-mod-bloco-head" onclick="poModToggleSec('oral')">
+        <span class="po-mod-chev">${chev(oralOpen)}</span>
+        <span class="po-mod-bloco-t">TSA Oral</span>
+        <span class="po-mod-bloco-c">${temasOral.length} temas</span>
+      </div>
+      ${oralOpen?`<div class="po-mod-bloco-body">
+        <p class="po-mut" style="margin:0 0 8px;font-size:11.5px">Prova oral não tem questões — liste aqui os <b>temas cobrados</b> (um por linha).</p>
+        <table class="po-ped-tabela"><tbody>${oralRows}</tbody></table>
+        <div class="po-ped-add">
+          <input type="text" id="po-oral-novo" class="po-inp" placeholder="Novo tema cobrado no TSA Oral… (Enter pra adicionar)" onkeydown="if(event.key==='Enter'){event.preventDefault();poModAddTema();}">
+          <button type="button" class="btn btn-g" onclick="poModAddTema()">Adicionar</button>
+        </div>
+      </div>`:''}
+    </div>`;
   const peds=bucket.pedidos||[];
   const pedOpen=!!S._poModSec.pedidos;
   const pedRows=peds.length?peds.map((p,i)=>`<tr><td>${_poEsc(p)}</td><td class="po-ped-del"><button type="button" onclick="poModDelPedido(${i})" title="Remover">✕</button></td></tr>`).join(''):`<tr><td colspan="2" class="po-ped-vazio">Nenhum pedido ainda.</td></tr>`;
@@ -39888,7 +39930,7 @@ function _poModModalRender(){
       </div>`:''}
     </div>`;
   // nº total de itens que alimentam a IA (mostrado no cabeçalho do dropdown maior)
-  const nInputs=_PO_MOD_TIPOS.reduce((s,t)=>s+((bucket[t]||[]).length),0)+peds.length;
+  const nInputs=_PO_MOD_TIPOS.reduce((s,t)=>s+((bucket[t]||[]).length),0)+temasOral.length+peds.length;
   const inputsOpen=S._poModInputsOpen!==false;
   const inputsSection=`
     <div class="po-mod-inputs${inputsOpen?' open':''}">
@@ -39900,7 +39942,7 @@ function _poModModalRender(){
       </div>
       ${inputsOpen?`<div class="po-mod-inputs-body">
         ${avisoHTML}
-        <div class="po-mod-blocos">${blocos}${pedBloco}</div>
+        <div class="po-mod-blocos">${blocos}${oralBloco}${pedBloco}</div>
       </div>`:''}
     </div>`;
   host.innerHTML=`

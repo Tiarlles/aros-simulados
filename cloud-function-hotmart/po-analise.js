@@ -123,7 +123,9 @@ function buildSystemPrompt(instr) {
 Critérios (use exatamente estas chaves no campo "notas"):
 ${_criteriosTxt()}
 
-Cada ação serve a uma ou mais PROVAS. As provas são: TEA, TSA, MEs (cada questão do material vem rotulada por uma delas; "Outras" = sem prova específica). No campo "provas" da ação, liste as provas cujas questões cobram aquele tema (ex.: ["TSA"] se só cai no TSA; ["TEA","TSA"] se cai nos dois). Se o tema for geral/transversal sem prova específica, use ["Geral"].
+Cada ação serve a uma ou mais PROVAS. Use estas CHAVES exatas no campo "provas":
+- "MEs" = prova ME · "TEA" = TEA · "TSA" = TSA 1ª fase (questões de múltipla escolha) · "TSAOral" = TSA Oral (prova oral, sem questões — vem da lista de TEMAS COBRADOS) · "Geral" = transversal/sem prova específica.
+Liste as provas a que a ação se refere (ex.: ["TSA"] se só cai na 1ª fase; ["TEA","TSA"] se cai nas duas; ["TSAOral"] se for tema da prova oral). Use ["Geral"] só quando não couber em nenhuma prova específica.
 
 Responda SOMENTE com JSON válido (sem markdown, sem cercas de código), neste formato exato:
 {
@@ -132,7 +134,7 @@ Responda SOMENTE com JSON válido (sem markdown, sem cercas de código), neste f
     {
       "titulo": "ação curta e acionável",
       "categoria": "gravar | regravar | atualizar | material | questoes | edital",
-      "provas": ["TEA" | "TSA" | "MEs" | "Geral"],
+      "provas": ["MEs" | "TEA" | "TSA" | "TSAOral" | "Geral"],
       "aula": "título da aula alvo, ou null se for aula nova/ausente",
       "porque": "1-2 frases justificando com base nos dados",
       "notas": { ${CRIT_IDS.map(id => `"${id}": 0.0`).join(', ')} }
@@ -143,6 +145,7 @@ Responda SOMENTE com JSON válido (sem markdown, sem cercas de código), neste f
 
 function buildUserPrompt(ctx) {
   const { cursoNome, modulo, edital, aulas, questoes, pedidos } = ctx;
+  const oralTemas = ctx.oralTemas || [];
   const linhas = [];
   linhas.push(`CURSO: ${cursoNome}`);
   linhas.push(`MÓDULO (Ponto): ${modulo}`);
@@ -174,18 +177,22 @@ function buildUserPrompt(ctx) {
   linhas.push('(A FICHA RESUMO é diferente: é POR AULA — veja "Ficha resumo: sim/NÃO" em cada aula acima.)');
   linhas.push('');
 
-  linhas.push(`=== QUESTÕES REAIS DE PROVA (banco do módulo, por tipo) ===`);
-  const tipos = ['TEA', 'TSA', 'MEs', 'Outras'];
+  linhas.push(`=== QUESTÕES REAIS DE PROVA (banco do módulo, por prova) ===`);
+  const tipos = [['MEs', 'ME'], ['TEA', 'TEA'], ['TSA', 'TSA 1ª fase'], ['Outras', 'Outras']];
   let temQ = false;
-  tipos.forEach(t => {
+  tipos.forEach(([t, lbl]) => {
     const arr = questoes[t] || [];
     if (!arr.length) return;
     temQ = true;
-    linhas.push(`-- ${t} (${arr.length} questões; mostrando até ${QUESTOES_CAP}) --`);
+    linhas.push(`-- ${lbl} [chave ${t === 'MEs' ? 'MEs' : t}] (${arr.length} questões; mostrando até ${QUESTOES_CAP}) --`);
     arr.slice(0, QUESTOES_CAP).forEach((q, i) => linhas.push(`${i + 1}. ${q}`));
     linhas.push('');
   });
   if (!temQ) linhas.push('(nenhuma questão puxada para este módulo)');
+  linhas.push('');
+
+  linhas.push(`=== TSA ORAL — TEMAS COBRADOS (prova oral; NÃO são questões) [chave TSAOral] ===`);
+  linhas.push(oralTemas.length ? oralTemas.map((t, i) => `${i + 1}. ${t}`).join('\n') : '(nenhum tema do TSA Oral cadastrado)');
   linhas.push('');
 
   linhas.push(`=== PEDIDOS DE ALUNOS ===`);
@@ -272,6 +279,7 @@ exports.analisarModuloPO = onRequest(
       const questoes = {};
       ['TEA', 'TSA', 'MEs', 'Outras'].forEach(t => { questoes[t] = (Array.isArray(md[t]) ? md[t] : []).map(enun).filter(Boolean); });
       const pedidos = Array.isArray(md.pedidos) ? md.pedidos.map(p => String(p).trim()).filter(Boolean) : [];
+      const oralTemas = Array.isArray(md.oralTemas) ? md.oralTemas.map(t => String(t).trim()).filter(Boolean) : [];
       const apostilas = Array.isArray(md.apostilas) ? md.apostilas : [];
       const apostilaStatus = apostilas.length
         ? apostilas.map(ap => `- ${ap.titulo || '(sem título)'}: ${ap.status || 'Pendente'}`).join('\n')
@@ -286,7 +294,7 @@ exports.analisarModuloPO = onRequest(
       const edital = String(editais[cursoId] || '').trim();
       const promptCustom = cfg.analisePrompt && cfg.analisePrompt.modulo;
 
-      const ctx = { cursoNome, modulo, edital, aulas, questoes, pedidos, apostilaStatus, dispensadas };
+      const ctx = { cursoNome, modulo, edital, aulas, questoes, pedidos, oralTemas, apostilaStatus, dispensadas };
       const systemPrompt = buildSystemPrompt(promptCustom);
       const userPrompt = buildUserPrompt(ctx);
 
@@ -313,11 +321,12 @@ exports.analisarModuloPO = onRequest(
         return;
       }
 
-      // Normaliza rótulo de prova vindo da IA (tolera ME/ME1/mes/tsa…).
+      // Normaliza rótulo de prova vindo da IA (tolera ME/ME1/mes/tsa/tsa oral…).
       const _normProva = (p) => {
         const s = String(p || '').trim().toUpperCase().replace(/[^A-Z]/g, '');
+        if (s === 'TSAORAL' || s === 'ORAL' || s.includes('ORAL')) return 'TSAOral';
         if (s === 'TEA') return 'TEA';
-        if (s === 'TSA') return 'TSA';
+        if (s === 'TSA' || s.startsWith('TSA')) return 'TSA';
         if (s === 'ME' || s === 'MES' || s.startsWith('ME')) return 'MEs';
         if (s === 'GERAL') return 'Geral';
         return null;
@@ -338,8 +347,8 @@ exports.analisarModuloPO = onRequest(
         };
       });
 
-      // Contagem de questões por prova (sinal de incidência usado no produto).
-      const porProva = { TEA: (questoes.TEA || []).length, TSA: (questoes.TSA || []).length, MEs: (questoes.MEs || []).length, Outras: (questoes.Outras || []).length };
+      // Contagem por prova (sinal de incidência usado no produto). TSA Oral = nº de temas.
+      const porProva = { TEA: (questoes.TEA || []).length, TSA: (questoes.TSA || []).length, MEs: (questoes.MEs || []).length, TSAOral: oralTemas.length, Outras: (questoes.Outras || []).length };
 
       const resultado = {
         resumo: String(parsed.resumo || '').trim(),
@@ -385,17 +394,17 @@ exports.analisarModuloPO = onRequest(
 // incidência de cada módulo e produz, POR PROVA (TEA/TSA/MEs), um ranking de
 // módulos (priorizando maior incidência na prova) + panorama + resumo geral.
 // ──────────────────────────────────────────────────────────────────────────
-const PROVAS_PRODUTO = ['TEA', 'TSA', 'MEs'];
+const PROVAS_PRODUTO = ['MEs', 'TEA', 'TSA', 'TSAOral'];
 
 // Instruções EDITÁVEIS do prompt do produto. Formato JSON fixo é anexado por código.
 const DEFAULT_PROMPT_PRODUTO = `Você está consolidando a análise de um PRODUTO (curso de revisão para provas de título médico) inteiro, a partir das análises JÁ FEITAS de cada módulo.
 
-IMPORTANTE: você NÃO recebe transcrições nem questões — recebe apenas, de cada módulo já analisado: o resumo, a lista de ações recomendadas (com categoria e provas) e a INCIDÊNCIA (nº de questões reais de prova por prova: TEA, TSA, MEs). Trabalhe só com isso.
+IMPORTANTE: você NÃO recebe transcrições nem questões — recebe apenas, de cada módulo já analisado: o resumo, a lista de ações recomendadas (com categoria e provas) e a INCIDÊNCIA por prova. As provas são: ME, TEA, TSA 1ª fase (chave TSA) e TSA Oral (chave TSAOral; incidência = nº de temas cobrados, não questões). Trabalhe só com isso.
 
-Sua tarefa: para CADA prova (TEA, TSA, MEs), produza um RANKING dos módulos do mais para o menos prioritário, e um panorama curto.
+Sua tarefa: para CADA prova (ME, TEA, TSA 1ªF, TSA Oral), produza um RANKING dos módulos do mais para o menos prioritário, e um panorama curto.
 
 Como priorizar dentro de cada prova:
-1. INCIDÊNCIA primeiro: módulos com MAIS questões naquela prova são mais importantes — é por onde o aluno mais perde/ganha ponto. Dê mais peso a eles.
+1. INCIDÊNCIA primeiro: módulos com MAIS questões/temas naquela prova são mais importantes — é por onde o aluno mais perde/ganha ponto. Dê mais peso a eles.
 2. Gravidade das ações: módulos com ações fortes (lacuna real, aula a gravar/regravar, avaliação baixa) sobem.
 3. Um módulo com altíssima incidência e ações sérias é prioridade máxima naquela prova.
 Atribua a cada módulo um nível: "alta", "media" ou "baixa".
@@ -405,13 +414,14 @@ function buildProdutoSystemPrompt(instr) {
   const base = (instr && String(instr).trim()) ? String(instr).trim() : DEFAULT_PROMPT_PRODUTO;
   return `${base}
 
-Responda SOMENTE com JSON válido (sem markdown, sem cercas), neste formato exato:
+Responda SOMENTE com JSON válido (sem markdown, sem cercas), neste formato exato (use as chaves MEs/TEA/TSA/TSAOral):
 {
   "resumoGeral": "3 a 5 frases: estado geral do produto, onde focar primeiro, padrões que se repetem entre módulos.",
   "porProva": {
-    "TEA": { "panorama": "2-3 frases sobre o cenário desta prova no produto.", "ranking": [ { "modulo": "nome exato do módulo", "nivel": "alta|media|baixa", "porque": "1 frase: por que essa posição (cite incidência e/ou ação)." } ] },
+    "MEs": { "panorama": "2-3 frases sobre o cenário desta prova no produto.", "ranking": [ { "modulo": "nome exato do módulo", "nivel": "alta|media|baixa", "porque": "1 frase: por que essa posição (cite incidência e/ou ação)." } ] },
+    "TEA": { "panorama": "...", "ranking": [ ... ] },
     "TSA": { "panorama": "...", "ranking": [ ... ] },
-    "MEs": { "panorama": "...", "ranking": [ ... ] }
+    "TSAOral": { "panorama": "...", "ranking": [ ... ] }
   }
 }`;
 }
@@ -421,7 +431,7 @@ function buildProdutoUserPrompt(cursoNome, mods) {
   mods.forEach((m, i) => {
     const inc = m.porProva || {};
     linhas.push(`### Módulo ${i + 1}: ${m.modulo}`);
-    linhas.push(`Incidência (nº de questões): TEA ${inc.TEA || 0} · TSA ${inc.TSA || 0} · MEs ${inc.MEs || 0}`);
+    linhas.push(`Incidência: ME ${inc.MEs || 0} · TEA ${inc.TEA || 0} · TSA 1ªF ${inc.TSA || 0} · TSA Oral ${inc.TSAOral || 0} temas`);
     if (m.resumo) linhas.push(`Resumo: ${m.resumo}`);
     const acoes = (m.acoes || []).slice(0, 8);
     if (acoes.length) {
