@@ -5930,6 +5930,11 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-mod-modal .po-an-tabc{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;background:color-mix(in srgb,var(--t2) 18%,transparent);padding:1px 6px;border-radius:6px}
         #po-mod-modal .po-an-tab.on .po-an-tabc{background:color-mix(in srgb,var(--bg) 35%,transparent)}
         #po-mod-modal .po-an-prio{display:flex;align-items:center;gap:10px;font-size:11px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--t2)}
+        #po-mod-modal .po-an-saude{display:flex;align-items:center;gap:10px}
+        #po-mod-modal .po-an-saude-lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--t2)}
+        #po-mod-modal .po-an-saude-track{flex:1;max-width:260px;height:8px;border-radius:999px;background:var(--bg4,var(--bg3));overflow:hidden}
+        #po-mod-modal .po-an-saude-track>i{display:block;height:100%;border-radius:999px;transition:width .3s}
+        #po-mod-modal .po-an-saude>b{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700}
         #po-mod-modal .po-an-badge{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:3px 12px;border-radius:7px;color:var(--nc);background:color-mix(in srgb,var(--nc) 15%,transparent);border:1px solid color-mix(in srgb,var(--nc) 40%,transparent)}
         #po-mod-modal .po-an-list{display:flex;flex-direction:column;gap:8px}
         #po-mod-modal .po-an-acao{display:flex;gap:13px;align-items:flex-start;padding:13px 15px;border-radius:11px;background:color-mix(in srgb,var(--nc) 6%,var(--bg2));border:1px solid color-mix(in srgb,var(--nc) 22%,var(--border));border-left:3px solid var(--nc);transition:.15s}
@@ -38715,7 +38720,7 @@ function _poTableRowsHTML(aulas,q){
     const modSelMarcado=(S.poSel&&S.poSel.modulos&&S.poSel.modulos.has(g.modulo))||(g.aulas.length&&g.aulas.every(a=>S.poSel&&S.poSel.aulas.has(a.id)));
     const modChk=`<input type="checkbox" class="po-sel-mod"${modSelMarcado?' checked':''} data-modulo="${_poEsc(g.modulo)}" onclick="event.stopPropagation();poToggleSelModulo('${encodeURIComponent(g.modulo)}',this.checked)">`;
     out+=`<tr class="po-mod-row${open?' open':''}" draggable="false" data-modulo="${_poEsc(g.modulo)}" onclick="poModRowClick(event,'${encodeURIComponent(g.modulo)}')">
-      <td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><span class="po-grip" onmousedown="event.stopPropagation();this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span>${modChk}<span class="po-chev">▸</span><span class="po-mod-nome" ondblclick="event.stopPropagation();poModNomeEdit(event,'${encodeURIComponent(g.modulo)}',this)" title="Duplo-clique pra renomear">${_poEsc(g.modulo)}</span>${at}${qBadge}${btnAnalisar}${progBar}</span></td>
+      <td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><span class="po-grip" onmousedown="event.stopPropagation();this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span>${modChk}<span class="po-chev">▸</span><span class="po-mod-nome" ondblclick="event.stopPropagation();poModNomeEdit(event,'${encodeURIComponent(g.modulo)}',this)" title="Duplo-clique pra renomear">${_poEsc(g.modulo)}</span>${at}${btnAnalisar}${progBar}</span></td>
     </tr>`;
     if(open){
       out+=apostRow;
@@ -39806,17 +39811,21 @@ const _PO_CAT_ICON={gravar:'🎬',regravar:'🔁',atualizar:'♻️',material:'�
 // 3 níveis de prioridade (cor) derivados da nota 0..1 ponderada pelos pesos.
 const _PO_NIVEL={alta:{lbl:'Alta',cor:'#f85149'},media:{lbl:'Média',cor:'#d29922'},baixa:{lbl:'Baixa',cor:'#3fb950'}};
 function _poNivelDe(p){ return p>=0.5?'alta':(p>=0.25?'media':'baixa'); }
-// Progresso/saúde de um módulo (0-100) a partir da análise salva + pesos. null = não analisado.
-// 100 = nada pendente; quanto mais urgente a ação mais grave (pega a maior prioridade entre as ações não dispensadas).
+// Saúde de um conjunto de ações (0-100): ACUMULA todas as pendências (produto).
+// Cada ação tira um pedaço proporcional à sua prioridade — várias faltas derrubam mais
+// que uma só. 100 = nada pendente.
+function _poSaudeDeAcoes(acoes){
+  if(!acoes||!acoes.length)return 100;
+  let s=1; acoes.forEach(a=>{ s*=(1-_poPrioridade(a.notas)); });
+  return Math.max(0,Math.min(100,Math.round(100*s)));
+}
+// Progresso/saúde de um módulo (0-100) a partir da análise salva. null = não analisado.
 function _poModProgresso(cid,modulo){
   const k=_poModKey(cid,modulo);
   const an=(S._poAnalises&&S._poAnalises[k])||(S.poModQuestoes[k]&&S.poModQuestoes[k].analise);
   if(!an||!Array.isArray(an.acoes))return null;
   const dis=_poDispSet(k);
-  const acoes=an.acoes.filter(a=>!dis.has(_poNormTit(a.titulo)));
-  if(!acoes.length)return 100;
-  const topP=Math.max(...acoes.map(a=>_poPrioridade(a.notas)));
-  return Math.max(0,Math.min(100,Math.round(100*(1-topP))));
+  return _poSaudeDeAcoes(an.acoes.filter(a=>!dis.has(_poNormTit(a.titulo))));
 }
 // Cor da barra de progresso por faixa (verde=ok, amarelo=atenção, vermelho=crítico).
 function _poProgCor(pct){ if(pct==null)return 'var(--border2)'; return pct>=70?'#3fb950':(pct>=40?'#d29922':'#f85149'); }
@@ -39899,11 +39908,17 @@ function _poRenderAnalise(an){
       </div></div>`;
   }).join('')||`<div class="po-an-vazio">Nenhuma ação ${aba==='Todas'?'pendente neste módulo':'para esta prova'} — a cobertura está adequada.</div>`;
   const nvm=_PO_NIVEL[nivelMod];
+  const saude=_poSaudeDeAcoes(todas); const saudeCor=_poProgCor(saude);
   const dispFoot=nDisp?`<button type="button" class="po-an-restaurar" onclick="poAnRestaurarDispensadas()" title="Voltar a mostrar as recomendações dispensadas">↩︎ ${nDisp} descartada(s) — restaurar</button>`:'';
   box.innerHTML=`<div class="po-an-wrap">
     <div class="po-an-head">
       <span class="po-an-h-tit">Análise do módulo</span>
       ${m.em?`<span class="po-an-saved">última análise em ${_poDataFmt(m.em)}</span>`:''}
+    </div>
+    <div class="po-an-saude" title="Saúde do módulo pelos pesos (todas as pendências)">
+      <span class="po-an-saude-lbl">Saúde do módulo</span>
+      <span class="po-an-saude-track"><i style="width:${saude}%;background:${saudeCor}"></i></span>
+      <b style="color:${saudeCor}">${saude}%</b>
     </div>
     <div class="po-an-tabs">${tabs}</div>
     ${acoes.length?`<div class="po-an-prio"><span>Prioridade ${aba==='Todas'?'geral':'no '+(_PO_PROVA_LBL[aba]||aba)}</span><span class="po-an-badge" style="--nc:${nvm.cor}">${nvm.lbl}</span></div>`:''}
