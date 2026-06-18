@@ -5657,6 +5657,13 @@ body.pro-rt-fs-on{overflow:hidden}
         /* Barra de progresso */
         #tab-po .po-bar{height:6px;border-radius:999px;background:var(--bg4);overflow:hidden;margin:0 0 12px;margin-left:8px}
         #tab-po .po-bar>i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#3fb950,#2ea043)}
+        #tab-po .po-bar.po-bar-an{margin-top:-6px}
+        #tab-po .po-bar.po-bar-an>i{background:var(--border2)}
+        /* Barra de saúde na linha do módulo (análise × pesos) */
+        #tab-po .po-prog{display:inline-flex;align-items:center;gap:7px;margin-left:14px;vertical-align:middle}
+        #tab-po .po-prog-track{width:88px;height:7px;border-radius:999px;background:var(--bg4);overflow:hidden;display:inline-block;flex:none}
+        #tab-po .po-prog-track>i{display:block;height:100%;border-radius:999px;transition:width .3s}
+        #tab-po .po-prog>b{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;min-width:30px}
         /* Toolbar / voltar */
         #tab-po .po-back{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--t2);font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.04em;cursor:pointer;padding:4px 0;margin-bottom:10px}
         #tab-po .po-back:hover{color:var(--accent)}
@@ -37566,7 +37573,8 @@ async function loadPO(){
       if(!x.cursoId||x.modulo==null)return;
       const key=_poModKey(x.cursoId,x.modulo);
       const ped=Array.isArray(x.pedidos)?x.pedidos:(x.pedidos?String(x.pedidos).split('\n').map(s=>s.trim()).filter(Boolean):[]);
-      mq[key]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],pedidos:ped,apostilas:Array.isArray(x.apostilas)?x.apostilas:[]};
+      mq[key]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],oralTemas:Array.isArray(x.oralTemas)?x.oralTemas:[],atualizacaoConteudo:String(x.atualizacaoConteudo||''),transcricaoAvulsa:String(x.transcricaoAvulsa||''),pedidos:ped,apostilas:Array.isArray(x.apostilas)?x.apostilas:[],analise:x.analise||null};
+      if(Array.isArray(x.analiseDismissed)&&x.analiseDismissed.length)S._poAnDispensadas[key]=new Set(x.analiseDismissed.map(_poNormTit));
     });
     S.poModQuestoes=mq;
   }catch(e){ /* mantém o que tem */ }
@@ -38702,10 +38710,12 @@ function _poTableRowsHTML(aulas,q){
     const apTitle=apos.length?`Apostila do módulo: ${apStatus} — ${apos.length} cadastrada(s)`:'Sem apostila cadastrada (Pendente)';
     const apostRow=`<tr class="po-apost-row-tr"><td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><button type="button" class="po-apost-rowbtn" style="--ac:${apCor}" onclick="poAbrirApostilas('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="${apTitle}">📚 Apostila do módulo: ${apLabel}</button></span></td></tr>`;
     const btnAnalisar=`<button type="button" class="po-mod-analisar" onclick="event.stopPropagation();poAbrirAnaliseModulo('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="Analisar este módulo com a IA">🤖 Analisar módulo</button>`;
+    const modProg=S.poCursoAtual?_poModProgresso(S.poCursoAtual,g.modulo):null;
+    const progBar=_poProgBar(modProg);
     const modSelMarcado=(S.poSel&&S.poSel.modulos&&S.poSel.modulos.has(g.modulo))||(g.aulas.length&&g.aulas.every(a=>S.poSel&&S.poSel.aulas.has(a.id)));
     const modChk=`<input type="checkbox" class="po-sel-mod"${modSelMarcado?' checked':''} data-modulo="${_poEsc(g.modulo)}" onclick="event.stopPropagation();poToggleSelModulo('${encodeURIComponent(g.modulo)}',this.checked)">`;
     out+=`<tr class="po-mod-row${open?' open':''}" draggable="false" data-modulo="${_poEsc(g.modulo)}" onclick="poModRowClick(event,'${encodeURIComponent(g.modulo)}')">
-      <td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><span class="po-grip" onmousedown="event.stopPropagation();this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span>${modChk}<span class="po-chev">▸</span><span class="po-mod-nome" ondblclick="event.stopPropagation();poModNomeEdit(event,'${encodeURIComponent(g.modulo)}',this)" title="Duplo-clique pra renomear">${_poEsc(g.modulo)}</span>${at}${qBadge}${btnAnalisar}</span></td>
+      <td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><span class="po-grip" onmousedown="event.stopPropagation();this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span>${modChk}<span class="po-chev">▸</span><span class="po-mod-nome" ondblclick="event.stopPropagation();poModNomeEdit(event,'${encodeURIComponent(g.modulo)}',this)" title="Duplo-clique pra renomear">${_poEsc(g.modulo)}</span>${at}${qBadge}${btnAnalisar}${progBar}</span></td>
     </tr>`;
     if(open){
       out+=apostRow;
@@ -38775,13 +38785,19 @@ function _poRenderCursos(root){
     const prontas=aulas.filter(a=>_poIsPronta(a.status)).length;
     const pct=base?Math.round((prontas/base)*100):0;
     const prodTag=c.produtoId?`<span class="po-prod-tag">🛍️ ${_poEsc(c.produtoId)}</span>`:'';
+    const prog=_poProdProgresso(c.id);
+    const aCor=_poProgCor(prog.pct);
+    const aLbl=prog.pct==null?'sem análise':`${prog.pct}% análise`;
+    const aTitle=prog.pct==null?'Nenhum módulo analisado ainda':`Saúde média (pela IA/pesos) dos ${prog.analisados}/${prog.total} módulos analisados`;
     return `<button type="button" class="po-curso-card" style="--cc:${v.cor};--cc2:${v.cor2||v.cor}" onclick="poAbrirCurso('${c.id}')">
       <div class="po-cc-nome">${_poEsc(c.nome)}</div>
       <div class="po-cc-desc">${_poEsc(c.descricao||'')}</div>
-      <div class="po-bar"><i style="width:${pct}%"></i></div>
+      <div class="po-bar" title="Aulas com status 'no ar'"><i style="width:${pct}%"></i></div>
+      <div class="po-bar po-bar-an" title="${aTitle}"><i style="width:${prog.pct==null?0:prog.pct}%;background:${aCor}"></i></div>
       <div class="po-cc-foot">
         <span class="po-cc-stat"><b>${total}</b> aulas</span>
         <span class="po-cc-stat"><b>${pct}%</b> em produção</span>
+        <span class="po-cc-stat" style="color:${aCor}"><b>${aLbl}</b></span>
         ${prodTag}
       </div>
       <span class="po-cc-del" role="button" tabindex="0" onclick="event.stopPropagation();event.preventDefault();poExcluirProduto('${c.id}')" title="Excluir produto">🗑️</span>
@@ -39790,6 +39806,34 @@ const _PO_CAT_ICON={gravar:'🎬',regravar:'🔁',atualizar:'♻️',material:'�
 // 3 níveis de prioridade (cor) derivados da nota 0..1 ponderada pelos pesos.
 const _PO_NIVEL={alta:{lbl:'Alta',cor:'#f85149'},media:{lbl:'Média',cor:'#d29922'},baixa:{lbl:'Baixa',cor:'#3fb950'}};
 function _poNivelDe(p){ return p>=0.5?'alta':(p>=0.25?'media':'baixa'); }
+// Progresso/saúde de um módulo (0-100) a partir da análise salva + pesos. null = não analisado.
+// 100 = nada pendente; quanto mais urgente a ação mais grave (pega a maior prioridade entre as ações não dispensadas).
+function _poModProgresso(cid,modulo){
+  const k=_poModKey(cid,modulo);
+  const an=(S._poAnalises&&S._poAnalises[k])||(S.poModQuestoes[k]&&S.poModQuestoes[k].analise);
+  if(!an||!Array.isArray(an.acoes))return null;
+  const dis=_poDispSet(k);
+  const acoes=an.acoes.filter(a=>!dis.has(_poNormTit(a.titulo)));
+  if(!acoes.length)return 100;
+  const topP=Math.max(...acoes.map(a=>_poPrioridade(a.notas)));
+  return Math.max(0,Math.min(100,Math.round(100*(1-topP))));
+}
+// Cor da barra de progresso por faixa (verde=ok, amarelo=atenção, vermelho=crítico).
+function _poProgCor(pct){ if(pct==null)return 'var(--border2)'; return pct>=70?'#3fb950':(pct>=40?'#d29922':'#f85149'); }
+// HTML da barrinha (usada na linha do módulo e no card do produto).
+function _poProgBar(pct,opts){
+  const o=opts||{}; const cor=_poProgCor(pct);
+  const lbl=pct==null?(o.semLabel||'—'):pct+'%';
+  const fill=pct==null?0:pct;
+  return `<span class="po-prog${o.cls?' '+o.cls:''}" title="${pct==null?'Módulo ainda não analisado':'Saúde do módulo: '+pct+'% (pelos pesos)'}"><span class="po-prog-track"><i style="width:${fill}%;background:${cor}"></i></span><b style="color:${cor}">${lbl}</b></span>`;
+}
+// Progresso do PRODUTO = média dos módulos analisados (+ contagem).
+function _poProdProgresso(cid){
+  const mods=_poGroupByMod(_poAulasDoCurso(cid)).map(g=>g.modulo);
+  const vals=mods.map(m=>_poModProgresso(cid,m)).filter(v=>v!=null);
+  if(!vals.length)return {pct:null,analisados:0,total:mods.length};
+  return {pct:Math.round(vals.reduce((s,v)=>s+v,0)/vals.length),analisados:vals.length,total:mods.length};
+}
 const _PO_PROVAS_ORDEM=['MEs','TEA','TSA','TSAOral','Geral'];
 const _PO_PROVA_LBL={MEs:'ME',TEA:'TEA',TSA:'TSA 1ªF',TSAOral:'TSA Oral',Geral:'GERAL'};
 function _poDataFmt(iso){ try{ const d=new Date(iso); if(isNaN(d))return ''; return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }catch(_){return '';} }
