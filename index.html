@@ -6138,6 +6138,27 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-edital-modal .po-modal-body,#po-pesos-modal .po-modal-body{padding:18px 20px;max-height:72vh;overflow:auto}
         #po-edital-modal .po-modal-foot,#po-pesos-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
         #po-edital-modal .po-imp-instr,#po-pesos-modal .po-imp-instr{font-size:12.5px;color:var(--t2);margin:0 0 14px;line-height:1.5}
+        /* Modal de edição do prompt da IA */
+        #po-prompt-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-prompt-modal.show{display:block}
+        #po-prompt-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-prompt-modal .po-modal{position:relative;max-width:620px;margin:7vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-prompt-modal .po-modal.po-modal-lg{max-width:780px}
+        #po-prompt-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-prompt-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text)}
+        #po-prompt-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-prompt-modal .po-modal-x:hover{color:var(--text)}
+        #po-prompt-modal .po-modal-body{padding:18px 20px;max-height:74vh;overflow:auto}
+        #po-prompt-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        #po-prompt-modal .po-imp-instr{font-size:12.5px;color:var(--t2);margin:0 0 12px;line-height:1.5}
+        #po-prompt-modal .po-prompt-tabs{display:flex;gap:6px;margin-bottom:12px}
+        #po-prompt-modal .po-prompt-tab{font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--t2);cursor:pointer;transition:.15s}
+        #po-prompt-modal .po-prompt-tab:hover{color:var(--text);border-color:var(--border2)}
+        #po-prompt-modal .po-prompt-tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+        #po-prompt-modal .po-prompt-ta{width:100%;box-sizing:border-box;min-height:46vh;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;padding:12px 14px;resize:vertical}
+        #po-prompt-modal .po-prompt-hint{font-size:11.5px;color:var(--t2);margin-top:10px;line-height:1.5}
+        #po-prompt-modal .po-an-load{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--text);margin:0 0 10px}
+        #po-prompt-modal .po-an-spin{width:15px;height:15px;border-radius:50%;border:2px solid color-mix(in srgb,var(--accent) 30%,transparent);border-top-color:var(--accent);display:inline-block;animation:po-an-rot .7s linear infinite;flex:none}
         #po-edital-modal .po-inp{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;line-height:1.55;padding:10px 12px;resize:vertical}
         #po-pesos-modal .po-peso-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border)}
         #po-pesos-modal .po-peso-row:last-child{border-bottom:none}
@@ -37463,6 +37484,7 @@ async function loadPO(){
       if(d.editais&&typeof d.editais==='object')S.poEditais=d.editais;
       if(d.temaModulo&&typeof d.temaModulo==='object')S.poTemaModulo=d.temaModulo;
       if(d.analiseProduto&&typeof d.analiseProduto==='object')S.poAnaliseProduto=d.analiseProduto;
+      if(d.analisePrompt&&typeof d.analisePrompt==='object')S.poAnalisePrompt=d.analisePrompt;
     }
   }catch(e){ /* sem permissão de leitura: segue com defaults */ }
 
@@ -38809,6 +38831,7 @@ function _poRenderCurso(root){
           <button type="button" class="po-ia-btn po-ia-on" onclick="poAbrirMapaTemas()">🧩 Temas dos módulos</button>
           <button type="button" class="po-ia-btn po-ia-on" onclick="poAbrirEdital()">📋 Edital do produto</button>
           <button type="button" class="po-ia-btn po-ia-on" onclick="poAbrirPesos()">⚖️ Pesos da priorização</button>
+          <button type="button" class="po-ia-btn po-ia-on" onclick="poAbrirPromptIA()">✍️ Prompt da IA</button>
           <button type="button" class="po-ia-btn po-ia-on" onclick="poAnalisarProduto()">⚡ Analisar produto</button>
         </div>
         <div id="po-prod-timeline"></div>
@@ -39416,6 +39439,67 @@ const PO_CRITERIOS=[
 S.poPesos=Object.fromEntries(PO_CRITERIOS.map(c=>[c.id,c.peso])); // default; sobrescrito pelo config
 S.poEditais={}; // {cursoId: textoDoEdital}
 S.poAnaliseProduto={}; // {cursoId: resultado da análise do produto (IA)}
+S.poAnalisePrompt={};  // {modulo, produto} — instruções editáveis dos prompts da IA
+
+// ── Tela: editar os prompts da IA (módulo + produto) ──
+S._poPromptDefaults=null;  // {modulo,produto} buscado da função
+S._poPromptDraft=null;     // cópia de trabalho {modulo,produto}
+S._poPromptTab='modulo';
+const _PO_PROMPT_LBL={modulo:'🤖 Análise do módulo',produto:'🧠 Análise do produto'};
+window.poAbrirPromptIA=async()=>{
+  S._poPromptTab='modulo';
+  S._poPromptDraft={modulo:String(S.poAnalisePrompt.modulo||''),produto:String(S.poAnalisePrompt.produto||'')};
+  _poPromptIARender();
+  // busca os textos-padrão (pra preencher quando vazio e pro botão "restaurar")
+  if(!S._poPromptDefaults){
+    try{ const r=await _poApiPost(ANALISE_PO_ENDPOINT,{acao:'defaults'}); S._poPromptDefaults=r.defaults||{modulo:'',produto:''}; }
+    catch(e){ S._poPromptDefaults={modulo:'',produto:''}; }
+    // se o draft está vazio, mostra o padrão como ponto de partida
+    if(!S._poPromptDraft.modulo)S._poPromptDraft.modulo=S._poPromptDefaults.modulo||'';
+    if(!S._poPromptDraft.produto)S._poPromptDraft.produto=S._poPromptDefaults.produto||'';
+    _poPromptIARender();
+  }
+};
+window.poPromptIAClose=()=>{const h=document.getElementById('po-prompt-modal');if(h){h.classList.remove('show');h.innerHTML='';}S._poPromptDraft=null;};
+function _poPromptCapture(){ const ta=document.getElementById('po-prompt-ta'); if(ta&&S._poPromptDraft)S._poPromptDraft[S._poPromptTab]=ta.value; }
+window.poPromptIASetTab=(t)=>{ _poPromptCapture(); S._poPromptTab=t; _poPromptIARender(); };
+window.poPromptIARestaurar=()=>{ if(!S._poPromptDefaults||!S._poPromptDraft)return; S._poPromptDraft[S._poPromptTab]=S._poPromptDefaults[S._poPromptTab]||''; _poPromptIARender(); arosToast('Texto padrão restaurado neste campo (salve para aplicar).','success',2600); };
+window.poPromptIASalvar=async()=>{
+  _poPromptCapture();
+  const novo={modulo:String(S._poPromptDraft.modulo||'').trim(),produto:String(S._poPromptDraft.produto||'').trim()};
+  S.poAnalisePrompt=novo;
+  try{ await setDoc(doc(db,'config','poConfig'),{analisePrompt:novo},{merge:true}); arosToast('Prompt salvo — vale na próxima análise.','success',2600); poPromptIAClose(); }
+  catch(e){ arosToast('Erro ao salvar: '+(e.message||e),'err',3500); }
+};
+function _poPromptIARender(){
+  let host=document.getElementById('po-prompt-modal');
+  if(!host){host=document.createElement('div');host.id='po-prompt-modal';document.body.appendChild(host);}
+  if(!S._poPromptDraft){host.classList.remove('show');host.innerHTML='';return;}
+  const tab=S._poPromptTab;
+  const carregando=!S._poPromptDefaults;
+  const val=String(S._poPromptDraft[tab]||'');
+  const tabBtn=(t)=>`<button type="button" class="po-prompt-tab${tab===t?' on':''}" onclick="poPromptIASetTab('${t}')">${_PO_PROMPT_LBL[t]}</button>`;
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poPromptIAClose()"></div>
+    <div class="po-modal po-modal-lg" role="dialog">
+      <div class="po-modal-head"><h3>✍️ Prompt da IA</h3><button type="button" class="po-modal-x" onclick="poPromptIAClose()">✕</button></div>
+      <div class="po-modal-body">
+        <p class="po-imp-instr">Ajuste como a IA pensa em cada análise. Você edita só as <b>instruções/regras</b> — a parte técnica (lista de critérios e o formato da resposta) é montada automaticamente e não aparece aqui, pra não quebrar a leitura do resultado.</p>
+        <div class="po-prompt-tabs">${tabBtn('modulo')}${tabBtn('produto')}</div>
+        ${carregando?`<div class="po-an-load"><span class="po-an-spin"></span> Carregando o texto padrão…</div>`:''}
+        <textarea id="po-prompt-ta" class="po-inp po-prompt-ta" spellcheck="false" placeholder="Instruções da IA…">${_poEsc(val)}</textarea>
+        <div class="po-prompt-hint">💡 Dica: mantenha as regras numeradas claras e objetivas. Mudanças valem na <b>próxima</b> análise (re-analise o módulo/produto pra aplicar).</div>
+      </div>
+      <div class="po-modal-foot">
+        <button type="button" class="btn btn-g" onclick="poPromptIARestaurar()" ${carregando?'disabled':''}>↺ Restaurar padrão (deste)</button>
+        <div style="display:flex;gap:10px">
+          <button type="button" class="btn btn-g" onclick="poPromptIAClose()">Fechar</button>
+          <button type="button" class="btn btn-p" onclick="poPromptIASalvar()">💾 Salvar prompt</button>
+        </div>
+      </div>
+    </div>`;
+  host.classList.add('show');
+}
 
 async function _poSavePesos(){ try{ await setDoc(doc(db,'config','poConfig'),{poPesos:S.poPesos},{merge:true}); }catch(e){console.warn('poPesos save',e);} }
 async function _poSaveEditais(){ try{ await setDoc(doc(db,'config','poConfig'),{editais:S.poEditais},{merge:true}); }catch(e){console.warn('editais save',e);} }

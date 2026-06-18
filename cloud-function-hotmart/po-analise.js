@@ -92,8 +92,9 @@ function _criteriosTxt() {
   return CRITERIOS.map(c => `- "${c.id}" — ${c.label}: ${c.desc}`).join('\n');
 }
 
-function buildSystemPrompt() {
-  return `Você é o motor de priorização de produto da MedReview ("megabrain"), analisando UM módulo (Ponto) de um curso de revisão para prova de título médico.
+// Instruções EDITÁVEIS do prompt do módulo (o coordenador ajusta pela tela).
+// A parte técnica (lista de critérios + formato JSON) é fixa e anexada por código.
+const DEFAULT_PROMPT_MODULO = `Você é o motor de priorização de produto da MedReview ("megabrain"), analisando UM módulo (Ponto) de um curso de revisão para prova de título médico.
 
 Sua tarefa: ler o material do módulo (aulas com transcrição, status, avaliação dos alunos e ano de gravação; banco de questões reais de prova por tipo; pedidos de alunos; edital; status do material de apoio) e produzir uma lista de AÇÕES concretas e acionáveis para a coordenação de produto — o que gravar, regravar, atualizar, ou que material/questão falta.
 
@@ -112,7 +113,11 @@ Regras:
 10. Use a avaliação dos alunos e o status/ano das aulas para sinalizar regravação/atualização.
 11. Para CADA ação, pontue os 7 critérios de 0 a 1 (0 = irrelevante para esta ação, 1 = máximo). NÃO aplique pesos — só pontue. Os pesos são aplicados depois pelo sistema. Em especial, a nota "frequencia" deve ser PROPORCIONAL ao nº de questões que cobrem o tema (0 questões = 0; 1 questão isolada ≈ 0,1; tema dominante ≈ 1).
 12. Ordene as ações da mais para a menos relevante na sua visão, mas a ordenação final é feita pelo sistema via pesos.
-13. Seja conciso. No máximo 12 ações, priorizando as de maior impacto. Não liste ação para todo tema raro — agrupe ou omita o que tem baixíssimo impacto.
+13. Seja conciso. No máximo 12 ações, priorizando as de maior impacto. Não liste ação para todo tema raro — agrupe ou omita o que tem baixíssimo impacto.`;
+
+function buildSystemPrompt(instr) {
+  const base = (instr && String(instr).trim()) ? String(instr).trim() : DEFAULT_PROMPT_MODULO;
+  return `${base}
 
 Critérios (use exatamente estas chaves no campo "notas"):
 ${_criteriosTxt()}
@@ -205,6 +210,12 @@ exports.analisarModuloPO = onRequest(
     const decoded = await exigeAuth(req, res);
     if (!decoded) return;
 
+    // Modo "defaults": devolve os textos-padrão dos prompts pra tela de edição (sem chamar IA).
+    if (String(req.body?.acao || '') === 'defaults') {
+      res.status(200).json({ ok: true, defaults: { modulo: DEFAULT_PROMPT_MODULO, produto: DEFAULT_PROMPT_PRODUTO } });
+      return;
+    }
+
     const cursoId = String(req.body?.cursoId || '').trim();
     const cursoNome = String(req.body?.cursoNome || '').trim();
     const modulo = String(req.body?.modulo || '').trim();
@@ -265,13 +276,15 @@ exports.analisarModuloPO = onRequest(
       // Recomendações que o coordenador já dispensou — a IA não deve propô-las de novo.
       const dispensadas = Array.isArray(md.analiseDismissed) ? md.analiseDismissed.map(d => String(d).trim()).filter(Boolean) : [];
 
-      // 4) Edital do curso.
+      // 4) Edital do curso + prompt customizado (editável pela tela).
       const cfgSnap = await db.collection('config').doc('poConfig').get();
-      const editais = cfgSnap.exists ? (cfgSnap.data()?.editais || {}) : {};
+      const cfg = cfgSnap.exists ? (cfgSnap.data() || {}) : {};
+      const editais = cfg.editais || {};
       const edital = String(editais[cursoId] || '').trim();
+      const promptCustom = cfg.analisePrompt && cfg.analisePrompt.modulo;
 
       const ctx = { cursoNome, modulo, edital, aulas, questoes, pedidos, apostilaStatus, dispensadas };
-      const systemPrompt = buildSystemPrompt();
+      const systemPrompt = buildSystemPrompt(promptCustom);
       const userPrompt = buildUserPrompt(ctx);
 
       const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
@@ -371,8 +384,8 @@ exports.analisarModuloPO = onRequest(
 // ──────────────────────────────────────────────────────────────────────────
 const PROVAS_PRODUTO = ['TEA', 'TSA', 'MEs'];
 
-function buildProdutoSystemPrompt() {
-  return `Você está consolidando a análise de um PRODUTO (curso de revisão para provas de título médico) inteiro, a partir das análises JÁ FEITAS de cada módulo.
+// Instruções EDITÁVEIS do prompt do produto. Formato JSON fixo é anexado por código.
+const DEFAULT_PROMPT_PRODUTO = `Você está consolidando a análise de um PRODUTO (curso de revisão para provas de título médico) inteiro, a partir das análises JÁ FEITAS de cada módulo.
 
 IMPORTANTE: você NÃO recebe transcrições nem questões — recebe apenas, de cada módulo já analisado: o resumo, a lista de ações recomendadas (com categoria e provas) e a INCIDÊNCIA (nº de questões reais de prova por prova: TEA, TSA, MEs). Trabalhe só com isso.
 
@@ -383,7 +396,11 @@ Como priorizar dentro de cada prova:
 2. Gravidade das ações: módulos com ações fortes (lacuna real, aula a gravar/regravar, avaliação baixa) sobem.
 3. Um módulo com altíssima incidência e ações sérias é prioridade máxima naquela prova.
 Atribua a cada módulo um nível: "alta", "media" ou "baixa".
-Só inclua no ranking de uma prova os módulos que têm incidência > 0 OU ações relevantes para aquela prova.
+Só inclua no ranking de uma prova os módulos que têm incidência > 0 OU ações relevantes para aquela prova.`;
+
+function buildProdutoSystemPrompt(instr) {
+  const base = (instr && String(instr).trim()) ? String(instr).trim() : DEFAULT_PROMPT_PRODUTO;
+  return `${base}
 
 Responda SOMENTE com JSON válido (sem markdown, sem cercas), neste formato exato:
 {
@@ -430,6 +447,9 @@ exports.analisarProdutoPO = onRequest(
 
     try {
       const db = admin.firestore();
+      // Prompt customizado do produto (editável pela tela).
+      const cfgSnap = await db.collection('config').doc('poConfig').get();
+      const promptCustom = cfgSnap.exists && cfgSnap.data().analisePrompt && cfgSnap.data().analisePrompt.produto;
       // Lê os módulos do curso que já têm análise salva.
       const snap = await db.collection('poModQuestoes').where('cursoId', '==', cursoId).get();
       const mods = [];
@@ -457,7 +477,7 @@ exports.analisarProdutoPO = onRequest(
       const resp = await client.messages.create({
         model: MODEL,
         max_tokens: MAX_TOKENS,
-        system: [{ type: 'text', text: buildProdutoSystemPrompt(), cache_control: { type: 'ephemeral' } }],
+        system: [{ type: 'text', text: buildProdutoSystemPrompt(promptCustom), cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: buildProdutoUserPrompt(cursoNome, mods) }],
       });
 
