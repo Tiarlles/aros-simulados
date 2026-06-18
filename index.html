@@ -5950,6 +5950,17 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-mod-modal .po-an-pchip{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.3px;padding:1px 6px;border-radius:10px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
         #po-mod-modal .po-an-aula{font-size:11.5px;color:var(--t2);margin-top:2px}
         #po-mod-modal .po-an-por{font-size:12px;line-height:1.45;color:var(--t2);margin-top:2px}
+        #po-mod-modal .po-an-titxt{flex:0 1 auto}
+        #po-mod-modal .po-an-acts{margin-left:auto;display:inline-flex;gap:4px;flex:none}
+        #po-mod-modal .po-an-ibtn,#po-mod-modal .po-an-xbtn{width:24px;height:24px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;font-size:11px;line-height:1;display:inline-flex;align-items:center;justify-content:center;padding:0;opacity:.6;transition:.15s}
+        #po-mod-modal .po-an-ibtn:hover,#po-mod-modal .po-an-xbtn:hover{opacity:1;border-color:var(--border2)}
+        #po-mod-modal .po-an-ibtn.on{opacity:1;background:color-mix(in srgb,var(--accent) 18%,transparent);border-color:var(--accent)}
+        #po-mod-modal .po-an-xbtn:hover{border-color:#f85149;background:color-mix(in srgb,#f85149 14%,transparent)}
+        #po-mod-modal .po-an-det{margin-top:6px;padding:8px 11px;border-left:2px solid color-mix(in srgb,var(--accent) 45%,transparent);background:color-mix(in srgb,var(--accent) 7%,transparent);border-radius:0 8px 8px 0}
+        #po-mod-modal .po-an-vazio{padding:16px;text-align:center;font-size:12.5px;color:var(--t2)}
+        #po-mod-modal .po-an-restaurar{background:none;border:1px dashed var(--border2);color:var(--t2);font-size:11px;padding:4px 11px;border-radius:7px;cursor:pointer}
+        #po-mod-modal .po-an-restaurar:hover{color:var(--text);border-color:var(--accent)}
+        #po-mod-modal .po-an-foot-hint{margin-left:auto;display:inline-flex;align-items:center;gap:8px}
         #po-mod-modal .po-q-mock .po-imp-erro{padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 35%,transparent);color:#f85149;font-size:12.5px}
         #po-mod-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
         #po-mod-modal .po-mod-sub{font-size:12px;color:var(--t2);margin-top:2px;font-family:'JetBrains Mono',monospace}
@@ -39538,13 +39549,18 @@ window.poAbrirAnaliseModulo=(cid,modEnc)=>{
   _PO_MOD_TIPOS.forEach(t=>{S._poModSec[t]=(b[t]||[]).length>0;});
   S._poModSec.pedidos=(b.pedidos||[]).length>0;
   const k=_poModKey(cid,S._poModAtual.modulo);
+  S._poAnInfo[k]=new Set(); // começa com todos os "porquês" recolhidos
   // Se já há análise salva, abre com os INPUTS dobrados (foco no resultado); senão, abertos.
   S._poModInputsOpen=!S._poAnalises[k];
   _poModModalRender(); // já re-pinta a análise em memória, se houver
-  // Restaura a última análise persistida (poModQuestoes.analise) quando não está em memória.
-  if(!S._poAnalises[k]){
-    getDoc(doc(db,'poModQuestoes',k)).then(s=>{const an=s.exists()&&(s.data()||{}).analise;if(an&&S._poModAtual&&_poModKey(S._poModAtual.cid,S._poModAtual.modulo)===k){S._poAnalises[k]=an;S._poModInputsOpen=false;_poModModalRender();}}).catch(()=>{});
-  }
+  // Carrega do Firestore: análise persistida (se não está em memória) + lista de dispensadas.
+  getDoc(doc(db,'poModQuestoes',k)).then(s=>{
+    if(!s.exists()||!S._poModAtual||_poModKey(S._poModAtual.cid,S._poModAtual.modulo)!==k)return;
+    const d=s.data()||{};
+    if(Array.isArray(d.analiseDismissed))S._poAnDispensadas[k]=new Set(d.analiseDismissed.map(_poNormTit));
+    if(d.analise&&!S._poAnalises[k]){S._poAnalises[k]=d.analise;S._poModInputsOpen=false;}
+    _poModModalRender();
+  }).catch(()=>{});
 };
 window.poModModalClose=()=>{const h=document.getElementById('po-mod-modal');if(h){h.classList.remove('show');h.innerHTML='';}S._poModAtual=null;try{_poRefreshTabela();}catch(e){}};
 window.poModFileUpload=(tipo,ev)=>{
@@ -39582,6 +39598,15 @@ window.poModLimparTipo=(tipo)=>{
 // Análise real: chama a Cloud Function (Sonnet), que lê transcrições+questões+edital
 // do Firestore e devolve ações com nota 0-1 por critério. O peso é aplicado AQUI.
 S._poAnalises={};   // {modKey: resultado da IA}
+S._poAnDispensadas={}; // {modKey: Set(títuloNormalizado)} — recomendações marcadas "não é necessária"
+S._poAnInfo={};     // {modKey: Set(títuloNormalizado)} — quais ações estão com o "porquê" aberto
+function _poNormTit(t){return String(t||'').toLowerCase().replace(/\s+/g,' ').trim();}
+function _poDispSet(key){ if(!S._poAnDispensadas[key])S._poAnDispensadas[key]=new Set(); return S._poAnDispensadas[key]; }
+function _poInfoSet(key){ if(!S._poAnInfo[key])S._poAnInfo[key]=new Set(); return S._poAnInfo[key]; }
+async function _poSaveDispensadas(cid,modulo){ const key=_poModKey(cid,modulo); try{ await setDoc(doc(db,'poModQuestoes',key),{analiseDismissed:[..._poDispSet(key)]},{merge:true}); }catch(e){console.warn('dispensadas save',e);} }
+window.poAnDispensar=(titEnc)=>{ if(!S._poModAtual)return; const key=_poModKey(S._poModAtual.cid,S._poModAtual.modulo); _poDispSet(key).add(_poNormTit(decodeURIComponent(titEnc))); _poSaveDispensadas(S._poModAtual.cid,S._poModAtual.modulo); const an=S._poAnalises[key]; if(an)_poRenderAnalise(an); arosToast('Recomendação dispensada — não voltará nas próximas análises.','success',2600); };
+window.poAnRestaurarDispensadas=()=>{ if(!S._poModAtual)return; const key=_poModKey(S._poModAtual.cid,S._poModAtual.modulo); _poDispSet(key).clear(); _poSaveDispensadas(S._poModAtual.cid,S._poModAtual.modulo); const an=S._poAnalises[key]; if(an)_poRenderAnalise(an); };
+window.poAnToggleInfo=(titEnc)=>{ if(!S._poModAtual)return; const key=_poModKey(S._poModAtual.cid,S._poModAtual.modulo); const t=_poNormTit(decodeURIComponent(titEnc)); const s=_poInfoSet(key); if(s.has(t))s.delete(t);else s.add(t); const an=S._poAnalises[key]; if(an)_poRenderAnalise(an); };
 // Prioridade de uma ação = Σ nota[c]·peso[c] / Σ peso[c]  (0..1), aplicando os pesos atuais.
 function _poPrioridade(notas){
   let soma=0,pesoTot=0;
@@ -39623,35 +39648,46 @@ window.poAnSetTab=(prova)=>{ S._poAnTab=prova; const an=S._poModAtual&&S._poAnal
 function _poRenderAnalise(an){
   const box=document.getElementById('po-mod-mock'); if(!box||!an)return;
   box.style.display='block';
-  const todas=(an.acoes||[]).map(a=>({...a,_p:_poPrioridade(a.notas),provas:Array.isArray(a.provas)&&a.provas.length?a.provas:['Geral']}));
   const m=an.meta||{};
+  const key=S._poModAtual?_poModKey(S._poModAtual.cid,S._poModAtual.modulo):'';
+  const disSet=_poDispSet(key), infoSet=_poInfoSet(key);
+  const acoesAll=(an.acoes||[]).map(a=>({...a,_p:_poPrioridade(a.notas),provas:Array.isArray(a.provas)&&a.provas.length?a.provas:['Geral']}));
+  const todas=acoesAll.filter(a=>!disSet.has(_poNormTit(a.titulo)));   // tira as dispensadas
+  const nDisp=acoesAll.length-todas.length;
   // Abas: "Todas" + as provas presentes nas ações (na ordem TEA/TSA/ME/Geral)
   const presentes=_PO_PROVAS_ORDEM.filter(p=>todas.some(a=>a.provas.includes(p)));
   let aba=S._poAnTab||'Todas';
   if(aba!=='Todas'&&!presentes.includes(aba))aba='Todas';
   const acoes=(aba==='Todas'?todas:todas.filter(a=>a.provas.includes(aba))).sort((x,y)=>y._p-x._p);
-  // Prioridade do módulo (na aba atual) = maior prioridade entre as ações
   const topP=acoes.length?Math.max(...acoes.map(a=>a._p)):0;
   const nivelMod=_poNivelDe(topP);
-  const tabBtn=(p,lbl)=>{const inc=p==='Todas'?0:(m.porProva&&m.porProva[p==='MEs'?'MEs':p]||0);const cnt=p==='Todas'?todas.length:todas.filter(a=>a.provas.includes(p)).length;return `<button type="button" class="po-an-tab${aba===p?' on':''}" onclick="poAnSetTab('${p}')">${lbl}<span class="po-an-tabc">${cnt}</span></button>`;};
+  const tabBtn=(p,lbl)=>{const cnt=p==='Todas'?todas.length:todas.filter(a=>a.provas.includes(p)).length;return `<button type="button" class="po-an-tab${aba===p?' on':''}" onclick="poAnSetTab('${p}')">${lbl}<span class="po-an-tabc">${cnt}</span></button>`;};
   const tabs=[tabBtn('Todas','Todas')].concat(presentes.map(p=>tabBtn(p,_PO_PROVA_LBL[p]))).join('');
   const incTxt=m.porProva?`TEA ${m.porProva.TEA||0} · TSA ${m.porProva.TSA||0} · ME ${m.porProva.MEs||0}`:'';
   const metaTxt=`${m.nAulas||0} aula(s) · ${m.nTranscricoes||0} c/ transcrição · ${m.nQuestoes||0} questões${incTxt?` (${incTxt})`:''} · ${m.nPedidos||0} pedido(s) · edital ${m.temEdital?'✓':'—'}`;
   const rows=acoes.map((a,i)=>{
     const ic=_PO_CAT_ICON[a.categoria]||'•';
     const pct=Math.round(a._p*100);
-    const nv=_poNivelDe(a._p), nvm=_PO_NIVEL[nv];
+    const nvm=_PO_NIVEL[_poNivelDe(a._p)];
     const provaChips=a.provas.map(p=>`<span class="po-an-pchip">${_PO_PROVA_LBL[p]||p}</span>`).join('');
+    const tEnc=encodeURIComponent(a.titulo);
+    const infoOpen=infoSet.has(_poNormTit(a.titulo));
+    const det=[a.aula?`<div class="po-an-aula">📎 ${_poEsc(a.aula)}</div>`:'',a.porque?`<div class="po-an-por">${_poEsc(a.porque)}</div>`:''].join('');
     return `<tr class="po-an-tr">
       <td class="po-an-c-rank">${i+1}</td>
-      <td class="po-an-c-niv"><span class="po-an-dot" style="--nc:${nvm.cor}" title="${nvm.lbl} · ${pct}%"></span><span class="po-an-pct">${pct}</span></td>
+      <td class="po-an-c-niv"><span class="po-an-dot" style="--nc:${nvm.cor}" title="${nvm.lbl} · ${pct}%"></span></td>
       <td class="po-an-c-acao">
-        <div class="po-an-tit">${ic} ${_poEsc(a.titulo)} ${provaChips}</div>
-        ${a.aula?`<div class="po-an-aula">📎 ${_poEsc(a.aula)}</div>`:''}
-        <div class="po-an-por">${_poEsc(a.porque)}</div>
+        <div class="po-an-tit"><span class="po-an-titxt">${ic} ${_poEsc(a.titulo)}</span> ${provaChips}
+          <span class="po-an-acts">
+            <button type="button" class="po-an-ibtn${infoOpen?' on':''}" title="Por que esta recomendação?" onclick="poAnToggleInfo('${tEnc}')">ℹ️</button>
+            <button type="button" class="po-an-xbtn" title="Não é necessária — não mostrar de novo" onclick="poAnDispensar('${tEnc}')">✕</button>
+          </span>
+        </div>
+        ${infoOpen&&det?`<div class="po-an-det">${det}</div>`:''}
       </td></tr>`;
-  }).join('')||`<tr><td colspan="3" class="po-mut" style="padding:14px">Nenhuma ação para esta prova.</td></tr>`;
+  }).join('')||`<tr><td colspan="3" class="po-an-vazio">✅ Nenhuma ação ${aba==='Todas'?'pendente neste módulo':'para esta prova'} — a cobertura está adequada.</td></tr>`;
   const nvm=_PO_NIVEL[nivelMod];
+  const dispFoot=nDisp?`<button type="button" class="po-an-restaurar" onclick="poAnRestaurarDispensadas()" title="Voltar a mostrar as recomendações dispensadas">↩︎ ${nDisp} dispensada(s) — restaurar</button>`:'';
   box.innerHTML=`<div class="po-an-wrap">
     <div class="po-an-head">
       <span class="po-an-h-tit">🧠 Análise do módulo</span>
@@ -39660,9 +39696,9 @@ function _poRenderAnalise(an){
     <div class="po-an-meta">${metaTxt}</div>
     ${an.resumo?`<div class="po-an-resumo">${_poEsc(an.resumo)}</div>`:''}
     <div class="po-an-tabs">${tabs}</div>
-    <div class="po-an-prio"><span>Prioridade ${aba==='Todas'?'geral':'no '+(_PO_PROVA_LBL[aba]||aba)}:</span> <span class="po-an-badge" style="--nc:${nvm.cor}">${nvm.lbl}</span></div>
+    ${acoes.length?`<div class="po-an-prio"><span>Prioridade ${aba==='Todas'?'geral':'no '+(_PO_PROVA_LBL[aba]||aba)}:</span> <span class="po-an-badge" style="--nc:${nvm.cor}">${nvm.lbl}</span></div>`:''}
     <table class="po-an-tbl"><tbody>${rows}</tbody></table>
-    <div class="po-an-foot">Ordenado pelos <b>pesos</b> atuais. Mexa em ⚖️ Pesos e clique <b>↻ Re-ordenar</b> — sem gastar IA. <button type="button" class="btn btn-g po-an-reorder" onclick="poReordenarAnalise()">↻ Re-ordenar</button></div>
+    <div class="po-an-foot">${dispFoot}<span class="po-an-foot-hint">Ordenado pelos <b>pesos</b>. <button type="button" class="btn btn-g po-an-reorder" onclick="poReordenarAnalise()">↻ Re-ordenar</button></span></div>
   </div>`;
   box.scrollIntoView({behavior:'smooth',block:'nearest'});
 }

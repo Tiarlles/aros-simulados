@@ -97,6 +97,8 @@ function buildSystemPrompt() {
 
 Sua tarefa: ler o material do módulo (aulas com transcrição, status, avaliação dos alunos e ano de gravação; banco de questões reais de prova por tipo; pedidos de alunos; edital; status do material de apoio) e produzir uma lista de AÇÕES concretas e acionáveis para a coordenação de produto — o que gravar, regravar, atualizar, ou que material/questão falta.
 
+PRINCÍPIO GERAL — MENOS É MAIS. NÃO infle a lista. Se o módulo já cobre bem o que é cobrado (com base nas QUESTÕES), o certo é retornar POUCAS ou NENHUMA ação — isso é um ótimo resultado, não uma falha. Um módulo que cobre ~90% do que cai não precisa de ações; diga isso no resumo e devolve "acoes": []. Cada ação que você lista é trabalho de produção que alguém vai executar — só inclua o que tem impacto REAL e claro. Não invente trabalho, não liste o óbvio, não preencha cota. Prefira 0-3 ações certeiras a 8 ações genéricas. Na dúvida sobre listar ou não uma ação, NÃO liste.
+
 Regras:
 1. Baseie-se SOMENTE nos dados fornecidos. Não invente aulas, números ou temas que não estejam no material.
 2. Cada ação deve ser específica e executável ("Gravar aula sobre X", "Regravar a aula Y — avaliação 3.1"). Nada de conselho genérico.
@@ -181,6 +183,13 @@ function buildUserPrompt(ctx) {
 
   linhas.push(`=== PEDIDOS DE ALUNOS ===`);
   linhas.push(pedidos.length ? pedidos.map((p, i) => `${i + 1}. ${p}`).join('\n') : '(nenhum pedido registrado)');
+  linhas.push('');
+
+  const disp = ctx.dispensadas || [];
+  if (disp.length) {
+    linhas.push(`=== RECOMENDAÇÕES JÁ DISPENSADAS PELO COORDENADOR (NÃO proponha de novo — nem reformuladas/com outro título) ===`);
+    disp.forEach((d, i) => linhas.push(`${i + 1}. ${d}`));
+  }
 
   return linhas.join('\n');
 }
@@ -253,13 +262,15 @@ exports.analisarModuloPO = onRequest(
       const apostilaStatus = apostilas.length
         ? apostilas.map(ap => `- ${ap.titulo || '(sem título)'}: ${ap.status || 'Pendente'}`).join('\n')
         : '';
+      // Recomendações que o coordenador já dispensou — a IA não deve propô-las de novo.
+      const dispensadas = Array.isArray(md.analiseDismissed) ? md.analiseDismissed.map(d => String(d).trim()).filter(Boolean) : [];
 
       // 4) Edital do curso.
       const cfgSnap = await db.collection('config').doc('poConfig').get();
       const editais = cfgSnap.exists ? (cfgSnap.data()?.editais || {}) : {};
       const edital = String(editais[cursoId] || '').trim();
 
-      const ctx = { cursoNome, modulo, edital, aulas, questoes, pedidos, apostilaStatus };
+      const ctx = { cursoNome, modulo, edital, aulas, questoes, pedidos, apostilaStatus, dispensadas };
       const systemPrompt = buildSystemPrompt();
       const userPrompt = buildUserPrompt(ctx);
 
@@ -422,12 +433,16 @@ exports.analisarProdutoPO = onRequest(
       // Lê os módulos do curso que já têm análise salva.
       const snap = await db.collection('poModQuestoes').where('cursoId', '==', cursoId).get();
       const mods = [];
+      const _norm = t => String(t || '').toLowerCase().replace(/\s+/g, ' ').trim();
       snap.forEach(d => {
         const x = d.data() || {};
         const an = x.analise;
         if (!an || !Array.isArray(an.acoes)) return;
         const porProva = (an.meta && an.meta.porProva) || { TEA: (x.TEA || []).length, TSA: (x.TSA || []).length, MEs: (x.MEs || []).length };
-        mods.push({ modulo: x.modulo || an.meta?.modulo || '(módulo)', resumo: an.resumo || '', acoes: an.acoes, porProva });
+        // Ignora ações que o coordenador dispensou.
+        const disp = new Set((Array.isArray(x.analiseDismissed) ? x.analiseDismissed : []).map(_norm));
+        const acoes = an.acoes.filter(a => !disp.has(_norm(a.titulo)));
+        mods.push({ modulo: x.modulo || an.meta?.modulo || '(módulo)', resumo: an.resumo || '', acoes, porProva });
       });
 
       if (!mods.length) {
