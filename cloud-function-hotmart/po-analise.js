@@ -135,6 +135,8 @@ Cada ação serve a uma ou mais PROVAS. Use estas CHAVES exatas no campo "provas
 - "MEs" = prova ME · "TEA" = TEA · "TSA" = TSA 1ª fase (questões de múltipla escolha) · "TSAOral" = TSA Oral (prova oral, sem questões — vem da lista de TEMAS COBRADOS) · "Geral" = transversal/sem prova específica.
 Liste as provas a que a ação se refere (ex.: ["TSA"] se só cai na 1ª fase; ["TEA","TSA"] se cai nas duas; ["TSAOral"] se for tema da prova oral). Use ["Geral"] só quando não couber em nenhuma prova específica.
 
+FORMATAÇÃO do campo "porque": quando precisar LISTAR várias aulas ou itens, NÃO escreva em série separada por vírgula. Coloque uma frase de introdução e, em seguida, CADA item em uma LINHA NOVA começando com "- " (hífen + espaço). Use quebras de linha reais (\\n) dentro da string. Exemplo: "As seguintes aulas têm ficha resumo Pendente:\\n- PANI\\n- PAI Sistema de Medida\\n- Oxímetro de Pulso".
+
 Responda SOMENTE com JSON válido (sem markdown, sem cercas de código), neste formato exato:
 {
   "resumo": "2 a 4 frases sobre o estado geral do módulo e onde está o maior risco.",

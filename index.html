@@ -5954,6 +5954,9 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-mod-modal .po-an-det{margin-top:4px;padding:9px 12px;background:color-mix(in srgb,var(--t2) 7%,transparent);border-radius:8px;display:flex;flex-direction:column;gap:3px}
         #po-mod-modal .po-an-aula{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--t2);letter-spacing:-.2px}
         #po-mod-modal .po-an-por{font-size:12px;line-height:1.5;color:var(--text)}
+        #po-mod-modal .po-an-por-p{margin:0 0 4px}
+        #po-mod-modal .po-an-por-ul{margin:4px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:2px}
+        #po-mod-modal .po-an-por-ul li{list-style:disc}
         #po-mod-modal .po-an-vazio{padding:22px 16px;text-align:center;font-size:12.5px;color:var(--t2);border:1px dashed var(--border);border-radius:11px}
         #po-mod-modal .po-an-foot{display:flex;align-items:center;padding-top:2px}
         #po-mod-modal .po-an-restaurar{background:none;border:1px dashed var(--border2);color:var(--t2);font-size:11px;padding:5px 12px;border-radius:8px;cursor:pointer;transition:.15s}
@@ -39846,6 +39849,20 @@ function _poProdProgresso(cid){
 const _PO_PROVAS_ORDEM=['MEs','TEA','TSA','TSAOral','Geral'];
 const _PO_PROVA_LBL={MEs:'ME',TEA:'TEA',TSA:'TSA 1ªF',TSAOral:'TSA Oral',Geral:'GERAL'};
 function _poDataFmt(iso){ try{ const d=new Date(iso); if(isNaN(d))return ''; return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }catch(_){return '';} }
+// Formata o "porque": linhas começando com - / * / • viram itens de lista; resto vira parágrafo.
+function _poFmtPorque(txt){
+  const linhas=String(txt||'').split('\n').map(s=>s.trim());
+  let html='',emLista=false;
+  const fechaLista=()=>{ if(emLista){html+='</ul>';emLista=false;} };
+  linhas.forEach(l=>{
+    if(!l){fechaLista();return;}
+    const m=l.match(/^[-*•·]\s+(.*)$/);
+    if(m){ if(!emLista){html+='<ul class="po-an-por-ul">';emLista=true;} html+=`<li>${_poEsc(m[1])}</li>`; }
+    else { fechaLista(); html+=`<div class="po-an-por-p">${_poEsc(l)}</div>`; }
+  });
+  fechaLista();
+  return html||_poEsc(String(txt||''));
+}
 window.poAnalisarModulo=async()=>{
   if(!S._poModAtual||S._poModAnalisando)return;
   const {cid,modulo}=S._poModAtual;
@@ -39894,7 +39911,7 @@ function _poRenderAnalise(an){
     const provaChips=a.provas.map(p=>`<span class="po-an-pchip">${_PO_PROVA_LBL[p]||p}</span>`).join('');
     const tEnc=encodeURIComponent(a.titulo);
     const infoOpen=infoSet.has(_poNormTit(a.titulo));
-    const det=[a.aula?`<div class="po-an-aula">${_poEsc(a.aula)}</div>`:'',a.porque?`<div class="po-an-por">${_poEsc(a.porque)}</div>`:''].join('');
+    const det=[a.aula?`<div class="po-an-aula">${_poEsc(a.aula)}</div>`:'',a.porque?`<div class="po-an-por">${_poFmtPorque(a.porque)}</div>`:''].join('');
     return `<div class="po-an-acao lvl-${nv}" style="--nc:${nvm.cor}">
       <div class="po-an-rank">${String(i+1).padStart(2,'0')}</div>
       <div class="po-an-body">
