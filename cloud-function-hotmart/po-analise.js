@@ -102,12 +102,14 @@ Regras:
 2. Cada ação deve ser específica e executável ("Gravar aula sobre X", "Regravar a aula Y — avaliação 3.1", "Cobrir tema Z do edital, ausente nas transcrições"). Nada de conselho genérico.
 3. Cruze o EDITAL e as QUESTÕES com o CONTEÚDO das transcrições: tema que cai (edital/questões) e não aparece nas aulas = lacuna forte.
 4. ANTES de afirmar que um tema NÃO é coberto, LEIA cada transcrição por INTEIRO. Um tema pode estar DENTRO de uma aula de escopo mais amplo (ex.: os 4 princípios da bioética dentro de uma aula de "Ética e Responsabilidade") e ainda assim estar bem coberto. Só trate como lacuna se realmente não encontrar o conteúdo em NENHUMA transcrição. Quando o tema EXISTE mas está raso/incompleto, prefira "Aprofundar/expandir na aula X" em vez de "Gravar aula nova".
-5. Se uma transcrição vier marcada como "(truncada)", NÃO afirme que um tema está ausente só porque não apareceu — a parte cortada pode cobri-lo. Trate como incerto.
-6. Cite a aula concreta no campo "aula" sempre que a ação se referir a conteúdo que já existe (ou deveria existir) numa aula do módulo.
-7. Use a avaliação dos alunos e o status/ano das aulas para sinalizar regravação/atualização.
-8. Para CADA ação, pontue os 7 critérios de 0 a 1 (0 = irrelevante para esta ação, 1 = máximo). NÃO aplique pesos — só pontue. Os pesos são aplicados depois pelo sistema.
-9. Ordene as ações da mais para a menos relevante na sua visão, mas a ordenação final é feita pelo sistema via pesos.
-10. Seja conciso. No máximo 12 ações, priorizando as de maior impacto.
+5. DOSE PELA FREQUÊNCIA. Conte em quantas questões o tema realmente aparece. Tema que cai em UMA questão isolada NÃO justifica aula dedicada — dá frequência baixa (perto de 0) e, no máximo, uma ação leve. Reserve "Gravar aula nova" para temas RECORRENTES (várias questões e/ou presença clara no edital). Quanto mais raro o tema, mais leve a ação.
+6. O ALUNO TAMBÉM ESTUDA PELA QUESTÃO. Uma questão com bom enunciado/gabarito já é material de estudo. Para temas raros que já aparecem em questão, a ação certa costuma ser leve ("garantir um bom comentário na questão" ou "mencionar brevemente numa aula existente"), não uma aula inteira. Só proponha aula nova quando o ganho de aprendizado justifique o esforço de produção.
+7. Se uma transcrição vier marcada como "(truncada)", NÃO afirme que um tema está ausente só porque não apareceu — a parte cortada pode cobri-lo. Trate como incerto.
+8. Cite a aula concreta no campo "aula" sempre que a ação se referir a conteúdo que já existe (ou deveria existir) numa aula do módulo.
+9. Use a avaliação dos alunos e o status/ano das aulas para sinalizar regravação/atualização.
+10. Para CADA ação, pontue os 7 critérios de 0 a 1 (0 = irrelevante para esta ação, 1 = máximo). NÃO aplique pesos — só pontue. Os pesos são aplicados depois pelo sistema. Em especial, a nota "frequencia" deve ser PROPORCIONAL ao nº de questões que cobrem o tema (1 questão isolada ≈ 0,1; tema dominante ≈ 1).
+11. Ordene as ações da mais para a menos relevante na sua visão, mas a ordenação final é feita pelo sistema via pesos.
+12. Seja conciso. No máximo 12 ações, priorizando as de maior impacto. Não liste ação para todo tema raro — agrupe ou omita o que tem baixíssimo impacto.
 
 Critérios (use exatamente estas chaves no campo "notas"):
 ${_criteriosTxt()}
