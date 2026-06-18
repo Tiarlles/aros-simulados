@@ -5907,6 +5907,28 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-mod-modal .po-q-item .po-q-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);display:flex;gap:8px;margin-bottom:2px}
         #po-mod-modal .po-q-item .po-q-en{color:var(--t2);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
         #po-mod-modal .po-q-mock{margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--accent-dim);border:1px solid color-mix(in srgb,var(--accent) 32%,transparent);font-size:12.5px;color:var(--text)}
+        #po-mod-modal .po-q-mock .po-an-load{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--text)}
+        #po-mod-modal .po-an-spin{width:15px;height:15px;border-radius:50%;border:2px solid color-mix(in srgb,var(--accent) 30%,transparent);border-top-color:var(--accent);display:inline-block;animation:po-an-rot .7s linear infinite;flex:none}
+        @keyframes po-an-rot{to{transform:rotate(360deg)}}
+        #po-mod-modal .po-an-wrap{display:flex;flex-direction:column;gap:10px}
+        #po-mod-modal .po-an-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px}
+        #po-mod-modal .po-an-meta{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:400;color:var(--t2);letter-spacing:-.2px}
+        #po-mod-modal .po-an-resumo{font-size:12.5px;line-height:1.5;color:var(--text);padding:10px 12px;border-radius:8px;background:color-mix(in srgb,var(--accent) 8%,transparent)}
+        #po-mod-modal .po-an-list{display:flex;flex-direction:column;gap:8px}
+        #po-mod-modal .po-an-acao{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:9px;background:var(--bg2);border:1px solid var(--border)}
+        #po-mod-modal .po-an-rank{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--t2);min-width:18px;text-align:center;padding-top:2px}
+        #po-mod-modal .po-an-bar{position:relative;width:46px;height:46px;flex:none;border-radius:8px;overflow:hidden;background:color-mix(in srgb,var(--accent) 14%,transparent);display:flex;align-items:flex-end}
+        #po-mod-modal .po-an-bar i{display:block;width:100%;background:var(--accent);transition:height .4s ease}
+        #po-mod-modal .po-an-bar b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--text)}
+        #po-mod-modal .po-an-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+        #po-mod-modal .po-an-tit{font-weight:600;font-size:13px;color:var(--text)}
+        #po-mod-modal .po-an-aula{font-size:11.5px;color:var(--t2)}
+        #po-mod-modal .po-an-por{font-size:12px;line-height:1.45;color:var(--t2)}
+        #po-mod-modal .po-an-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px}
+        #po-mod-modal .po-an-tag{font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.3px;padding:2px 7px;border-radius:20px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
+        #po-mod-modal .po-an-foot{font-size:11px;color:var(--t2);display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:2px}
+        #po-mod-modal .po-an-reorder{margin-left:auto;font-size:11px;padding:4px 10px}
+        #po-mod-modal .po-q-mock .po-imp-erro{padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 35%,transparent);color:#f85149;font-size:12.5px}
         #po-mod-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
         #po-mod-modal .po-mod-sub{font-size:12px;color:var(--t2);margin-top:2px;font-family:'JetBrains Mono',monospace}
         #po-mod-modal .po-mod-resumo{font-size:12.5px;color:var(--text);margin-bottom:8px}
@@ -37294,7 +37316,7 @@ S.poCursoAtual=null;      // id do curso aberto
 S.poBusca='';
 S.poColFiltros={};        // filtro por coluna: { [colId|'__aula']: termo }
 S.poModAbertos=new Set(); // módulos/pontos expandidos na visão do curso
-S.poSel={aulas:new Set()}; // seleção (checkbox) para exclusão em lote
+S.poSel={aulas:new Set(),modulos:new Set()}; // seleção (checkbox) p/ exclusão em lote (aulas + módulos vazios)
 S.poModOrdem={};          // ordem manual de módulos por curso: { [cursoId]: [nome,...] }
 S.poModExtra={};          // módulos criados manualmente (podem estar sem aula): { [cursoId]: [nome,...] }
 S.poColAulaW=300;         // largura (px) da 1ª coluna fixa (Aula)
@@ -37614,9 +37636,11 @@ window.poExcluirAula=async(id)=>{
 window.poExcluirModulo=async(cid,modEnc)=>{
   const modulo=decodeURIComponent(modEnc);
   const aulas=(S.poAulas[cid]||[]).filter(a=>(a.modulo||'')===modulo);
-  if(!aulas.length)return;
-  if(!confirm(`Excluir o módulo "${modulo}" e suas ${aulas.length} aula(s)?\n\nAs aulas são apagadas de TODOS os cursos.`))return;
-  if(!confirm(`Confirmar de novo: excluir o módulo "${modulo}" (${aulas.length} aula(s))?`))return;
+  const isExtra=!!(S.poModExtra&&Array.isArray(S.poModExtra[cid])&&S.poModExtra[cid].includes(modulo));
+  if(!aulas.length&&!isExtra)return;
+  const msg=aulas.length?`Excluir o módulo "${modulo}" e suas ${aulas.length} aula(s)?\n\nAs aulas são apagadas de TODOS os cursos.`:`Excluir o módulo vazio "${modulo}"?`;
+  if(!confirm(msg))return;
+  if(!confirm(`Confirmar de novo: excluir o módulo "${modulo}"${aulas.length?` (${aulas.length} aula(s))`:''}?`))return;
   const ids=aulas.map(a=>a.id).filter(Boolean);
   try{
     const reais=ids.filter(x=>!String(x).startsWith('tmp_'));
@@ -37626,33 +37650,58 @@ window.poExcluirModulo=async(cid,modEnc)=>{
   }catch(e){alert('Erro ao excluir módulo: '+((e&&e.message)||e));return;}
   const idset=new Set(ids);
   for(const c in S.poAulas){S.poAulas[c]=(S.poAulas[c]||[]).filter(x=>!idset.has(x.id));}
+  // remove o módulo dos registros de ordenação/extra onde ficou sem aula
+  let cfgDirty=false;
+  for(const c in (S.poModExtra||{})){ if((S.poModExtra[c]||[]).includes(modulo)&&!(S.poAulas[c]||[]).some(a=>(a.modulo||'')===modulo)){S.poModExtra[c]=S.poModExtra[c].filter(m=>m!==modulo);cfgDirty=true;} }
+  for(const c in (S.poModOrdem||{})){ if((S.poModOrdem[c]||[]).includes(modulo)&&!(S.poAulas[c]||[]).some(a=>(a.modulo||'')===modulo)){S.poModOrdem[c]=S.poModOrdem[c].filter(m=>m!==modulo);cfgDirty=true;} }
+  if(S.poModAbertos)S.poModAbertos.delete(modulo);
+  if(cfgDirty)_poSaveConfig().catch(e=>console.warn('poConfig save',e));
   _poRefreshTabela();
 };
 // ── Seleção por checkbox (exclusão em lote) ──
+function _poSelInit(){if(!S.poSel)S.poSel={aulas:new Set(),modulos:new Set()};if(!S.poSel.modulos)S.poSel.modulos=new Set();}
 window.poToggleSelAula=(id,ch)=>{
-  if(!S.poSel)S.poSel={aulas:new Set()};
-  if(ch)S.poSel.aulas.add(id);else S.poSel.aulas.delete(id);
+  _poSelInit();
+  if(ch)S.poSel.aulas.add(id);else{
+    S.poSel.aulas.delete(id);
+    // desmarcar uma aula desfaz a seleção "cheia" do módulo dela
+    let mod='';for(const c in S.poAulas){const a=(S.poAulas[c]||[]).find(x=>x.id===id);if(a){mod=a.modulo||'';break;}}
+    if(mod)S.poSel.modulos.delete(mod);
+  }
   _poUpdateModIndeterminate();_poUpdateSelBar();
 };
 window.poToggleSelModulo=(modEnc,ch)=>{
-  if(!S.poSel)S.poSel={aulas:new Set()};
+  _poSelInit();
   const modulo=decodeURIComponent(modEnc);
   const aulas=_poAulasDoCurso(S.poCursoAtual).filter(a=>String(a.modulo||'')===modulo);
   aulas.forEach(a=>{if(ch)S.poSel.aulas.add(a.id);else S.poSel.aulas.delete(a.id);});
+  // marca o MÓDULO em si (cobre o caso de módulo vazio, sem aula pra marcar)
+  if(ch)S.poSel.modulos.add(modulo);else S.poSel.modulos.delete(modulo);
   // re-renderiza pra refletir os checkboxes das aulas do módulo
   _poRefreshTabela();
 };
 window.poLimparSelecao=()=>{
-  if(S.poSel)S.poSel.aulas.clear();else S.poSel={aulas:new Set()};
+  _poSelInit();S.poSel.aulas.clear();S.poSel.modulos.clear();
   _poRefreshTabela();
 };
 // Excluir TODAS as aulas selecionadas (de TODOS os cursos) — dupla confirmação.
 window.poExcluirSelecionadas=async()=>{
-  if(!S.poSel||!S.poSel.aulas.size)return;
+  _poSelInit();
   const ids=Array.from(S.poSel.aulas);
   const n=ids.length;
-  if(!confirm(`Excluir ${n} aula${n===1?'':'s'} selecionada${n===1?'':'s'}?\n\nElas são apagadas de TODOS os cursos.`))return;
-  if(!confirm(`Confirmar de novo: excluir definitivamente ${n} aula${n===1?'':'s'}?`))return;
+  // módulos marcados que estão VAZIOS no curso atual (sem aula pra deletar) — apagamos o módulo em si
+  const modsSel=Array.from(S.poSel.modulos);
+  const modsVazios=modsSel.filter(m=>!_poAulasDoCurso(S.poCursoAtual).some(a=>String(a.modulo||'')===m));
+  if(!n&&!modsVazios.length)return;
+  const partes=[];
+  if(n)partes.push(`${n} aula${n===1?'':'s'}`);
+  if(modsVazios.length)partes.push(`${modsVazios.length} módulo${modsVazios.length===1?'':'s'} vazio${modsVazios.length===1?'':'s'}`);
+  const alvoTxt=partes.join(' e ');
+  if(!confirm(`Excluir ${alvoTxt}?${n?'\n\nAs aulas são apagadas de TODOS os cursos.':''}`))return;
+  if(!confirm(`Confirmar de novo: excluir definitivamente ${alvoTxt}?`))return;
+  // módulos que TÊM aula agora (por curso) — pra detectar quais ficam vazios depois
+  const antes={};
+  for(const c in S.poAulas){antes[c]=new Set((S.poAulas[c]||[]).map(a=>a.modulo||'').filter(Boolean));}
   try{
     const reais=ids.filter(x=>x&&!String(x).startsWith('tmp_'));
     let b=writeBatch(db),k=0;
@@ -37661,7 +37710,28 @@ window.poExcluirSelecionadas=async()=>{
   }catch(e){alert('Erro ao excluir: '+((e&&e.message)||e));return;}
   const idset=new Set(ids);
   for(const c in S.poAulas){S.poAulas[c]=(S.poAulas[c]||[]).filter(x=>!idset.has(x.id));}
-  S.poSel.aulas.clear();
+  // Módulos que ficaram sem aula somem de vez (poModExtra/poModOrdem):
+  //  - os que TINHAM aula e foram esvaziados pela exclusão (via `antes`);
+  //  - os módulos VAZIOS marcados explicitamente na checkbox.
+  // Módulos criados vazios e NÃO marcados são preservados.
+  let cfgDirty=false;
+  const pruneMod=(c,lista)=>{
+    if(!lista.length)return;
+    if(S.poModExtra&&Array.isArray(S.poModExtra[c])){const nx=S.poModExtra[c].filter(m=>!lista.includes(m));if(nx.length!==S.poModExtra[c].length){S.poModExtra[c]=nx;cfgDirty=true;}}
+    if(S.poModOrdem&&Array.isArray(S.poModOrdem[c])){const nx=S.poModOrdem[c].filter(m=>!lista.includes(m));if(nx.length!==S.poModOrdem[c].length){S.poModOrdem[c]=nx;cfgDirty=true;}}
+    if(S.poModAbertos)lista.forEach(m=>S.poModAbertos.delete(m));
+  };
+  for(const c in antes){
+    const depois=new Set((S.poAulas[c]||[]).map(a=>a.modulo||'').filter(Boolean));
+    pruneMod(c,[...antes[c]].filter(m=>!depois.has(m)));
+  }
+  // módulos vazios marcados (em todos os cursos onde estão registrados sem aula)
+  if(modsVazios.length){
+    const cursosReg=new Set([...Object.keys(S.poModExtra||{}),...Object.keys(S.poModOrdem||{}),S.poCursoAtual]);
+    cursosReg.forEach(c=>{ if(!c)return; pruneMod(c,modsVazios.filter(m=>!(S.poAulas[c]||[]).some(a=>(a.modulo||'')===m))); });
+  }
+  if(cfgDirty)_poSaveConfig().catch(e=>console.warn('poConfig save',e));
+  S.poSel.aulas.clear();S.poSel.modulos.clear();
   _poRefreshTabela();
 };
 // ── Novo módulo (pode nascer vazio; recebe aulas pelo "+ Nova aula" interno) ──
@@ -38516,10 +38586,10 @@ function _poTableRowsHTML(aulas,q){
     const apTitle=apos.length?`Apostila do módulo: ${apStatus} — ${apos.length} cadastrada(s)`:'Sem apostila cadastrada (Pendente)';
     const apostRow=`<tr class="po-apost-row-tr"><td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><button type="button" class="po-apost-rowbtn" style="--ac:${apCor}" onclick="poAbrirApostilas('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="${apTitle}">📚 Apostila do módulo: ${apLabel}</button></span></td></tr>`;
     const btnAnalisar=`<button type="button" class="po-mod-analisar" onclick="event.stopPropagation();poAbrirAnaliseModulo('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="Analisar este módulo com a IA">🤖 Analisar módulo</button>`;
-    const modSelMarcado=g.aulas.length&&g.aulas.every(a=>S.poSel&&S.poSel.aulas.has(a.id));
+    const modSelMarcado=(S.poSel&&S.poSel.modulos&&S.poSel.modulos.has(g.modulo))||(g.aulas.length&&g.aulas.every(a=>S.poSel&&S.poSel.aulas.has(a.id)));
     const modChk=`<input type="checkbox" class="po-sel-mod"${modSelMarcado?' checked':''} data-modulo="${_poEsc(g.modulo)}" onclick="event.stopPropagation();poToggleSelModulo('${encodeURIComponent(g.modulo)}',this.checked)">`;
-    out+=`<tr class="po-mod-row${open?' open':''}" draggable="false" data-modulo="${_poEsc(g.modulo)}" onclick="poToggleMod('${encodeURIComponent(g.modulo)}')">
-      <td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><span class="po-grip" onmousedown="event.stopPropagation();this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span>${modChk}<span class="po-chev">▸</span><span class="po-mod-nome" ondblclick="event.stopPropagation();poEditarNomeModulo('${encodeURIComponent(g.modulo)}',this)" title="Duplo-clique pra renomear">${_poEsc(g.modulo)}</span>${at}${qBadge}${btnAnalisar}</span></td>
+    out+=`<tr class="po-mod-row${open?' open':''}" draggable="false" data-modulo="${_poEsc(g.modulo)}" onclick="poModRowClick(event,'${encodeURIComponent(g.modulo)}')">
+      <td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><span class="po-grip" onmousedown="event.stopPropagation();this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span>${modChk}<span class="po-chev">▸</span><span class="po-mod-nome" ondblclick="event.stopPropagation();poModNomeEdit(event,'${encodeURIComponent(g.modulo)}',this)" title="Duplo-clique pra renomear">${_poEsc(g.modulo)}</span>${at}${qBadge}${btnAnalisar}</span></td>
     </tr>`;
     if(open){
       out+=apostRow;
@@ -38575,8 +38645,8 @@ function _poRenderVerticals(root){
 
 window.poSelectVertical=(id)=>{if(!VERTICAIS.find(v=>v.id===id))return;S.poVertical=id;S.poView='cursos';_poRender();};
 window.poVoltarVerticais=()=>{S.poVertical=null;S.poCursoAtual=null;S.poView='verticals';_poRender();};
-window.poAbrirCurso=(id)=>{S.poCursoAtual=id;S.poView='curso';S.poBusca='';S.poModAbertos=new Set();if(S.poSel)S.poSel.aulas.clear();_poRender();};
-window.poVoltarCursos=()=>{S.poCursoAtual=null;S.poView='cursos';if(S.poSel)S.poSel.aulas.clear();_poRender();};
+window.poAbrirCurso=(id)=>{S.poCursoAtual=id;S.poView='curso';S.poBusca='';S.poModAbertos=new Set();if(S.poSel){S.poSel.aulas.clear();if(S.poSel.modulos)S.poSel.modulos.clear();}_poRender();};
+window.poVoltarCursos=()=>{S.poCursoAtual=null;S.poView='cursos';if(S.poSel){S.poSel.aulas.clear();if(S.poSel.modulos)S.poSel.modulos.clear();}_poRender();};
 
 // Tela 2 — cards dos cursos da vertical
 function _poRenderCursos(root){
@@ -38689,25 +38759,31 @@ function _poRefreshTabela(){
 // Estado parcial (indeterminate) dos checkboxes de módulo: marcado se TODAS as aulas estão na seleção,
 // indeterminado se SÓ ALGUMAS. Roda depois de cada render do corpo da tabela.
 function _poUpdateModIndeterminate(){
-  if(!S.poSel)return;
+  if(!S.poSel)return;_poSelInit();
   const grupos=_poGroupByMod(_poAulasDoCurso(S.poCursoAtual));
   const byMod={};grupos.forEach(g=>{byMod[g.modulo]=g.aulas;});
   document.querySelectorAll('#po-root .po-sel-mod').forEach(chk=>{
     const mod=chk.getAttribute('data-modulo')||'';
     const aulas=byMod[mod]||[];
     const marc=aulas.filter(a=>S.poSel.aulas.has(a.id)).length;
-    chk.checked=aulas.length>0&&marc===aulas.length;
-    chk.indeterminate=marc>0&&marc<aulas.length;
+    const inMod=S.poSel.modulos.has(mod);
+    chk.checked=inMod||(aulas.length>0&&marc===aulas.length);
+    chk.indeterminate=!inMod&&marc>0&&marc<aulas.length;
   });
 }
 // Atualiza a barra de seleção (contagem) sem re-renderizar a tabela inteira.
 function _poUpdateSelBar(){
   const bar=document.getElementById('po-sel-bar');if(!bar)return;
-  const n=S.poSel?S.poSel.aulas.size:0;
-  if(n<=0){bar.style.display='none';return;}
+  _poSelInit();
+  const nA=S.poSel.aulas.size;
+  const modsVazios=Array.from(S.poSel.modulos).filter(m=>!_poAulasDoCurso(S.poCursoAtual).some(a=>String(a.modulo||'')===m));
+  if(nA<=0&&!modsVazios.length){bar.style.display='none';return;}
   bar.style.display='';
+  const partes=[];
+  if(nA>0)partes.push(`${nA} aula${nA===1?'':'s'}`);
+  if(modsVazios.length)partes.push(`${modsVazios.length} módulo${modsVazios.length===1?'':'s'} vazio${modsVazios.length===1?'':'s'}`);
   const c=bar.querySelector('.po-sel-count');
-  if(c)c.textContent=`${n} aula${n===1?'':'s'} selecionada${n===1?'':'s'}`;
+  if(c)c.textContent=`${partes.join(' e ')} selecionado${(nA+modsVazios.length)===1?'':'s'}`;
 }
 window.poSetBusca=(val)=>{S.poBusca=val;_poRefreshTabela();};
 
@@ -38817,6 +38893,19 @@ window.poToggleMod=(key)=>{
   if(!S.poModAbertos)S.poModAbertos=new Set();
   if(S.poModAbertos.has(mod))S.poModAbertos.delete(mod);else S.poModAbertos.add(mod);
   _poRefreshTabela();_poUpdateToggleBtn();
+};
+// Clique na linha do módulo: agenda o toggle (~240ms) pra NÃO re-renderizar a tabela
+// entre os dois cliques de um duplo-clique — senão o <span> do nome some e o
+// ondblclick nunca dispara. O duplo-clique cancela o toggle e abre a edição.
+let _poModClickT=null;
+window.poModRowClick=(ev,key)=>{
+  if(S._poDragging)return;
+  clearTimeout(_poModClickT);
+  _poModClickT=setTimeout(()=>{poToggleMod(key);},240);
+};
+window.poModNomeEdit=(ev,key,span)=>{
+  clearTimeout(_poModClickT); // cancela o toggle agendado pelos cliques
+  poEditarNomeModulo(key,span);
 };
 function _poTodosModulos(){return S.poCursoAtual?_poGroupByMod(_poAulasDoCurso(S.poCursoAtual)).map(g=>g.modulo):[];}
 function _poUpdateToggleBtn(){
@@ -39113,6 +39202,7 @@ function _poApostModalRender(){
 // ===== Questões via API do Laravel (por TEMA, últimos 5 anos) =====
 const FILTROS_PO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/filtrosPO';
 const PUXAR_QUESTOES_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/puxarQuestoesPO';
+const ANALISE_PO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/analisarModuloPO';
 S.poTemaModulo={};   // {cursoId:{modulo:[catIds]}}
 S._poFiltros=null;   // cache de {categorias,tipos,anos}
 S._poMapaAtual=null; // estado do modal de mapeamento {cid}
@@ -39339,6 +39429,10 @@ window.poAbrirAnaliseModulo=(cid,modEnc)=>{
   _PO_MOD_TIPOS.forEach(t=>{S._poModSec[t]=(b[t]||[]).length>0;});
   S._poModSec.pedidos=(b.pedidos||[]).length>0;
   _poModModalRender();
+  // Restaura a última análise da IA (persistida em poModQuestoes.analise), se houver.
+  const k=_poModKey(cid,S._poModAtual.modulo);
+  if(S._poAnalises[k]){_poRenderAnalise(S._poAnalises[k]);}
+  else{getDoc(doc(db,'poModQuestoes',k)).then(s=>{const an=s.exists()&&(s.data()||{}).analise;if(an&&S._poModAtual&&_poModKey(S._poModAtual.cid,S._poModAtual.modulo)===k){S._poAnalises[k]=an;_poRenderAnalise(an);}}).catch(()=>{});}
 };
 window.poModModalClose=()=>{const h=document.getElementById('po-mod-modal');if(h){h.classList.remove('show');h.innerHTML='';}S._poModAtual=null;try{_poRefreshTabela();}catch(e){}};
 window.poModFileUpload=(tipo,ev)=>{
@@ -39373,25 +39467,72 @@ window.poModLimparTipo=(tipo)=>{
   _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
   _poModModalRender();
 };
-// Mock por enquanto: a análise real entra quando a Cloud Function for publicada.
-window.poAnalisarModulo=()=>{
-  if(!S._poModAtual)return;
+// Análise real: chama a Cloud Function (Sonnet), que lê transcrições+questões+edital
+// do Firestore e devolve ações com nota 0-1 por critério. O peso é aplicado AQUI.
+S._poAnalises={};   // {modKey: resultado da IA}
+// Prioridade de uma ação = Σ nota[c]·peso[c] / Σ peso[c]  (0..1), aplicando os pesos atuais.
+function _poPrioridade(notas){
+  let soma=0,pesoTot=0;
+  PO_CRITERIOS.forEach(c=>{ const p=Number(S.poPesos[c.id]!=null?S.poPesos[c.id]:c.peso); pesoTot+=p; soma+=p*Number(notas&&notas[c.id]||0); });
+  return pesoTot?soma/pesoTot:0;
+}
+const _PO_CAT_ICON={gravar:'🎬',regravar:'🔁',atualizar:'♻️',material:'📚',questoes:'❓',edital:'📋'};
+window.poAnalisarModulo=async()=>{
+  if(!S._poModAtual||S._poModAnalisando)return;
   const {cid,modulo}=S._poModAtual;
-  const bucket=_poModQ(cid,modulo);
-  _poSaveModQuestoes(cid,modulo); // analisar também salva
-  const a=(bucket.TEA||[]).length,b=(bucket.TSA||[]).length,m=(bucket.MEs||[]).length,o=(bucket.Outras||[]).length;
-  const qTotal=a+b+m+o;
-  const nPed=(bucket.pedidos||[]).length;
-  const aulas=_poAulasDoCurso(cid).filter(x=>x.modulo===modulo);
+  const curso=(S.poCursos||[]).find(c=>c.id===cid);
+  if(!curso){arosToast('Curso não encontrado.','err',3000);return;}
+  _poSaveModQuestoes(cid,modulo); // analisar também salva o que foi editado
+  S._poModAnalisando=true;
+  const btn=document.querySelector('#po-mod-modal .po-modal-foot .btn-p');
+  if(btn){btn.disabled=true;btn.textContent='🧠 Analisando…';}
   const box=document.getElementById('po-mod-mock');
-  if(box){
-    box.style.display='block';
-    box.innerHTML=`🤖 <strong>Análise do módulo — em breve (Fase 2).</strong><br>
-      A IA receberia: <strong>${aulas.length} aula(s)</strong> do módulo (com Conteúdo, Avaliação, Status e Ano) + <strong>${qTotal} questão(ões)</strong> (TEA: ${a} · TSA: ${b} · MEs: ${m} · Outras: ${o}) + <strong>${nPed} pedido(s) de aluno</strong>, sem imagens.<br>
-      Ela cruzaria os temas das questões com o conteúdo das aulas e devolveria um <strong>relatório priorizado</strong>: aulas a gravar, aulas com avaliação baixa/problema (status) a revisar, e o que falta cobrir por tipo (TEA/TSA/MEs).<br>
-      <span style="color:var(--t2)">A conexão real é ativada quando a Cloud Function de análise for publicada.</span>`;
-    box.scrollIntoView({behavior:'smooth',block:'nearest'});
+  if(box){box.style.display='block';box.innerHTML=`<div class="po-an-load"><span class="po-an-spin"></span> A IA está lendo as transcrições, questões e edital deste módulo… (pode levar até 1 minuto)</div>`;box.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  try{
+    const r=await _poApiPost(ANALISE_PO_ENDPOINT,{cursoId:cid,cursoNome:curso.nome,modulo});
+    S._poAnalises[_poModKey(cid,modulo)]=r.analise;
+    _poRenderAnalise(r.analise);
+  }catch(e){
+    if(box)box.innerHTML=`<div class="po-imp-erro">⚠️ ${_poEsc(e.message||String(e))}</div>`;
+  }finally{
+    S._poModAnalisando=false;
+    if(btn){btn.disabled=false;btn.textContent='🤖 Analisar módulo';}
   }
+};
+function _poRenderAnalise(an){
+  const box=document.getElementById('po-mod-mock'); if(!box||!an)return;
+  box.style.display='block';
+  const acoes=(an.acoes||[]).map(a=>({...a,_p:_poPrioridade(a.notas)})).sort((x,y)=>y._p-x._p);
+  const m=an.meta||{};
+  const metaTxt=`${m.nAulas||0} aula(s) · ${m.nTranscricoes||0} c/ transcrição · ${m.nQuestoes||0} questões · ${m.nPedidos||0} pedido(s) · edital ${m.temEdital?'✓':'—'}`;
+  const rows=acoes.map((a,i)=>{
+    const ic=_PO_CAT_ICON[a.categoria]||'•';
+    const pct=Math.round(a._p*100);
+    const topCrit=PO_CRITERIOS.map(c=>({c,v:Number(a.notas&&a.notas[c.id]||0)})).filter(x=>x.v>=0.5).sort((x,y)=>y.v-x.v).slice(0,3)
+      .map(x=>`<span class="po-an-tag">${_poEsc(x.c.label)}</span>`).join('');
+    return `<div class="po-an-acao">
+      <div class="po-an-rank">${i+1}</div>
+      <div class="po-an-bar" title="Prioridade ${pct}%"><i style="width:${pct}%"></i><b>${pct}</b></div>
+      <div class="po-an-body">
+        <div class="po-an-tit">${ic} ${_poEsc(a.titulo)}</div>
+        ${a.aula?`<div class="po-an-aula">📎 ${_poEsc(a.aula)}</div>`:''}
+        <div class="po-an-por">${_poEsc(a.porque)}</div>
+        ${topCrit?`<div class="po-an-tags">${topCrit}</div>`:''}
+      </div></div>`;
+  }).join('')||`<div class="po-mut">A IA não sugeriu nenhuma ação para este módulo.</div>`;
+  box.innerHTML=`<div class="po-an-wrap">
+    <div class="po-an-head"><span>🧠 Análise do módulo</span><span class="po-an-meta">${metaTxt}</span></div>
+    ${an.resumo?`<div class="po-an-resumo">${_poEsc(an.resumo)}</div>`:''}
+    <div class="po-an-list">${rows}</div>
+    <div class="po-an-foot">Ordenado pelos <b>pesos</b> atuais. Mexa em ⚖️ Pesos e clique <b>↻ Re-ordenar</b> — sem gastar IA. <button type="button" class="btn btn-g po-an-reorder" onclick="poReordenarAnalise()">↻ Re-ordenar</button></div>
+  </div>`;
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+// Re-aplica os pesos atuais na última análise (sem chamar IA de novo).
+window.poReordenarAnalise=()=>{
+  if(!S._poModAtual)return;
+  const an=S._poAnalises[_poModKey(S._poModAtual.cid,S._poModAtual.modulo)];
+  if(an)_poRenderAnalise(an);
 };
 function _poModModalRender(){
   let host=document.getElementById('po-mod-modal');
