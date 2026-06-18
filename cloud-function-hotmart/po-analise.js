@@ -110,10 +110,11 @@ Regras:
 7. O ALUNO TAMBÉM ESTUDA PELA QUESTÃO. Uma questão com gabarito já é material de estudo. Então, para um tema raro que já cai em questão, o normal é NÃO precisar de ação nenhuma. NÃO sugira "incluir o tema X na aula", "garantir um bom comentário na questão", "revisar o gabarito" ou coisas do tipo quando o tema é raro — a questão basta. Só proponha mexer numa aula (gravar/regravar/aprofundar/incluir) quando o tema for recorrente E o ganho de aprendizado justificar o esforço.
 8. Se uma transcrição vier marcada como "(truncada)", NÃO afirme que um tema está ausente só porque não apareceu — a parte cortada pode cobri-lo. Trate como incerto.
 9. Cite a aula concreta no campo "aula" sempre que a ação se referir a conteúdo que já existe (ou deveria existir) numa aula do módulo.
-10. Use a avaliação dos alunos e o status/ano das aulas para sinalizar regravação/atualização.
-11. Para CADA ação, pontue os 7 critérios de 0 a 1 (0 = irrelevante para esta ação, 1 = máximo). NÃO aplique pesos — só pontue. Os pesos são aplicados depois pelo sistema. Em especial, a nota "frequencia" deve ser PROPORCIONAL ao nº de questões que cobrem o tema (0 questões = 0; 1 questão isolada ≈ 0,1; tema dominante ≈ 1).
-12. Ordene as ações da mais para a menos relevante na sua visão, mas a ordenação final é feita pelo sistema via pesos.
-13. Seja conciso. No máximo 12 ações, priorizando as de maior impacto. Não liste ação para todo tema raro — agrupe ou omita o que tem baixíssimo impacto.`;
+10. APOSTILA e FICHA RESUMO são coisas DIFERENTES — gere ações SEPARADAS, nunca junte numa só ("apostila/ficha"). APOSTILA é material do MÓDULO inteiro: se faltar, a ação é "Criar apostila do módulo". FICHA RESUMO é POR AULA: se houver aulas sem ficha (marcadas "Ficha resumo: NÃO"), gere "Criar ficha resumo das aulas" e, no campo "porque", LISTE quais aulas estão sem. Se TODAS já têm ficha, não gere essa ação.
+11. Use a avaliação dos alunos e o status/ano das aulas para sinalizar regravação/atualização.
+12. Para CADA ação, pontue os 7 critérios de 0 a 1 (0 = irrelevante para esta ação, 1 = máximo). NÃO aplique pesos — só pontue. Os pesos são aplicados depois pelo sistema. Em especial, a nota "frequencia" deve ser PROPORCIONAL ao nº de questões que cobrem o tema (0 questões = 0; 1 questão isolada ≈ 0,1; tema dominante ≈ 1).
+13. Ordene as ações da mais para a menos relevante na sua visão, mas a ordenação final é feita pelo sistema via pesos.
+14. Seja conciso. No máximo 12 ações, priorizando as de maior impacto. Não liste ação para todo tema raro — agrupe ou omita o que tem baixíssimo impacto.`;
 
 function buildSystemPrompt(instr) {
   const base = (instr && String(instr).trim()) ? String(instr).trim() : DEFAULT_PROMPT_MODULO;
@@ -156,7 +157,7 @@ function buildUserPrompt(ctx) {
   aulas.forEach((a, i) => {
     const av = a.aval.nota != null ? `${a.aval.nota}${a.aval.n ? ` (${a.aval.n} avaliações)` : ''}` : 'sem avaliação';
     linhas.push(`--- Aula ${i + 1}: ${a.titulo} ---`);
-    linhas.push(`Status: ${a.status || '(sem status)'} · Ano: ${a.ano || '?'} · Avaliação: ${av} · Trilha de questões: ${a.questoes || '?'} · Trilha de flashcards: ${a.cards || '?'}`);
+    linhas.push(`Status: ${a.status || '(sem status)'} · Ano: ${a.ano || '?'} · Avaliação: ${av} · Trilha de questões: ${a.questoes || '?'} · Trilha de flashcards: ${a.cards || '?'} · Ficha resumo: ${a.fichaResumo ? 'sim' : 'NÃO'}`);
     if (a.transcricao) {
       linhas.push(`Transcrição (${a.transChars} chars${a.transTrunc ? ', truncada' : ''}):`);
       linhas.push(a.transcricao);
@@ -168,8 +169,9 @@ function buildUserPrompt(ctx) {
     linhas.push('');
   });
 
-  linhas.push(`=== APOSTILA / MATERIAL DO MÓDULO ===`);
+  linhas.push(`=== APOSTILA DO MÓDULO (material único do módulo inteiro) ===`);
   linhas.push(ctx.apostilaStatus || '(sem apostila cadastrada)');
+  linhas.push('(A FICHA RESUMO é diferente: é POR AULA — veja "Ficha resumo: sim/NÃO" em cada aula acima.)');
   linhas.push('');
 
   linhas.push(`=== QUESTÕES REAIS DE PROVA (banco do módulo, por tipo) ===`);
@@ -254,6 +256,7 @@ exports.analisarModuloPO = onRequest(
           titulo: a.titulo || a.nomeOriginal || '(sem título)',
           status: a.status || '', ano: a.ano || '',
           questoes: a.questoes || '', cards: a.cards || '',
+          fichaResumo: !!String(a.fichaResumo || '').trim(),  // tem ficha resumo? (por aula)
           aval: _parseAval(a),
           conteudo: String(a.conteudo || '').trim(),
           transcricao: trunc ? full.slice(0, capPorAula) : full,
