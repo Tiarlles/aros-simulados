@@ -114,6 +114,8 @@ Regras:
 Critérios (use exatamente estas chaves no campo "notas"):
 ${_criteriosTxt()}
 
+Cada ação serve a uma ou mais PROVAS. As provas são: TEA, TSA, MEs (cada questão do material vem rotulada por uma delas; "Outras" = sem prova específica). No campo "provas" da ação, liste as provas cujas questões cobram aquele tema (ex.: ["TSA"] se só cai no TSA; ["TEA","TSA"] se cai nos dois). Se o tema for geral/transversal sem prova específica, use ["Geral"].
+
 Responda SOMENTE com JSON válido (sem markdown, sem cercas de código), neste formato exato:
 {
   "resumo": "2 a 4 frases sobre o estado geral do módulo e onde está o maior risco.",
@@ -121,6 +123,7 @@ Responda SOMENTE com JSON válido (sem markdown, sem cercas de código), neste f
     {
       "titulo": "ação curta e acionável",
       "categoria": "gravar | regravar | atualizar | material | questoes | edital",
+      "provas": ["TEA" | "TSA" | "MEs" | "Geral"],
       "aula": "título da aula alvo, ou null se for aula nova/ausente",
       "porque": "1-2 frases justificando com base nos dados",
       "notas": { ${CRIT_IDS.map(id => `"${id}": 0.0`).join(', ')} }
@@ -282,18 +285,33 @@ exports.analisarModuloPO = onRequest(
         return;
       }
 
+      // Normaliza rótulo de prova vindo da IA (tolera ME/ME1/mes/tsa…).
+      const _normProva = (p) => {
+        const s = String(p || '').trim().toUpperCase().replace(/[^A-Z]/g, '');
+        if (s === 'TEA') return 'TEA';
+        if (s === 'TSA') return 'TSA';
+        if (s === 'ME' || s === 'MES' || s.startsWith('ME')) return 'MEs';
+        if (s === 'GERAL') return 'Geral';
+        return null;
+      };
       // Sanitiza as notas: garante todas as chaves, clampa 0..1.
       const acoes = parsed.acoes.slice(0, 20).map(a => {
         const notas = {};
         CRIT_IDS.forEach(id => { let v = Number(a.notas?.[id]); if (!Number.isFinite(v)) v = 0; notas[id] = Math.max(0, Math.min(1, v)); });
+        let provas = Array.isArray(a.provas) ? [...new Set(a.provas.map(_normProva).filter(Boolean))] : [];
+        if (!provas.length) provas = ['Geral'];
         return {
           titulo: String(a.titulo || '').trim() || '(sem título)',
           categoria: String(a.categoria || '').trim().toLowerCase(),
+          provas,
           aula: a.aula ? String(a.aula).trim() : null,
           porque: String(a.porque || '').trim(),
           notas,
         };
       });
+
+      // Contagem de questões por prova (sinal de incidência usado no produto).
+      const porProva = { TEA: (questoes.TEA || []).length, TSA: (questoes.TSA || []).length, MEs: (questoes.MEs || []).length, Outras: (questoes.Outras || []).length };
 
       const resultado = {
         resumo: String(parsed.resumo || '').trim(),
@@ -303,6 +321,7 @@ exports.analisarModuloPO = onRequest(
           nAulas: aulas.length,
           nTranscricoes: aulas.filter(a => a.transcricao).length,
           nQuestoes: Object.values(questoes).reduce((s, arr) => s + arr.length, 0),
+          porProva,
           nPedidos: pedidos.length,
           temEdital: !!edital,
           modelo: MODEL,
@@ -328,6 +347,155 @@ exports.analisarModuloPO = onRequest(
     } catch (e) {
       console.error('IA PO erro:', e);
       res.status(500).json({ error: 'Erro ao analisar: ' + (e.message || String(e)) });
+    }
+  }
+);
+
+// ──────────────────────────────────────────────────────────────────────────
+// Análise do PRODUTO inteiro — consolida as análises JÁ SALVAS de cada módulo.
+// A IA NÃO reprocessa transcrições/questões: recebe só os resumos+ações+
+// incidência de cada módulo e produz, POR PROVA (TEA/TSA/MEs), um ranking de
+// módulos (priorizando maior incidência na prova) + panorama + resumo geral.
+// ──────────────────────────────────────────────────────────────────────────
+const PROVAS_PRODUTO = ['TEA', 'TSA', 'MEs'];
+
+function buildProdutoSystemPrompt() {
+  return `Você está consolidando a análise de um PRODUTO (curso de revisão para provas de título médico) inteiro, a partir das análises JÁ FEITAS de cada módulo.
+
+IMPORTANTE: você NÃO recebe transcrições nem questões — recebe apenas, de cada módulo já analisado: o resumo, a lista de ações recomendadas (com categoria e provas) e a INCIDÊNCIA (nº de questões reais de prova por prova: TEA, TSA, MEs). Trabalhe só com isso.
+
+Sua tarefa: para CADA prova (TEA, TSA, MEs), produza um RANKING dos módulos do mais para o menos prioritário, e um panorama curto.
+
+Como priorizar dentro de cada prova:
+1. INCIDÊNCIA primeiro: módulos com MAIS questões naquela prova são mais importantes — é por onde o aluno mais perde/ganha ponto. Dê mais peso a eles.
+2. Gravidade das ações: módulos com ações fortes (lacuna real, aula a gravar/regravar, avaliação baixa) sobem.
+3. Um módulo com altíssima incidência e ações sérias é prioridade máxima naquela prova.
+Atribua a cada módulo um nível: "alta", "media" ou "baixa".
+Só inclua no ranking de uma prova os módulos que têm incidência > 0 OU ações relevantes para aquela prova.
+
+Responda SOMENTE com JSON válido (sem markdown, sem cercas), neste formato exato:
+{
+  "resumoGeral": "3 a 5 frases: estado geral do produto, onde focar primeiro, padrões que se repetem entre módulos.",
+  "porProva": {
+    "TEA": { "panorama": "2-3 frases sobre o cenário desta prova no produto.", "ranking": [ { "modulo": "nome exato do módulo", "nivel": "alta|media|baixa", "porque": "1 frase: por que essa posição (cite incidência e/ou ação)." } ] },
+    "TSA": { "panorama": "...", "ranking": [ ... ] },
+    "MEs": { "panorama": "...", "ranking": [ ... ] }
+  }
+}`;
+}
+
+function buildProdutoUserPrompt(cursoNome, mods) {
+  const linhas = [`PRODUTO: ${cursoNome}`, `Módulos já analisados: ${mods.length}`, ''];
+  mods.forEach((m, i) => {
+    const inc = m.porProva || {};
+    linhas.push(`### Módulo ${i + 1}: ${m.modulo}`);
+    linhas.push(`Incidência (nº de questões): TEA ${inc.TEA || 0} · TSA ${inc.TSA || 0} · MEs ${inc.MEs || 0}`);
+    if (m.resumo) linhas.push(`Resumo: ${m.resumo}`);
+    const acoes = (m.acoes || []).slice(0, 8);
+    if (acoes.length) {
+      linhas.push('Ações:');
+      acoes.forEach(a => linhas.push(`  - [${a.categoria || '?'} | ${(a.provas || []).join(',') || 'Geral'}] ${a.titulo}${a.porque ? ' — ' + a.porque : ''}`));
+    }
+    linhas.push('');
+  });
+  return linhas.join('\n');
+}
+
+exports.analisarProdutoPO = onRequest(
+  { region: 'us-central1', invoker: 'public', cors: false, timeoutSeconds: 180, memory: '512MiB' },
+  async (req, res) => {
+    setCors(req, res);
+    if (req.method === 'OPTIONS') { res.status(204).send(''); return; }
+    if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
+    if (!ANTHROPIC_API_KEY) { console.error('ANTHROPIC_API_KEY_PO ausente'); res.status(500).json({ error: 'IA de análise não configurada no servidor (falta ANTHROPIC_API_KEY_PO)' }); return; }
+
+    const decoded = await exigeAuth(req, res);
+    if (!decoded) return;
+
+    const cursoId = String(req.body?.cursoId || '').trim();
+    const cursoNome = String(req.body?.cursoNome || '').trim();
+    if (!cursoId || !cursoNome) { res.status(400).json({ error: 'Faltam cursoId ou cursoNome' }); return; }
+
+    try {
+      const db = admin.firestore();
+      // Lê os módulos do curso que já têm análise salva.
+      const snap = await db.collection('poModQuestoes').where('cursoId', '==', cursoId).get();
+      const mods = [];
+      snap.forEach(d => {
+        const x = d.data() || {};
+        const an = x.analise;
+        if (!an || !Array.isArray(an.acoes)) return;
+        const porProva = (an.meta && an.meta.porProva) || { TEA: (x.TEA || []).length, TSA: (x.TSA || []).length, MEs: (x.MEs || []).length };
+        mods.push({ modulo: x.modulo || an.meta?.modulo || '(módulo)', resumo: an.resumo || '', acoes: an.acoes, porProva });
+      });
+
+      if (!mods.length) {
+        res.status(200).json({ ok: true, analise: { resumoGeral: 'Nenhum módulo deste produto foi analisado ainda. Analise os módulos individualmente primeiro — a análise do produto consolida esses resultados.', porProva: {}, meta: { cursoId, cursoNome, nModulos: 0, em: new Date().toISOString() } } });
+        return;
+      }
+
+      // Ordena por incidência total (só pra deixar o prompt mais legível).
+      mods.sort((a, b) => ((b.porProva.TEA || 0) + (b.porProva.TSA || 0) + (b.porProva.MEs || 0)) - ((a.porProva.TEA || 0) + (a.porProva.TSA || 0) + (a.porProva.MEs || 0)));
+
+      const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
+      const resp = await client.messages.create({
+        model: MODEL,
+        max_tokens: MAX_TOKENS,
+        system: [{ type: 'text', text: buildProdutoSystemPrompt(), cache_control: { type: 'ephemeral' } }],
+        messages: [{ role: 'user', content: buildProdutoUserPrompt(cursoNome, mods) }],
+      });
+
+      const texto = resp.content.filter(c => c.type === 'text').map(c => c.text).join('\n').trim();
+      const limpo = texto.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+      let parsed;
+      try { parsed = JSON.parse(limpo); }
+      catch (e) { const m = limpo.match(/\{[\s\S]*\}/); if (m) { try { parsed = JSON.parse(m[0]); } catch (_) {} } }
+      if (!parsed || !parsed.porProva) {
+        console.error('IA PO produto: resposta não-JSON', texto.slice(0, 500));
+        res.status(502).json({ error: 'A IA não devolveu um panorama válido. Tente de novo.' });
+        return;
+      }
+
+      // Mapa de incidência por módulo p/ enriquecer o ranking com números confiáveis.
+      const incPorMod = {};
+      mods.forEach(m => { incPorMod[m.modulo] = m.porProva; });
+      const NIVEIS = new Set(['alta', 'media', 'baixa']);
+      const porProva = {};
+      PROVAS_PRODUTO.forEach(prova => {
+        const blk = parsed.porProva[prova] || {};
+        const ranking = (Array.isArray(blk.ranking) ? blk.ranking : []).map(r => {
+          const modulo = String(r.modulo || '').trim();
+          let nivel = String(r.nivel || '').trim().toLowerCase();
+          if (!NIVEIS.has(nivel)) nivel = 'media';
+          const inc = incPorMod[modulo] || {};
+          return { modulo, nivel, porque: String(r.porque || '').trim(), incidencia: Number(inc[prova] || 0) };
+        }).filter(r => r.modulo);
+        porProva[prova] = { panorama: String(blk.panorama || '').trim(), ranking };
+      });
+
+      const resultado = {
+        resumoGeral: String(parsed.resumoGeral || '').trim(),
+        porProva,
+        meta: {
+          cursoId, cursoNome,
+          nModulos: mods.length,
+          modelo: MODEL,
+          em: new Date().toISOString(),
+          por: decoded.email || decoded.uid,
+        },
+      };
+
+      const usage = resp.usage || {};
+      console.log('IA PO produto OK', {
+        user: decoded.email || decoded.uid, curso: cursoNome, n_modulos: mods.length,
+        input_tokens: usage.input_tokens, output_tokens: usage.output_tokens,
+        cache_read: usage.cache_read_input_tokens || 0, cache_write: usage.cache_creation_input_tokens || 0,
+      });
+
+      res.status(200).json({ ok: true, analise: resultado, usage });
+    } catch (e) {
+      console.error('IA PO produto erro:', e);
+      res.status(500).json({ error: 'Erro ao analisar o produto: ' + (e.message || String(e)) });
     }
   }
 );

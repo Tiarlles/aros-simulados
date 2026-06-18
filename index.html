@@ -5928,6 +5928,28 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-mod-modal .po-an-tag{font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.3px;padding:2px 7px;border-radius:20px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
         #po-mod-modal .po-an-foot{font-size:11px;color:var(--t2);display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:2px}
         #po-mod-modal .po-an-reorder{margin-left:auto;font-size:11px;padding:4px 10px}
+        #po-mod-modal .po-an-h-tit{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px}
+        #po-mod-modal .po-an-saved{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)}
+        #po-mod-modal .po-an-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0}
+        #po-mod-modal .po-an-tab{display:inline-flex;align-items:center;gap:6px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--t2);cursor:pointer;transition:.15s}
+        #po-mod-modal .po-an-tab:hover{color:var(--text);border-color:var(--border2)}
+        #po-mod-modal .po-an-tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+        #po-mod-modal .po-an-tabc{font-family:'JetBrains Mono',monospace;font-size:9.5px;background:color-mix(in srgb,var(--text) 12%,transparent);padding:1px 5px;border-radius:10px}
+        #po-mod-modal .po-an-tab.on .po-an-tabc{background:rgba(255,255,255,.25)}
+        #po-mod-modal .po-an-prio{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2)}
+        #po-mod-modal .po-an-badge{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;padding:3px 12px;border-radius:20px;color:var(--nc);background:color-mix(in srgb,var(--nc) 16%,transparent);border:1px solid color-mix(in srgb,var(--nc) 45%,transparent)}
+        #po-mod-modal .po-an-tbl{width:100%;border-collapse:collapse}
+        #po-mod-modal .po-an-tr{border-bottom:1px solid var(--border)}
+        #po-mod-modal .po-an-tr:last-child{border-bottom:none}
+        #po-mod-modal .po-an-tbl td{padding:10px 8px;vertical-align:top}
+        #po-mod-modal .po-an-c-rank{width:26px;text-align:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;color:var(--t2)}
+        #po-mod-modal .po-an-c-niv{width:54px;text-align:center;white-space:nowrap}
+        #po-mod-modal .po-an-dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--nc);box-shadow:0 0 0 3px color-mix(in srgb,var(--nc) 22%,transparent);vertical-align:middle}
+        #po-mod-modal .po-an-pct{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--text);margin-left:6px}
+        #po-mod-modal .po-an-tit{font-weight:600;font-size:13px;color:var(--text);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+        #po-mod-modal .po-an-pchip{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.3px;padding:1px 6px;border-radius:10px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
+        #po-mod-modal .po-an-aula{font-size:11.5px;color:var(--t2);margin-top:2px}
+        #po-mod-modal .po-an-por{font-size:12px;line-height:1.45;color:var(--t2);margin-top:2px}
         #po-mod-modal .po-q-mock .po-imp-erro{padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 35%,transparent);color:#f85149;font-size:12.5px}
         #po-mod-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
         #po-mod-modal .po-mod-sub{font-size:12px;color:var(--t2);margin-top:2px;font-family:'JetBrains Mono',monospace}
@@ -6106,6 +6128,36 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-pesos-modal .po-peso-ctrl input[type=range]{flex:1;accent-color:var(--accent)}
         #po-pesos-modal .po-peso-val{width:26px;text-align:right;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:var(--accent)}
         #tab-po .po-tl-empty{margin-top:14px;padding:14px 16px;border-radius:12px;background:var(--bg2);border:1px dashed color-mix(in srgb,var(--accent) 35%,var(--border));font-size:12.5px;color:var(--text);line-height:1.55}
+        /* Análise do produto reusa as classes .po-an-* do modal, re-escopadas aqui */
+        #tab-po .po-an-wrap{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+        #tab-po .po-an-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+        #tab-po .po-an-h-tit{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px}
+        #tab-po .po-an-saved{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--t2)}
+        #tab-po .po-an-resumo{font-size:13px;line-height:1.55;color:var(--text);padding:11px 13px;border-radius:9px;background:color-mix(in srgb,var(--accent) 9%,transparent)}
+        #tab-po .po-an-tabs{display:flex;gap:6px;flex-wrap:wrap}
+        #tab-po .po-an-tab{display:inline-flex;align-items:center;gap:6px;font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--t2);cursor:pointer;transition:.15s}
+        #tab-po .po-an-tab:hover{color:var(--text);border-color:var(--border2)}
+        #tab-po .po-an-tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+        #tab-po .po-an-tabc{font-family:'JetBrains Mono',monospace;font-size:9.5px;background:color-mix(in srgb,var(--text) 12%,transparent);padding:1px 5px;border-radius:10px}
+        #tab-po .po-an-tab.on .po-an-tabc{background:rgba(255,255,255,.25)}
+        #tab-po .po-an-prov-pano{font-size:12.5px;line-height:1.5;color:var(--t2);padding:2px 2px}
+        #tab-po .po-an-tbl{width:100%;border-collapse:collapse}
+        #tab-po .po-an-tr{border-bottom:1px solid var(--border)}
+        #tab-po .po-an-tr:last-child{border-bottom:none}
+        #tab-po .po-an-tbl td{padding:10px 8px;vertical-align:top}
+        #tab-po .po-an-c-rank{width:26px;text-align:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;color:var(--t2)}
+        #tab-po .po-an-c-niv{width:30px;text-align:center}
+        #tab-po .po-an-dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--nc);box-shadow:0 0 0 3px color-mix(in srgb,var(--nc) 22%,transparent);vertical-align:middle}
+        #tab-po .po-an-tit{font-weight:600;font-size:13.5px;color:var(--text);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+        #tab-po .po-an-pchip{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:1px 6px;border-radius:10px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
+        #tab-po .po-an-por{font-size:12px;line-height:1.45;color:var(--t2);margin-top:2px}
+        #tab-po .po-an-foot{font-size:11px;color:var(--t2);display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:2px}
+        #tab-po .po-an-reorder{margin-left:auto;font-size:11.5px;padding:5px 12px}
+        #tab-po .po-an-badge,#po-mod-modal .po-an-badge{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;padding:3px 12px;border-radius:20px;color:var(--nc);background:color-mix(in srgb,var(--nc) 16%,transparent);border:1px solid color-mix(in srgb,var(--nc) 45%,transparent)}
+        #tab-po .po-an-badge.sm,#po-mod-modal .po-an-badge.sm{font-size:9.5px;padding:2px 9px}
+        #tab-po .po-an-load,#po-mod-modal .po-an-load{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--text);margin-top:14px}
+        #tab-po .po-an-spin{width:15px;height:15px;border-radius:50%;border:2px solid color-mix(in srgb,var(--accent) 30%,transparent);border-top-color:var(--accent);display:inline-block;animation:po-an-rot .7s linear infinite;flex:none}
+        #tab-po .po-imp-erro{margin-top:14px;padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 35%,transparent);color:#f85149;font-size:12.5px}
       </style>
       <div id="po-root"></div>
     </div>
@@ -37390,6 +37442,7 @@ async function loadPO(){
       if(d.poPesos&&typeof d.poPesos==='object')S.poPesos={...S.poPesos,...d.poPesos};
       if(d.editais&&typeof d.editais==='object')S.poEditais=d.editais;
       if(d.temaModulo&&typeof d.temaModulo==='object')S.poTemaModulo=d.temaModulo;
+      if(d.analiseProduto&&typeof d.analiseProduto==='object')S.poAnaliseProduto=d.analiseProduto;
     }
   }catch(e){ /* sem permissão de leitura: segue com defaults */ }
 
@@ -38746,6 +38799,9 @@ function _poRenderCurso(root){
   try{_poBindDrag();}catch(e){}
   _poUpdateModIndeterminate();
   _poUpdateSelBar();
+  // Restaura a última análise do produto salva, se houver.
+  S._poProdTab=null;
+  if(S.poAnaliseProduto&&S.poAnaliseProduto[S.poCursoAtual]){try{_poRenderAnaliseProduto(S.poAnaliseProduto[S.poCursoAtual]);}catch(e){}}
 }
 
 function _poRefreshTabela(){
@@ -39203,6 +39259,7 @@ function _poApostModalRender(){
 const FILTROS_PO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/filtrosPO';
 const PUXAR_QUESTOES_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/puxarQuestoesPO';
 const ANALISE_PO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/analisarModuloPO';
+const ANALISE_PRODUTO_PO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/analisarProdutoPO';
 S.poTemaModulo={};   // {cursoId:{modulo:[catIds]}}
 S._poFiltros=null;   // cache de {categorias,tipos,anos}
 S._poMapaAtual=null; // estado do modal de mapeamento {cid}
@@ -39336,6 +39393,7 @@ const PO_CRITERIOS=[
 ];
 S.poPesos=Object.fromEntries(PO_CRITERIOS.map(c=>[c.id,c.peso])); // default; sobrescrito pelo config
 S.poEditais={}; // {cursoId: textoDoEdital}
+S.poAnaliseProduto={}; // {cursoId: resultado da análise do produto (IA)}
 
 async function _poSavePesos(){ try{ await setDoc(doc(db,'config','poConfig'),{poPesos:S.poPesos},{merge:true}); }catch(e){console.warn('poPesos save',e);} }
 async function _poSaveEditais(){ try{ await setDoc(doc(db,'config','poConfig'),{editais:S.poEditais},{merge:true}); }catch(e){console.warn('editais save',e);} }
@@ -39412,17 +39470,57 @@ window.poPesoSet=(id,v)=>{ S.poPesos[id]=Number(v); const el=document.getElement
 window.poPesosRestaurar=()=>{ S.poPesos=Object.fromEntries(PO_CRITERIOS.map(c=>[c.id,c.peso])); poAbrirPesos(); };
 window.poPesosSalvar=()=>{ _poSavePesos(); arosToast('Pesos salvos','success',1800); poPesosClose(); };
 
-// Placeholder até a Cloud Function de análise (Fase 2) ser publicada.
-window.poAnalisarProduto=()=>{
+// Análise do PRODUTO inteiro: consolida (via IA) os módulos JÁ analisados.
+async function _poSaveAnaliseProduto(cid){ try{ await setDoc(doc(db,'config','poConfig'),{analiseProduto:{[cid]:S.poAnaliseProduto[cid]}},{merge:true}); }catch(e){console.warn('analiseProduto save',e);} }
+window.poProdSetTab=(prova)=>{ S._poProdTab=prova; const cid=S.poCursoAtual; if(cid&&S.poAnaliseProduto[cid])_poRenderAnaliseProduto(S.poAnaliseProduto[cid]); };
+window.poAnalisarProduto=async()=>{
+  const cid=S.poCursoAtual; const curso=(S.poCursos||[]).find(c=>c.id===cid);
+  if(!cid||!curso){arosToast('Abra um curso primeiro.','err',2500);return;}
+  if(S._poProdAnalisando)return;
   const el=document.getElementById('po-prod-timeline'); if(!el)return;
-  el.innerHTML=`<div class="po-tl-empty">⚡ <b>Linha do tempo de prioridades — em breve (Fase 2).</b><br>
-    O motor de IA (que cruza edital × questões × transcrição e pontua cada critério) é ativado quando a Cloud Function de análise for publicada.<br>
-    <span style="color:var(--t2)">Por enquanto, já dá pra preencher o <b>edital</b>, ajustar os <b>pesos</b> e cadastrar <b>questões + pedidos</b> por módulo — tudo isso vira insumo da análise.</span></div>`;
+  S._poProdAnalisando=true;
+  el.innerHTML=`<div class="po-an-load"><span class="po-an-spin"></span> Consolidando as análises já salvas dos módulos… (a IA usa só os resultados salvos, não reprocessa tudo)</div>`;
   el.scrollIntoView({behavior:'smooth',block:'nearest'});
+  try{
+    const r=await _poApiPost(ANALISE_PRODUTO_PO_ENDPOINT,{cursoId:cid,cursoNome:curso.nome});
+    S.poAnaliseProduto[cid]=r.analise;
+    _poSaveAnaliseProduto(cid);
+    _poRenderAnaliseProduto(r.analise);
+  }catch(e){ el.innerHTML=`<div class="po-imp-erro">⚠️ ${_poEsc(e.message||String(e))}</div>`; }
+  finally{ S._poProdAnalisando=false; }
 };
+function _poRenderAnaliseProduto(an){
+  const el=document.getElementById('po-prod-timeline'); if(!el||!an)return;
+  const m=an.meta||{};
+  if(!m.nModulos){ el.innerHTML=`<div class="po-tl-empty">${_poEsc(an.resumoGeral||'Nenhum módulo analisado ainda.')}</div>`; return; }
+  const provas=_PO_PROVAS_ORDEM.filter(p=>p!=='Geral'&&an.porProva&&an.porProva[p]&&(an.porProva[p].ranking||[]).length);
+  let aba=S._poProdTab||(provas[0]||'TEA');
+  if(!provas.includes(aba))aba=provas[0]||'TEA';
+  const blk=(an.porProva&&an.porProva[aba])||{ranking:[],panorama:''};
+  const tabs=provas.map(p=>`<button type="button" class="po-an-tab${aba===p?' on':''}" onclick="poProdSetTab('${p}')">${_PO_PROVA_LBL[p]||p}<span class="po-an-tabc">${(an.porProva[p].ranking||[]).length}</span></button>`).join('');
+  const rows=(blk.ranking||[]).map((r,i)=>{
+    const nvm=_PO_NIVEL[r.nivel]||_PO_NIVEL.media;
+    return `<tr class="po-an-tr">
+      <td class="po-an-c-rank">${i+1}</td>
+      <td class="po-an-c-niv"><span class="po-an-dot" style="--nc:${nvm.cor}" title="${nvm.lbl}"></span></td>
+      <td class="po-an-c-acao">
+        <div class="po-an-tit">${_poEsc(r.modulo)} <span class="po-an-pchip" title="questões nesta prova">${r.incidencia||0}q</span> <span class="po-an-badge sm" style="--nc:${nvm.cor}">${nvm.lbl}</span></div>
+        ${r.porque?`<div class="po-an-por">${_poEsc(r.porque)}</div>`:''}
+      </td></tr>`;
+  }).join('')||`<tr><td colspan="3" class="po-mut" style="padding:14px">Sem módulos relevantes para esta prova.</td></tr>`;
+  el.innerHTML=`<div class="po-an-wrap">
+    <div class="po-an-head"><span class="po-an-h-tit">🧠 Análise do produto</span>${m.em?`<span class="po-an-saved">💾 ${m.nModulos} módulo(s) · ${_poDataFmt(m.em)}</span>`:''}</div>
+    ${an.resumoGeral?`<div class="po-an-resumo">${_poEsc(an.resumoGeral)}</div>`:''}
+    <div class="po-an-tabs">${tabs}</div>
+    ${blk.panorama?`<div class="po-an-prov-pano">${_poEsc(blk.panorama)}</div>`:''}
+    <table class="po-an-tbl"><tbody>${rows}</tbody></table>
+    <div class="po-an-foot">Ranking por prova, priorizando incidência (nº de questões) + gravidade. Re-analise quando atualizar módulos. <button type="button" class="btn btn-g po-an-reorder" onclick="poAnalisarProduto()">🔄 Re-analisar produto</button></div>
+  </div>`;
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 window.poAbrirAnaliseModulo=(cid,modEnc)=>{
   S._poModAtual={cid,modulo:decodeURIComponent(modEnc)};
-  S._poModErro={};
+  S._poModErro={};S._poAnTab='Todas';
   // abre por padrão os accordions que já têm conteúdo
   const b=_poModQ(cid,S._poModAtual.modulo);
   S._poModSec={};S._poModFile={};
@@ -39477,6 +39575,12 @@ function _poPrioridade(notas){
   return pesoTot?soma/pesoTot:0;
 }
 const _PO_CAT_ICON={gravar:'🎬',regravar:'🔁',atualizar:'♻️',material:'📚',questoes:'❓',edital:'📋'};
+// 3 níveis de prioridade (cor) derivados da nota 0..1 ponderada pelos pesos.
+const _PO_NIVEL={alta:{lbl:'Alta',cor:'#f85149'},media:{lbl:'Média',cor:'#d29922'},baixa:{lbl:'Baixa',cor:'#3fb950'}};
+function _poNivelDe(p){ return p>=0.5?'alta':(p>=0.25?'media':'baixa'); }
+const _PO_PROVAS_ORDEM=['TEA','TSA','MEs','Geral'];
+const _PO_PROVA_LBL={TEA:'TEA',TSA:'TSA',MEs:'ME',Geral:'Geral'};
+function _poDataFmt(iso){ try{ const d=new Date(iso); if(isNaN(d))return ''; return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }catch(_){return '';} }
 window.poAnalisarModulo=async()=>{
   if(!S._poModAtual||S._poModAnalisando)return;
   const {cid,modulo}=S._poModAtual;
@@ -39499,31 +39603,49 @@ window.poAnalisarModulo=async()=>{
     if(btn){btn.disabled=false;btn.textContent='🤖 Analisar módulo';}
   }
 };
+window.poAnSetTab=(prova)=>{ S._poAnTab=prova; const an=S._poModAtual&&S._poAnalises[_poModKey(S._poModAtual.cid,S._poModAtual.modulo)]; if(an)_poRenderAnalise(an); };
 function _poRenderAnalise(an){
   const box=document.getElementById('po-mod-mock'); if(!box||!an)return;
   box.style.display='block';
-  const acoes=(an.acoes||[]).map(a=>({...a,_p:_poPrioridade(a.notas)})).sort((x,y)=>y._p-x._p);
+  const todas=(an.acoes||[]).map(a=>({...a,_p:_poPrioridade(a.notas),provas:Array.isArray(a.provas)&&a.provas.length?a.provas:['Geral']}));
   const m=an.meta||{};
-  const metaTxt=`${m.nAulas||0} aula(s) · ${m.nTranscricoes||0} c/ transcrição · ${m.nQuestoes||0} questões · ${m.nPedidos||0} pedido(s) · edital ${m.temEdital?'✓':'—'}`;
+  // Abas: "Todas" + as provas presentes nas ações (na ordem TEA/TSA/ME/Geral)
+  const presentes=_PO_PROVAS_ORDEM.filter(p=>todas.some(a=>a.provas.includes(p)));
+  let aba=S._poAnTab||'Todas';
+  if(aba!=='Todas'&&!presentes.includes(aba))aba='Todas';
+  const acoes=(aba==='Todas'?todas:todas.filter(a=>a.provas.includes(aba))).sort((x,y)=>y._p-x._p);
+  // Prioridade do módulo (na aba atual) = maior prioridade entre as ações
+  const topP=acoes.length?Math.max(...acoes.map(a=>a._p)):0;
+  const nivelMod=_poNivelDe(topP);
+  const tabBtn=(p,lbl)=>{const inc=p==='Todas'?0:(m.porProva&&m.porProva[p==='MEs'?'MEs':p]||0);const cnt=p==='Todas'?todas.length:todas.filter(a=>a.provas.includes(p)).length;return `<button type="button" class="po-an-tab${aba===p?' on':''}" onclick="poAnSetTab('${p}')">${lbl}<span class="po-an-tabc">${cnt}</span></button>`;};
+  const tabs=[tabBtn('Todas','Todas')].concat(presentes.map(p=>tabBtn(p,_PO_PROVA_LBL[p]))).join('');
+  const incTxt=m.porProva?`TEA ${m.porProva.TEA||0} · TSA ${m.porProva.TSA||0} · ME ${m.porProva.MEs||0}`:'';
+  const metaTxt=`${m.nAulas||0} aula(s) · ${m.nTranscricoes||0} c/ transcrição · ${m.nQuestoes||0} questões${incTxt?` (${incTxt})`:''} · ${m.nPedidos||0} pedido(s) · edital ${m.temEdital?'✓':'—'}`;
   const rows=acoes.map((a,i)=>{
     const ic=_PO_CAT_ICON[a.categoria]||'•';
     const pct=Math.round(a._p*100);
-    const topCrit=PO_CRITERIOS.map(c=>({c,v:Number(a.notas&&a.notas[c.id]||0)})).filter(x=>x.v>=0.5).sort((x,y)=>y.v-x.v).slice(0,3)
-      .map(x=>`<span class="po-an-tag">${_poEsc(x.c.label)}</span>`).join('');
-    return `<div class="po-an-acao">
-      <div class="po-an-rank">${i+1}</div>
-      <div class="po-an-bar" title="Prioridade ${pct}%"><i style="width:${pct}%"></i><b>${pct}</b></div>
-      <div class="po-an-body">
-        <div class="po-an-tit">${ic} ${_poEsc(a.titulo)}</div>
+    const nv=_poNivelDe(a._p), nvm=_PO_NIVEL[nv];
+    const provaChips=a.provas.map(p=>`<span class="po-an-pchip">${_PO_PROVA_LBL[p]||p}</span>`).join('');
+    return `<tr class="po-an-tr">
+      <td class="po-an-c-rank">${i+1}</td>
+      <td class="po-an-c-niv"><span class="po-an-dot" style="--nc:${nvm.cor}" title="${nvm.lbl} · ${pct}%"></span><span class="po-an-pct">${pct}</span></td>
+      <td class="po-an-c-acao">
+        <div class="po-an-tit">${ic} ${_poEsc(a.titulo)} ${provaChips}</div>
         ${a.aula?`<div class="po-an-aula">📎 ${_poEsc(a.aula)}</div>`:''}
         <div class="po-an-por">${_poEsc(a.porque)}</div>
-        ${topCrit?`<div class="po-an-tags">${topCrit}</div>`:''}
-      </div></div>`;
-  }).join('')||`<div class="po-mut">A IA não sugeriu nenhuma ação para este módulo.</div>`;
+      </td></tr>`;
+  }).join('')||`<tr><td colspan="3" class="po-mut" style="padding:14px">Nenhuma ação para esta prova.</td></tr>`;
+  const nvm=_PO_NIVEL[nivelMod];
   box.innerHTML=`<div class="po-an-wrap">
-    <div class="po-an-head"><span>🧠 Análise do módulo</span><span class="po-an-meta">${metaTxt}</span></div>
+    <div class="po-an-head">
+      <span class="po-an-h-tit">🧠 Análise do módulo</span>
+      ${m.em?`<span class="po-an-saved">💾 salvo em ${_poDataFmt(m.em)}</span>`:''}
+    </div>
+    <div class="po-an-meta">${metaTxt}</div>
     ${an.resumo?`<div class="po-an-resumo">${_poEsc(an.resumo)}</div>`:''}
-    <div class="po-an-list">${rows}</div>
+    <div class="po-an-tabs">${tabs}</div>
+    <div class="po-an-prio"><span>Prioridade ${aba==='Todas'?'geral':'no '+(_PO_PROVA_LBL[aba]||aba)}:</span> <span class="po-an-badge" style="--nc:${nvm.cor}">${nvm.lbl}</span></div>
+    <table class="po-an-tbl"><tbody>${rows}</tbody></table>
     <div class="po-an-foot">Ordenado pelos <b>pesos</b> atuais. Mexa em ⚖️ Pesos e clique <b>↻ Re-ordenar</b> — sem gastar IA. <button type="button" class="btn btn-g po-an-reorder" onclick="poReordenarAnalise()">↻ Re-ordenar</button></div>
   </div>`;
   box.scrollIntoView({behavior:'smooth',block:'nearest'});

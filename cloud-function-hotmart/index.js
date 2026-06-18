@@ -27,8 +27,10 @@ exports.sincronizarLaravelAuto = require('./sincronizar-laravel').sincronizarLar
 exports.filtrosPO = require('./questoes-po').filtrosPO;
 exports.puxarQuestoesPO = require('./questoes-po').puxarQuestoesPO;
 
-// IA de análise do PO ("megabrain") — analisa um módulo (Sonnet, chave ANTHROPIC_API_KEY_PO)
+// IA de análise do PO ("megabrain") — módulo (Sonnet, chave ANTHROPIC_API_KEY_PO)
 exports.analisarModuloPO = require('./po-analise').analisarModuloPO;
+// IA de análise do PO — produto inteiro (consolida os módulos já analisados)
+exports.analisarProdutoPO = require('./po-analise').analisarProdutoPO;
 
 // Helper que faz UPSERT em alunosAprovados (Cruzar Lista) a partir do webhook Hotmart
 const { upsertAluno } = require('./hotmart-alunos');
