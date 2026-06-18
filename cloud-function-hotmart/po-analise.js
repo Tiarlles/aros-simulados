@@ -203,6 +203,19 @@ function buildUserPrompt(ctx) {
   linhas.push(oralTemas.length ? oralTemas.map((t, i) => `${i + 1}. ${t}`).join('\n') : '(nenhum tema do TSA Oral cadastrado)');
   linhas.push('');
 
+  if (ctx.atualizacaoConteudo) {
+    linhas.push(`=== ATUALIZAÇÃO / NOVA DIRETRIZ (texto colado pela coordenação) ===`);
+    linhas.push('Compare este texto com o conteúdo das aulas. Se alguma aula ensina algo que MUDOU/foi superado por esta atualização, recomende ATUALIZAR essa aula (cite a aula e o que mudou). Se nada conflita, não gere ação por isso.');
+    linhas.push(ctx.atualizacaoConteudo.slice(0, 12000));
+    linhas.push('');
+  }
+  if (ctx.transcricaoAvulsa) {
+    linhas.push(`=== TRANSCRIÇÃO DE AULA AVULSA (conteúdo extra a considerar como JÁ COBERTO) ===`);
+    linhas.push('Considere este conteúdo como já existente ao avaliar lacunas — NÃO recomende criar/gravar algo que esta transcrição avulsa já cobre.');
+    linhas.push(ctx.transcricaoAvulsa.slice(0, 30000));
+    linhas.push('');
+  }
+
   linhas.push(`=== PEDIDOS DE ALUNOS ===`);
   linhas.push(pedidos.length ? pedidos.map((p, i) => `${i + 1}. ${p}`).join('\n') : '(nenhum pedido registrado)');
   linhas.push('');
@@ -288,6 +301,8 @@ exports.analisarModuloPO = onRequest(
       ['TEA', 'TSA', 'MEs', 'Outras'].forEach(t => { questoes[t] = (Array.isArray(md[t]) ? md[t] : []).map(enun).filter(Boolean); });
       const pedidos = Array.isArray(md.pedidos) ? md.pedidos.map(p => String(p).trim()).filter(Boolean) : [];
       const oralTemas = Array.isArray(md.oralTemas) ? md.oralTemas.map(t => String(t).trim()).filter(Boolean) : [];
+      const atualizacaoConteudo = String(md.atualizacaoConteudo || '').trim();
+      const transcricaoAvulsa = String(md.transcricaoAvulsa || '').trim();
       const apostilas = Array.isArray(md.apostilas) ? md.apostilas : [];
       const apostilaStatus = apostilas.length
         ? apostilas.map(ap => `- ${ap.titulo || '(sem título)'}: ${ap.status || 'Pendente'}`).join('\n')
@@ -302,7 +317,7 @@ exports.analisarModuloPO = onRequest(
       const edital = String(editais[cursoId] || '').trim();
       const promptCustom = cfg.analisePrompt && cfg.analisePrompt.modulo;
 
-      const ctx = { cursoNome, modulo, edital, aulas, questoes, pedidos, oralTemas, apostilaStatus, dispensadas };
+      const ctx = { cursoNome, modulo, edital, aulas, questoes, pedidos, oralTemas, atualizacaoConteudo, transcricaoAvulsa, apostilaStatus, dispensadas };
       const systemPrompt = buildSystemPrompt(promptCustom);
       const userPrompt = buildUserPrompt(ctx);
 

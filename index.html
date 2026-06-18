@@ -5985,6 +5985,8 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-mod-modal .po-mod-limpar:hover{border-color:#f85149;color:#f85149}
         #po-mod-modal .po-drop.po-drop-sm{padding:10px}
         #po-mod-modal .po-mod-bloco textarea.po-inp{min-height:80px;margin-top:8px}
+        #po-mod-modal textarea.po-mod-ta{width:100%;box-sizing:border-box;min-height:120px;resize:vertical;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;line-height:1.5}
+        #po-mod-modal textarea#po-avulsa-ta{min-height:180px}
         /* Accordion dos baldes de questões + pedidos */
         #po-mod-modal .po-mod-bloco-head{cursor:pointer;user-select:none}
         #po-mod-modal .po-mod-bloco-head:hover .po-mod-bloco-t{color:var(--text)}
@@ -39158,9 +39160,9 @@ function _poModKey(cid,mod){return _poSlug(cid+'__'+mod);}
 function _poSaveModQuestoes(cid,mod){
   const key=_poModKey(cid,mod);
   const b=S.poModQuestoes[key]||{TEA:[],TSA:[],MEs:[],Outras:[],pedidos:[],apostilas:[]};
-  setDoc(doc(db,'poModQuestoes',key),{cursoId:cid,modulo:mod,TEA:b.TEA||[],TSA:b.TSA||[],MEs:b.MEs||[],Outras:b.Outras||[],oralTemas:Array.isArray(b.oralTemas)?b.oralTemas:[],pedidos:Array.isArray(b.pedidos)?b.pedidos:[],apostilas:Array.isArray(b.apostilas)?b.apostilas:[]},{merge:true}).catch(e=>console.warn('poModQuestoes save',e));
+  setDoc(doc(db,'poModQuestoes',key),{cursoId:cid,modulo:mod,TEA:b.TEA||[],TSA:b.TSA||[],MEs:b.MEs||[],Outras:b.Outras||[],oralTemas:Array.isArray(b.oralTemas)?b.oralTemas:[],atualizacaoConteudo:String(b.atualizacaoConteudo||''),transcricaoAvulsa:String(b.transcricaoAvulsa||''),pedidos:Array.isArray(b.pedidos)?b.pedidos:[],apostilas:Array.isArray(b.apostilas)?b.apostilas:[]},{merge:true}).catch(e=>console.warn('poModQuestoes save',e));
 }
-function _poModQ(cid,mod){const k=_poModKey(cid,mod);if(!S.poModQuestoes[k])S.poModQuestoes[k]={TEA:[],TSA:[],MEs:[],Outras:[],oralTemas:[],pedidos:[],apostilas:[]};const b=S.poModQuestoes[k];if(!b.Outras)b.Outras=[];if(!Array.isArray(b.oralTemas))b.oralTemas=[];if(!Array.isArray(b.pedidos))b.pedidos=b.pedidos?String(b.pedidos).split('\n').map(s=>s.trim()).filter(Boolean):[];if(!Array.isArray(b.apostilas))b.apostilas=[];return b;}
+function _poModQ(cid,mod){const k=_poModKey(cid,mod);if(!S.poModQuestoes[k])S.poModQuestoes[k]={TEA:[],TSA:[],MEs:[],Outras:[],oralTemas:[],atualizacaoConteudo:'',transcricaoAvulsa:'',pedidos:[],apostilas:[]};const b=S.poModQuestoes[k];if(!b.Outras)b.Outras=[];if(!Array.isArray(b.oralTemas))b.oralTemas=[];if(typeof b.atualizacaoConteudo!=='string')b.atualizacaoConteudo='';if(typeof b.transcricaoAvulsa!=='string')b.transcricaoAvulsa='';if(!Array.isArray(b.pedidos))b.pedidos=b.pedidos?String(b.pedidos).split('\n').map(s=>s.trim()).filter(Boolean):[];if(!Array.isArray(b.apostilas))b.apostilas=[];return b;}
 // Remove <img>, data:image base64 e atributos src de imagem de um HTML/texto.
 function _poStripImagens(s){
   let t=String(s||'');
@@ -39247,6 +39249,20 @@ window.poModDelTema=(i)=>{
   if(Array.isArray(b.oralTemas))b.oralTemas.splice(i,1);
   _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
   _poModModalRender();
+};
+// TSA Oral por texto (um tema por linha) — salva no blur, sem re-render (não perde o foco).
+window.poModSetOral=(text)=>{
+  if(!S._poModAtual)return;
+  const b=_poModQ(S._poModAtual.cid,S._poModAtual.modulo);
+  b.oralTemas=String(text||'').split('\n').map(s=>s.trim()).filter(Boolean);
+  _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
+};
+// Campos de texto livre do módulo (atualizacaoConteudo, transcricaoAvulsa) — salva no blur.
+window.poModSetCampo=(campo,text)=>{
+  if(!S._poModAtual)return;
+  const b=_poModQ(S._poModAtual.cid,S._poModAtual.modulo);
+  b[campo]=String(text||'');
+  _poSaveModQuestoes(S._poModAtual.cid,S._poModAtual.modulo);
 };
 // Salva tudo (questões + pedidos) sem analisar — pra guardar pra análise futura.
 window.poModSalvarTudo=()=>{
@@ -39454,7 +39470,7 @@ window.poPuxarQuestoesModulo=async()=>{
     try{
       const snap=await getDoc(doc(db,'poModQuestoes',_poModKey(cid,modulo)));
       if(snap.exists()){const x=snap.data()||{};const k=_poModKey(cid,modulo);
-        S.poModQuestoes[k]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],oralTemas:Array.isArray(x.oralTemas)?x.oralTemas:[],pedidos:Array.isArray(x.pedidos)?x.pedidos:[],apostilas:Array.isArray(x.apostilas)?x.apostilas:[]};
+        S.poModQuestoes[k]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],oralTemas:Array.isArray(x.oralTemas)?x.oralTemas:[],atualizacaoConteudo:String(x.atualizacaoConteudo||''),transcricaoAvulsa:String(x.transcricaoAvulsa||''),pedidos:Array.isArray(x.pedidos)?x.pedidos:[],apostilas:Array.isArray(x.apostilas)?x.apostilas:[]};
       }
     }catch(_){}
     S._poModPuxando=false;
@@ -39675,6 +39691,8 @@ window.poAbrirAnaliseModulo=(cid,modEnc)=>{
   S._poModSec={};S._poModFile={};
   _PO_MOD_TIPOS.forEach(t=>{S._poModSec[t]=(b[t]||[]).length>0;});
   S._poModSec.oral=(b.oralTemas||[]).length>0;
+  S._poModSec.atualizacao=!!String(b.atualizacaoConteudo||'').trim();
+  S._poModSec.avulsa=!!String(b.transcricaoAvulsa||'').trim();
   S._poModSec.pedidos=(b.pedidos||[]).length>0;
   const k=_poModKey(cid,S._poModAtual.modulo);
   S._poAnInfo[k]=new Set(); // começa com todos os "porquês" recolhidos
@@ -39894,10 +39912,9 @@ function _poModModalRender(){
         ${open&&lst.length?`<div class="po-mod-bloco-body"><ol class="po-q-prev">${lst.slice(0,30).map(q=>`<li>${_poEsc(String(q.enunciado||'').slice(0,130))}…</li>`).join('')}${lst.length>30?`<li class="po-mut">… +${lst.length-30} questões</li>`:''}</ol></div>`:''}
       </div>`;
   }).join('');
-  // TSA Oral = lista de TEMAS cobrados (não questões) — funciona como os pedidos.
+  // TSA Oral = TEMAS cobrados (texto, um por linha — a prova oral não tem questões).
   const temasOral=bucket.oralTemas||[];
   const oralOpen=!!S._poModSec.oral;
-  const oralRows=temasOral.length?temasOral.map((t,i)=>`<tr><td>${_poEsc(t)}</td><td class="po-ped-del"><button type="button" onclick="poModDelTema(${i})" title="Remover">✕</button></td></tr>`).join(''):`<tr><td colspan="2" class="po-ped-vazio">Nenhum tema ainda.</td></tr>`;
   const oralBloco=`
     <div class="po-mod-bloco">
       <div class="po-mod-bloco-head" onclick="poModToggleSec('oral')">
@@ -39906,12 +39923,38 @@ function _poModModalRender(){
         <span class="po-mod-bloco-c">${temasOral.length} temas</span>
       </div>
       ${oralOpen?`<div class="po-mod-bloco-body">
-        <p class="po-mut" style="margin:0 0 8px;font-size:11.5px">Prova oral não tem questões — liste aqui os <b>temas cobrados</b> (um por linha).</p>
-        <table class="po-ped-tabela"><tbody>${oralRows}</tbody></table>
-        <div class="po-ped-add">
-          <input type="text" id="po-oral-novo" class="po-inp" placeholder="Novo tema cobrado no TSA Oral… (Enter pra adicionar)" onkeydown="if(event.key==='Enter'){event.preventDefault();poModAddTema();}">
-          <button type="button" class="btn btn-g" onclick="poModAddTema()">Adicionar</button>
-        </div>
+        <p class="po-mut" style="margin:0 0 8px;font-size:11.5px">Prova oral não tem questões — liste os <b>temas cobrados</b>, <b>um por linha</b>.</p>
+        <textarea class="po-inp po-mod-ta" id="po-oral-ta" placeholder="Um tema por linha…" onblur="poModSetOral(this.value)">${_poEsc(temasOral.join('\n'))}</textarea>
+      </div>`:''}
+    </div>`;
+  // Atualização de conteúdo: texto livre (ex.: nova diretriz) que a IA usa pra dizer se alguma aula precisa atualizar.
+  const atualTxt=String(bucket.atualizacaoConteudo||'');
+  const atualOpen=!!S._poModSec.atualizacao;
+  const atualBloco=`
+    <div class="po-mod-bloco">
+      <div class="po-mod-bloco-head" onclick="poModToggleSec('atualizacao')">
+        <span class="po-mod-chev">${chev(atualOpen)}</span>
+        <span class="po-mod-bloco-t">ATUALIZAÇÃO DE CONTEÚDO</span>
+        <span class="po-mod-bloco-c">${atualTxt.trim()?'preenchido':'vazio'}</span>
+      </div>
+      ${atualOpen?`<div class="po-mod-bloco-body">
+        <p class="po-mut" style="margin:0 0 8px;font-size:11.5px">Cole aqui uma <b>nova diretriz/atualização</b>. A IA compara com as aulas e diz quais precisam ser atualizadas.</p>
+        <textarea class="po-inp po-mod-ta" id="po-atual-ta" placeholder="Cole o texto da nova diretriz/atualização…" onblur="poModSetCampo('atualizacaoConteudo',this.value)">${_poEsc(atualTxt)}</textarea>
+      </div>`:''}
+    </div>`;
+  // Transcrição de aula avulsa: texto de uma aula extra que a IA também considera.
+  const avulsaTxt=String(bucket.transcricaoAvulsa||'');
+  const avulsaOpen=!!S._poModSec.avulsa;
+  const avulsaBloco=`
+    <div class="po-mod-bloco">
+      <div class="po-mod-bloco-head" onclick="poModToggleSec('avulsa')">
+        <span class="po-mod-chev">${chev(avulsaOpen)}</span>
+        <span class="po-mod-bloco-t">TRANSCRIÇÃO DE AULA AVULSA</span>
+        <span class="po-mod-bloco-c">${avulsaTxt.trim()?'preenchido':'vazio'}</span>
+      </div>
+      ${avulsaOpen?`<div class="po-mod-bloco-body">
+        <p class="po-mut" style="margin:0 0 8px;font-size:11.5px">Cole a transcrição de uma <b>aula avulsa</b> que também deve ser considerada na análise.</p>
+        <textarea class="po-inp po-mod-ta" id="po-avulsa-ta" placeholder="Cole a transcrição da aula avulsa…" onblur="poModSetCampo('transcricaoAvulsa',this.value)">${_poEsc(avulsaTxt)}</textarea>
       </div>`:''}
     </div>`;
   const peds=bucket.pedidos||[];
@@ -39921,7 +39964,7 @@ function _poModModalRender(){
     <div class="po-mod-bloco">
       <div class="po-mod-bloco-head" onclick="poModToggleSec('pedidos')">
         <span class="po-mod-chev">${chev(pedOpen)}</span>
-        <span class="po-mod-bloco-t">🗣️ PEDIDOS</span>
+        <span class="po-mod-bloco-t">🗣️ PEDIDOS DE ALUNOS</span>
         <span class="po-mod-bloco-c">${peds.length} pedidos</span>
       </div>
       ${pedOpen?`<div class="po-mod-bloco-body">
@@ -39933,7 +39976,7 @@ function _poModModalRender(){
       </div>`:''}
     </div>`;
   // nº total de itens que alimentam a IA (mostrado no cabeçalho do dropdown maior)
-  const nInputs=_PO_MOD_TIPOS.reduce((s,t)=>s+((bucket[t]||[]).length),0)+temasOral.length+peds.length;
+  const nInputs=_PO_MOD_TIPOS.reduce((s,t)=>s+((bucket[t]||[]).length),0)+temasOral.length+peds.length+(atualTxt.trim()?1:0)+(avulsaTxt.trim()?1:0);
   const inputsOpen=S._poModInputsOpen!==false;
   const inputsSection=`
     <div class="po-mod-inputs${inputsOpen?' open':''}">
@@ -39945,7 +39988,7 @@ function _poModModalRender(){
       </div>
       ${inputsOpen?`<div class="po-mod-inputs-body">
         ${avisoHTML}
-        <div class="po-mod-blocos">${blocos}${oralBloco}${pedBloco}</div>
+        <div class="po-mod-blocos">${blocos}${oralBloco}${atualBloco}${avulsaBloco}${pedBloco}</div>
       </div>`:''}
     </div>`;
   host.innerHTML=`
