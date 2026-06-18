@@ -16,9 +16,12 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY_PO || '';
 const MODEL = 'claude-sonnet-4-6';
 const MAX_TOKENS = 4096;
 
-// Quanto de cada transcrição mandamos (chars). Evita estourar contexto/custo
-// quando o módulo tem muitas aulas longas (~31k chars cada).
-const TRANSCRICAO_CAP = 14000;
+// Orçamento TOTAL de transcrição (chars) distribuído entre as aulas do módulo.
+// Sonnet tem ~200k tokens de contexto; ~360k chars ≈ 90k tokens deixa folga pro
+// resto do prompt. Uma transcrição inteira tem ~31k chars, então módulos normais
+// (poucas aulas) vão INTEIROS, sem corte. Só módulos gigantes são reduzidos.
+const TRANSC_TOTAL_CAP = 360000;
+const TRANSC_MAX_POR_AULA = 90000; // teto por aula (uma aula inteira ~31k chars)
 // Quantas questões por tipo entram no prompt (enunciado puro, sem imagens).
 const QUESTOES_CAP = 40;
 
@@ -98,10 +101,13 @@ Regras:
 1. Baseie-se SOMENTE nos dados fornecidos. Não invente aulas, números ou temas que não estejam no material.
 2. Cada ação deve ser específica e executável ("Gravar aula sobre X", "Regravar a aula Y — avaliação 3.1", "Cobrir tema Z do edital, ausente nas transcrições"). Nada de conselho genérico.
 3. Cruze o EDITAL e as QUESTÕES com o CONTEÚDO das transcrições: tema que cai (edital/questões) e não aparece nas aulas = lacuna forte.
-4. Use a avaliação dos alunos e o status/ano das aulas para sinalizar regravação/atualização.
-5. Para CADA ação, pontue os 7 critérios de 0 a 1 (0 = irrelevante para esta ação, 1 = máximo). NÃO aplique pesos — só pontue. Os pesos são aplicados depois pelo sistema.
-6. Ordene as ações da mais para a menos relevante na sua visão, mas a ordenação final é feita pelo sistema via pesos.
-7. Seja conciso. No máximo 12 ações, priorizando as de maior impacto.
+4. ANTES de afirmar que um tema NÃO é coberto, LEIA cada transcrição por INTEIRO. Um tema pode estar DENTRO de uma aula de escopo mais amplo (ex.: os 4 princípios da bioética dentro de uma aula de "Ética e Responsabilidade") e ainda assim estar bem coberto. Só trate como lacuna se realmente não encontrar o conteúdo em NENHUMA transcrição. Quando o tema EXISTE mas está raso/incompleto, prefira "Aprofundar/expandir na aula X" em vez de "Gravar aula nova".
+5. Se uma transcrição vier marcada como "(truncada)", NÃO afirme que um tema está ausente só porque não apareceu — a parte cortada pode cobri-lo. Trate como incerto.
+6. Cite a aula concreta no campo "aula" sempre que a ação se referir a conteúdo que já existe (ou deveria existir) numa aula do módulo.
+7. Use a avaliação dos alunos e o status/ano das aulas para sinalizar regravação/atualização.
+8. Para CADA ação, pontue os 7 critérios de 0 a 1 (0 = irrelevante para esta ação, 1 = máximo). NÃO aplique pesos — só pontue. Os pesos são aplicados depois pelo sistema.
+9. Ordene as ações da mais para a menos relevante na sua visão, mas a ordenação final é feita pelo sistema via pesos.
+10. Seja conciso. No máximo 12 ações, priorizando as de maior impacto.
 
 Critérios (use exatamente estas chaves no campo "notas"):
 ${_criteriosTxt()}
@@ -210,17 +216,21 @@ exports.analisarModuloPO = onRequest(
         catch (_) {}
       }));
 
-      const aulas = aulasRaw.map(a => {
-        const vid = String(a.vimeoId || '');
-        const full = vid && transMap[vid] ? transMap[vid] : '';
-        const trunc = full.length > TRANSCRICAO_CAP;
+      // Orçamento de transcrição distribuído entre as aulas COM transcrição:
+      // módulos normais (poucas aulas) mandam tudo inteiro; só os gigantes cortam.
+      const fulls = aulasRaw.map(a => { const vid = String(a.vimeoId || ''); return vid && transMap[vid] ? transMap[vid] : ''; });
+      const nComTrans = fulls.filter(Boolean).length;
+      const capPorAula = Math.min(TRANSC_MAX_POR_AULA, nComTrans ? Math.floor(TRANSC_TOTAL_CAP / nComTrans) : TRANSC_TOTAL_CAP);
+      const aulas = aulasRaw.map((a, i) => {
+        const full = fulls[i];
+        const trunc = full.length > capPorAula;
         return {
           titulo: a.titulo || a.nomeOriginal || '(sem título)',
           status: a.status || '', ano: a.ano || '',
           questoes: a.questoes || '', cards: a.cards || '',
           aval: _parseAval(a),
           conteudo: String(a.conteudo || '').trim(),
-          transcricao: trunc ? full.slice(0, TRANSCRICAO_CAP) : full,
+          transcricao: trunc ? full.slice(0, capPorAula) : full,
           transChars: full.length, transTrunc: trunc,
         };
       });
