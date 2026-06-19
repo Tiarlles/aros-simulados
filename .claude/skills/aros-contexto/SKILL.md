@@ -2487,8 +2487,49 @@ Mapeamento Monday → campo da aula:
 - **Botão "Publicar na Comunicação"** (joga a aula publicada pra aba Comunicação que o aluno vê) → Fase 3.
 - Verticais do Catálogo: **AnestReview, OftReview (OFT), OrtopReview (Ortop), MedReview (R1)**.
 
-### IA do Produto — "megabrain" Fase 2 ENTREGUE e no ar (2026-06-18)
+### IA do Produto — "megabrain" Fase 2 ENTREGUE e no ar (atualizado 2026-06-19)
 A IA real de análise está **publicada e funcionando** (substituiu os mocks). Resumo do que existe:
+
+---
+**📋 REFERÊNCIA — O QUE A IA USA PRA ANALISAR (⚠️ MANTER ATUALIZADO: toda mudança de input/regra/peso/critério deve ser refletida AQUI quando esta skill for atualizada)**
+
+**A) INPUTS da análise de MÓDULO** (`analisarModuloPO`, lê tudo server-side via Admin SDK a partir de `{cursoId,cursoNome,modulo}`):
+1. **Aulas do módulo** (`poAulas`): título, status, ano de gravação, avaliação dos alunos, e status por aula de **trilha de questões / flashcards / ficha resumo**.
+2. **Transcrições** (`poTranscricoes/{vimeoId}.texto`): conteúdo real da aula; orçamento ~360k chars distribuído (módulos normais vão inteiros). Pode ser do Vimeo OU **manual** (colada; `fonte:'manual'`).
+3. **Questões reais por prova** (`poModQuestoes`: ME/TEA/TSA 1ªF) + **TSA Oral por temas** (`oralTemas`).
+4. **Pedidos de alunos** (`poModQuestoes.pedidos[]`).
+5. **Edital** — **por módulo** (`poModQuestoes.editalModulo`) se preenchido; senão o **do curso** (`config/poConfig.editais[cursoId]`). Sem corte rígido (guarda alta 60k chars).
+6. **Status da apostila** do módulo (`poModQuestoes.apostilas[]`; auto-importada do Laravel quando `apostila:true`).
+7. **Atualização de conteúdo / nova diretriz** (`atualizacaoConteudo`) + **transcrição de aula avulsa** (`transcricaoAvulsa`).
+8. **Erros detectados ABERTOS** (`poErros/{aulaId}.erros`, status='aberto') → justificam **REGRAVAR** a aula (o "porque" resume o erro).
+9. **Dúvidas com DEMANDA de atualização** (`poDuvidas/{aulaId}.posts`, status='demanda') → justificam **ATUALIZAR** a aula.
+10. **Ações já dispensadas** (`analiseDismissed`) — a IA não repropõe.
+Saída: `{resumo, acoes:[{titulo,categoria,provas,aula,porque,notas}], meta}`, salva em `poModQuestoes/{key}.analise`.
+
+**B) INPUTS da análise de PRODUTO** (`analisarProdutoPO`, a partir de `{cursoId,cursoNome}`):
+- Consolida as **análises JÁ SALVAS** de cada módulo (resumo + ações + provas) — NÃO reprocessa transcrição/questão.
+- **Incidência OFICIAL por módulo** (API `POST /api/analise-provas/incidencia`, formato `{provas:[{escopo_id,ano}]}`, recorte **últimos 5 anos + o atual**), cruzada via `temaModulo` → **% de cada prova** que os temas do módulo cobrem. Escopos: TEA=9, TSA 1ªF=8, **ME = anuais 10/11/12 + quadrimestrais 136-144**. Substitui a contagem crua. TSA Oral = nº de temas.
+- Produz **ranking por prova** (ME/TEA/TSA 1ªF/TSA Oral) priorizando incidência + gravidade. Persiste em `config/poConfig.analiseProduto[cursoId]`. O **sync Laravel reatualiza só os números** de incidência salvos (sem IA, via `atualizarIncidenciaSalva`).
+
+**C) REGRAS que a IA segue** (instruções em `DEFAULT_PROMPT_MODULO`, editáveis em ✍️ Prompt da IA):
+- **Menos é mais:** se o módulo já cobre bem o que cai (pelas QUESTÕES), o certo é retornar POUCAS ou ZERO ações. Não inflar.
+- **Quem manda é a QUESTÃO:** só propõe aula (gravar/aprofundar) se o tema CAI na prova (questões reais) OU é alicerce clínico. Tema raro que já cai em 1-2 questões → a questão já cobre, NÃO propor ação.
+- **Edital = sinal de BAIXO peso:** dá um empurrãozinho/desempate (critério `edital`), mas NÃO justifica sozinho. Itens administrativos do edital sem questões → omitir ou prioridade mínima.
+- **Material de apoio = 4 ações SEPARADAS** (apostila do módulo; ficha resumo / trilha de questões / trilha de flashcards POR AULA com status Pendente).
+- **Erro aberto → `regravar`** (porque resume o erro). **Dúvida com demanda → `atualizar`**. (sinais FORTES — demanda do time.)
+
+**D) COMO FUNCIONAM OS PESOS** (`⚖️ Pesos da priorização` · `config/poConfig.poPesos` × `PO_CRITERIOS`):
+- A IA pontua cada **critério de 0 a 1** por ação (só os fatos). O **FRONTEND aplica os pesos** → mexer num peso re-ordena na hora, SEM custo de IA.
+- Fórmula = **média ponderada NORMALIZADA**: `Σ(peso×nota) ÷ Σ(pesos)` (`_poPrioridade`). **A soma dos pesos NÃO precisa dar 100** — só importa a PROPORÇÃO de cada um (peso ÷ soma); dobrar todos os pesos não muda nada. O modal mostra o **% (fatia)** e uma barra de proporção por critério (amarelo), o valor do peso em azul, lista ordenada por peso, "Restaurar padrão".
+- **11 critérios** (ids DEVEM bater entre `PO_CRITERIOS` no front e `CRITERIOS` na função), pesos-padrão: `lacuna(30), frequencia(20), edital(6), status(15), avaliacao(12), pedidos(10), idade(8), apostila(5), fichaResumo(5), trilhaQuestoes(5), trilhaFlashcards(5)`. Sliders 0-50.
+
+**E) O QUE NÃO É CONSIDERADO / não vira ação forte:**
+- Estar no edital **sem** cair em questão e sem ser essencial clínico.
+- Tema raro (1-2 questões isoladas) — a questão basta; não gravar/incluir.
+- Ações **dispensadas** (`analiseDismissed`); erros **corrigidos**; dúvidas **resolvidas** ou só "abertas" (sem demanda).
+- A IA NÃO inventa aulas/números/temas fora do material; transcrição "(truncada)" não vira "ausência".
+---
+
 
 **Cloud Functions** (`cloud-function-hotmart/po-analise.js`, exportadas no `index.js`): `analisarModuloPO` e `analisarProdutoPO`. Modelo **Sonnet** (`claude-sonnet-4-6`), chave **separada** `ANTHROPIC_API_KEY_PO` (no `.env`, isola custo). CORS libera `localhost:8766` (dá pra testar local chamando a função de produção). Auth: Firebase ID token. Endpoints `analisarModuloPO`/`analisarProdutoPO`.
 - **Módulo:** recebe só `{cursoId,cursoNome,modulo}` e lê TUDO server-side (Admin SDK): aulas do módulo (`poAulas`, com status/ano/avaliação/**status de trilha de questões, flashcards e ficha resumo por aula**), transcrições (`poTranscricoes/{vimeoId}` — orçamento ~360k chars distribuído, manda INTEIRO em módulos normais), questões + temas do oral + pedidos + atualização + transcrição avulsa (`poModQuestoes`), edital (`config/poConfig.editais`). Devolve `{resumo, acoes:[{titulo,categoria,provas:[],aula,porque,notas:{...}}], meta:{porProva,...}}`. **Cada ação pontua os critérios 0-1; o FRONTEND aplica os pesos.** Persiste em `poModQuestoes/{key}.analise`.
@@ -2498,7 +2539,7 @@ A IA real de análise está **publicada e funcionando** (substituiu os mocks). R
 
 **Inputs (modal `#po-mod-modal`, dropdown "📥 INPUTS ANÁLISE"):** baldes de questões **ME/TEA/TSA 1ªF** (via API, `_PO_MOD_TIPOS=['MEs','TEA','TSA']`, rótulos `_PO_TIPO_LBL`), **TSA Oral** (textarea, 1 tema/linha → `poModQuestoes.oralTemas`), **ATUALIZAÇÃO DE CONTEÚDO** (textarea de nova diretriz → IA recomenda atualizar aulas desatualizadas; `atualizacaoConteudo`), **TRANSCRIÇÃO DE AULA AVULSA** (textarea de conteúdo extra que a IA trata como já coberto; `transcricaoAvulsa`), **PEDIDOS DE ALUNOS** (`pedidos`). Handlers `poModSetOral`/`poModSetCampo` salvam no blur.
 
-**Critérios (`PO_CRITERIOS` no front × `CRITERIOS` na função — ids DEVEM bater):** 10 critérios = `lacuna, frequencia, status, avaliacao, pedidos, idade` + **4 de material separados**: `apostila, fichaResumo, trilhaQuestoes, trilhaFlashcards`. Cada um com peso editável em ⚖️ Pesos. A IA gera **ação separada** por tipo de material faltante (apostila do módulo; ficha/trilha de questões/trilha de flashcards POR AULA com status Pendente, listando quais aulas).
+**Critérios (`PO_CRITERIOS` no front × `CRITERIOS` na função — ids DEVEM bater):** **11 critérios** = `lacuna, frequencia, edital, status, avaliacao, pedidos, idade` + **4 de material separados**: `apostila, fichaResumo, trilhaQuestoes, trilhaFlashcards`. (Ver bloco REFERÊNCIA acima pros pesos-padrão.) Cada um com peso editável em ⚖️ Pesos. A IA gera **ação separada** por tipo de material faltante (apostila do módulo; ficha/trilha de questões/trilha de flashcards POR AULA com status Pendente, listando quais aulas).
 
 **Relatório (redesenho técnico/Apple-like):** abas por prova, **linha colorida por prioridade** (3 níveis: vermelho/amarelo/verde, sem bolinha), ação curta + **ℹ️** (abre o "porque"; listas viram bullets via `_poFmtPorque`) + **✕ descartar** (confirmação custom `#po-an-confirm`). "última análise em …". **Não fecha ao clicar fora.** Descartar → `poModQuestoes.analiseDismissed` (a função não repropõe; o produto ignora; restaurável).
 
@@ -2513,13 +2554,20 @@ Fundações da IA de priorização do PO (tudo em produção):
 - **Apostila por MÓDULO** (não por aula): `poModQuestoes/{key}.apostilas:[{titulo,link,status}]`; status = Pendente/Em produção/Parcial/Finalizado (`PO_APOST_STATUS`). Regra única `_poApostStatusModulo` (**sem apostila = Pendente**; senão o status "menos pronto") — alimenta o badge E a IA. UI: aparece como **1ª linha dentro do módulo aberto** (`_poApostRowHTML`, não no cabeçalho), abre modal gerenciador (`poAbrirApostilas`, várias, add/editar/excluir-com-confirmação). Coluna "Apostila" por aula REMOVIDA (migração `apostilaColRemovida`).
 - **Pedidos de alunos** por módulo: `poModQuestoes/{key}.pedidos:[]` (array; migrou de string), tabela no modal (cada linha salva). (Baldes de questões hoje = `_PO_MOD_TIPOS=['MEs','TEA','TSA']`; o antigo "Outras" deu lugar ao **TSA Oral** por temas — ver megabrain Fase 2.)
 - **Edital** por produto: `config/poConfig.editais[cursoId]` (campo único, botão "📋 Edital").
-- **Pesos** da priorização: `config/poConfig.poPesos` + `PO_CRITERIOS` (**10 critérios** após split do material, sliders 0-50, botão "⚖️ Pesos"). **Design:** a IA pontua cada critério 0-1; o código aplica os pesos → mexer peso re-ordena (e recalcula a barra de saúde) SEM chamar IA.
+- **Pesos** da priorização: `config/poConfig.poPesos` + `PO_CRITERIOS` (**11 critérios** — inclui `edital`, sliders 0-50, botão "⚖️ Pesos"). **Design:** a IA pontua cada critério 0-1; o código aplica os pesos → mexer peso re-ordena (e recalcula a barra de saúde) SEM chamar IA. Fórmula é média ponderada normalizada (soma dos pesos não precisa ser 100 — ver bloco REFERÊNCIA). `_poSavePesos` sanitiza o payload (só números válidos) pra não falhar no Firestore.
 - **Questões via API do Laravel** (substituiu o anexo manual de .json): Cloud Functions **`filtrosPO`** (GET `/api/filtros` → categorias com `taxa_incidencia`+`peso`, tipos, anos) e **`puxarQuestoesPO`** (POST `/api/v2/web/questoes` por `categorias`, **últimos 5 anos SEM o atual**, paginado; adapta `descricao`→enunciado c/ decode de entidades, `isResposta`→gabarito, `escopo.alias`→balde TEA/TSA/MEs/Outras; grava em poModQuestoes preservando pedidos/apostilas). **Params da API (sem `filtro_`):** `categorias:[id]` (pai P1.. agrega subs), `ids:[]`, `anos:[]` — tipo de prova NÃO filtra (agrupa pelo `escopo` da questão). Mapeamento Ponto↔tema: `config/poConfig.temaModulo[cursoId][modulo]=[catIds]`, auto-match por número (P10↔Ponto 10) via botão "🧩 Temas dos módulos" (`poAbrirMapaTemas`), revisável. Botão "🔄 Puxar questões da API" no modal do módulo. **Só roda publicado** (token Laravel server-side + CORS).
 
 ### Próximos passos (retomar aqui)
-> **Onde paramos (2026-06-18):** a IA real de análise ("megabrain") está **toda no ar** — módulo + produto, prompt editável, dispensar, barras de saúde, ficha resumo como status, TSA Oral por temas, atualização/diretriz e transcrição avulsa. Tiarlles vinha calibrando a régua (pesos, fórmula da saúde, formatação do "porque"). Tudo publicado e commitado.
+> **Onde paramos (2026-06-19):** rodada grande entregue (funções deployadas; frontend commitado e publicado). Novidades desta rodada:
+> - **Incidência oficial** ligada no produto (ver REFERÊNCIA B) + botão "🔌 Testar API de incidência".
+> - **Edital com peso próprio** (critério `edital`, baixo) + **edital POR MÓDULO** (`editalModulo`) + limite de 8k removido.
+> - **Sync Laravel** mais seguro: preserva trilha "Não se aplica", **auto-importa apostilas** (`apostila:true` no `tasks[]`), reatualiza incidência salva, retry/backoff em 429.
+> - **Transcrição:** fallback entre faixas do Vimeo (faixa active quebrada → usa a inativa) + **entrada MANUAL** e re-pull individual (`salvarTranscricaoManual`).
+> - **Colunas "Erro detectado" e "Dúvidas"** (fóruns por aula) que alimentam a IA (erro aberto→regravar; dúvida demanda→atualizar). Ver [[project_aros_forum_erro_duvida]].
+> - **Saúde do módulo dividida** em 🎬 Aulas × 📎 Materiais (modal, linha da tabela e capa). **Capa do produto** redesenhada (dark-glass). **⚖️ Pesos** redesenhado (ordenado por peso, % + barra de proporção, sem somatório).
+> - Rename de módulo agora migra `poModExtra`/`poModOrdem`/`poModQuestoes`/`temaModulo` (não orfaniza).
 
-1. **Incidência do edital nas provas** (próximo grande): cruzar a incidência real dos assuntos com os módulos pra priorizar no **produto**. Endpoint `POST /api/analise-provas/incidencia` já mapeado (devolve árvore de temas com `percentual`/`priority_level`, ids batem com `temaModulo`), MAS ignora ano/tipo de prova. **PAUSADO aguardando o dev mandar o endpoint que LISTA as provas** (pra filtrar últimos 5 anos sem o atual + por TEA/TSA 1ªF/ME). Ver [[project_aros_incidencia_edital]].
+1. ~~Incidência do edital nas provas~~ **ENTREGUE (2026-06-19)**: incidência oficial cruzada por módulo (`temaModulo`) alimenta o ranking do **produto**. Formato certo do endpoint = `{provas:[{escopo_id,ano}]}` (recorte 5 anos + atual; o antigo `escopo_ids`+`years` ignorava o ano). Botão "🔌 Testar API de incidência" no painel. Ver bloco REFERÊNCIA (B) e [[project_aros_incidencia_edital]].
 2. **Fase 3**: botão "Publicar na Comunicação"; liberar a aba `po` pra professor (hoje admin-only).
 3. Pendências menores: Tiarlles rodar o lote das 436 transcrições; **regenerar tokens** expostos no chat (Vimeo `6eed…`, Client secret Vimeo). Laravel token é permanente — manter.
 

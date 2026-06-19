@@ -15,6 +15,7 @@ const { onRequest } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
 const { obterTranscricao } = require('./vimeo-transcricao');
+const { atualizarIncidenciaSalva } = require('./po-analise');
 
 const LARAVEL_TOKEN = process.env.LARAVEL_TOKEN || '';
 const SLACK_WEBHOOK = process.env.SLACK_WEBHOOK || '';
@@ -49,10 +50,20 @@ function _slug(s) {
     .replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || '_';
 }
 
-async function laravelGet(path) {
+const _sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// GET com retry/backoff em 429 (rate limit) e 5xx transitórios. Respeita Retry-After.
+async function laravelGet(path, tentativa = 0) {
   const resp = await fetch(`${LARAVEL_API}${path}`, {
     headers: { Authorization: `Bearer ${LARAVEL_TOKEN}`, Accept: 'application/json' },
   });
+  if ((resp.status === 429 || resp.status >= 500) && tentativa < 5) {
+    const ra = Number(resp.headers.get('retry-after')) || 0;
+    const espera = ra > 0 ? Math.min(ra * 1000, 30000) : Math.min(1000 * Math.pow(2, tentativa), 15000);
+    console.warn(`Laravel ${path} → ${resp.status}; retry em ${espera}ms (tentativa ${tentativa + 1}/5)`);
+    await _sleep(espera);
+    return laravelGet(path, tentativa + 1);
+  }
   if (!resp.ok) {
     const txt = await resp.text();
     throw new Error(`Laravel ${path} → ${resp.status} ${txt.slice(0, 120)}`);
@@ -99,29 +110,50 @@ const CAMPOS_LARAVEL = ['titulo', 'nomeOriginal', 'ordem', 'modulo', 'video', 'v
   'avaliacao', 'ratingNum', 'ratingTotal', 'duracao', 'publishedAt', 'ano', 'tipoLaravel',
   'questoes', 'cards', 'ordemPO'];
 
-// Busca todo o currículo de um curso no Laravel → lista de aulas mapeadas (+ ordem dos módulos).
+// Trilha Questões/Flashcards: o Laravel só sabe dizer 'Lançada' (tem trilha) ou
+// 'Pendente' (não tem). Se o coord marcou à mão um estado que o Laravel NÃO produz
+// (ex.: 'Não se aplica'), isso é uma decisão manual e a sync NÃO sobrescreve.
+const TRILHA_CAMPOS = ['questoes', 'cards'];
+const TRILHA_DO_LARAVEL = new Set(['Lançada', 'Pendente', '', null, undefined]);
+
+// Apostilas anexadas a uma aula: itens de tasks[] type 'material' com flag apostila=true.
+// O Laravel embute os anexos no array tasks[] de cada conteúdo (o campo `attachments`
+// é só uma contagem). Devolve os títulos (label) das apostilas.
+function apostilasDaAula(c) {
+  return (Array.isArray(c.tasks) ? c.tasks : [])
+    .filter(t => t && t.type === 'material' && t.apostila === true)
+    .map(t => String(t.label || '').trim())
+    .filter(Boolean);
+}
+
+// Busca todo o currículo de um curso no Laravel → lista de aulas mapeadas (+ ordem dos
+// módulos + apostilas detectadas por módulo).
 async function buscarCursoLaravel(courseId, nome) {
   const modulos = await laravelGet(`/curso/${courseId}/modulos`);
   const lista = Array.isArray(modulos) ? modulos : (modulos.data || modulos.modulos || []);
   const aulas = [];
   const modOrdem = [];
+  const apostilasPorModulo = {}; // {moduloNome: [labels]}
   let ordemPO = 0;
   for (const mod of lista) {
+    await _sleep(120); // respiro entre módulos p/ não estourar o rate limit do Laravel
     const cont = await laravelGet(`/modulo/${mod.id}/conteudos`);
     const conteudos = Array.isArray(cont) ? cont : (cont.data || cont.conteudos || []);
     for (const c of conteudos) {
       const a = mapAula(c, nome, ordemPO++);
       if (!modOrdem.includes(a.modulo)) modOrdem.push(a.modulo);
       aulas.push(a);
+      const aps = apostilasDaAula(c);
+      if (aps.length) (apostilasPorModulo[a.modulo] = apostilasPorModulo[a.modulo] || []).push(...aps);
     }
   }
-  return { aulas, modOrdem };
+  return { aulas, modOrdem, apostilasPorModulo };
 }
 
 // Sincroniza um curso. dryRun=true só calcula o diff (não escreve nem transcreve).
 async function sincronizarCurso(courseId, nome, { dryRun }) {
   const db = admin.firestore();
-  const { aulas, modOrdem } = await buscarCursoLaravel(courseId, nome);
+  const { aulas, modOrdem, apostilasPorModulo } = await buscarCursoLaravel(courseId, nome);
 
   // índice das aulas existentes por laravelId
   const snap = await db.collection('poAulas').get();
@@ -138,6 +170,8 @@ async function sincronizarCurso(courseId, nome, { dryRun }) {
       const nv = a[k], ov = prev[k];
       if (JSON.stringify(nv) !== JSON.stringify(ov === undefined ? null : ov) && !(nv == null && ov == null)) patch[k] = nv;
     }
+    // Preserva trilha marcada à mão num estado que o Laravel não conhece (ex.: 'Não se aplica').
+    for (const k of TRILHA_CAMPOS) { if (k in patch && !TRILHA_DO_LARAVEL.has(prev[k])) delete patch[k]; }
     // cursos: merge (não derrubar pertencimento a outros cursos)
     const cursosPrev = Array.isArray(prev.cursos) ? prev.cursos : [];
     if (!cursosPrev.includes(nome)) patch.cursos = Array.from(new Set([...cursosPrev, nome]));
@@ -162,6 +196,8 @@ async function sincronizarCurso(courseId, nome, { dryRun }) {
     atualizadasTitulos: atualizadas.slice(0, 50).map(x => x.prev.nomeOriginal || x.prev.titulo),
     transcricoesPendentes: faltamTranscricao,
     transcricoesNovas: 0, semLegenda: 0, errosTranscricao: 0,
+    apostilasDetectadas: Object.values(apostilasPorModulo).reduce((s, arr) => s + new Set(arr).size, 0),
+    apostilasModulos: Object.keys(apostilasPorModulo).length,
     dryRun: !!dryRun,
   };
   if (dryRun) return resumo;
@@ -195,6 +231,32 @@ async function sincronizarCurso(courseId, nome, { dryRun }) {
     if (merged.length !== atual.length) { mo[cursoId] = merged; await cfgRef.set({ modOrdem: mo }, { merge: true }); }
   } catch (e) { console.warn('modOrdem update falhou:', e?.message || e); }
 
+  // AUTO-IMPORT de apostilas (apostila=true no Laravel) → poModQuestoes[modKey].apostilas.
+  // Preserva as cadastradas à mão (sem fonteLaravel) e o status editado nas auto.
+  // Processa TODOS os módulos do currículo p/ também REMOVER apostila auto que sumiu do Laravel.
+  try {
+    const cursoIdPO = _slug(nome);
+    let importadas = 0;
+    for (const modulo of modOrdem) {
+      const labels = Array.from(new Set(apostilasPorModulo[modulo] || []));
+      const modKey = _slug(cursoIdPO + '__' + modulo);
+      const ref = db.collection('poModQuestoes').doc(modKey);
+      const prev = (await ref.get()).data() || {};
+      const prevApost = Array.isArray(prev.apostilas) ? prev.apostilas : [];
+      // manuais com conteúdo (descarta cascas vazias: sem nome E sem link).
+      const manuais = prevApost.filter(a => !a.fonteLaravel && (String(a.titulo || '').trim() || String(a.link || '').trim()));
+      const statusPrev = {}; prevApost.filter(a => a.fonteLaravel).forEach(a => { if (a.laravelLabel) statusPrev[a.laravelLabel] = a.status; });
+      const auto = labels.map(lbl => ({ titulo: lbl, link: '', status: statusPrev[lbl] || 'Finalizado', fonteLaravel: true, laravelLabel: lbl }));
+      const novaLista = [...manuais, ...auto];
+      // só escreve se mudou (evita writes à toa)
+      if (JSON.stringify(novaLista) !== JSON.stringify(prevApost)) {
+        await ref.set({ cursoId: cursoIdPO, modulo, apostilas: novaLista }, { merge: true });
+      }
+      importadas += auto.length;
+    }
+    resumo.apostilasImportadas = importadas;
+  } catch (e) { console.warn('auto-import apostilas falhou:', e?.message || e); resumo.apostilasImportadas = -1; }
+
   // transcrição: TODA aula com vídeo que ainda não tem (novas + existentes sem marcador).
   // Cada item salva na hora, então se o run estourar o tempo, o próximo continua de onde parou.
   const aTranscrever = [];
@@ -219,6 +281,14 @@ async function sincronizarCurso(courseId, nome, { dryRun }) {
         resumo.transcricoesNovas++;
       } else { resumo.semLegenda++; }
     } catch (e) { resumo.errosTranscricao++; console.warn('transcrição falhou', item.vimeoId, e?.message || e); }
+  }
+
+  // Reatualiza a incidência salva do produto (sem IA) com os números ao vivo da API.
+  try {
+    resumo.incidencia = await atualizarIncidenciaSalva(_slug(nome));
+  } catch (e) {
+    console.warn('atualizar incidência salva falhou:', e?.message || e);
+    resumo.incidencia = { atualizado: false, motivo: String(e?.message || e) };
   }
 
   return resumo;
@@ -270,7 +340,7 @@ exports.sincronizarLaravelAuto = onSchedule(
       const totTrans = resultados.reduce((s, r) => s + r.transcricoesNovas, 0);
       console.log('Sync Laravel concluída:', JSON.stringify(resultados));
       if (SLACK_WEBHOOK && (totNovas || totAtu)) {
-        const linhas = resultados.map(r => `• ${r.curso}: ${r.novas} nova(s), ${r.atualizadas} atualizada(s), ${r.transcricoesNovas} transcrição(ões)`).join('\n');
+        const linhas = resultados.map(r => `• ${r.curso}: ${r.novas} nova(s), ${r.atualizadas} atualizada(s), ${r.transcricoesNovas} transcrição(ões), ${r.apostilasImportadas || 0} apostila(s)`).join('\n');
         await fetch(SLACK_WEBHOOK, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text: `🔄 *Sincronização Laravel → PO* (automática)\n${linhas}` }),

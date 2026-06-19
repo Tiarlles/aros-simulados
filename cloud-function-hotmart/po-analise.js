@@ -30,6 +30,7 @@ const QUESTOES_CAP = 40;
 const CRITERIOS = [
   { id: 'lacuna',     label: 'Lacuna de conteúdo',                desc: 'Tema cai na prova/edital e falta (ou está raso) na aula' },
   { id: 'frequencia', label: 'Frequência do tema nas provas',     desc: 'Quanto mais o tema é cobrado, mais urgente' },
+  { id: 'edital',     label: 'Cobertura do edital',               desc: 'O tema da ação consta no edital oficial da prova (sinal de baixo peso)' },
   { id: 'status',     label: 'Aula inexistente / status crítico', desc: 'Não gravada, com erro, ou precisa atualizar' },
   { id: 'avaliacao',  label: 'Avaliação baixa dos alunos',        desc: 'Aula mal avaliada pelos alunos' },
   { id: 'pedidos',    label: 'Pedidos de alunos',                 desc: 'Demanda explícita registrada no módulo' },
@@ -107,7 +108,7 @@ Regras:
 1. Baseie-se SOMENTE nos dados fornecidos. Não invente aulas, números ou temas que não estejam no material.
 2. Cada ação deve ser específica e executável ("Gravar aula sobre X", "Regravar a aula Y — avaliação 3.1"). Nada de conselho genérico.
 3. CRITÉRIO PRINCIPAL para propor uma aula (gravar nova ou aprofundar existente): o tema precisa (a) CAIR na prova — ter questões reais no material — OU (b) ser ESSENCIAL pro raciocínio clínico do assunto (uma base sem a qual o aluno não entende outros temas que caem). Se NÃO atende nem (a) nem (b), NÃO proponha aula. Aula é cara de produzir: só vale pra conteúdo de alto rendimento ou alicerce clínico.
-4. O EDITAL, SOZINHO, NÃO justifica gravar aula. O edital é uma lista AMPLA do que PODERIA cair — inclui itens administrativos/burocráticos de baixíssimo rendimento (ex.: Vigilância Sanitária, organização de serviços de saúde, legislação). Um item do edital que NÃO tem questões E não é essencial pro raciocínio clínico → NÃO recomende aula nem segmento; no máximo registre como observação de prioridade mínima, ou simplesmente omita. Nunca trate "está no edital mas não aparece nas aulas" como lacuna forte por si só — verifique se realmente cai em prova.
+4. O EDITAL conta como um sinal de BAIXO PESO (tem um critério próprio, "edital", que o sistema pondera bem abaixo das questões). Ou seja: estar no edital dá um EMPURRÃO PEQUENO na prioridade, mas NÃO justifica sozinho gravar uma aula. O edital é uma lista AMPLA do que PODERIA cair — inclui itens administrativos/burocráticos de baixíssimo rendimento (ex.: Vigilância Sanitária, organização de serviços de saúde, legislação). Um item do edital que NÃO tem questões E não é essencial pro raciocínio clínico → no máximo uma observação de prioridade mínima (ou omita); nunca uma ação de alta prioridade. Quem manda na prioridade são as QUESTÕES e a importância clínica — o edital só ajuda a desempatar.
 5. ANTES de afirmar que um tema NÃO é coberto, LEIA cada transcrição por INTEIRO. Um tema pode estar DENTRO de uma aula de escopo mais amplo (ex.: os 4 princípios da bioética dentro de uma aula de "Ética e Responsabilidade") e ainda assim estar bem coberto. Só trate como lacuna se realmente não encontrar o conteúdo em NENHUMA transcrição.
 6. O LIMITE DE FREQUÊNCIA VALE PRA QUALQUER AÇÃO DE PRODUÇÃO — gravar nova, regravar, APROFUNDAR, INCLUIR/ADICIONAR um tópico ou segmento numa aula. Conte em quantas questões o tema aparece. Um tema que cai em só 1 (ou 2) questão isolada NÃO justifica NENHUMA dessas ações — nem incluir numa aula existente — MESMO que seja "questão direta e específica". A questão, com seu gabarito, já cobre o aluno. EXEMPLO CONCRETO: se apenas 1 questão cobra o "modelo de Diego Gracia", NÃO recomende incluí-lo nem mencioná-lo numa aula — deixe a questão fazer esse trabalho. Reserve ações de produção (gravar/aprofundar/incluir) para temas RECORRENTES (várias questões) ou clinicamente essenciais.
 7. O ALUNO TAMBÉM ESTUDA PELA QUESTÃO. Uma questão com gabarito já é material de estudo. Então, para um tema raro que já cai em questão, o normal é NÃO precisar de ação nenhuma. NÃO sugira "incluir o tema X na aula", "garantir um bom comentário na questão", "revisar o gabarito" ou coisas do tipo quando o tema é raro — a questão basta. Só proponha mexer numa aula (gravar/regravar/aprofundar/incluir) quando o tema for recorrente E o ganho de aprendizado justificar o esforço.
@@ -120,7 +121,8 @@ Regras:
    d) TRILHA DE FLASHCARDS: é POR AULA, com status (Pendente = falta). Se houver aulas "Trilha de flashcards: Pendente", gere "Criar trilha de flashcards das aulas" listando quais; pontue notas.trilhaFlashcards alto.
    Em TODAS: status "Lançada" = já existe (não gere) · "Não se aplica" = ignore. Se nada estiver Pendente naquele tipo, NÃO gere a ação dele. Cada uma dessas ações de material pontua SÓ o seu próprio critério (as outras notas ficam baixas).
 11. Use a avaliação dos alunos e o status/ano das aulas para sinalizar regravação/atualização.
-12. Para CADA ação, pontue os 7 critérios de 0 a 1 (0 = irrelevante para esta ação, 1 = máximo). NÃO aplique pesos — só pontue. Os pesos são aplicados depois pelo sistema. Em especial, a nota "frequencia" deve ser PROPORCIONAL ao nº de questões que cobrem o tema (0 questões = 0; 1 questão isolada ≈ 0,1; tema dominante ≈ 1).
+11b. ERROS DETECTADOS pelo time são sinais FORTES: para cada aula com erro detectado aberto, gere uma ação categoria 'regravar' citando a aula no campo 'aula', com nota 'status' alta, e o 'porque' deve RESUMIR de forma clara e curta o erro relatado. DÚVIDAS com demanda de atualização: gere uma ação categoria 'atualizar' pra aula citada, 'porque' citando a demanda. Esses dois são demanda explícita do time — priorize.
+12. Para CADA ação, pontue TODOS os critérios listados de 0 a 1 (0 = irrelevante para esta ação, 1 = máximo). NÃO aplique pesos — só pontue. Os pesos são aplicados depois pelo sistema. Em especial: a nota "frequencia" deve ser PROPORCIONAL ao nº de questões que cobrem o tema (0 questões = 0; 1 questão isolada ≈ 0,1; tema dominante ≈ 1); a nota "edital" = 1 se o tema da ação está EXPLICITAMENTE no edital fornecido, ~0,5 se está de forma genérica/indireta, 0 se não aparece (é um sinal de baixo peso, não infle as outras notas por causa dele).
 13. Ordene as ações da mais para a menos relevante na sua visão, mas a ordenação final é feita pelo sistema via pesos.
 14. Seja conciso. No máximo 12 ações, priorizando as de maior impacto. Não liste ação para todo tema raro — agrupe ou omita o que tem baixíssimo impacto.`;
 
@@ -161,8 +163,12 @@ function buildUserPrompt(ctx) {
   linhas.push(`MÓDULO (Ponto): ${modulo}`);
   linhas.push('');
 
-  linhas.push(`=== EDITAL (do curso; pode cobrir vários módulos) ===`);
-  linhas.push(edital ? edital.slice(0, 8000) : '(edital não cadastrado)');
+  // Edital sem corte rígido (guarda alta só pra evitar prompt gigante por engano).
+  const editalHdr = ctx.editalFonte === 'módulo'
+    ? '=== EDITAL DESTE MÓDULO ==='
+    : '=== EDITAL (do curso; pode cobrir vários módulos) ===';
+  linhas.push(editalHdr);
+  linhas.push(edital ? edital.slice(0, 60000) : '(edital não cadastrado)');
   linhas.push('');
 
   linhas.push(`=== AULAS DO MÓDULO (${aulas.length}) ===`);
@@ -220,6 +226,16 @@ function buildUserPrompt(ctx) {
 
   linhas.push(`=== PEDIDOS DE ALUNOS ===`);
   linhas.push(pedidos.length ? pedidos.map((p, i) => `${i + 1}. ${p}`).join('\n') : '(nenhum pedido registrado)');
+  linhas.push('');
+
+  const erros = ctx.erros || [];
+  linhas.push(`=== ERROS DETECTADOS PELO TIME (cada um JUSTIFICA uma ação de REGRAVAR a aula citada) ===`);
+  linhas.push(erros.length ? erros.map((e, i) => `${i + 1}. Aula "${e.aula}": ${e.resumo}`).join('\n') : '(nenhum)');
+  linhas.push('');
+
+  const duvDem = ctx.duvidasDemanda || [];
+  linhas.push(`=== DÚVIDAS COM DEMANDA DE ATUALIZAÇÃO (justificam ATUALIZAR a aula citada) ===`);
+  linhas.push(duvDem.length ? duvDem.map((d, i) => `${i + 1}. Aula "${d.aula}": ${d.texto}`).join('\n') : '(nenhum)');
   linhas.push('');
 
   const disp = ctx.dispensadas || [];
@@ -294,6 +310,41 @@ exports.analisarModuloPO = onRequest(
         };
       });
 
+      // 2b) Fórum por aula: erros detectados (poErros) + dúvidas (poDuvidas).
+      // Doc id = aulaId (= doc id de poAulas). Só vira insumo o que está EM ABERTO
+      // (erro status='aberto' com mensagens) ou DEMANDA (post status='demanda').
+      const erros = [];          // {aula, resumo}  → cada um justifica REGRAVAR
+      const duvidasDemanda = []; // {aula, texto}   → cada um justifica ATUALIZAR
+      await Promise.all(aulasRaw.map(async (a, i) => {
+        const aulaId = a.id;
+        const titulo = aulas[i].titulo;
+        try {
+          const eSnap = await db.collection('poErros').doc(aulaId).get();
+          if (eSnap.exists) {
+            const ed = eSnap.data() || {};
+            // Modelo novo: erros:[{texto,status}]. Só os 'aberto' viram insumo (regravar).
+            let abertos = [];
+            if (Array.isArray(ed.erros)) abertos = ed.erros.filter(e => e && e.status === 'aberto').map(e => String(e.texto || '').trim());
+            else if (Array.isArray(ed.mensagens) && ed.status === 'aberto') abertos = ed.mensagens.map(m => String(m && m.texto || '').trim()); // compat modelo antigo
+            const resumo = abertos.filter(Boolean).join(' · ').slice(0, 600);
+            if (resumo) erros.push({ aula: titulo, resumo });
+          }
+        } catch (_) {}
+        try {
+          const dSnap = await db.collection('poDuvidas').doc(aulaId).get();
+          if (dSnap.exists) {
+            const dd = dSnap.data() || {};
+            const posts = Array.isArray(dd.posts) ? dd.posts : [];
+            posts.forEach(p => {
+              if (p && p.status === 'demanda') {
+                const texto = String(p.texto || '').trim().slice(0, 400);
+                if (texto) duvidasDemanda.push({ aula: titulo, texto });
+              }
+            });
+          }
+        } catch (_) {}
+      }));
+
       // 3) Questões + pedidos + apostilas do módulo.
       const modKey = _modKey(cursoId, modulo);
       const modSnap = await db.collection('poModQuestoes').doc(modKey).get();
@@ -312,14 +363,18 @@ exports.analisarModuloPO = onRequest(
       // Recomendações que o coordenador já dispensou — a IA não deve propô-las de novo.
       const dispensadas = Array.isArray(md.analiseDismissed) ? md.analiseDismissed.map(d => String(d).trim()).filter(Boolean) : [];
 
-      // 4) Edital do curso + prompt customizado (editável pela tela).
+      // 4) Edital + prompt customizado (editável pela tela). Edital POR MÓDULO
+      // (md.editalModulo) tem prioridade; se vazio, cai no edital geral do curso.
       const cfgSnap = await db.collection('config').doc('poConfig').get();
       const cfg = cfgSnap.exists ? (cfgSnap.data() || {}) : {};
       const editais = cfg.editais || {};
-      const edital = String(editais[cursoId] || '').trim();
+      const editalCurso = String(editais[cursoId] || '').trim();
+      const editalModulo = String(md.editalModulo || '').trim();
+      const edital = editalModulo || editalCurso;
+      const editalFonte = editalModulo ? 'módulo' : (editalCurso ? 'curso' : '');
       const promptCustom = cfg.analisePrompt && cfg.analisePrompt.modulo;
 
-      const ctx = { cursoNome, modulo, edital, aulas, questoes, pedidos, oralTemas, atualizacaoConteudo, transcricaoAvulsa, apostilaStatus, dispensadas };
+      const ctx = { cursoNome, modulo, edital, editalFonte, aulas, questoes, pedidos, oralTemas, atualizacaoConteudo, transcricaoAvulsa, apostilaStatus, dispensadas, erros, duvidasDemanda };
       const systemPrompt = buildSystemPrompt(promptCustom);
       const userPrompt = buildUserPrompt(ctx);
 
@@ -421,15 +476,124 @@ exports.analisarModuloPO = onRequest(
 // ──────────────────────────────────────────────────────────────────────────
 const PROVAS_PRODUTO = ['MEs', 'TEA', 'TSA', 'TSAOral'];
 
+// ── Incidência OFICIAL dos temas nas provas (API Laravel /analise-provas) ──
+// Substitui a contagem crua de questões por um sinal forte: o % das questões de
+// cada tipo de prova que o(s) tema(s) do módulo cobrem, nos últimos 5 anos + o
+// atual. Cruza config/poConfig.temaModulo[curso][modulo]=[pcodeIds] com a árvore
+// de incidência (os ids dos temas-pai batem 1:1 com os nós do topo da árvore).
+const LARAVEL_TOKEN = process.env.LARAVEL_TOKEN || '';
+const LARAVEL_API = 'https://api.grupomedreview.com.br/api';
+// Escopos (tipos de prova) por chave do PO. ME = anuais + quadrimestrais.
+const ESCOPOS_PROVA = {
+  TEA: [9],
+  TSA: [8],
+  MEs: [10, 11, 12, 136, 137, 138, 139, 140, 141, 142, 143, 144],
+};
+// Últimos 5 anos + o atual. Ex.: 2026 → [2021..2026].
+function anosIncidencia() {
+  const atual = new Date().getFullYear();
+  const out = [];
+  for (let i = 5; i >= 0; i--) out.push(atual - i);
+  return out;
+}
+const _sleep = ms => new Promise(r => setTimeout(r, ms));
+// Uma chamada à API → mapa pcodeId → {q: total_questoes, pct: percentual}.
+// Com retry/backoff em 429 (rate limit) e 5xx transitórios.
+async function incidenciaTree(escopoIds, anos, tentativa = 0) {
+  const provas = [];
+  escopoIds.forEach(e => anos.forEach(a => provas.push({ escopo_id: e, ano: a })));
+  const r = await fetch(`${LARAVEL_API}/analise-provas/incidencia`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${LARAVEL_TOKEN}`, Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ provas }),
+  });
+  if ((r.status === 429 || r.status >= 500) && tentativa < 4) {
+    const ra = Number(r.headers.get('retry-after')) || 0;
+    await _sleep(ra > 0 ? Math.min(ra * 1000, 30000) : Math.min(1000 * Math.pow(2, tentativa), 12000));
+    return incidenciaTree(escopoIds, anos, tentativa + 1);
+  }
+  if (!r.ok) throw new Error(`incidencia → ${r.status}`);
+  const j = await r.json();
+  const map = {};
+  const walk = nodes => (Array.isArray(nodes) ? nodes : []).forEach(n => {
+    if (n && n.id != null) map[n.id] = { q: Number(n.total_questoes) || 0, pct: Number(n.percentual) || 0 };
+    if (n && Array.isArray(n.children)) walk(n.children);
+  });
+  walk(j.data);
+  return map;
+}
+// Cruza o temaModulo de UM curso × incidência oficial → {modulo: {TEA:{q,pct}, TSA, MEs}}.
+// Retorna null se não dá pra calcular (sem token ou sem mapeamento de temas).
+async function incidenciaOficialPorModulo(temaModuloCurso) {
+  if (!LARAVEL_TOKEN || !temaModuloCurso || !Object.keys(temaModuloCurso).length) return null;
+  const anos = anosIncidencia();
+  const trees = {};
+  for (const prova of Object.keys(ESCOPOS_PROVA)) {
+    try { trees[prova] = await incidenciaTree(ESCOPOS_PROVA[prova], anos); }
+    catch (e) { console.warn('incidencia', prova, e.message); trees[prova] = {}; }
+  }
+  const porMod = {};
+  Object.entries(temaModuloCurso).forEach(([modulo, pcodes]) => {
+    const ids = (Array.isArray(pcodes) ? pcodes : []).map(Number).filter(Boolean);
+    const rec = {};
+    Object.keys(ESCOPOS_PROVA).forEach(prova => {
+      let q = 0, pct = 0;
+      ids.forEach(id => { const v = trees[prova][id]; if (v) { q += v.q; pct += v.pct; } });
+      rec[prova] = { q, pct: Math.round(Math.min(pct, 100) * 10) / 10 };
+    });
+    porMod[modulo] = rec;
+  });
+  return { porMod, anos };
+}
+
+// Reatualiza SÓ os números de incidência no ranking JÁ SALVO do produto, sem chamar
+// a IA. Lê config/poConfig.analiseProduto[cursoId] + temaModulo[cursoId], rebusca a
+// incidência ao vivo e regrava incidencia/incLabel/incQ de cada linha (nível, porquê
+// e ordem da IA ficam intactos). Usado pela sincronização Laravel.
+async function atualizarIncidenciaSalva(cursoId) {
+  const db = admin.firestore();
+  const cfgRef = db.collection('config').doc('poConfig');
+  const cfg = (await cfgRef.get()).data() || {};
+  const analise = cfg.analiseProduto && cfg.analiseProduto[cursoId];
+  if (!analise || !analise.porProva) return { cursoId, atualizado: false, motivo: 'sem análise salva' };
+  const tmCurso = cfg.temaModulo && cfg.temaModulo[cursoId];
+  const incOf = await incidenciaOficialPorModulo(tmCurso);
+  if (!incOf) return { cursoId, atualizado: false, motivo: 'sem incidência (token/temas)' };
+  const _norm = t => String(t || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const incOfPorMod = {};
+  Object.entries(incOf.porMod).forEach(([mod, rec]) => { incOfPorMod[_norm(mod)] = rec; });
+  let linhas = 0;
+  ['MEs', 'TEA', 'TSA'].forEach(prova => {
+    const blk = analise.porProva[prova];
+    if (!blk || !Array.isArray(blk.ranking)) return;
+    blk.ranking.forEach(r => {
+      const of = incOfPorMod[_norm(r.modulo)];
+      if (of && of[prova]) {
+        r.incidencia = of[prova].pct;
+        r.incQ = of[prova].q;
+        r.incLabel = `${String(of[prova].pct).replace('.', ',')}%`;
+        linhas++;
+      }
+    });
+  });
+  // TSA Oral fica como está (nº de temas, não vem da API de incidência).
+  analise.meta = analise.meta || {};
+  analise.meta.incidenciaOficial = true;
+  analise.meta.incidenciaAnos = incOf.anos;
+  analise.meta.incidenciaAtualizadaEm = new Date().toISOString();
+  await cfgRef.set({ analiseProduto: { [cursoId]: analise } }, { merge: true });
+  return { cursoId, atualizado: true, linhas };
+}
+
 // Instruções EDITÁVEIS do prompt do produto. Formato JSON fixo é anexado por código.
 const DEFAULT_PROMPT_PRODUTO = `Você está consolidando a análise de um PRODUTO (curso de revisão para provas de título médico) inteiro, a partir das análises JÁ FEITAS de cada módulo.
 
-IMPORTANTE: você NÃO recebe transcrições nem questões — recebe apenas, de cada módulo já analisado: o resumo, a lista de ações recomendadas (com categoria e provas) e a INCIDÊNCIA por prova. As provas são: ME, TEA, TSA 1ª fase (chave TSA) e TSA Oral (chave TSAOral; incidência = nº de temas cobrados, não questões). Trabalhe só com isso.
+IMPORTANTE: você NÃO recebe transcrições nem questões — recebe apenas, de cada módulo já analisado: o resumo, a lista de ações recomendadas (com categoria e provas) e a INCIDÊNCIA por prova. As provas são: ME, TEA, TSA 1ª fase (chave TSA) e TSA Oral (chave TSAOral; incidência = nº de temas cobrados, não questões). Para ME/TEA/TSA a incidência é o % OFICIAL das questões daquele tipo de prova (últimos 5 anos + o atual) que os temas do módulo cobrem — quanto maior o %, mais a prova cobra esse módulo. Trabalhe só com isso.
 
 Sua tarefa: para CADA prova (ME, TEA, TSA 1ªF, TSA Oral), produza um RANKING dos módulos do mais para o menos prioritário, e um panorama curto.
 
 Como priorizar dentro de cada prova:
-1. INCIDÊNCIA primeiro: módulos com MAIS questões/temas naquela prova são mais importantes — é por onde o aluno mais perde/ganha ponto. Dê mais peso a eles.
+1. INCIDÊNCIA primeiro: módulos com MAIOR % (ou mais temas, no TSA Oral) naquela prova são mais importantes — é por onde o aluno mais perde/ganha ponto. Dê mais peso a eles.
 2. Gravidade das ações: módulos com ações fortes (lacuna real, aula a gravar/regravar, avaliação baixa) sobem.
 3. Um módulo com altíssima incidência e ações sérias é prioridade máxima naquela prova.
 Atribua a cada módulo um nível: "alta", "media" ou "baixa".
@@ -455,8 +619,13 @@ function buildProdutoUserPrompt(cursoNome, mods) {
   const linhas = [`PRODUTO: ${cursoNome}`, `Módulos já analisados: ${mods.length}`, ''];
   mods.forEach((m, i) => {
     const inc = m.porProva || {};
+    const of = m.incOficial;
     linhas.push(`### Módulo ${i + 1}: ${m.modulo}`);
-    linhas.push(`Incidência: ME ${inc.MEs || 0} · TEA ${inc.TEA || 0} · TSA 1ªF ${inc.TSA || 0} · TSA Oral ${inc.TSAOral || 0} temas`);
+    if (of) {
+      linhas.push(`Incidência oficial nas provas (% das questões do tipo nos últimos 5 anos + o atual): ME ${of.MEs.pct}% (${of.MEs.q}q) · TEA ${of.TEA.pct}% (${of.TEA.q}q) · TSA 1ªF ${of.TSA.pct}% (${of.TSA.q}q) · TSA Oral ${inc.TSAOral || 0} temas`);
+    } else {
+      linhas.push(`Incidência: ME ${inc.MEs || 0} · TEA ${inc.TEA || 0} · TSA 1ªF ${inc.TSA || 0} · TSA Oral ${inc.TSAOral || 0} temas`);
+    }
     if (m.resumo) linhas.push(`Resumo: ${m.resumo}`);
     const acoes = (m.acoes || []).slice(0, 8);
     if (acoes.length) {
@@ -479,6 +648,22 @@ exports.analisarProdutoPO = onRequest(
     const decoded = await exigeAuth(req, res);
     if (!decoded) return;
 
+    // Teste de conexão da API de incidência (sem IA, sem precisar de curso/temas).
+    if (req.body?.pingIncidencia === true) {
+      if (!LARAVEL_TOKEN) { res.status(500).json({ error: 'Token do Laravel não configurado no servidor.' }); return; }
+      const anos = anosIncidencia();
+      try {
+        const tree = await incidenciaTree([8], anos); // amostra: TSA 1ªF
+        const nTemas = Object.keys(tree).length;
+        const totalQ = Object.values(tree).reduce((s, v) => s + (v.q || 0), 0);
+        console.log('IA PO ping incidência', { user: decoded.email || decoded.uid, nTemas, totalQ, anos: anos.join(',') });
+        res.status(200).json({ ok: true, pingIncidencia: true, nTemas, totalQ, anos });
+      } catch (e) {
+        res.status(502).json({ error: 'A API de incidência não respondeu: ' + (e.message || String(e)) });
+      }
+      return;
+    }
+
     const cursoId = String(req.body?.cursoId || '').trim();
     const cursoNome = String(req.body?.cursoNome || '').trim();
     if (!cursoId || !cursoNome) { res.status(400).json({ error: 'Faltam cursoId ou cursoNome' }); return; }
@@ -488,6 +673,21 @@ exports.analisarProdutoPO = onRequest(
       // Prompt customizado do produto (editável pela tela).
       const cfgSnap = await db.collection('config').doc('poConfig').get();
       const promptCustom = cfgSnap.exists && cfgSnap.data().analisePrompt && cfgSnap.data().analisePrompt.produto;
+
+      // ── Atalho "só incidência": busca a incidência oficial por módulo SEM chamar
+      // a IA (custo de crédito = 0). Só precisa dos temas mapeados (temaModulo).
+      if (req.body?.soIncidencia === true) {
+        const tmCurso = (cfgSnap.exists && cfgSnap.data().temaModulo && cfgSnap.data().temaModulo[cursoId]) || null;
+        if (!tmCurso || !Object.keys(tmCurso).length) {
+          res.status(200).json({ ok: true, soIncidencia: true, incidencia: null, motivo: 'Nenhum módulo deste produto tem temas mapeados (🧩 Temas dos módulos).' });
+          return;
+        }
+        const incOf = await incidenciaOficialPorModulo(tmCurso);
+        if (!incOf) { res.status(502).json({ error: 'Não consegui buscar a incidência (API indisponível ou token ausente).' }); return; }
+        console.log('IA PO incidência (sem IA)', { user: decoded.email || decoded.uid, curso: cursoNome || cursoId, n_modulos: Object.keys(incOf.porMod).length, anos: incOf.anos.join(',') });
+        res.status(200).json({ ok: true, soIncidencia: true, incidencia: incOf });
+        return;
+      }
       // Lê os módulos do curso que já têm análise salva.
       const snap = await db.collection('poModQuestoes').where('cursoId', '==', cursoId).get();
       const mods = [];
@@ -508,8 +708,20 @@ exports.analisarProdutoPO = onRequest(
         return;
       }
 
-      // Ordena por incidência total (só pra deixar o prompt mais legível).
-      mods.sort((a, b) => ((b.porProva.TEA || 0) + (b.porProva.TSA || 0) + (b.porProva.MEs || 0)) - ((a.porProva.TEA || 0) + (a.porProva.TSA || 0) + (a.porProva.MEs || 0)));
+      // Incidência OFICIAL por módulo (% das questões de cada prova, 5 anos + atual),
+      // cruzando o mapeamento de temas do curso. Se não der, cai na contagem crua.
+      const temaModuloCurso = (cfgSnap.exists && cfgSnap.data().temaModulo && cfgSnap.data().temaModulo[cursoId]) || null;
+      let incOf = null;
+      try { incOf = await incidenciaOficialPorModulo(temaModuloCurso); }
+      catch (e) { console.warn('IA PO produto: incidência oficial falhou', e.message); }
+      if (incOf) mods.forEach(m => { m.incOficial = incOf.porMod[m.modulo] || null; });
+
+      // Ordena por incidência total (só pra deixar o prompt mais legível). Usa o %
+      // oficial quando disponível; senão, a contagem crua de questões.
+      const _incTot = m => m.incOficial
+        ? (m.incOficial.TEA.pct + m.incOficial.TSA.pct + m.incOficial.MEs.pct)
+        : ((m.porProva.TEA || 0) + (m.porProva.TSA || 0) + (m.porProva.MEs || 0));
+      mods.sort((a, b) => _incTot(b) - _incTot(a));
 
       const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
       const resp = await client.messages.create({
@@ -531,8 +743,11 @@ exports.analisarProdutoPO = onRequest(
       }
 
       // Mapa de incidência por módulo p/ enriquecer o ranking com números confiáveis.
+      // Indexa por nome normalizado: a IA às vezes devolve o nome com capitalização/
+      // espaços diferentes do salvo no Firestore.
       const incPorMod = {};
-      mods.forEach(m => { incPorMod[m.modulo] = m.porProva; });
+      const incOfPorMod = {};
+      mods.forEach(m => { incPorMod[_norm(m.modulo)] = m.porProva; if (m.incOficial) incOfPorMod[_norm(m.modulo)] = m.incOficial; });
       const NIVEIS = new Set(['alta', 'media', 'baixa']);
       const porProva = {};
       PROVAS_PRODUTO.forEach(prova => {
@@ -541,8 +756,20 @@ exports.analisarProdutoPO = onRequest(
           const modulo = String(r.modulo || '').trim();
           let nivel = String(r.nivel || '').trim().toLowerCase();
           if (!NIVEIS.has(nivel)) nivel = 'media';
-          const inc = incPorMod[modulo] || {};
-          return { modulo, nivel, porque: String(r.porque || '').trim(), incidencia: Number(inc[prova] || 0) };
+          const inc = incPorMod[_norm(modulo)] || {};
+          const of = incOfPorMod[_norm(modulo)];
+          let incidencia, incLabel, incQ = 0;
+          if (prova === 'TSAOral') {
+            incidencia = Number(inc.TSAOral || 0);
+            incLabel = `${incidencia} tema${incidencia === 1 ? '' : 's'}`;
+          } else if (of && of[prova]) {
+            incidencia = of[prova].pct; incQ = of[prova].q;
+            incLabel = `${String(incidencia).replace('.', ',')}%`;
+          } else {
+            incidencia = Number(inc[prova] || 0);
+            incLabel = `${incidencia}q`;
+          }
+          return { modulo, nivel, porque: String(r.porque || '').trim(), incidencia, incLabel, incQ };
         }).filter(r => r.modulo);
         porProva[prova] = { panorama: String(blk.panorama || '').trim(), ranking };
       });
@@ -553,6 +780,8 @@ exports.analisarProdutoPO = onRequest(
         meta: {
           cursoId, cursoNome,
           nModulos: mods.length,
+          incidenciaOficial: !!incOf,
+          incidenciaAnos: incOf ? incOf.anos : null,
           modelo: MODEL,
           em: new Date().toISOString(),
           por: decoded.email || decoded.uid,
@@ -573,3 +802,6 @@ exports.analisarProdutoPO = onRequest(
     }
   }
 );
+
+// Exposto p/ a sincronização Laravel reatualizar a incidência salva (sem IA).
+exports.atualizarIncidenciaSalva = atualizarIncidenciaSalva;

@@ -455,6 +455,9 @@ service cloud.firestore {
       allow read: if isAuth();
       allow write: if false;
     }
+    // Threads de "Erro detectado" e "Dúvidas" por aula (fórum interno do PO).
+    match /poErros/{aulaId}   { allow read: if isAuth(); allow create, update, delete: if isAuth(); }
+    match /poDuvidas/{aulaId} { allow read: if isAuth(); allow create, update, delete: if isAuth(); }
 
     // ────────────────────────────────────────────────────────────────────────
     // DEFAULT DENY — qualquer coleção/path não listada acima é bloqueada.

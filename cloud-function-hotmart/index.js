@@ -18,6 +18,7 @@ exports.criarAcessoConvite = require('./criar-acesso').criarAcessoConvite;
 
 // Re-exporta a function de transcrição via Vimeo (legenda do vídeo → texto no PO)
 exports.vimeoTranscricao = require('./vimeo-transcricao').vimeoTranscricao;
+exports.salvarTranscricaoManual = require('./vimeo-transcricao').salvarTranscricaoManual;
 
 // Re-exporta a sincronização Laravel → PO (botão manual + rotina semanal)
 exports.sincronizarLaravel = require('./sincronizar-laravel').sincronizarLaravel;

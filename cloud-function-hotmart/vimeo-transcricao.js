@@ -36,15 +36,15 @@ function setCors(req, res) {
   res.set('Access-Control-Max-Age', '3600');
 }
 
-// Escolhe a melhor faixa de legenda: prefere legenda humana sobre autogerada,
-// e dentro de cada grupo a marcada como active.
-function escolherFaixa(tracks) {
+// Ordena as faixas de legenda por preferência: humana antes de autogerada e,
+// dentro de cada grupo, a marcada como active primeiro. Devolve a LISTA inteira
+// (não só a melhor) pra dar pra tentar as outras se o download de uma falhar —
+// às vezes a faixa "active" está quebrada no Vimeo (404) e a inativa funciona.
+function ordenarFaixas(tracks) {
   const list = Array.isArray(tracks) ? tracks.filter(t => t && t.link) : [];
-  if (!list.length) return null;
   const isAuto = t => /-x-autogen$/i.test(t.language || '');
-  const humanas = list.filter(t => !isAuto(t));
-  const grupo = humanas.length ? humanas : list;
-  return grupo.find(t => t.active) || grupo[0];
+  const rank = t => (isAuto(t) ? 2 : 0) + (t.active ? 0 : 1);
+  return list.slice().sort((a, b) => rank(a) - rank(b));
 }
 
 // Converte VTT em texto corrido limpo (sem timestamps, índices, cabeçalho ou tags).
@@ -133,17 +133,25 @@ async function obterTranscricao(vimeoIdRaw, aulaId) {
     return { ok: false, motivo: 'erro_vimeo', status: ttResp.status };
   }
   const ttJson = await ttResp.json();
-  const faixa = escolherFaixa(ttJson.data);
-  if (!faixa) return { ok: false, motivo: 'sem_legenda' };
+  const faixas = ordenarFaixas(ttJson.data);
+  if (!faixas.length) return { ok: false, motivo: 'sem_legenda' };
 
-  const vttResp = await fetch(faixa.link);
-  if (!vttResp.ok) return { ok: false, motivo: 'erro_download_vtt', status: vttResp.status };
-  const vtt = await vttResp.text();
-  const texto = vttParaTexto(vtt);
-  if (!texto) return { ok: false, motivo: 'legenda_vazia' };
+  // Tenta cada faixa em ordem de preferência até uma baixar com texto de verdade.
+  // (A faixa "active" às vezes 404 no CDN do Vimeo enquanto a inativa funciona.)
+  let texto = '', faixaUsada = null, ultimoMotivo = 'sem_legenda';
+  for (const faixa of faixas) {
+    try {
+      const vttResp = await fetch(faixa.link);
+      if (!vttResp.ok) { ultimoMotivo = 'erro_download_vtt'; console.warn('VTT download falhou', vimeoId, faixa.language, vttResp.status); continue; }
+      const t = vttParaTexto(await vttResp.text());
+      if (!t) { ultimoMotivo = 'legenda_vazia'; continue; }
+      texto = t; faixaUsada = faixa; break;
+    } catch (e) { ultimoMotivo = 'erro_download_vtt'; console.warn('VTT erro', vimeoId, e?.message || e); }
+  }
+  if (!texto) return { ok: false, motivo: ultimoMotivo };
 
   const palavras = texto.split(/\s+/).filter(Boolean).length;
-  const lang = faixa.language || '';
+  const lang = faixaUsada.language || '';
   const autogerada = /-x-autogen$/i.test(lang);
 
   await admin.firestore().collection('poTranscricoes').doc(vimeoId).set({
@@ -156,3 +164,39 @@ async function obterTranscricao(vimeoIdRaw, aulaId) {
 }
 
 exports.obterTranscricao = obterTranscricao;
+
+// ── Transcrição MANUAL: coord cola o texto à mão (ex.: vídeo fora do nosso Vimeo,
+// ou legenda quebrada). Grava em poTranscricoes/{vimeoId} com fonte:'manual'. ──
+exports.salvarTranscricaoManual = onRequest(
+  { region: 'us-central1', invoker: 'public', cors: false, timeoutSeconds: 60, memory: '256MiB' },
+  async (req, res) => {
+    setCors(req, res);
+    if (req.method === 'OPTIONS') { res.status(204).send(''); return; }
+    if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
+
+    const authHeader = req.get('Authorization') || '';
+    const idToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+    if (!idToken) { res.status(401).json({ error: 'Faça login' }); return; }
+    try { await admin.auth().verifyIdToken(idToken); }
+    catch (e) { res.status(401).json({ error: 'Sessão expirada — faça login novamente' }); return; }
+
+    const vimeoId = String(req.body?.vimeoId || '').trim().replace(/\D/g, '');
+    const aulaId = String(req.body?.aulaId || '').trim();
+    const texto = String(req.body?.texto || '').replace(/\s+/g, ' ').trim();
+    const docId = vimeoId || (aulaId ? 'aula_' + aulaId : '');
+    if (!docId) { res.status(400).json({ error: 'Informe o vídeo (vimeoId) ou a aula' }); return; }
+    if (!texto) { res.status(400).json({ error: 'Cole a transcrição (texto vazio)' }); return; }
+
+    try {
+      const palavras = texto.split(/\s+/).filter(Boolean).length;
+      await admin.firestore().collection('poTranscricoes').doc(docId).set({
+        texto, vimeoId, aulaId: aulaId || '', lang: 'manual', autogerada: false,
+        chars: texto.length, palavras, fonte: 'manual', updatedAt: new Date().toISOString(),
+      });
+      res.status(200).json({ ok: true, vimeoId: docId, palavras, chars: texto.length, lang: 'manual', preview: texto.slice(0, 160) });
+    } catch (err) {
+      console.error('salvarTranscricaoManual erro:', err?.message || err);
+      res.status(500).json({ error: 'Erro ao salvar transcrição', detail: String(err?.message || err) });
+    }
+  }
+);
