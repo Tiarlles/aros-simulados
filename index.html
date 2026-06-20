@@ -37610,7 +37610,7 @@ async function _poSaveConfig(){
 // Carrega tudo do Firestore. Mantém o demo se a coleção estiver vazia ou sem auth.
 async function loadPO(){
   // 1) config (colunas + cursos)
-  let _duracaoInjetada=false, _trilhaRenamed=false, _apostilaColRemovida=false, _fichaStatusMig=false, _errDuvColsAdded=false, _regravarColAdded=false;
+  let _duracaoInjetada=false, _trilhaRenamed=false, _apostilaColRemovida=false, _fichaStatusMig=false, _errDuvColsAdded=false, _regravarColAdded=false, _statusBackfill=false;
   try{
     const cfgSnap=await getDoc(doc(db,'config','poConfig'));
     if(cfgSnap.exists()){
@@ -37626,6 +37626,7 @@ async function loadPO(){
       _fichaStatusMig=!!d.fichaResumoStatusMigrada;
       _errDuvColsAdded=!!d.errDuvColsAdded;
       _regravarColAdded=!!d.regravarColAdded;
+      _statusBackfill=!!d.statusPostadoBackfill;
       if(d.poPesos&&typeof d.poPesos==='object')S.poPesos={...S.poPesos,...d.poPesos};
       if(d.editais&&typeof d.editais==='object')S.poEditais=d.editais;
       if(d.temaModulo&&typeof d.temaModulo==='object')S.poTemaModulo=d.temaModulo;
@@ -37700,6 +37701,18 @@ async function loadPO(){
         if(iStatus>=0)S.poColunas.splice(iStatus+1,0,colRg); else S.poColunas.push(colRg);
       }
       try{ await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,regravarColAdded:true},{merge:true}); }catch(e){ console.warn('migração regravar:',e); }
+    }
+    // Migração one-time: preenche o Status Aula VAZIO como "Postado" (não toca em quem já tem status).
+    // Agora que a barra de Aulas lê o status, aulas sem status apareciam como 0%.
+    if(!_statusBackfill){
+      try{
+        let b=writeBatch(db),n=0;
+        for(const a of aulasDocs){
+          if(!String(a.status||'').trim()){ a.status='Postado'; if(a.id&&!String(a.id).startsWith('tmp_')){ b.update(doc(db,'poAulas',a.id),{status:'Postado'}); if(++n>=450){await b.commit();b=writeBatch(db);n=0;} } }
+        }
+        if(n>0)await b.commit();
+      }catch(e){ console.warn('backfill status (aulas):',e); }
+      try{ await setDoc(doc(db,'config','poConfig'),{statusPostadoBackfill:true},{merge:true}); }catch(e){ console.warn('backfill status (cfg):',e); }
     }
   }else if(aulasDocs&&!aulasDocs.length){
     // coleção existe e está VAZIA → mantém demo
@@ -38506,6 +38519,8 @@ window.poImportLaravelConfirmar=async()=>{
         _PRESERVAR.forEach(k=>{if((prev[k]||'')!==''&&(rec[k]||'')==='')rec[k]=prev[k];});
         if(prev.dados&&typeof prev.dados==='object')rec.dados={...prev.dados,...(rec.dados||{})};
       }
+      // Aula nova (ou sem status definido) entra como "Postada" por padrão — não sobrescreve status real preservado acima.
+      if(!String(rec.status||'').trim())rec.status='Postado';
       batch.set(ref,{...rec,criadoEm:(prev&&prev.criadoEm)||nowIso,updatedAt:nowIso});op++;
       if(op>=450){imp.prog=`Gravando ${i+1}/${aulas.length}…`;_poImportLaravelProg();await flush();}
     }
