@@ -5905,6 +5905,43 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-po .po-ia-btn{display:inline-flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-weight:600;font-size:13px;cursor:not-allowed;opacity:.7}
         #tab-po .po-ia-btn.po-ia-on{cursor:pointer;opacity:1;border-color:color-mix(in srgb,var(--accent) 45%,var(--border));transition:border-color .15s,background .15s,transform .12s}
         #tab-po .po-ia-btn.po-ia-on:hover{border-color:var(--accent);background:var(--accent-dim);transform:translateY(-1px)}
+        /* Inteligência do Produto — dropdown tech */
+        #tab-po .po-iq{margin:14px 0 4px;border:1px solid var(--border);border-radius:14px;background:var(--bg2);overflow:hidden}
+        #tab-po .po-iq.open{border-color:color-mix(in srgb,var(--accent) 34%,var(--border))}
+        #tab-po .po-iq-head{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;user-select:none;transition:background .15s}
+        #tab-po .po-iq-head:hover{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+        #tab-po .po-iq-chev{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);flex:none;width:12px}
+        #tab-po .po-iq-tit{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--text)}
+        #tab-po .po-iq-chip{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.04em;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);padding:3px 9px;border-radius:999px;white-space:nowrap}
+        #tab-po .po-iq-chip.off{color:var(--t2);background:color-mix(in srgb,var(--text) 7%,transparent);border-color:var(--border2)}
+        #tab-po .po-iq-body{padding:0 16px 16px;border-top:1px solid var(--border)}
+        #tab-po .po-iq-desc{color:var(--t2);font-size:13px;line-height:1.5;margin:14px 0 4px}
+        #tab-po .po-iq-tools{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+        #tab-po .po-iq-tool{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.02em;color:var(--t2);background:transparent;border:1px solid var(--border2);border-radius:8px;padding:7px 12px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+        #tab-po .po-iq-tool:hover{color:var(--text);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent)}
+        #tab-po .po-iq-run{display:flex;flex-direction:column;gap:10px;align-items:flex-start;margin:6px 0 4px}
+        #tab-po .po-iq-act{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:9px 16px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border2);background:transparent;color:var(--t2);transition:color .16s,border-color .16s,background .16s,box-shadow .16s,transform .12s;white-space:nowrap}
+        #tab-po .po-iq-act:hover{color:var(--text);border-color:var(--accent);transform:translateY(-1px)}
+        #tab-po .po-iq-act:active{transform:translateY(0)}
+        #tab-po .po-iq-act:disabled{opacity:.5;cursor:default;transform:none;box-shadow:none}
+        #tab-po .po-iq-act.primary{color:#fff;border-color:transparent;background:linear-gradient(135deg,#1f6feb,#2f81f7);box-shadow:0 2px 14px color-mix(in srgb,#2f81f7 32%,transparent)}
+        #tab-po .po-iq-act.primary:hover{color:#fff;border-color:transparent;background:linear-gradient(135deg,#2f81f7,#4493f8);box-shadow:0 4px 20px color-mix(in srgb,#2f81f7 46%,transparent)}
+        #tab-po .po-iq-act.rapida{color:#fff;border-color:transparent;background:linear-gradient(135deg,#0e7490,#06b6d4);box-shadow:0 2px 14px color-mix(in srgb,#06b6d4 30%,transparent)}
+        #tab-po .po-iq-act.rapida:hover{color:#fff;background:linear-gradient(135deg,#0e8aa8,#22d3ee);box-shadow:0 4px 20px color-mix(in srgb,#06b6d4 46%,transparent)}
+        #tab-po .po-iq-act.completa{color:#fff;border:1px solid color-mix(in srgb,#a371f7 60%,transparent);background:linear-gradient(135deg,#6d28d9,#a371f7);box-shadow:0 0 0 1px color-mix(in srgb,#a371f7 22%,transparent),0 4px 22px color-mix(in srgb,#a371f7 42%,transparent)}
+        #tab-po .po-iq-act.completa:hover{color:#fff;border-color:color-mix(in srgb,#a371f7 80%,transparent);background:linear-gradient(135deg,#7c3aed,#b88af9);box-shadow:0 0 0 1px color-mix(in srgb,#a371f7 38%,transparent),0 6px 30px color-mix(in srgb,#a371f7 58%,transparent)}
+        #tab-po .po-iq-act.ghost{border-color:color-mix(in srgb,#f85149 40%,transparent);color:#f85149;background:transparent}
+        #tab-po .po-iq-act.ghost:hover{border-color:#f85149;background:color-mix(in srgb,#f85149 12%,transparent);color:#f85149;transform:none}
+        #tab-po .po-iq-menu{display:flex;gap:12px;flex-wrap:wrap;margin-top:2px}
+        #tab-po .po-iq-opt{display:inline-flex;align-items:center;gap:6px}
+        #tab-po .po-iq-i{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-family:'JetBrains Mono',monospace;font-size:10px;font-style:italic;font-weight:700;border:1px solid var(--border2);color:var(--t2);cursor:help;transition:color .15s,border-color .15s}
+        #tab-po .po-iq-i:hover{color:var(--accent);border-color:var(--accent)}
+        #tab-po .po-iq-hint{font-size:12px;color:var(--t2);margin-top:14px}
+        #tab-po .po-iq-prog{margin-top:14px;display:flex;flex-direction:column;gap:9px}
+        #tab-po .po-iq-prog-top{display:flex;align-items:center;gap:12px}
+        #tab-po .po-iq-prog-lbl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        #tab-po .po-iq-prog-bar{height:6px;border-radius:999px;background:color-mix(in srgb,var(--text) 9%,transparent);overflow:hidden}
+        #tab-po .po-iq-prog-bar>span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#0e7490,#06b6d4,#2f81f7);transition:width .3s ease}
         #tab-po .po-soon{font-size:10px;font-family:'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-dim);padding:1px 6px;border-radius:5px}
         /* Modal: analisar módulo (lotes TEA/TSA/MEs) */
         #po-mod-modal{position:fixed;inset:0;z-index:9999;display:none}
@@ -6015,6 +6052,15 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-mod-modal .po-modal-foot .po-act.oral:hover{color:#fff;border-color:color-mix(in srgb,#a371f7 80%,transparent);background:linear-gradient(135deg,#7c3aed,#b88af9);box-shadow:0 0 0 1px color-mix(in srgb,#a371f7 38%,transparent),0 6px 30px color-mix(in srgb,#a371f7 58%,transparent);transform:translateY(-1px)}
         #po-mod-modal .po-modal-foot .po-act.oral .po-act-i{opacity:1;color:#fff}
         #po-mod-modal .po-mod-sub{font-size:12px;color:var(--t2);margin-top:2px;font-family:'JetBrains Mono',monospace}
+        /* Box "TSA Oral" — dropdown roxo, título moderno (gradiente) */
+        #po-mod-oral .po-oral-wrap{border:1px solid color-mix(in srgb,#a371f7 32%,var(--border));border-radius:12px;margin-top:14px;overflow:hidden;background:color-mix(in srgb,#a371f7 6%,transparent)}
+        #po-mod-oral .po-oral-head{display:flex;align-items:center;gap:11px;padding:12px 15px;cursor:pointer;user-select:none}
+        #po-mod-oral .po-oral-head:hover{background:color-mix(in srgb,#a371f7 9%,transparent)}
+        #po-mod-oral .po-oral-chev{color:#a371f7;font-size:12px;width:12px;text-align:center}
+        #po-mod-oral .po-oral-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:.16em;text-transform:uppercase;background:linear-gradient(90deg,#a371f7,#d0b0ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+        #po-mod-oral .po-oral-count{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#c9a3ff;background:color-mix(in srgb,#a371f7 16%,transparent);border:1px solid color-mix(in srgb,#a371f7 34%,transparent);padding:2px 8px;border-radius:999px}
+        #po-mod-oral .po-oral-saved{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)}
+        #po-mod-oral .po-oral-body{padding:2px 14px 14px}
         #po-mod-modal .po-mod-resumo{font-size:12.5px;color:var(--text);margin-bottom:8px}
         #po-mod-modal .po-mod-aviso{margin-bottom:12px;padding:9px 12px;border-radius:9px;background:color-mix(in srgb,#f0883e 12%,transparent);border:1px solid color-mix(in srgb,#f0883e 32%,transparent);color:#f0883e;font-size:12px}
         /* Dropdown maior que agrupa todos os inputs (TEA/TSA/MEs/Outras/Pedidos) */
@@ -39086,7 +39132,6 @@ function _poRenderCursos(root){
         <div class="po-cc-desc">${_poEsc(c.descricao||'')}</div>
       </div>
       <div class="po-cc-bars">
-        ${barRow('Produção',`${pct}%`,pct,'var(--prod)',`Aulas com status 'no ar': ${pct}%`)}
         ${barRow('🎬 Aulas',semAn?'—':`${prog.aulas}%`,semAn?0:prog.aulas,corA,`🎬 Aulas — ${subAn}`)}
         ${barRow('📎 Materiais',semAn?'—':`${prog.apoio}%`,semAn?0:prog.apoio,corM,`📎 Materiais — ${subAn}`)}
       </div>
@@ -39127,6 +39172,7 @@ function _poRenderCurso(root){
         <h2 class="po-title">${_poEsc(c.nome)} ${prodLink}</h2>
         ${c.descricao?`<p class="po-sub">${_poEsc(c.descricao)}</p>`:''}
       </div>
+      ${_poIABoxHTML(c)}
       <div class="po-toolbar">
         <input class="po-search" type="text" placeholder="Buscar aula, módulo, professor, status…" value="${_poEsc(S.poBusca||'')}" oninput="poSetBusca(this.value)">
         <button id="po-toggle-all" class="btn btn-g" type="button" onclick="poToggleAll()" title="Expandir / recolher todos os módulos">⊕ Expandir tudo</button>
@@ -39156,29 +39202,73 @@ function _poRenderCurso(root){
         <button type="button" class="po-sel-del" onclick="poExcluirSelecionadas()">🗑️ Excluir selecionadas</button>
         <button type="button" class="po-sel-clear" onclick="poLimparSelecao()">Limpar seleção</button>
       </div>
-      <div class="po-ia">
-        <h3>🤖 Inteligência do Produto</h3>
-        <p>Configure o edital e os pesos, depois rode a análise pra ver a linha do tempo de prioridades do produto.</p>
-        <div class="po-ia-btns">
-          <button type="button" class="po-ia-btn po-ia-on" onclick="poAbrirMapaTemas()">🧩 Temas dos módulos</button>
-          <button type="button" class="po-ia-btn po-ia-on" onclick="poAbrirEdital()">📋 Edital do produto</button>
-          <button type="button" class="po-ia-btn po-ia-on" onclick="poAbrirPesos()">⚖️ Pesos da priorização</button>
-          <button type="button" class="po-ia-btn po-ia-on" onclick="poAbrirPromptIA()">✍️ Prompt da IA</button>
-          <button type="button" class="po-ia-btn po-ia-on" onclick="poTestarIncidencia()" title="Testa a conexão com a API de incidência das provas — sem IA, sem custo">🔌 Testar API de incidência</button>
-          <button type="button" class="po-ia-btn po-ia-on" onclick="poAnalisarProduto()">⚡ Analisar produto</button>
-        </div>
-        <div id="po-prod-timeline"></div>
-        <div class="po-ia-hint">📥 As questões e os pedidos de alunos entram pelo botão <strong>🤖 Analisar</strong> em cada Ponto.</div>
-      </div>
     </div>`;
   try{_poBindResize();}catch(e){}
   try{_poBindDrag();}catch(e){}
   _poUpdateModIndeterminate();
   _poUpdateSelBar();
-  // Restaura a última análise do produto salva, se houver.
+  // Restaura a última análise do produto salva, se houver (só se o box estiver aberto e o alvo no DOM).
   S._poProdTab=null;
-  if(S.poAnaliseProduto&&S.poAnaliseProduto[S.poCursoAtual]){try{_poRenderAnaliseProduto(S.poAnaliseProduto[S.poCursoAtual]);}catch(e){}}
+  if(document.getElementById('po-prod-timeline')){
+    if(S._poProdBatch&&S._poProdAnalisando){ try{_poProdRenderProgress();}catch(e){} }
+    else if(S.poAnaliseProduto&&S.poAnaliseProduto[S.poCursoAtual]){try{_poRenderAnaliseProduto(S.poAnaliseProduto[S.poCursoAtual]);}catch(e){}}
+  }
 }
+// Box "Inteligência do Produto" — dropdown colapsável no topo da view do curso.
+function _poIABoxHTML(c){
+  const open=!!S._poIAOpen;
+  const prog=_poProdProgressoSplit(c.id);
+  const chip=prog.total
+    ?(prog.analisados>0
+       ?`<span class="po-iq-chip">${prog.analisados}/${prog.total} módulos</span>`
+       :`<span class="po-iq-chip off">não analisado</span>`)
+    :'';
+  if(!open){
+    return `<div class="po-iq">
+      <div class="po-iq-head" onclick="poIAToggle()">
+        <span class="po-iq-chev">▸</span>
+        <span class="po-iq-tit">Inteligência do Produto</span>
+        ${chip}
+      </div>
+    </div>`;
+  }
+  const menu=S._poProdMenuOpen?`
+    <div class="po-iq-menu">
+      <span class="po-iq-opt">
+        <button type="button" class="po-iq-act rapida" onclick="poAnalisarProdutoRapida()">Análise rápida</button>
+        <span class="po-iq-i" title="Analisa só os módulos ainda SEM análise e reaproveita os já feitos. Mais rápida e barata. Não atualiza módulos cujo conteúdo mudou desde a última análise.">i</span>
+      </span>
+      <span class="po-iq-opt">
+        <button type="button" class="po-iq-act completa" onclick="poAnalisarProdutoCompleta()">Análise completa</button>
+        <span class="po-iq-i" title="Re-analisa TODOS os módulos do zero (mais demorada e cara). Mostra progresso X de Y. Não inclui o TSA Oral (que é analisado individualmente em cada módulo).">i</span>
+      </span>
+    </div>`:'';
+  return `<div class="po-iq open">
+    <div class="po-iq-head" onclick="poIAToggle()">
+      <span class="po-iq-chev">▾</span>
+      <span class="po-iq-tit">🤖 Inteligência do Produto</span>
+      ${chip}
+    </div>
+    <div class="po-iq-body">
+      <p class="po-iq-desc">Configure o edital e os pesos, depois rode a análise pra ver a linha do tempo de prioridades do produto.</p>
+      <div class="po-iq-tools">
+        <button type="button" class="po-iq-tool" onclick="poAbrirMapaTemas()">🧩 Temas dos módulos</button>
+        <button type="button" class="po-iq-tool" onclick="poAbrirEdital()">📋 Edital do produto</button>
+        <button type="button" class="po-iq-tool" onclick="poAbrirPesos()">⚖️ Pesos da priorização</button>
+        <button type="button" class="po-iq-tool" onclick="poAbrirPromptIA()">✍️ Prompt da IA</button>
+        <button type="button" class="po-iq-tool" onclick="poTestarIncidencia()" title="Testa a conexão com a API de incidência das provas — sem IA, sem custo">🔌 Testar API de incidência</button>
+      </div>
+      <div class="po-iq-run">
+        <button type="button" class="po-iq-act primary" onclick="poProdMenuToggle()"${S._poProdAnalisando?' disabled':''}>▸ Analisar produto</button>
+        ${menu}
+      </div>
+      <div id="po-prod-timeline"></div>
+      <div class="po-iq-hint">📥 As questões e os pedidos de alunos entram pelo botão <strong>🤖 Analisar</strong> em cada Ponto.</div>
+    </div>
+  </div>`;
+}
+window.poIAToggle=()=>{S._poIAOpen=!S._poIAOpen; if(!S._poIAOpen)S._poProdMenuOpen=false; _poRender();};
+window.poProdMenuToggle=()=>{S._poProdMenuOpen=!S._poProdMenuOpen; _poRender();};
 
 function _poRefreshTabela(){
   if(!S.poCursoAtual)return;
@@ -40026,6 +40116,9 @@ const PO_CRITERIOS=[
 S.poPesos=Object.fromEntries(PO_CRITERIOS.map(c=>[c.id,c.peso])); // default; sobrescrito pelo config
 S.poEditais={}; // {cursoId: textoDoEdital}
 S.poAnaliseProduto={}; // {cursoId: resultado da análise do produto (IA)}
+S._poIAOpen=false;     // box "Inteligência do Produto" começa fechado
+S._poProdMenuOpen=false;// menu Rápida/Completa fechado por padrão
+S._poProdBatch=null;   // {total,done,cancel,atual} durante análise em lote
 S.poAnalisePrompt={};  // {modulo, produto} — instruções editáveis dos prompts da IA
 
 // ── Tela: editar os prompts da IA (módulo + produto) ──
@@ -40210,6 +40303,62 @@ window.poAnalisarProduto=async()=>{
   }catch(e){ el.innerHTML=`<div class="po-imp-erro">⚠️ ${_poEsc(e.message||String(e))}</div>`; }
   finally{ S._poProdAnalisando=false; }
 };
+// ── Análise do produto em LOTE (Rápida / Completa) com progresso + cancelar ──
+function _poProdRenderProgress(){
+  const el=document.getElementById('po-prod-timeline'); if(!el)return;
+  const b=S._poProdBatch||{total:0,done:0,atual:''};
+  const pct=b.total?Math.round((b.done/b.total)*100):0;
+  el.innerHTML=`<div class="po-iq-prog">
+    <div class="po-iq-prog-top">
+      <span class="po-iq-prog-lbl">ANALISANDO ${b.done}/${b.total}${b.atual?` — ${_poEsc(b.atual)}`:''}</span>
+      <button type="button" class="po-iq-act ghost" onclick="poProdCancelar()">Cancelar</button>
+    </div>
+    <div class="po-iq-prog-bar"><span style="width:${pct}%"></span></div>
+  </div>`;
+}
+window.poProdCancelar=()=>{ if(S._poProdBatch)S._poProdBatch.cancel=true; arosToast('Cancelando após o módulo atual…','info',2500); };
+async function _poProdAnalisarLote(cid, curso, modulos){
+  S._poProdBatch={total:modulos.length, done:0, cancel:false, atual:''};
+  _poProdRenderProgress();
+  const CONC=3; let idx=0; const erros=[];
+  const worker=async()=>{
+    while(idx<modulos.length && !S._poProdBatch.cancel){
+      const mod=modulos[idx++];
+      S._poProdBatch.atual=mod; _poProdRenderProgress();
+      try{
+        const r=await _poApiPost(ANALISE_PO_ENDPOINT,{cursoId:cid,cursoNome:curso.nome,modulo:mod});
+        const k=_poModKey(cid,mod);
+        S._poAnalises[k]=r.analise;
+        if(S.poModQuestoes[k]) S.poModQuestoes[k].analise=r.analise; else S.poModQuestoes[k]={analise:r.analise};
+      }catch(e){ erros.push({mod, msg:(e&&e.message)||String(e)}); }
+      S._poProdBatch.done++; _poProdRenderProgress();
+    }
+  };
+  await Promise.all(Array.from({length:Math.min(CONC,modulos.length||1)},()=>worker()));
+  return {erros, cancelado:S._poProdBatch.cancel};
+}
+async function _poProdRun(cid, modo){ // modo: 'rapida'|'completa'
+  const curso=(S.poCursos||[]).find(c=>c.id===cid);
+  if(!cid||!curso){arosToast('Abra um curso primeiro.','err',2500);return;}
+  if(S._poProdAnalisando)return;
+  S._poProdMenuOpen=false; S._poProdAnalisando=true;
+  const todos=_poGroupByMod(_poAulasDoCurso(cid)).map(g=>g.modulo);
+  const modulos = modo==='completa' ? todos : todos.filter(m=>!(S._poAnalises[_poModKey(cid,m)]||(S.poModQuestoes[_poModKey(cid,m)]&&S.poModQuestoes[_poModKey(cid,m)].analise)));
+  try{
+    let cancelado=false;
+    if(modulos.length){ const r=await _poProdAnalisarLote(cid,curso,modulos); cancelado=r.cancelado;
+      if(r.erros&&r.erros.length) arosToast(`${r.erros.length} módulo(s) falharam na análise.`,'err',4000);
+    } else if(modo==='rapida'){ arosToast('Todos os módulos já estavam analisados — consolidando.','info',3000); }
+    if(!cancelado){
+      const el=document.getElementById('po-prod-timeline'); if(el)el.innerHTML=`<div class="po-an-load"><span class="po-an-spin"></span> Consolidando a análise do produto…</div>`;
+      const rc=await _poApiPost(ANALISE_PRODUTO_PO_ENDPOINT,{cursoId:cid,cursoNome:curso.nome});
+      S.poAnaliseProduto[cid]=rc.analise; _poSaveAnaliseProduto(cid); _poRenderAnaliseProduto(rc.analise);
+    } else { const el=document.getElementById('po-prod-timeline'); if(el)el.innerHTML=`<div class="po-tl-empty">Análise cancelada. Os módulos já analisados foram salvos — rode a Análise rápida pra continuar de onde parou.</div>`; }
+  }catch(e){ const el=document.getElementById('po-prod-timeline'); if(el)el.innerHTML=`<div class="po-imp-erro">⚠️ ${_poEsc((e&&e.message)||String(e))}</div>`; }
+  finally{ S._poProdAnalisando=false; S._poProdBatch=null; }
+}
+window.poAnalisarProdutoRapida=()=>_poProdRun(S.poCursoAtual,'rapida');
+window.poAnalisarProdutoCompleta=()=>_poProdRun(S.poCursoAtual,'completa');
 // Botão de teste: confirma que a API de incidência das provas está respondendo.
 // Não usa IA, não depende de mapeamento de temas — só pinga a API e mostra um modal.
 window.poTestarIncidencia=async()=>{
@@ -40259,13 +40408,13 @@ function _poRenderAnaliseProduto(an){
     <div class="po-an-tabs">${tabs}</div>
     ${blk.panorama?`<div class="po-an-prov-pano">${_poEsc(blk.panorama)}</div>`:''}
     <table class="po-an-tbl"><tbody>${rows}</tbody></table>
-    <div class="po-an-foot">Ranking por prova, priorizando incidência oficial (% das questões nos últimos 5 anos + o atual) + gravidade. Re-analise quando atualizar módulos. <button type="button" class="btn btn-g po-an-reorder" onclick="poAnalisarProduto()">🔄 Re-analisar produto</button></div>
+    <div class="po-an-foot">Ranking por prova, priorizando incidência oficial (% das questões nos últimos 5 anos + o atual) + gravidade. Re-analise quando atualizar módulos. <button type="button" class="btn btn-g po-an-reorder" onclick="poAnalisarProdutoRapida()">🔄 Re-analisar produto</button></div>
   </div>`;
   el.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 window.poAbrirAnaliseModulo=(cid,modEnc)=>{
   S._poModAtual={cid,modulo:decodeURIComponent(modEnc)};
-  S._poModErro={};S._poAnTab='Todas';
+  S._poModErro={};S._poAnTab='Todas';S._poOralOpen=false; // box TSA Oral começa FECHADO ao abrir o módulo
   // todos os accordions começam FECHADOS por padrão
   S._poModSec={};S._poModFile={};
   const k=_poModKey(cid,S._poModAtual.modulo);
@@ -40505,7 +40654,7 @@ window.poAnalisarTSAOral=async()=>{
     S._poAnalisesOral[_poModKey(cid,modulo)]=r.analiseOral;
     const b=_poModQ(cid,modulo); b.analiseOral=r.analiseOral;
     S._poOralAnalisando=false;
-    _poRenderAnaliseOral(r.analiseOral);
+    _poRenderAnaliseOral(r.analiseOral,true);
   }catch(e){
     if(box)box.innerHTML=`<div class="po-imp-erro">⚠️ ${_poEsc(e.message||String(e))}</div>`;
   }finally{
@@ -40514,9 +40663,13 @@ window.poAnalisarTSAOral=async()=>{
   }
 };
 // Render do box "TSA Oral" (lista só lacunas). Roxo pra distinguir das ações do módulo.
-function _poRenderAnaliseOral(ao){
+// Box "TSA Oral" em DROPDOWN. `open`: true abre (recém-gerado), false/omitido = fechado
+// (estado padrão ao reabrir o modal com análise já salva). Sem resumo — só as lacunas.
+function _poRenderAnaliseOral(ao,open){
   const box=document.getElementById('po-mod-oral'); if(!box||!ao)return;
   box.style.display='block';
+  if(typeof open==='boolean')S._poOralOpen=open;
+  const isOpen=!!S._poOralOpen;
   const m=ao.meta||{};
   const lac=Array.isArray(ao.lacunas)?ao.lacunas:[];
   const rows=lac.map((l,i)=>`<div class="po-an-acao lvl-alta" style="--nc:#a371f7">
@@ -40526,17 +40679,24 @@ function _poRenderAnaliseOral(ao){
         ${l.porque?`<div class="po-an-det"><div class="po-an-por">${_poFmtPorque(l.porque)}</div></div>`:''}
       </div></div>`).join('')
     ||`<div class="po-an-vazio">Nenhuma lacuna para o TSA Oral — o conteúdo (aulas + casos clínicos) cobre o que é exigido.</div>`;
-  box.innerHTML=`<div class="po-an-wrap" style="border-top:3px solid #a371f7;margin-top:14px;padding-top:12px">
-    <div class="po-an-head">
-      <span class="po-an-h-tit">🎤 TSA Oral</span>
-      ${m.em?`<span class="po-an-saved">última análise em ${_poDataFmt(m.em)}</span>`:''}
+  box.innerHTML=`<div class="po-oral-wrap${isOpen?' open':''}">
+    <div class="po-oral-head" onclick="poOralToggle()">
+      <span class="po-oral-chev">${isOpen?'▾':'▸'}</span>
+      <span class="po-oral-title">TSA Oral</span>
+      <span class="po-oral-count">${lac.length} lacuna${lac.length===1?'':'s'}</span>
+      ${m.em?`<span class="po-oral-saved">${_poDataFmt(m.em)}</span>`:''}
     </div>
-    ${ao.resumo?`<div class="po-an-por" style="margin:4px 0 10px">${_poFmtPorque(ao.resumo)}</div>`:''}
-    ${lac.length?`<div class="po-an-prio"><span>Lacunas para o oral</span><span class="po-an-badge" style="--nc:#a371f7">${lac.length}</span></div>`:''}
-    <div class="po-an-list">${rows}</div>
+    ${isOpen?`<div class="po-oral-body"><div class="po-an-list">${rows}</div></div>`:''}
   </div>`;
-  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+  if(isOpen)box.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
+window.poOralToggle=()=>{
+  S._poOralOpen=!S._poOralOpen;
+  if(!S._poModAtual)return;
+  const k=_poModKey(S._poModAtual.cid,S._poModAtual.modulo);
+  const ao=S._poAnalisesOral[k]||(_poModQ(S._poModAtual.cid,S._poModAtual.modulo).analiseOral);
+  if(ao)_poRenderAnaliseOral(ao);
+};
 window.poAnSetTab=(prova)=>{ S._poAnTab=prova; const an=S._poModAtual&&S._poAnalises[_poModKey(S._poModAtual.cid,S._poModAtual.modulo)]; if(an)_poRenderAnalise(an); };
 function _poRenderAnalise(an){
   const box=document.getElementById('po-mod-mock'); if(!box||!an)return;
