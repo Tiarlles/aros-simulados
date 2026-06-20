@@ -45,9 +45,9 @@ const CRIT_IDS = CRITERIOS.map(c => c.id);
 const ALLOWED_ORIGINS = [
   'https://aros.anestreview.com.br',
   'http://localhost:8081', 'http://localhost:8080', 'http://localhost:8766',
-  'http://localhost:8767', 'http://localhost:8765',
+  'http://localhost:8767', 'http://localhost:8765', 'http://localhost:8768',
   'http://127.0.0.1:8081', 'http://127.0.0.1:8080', 'http://127.0.0.1:8766',
-  'http://127.0.0.1:8767', 'http://127.0.0.1:8765',
+  'http://127.0.0.1:8767', 'http://127.0.0.1:8765', 'http://127.0.0.1:8768',
 ];
 function setCors(req, res) {
   const origin = req.get('Origin') || '';
@@ -129,6 +129,10 @@ Regras:
 function buildSystemPrompt(instr) {
   const base = (instr && String(instr).trim()) ? String(instr).trim() : DEFAULT_PROMPT_MODULO;
   return `${base}
+
+REGRA OBRIGATÓRIA — REGRAVAÇÃO MARCADA PELA COORDENAÇÃO: para CADA aula listada na seção "AULAS MARCADAS PELA COORDENAÇÃO PARA REGRAVAR", você DEVE gerar exatamente uma ação categoria 'regravar', citando essa aula no campo "aula". Isto é uma decisão explícita da coordenação: NUNCA a omita pelo princípio "menos é mais" nem pelos limites de frequência — ela entra na lista independentemente de incidência. O campo "porque" deve ser EXATAMENTE "Definido pela coordenação." (sem inventar outro motivo). A PRIORIDADE desta ação vem da INCIDÊNCIA do módulo na prova: pontue "frequencia" PROPORCIONAL a quão cobrado o módulo é nas QUESTÕES fornecidas (módulo muito cobrado ≈ 1; pouco cobrado ≈ 0,1) e "status" em ~0,4 (é regravação planejada, não erro crítico); as demais notas baixas, salvo sinal real nos dados. Se a seção estiver "(nenhuma)", não gere nenhuma ação por esta regra.
+
+REGRA OBRIGATÓRIA — COBERTURA DE TEMA DO EDITAL (tem prioridade sobre o limite de frequência): se um tema está EXPLÍCITO no edital fornecido E tem MAIS DE UMA questão no banco (2 ou mais) E NENHUMA aula do módulo o cobre (você leu TODAS as transcrições) E nenhum material de apoio o cobre, então você DEVE gerar uma ação para garantir esse conteúdo — categoria 'gravar' quando for uma aula inteira ausente, ou incluir/aprofundar numa aula existente quando o tema couber numa que já existe. NÃO omita pelo princípio "menos é mais": a combinação edital-explícito + ≥2 questões + ausência total já é sinal suficiente. Pontue "lacuna" alto, "edital"=1 (está explícito) e "frequencia" conforme o nº de questões — a prioridade final (incidência) põe temas recorrentes no topo e itens periféricos do edital no fim. NÃO dispare esta regra quando: (a) o tema já está coberto por alguma aula, mesmo dentro de uma aula de escopo mais amplo; ou (b) há só 1 questão isolada; ou (c) o tema não está explícito no edital (aparece só de forma genérica/indireta). Exemplo: módulo de Sistema Endócrino cujo edital cita explicitamente a disfunção da tireoide, com 2+ questões de tireoide no banco e NENHUMA aula cobrindo isso → você DEVE recomendar GRAVAR essa aula.
 
 Critérios (use exatamente estas chaves no campo "notas"):
 ${_criteriosTxt()}
@@ -233,6 +237,11 @@ function buildUserPrompt(ctx) {
   linhas.push(erros.length ? erros.map((e, i) => `${i + 1}. Aula "${e.aula}": ${e.resumo}`).join('\n') : '(nenhum)');
   linhas.push('');
 
+  const regravarManual = ctx.regravarManual || [];
+  linhas.push(`=== AULAS MARCADAS PELA COORDENAÇÃO PARA REGRAVAR (decisão explícita — SEMPRE gere a ação) ===`);
+  linhas.push(regravarManual.length ? regravarManual.map((t, i) => `${i + 1}. ${t}`).join('\n') : '(nenhuma)');
+  linhas.push('');
+
   const duvDem = ctx.duvidasDemanda || [];
   linhas.push(`=== DÚVIDAS COM DEMANDA DE ATUALIZAÇÃO (justificam ATUALIZAR a aula citada) ===`);
   linhas.push(duvDem.length ? duvDem.map((d, i) => `${i + 1}. Aula "${d.aula}": ${d.texto}`).join('\n') : '(nenhum)');
@@ -305,10 +314,13 @@ exports.analisarModuloPO = onRequest(
           fichaResumo: String(a.fichaResumo || '').trim() || 'Pendente',  // status da ficha resumo (por aula): Pendente/Lançada/Não se aplica
           aval: _parseAval(a),
           conteudo: String(a.conteudo || '').trim(),
+          regravar: !!a.regravar,  // coordenação marcou esta aula p/ regravar (coluna "Regravar")
           transcricao: trunc ? full.slice(0, capPorAula) : full,
           transChars: full.length, transTrunc: trunc,
         };
       });
+      // Aulas que a coordenação marcou explicitamente p/ regravar (decisão manual).
+      const regravarManual = aulas.filter(a => a.regravar).map(a => a.titulo);
 
       // 2b) Fórum por aula: erros detectados (poErros) + dúvidas (poDuvidas).
       // Doc id = aulaId (= doc id de poAulas). Só vira insumo o que está EM ABERTO
@@ -374,7 +386,7 @@ exports.analisarModuloPO = onRequest(
       const editalFonte = editalModulo ? 'módulo' : (editalCurso ? 'curso' : '');
       const promptCustom = cfg.analisePrompt && cfg.analisePrompt.modulo;
 
-      const ctx = { cursoNome, modulo, edital, editalFonte, aulas, questoes, pedidos, oralTemas, atualizacaoConteudo, transcricaoAvulsa, apostilaStatus, dispensadas, erros, duvidasDemanda };
+      const ctx = { cursoNome, modulo, edital, editalFonte, aulas, questoes, pedidos, oralTemas, atualizacaoConteudo, transcricaoAvulsa, apostilaStatus, dispensadas, erros, duvidasDemanda, regravarManual };
       const systemPrompt = buildSystemPrompt(promptCustom);
       const userPrompt = buildUserPrompt(ctx);
 

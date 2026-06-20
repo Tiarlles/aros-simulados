@@ -6158,6 +6158,12 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-po .po-duv-btn{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px;cursor:pointer;white-space:nowrap;border:1px solid var(--border2);background:transparent;color:var(--t2);opacity:.78;transition:opacity .15s,border-color .15s,color .15s}
         #tab-po .po-duv-btn:hover{opacity:1;color:var(--text);border-color:var(--accent)}
         #tab-po .po-duv-btn .po-duv-flag{color:#f0883e}
+        /* Coluna "Regravar" — slider Não/Sim por aula */
+        #tab-po .po-rg-toggle{display:inline-flex;align-items:center;border:1px solid var(--border2);border-radius:999px;overflow:hidden;cursor:pointer;font-size:10.5px;font-weight:700;font-family:'JetBrains Mono',monospace;user-select:none;background:transparent;transition:border-color .15s}
+        #tab-po .po-rg-toggle:hover{border-color:var(--accent)}
+        #tab-po .po-rg-toggle span{padding:2px 9px;color:var(--t2);letter-spacing:.04em;transition:background .15s,color .15s}
+        #tab-po .po-rg-toggle .po-rg-nao.on{background:var(--border2);color:var(--text)}
+        #tab-po .po-rg-toggle .po-rg-sim.on{background:color-mix(in srgb,#f0883e 88%,transparent);color:#fff}
         /* Modais fórum (Erro detectado · Dúvidas) — reusam o visual dos modais do PO */
         #po-erros-modal,#po-duvidas-modal{position:fixed;inset:0;z-index:9999;display:none}
         #po-erros-modal.show,#po-duvidas-modal.show{display:block}
@@ -37529,6 +37535,11 @@ function _poColCell(a,col){
     const flag=a.duvidaDemanda?'<span class="po-duv-flag" title="Há dúvida que demanda atualização">🔄</span>':'';
     return `<button type="button" class="po-duv-btn" title="Abrir dúvidas da aula" onclick="event.stopPropagation();poAbrirDuvidas('${_poEsc(a.id)}')">💬 ${Number(a.nDuvidas)||0}${flag}</button>`;
   }
+  if(col.type==='regravar'&&a){
+    const on=!!a.regravar;
+    const tit=on?'Marcada para regravar — a IA vai gerar a ação (motivo: definido pela coordenação)':'Marcar esta aula para regravar';
+    return `<span class="po-rg-toggle" title="${tit}" onclick="event.stopPropagation();poToggleRegravar('${_poEsc(a.id)}')"><span class="po-rg-nao${on?'':' on'}">Não</span><span class="po-rg-sim${on?' on':''}">Sim</span></span>`;
+  }
   if(col.type==='link'){const u=String(val||'').trim();const ico=col.id==='video'?'▶':'🔗';return u?`<a class="po-vid" href="${_poEsc(u)}" target="_blank" rel="noopener" title="Abrir" onclick="event.stopPropagation()">${ico}</a>`:'<span class="po-mut">—</span>';}
   if(col.type==='status'){const s=String(val||'').trim();if(!s)return '<span class="po-mut">—</span>';const o=(col.opts||[]).find(x=>String(x.v).toLowerCase()===s.toLowerCase());return _poPill(o?o.cor:'#8b949e',s);}
   const t=String(val==null?'':val).trim();return t?_poEsc(t):'<span class="po-mut">—</span>';
@@ -37599,7 +37610,7 @@ async function _poSaveConfig(){
 // Carrega tudo do Firestore. Mantém o demo se a coleção estiver vazia ou sem auth.
 async function loadPO(){
   // 1) config (colunas + cursos)
-  let _duracaoInjetada=false, _trilhaRenamed=false, _apostilaColRemovida=false, _fichaStatusMig=false, _errDuvColsAdded=false;
+  let _duracaoInjetada=false, _trilhaRenamed=false, _apostilaColRemovida=false, _fichaStatusMig=false, _errDuvColsAdded=false, _regravarColAdded=false;
   try{
     const cfgSnap=await getDoc(doc(db,'config','poConfig'));
     if(cfgSnap.exists()){
@@ -37614,6 +37625,7 @@ async function loadPO(){
       _apostilaColRemovida=!!d.apostilaColRemovida;
       _fichaStatusMig=!!d.fichaResumoStatusMigrada;
       _errDuvColsAdded=!!d.errDuvColsAdded;
+      _regravarColAdded=!!d.regravarColAdded;
       if(d.poPesos&&typeof d.poPesos==='object')S.poPesos={...S.poPesos,...d.poPesos};
       if(d.editais&&typeof d.editais==='object')S.poEditais=d.editais;
       if(d.temaModulo&&typeof d.temaModulo==='object')S.poTemaModulo=d.temaModulo;
@@ -37680,6 +37692,15 @@ async function loadPO(){
       if(!S.poColunas.some(c=>c.id==='duvidas'))S.poColunas.push({id:'duvidas',label:'Dúvidas',type:'duvida',w:110});
       try{ await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,errDuvColsAdded:true},{merge:true}); }catch(e){ console.warn('migração err/dúvidas:',e); }
     }
+    // Migração one-time: adiciona a coluna "Regravar" (slider Não/Sim por aula), logo após "Status Aula".
+    if(!_regravarColAdded){
+      if(!S.poColunas.some(c=>c.id==='regravar')){
+        const colRg={id:'regravar',label:'Regravar',type:'regravar',w:96};
+        const iStatus=S.poColunas.findIndex(c=>c.id==='status');
+        if(iStatus>=0)S.poColunas.splice(iStatus+1,0,colRg); else S.poColunas.push(colRg);
+      }
+      try{ await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,regravarColAdded:true},{merge:true}); }catch(e){ console.warn('migração regravar:',e); }
+    }
   }else if(aulasDocs&&!aulasDocs.length){
     // coleção existe e está VAZIA → mantém demo
     S.poColunas=_PO_DEMO_COLUNAS.map(c=>({...c}));
@@ -37724,6 +37745,14 @@ async function _poSaveAula(a,patch){
     catch(e){console.warn('saveAula:',e);}
   }
 }
+// Coluna "Regravar": liga/desliga o flag da aula. Quando ON, a IA do módulo
+// gera uma ação de regravar (motivo "definido pela coordenação", prioridade
+// pela incidência do módulo). O flag fica na própria aula (poAulas.regravar).
+window.poToggleRegravar=async(aulaId)=>{
+  const a=_poFindAulaById(aulaId);if(!a)return;
+  await _poSaveAula(a,{regravar:!a.regravar});
+  _poRefreshTabela();
+};
 // Paleta pra cores automáticas de novas opções de tag.
 const _PO_OPT_PALETA=['#2f81f7','#3fb950','#f0883e','#a371f7','#db61a2','#1f6feb','#e3b341','#8b949e'];
 let _poOptCorSeq=0;
@@ -37735,6 +37764,8 @@ window.poCelEditar=(aulaId,ci,td)=>{
   // Colunas de fórum: abrem o modal próprio em vez de editar inline.
   if(col.type==='erro'){poAbrirErros(aulaId);return;}
   if(col.type==='duvida'){poAbrirDuvidas(aulaId);return;}
+  // Regravar: o toggle resolve o clique sozinho (não há edição inline).
+  if(col.type==='regravar'){poToggleRegravar(aulaId);return;}
   // Conteúdo com transcrição → abre o visualizador (read-only) em vez de editar.
   if(col.id==='conteudo'&&a.transcricaoPalavras){poVerTranscricao(aulaId);return;}
   const atual=String(_poCellVal(a,col)==null?'':_poCellVal(a,col));
@@ -38453,7 +38484,7 @@ window.poImportLaravelConfirmar=async()=>{
     const existDocs=exist.docs;
     // Indexa o enriquecimento manual das aulas atuais por laravelId, pra preservar no re-import
     // (o Laravel não manda esses campos — sem isso, re-importar zeraria Status Aula/Prof/Conteúdo).
-    const _PRESERVAR=['status','prof','conteudo','categoria','apostila','fichaResumo','slides','livros','transcricaoPalavras','transcricaoLang','conteudoPreview','transcricaoEm'];
+    const _PRESERVAR=['status','prof','conteudo','categoria','apostila','fichaResumo','slides','livros','transcricaoPalavras','transcricaoLang','conteudoPreview','transcricaoEm','regravar'];
     const prevByLid={};
     existDocs.forEach(dd=>{const a=dd.data()||{};if(a.laravelId!=null)prevByLid[a.laravelId]=a;});
     let op=0,batch=writeBatch(db);
