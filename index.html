@@ -8903,6 +8903,27 @@ body.pro-rt-fs-on{overflow:hidden}
   </div>
 </div>
 
+<!-- ══ MODAL: Duplicar revisão de casos ══ -->
+<div class="mo hidden" id="modal-rev-dup">
+  <div class="md" style="max-width:520px">
+    <div class="mh"><div><div class="m-title">🧬 Duplicar revisão</div><div class="m-sub" id="mrvd-sub">Copia todos os casos para outro simulado</div></div><button class="m-close" onclick="CM('modal-rev-dup')">✕</button></div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">Simulado de destino</label>
+        <select class="fc" id="mrvd-sim"></select>
+        <div style="font-size:11px;color:var(--t2);margin-top:6px">Simulados que já têm uma revisão ativa aparecem desabilitados.</div>
+      </div>
+      <div class="fg"><label class="fl">Data limite para revisar</label>
+        <input class="fc" id="mrvd-prazo" type="datetime-local"/>
+      </div>
+      <div id="mrvd-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-s" onclick="CM('modal-rev-dup')">Cancelar</button>
+      <button class="btn btn-p" id="mrvd-confirm" onclick="confirmDupRevisao()">🧬 Duplicar como rascunho</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODAL: Importar casos em bloco ══ -->
 <!-- ══ MODAL: Importar casos em bloco PRO TEMPLATE DO CHECKLIST (Simulado Extra) ══ -->
 <div class="mo hidden" id="modal-import-ck-tpl" data-no-backdrop-close>
@@ -20120,6 +20141,7 @@ function _revRenderCoordList(c){
         </div>
         <div class="aluno-acts" onclick="event.stopPropagation()">
           ${S.currentUser?.role==='admin'?`<button class="btn btn-s btn-sm" onclick="abrirRevisoresModal('${r.id}')" title="Ver quem contribuiu nesta revisão" style="font-size:11px">👥 Ver quem revisou</button>`:''}
+          <button class="btn btn-s btn-sm" onclick="openDupRevisao('${r.id}')" title="Duplicar esta revisão para outro simulado" style="font-size:11px">🧬 Duplicar</button>
           <button class="btn btn-d btn-sm" onclick="excluirRevisao('${r.id}')">🗑️</button>
         </div>
       </div>
@@ -20789,6 +20811,95 @@ window.saveNovaRevisao=async()=>{
   renderRevisaoTab();
 };
 
+// Coleta todas as URLs de imagem de uma revisão (enunciados + perguntas)
+function _revCollectImgs(rev){
+  const urls=[];
+  for(const co of (rev?.casos||[])){
+    for(const u of (co.enunciadoImagens||[]))if(u)urls.push(u);
+    for(const p of (co.perguntas||[]))for(const u of (p.perguntaImagens||[]))if(u)urls.push(u);
+  }
+  return urls;
+}
+// Verifica se uma URL de imagem ainda é usada por OUTRA revisão (evita apagar imagem
+// do Storage que foi compartilhada por uma duplicação). exceptId = revisão sendo apagada.
+function _revImgUsedElsewhere(url,exceptId){
+  if(!url)return false;
+  return (S.revisoes||[]).some(r=>r.id!==exceptId&&_revCollectImgs(r).includes(url));
+}
+
+// Clona a lista de casos gerando IDs novos para caso/pergunta/item.
+// Mantém as MESMAS URLs de imagem (compartilhadas) — a exclusão já respeita isso.
+function _revCloneCasos(casos){
+  return (casos||[]).map(co=>{
+    const c=JSON.parse(JSON.stringify(co));
+    c.id=_revUid('caso');
+    c.casoFinalizado=false;
+    c.perguntas=(c.perguntas||[]).map(p=>{
+      p.id=_revUid('perg');
+      p.itens=(p.itens||[]).map(it=>{it.id=_revUid('item');return it;});
+      return p;
+    });
+    return c;
+  });
+}
+
+S._revDupSrcId=null;
+window.openDupRevisao=(id)=>{
+  const src=S.revisoes.find(x=>x.id===id);if(!src)return;
+  S._revDupSrcId=id;
+  const sub=document.getElementById('mrvd-sub');
+  if(sub)sub.textContent=`Origem: ${src.simNome||'(simulado removido)'} · ${(src.casos||[]).length} caso${(src.casos||[]).length!==1?'s':''}`;
+  const sel=document.getElementById('mrvd-sim');
+  // Marca simulados que já têm revisão ativa (status != exportada) como indisponíveis.
+  const ocupados=new Set((S.revisoes||[]).filter(r=>r.status!=='exportada').map(r=>r.simId));
+  const opts=(S.sims||[]).filter(s=>!s.deleted).map(s=>{
+    const busy=ocupados.has(s.id);
+    return`<option value="${s.id}"${busy?' disabled':''}>${s.nome}${busy?' — já tem revisão ativa':''}</option>`;
+  }).join('');
+  sel.innerHTML='<option value="">— selecione —</option>'+opts;
+  document.getElementById('mrvd-prazo').value=src.prazoRevisao||'';
+  document.getElementById('mrvd-err').classList.add('hidden');
+  document.getElementById('modal-rev-dup').classList.remove('hidden');
+};
+
+window.confirmDupRevisao=async()=>{
+  const err=document.getElementById('mrvd-err');
+  const btn=document.getElementById('mrvd-confirm');
+  const src=S.revisoes.find(x=>x.id===S._revDupSrcId);
+  if(!src){err.textContent='Revisão de origem não encontrada.';err.classList.remove('hidden');return;}
+  const simId=document.getElementById('mrvd-sim').value;
+  const prazoRevisao=document.getElementById('mrvd-prazo').value;
+  const sim=S.sims.find(s=>s.id===simId);
+  if(!sim){err.textContent='Selecione o simulado de destino.';err.classList.remove('hidden');return;}
+  const dup=S.revisoes.find(r=>r.simId===simId&&r.status!=='exportada');
+  if(dup){err.innerHTML=`Já existe uma revisão ${_REV_STATUS_LABEL[dup.status]} para este simulado. Apague-a antes de duplicar.`;err.classList.remove('hidden');return;}
+  if(!prazoRevisao){err.textContent='Defina a data limite para revisar.';err.classList.remove('hidden');return;}
+  err.classList.add('hidden');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Duplicando...';}
+  const id=_revUid('rev');
+  const ts=new Date().toISOString();
+  const data={
+    simId,simNome:sim.nome,status:'rascunho',
+    prazoRevisao,casos:_revCloneCasos(src.casos||[]),
+    criadoEm:ts,updatedAt:ts,
+    criadoPor:S.currentUser?.nome||S.currentUser?.username||'admin',
+    duplicadoDe:src.id
+  };
+  try{
+    await setDoc(doc(db,'revisaoCasos',id),data);
+    if(typeof audit==='function')audit('REVISAO_DUPLICADA',{collection:'revisaoCasos',id},{after:{simNome:sim.nome},meta:{from:src.id,fromSim:src.simNome}});
+  }catch(e){
+    err.innerHTML=`❌ Erro ao duplicar: <strong>${e.code||e.message||e}</strong>`;
+    err.classList.remove('hidden');
+    if(btn){btn.disabled=false;btn.textContent='🧬 Duplicar como rascunho';}
+    return;
+  }
+  if(btn){btn.disabled=false;btn.textContent='🧬 Duplicar como rascunho';}
+  CM('modal-rev-dup');
+  await loadRevisoes();
+  openRevisaoEditor(id);
+};
+
 window.excluirRevisao=async(id)=>{
   const r=S.revisoes.find(x=>x.id===id);if(!r)return;
   if(!confirm(`Apagar a revisão "${r.simNome} · ${_REV_BLOCO_LABEL[r.bloco]}"? Comentários e histórico também serão removidos.`))return;
@@ -20799,10 +20910,11 @@ window.excluirRevisao=async(id)=>{
     const snap=await getDocs(collection(db,`revisaoCasos/${id}/${sub}`));
     const batch=writeBatch(db);snap.docs.forEach(d=>batch.delete(d.ref));await batch.commit();
   }
-  // Apaga imagens do storage
+  // Apaga imagens do storage — mas pula as que ainda são usadas por outra revisão
+  // (caso típico: esta revisão é cópia/original de uma duplicação que compartilha imagens).
   for(const co of (r.casos||[])){
-    for(const u of (co.enunciadoImagens||[]))await _revRemoveStorage(u);
-    for(const p of (co.perguntas||[]))for(const u of (p.perguntaImagens||[]))await _revRemoveStorage(u);
+    for(const u of (co.enunciadoImagens||[]))if(!_revImgUsedElsewhere(u,id))await _revRemoveStorage(u);
+    for(const p of (co.perguntas||[]))for(const u of (p.perguntaImagens||[]))if(!_revImgUsedElsewhere(u,id))await _revRemoveStorage(u);
   }
   await deleteDoc(doc(db,'revisaoCasos',id));
   await loadRevisoes();
