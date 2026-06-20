@@ -4912,6 +4912,7 @@ body.pro-rt-fs-on{overflow:hidden}
         <div style="position:sticky;top:78px;z-index:50;display:flex;align-items:center;gap:8px;margin:-4px -4px 16px;padding:12px 4px 12px;background:var(--bg);border-bottom:1px solid var(--border);box-shadow:0 6px 14px -10px rgba(0,0,0,.45);flex-wrap:wrap">
           <button class="btn btn-s btn-sm" onclick="voltarTemplateEditor()">← Voltar</button>
           <h3 style="font-family:Fraunces,serif;font-size:17px;font-weight:700;flex:1;margin:0;min-width:140px">⚙️ Configuração do Checklist</h3>
+          <button class="btn btn-s btn-sm" onclick="openImportCkFromSim()" title="Trazer os casos de um checklist já configurado em outro simulado">📋 Importar de outro simulado</button>
           <!-- Botões admin-only — visibilidade controlada por JS em renderTemplateEditor -->
           <button class="btn btn-s btn-sm hidden" id="btn-tpl-prompt-ia" onclick="openPromptIaConfig()" title="Configurar o prompt de IA usado pra revisar feedbacks">🤖 Prompt IA</button>
           <button class="btn btn-s btn-sm hidden" id="btn-tpl-cronometro" onclick="openCronometroConfig()" title="Tempo limite do cronômetro da projeção (padrão 07:30)">⏱️ Cronômetro</button>
@@ -8945,6 +8946,29 @@ body.pro-rt-fs-on{overflow:hidden}
       <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);margin-right:auto;cursor:pointer"><input type="checkbox" id="mict-substituir" style="cursor:pointer"/> Substituir todos os casos existentes deste bloco</label>
       <button class="btn btn-s" onclick="CM('modal-import-ck-tpl')">Cancelar</button>
       <button class="btn btn-p" id="mict-confirm" onclick="confirmImportCkTpl()">📥 Importar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Importar checklist de OUTRO SIMULADO ══ -->
+<div class="mo hidden" id="modal-ck-import-sim">
+  <div class="md" style="max-width:560px">
+    <div class="mh"><div><div class="m-title">📋 Importar checklist de outro simulado</div><div class="m-sub">Copia os casos de um checklist já configurado</div></div><button class="m-close" onclick="CM('modal-ck-import-sim')">✕</button></div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">Simulado de origem</label>
+        <select class="fc" id="mcis-sim" onchange="_ckImportLoadSrc()"></select>
+        <div id="mcis-summary" style="font-size:12px;color:var(--t2);margin-top:6px;min-height:16px"></div>
+      </div>
+      <div class="fg"><label class="fl">Quais blocos importar</label>
+        <label style="display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer"><input type="checkbox" id="mcis-bloco-criar" checked style="width:17px;height:17px;cursor:pointer"/><span style="font-size:13px">🩺 Criar / Simulação <span id="mcis-cnt-criar" style="color:var(--t2)"></span></span></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer"><input type="checkbox" id="mcis-bloco-oral" checked style="width:17px;height:17px;cursor:pointer"/><span style="font-size:13px">🎙️ Oral Online <span id="mcis-cnt-oral" style="color:var(--t2)"></span></span></label>
+      </div>
+      <div id="mcis-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot">
+      <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);margin-right:auto;cursor:pointer"><input type="checkbox" id="mcis-substituir" style="cursor:pointer"/> Substituir os casos atuais (em vez de adicionar ao final)</label>
+      <button class="btn btn-s" onclick="CM('modal-ck-import-sim')">Cancelar</button>
+      <button class="btn btn-p" id="mcis-confirm" onclick="confirmImportCkFromSim()">📋 Importar</button>
     </div>
   </div>
 </div>
@@ -34463,6 +34487,7 @@ function _renderTplCaso(bloco,caso,ci){
         onblur="autoSaveCkTemplate()"/>
       ${bloco==='criar'?`<button class="tpl-btn-action" onclick="previewCasoSlides('${bloco}',${ci})" title="Pré-visualizar slides desse caso em janela separada">👁 Pré-visualizar</button>`:''}
       ${bloco==='criar'?`<button class="tpl-btn-action" onclick="openSlidesModal('${bloco}',${ci})" title="Editar slides de projeção deste caso">🎬 Editar Slides${numSlides?' ('+numSlides+')':''}</button>`:''}
+      <button class="tpl-btn-action" onclick="moveCkCaso('${bloco}',${ci})" title="Mover este caso para o bloco ${bloco==='criar'?'Oral Online':'Criar / Simulação'}">↔ Mover p/ ${bloco==='criar'?'Oral':'Criar'}</button>
       <button class="tpl-btn-action del" onclick="rmCkCaso('${bloco}',${ci})" title="Remover este caso">✕ Remover</button>
     </div>
     <div id="${idPrefix}-caso-${ci}" class="tpl-caso-body" style="display:${casoOpen?'block':'none'}">
@@ -34748,6 +34773,24 @@ window.rmCkCaso=(bloco,ci)=>{
   renderTemplateEditor();
   autoSaveCkTemplate();
 };
+// Move um caso inteiro entre os blocos Criar ↔ Oral Online (leva enunciado,
+// perguntas, itens, gabaritos e imagens). Slides só existem no Criar.
+window.moveCkCaso=(bloco,ci)=>{
+  bloco=bloco==='oral'?'oral':'criar';
+  const destBloco=bloco==='criar'?'oral':'criar';
+  syncTplFromDOM();
+  const src=_tplBlocoObj(bloco);
+  if(!src.casos||!src.casos[ci])return;
+  const dest=_tplBlocoObj(destBloco);
+  if(!Array.isArray(dest.casos))dest.casos=[];
+  const [caso]=src.casos.splice(ci,1);
+  if(destBloco==='oral'){delete caso.slides;delete caso.slidesManual;} // Oral não projeta slides
+  _tplOpen[destBloco].casos.add(dest.casos.length); // deixa o caso movido aberto no destino
+  dest.casos.push(caso);
+  _autoSyncAllSlidesCriar();
+  renderTemplateEditor();
+  autoSaveCkTemplate();
+};
 window.addCkPergunta=(bloco,ci)=>{
   bloco=bloco==='oral'?'oral':'criar';
   syncTplFromDOM();
@@ -34775,6 +34818,87 @@ window.addCkItem=(bloco,ci,pi)=>{
   const tpl=_tplBlocoObj(bloco);
   tpl.casos[ci].perguntas[pi].itens.push({label:'',descricao:''});
   renderTemplateEditor();
+};
+
+// ── Importar checklist de OUTRO simulado ─────────────────────────────────────
+// Traz os casos (Criar e/ou Oral) de um checklist já configurado em outro
+// simulado. As imagens são referenciadas (mesma URL do Storage da origem).
+S._ckImportSrc={criar:null,oral:null};
+window.openImportCkFromSim=()=>{
+  const sel=document.getElementById('mcis-sim');
+  const opts=(S.sims||[]).filter(s=>!s.deleted&&s.id!==_ckSimId)
+    .map(s=>`<option value="${s.id}">${s.nome}${s.isExtra?' · Extra':''}</option>`).join('');
+  sel.innerHTML='<option value="">— selecione —</option>'+opts;
+  S._ckImportSrc={criar:null,oral:null};
+  document.getElementById('mcis-summary').textContent='';
+  document.getElementById('mcis-cnt-criar').textContent='';
+  document.getElementById('mcis-cnt-oral').textContent='';
+  document.getElementById('mcis-bloco-criar').checked=true;
+  document.getElementById('mcis-bloco-oral').checked=true;
+  document.getElementById('mcis-substituir').checked=false;
+  document.getElementById('mcis-err').classList.add('hidden');
+  document.getElementById('modal-ck-import-sim').classList.remove('hidden');
+};
+
+window._ckImportLoadSrc=async()=>{
+  const simId=document.getElementById('mcis-sim').value;
+  const sum=document.getElementById('mcis-summary');
+  const cntC=document.getElementById('mcis-cnt-criar');
+  const cntO=document.getElementById('mcis-cnt-oral');
+  S._ckImportSrc={criar:null,oral:null};
+  cntC.textContent='';cntO.textContent='';
+  if(!simId){sum.textContent='';return;}
+  sum.textContent='Carregando...';
+  try{
+    const [sc,so]=await Promise.all([
+      getDoc(doc(db,`checklists/${simId}/meta/templateCriar`)),
+      getDoc(doc(db,`checklists/${simId}/meta/templateOral`))
+    ]);
+    const tc=sc.exists()?sc.data():{casos:[]};
+    const to=so.exists()?so.data():{casos:[]};
+    S._ckImportSrc={criar:tc,oral:to};
+    const nC=(tc.casos||[]).length, nO=(to.casos||[]).length;
+    cntC.textContent=`(${nC} caso${nC!==1?'s':''})`;
+    cntO.textContent=`(${nO} caso${nO!==1?'s':''})`;
+    document.getElementById('mcis-bloco-criar').checked=nC>0;
+    document.getElementById('mcis-bloco-oral').checked=nO>0;
+    sum.textContent=(nC+nO)?`Encontrado: ${nC+nO} caso${(nC+nO)!==1?'s':''} no total.`:'⚠ Este simulado não tem casos configurados no checklist.';
+  }catch(e){sum.textContent='❌ Erro ao carregar: '+(e.code||e.message);}
+};
+
+window.confirmImportCkFromSim=async()=>{
+  const err=document.getElementById('mcis-err');
+  const btn=document.getElementById('mcis-confirm');
+  const simId=document.getElementById('mcis-sim').value;
+  if(!simId){err.textContent='Selecione o simulado de origem.';err.classList.remove('hidden');return;}
+  if(!S._ckImportSrc.criar&&!S._ckImportSrc.oral){err.textContent='Aguarde o carregamento dos casos.';err.classList.remove('hidden');return;}
+  const wantCriar=document.getElementById('mcis-bloco-criar').checked;
+  const wantOral=document.getElementById('mcis-bloco-oral').checked;
+  if(!wantCriar&&!wantOral){err.textContent='Marque pelo menos um bloco para importar.';err.classList.remove('hidden');return;}
+  const substituir=document.getElementById('mcis-substituir').checked;
+  const srcC=(S._ckImportSrc.criar?.casos)||[];
+  const srcO=(S._ckImportSrc.oral?.casos)||[];
+  if((wantCriar?srcC.length:0)+(wantOral?srcO.length:0)===0){err.textContent='Os blocos marcados não têm casos.';err.classList.remove('hidden');return;}
+  err.classList.add('hidden');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Importando...';}
+  syncTplFromDOM();
+  const aplicar=(bloco,srcCasos)=>{
+    const tpl=_tplBlocoObj(bloco);
+    if(!Array.isArray(tpl.casos))tpl.casos=[];
+    const clone=JSON.parse(JSON.stringify(srcCasos));
+    tpl.casos=substituir?clone:tpl.casos.concat(clone);
+  };
+  if(wantCriar&&srcC.length)aplicar('criar',srcC);
+  if(wantOral&&srcO.length)aplicar('oral',srcO);
+  _autoSyncAllSlidesCriar();
+  // Reabre todos os casos importados pra ficarem visíveis
+  ['criar','oral'].forEach(b=>{ (_tplBlocoObj(b).casos||[]).forEach((_,i)=>_tplOpen[b].casos.add(i)); });
+  renderTemplateEditor();
+  try{ await autoSaveCkTemplate(); }catch(e){}
+  if(btn){btn.disabled=false;btn.textContent='📋 Importar';}
+  CM('modal-ck-import-sim');
+  const nC=wantCriar?srcC.length:0, nO=wantOral?srcO.length:0;
+  alert(`Checklist importado: ${nC+nO} caso${(nC+nO)!==1?'s':''} ${substituir?'(substituiu os atuais)':'adicionado(s) ao final'}.`);
 };
 
 // Alterna um item entre normal e penalidade. Penalidade não tem certo/parcial/errado
