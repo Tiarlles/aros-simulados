@@ -32,6 +32,8 @@ exports.puxarQuestoesPO = require('./questoes-po').puxarQuestoesPO;
 exports.analisarModuloPO = require('./po-analise').analisarModuloPO;
 // IA de análise do PO — produto inteiro (consolida os módulos já analisados)
 exports.analisarProdutoPO = require('./po-analise').analisarProdutoPO;
+// IA de análise do PO — TSA Oral (análise separada, só lacunas; não mexe nas barras)
+exports.analisarTSAOralPO = require('./po-analise').analisarTSAOralPO;
 
 // Helper que faz UPSERT em alunosAprovados (Cruzar Lista) a partir do webhook Hotmart
 const { upsertAluno } = require('./hotmart-alunos');

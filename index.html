@@ -37736,7 +37736,7 @@ async function loadPO(){
       if(!x.cursoId||x.modulo==null)return;
       const key=_poModKey(x.cursoId,x.modulo);
       const ped=Array.isArray(x.pedidos)?x.pedidos:(x.pedidos?String(x.pedidos).split('\n').map(s=>s.trim()).filter(Boolean):[]);
-      mq[key]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],oralTemas:Array.isArray(x.oralTemas)?x.oralTemas:[],atualizacaoConteudo:String(x.atualizacaoConteudo||''),transcricaoAvulsa:String(x.transcricaoAvulsa||''),editalModulo:String(x.editalModulo||''),pedidos:ped,apostilas:Array.isArray(x.apostilas)?x.apostilas:[],analise:x.analise||null};
+      mq[key]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],oralTemas:Array.isArray(x.oralTemas)?x.oralTemas:[],atualizacaoConteudo:String(x.atualizacaoConteudo||''),transcricaoAvulsa:String(x.transcricaoAvulsa||''),casosClinicos:String(x.casosClinicos||''),editalModulo:String(x.editalModulo||''),pedidos:ped,apostilas:Array.isArray(x.apostilas)?x.apostilas:[],analise:x.analise||null,analiseOral:x.analiseOral||null};
       if(Array.isArray(x.analiseDismissed)&&x.analiseDismissed.length)S._poAnDispensadas[key]=new Set(x.analiseDismissed.map(_poNormTit));
     });
     S.poModQuestoes=mq;
@@ -39456,9 +39456,9 @@ function _poModKey(cid,mod){return _poSlug(cid+'__'+mod);}
 function _poSaveModQuestoes(cid,mod){
   const key=_poModKey(cid,mod);
   const b=S.poModQuestoes[key]||{TEA:[],TSA:[],MEs:[],Outras:[],pedidos:[],apostilas:[]};
-  setDoc(doc(db,'poModQuestoes',key),{cursoId:cid,modulo:mod,TEA:b.TEA||[],TSA:b.TSA||[],MEs:b.MEs||[],Outras:b.Outras||[],oralTemas:Array.isArray(b.oralTemas)?b.oralTemas:[],atualizacaoConteudo:String(b.atualizacaoConteudo||''),transcricaoAvulsa:String(b.transcricaoAvulsa||''),editalModulo:String(b.editalModulo||''),pedidos:Array.isArray(b.pedidos)?b.pedidos:[],apostilas:Array.isArray(b.apostilas)?b.apostilas:[]},{merge:true}).catch(e=>console.warn('poModQuestoes save',e));
+  setDoc(doc(db,'poModQuestoes',key),{cursoId:cid,modulo:mod,TEA:b.TEA||[],TSA:b.TSA||[],MEs:b.MEs||[],Outras:b.Outras||[],oralTemas:Array.isArray(b.oralTemas)?b.oralTemas:[],atualizacaoConteudo:String(b.atualizacaoConteudo||''),transcricaoAvulsa:String(b.transcricaoAvulsa||''),casosClinicos:String(b.casosClinicos||''),editalModulo:String(b.editalModulo||''),pedidos:Array.isArray(b.pedidos)?b.pedidos:[],apostilas:Array.isArray(b.apostilas)?b.apostilas:[]},{merge:true}).catch(e=>console.warn('poModQuestoes save',e));
 }
-function _poModQ(cid,mod){const k=_poModKey(cid,mod);if(!S.poModQuestoes[k])S.poModQuestoes[k]={TEA:[],TSA:[],MEs:[],Outras:[],oralTemas:[],atualizacaoConteudo:'',transcricaoAvulsa:'',editalModulo:'',pedidos:[],apostilas:[]};const b=S.poModQuestoes[k];if(!b.Outras)b.Outras=[];if(!Array.isArray(b.oralTemas))b.oralTemas=[];if(typeof b.atualizacaoConteudo!=='string')b.atualizacaoConteudo='';if(typeof b.transcricaoAvulsa!=='string')b.transcricaoAvulsa='';if(typeof b.editalModulo!=='string')b.editalModulo='';if(!Array.isArray(b.pedidos))b.pedidos=b.pedidos?String(b.pedidos).split('\n').map(s=>s.trim()).filter(Boolean):[];if(!Array.isArray(b.apostilas))b.apostilas=[];return b;}
+function _poModQ(cid,mod){const k=_poModKey(cid,mod);if(!S.poModQuestoes[k])S.poModQuestoes[k]={TEA:[],TSA:[],MEs:[],Outras:[],oralTemas:[],atualizacaoConteudo:'',transcricaoAvulsa:'',casosClinicos:'',editalModulo:'',pedidos:[],apostilas:[]};const b=S.poModQuestoes[k];if(!b.Outras)b.Outras=[];if(!Array.isArray(b.oralTemas))b.oralTemas=[];if(typeof b.atualizacaoConteudo!=='string')b.atualizacaoConteudo='';if(typeof b.transcricaoAvulsa!=='string')b.transcricaoAvulsa='';if(typeof b.casosClinicos!=='string')b.casosClinicos='';if(typeof b.editalModulo!=='string')b.editalModulo='';if(!Array.isArray(b.pedidos))b.pedidos=b.pedidos?String(b.pedidos).split('\n').map(s=>s.trim()).filter(Boolean):[];if(!Array.isArray(b.apostilas))b.apostilas=[];return b;}
 // Remove <img>, data:image base64 e atributos src de imagem de um HTML/texto.
 function _poStripImagens(s){
   let t=String(s||'');
@@ -39869,6 +39869,7 @@ const FILTROS_PO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfuncti
 const PUXAR_QUESTOES_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/puxarQuestoesPO';
 const ANALISE_PO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/analisarModuloPO';
 const ANALISE_PRODUTO_PO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/analisarProdutoPO';
+const ANALISE_ORAL_PO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/analisarTSAOralPO';
 S.poTemaModulo={};   // {cursoId:{modulo:[catIds]}}
 S._poFiltros=null;   // cache de {categorias,tipos,anos}
 S._poMapaAtual=null; // estado do modal de mapeamento {cid}
@@ -39978,7 +39979,8 @@ window.poPuxarQuestoesModulo=async()=>{
     try{
       const snap=await getDoc(doc(db,'poModQuestoes',_poModKey(cid,modulo)));
       if(snap.exists()){const x=snap.data()||{};const k=_poModKey(cid,modulo);
-        S.poModQuestoes[k]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],oralTemas:Array.isArray(x.oralTemas)?x.oralTemas:[],atualizacaoConteudo:String(x.atualizacaoConteudo||''),transcricaoAvulsa:String(x.transcricaoAvulsa||''),editalModulo:String(x.editalModulo||''),pedidos:Array.isArray(x.pedidos)?x.pedidos:[],apostilas:Array.isArray(x.apostilas)?x.apostilas:[]};
+        S.poModQuestoes[k]={TEA:x.TEA||[],TSA:x.TSA||[],MEs:x.MEs||[],Outras:x.Outras||[],oralTemas:Array.isArray(x.oralTemas)?x.oralTemas:[],atualizacaoConteudo:String(x.atualizacaoConteudo||''),transcricaoAvulsa:String(x.transcricaoAvulsa||''),casosClinicos:String(x.casosClinicos||''),editalModulo:String(x.editalModulo||''),pedidos:Array.isArray(x.pedidos)?x.pedidos:[],apostilas:Array.isArray(x.apostilas)?x.apostilas:[],analise:x.analise||null,analiseOral:x.analiseOral||null};
+        if(x.analiseOral)S._poAnalisesOral[k]=x.analiseOral;
       }
     }catch(_){}
     S._poModPuxando=false;
@@ -40300,6 +40302,8 @@ window.poModLimparTipo=(tipo)=>{
 // Análise real: chama a Cloud Function (Sonnet), que lê transcrições+questões+edital
 // do Firestore e devolve ações com nota 0-1 por critério. O peso é aplicado AQUI.
 S._poAnalises={};   // {modKey: resultado da IA}
+S._poAnalisesOral={};   // {modKey: resultado da análise SEPARADA do TSA Oral}
+S._poOralAnalisando=false;
 S._poAnDispensadas={}; // {modKey: Set(títuloNormalizado)} — recomendações marcadas "não é necessária"
 S._poAnInfo={};     // {modKey: Set(títuloNormalizado)} — quais ações estão com o "porquê" aberto
 function _poNormTit(t){return String(t||'').toLowerCase().replace(/\s+/g,' ').trim();}
@@ -40468,6 +40472,55 @@ window.poAnalisarModulo=async()=>{
     const b=document.querySelector('#po-mod-modal .po-modal-foot .btn-p'); if(b){b.disabled=false;b.textContent='🤖 Analisar módulo';}
   }
 };
+// Análise SEPARADA do TSA Oral: box próprio, NÃO mexe nas barras de saúde do módulo.
+window.poAnalisarTSAOral=async()=>{
+  if(!S._poModAtual||S._poOralAnalisando)return;
+  const {cid,modulo}=S._poModAtual;
+  const curso=(S.poCursos||[]).find(c=>c.id===cid);
+  if(!curso){arosToast('Curso não encontrado.','err',3000);return;}
+  _poSaveModQuestoes(cid,modulo);
+  S._poOralAnalisando=true;
+  const btn=document.querySelector('#po-mod-modal .po-oral-btn');
+  if(btn){btn.disabled=true;btn.textContent='🎤 Analisando…';}
+  const box=document.getElementById('po-mod-oral');
+  if(box){box.style.display='block';box.innerHTML=`<div class="po-an-load"><span class="po-an-spin"></span> A IA está cruzando aulas, casos clínicos, edital e temas do oral… (pode levar até 1 minuto)</div>`;box.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  try{
+    const r=await _poApiPost(ANALISE_ORAL_PO_ENDPOINT,{cursoId:cid,cursoNome:curso.nome,modulo});
+    S._poAnalisesOral[_poModKey(cid,modulo)]=r.analiseOral;
+    const b=_poModQ(cid,modulo); b.analiseOral=r.analiseOral;
+    S._poOralAnalisando=false;
+    _poRenderAnaliseOral(r.analiseOral);
+  }catch(e){
+    if(box)box.innerHTML=`<div class="po-imp-erro">⚠️ ${_poEsc(e.message||String(e))}</div>`;
+  }finally{
+    S._poOralAnalisando=false;
+    const b=document.querySelector('#po-mod-modal .po-oral-btn'); if(b){b.disabled=false;b.textContent='🎤 Analisar TSA Oral';}
+  }
+};
+// Render do box "TSA Oral" (lista só lacunas). Roxo pra distinguir das ações do módulo.
+function _poRenderAnaliseOral(ao){
+  const box=document.getElementById('po-mod-oral'); if(!box||!ao)return;
+  box.style.display='block';
+  const m=ao.meta||{};
+  const lac=Array.isArray(ao.lacunas)?ao.lacunas:[];
+  const rows=lac.map((l,i)=>`<div class="po-an-acao lvl-alta" style="--nc:#a371f7">
+      <div class="po-an-rank">${String(i+1).padStart(2,'0')}</div>
+      <div class="po-an-body">
+        <div class="po-an-tit"><span class="po-an-titxt">${_poEsc(l.titulo)}</span></div>
+        ${l.porque?`<div class="po-an-det"><div class="po-an-por">${_poFmtPorque(l.porque)}</div></div>`:''}
+      </div></div>`).join('')
+    ||`<div class="po-an-vazio">Nenhuma lacuna para o TSA Oral — o conteúdo (aulas + casos clínicos) cobre o que é exigido.</div>`;
+  box.innerHTML=`<div class="po-an-wrap" style="border-top:3px solid #a371f7;margin-top:14px;padding-top:12px">
+    <div class="po-an-head">
+      <span class="po-an-h-tit">🎤 TSA Oral</span>
+      ${m.em?`<span class="po-an-saved">última análise em ${_poDataFmt(m.em)}</span>`:''}
+    </div>
+    ${ao.resumo?`<div class="po-an-por" style="margin:4px 0 10px">${_poFmtPorque(ao.resumo)}</div>`:''}
+    ${lac.length?`<div class="po-an-prio"><span>Lacunas para o oral</span><span class="po-an-badge" style="--nc:#a371f7">${lac.length}</span></div>`:''}
+    <div class="po-an-list">${rows}</div>
+  </div>`;
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 window.poAnSetTab=(prova)=>{ S._poAnTab=prova; const an=S._poModAtual&&S._poAnalises[_poModKey(S._poModAtual.cid,S._poModAtual.modulo)]; if(an)_poRenderAnalise(an); };
 function _poRenderAnalise(an){
   const box=document.getElementById('po-mod-mock'); if(!box||!an)return;
@@ -40626,6 +40679,22 @@ function _poModModalRender(){
         <textarea class="po-inp po-mod-ta" id="po-avulsa-ta" placeholder="Cole a transcrição da aula da banca…" onblur="poModSetCampo('transcricaoAvulsa',this.value)">${_poEsc(avulsaTxt)}</textarea>
       </div>`:''}
     </div>`;
+  // Casos clínicos: material de estudo do TSA Oral (muito texto). Hoje colado à mão;
+  // depois virá via API. Só é usado na análise SEPARADA do TSA Oral (não no módulo).
+  const casosTxt=String(bucket.casosClinicos||'');
+  const casosOpen=!!S._poModSec.casos;
+  const casosBloco=`
+    <div class="po-mod-bloco">
+      <div class="po-mod-bloco-head" onclick="poModToggleSec('casos')">
+        <span class="po-mod-chev">${chev(casosOpen)}</span>
+        <span class="po-mod-bloco-t">🩺 CASOS CLÍNICOS</span>
+        <span class="po-mod-bloco-c">${casosTxt.trim()?(casosTxt.length.toLocaleString('pt-BR')+' chars'):'vazio'}</span>
+      </div>
+      ${casosOpen?`<div class="po-mod-bloco-body">
+        <p class="po-mut" style="margin:0 0 8px;font-size:11.5px">Casos clínicos do módulo — material de estudo do <b>TSA Oral</b>. Usado só na análise <b>Analisar TSA Oral</b> (não influencia o módulo nem as barras). Pode ser muito texto. <i>Em breve puxado por API; por ora, cole aqui.</i></p>
+        <textarea class="po-inp po-mod-ta" id="po-casos-ta" style="min-height:200px" placeholder="Cole os casos clínicos do módulo…" onblur="poModSetCampo('casosClinicos',this.value)">${_poEsc(casosTxt)}</textarea>
+      </div>`:''}
+    </div>`;
   // Edital DESTE módulo: se preenchido, a IA usa no lugar do edital geral do curso.
   const editalModTxt=String(bucket.editalModulo||'');
   const editalModOpen=!!S._poModSec.editalMod;
@@ -40672,7 +40741,7 @@ function _poModModalRender(){
       </div>
       ${inputsOpen?`<div class="po-mod-inputs-body">
         ${avisoHTML}
-        <div class="po-mod-blocos">${blocos}${oralBloco}${atualBloco}${avulsaBloco}${editalBloco}${pedBloco}</div>
+        <div class="po-mod-blocos">${blocos}${oralBloco}${atualBloco}${avulsaBloco}${casosBloco}${editalBloco}${pedBloco}</div>
       </div>`:''}
     </div>`;
   host.innerHTML=`
@@ -40688,11 +40757,13 @@ function _poModModalRender(){
       <div class="po-modal-body">
         ${inputsSection}
         <div id="po-mod-mock" class="po-q-mock" style="display:none"></div>
+        <div id="po-mod-oral" class="po-q-mock" style="display:none"></div>
       </div>
       <div class="po-modal-foot">
         <button type="button" class="btn btn-g" onclick="poModSalvarTudo()">💾 Salvar tudo</button>
         <div style="display:flex;gap:10px">
           <button type="button" class="btn btn-g" onclick="poModModalClose()">Fechar</button>
+          <button type="button" class="btn btn-g po-oral-btn" onclick="poAnalisarTSAOral()">🎤 Analisar TSA Oral</button>
           <button type="button" class="btn btn-p" onclick="poAnalisarModulo()">🤖 Analisar módulo</button>
         </div>
       </div>
@@ -40700,6 +40771,8 @@ function _poModModalRender(){
   host.classList.add('show');
   // Re-pinta a análise salva (se houver) — assim abrir/fechar um dropdown NÃO some com o resultado.
   if(!S._poModAnalisando){ const an=S._poAnalises[_poModKey(cid,modulo)]; if(an){try{_poRenderAnalise(an);}catch(e){}} }
+  // Re-pinta a análise do TSA Oral salva (box separado, abaixo do módulo).
+  if(!S._poOralAnalisando){ const ao=S._poAnalisesOral[_poModKey(cid,modulo)]||(_poModQ(cid,modulo).analiseOral); if(ao){try{_poRenderAnaliseOral(ao);}catch(e){}} }
   else {
     // Análise rodando: restaura o status (spinner + botão) que o re-render acabou de recriar,
     // pra fechar/abrir um dropdown no meio NÃO some com o "Analisando…".

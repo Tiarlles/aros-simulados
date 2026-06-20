@@ -822,5 +822,197 @@ exports.analisarProdutoPO = onRequest(
   }
 );
 
+// ──────────────────────────────────────────────────────────────────────────
+// Análise SEPARADA do TSA Oral (prova oral — peculiar, sem questões de múltipla
+// escolha). NÃO olha questões ME/TEA/TSA 1ªF. Identifica LACUNAS:
+//   • REFERÊNCIA DE CONTEÚDO (o que JÁ está coberto): aulas+transcrições + CASOS CLÍNICOS.
+//   • REFERÊNCIA DE COBERTURA (o que PRECISA existir): edital do módulo + aulas da
+//     banca + atualização de conteúdo + temas do TSA Oral + pedidos dos alunos.
+// Lista só o que está na cobertura e NÃO aparece em nenhuma referência de conteúdo.
+// Resultado vai pra um box próprio "TSA Oral" — NÃO entra nas barras de saúde.
+// ──────────────────────────────────────────────────────────────────────────
+const ORAL_CASOS_CAP = 350000;       // casos clínicos = MUITO texto; cap alto
+const ORAL_TRANSC_TOTAL_CAP = 150000; // transcrições deixam espaço pros casos
+
+const DEFAULT_PROMPT_ORAL = `Você é o analista do TSA Oral — a prova ORAL do título de anestesiologia, que é PECULIAR: cobra raciocínio clínico e conduta em casos, não questões de múltipla escolha. Sua tarefa, para UM módulo (Ponto), é identificar LACUNAS de conteúdo para a prova oral.
+
+Você recebe DUAS categorias de insumo:
+A) REFERÊNCIA DE CONTEÚDO (o que JÁ está coberto): as AULAS do módulo (com transcrição) e os CASOS CLÍNICOS. Se um tema/ponto está presente aqui, considere-o COBERTO.
+B) REFERÊNCIA DE COBERTURA (o universo do que a prova oral PODE cobrar): EDITAL do módulo, AULAS DA BANCA, ATUALIZAÇÃO DE CONTEÚDO, TEMAS DO TSA ORAL e PEDIDOS DE ALUNOS.
+
+REGRA CENTRAL: para cada tema/ponto da REFERÊNCIA DE COBERTURA, verifique se está coberto na REFERÊNCIA DE CONTEÚDO (aula OU caso clínico).
+- Se ESTÁ coberto (em alguma aula OU em algum caso clínico) → NÃO liste.
+- Se NÃO está em nenhum dos dois → liste como LACUNA (o que precisa ser coberto para o TSA Oral).
+
+NÃO considere questões de ME, TEA ou TSA 1ª fase — não valem para o oral.
+LEIA as transcrições e os casos clínicos por INTEIRO antes de afirmar que algo falta — um tema pode estar dentro de uma aula/caso de escopo amplo. Se uma transcrição vier "(truncada)", trate como incerto e não afirme ausência.
+Liste APENAS lacunas reais e relevantes para a prova oral. Seja específico e clínico (conduta, manejo, raciocínio). Se o módulo já está bem coberto para o oral, devolva "lacunas": [] e diga isso no resumo.`;
+
+function buildOralSystemPrompt(instr) {
+  const base = (instr && String(instr).trim()) ? String(instr).trim() : DEFAULT_PROMPT_ORAL;
+  return `${base}
+
+Responda SOMENTE com JSON válido (sem markdown, sem cercas de código), neste formato exato:
+{
+  "resumo": "2 a 4 frases sobre o estado do módulo para o TSA Oral e onde estão as maiores lacunas.",
+  "lacunas": [
+    {
+      "titulo": "tema/conteúdo a cobrir para o oral",
+      "porque": "1-2 frases: onde é exigido (edital / aula da banca / tema do oral / pedido / atualização) e por que NÃO está coberto nas aulas nem nos casos clínicos."
+    }
+  ]
+}`;
+}
+
+function buildOralUserPrompt(ctx) {
+  const { cursoNome, modulo, aulas, casosClinicos, edital, editalFonte, oralTemas, pedidos, atualizacaoConteudo, aulasBanca } = ctx;
+  const L = [];
+  L.push(`CURSO: ${cursoNome}`);
+  L.push(`MÓDULO (Ponto): ${modulo}`);
+  L.push('');
+  L.push('############ REFERÊNCIA DE CONTEÚDO (o que JÁ está coberto) ############');
+  L.push('');
+  L.push(`=== AULAS DO MÓDULO (${aulas.length}) ===`);
+  if (!aulas.length) L.push('(nenhuma aula cadastrada neste módulo)');
+  aulas.forEach((a, i) => {
+    L.push(`--- Aula ${i + 1}: ${a.titulo} ---`);
+    if (a.transcricao) { L.push(`Transcrição (${a.transChars} chars${a.transTrunc ? ', truncada' : ''}):`); L.push(a.transcricao); }
+    else if (a.conteudo) L.push(`Conteúdo (manual): ${a.conteudo.slice(0, 4000)}`);
+    else L.push('(sem transcrição nem conteúdo — não dá pra saber o que cobre)');
+    L.push('');
+  });
+  L.push(`=== CASOS CLÍNICOS (material de estudo do oral) ===`);
+  L.push(casosClinicos ? casosClinicos.slice(0, ORAL_CASOS_CAP) : '(nenhum caso clínico cadastrado)');
+  L.push('');
+  L.push('############ REFERÊNCIA DE COBERTURA (o que PRECISA existir) ############');
+  L.push('');
+  const edHdr = editalFonte === 'módulo' ? '=== EDITAL DESTE MÓDULO ===' : '=== EDITAL (do curso) ===';
+  L.push(edHdr);
+  L.push(edital ? edital.slice(0, 60000) : '(edital não cadastrado)');
+  L.push('');
+  L.push(`=== AULAS DA BANCA (transcrição de aula(s) da banca examinadora) ===`);
+  L.push(aulasBanca ? aulasBanca.slice(0, 60000) : '(nenhuma)');
+  L.push('');
+  L.push(`=== ATUALIZAÇÃO DE CONTEÚDO / NOVA DIRETRIZ ===`);
+  L.push(atualizacaoConteudo ? atualizacaoConteudo.slice(0, 12000) : '(nenhuma)');
+  L.push('');
+  L.push(`=== TEMAS DO TSA ORAL (temas cobrados na prova oral) ===`);
+  L.push(oralTemas.length ? oralTemas.map((t, i) => `${i + 1}. ${t}`).join('\n') : '(nenhum tema cadastrado)');
+  L.push('');
+  L.push(`=== PEDIDOS DE ALUNOS ===`);
+  L.push(pedidos.length ? pedidos.map((p, i) => `${i + 1}. ${p}`).join('\n') : '(nenhum)');
+  return L.join('\n');
+}
+
+exports.analisarTSAOralPO = onRequest(
+  { region: 'us-central1', invoker: 'public', cors: false, timeoutSeconds: 180, memory: '512MiB' },
+  async (req, res) => {
+    setCors(req, res);
+    if (req.method === 'OPTIONS') { res.status(204).send(''); return; }
+    if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
+    if (!ANTHROPIC_API_KEY) { console.error('ANTHROPIC_API_KEY_PO ausente'); res.status(500).json({ error: 'IA de análise não configurada no servidor (falta ANTHROPIC_API_KEY_PO)' }); return; }
+
+    const decoded = await exigeAuth(req, res);
+    if (!decoded) return;
+
+    const cursoId = String(req.body?.cursoId || '').trim();
+    const cursoNome = String(req.body?.cursoNome || '').trim();
+    const modulo = String(req.body?.modulo || '').trim();
+    if (!cursoId || !cursoNome || !modulo) { res.status(400).json({ error: 'Faltam cursoId, cursoNome ou modulo' }); return; }
+
+    try {
+      const db = admin.firestore();
+
+      // 1) Aulas do módulo (mesmo critério da análise normal).
+      const aulasSnap = await db.collection('poAulas').where('modulo', '==', modulo).get();
+      let aulasRaw = [];
+      aulasSnap.forEach(d => { const a = d.data() || {}; if (Array.isArray(a.cursos) && a.cursos.includes(cursoNome)) aulasRaw.push({ id: d.id, ...a }); });
+      aulasRaw.sort((x, y) => (Number(x.ordemPO ?? x.ordem ?? 0)) - (Number(y.ordemPO ?? y.ordem ?? 0)));
+
+      // 2) Transcrições.
+      const vimeoIds = [...new Set(aulasRaw.map(a => String(a.vimeoId || '')).filter(Boolean))];
+      const transMap = {};
+      await Promise.all(vimeoIds.map(async vid => { try { const s = await db.collection('poTranscricoes').doc(vid).get(); if (s.exists) transMap[vid] = String(s.data()?.texto || ''); } catch (_) {} }));
+      const fulls = aulasRaw.map(a => { const vid = String(a.vimeoId || ''); return vid && transMap[vid] ? transMap[vid] : ''; });
+      const nComTrans = fulls.filter(Boolean).length;
+      const capPorAula = Math.min(TRANSC_MAX_POR_AULA, nComTrans ? Math.floor(ORAL_TRANSC_TOTAL_CAP / nComTrans) : ORAL_TRANSC_TOTAL_CAP);
+      const aulas = aulasRaw.map((a, i) => {
+        const full = fulls[i]; const trunc = full.length > capPorAula;
+        return { titulo: a.titulo || a.nomeOriginal || '(sem título)', conteudo: String(a.conteudo || '').trim(), transcricao: trunc ? full.slice(0, capPorAula) : full, transChars: full.length, transTrunc: trunc };
+      });
+
+      // 3) Doc do módulo: casos clínicos + temas oral + pedidos + atualização + aulas da banca + edital.
+      const modKey = _modKey(cursoId, modulo);
+      const modSnap = await db.collection('poModQuestoes').doc(modKey).get();
+      const md = modSnap.exists ? (modSnap.data() || {}) : {};
+      const casosClinicos = String(md.casosClinicos || '').trim();
+      const oralTemas = Array.isArray(md.oralTemas) ? md.oralTemas.map(t => String(t).trim()).filter(Boolean) : [];
+      const pedidos = Array.isArray(md.pedidos) ? md.pedidos.map(p => String(p).trim()).filter(Boolean) : [];
+      const atualizacaoConteudo = String(md.atualizacaoConteudo || '').trim();
+      const aulasBanca = String(md.transcricaoAvulsa || '').trim();
+
+      const cfgSnap = await db.collection('config').doc('poConfig').get();
+      const cfg = cfgSnap.exists ? (cfgSnap.data() || {}) : {};
+      const editalCurso = String((cfg.editais || {})[cursoId] || '').trim();
+      const editalModulo = String(md.editalModulo || '').trim();
+      const edital = editalModulo || editalCurso;
+      const editalFonte = editalModulo ? 'módulo' : (editalCurso ? 'curso' : '');
+      const promptCustom = cfg.analisePrompt && cfg.analisePrompt.oral;
+
+      const ctx = { cursoNome, modulo, aulas, casosClinicos, edital, editalFonte, oralTemas, pedidos, atualizacaoConteudo, aulasBanca };
+      const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
+      const resp = await client.messages.create({
+        model: MODEL, max_tokens: MAX_TOKENS,
+        system: [{ type: 'text', text: buildOralSystemPrompt(promptCustom), cache_control: { type: 'ephemeral' } }],
+        messages: [{ role: 'user', content: buildOralUserPrompt(ctx) }],
+      });
+
+      const texto = resp.content.filter(c => c.type === 'text').map(c => c.text).join('\n').trim();
+      const limpo = texto.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+      let parsed;
+      try { parsed = JSON.parse(limpo); } catch (e) { const m = limpo.match(/\{[\s\S]*\}/); if (m) { try { parsed = JSON.parse(m[0]); } catch (_) {} } }
+      if (!parsed || !Array.isArray(parsed.lacunas)) {
+        console.error('IA PO oral: resposta não-JSON', texto.slice(0, 500));
+        res.status(502).json({ error: 'A IA não devolveu um relatório válido. Tente de novo.' });
+        return;
+      }
+
+      const lacunas = parsed.lacunas.slice(0, 30).map(l => ({
+        titulo: String(l.titulo || '').trim() || '(sem título)',
+        porque: String(l.porque || '').trim(),
+      })).filter(l => l.titulo !== '(sem título)' || l.porque);
+
+      const resultado = {
+        resumo: String(parsed.resumo || '').trim(),
+        lacunas,
+        meta: {
+          cursoId, cursoNome, modulo,
+          nAulas: aulas.length,
+          nCasos: casosClinicos ? 1 : 0, casosChars: casosClinicos.length,
+          nTemasOral: oralTemas.length,
+          temEdital: !!edital, temBanca: !!aulasBanca,
+          modelo: MODEL, em: new Date().toISOString(), por: decoded.email || decoded.uid,
+        },
+      };
+
+      try { await db.collection('poModQuestoes').doc(modKey).set({ analiseOral: resultado }, { merge: true }); }
+      catch (e) { console.warn('PO oral: falha ao persistir', e.message); }
+
+      const usage = resp.usage || {};
+      console.log('IA PO oral OK', {
+        user: decoded.email || decoded.uid, curso: cursoNome, modulo,
+        n_aulas: aulas.length, casos_chars: casosClinicos.length, n_temas_oral: oralTemas.length, n_lacunas: lacunas.length,
+        input_tokens: usage.input_tokens, output_tokens: usage.output_tokens,
+        cache_read: usage.cache_read_input_tokens || 0, cache_write: usage.cache_creation_input_tokens || 0,
+      });
+
+      res.status(200).json({ ok: true, analiseOral: resultado, usage });
+    } catch (e) {
+      console.error('IA PO oral erro:', e);
+      res.status(500).json({ error: 'Erro ao analisar o TSA Oral: ' + (e.message || String(e)) });
+    }
+  }
+);
+
 // Exposto p/ a sincronização Laravel reatualizar a incidência salva (sem IA).
 exports.atualizarIncidenciaSalva = atualizarIncidenciaSalva;
