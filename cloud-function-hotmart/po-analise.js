@@ -838,7 +838,7 @@ const DEFAULT_PROMPT_ORAL = `Você é o analista do TSA Oral — a prova ORAL do
 
 Você recebe DUAS categorias de insumo:
 A) REFERÊNCIA DE CONTEÚDO (o que JÁ está coberto): as AULAS do módulo (com transcrição) e os CASOS CLÍNICOS. Se um tema/ponto está presente aqui, considere-o COBERTO.
-B) REFERÊNCIA DE COBERTURA (o universo do que a prova oral PODE cobrar): EDITAL do módulo, AULAS DA BANCA, ATUALIZAÇÃO DE CONTEÚDO, TEMAS DO TSA ORAL e PEDIDOS DE ALUNOS.
+B) REFERÊNCIA DE COBERTURA (o universo do que a prova oral PODE cobrar): AULAS DA BANCA, ATUALIZAÇÃO DE CONTEÚDO, TEMAS DO TSA ORAL e PEDIDOS DE ALUNOS. NÃO use o edital aqui — para o TSA Oral o edital NÃO é referência de cobertura.
 
 REGRA CENTRAL: para cada tema/ponto da REFERÊNCIA DE COBERTURA, verifique se está coberto na REFERÊNCIA DE CONTEÚDO (aula OU caso clínico).
 - Se ESTÁ coberto (em alguma aula OU em algum caso clínico) → NÃO liste.
@@ -858,14 +858,14 @@ Responda SOMENTE com JSON válido (sem markdown, sem cercas de código), neste f
   "lacunas": [
     {
       "titulo": "tema/conteúdo a cobrir para o oral",
-      "porque": "1-2 frases: onde é exigido (edital / aula da banca / tema do oral / pedido / atualização) e por que NÃO está coberto nas aulas nem nos casos clínicos."
+      "porque": "1-2 frases: onde é exigido (aula da banca / tema do oral / pedido / atualização) e por que NÃO está coberto nas aulas nem nos casos clínicos."
     }
   ]
 }`;
 }
 
 function buildOralUserPrompt(ctx) {
-  const { cursoNome, modulo, aulas, casosClinicos, edital, editalFonte, oralTemas, pedidos, atualizacaoConteudo, aulasBanca } = ctx;
+  const { cursoNome, modulo, aulas, casosClinicos, oralTemas, pedidos, atualizacaoConteudo, aulasBanca } = ctx;
   const L = [];
   L.push(`CURSO: ${cursoNome}`);
   L.push(`MÓDULO (Ponto): ${modulo}`);
@@ -884,11 +884,7 @@ function buildOralUserPrompt(ctx) {
   L.push(`=== CASOS CLÍNICOS (material de estudo do oral) ===`);
   L.push(casosClinicos ? casosClinicos.slice(0, ORAL_CASOS_CAP) : '(nenhum caso clínico cadastrado)');
   L.push('');
-  L.push('############ REFERÊNCIA DE COBERTURA (o que PRECISA existir) ############');
-  L.push('');
-  const edHdr = editalFonte === 'módulo' ? '=== EDITAL DESTE MÓDULO ===' : '=== EDITAL (do curso) ===';
-  L.push(edHdr);
-  L.push(edital ? edital.slice(0, 60000) : '(edital não cadastrado)');
+  L.push('############ REFERÊNCIA DE COBERTURA (o que PRECISA existir — NÃO inclui o edital) ############');
   L.push('');
   L.push(`=== AULAS DA BANCA (transcrição de aula(s) da banca examinadora) ===`);
   L.push(aulasBanca ? aulasBanca.slice(0, 60000) : '(nenhuma)');
@@ -941,7 +937,7 @@ exports.analisarTSAOralPO = onRequest(
         return { titulo: a.titulo || a.nomeOriginal || '(sem título)', conteudo: String(a.conteudo || '').trim(), transcricao: trunc ? full.slice(0, capPorAula) : full, transChars: full.length, transTrunc: trunc };
       });
 
-      // 3) Doc do módulo: casos clínicos + temas oral + pedidos + atualização + aulas da banca + edital.
+      // 3) Doc do módulo: casos clínicos + temas oral + pedidos + atualização + aulas da banca (SEM edital).
       const modKey = _modKey(cursoId, modulo);
       const modSnap = await db.collection('poModQuestoes').doc(modKey).get();
       const md = modSnap.exists ? (modSnap.data() || {}) : {};
@@ -953,13 +949,10 @@ exports.analisarTSAOralPO = onRequest(
 
       const cfgSnap = await db.collection('config').doc('poConfig').get();
       const cfg = cfgSnap.exists ? (cfgSnap.data() || {}) : {};
-      const editalCurso = String((cfg.editais || {})[cursoId] || '').trim();
-      const editalModulo = String(md.editalModulo || '').trim();
-      const edital = editalModulo || editalCurso;
-      const editalFonte = editalModulo ? 'módulo' : (editalCurso ? 'curso' : '');
       const promptCustom = cfg.analisePrompt && cfg.analisePrompt.oral;
+      // Para o TSA Oral o edital NÃO é referência de cobertura — de propósito não é lido.
 
-      const ctx = { cursoNome, modulo, aulas, casosClinicos, edital, editalFonte, oralTemas, pedidos, atualizacaoConteudo, aulasBanca };
+      const ctx = { cursoNome, modulo, aulas, casosClinicos, oralTemas, pedidos, atualizacaoConteudo, aulasBanca };
       const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
       const resp = await client.messages.create({
         model: MODEL, max_tokens: MAX_TOKENS,
@@ -990,7 +983,7 @@ exports.analisarTSAOralPO = onRequest(
           nAulas: aulas.length,
           nCasos: casosClinicos ? 1 : 0, casosChars: casosClinicos.length,
           nTemasOral: oralTemas.length,
-          temEdital: !!edital, temBanca: !!aulasBanca,
+          temBanca: !!aulasBanca,
           modelo: MODEL, em: new Date().toISOString(), por: decoded.email || decoded.uid,
         },
       };

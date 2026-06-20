@@ -6001,6 +6001,19 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-an-confirm .po-anc-ok{background:#f85149;border-color:#f85149;color:#fff}
         #po-an-confirm .po-anc-ok:hover{background:#e5484d}
         #po-mod-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        /* Botões do rodapé — estética mono/tech (uppercase, sem emoji) */
+        #po-mod-modal .po-modal-foot .po-act{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:9px 15px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border2);background:transparent;color:var(--t2);transition:color .16s,border-color .16s,background .16s,box-shadow .16s,transform .12s;white-space:nowrap}
+        #po-mod-modal .po-modal-foot .po-act:hover{color:var(--text);border-color:var(--accent);transform:translateY(-1px)}
+        #po-mod-modal .po-modal-foot .po-act:active{transform:translateY(0)}
+        #po-mod-modal .po-modal-foot .po-act:disabled{opacity:.5;cursor:default;transform:none;box-shadow:none}
+        #po-mod-modal .po-modal-foot .po-act .po-act-i{font-size:12px;line-height:1;opacity:.9}
+        /* primário — Analisar módulo (azul) */
+        #po-mod-modal .po-modal-foot .po-act.primary{color:#fff;border-color:transparent;background:linear-gradient(135deg,#1f6feb,#2f81f7);box-shadow:0 2px 14px color-mix(in srgb,#2f81f7 32%,transparent)}
+        #po-mod-modal .po-modal-foot .po-act.primary:hover{color:#fff;border-color:transparent;background:linear-gradient(135deg,#2f81f7,#4493f8);box-shadow:0 4px 20px color-mix(in srgb,#2f81f7 46%,transparent)}
+        /* destaque — Analisar TSA Oral (roxo, mais proeminente: borda+glow) */
+        #po-mod-modal .po-modal-foot .po-act.oral{color:#fff;border:1px solid color-mix(in srgb,#a371f7 60%,transparent);background:linear-gradient(135deg,#6d28d9,#a371f7);box-shadow:0 0 0 1px color-mix(in srgb,#a371f7 22%,transparent),0 4px 22px color-mix(in srgb,#a371f7 42%,transparent);padding:9px 18px}
+        #po-mod-modal .po-modal-foot .po-act.oral:hover{color:#fff;border-color:color-mix(in srgb,#a371f7 80%,transparent);background:linear-gradient(135deg,#7c3aed,#b88af9);box-shadow:0 0 0 1px color-mix(in srgb,#a371f7 38%,transparent),0 6px 30px color-mix(in srgb,#a371f7 58%,transparent);transform:translateY(-1px)}
+        #po-mod-modal .po-modal-foot .po-act.oral .po-act-i{opacity:1;color:#fff}
         #po-mod-modal .po-mod-sub{font-size:12px;color:var(--t2);margin-top:2px;font-family:'JetBrains Mono',monospace}
         #po-mod-modal .po-mod-resumo{font-size:12.5px;color:var(--text);margin-bottom:8px}
         #po-mod-modal .po-mod-aviso{margin-bottom:12px;padding:9px 12px;border-radius:9px;background:color-mix(in srgb,#f0883e 12%,transparent);border:1px solid color-mix(in srgb,#f0883e 32%,transparent);color:#f0883e;font-size:12px}
@@ -6015,6 +6028,9 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-mod-modal .po-mod-inputs-body{padding:14px 15px}
         #po-mod-modal .po-mod-blocos{display:flex;flex-direction:column;gap:14px}
         #po-mod-modal .po-mod-bloco{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--bg)}
+        /* Estado do bloco: vazio = vermelho escuro translúcido · com conteúdo = verde translúcido (exceto Pedidos) */
+        #po-mod-modal .po-mod-bloco.is-vazio{background:color-mix(in srgb,#8f211d 22%,transparent);border-color:color-mix(in srgb,#8f211d 42%,transparent)}
+        #po-mod-modal .po-mod-bloco.is-cheio{background:color-mix(in srgb,#2ea043 15%,transparent);border-color:color-mix(in srgb,#2ea043 34%,transparent)}
         #po-mod-modal .po-mod-bloco-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
         #po-mod-modal .po-mod-bloco-t{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;letter-spacing:.06em;color:var(--accent)}
         #po-mod-modal .po-mod-bloco-c{font-size:11.5px;color:var(--t2)}
@@ -40455,8 +40471,8 @@ window.poAnalisarModulo=async()=>{
   if(!curso){arosToast('Curso não encontrado.','err',3000);return;}
   _poSaveModQuestoes(cid,modulo); // analisar também salva o que foi editado
   S._poModAnalisando=true;
-  const btn=document.querySelector('#po-mod-modal .po-modal-foot .btn-p');
-  if(btn){btn.disabled=true;btn.textContent='🧠 Analisando…';}
+  const btn=document.querySelector('#po-mod-modal .po-modal-foot .po-act.primary');
+  if(btn){btn.disabled=true;btn.innerHTML='<span class="po-act-i">▸</span> Analisando…';}
   const box=document.getElementById('po-mod-mock');
   if(box){box.style.display='block';box.innerHTML=`<div class="po-an-load"><span class="po-an-spin"></span> A IA está lendo as transcrições, questões e edital deste módulo… (pode levar até 1 minuto)</div>`;box.scrollIntoView({behavior:'smooth',block:'nearest'});}
   try{
@@ -40469,7 +40485,7 @@ window.poAnalisarModulo=async()=>{
     if(box)box.innerHTML=`<div class="po-imp-erro">⚠️ ${_poEsc(e.message||String(e))}</div>`;
   }finally{
     S._poModAnalisando=false;
-    const b=document.querySelector('#po-mod-modal .po-modal-foot .btn-p'); if(b){b.disabled=false;b.textContent='🤖 Analisar módulo';}
+    const b=document.querySelector('#po-mod-modal .po-modal-foot .po-act.primary'); if(b){b.disabled=false;b.innerHTML='<span class="po-act-i">▸</span> Analisar módulo';}
   }
 };
 // Análise SEPARADA do TSA Oral: box próprio, NÃO mexe nas barras de saúde do módulo.
@@ -40481,7 +40497,7 @@ window.poAnalisarTSAOral=async()=>{
   _poSaveModQuestoes(cid,modulo);
   S._poOralAnalisando=true;
   const btn=document.querySelector('#po-mod-modal .po-oral-btn');
-  if(btn){btn.disabled=true;btn.textContent='🎤 Analisando…';}
+  if(btn){btn.disabled=true;btn.innerHTML='<span class="po-act-i">◉</span> Analisando…';}
   const box=document.getElementById('po-mod-oral');
   if(box){box.style.display='block';box.innerHTML=`<div class="po-an-load"><span class="po-an-spin"></span> A IA está cruzando aulas, casos clínicos, edital e temas do oral… (pode levar até 1 minuto)</div>`;box.scrollIntoView({behavior:'smooth',block:'nearest'});}
   try{
@@ -40494,7 +40510,7 @@ window.poAnalisarTSAOral=async()=>{
     if(box)box.innerHTML=`<div class="po-imp-erro">⚠️ ${_poEsc(e.message||String(e))}</div>`;
   }finally{
     S._poOralAnalisando=false;
-    const b=document.querySelector('#po-mod-modal .po-oral-btn'); if(b){b.disabled=false;b.textContent='🎤 Analisar TSA Oral';}
+    const b=document.querySelector('#po-mod-modal .po-oral-btn'); if(b){b.disabled=false;b.innerHTML='<span class="po-act-i">◉</span> Analisar TSA Oral';}
   }
 };
 // Render do box "TSA Oral" (lista só lacunas). Roxo pra distinguir das ações do módulo.
@@ -40624,7 +40640,7 @@ function _poModModalRender(){
     const lst=bucket[tipo]||[];
     const open=!!S._poModSec[tipo];
     return `
-      <div class="po-mod-bloco">
+      <div class="po-mod-bloco ${lst.length?'is-cheio':'is-vazio'}">
         <div class="po-mod-bloco-head" onclick="poModToggleSec('${tipo}')">
           <span class="po-mod-chev">${chev(open)}</span>
           <span class="po-mod-bloco-t">${_PO_TIPO_LBL[tipo]||tipo}</span>
@@ -40637,7 +40653,7 @@ function _poModModalRender(){
   const temasOral=bucket.oralTemas||[];
   const oralOpen=!!S._poModSec.oral;
   const oralBloco=`
-    <div class="po-mod-bloco">
+    <div class="po-mod-bloco ${temasOral.length?'is-cheio':'is-vazio'}">
       <div class="po-mod-bloco-head" onclick="poModToggleSec('oral')">
         <span class="po-mod-chev">${chev(oralOpen)}</span>
         <span class="po-mod-bloco-t">TSA Oral</span>
@@ -40652,7 +40668,7 @@ function _poModModalRender(){
   const atualTxt=String(bucket.atualizacaoConteudo||'');
   const atualOpen=!!S._poModSec.atualizacao;
   const atualBloco=`
-    <div class="po-mod-bloco">
+    <div class="po-mod-bloco ${atualTxt.trim()?'is-cheio':'is-vazio'}">
       <div class="po-mod-bloco-head" onclick="poModToggleSec('atualizacao')">
         <span class="po-mod-chev">${chev(atualOpen)}</span>
         <span class="po-mod-bloco-t">ATUALIZAÇÃO DE CONTEÚDO</span>
@@ -40668,7 +40684,7 @@ function _poModModalRender(){
   const avulsaTxt=String(bucket.transcricaoAvulsa||'');
   const avulsaOpen=!!S._poModSec.avulsa;
   const avulsaBloco=`
-    <div class="po-mod-bloco">
+    <div class="po-mod-bloco ${avulsaTxt.trim()?'is-cheio':'is-vazio'}">
       <div class="po-mod-bloco-head" onclick="poModToggleSec('avulsa')">
         <span class="po-mod-chev">${chev(avulsaOpen)}</span>
         <span class="po-mod-bloco-t">AULAS DA BANCA</span>
@@ -40684,7 +40700,7 @@ function _poModModalRender(){
   const casosTxt=String(bucket.casosClinicos||'');
   const casosOpen=!!S._poModSec.casos;
   const casosBloco=`
-    <div class="po-mod-bloco">
+    <div class="po-mod-bloco ${casosTxt.trim()?'is-cheio':'is-vazio'}">
       <div class="po-mod-bloco-head" onclick="poModToggleSec('casos')">
         <span class="po-mod-chev">${chev(casosOpen)}</span>
         <span class="po-mod-bloco-t">🩺 CASOS CLÍNICOS</span>
@@ -40699,7 +40715,7 @@ function _poModModalRender(){
   const editalModTxt=String(bucket.editalModulo||'');
   const editalModOpen=!!S._poModSec.editalMod;
   const editalBloco=`
-    <div class="po-mod-bloco">
+    <div class="po-mod-bloco ${editalModTxt.trim()?'is-cheio':'is-vazio'}">
       <div class="po-mod-bloco-head" onclick="poModToggleSec('editalMod')">
         <span class="po-mod-chev">${chev(editalModOpen)}</span>
         <span class="po-mod-bloco-t">📋 EDITAL DESTE MÓDULO</span>
@@ -40760,11 +40776,11 @@ function _poModModalRender(){
         <div id="po-mod-oral" class="po-q-mock" style="display:none"></div>
       </div>
       <div class="po-modal-foot">
-        <button type="button" class="btn btn-g" onclick="poModSalvarTudo()">💾 Salvar tudo</button>
+        <button type="button" class="po-act" onclick="poModSalvarTudo()">Salvar tudo</button>
         <div style="display:flex;gap:10px">
-          <button type="button" class="btn btn-g" onclick="poModModalClose()">Fechar</button>
-          <button type="button" class="btn btn-g po-oral-btn" onclick="poAnalisarTSAOral()">🎤 Analisar TSA Oral</button>
-          <button type="button" class="btn btn-p" onclick="poAnalisarModulo()">🤖 Analisar módulo</button>
+          <button type="button" class="po-act" onclick="poModModalClose()">Fechar</button>
+          <button type="button" class="po-act oral po-oral-btn" onclick="poAnalisarTSAOral()"><span class="po-act-i">◉</span> Analisar TSA Oral</button>
+          <button type="button" class="po-act primary" onclick="poAnalisarModulo()"><span class="po-act-i">▸</span> Analisar módulo</button>
         </div>
       </div>
     </div>`;
@@ -40778,7 +40794,7 @@ function _poModModalRender(){
     // pra fechar/abrir um dropdown no meio NÃO some com o "Analisando…".
     const box=document.getElementById('po-mod-mock');
     if(box){box.style.display='block';box.innerHTML=`<div class="po-an-load"><span class="po-an-spin"></span> A IA está lendo as transcrições, questões e edital deste módulo… (pode levar até 1 minuto)</div>`;}
-    const btn=host.querySelector('.po-modal-foot .btn-p'); if(btn){btn.disabled=true;btn.textContent='🧠 Analisando…';}
+    const btn=host.querySelector('.po-modal-foot .po-act.primary'); if(btn){btn.disabled=true;btn.innerHTML='<span class="po-act-i">▸</span> Analisando…';}
   }
 }
 
