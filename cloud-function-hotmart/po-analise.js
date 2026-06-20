@@ -39,6 +39,7 @@ const CRITERIOS = [
   { id: 'fichaResumo',     label: 'Falta de ficha resumo',          desc: 'Aulas com ficha resumo Pendente' },
   { id: 'trilhaQuestoes',  label: 'Falta de trilha de questões',    desc: 'Aulas com trilha de questões Pendente' },
   { id: 'trilhaFlashcards', label: 'Falta de trilha de flashcards', desc: 'Aulas com trilha de flashcards Pendente' },
+  { id: 'banca',           label: 'Tema de aula da banca',          desc: 'Tema ensinado numa AULA DA BANCA (quem elabora a prova) e ausente/raso no módulo — sinal forte do que cai' },
 ];
 const CRIT_IDS = CRITERIOS.map(c => c.id);
 
@@ -134,6 +135,10 @@ REGRA OBRIGATÓRIA — REGRAVAÇÃO MARCADA PELA COORDENAÇÃO: para CADA aula l
 
 REGRA OBRIGATÓRIA — COBERTURA DE TEMA DO EDITAL (tem prioridade sobre o limite de frequência): se um tema está EXPLÍCITO no edital fornecido E tem MAIS DE UMA questão no banco (2 ou mais) E NENHUMA aula do módulo o cobre (você leu TODAS as transcrições) E nenhum material de apoio o cobre, então você DEVE gerar uma ação para garantir esse conteúdo — categoria 'gravar' quando for uma aula inteira ausente, ou incluir/aprofundar numa aula existente quando o tema couber numa que já existe. NÃO omita pelo princípio "menos é mais": a combinação edital-explícito + ≥2 questões + ausência total já é sinal suficiente. Pontue "lacuna" alto, "edital"=1 (está explícito) e "frequencia" conforme o nº de questões — a prioridade final (incidência) põe temas recorrentes no topo e itens periféricos do edital no fim. NÃO dispare esta regra quando: (a) o tema já está coberto por alguma aula, mesmo dentro de uma aula de escopo mais amplo; ou (b) há só 1 questão isolada; ou (c) o tema não está explícito no edital (aparece só de forma genérica/indireta). Exemplo: módulo de Sistema Endócrino cujo edital cita explicitamente a disfunção da tireoide, com 2+ questões de tireoide no banco e NENHUMA aula cobrindo isso → você DEVE recomendar GRAVAR essa aula.
 
+REGRA OBRIGATÓRIA — MATERIAL PENDENTE SEMPRE VIRA AÇÃO: material de apoio é fato objetivo lido das colunas, NÃO está sujeito ao "menos é mais". Para CADA tipo com pendência você DEVE gerar a ação correspondente (uma ação separada por tipo): (a) APOSTILA do módulo Pendente/ausente → "Criar apostila do módulo" (notas.apostila alto); (b) aulas com "Ficha resumo: Pendente" → "Criar ficha resumo das aulas" listando-as no porque (notas.fichaResumo alto); (c) aulas com "Trilha de questões: Pendente" → "Criar trilha de questões das aulas" (notas.trilhaQuestoes alto); (d) aulas com "Trilha de flashcards: Pendente" → "Criar trilha de flashcards das aulas" (notas.trilhaFlashcards alto). Status "Lançada" = não gere; "Não se aplica" = ignore. Se há pelo menos uma aula Pendente naquele tipo, a ação é OBRIGATÓRIA.
+
+REGRA OBRIGATÓRIA — MÓDULO VAZIO OU TEMA DO EDITAL SEM AULA: se o módulo NÃO tem nenhuma aula, OU um tema central do edital/das questões não tem NENHUMA aula que o cubra, você DEVE gerar ação(ões) categoria 'gravar' a partir do EDITAL e das QUESTÕES — o que precisa existir e não existe. NUNCA devolva "acoes": [] quando há aulas faltando. Num módulo vazio, percorra os tópicos do edital e gere uma ação 'gravar' para cada tópico relevante (priorize os com questões e os clinicamente essenciais); pontue "lacuna" e "status" alto.
+
 Critérios (use exatamente estas chaves no campo "notas"):
 ${_criteriosTxt()}
 
@@ -222,8 +227,8 @@ function buildUserPrompt(ctx) {
     linhas.push('');
   }
   if (ctx.transcricaoAvulsa) {
-    linhas.push(`=== TRANSCRIÇÃO DE AULA AVULSA (conteúdo extra a considerar como JÁ COBERTO) ===`);
-    linhas.push('Considere este conteúdo como já existente ao avaliar lacunas — NÃO recomende criar/gravar algo que esta transcrição avulsa já cobre.');
+    linhas.push(`=== AULAS DA BANCA (transcrição de aula(s) feita(s) pela BANCA que elabora a prova — sinal FORTE do que cai) ===`);
+    linhas.push('ATENÇÃO: estas aulas são da PRÓPRIA BANCA examinadora. O que ela ensina aqui é forte indício do que cobra na prova. COMPARE o conteúdo abaixo com o que as aulas do módulo já cobrem. Para CADA tema/segmento relevante que esta aula da banca cobre e que o módulo NÃO cobre (ou cobre raso), GERE uma ação: categoria \'gravar\' se for tema/aula ausente, ou aprofundar a aula existente se couber nela. Pontue "banca"=1 e "lacuna" alto nessas ações — independentemente do nº de questões (a aula da banca, por si só, já justifica priorizar). Se o módulo já cobre bem o que a banca ensina, NÃO gere ação por isso.');
     linhas.push(ctx.transcricaoAvulsa.slice(0, 30000));
     linhas.push('');
   }
@@ -310,7 +315,9 @@ exports.analisarModuloPO = onRequest(
         return {
           titulo: a.titulo || a.nomeOriginal || '(sem título)',
           status: a.status || '', ano: a.ano || '',
-          questoes: a.questoes || '', cards: a.cards || '',
+          // trilha de questões / flashcards: vazio conta como Pendente (igual à ficha resumo)
+          questoes: String(a.questoes || '').trim() || 'Pendente',
+          cards: String(a.cards || '').trim() || 'Pendente',
           fichaResumo: String(a.fichaResumo || '').trim() || 'Pendente',  // status da ficha resumo (por aula): Pendente/Lançada/Não se aplica
           aval: _parseAval(a),
           conteudo: String(a.conteudo || '').trim(),

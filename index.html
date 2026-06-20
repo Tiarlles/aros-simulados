@@ -39980,6 +39980,7 @@ const PO_CRITERIOS=[
   {id:'lacuna',     label:'Lacuna de conteúdo',                 desc:'Tema cai na prova/edital e falta (ou está raso) na aula', peso:30},
   {id:'frequencia', label:'Frequência do tema nas provas',      desc:'Quanto mais o tema é cobrado, mais urgente',              peso:20},
   {id:'edital',     label:'Cobertura do edital',                desc:'Tema consta no edital oficial (peso baixo — não justifica sozinho)', peso:6},
+  {id:'banca',      label:'Aulas da banca',                     desc:'Tema coberto por uma aula da banca examinadora e ausente/raso no módulo (sinal forte do que cai)', peso:25},
   {id:'status',     label:'Aula inexistente / status crítico',  desc:'Não gravada, com erro, ou "precisa atualizar"',           peso:15},
   {id:'avaliacao',  label:'Avaliação baixa dos alunos',         desc:'Aula mal avaliada',                                       peso:12},
   {id:'pedidos',    label:'Pedidos de alunos',                  desc:'Demanda explícita registrada no módulo',                  peso:10},
@@ -40361,22 +40362,52 @@ function _poProgBar2(cid,modulo){
     const cor=_poProgCor(pct), fill=pct==null?0:pct, lbl=pct==null?'—':pct+'%';
     return `<span class="po-prog2-row"><span class="po-prog2-lbl" title="${lblTit}">${ico}</span><span class="po-prog2-track"><i style="width:${fill}%;background:${cor}"></i></span><b style="color:${cor}">${lbl}</b></span>`;
   };
-  const tit=sp?`🎬 Aulas ${sp.aulas}% · 📎 Materiais ${sp.apoio}%`:'Módulo ainda não analisado';
+  const tit=sp?`🎬 Aulas ${sp.aulas}% · 📎 Materiais ${sp.apoio}%${sp.analisado?'':' · aulas ainda não analisadas pela IA'}`:'';
   return `<span class="po-prog2" title="${tit}">${linha('🎬','Aulas',sp?sp.aulas:null)}${linha('📎','Materiais',sp?sp.apoio:null)}</span>`;
 }
-// Saúde de um módulo separada em Aulas × Materiais de apoio. null = não analisado.
+// ── Saúde DETERMINÍSTICA (lida das colunas, não da ausência de ações da IA) ──
+// Prontidão das AULAS de um módulo: fração (0..1) das aulas prontas/postadas.
+// Módulo vazio → 0 (nunca "100% por não ter nada a fazer").
+function _poProntidaoAulas(cid,modulo){
+  const aulas=_poAulasDoCurso(cid).filter(a=>a.modulo===modulo);
+  if(!aulas.length)return 0;
+  return aulas.filter(a=>_poIsPronta(a.status)).length/aulas.length;
+}
+// Saúde dos MATERIAIS (0-100): % de slots "Lançada" entre apostila (módulo) +
+// ficha resumo / trilha de questões / trilha de flashcards (por aula).
+// "Não se aplica" sai da conta. Sem apostila cadastrada = 1 slot pendente.
+function _poSaudeMateriais(cid,modulo){
+  const aulas=_poAulasDoCurso(cid).filter(a=>a.modulo===modulo);
+  const bucket=_poModQ(cid,modulo);
+  const isNA=v=>String(v||'').trim()==='Não se aplica';
+  const isDone=v=>String(v||'').trim()==='Lançada';
+  let aplic=0,feito=0;
+  const aps=Array.isArray(bucket.apostilas)?bucket.apostilas:[];
+  if(aps.length){ aps.forEach(ap=>{ if(isNA(ap.status))return; aplic++; if(isDone(ap.status))feito++; }); }
+  else { aplic++; } // sem apostila = pendente
+  aulas.forEach(a=>{ ['fichaResumo','questoes','cards'].forEach(col=>{ const v=a[col]; if(isNA(v))return; aplic++; if(isDone(v))feito++; }); });
+  return aplic?Math.round(100*feito/aplic):100;
+}
+// Saúde do módulo: Materiais é determinístico; Aulas = prontidão real × fator das
+// lacunas que a IA achou (gravar/regravar/atualizar). `analisado` = já passou pela IA.
 function _poModProgressoSplit(cid,modulo){
   const k=_poModKey(cid,modulo);
   const an=(S._poAnalises&&S._poAnalises[k])||(S.poModQuestoes[k]&&S.poModQuestoes[k].analise);
-  if(!an||!Array.isArray(an.acoes))return null;
-  const dis=_poDispSet(k);
-  const acoes=an.acoes.filter(a=>!dis.has(_poNormTit(a.titulo)));
-  return { aulas:_poSaudeDeAcoes(acoes.filter(a=>!_poAcaoEhApoio(a))), apoio:_poSaudeDeAcoes(acoes.filter(_poAcaoEhApoio)) };
+  const pront=_poProntidaoAulas(cid,modulo); // 0..1
+  const apoio=_poSaudeMateriais(cid,modulo);
+  let gapFactor=1, analisado=false;
+  if(an&&Array.isArray(an.acoes)){
+    analisado=true;
+    const dis=_poDispSet(k);
+    const acoesAula=an.acoes.filter(a=>!dis.has(_poNormTit(a.titulo))&&!_poAcaoEhApoio(a));
+    gapFactor=_poSaudeDeAcoes(acoesAula)/100; // 0..1
+  }
+  return { aulas:Math.round(100*pront*gapFactor), apoio, analisado };
 }
-// Progresso do produto separado: média (por grupo) dos módulos analisados.
+// Progresso do produto: média (por grupo) dos módulos JÁ analisados pela IA.
 function _poProdProgressoSplit(cid){
   const mods=_poGroupByMod(_poAulasDoCurso(cid)).map(g=>g.modulo);
-  const vals=mods.map(m=>_poModProgressoSplit(cid,m)).filter(v=>v!=null);
+  const vals=mods.map(m=>_poModProgressoSplit(cid,m)).filter(v=>v&&v.analisado);
   if(!vals.length)return {aulas:null,apoio:null,analisados:0,total:mods.length};
   const avg=key=>Math.round(vals.reduce((s,v)=>s+v[key],0)/vals.length);
   return {aulas:avg('aulas'),apoio:avg('apoio'),analisados:vals.length,total:mods.length};
@@ -40461,8 +40492,10 @@ function _poRenderAnalise(an){
   }).join('')||`<div class="po-an-vazio">Nenhuma ação ${aba==='Todas'?'pendente neste módulo':'para esta prova'} — a cobertura está adequada.</div>`;
   const nvm=_PO_NIVEL[nivelMod];
   const acoesApoio=todas.filter(_poAcaoEhApoio), acoesAulas=todas.filter(a=>!_poAcaoEhApoio(a));
-  const saudeAulas=_poSaudeDeAcoes(acoesAulas), corAulas=_poProgCor(saudeAulas);
-  const saudeTar=_poSaudeDeAcoes(acoesApoio), corTar=_poProgCor(saudeTar);
+  // Barras determinísticas (prontidão real × lacunas da IA / materiais lidos das colunas).
+  const _sp=S._poModAtual?_poModProgressoSplit(S._poModAtual.cid,S._poModAtual.modulo):{aulas:0,apoio:0};
+  const saudeAulas=_sp.aulas, corAulas=_poProgCor(saudeAulas);
+  const saudeTar=_sp.apoio, corTar=_poProgCor(saudeTar);
   const dispFoot=nDisp?`<button type="button" class="po-an-restaurar" onclick="poAnRestaurarDispensadas()" title="Voltar a mostrar as recomendações dispensadas">↩︎ ${nDisp} descartada(s) — restaurar</button>`:'';
   box.innerHTML=`<div class="po-an-wrap">
     <div class="po-an-head">
@@ -40470,12 +40503,12 @@ function _poRenderAnalise(an){
       ${m.em?`<span class="po-an-saved">última análise em ${_poDataFmt(m.em)}</span>`:''}
     </div>
     <div class="po-an-saude2">
-      <div class="po-an-saude" title="Progresso das AULAS: gravar, regravar, atualizar e lacunas de conteúdo (${acoesAulas.length} pendência(s))">
+      <div class="po-an-saude" title="AULAS: % de aulas prontas/postadas, reduzido pelas lacunas que a IA achou (gravar/regravar/atualizar). Módulo sem aula = 0%.">
         <span class="po-an-saude-lbl">🎬 Aulas</span>
         <span class="po-an-saude-track"><i style="width:${saudeAulas}%;background:${corAulas}"></i></span>
         <b style="color:${corAulas}">${saudeAulas}%</b>
       </div>
-      <div class="po-an-saude" title="Progresso dos MATERIAIS: apostila, ficha resumo, trilha de questões e flashcards (${acoesApoio.length} pendência(s))">
+      <div class="po-an-saude" title="MATERIAIS: % lançado, lido direto das colunas (apostila + ficha resumo, trilha de questões e flashcards por aula). 'Não se aplica' sai da conta.">
         <span class="po-an-saude-lbl">📎 Materiais</span>
         <span class="po-an-saude-track"><i style="width:${saudeTar}%;background:${corTar}"></i></span>
         <b style="color:${corTar}">${saudeTar}%</b>
@@ -40562,19 +40595,20 @@ function _poModModalRender(){
         <textarea class="po-inp po-mod-ta" id="po-atual-ta" placeholder="Cole o texto da nova diretriz/atualização…" onblur="poModSetCampo('atualizacaoConteudo',this.value)">${_poEsc(atualTxt)}</textarea>
       </div>`:''}
     </div>`;
-  // Transcrição de aula avulsa: texto de uma aula extra que a IA também considera.
+  // Aulas da banca: transcrição de aula(s) feita(s) pela banca examinadora — sinal forte
+  // do que cai. Conteúdo que a banca cobre e o módulo NÃO cobre vira priorização (gravar).
   const avulsaTxt=String(bucket.transcricaoAvulsa||'');
   const avulsaOpen=!!S._poModSec.avulsa;
   const avulsaBloco=`
     <div class="po-mod-bloco">
       <div class="po-mod-bloco-head" onclick="poModToggleSec('avulsa')">
         <span class="po-mod-chev">${chev(avulsaOpen)}</span>
-        <span class="po-mod-bloco-t">TRANSCRIÇÃO DE AULA AVULSA</span>
+        <span class="po-mod-bloco-t">AULAS DA BANCA</span>
         <span class="po-mod-bloco-c">${avulsaTxt.trim()?'preenchido':'vazio'}</span>
       </div>
       ${avulsaOpen?`<div class="po-mod-bloco-body">
-        <p class="po-mut" style="margin:0 0 8px;font-size:11.5px">Cole a transcrição de uma <b>aula avulsa</b> que também deve ser considerada na análise.</p>
-        <textarea class="po-inp po-mod-ta" id="po-avulsa-ta" placeholder="Cole a transcrição da aula avulsa…" onblur="poModSetCampo('transcricaoAvulsa',this.value)">${_poEsc(avulsaTxt)}</textarea>
+        <p class="po-mut" style="margin:0 0 8px;font-size:11.5px">Cole a transcrição de <b>aula(s) feita(s) pela banca</b> que elabora a prova. A IA usa como sinal forte do que cai: o que a banca ensina e o módulo <b>não cobre</b> entra como <b>priorização</b> (gravar). Pondere o impacto em <b>⚖️ Pesos da priorização → "Aulas da banca"</b>.</p>
+        <textarea class="po-inp po-mod-ta" id="po-avulsa-ta" placeholder="Cole a transcrição da aula da banca…" onblur="poModSetCampo('transcricaoAvulsa',this.value)">${_poEsc(avulsaTxt)}</textarea>
       </div>`:''}
     </div>`;
   // Edital DESTE módulo: se preenchido, a IA usa no lugar do edital geral do curso.
