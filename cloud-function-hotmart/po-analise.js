@@ -745,7 +745,9 @@ exports.analisarProdutoPO = onRequest(
       const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
       const resp = await client.messages.create({
         model: MODEL,
-        max_tokens: MAX_TOKENS,
+        // Produto consolida o ranking de TODOS os módulos × provas — a saída JSON pode ser
+        // grande (muitos módulos). 4096 truncava o JSON e quebrava o parse ("panorama inválido").
+        max_tokens: 16384,
         system: [{ type: 'text', text: buildProdutoSystemPrompt(promptCustom), cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: buildProdutoUserPrompt(cursoNome, mods) }],
       });

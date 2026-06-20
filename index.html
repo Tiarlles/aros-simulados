@@ -39472,11 +39472,11 @@ function _poIABoxHTML(c){
     <div class="po-iq-menu">
       <span class="po-iq-opt">
         <button type="button" class="po-iq-act rapida" onclick="poAnalisarProdutoRapida()">Análise rápida</button>
-        <span class="po-iq-i" title="Analisa só os módulos ainda SEM análise e reaproveita os já feitos. Mais rápida e barata. Não atualiza módulos cujo conteúdo mudou desde a última análise.">i</span>
+        <button type="button" class="po-iq-i" onclick="event.stopPropagation();poProdInfo('rapida')" title="Clique pra saber o que faz">i</button>
       </span>
       <span class="po-iq-opt">
         <button type="button" class="po-iq-act completa" onclick="poAnalisarProdutoCompleta()">Análise completa</button>
-        <span class="po-iq-i" title="Re-analisa TODOS os módulos do zero (mais demorada e cara). Mostra progresso X de Y. Não inclui o TSA Oral (que é analisado individualmente em cada módulo).">i</span>
+        <button type="button" class="po-iq-i" onclick="event.stopPropagation();poProdInfo('completa')" title="Clique pra saber o que faz">i</button>
       </span>
     </div>`:'';
   return `<div class="po-iq open">
@@ -39505,6 +39505,11 @@ function _poIABoxHTML(c){
 }
 window.poIAToggle=()=>{S._poIAOpen=!S._poIAOpen; if(!S._poIAOpen)S._poProdMenuOpen=false; _poRender();};
 window.poProdMenuToggle=()=>{S._poProdMenuOpen=!S._poProdMenuOpen; _poRender();};
+// "i" das opções de análise — abre a explicação ao CLICAR (title só aparece no hover).
+window.poProdInfo=(qual)=>{
+  if(qual==='rapida') arosAlert({icon:'⚡',title:'Análise rápida',message:'Analisa só os módulos que ainda NÃO têm análise e reaproveita os que já foram feitos. Mais rápida e mais barata em IA.\n\nNão re-analisa módulos cujo conteúdo possa ter mudado desde a última vez — pra isso, use a Análise completa.',okLabel:'Entendi'});
+  else arosAlert({icon:'🔄',title:'Análise completa',message:'Re-analisa TODOS os módulos do zero (mais demorada e mais cara em IA). Mostra o progresso “X de Y”, roda 3 em paralelo e dá pra cancelar no meio.\n\nNÃO inclui o TSA Oral — esse é analisado individualmente, pelo botão “Analisar TSA Oral” dentro de cada Ponto.',okLabel:'Entendi'});
+};
 
 function _poRefreshTabela(){
   if(!S.poCursoAtual)return;
@@ -40546,7 +40551,7 @@ function _poProdRenderProgress(){
   const pct=b.total?Math.round((b.done/b.total)*100):0;
   el.innerHTML=`<div class="po-iq-prog">
     <div class="po-iq-prog-top">
-      <span class="po-iq-prog-lbl">ANALISANDO ${b.done}/${b.total}${b.atual?` — ${_poEsc(b.atual)}`:''}</span>
+      <span class="po-iq-prog-lbl">ANALISANDO MÓDULO ${b.done}/${b.total}${b.atual?` — ${_poEsc(b.atual)}`:''}</span>
       <button type="button" class="po-iq-act ghost" onclick="poProdCancelar()">Cancelar</button>
     </div>
     <div class="po-iq-prog-bar"><span style="width:${pct}%"></span></div>
@@ -40577,9 +40582,21 @@ async function _poProdRun(cid, modo){ // modo: 'rapida'|'completa'
   const curso=(S.poCursos||[]).find(c=>c.id===cid);
   if(!cid||!curso){arosToast('Abra um curso primeiro.','err',2500);return;}
   if(S._poProdAnalisando)return;
-  S._poProdMenuOpen=false; S._poProdAnalisando=true;
+  S._poProdMenuOpen=false;
   const todos=_poGroupByMod(_poAulasDoCurso(cid)).map(g=>g.modulo);
   const modulos = modo==='completa' ? todos : todos.filter(m=>!(S._poAnalises[_poModKey(cid,m)]||(S.poModQuestoes[_poModKey(cid,m)]&&S.poModQuestoes[_poModKey(cid,m)].analise)));
+  // Confirmação ANTES de gastar IA — na Rápida lista QUAIS módulos serão analisados (pra conferir).
+  if(modulos.length){
+    let msg;
+    if(modo==='completa'){
+      msg=`Análise COMPLETA\n\nVai RE-analisar os ${todos.length} módulos do zero (demorada e cara em IA). Mostra progresso e dá pra cancelar.\n\nContinuar?`;
+    }else{
+      const lista=modulos.slice(0,40).map(m=>'• '+m).join('\n')+(modulos.length>40?`\n…+${modulos.length-40} módulo(s)`:'');
+      msg=`Análise rápida\n\nVai analisar os ${modulos.length} módulo(s) que ainda NÃO têm análise salva:\n\n${lista}\n\nContinuar?`;
+    }
+    if(!confirm(msg)){ _poRender(); return; }
+  }
+  S._poProdAnalisando=true;
   try{
     let cancelado=false;
     if(modulos.length){ const r=await _poProdAnalisarLote(cid,curso,modulos); cancelado=r.cancelado;
