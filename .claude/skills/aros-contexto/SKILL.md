@@ -2103,6 +2103,27 @@ Input agora é **inline dentro da caixa dos chips** (classe `.pro-ms-input`, sem
 - **Auth providers habilitados**: Email/Password + Google.
 - **Template editing locked**: Firebase bloqueia edição manual do template (medida anti-phishing); usuário aceita o template default em PT-BR.
 
+## Group Remember — Casos Clínicos TSA 2ª fase (Kanban · 2026-06-22)
+
+Grupo novo na sidebar da coordenação: **Group Remember**, com 2 abas — `rememberF1` (🧠 TSA 1ª fase, só placeholder) e `rememberF2` (🗣️ TSA 2ª fase, feature real). Banco de casos clínicos vindos das **lembranças da prova oral**: alunos relatam o que caiu, a coordenação cadastra e os casos caminham num Kanban até virarem material pros simulados. Quem acessa é configurado em Usuários (presets); por padrão aparece só pra admin.
+
+**Coleção `remembers/{id}`** (rules: read/write exigem `isAuth()`; status enum `pendente|confeccao|revisao|reprovado|aprovado|utilizado`). Campos: `fase:'f2'`, `codigo` (ID curto único `CC-XXXX`, identifica o caso — **não há título visível**; `titulo` interno = assuntos ou codigo só pra satisfazer a rule), `ano`, `assuntos[]` (códigos dos 56 pontos do edital, lista `_REM_ASSUNTOS` P1–P56 hardcoded no index.html), `tipoProva` (TSA default/TEA), `categoria` ("Tipo de Caso": simulacao/oral/criar), `origem` (autoral default/oficial), `status`, `profNome`, `enunciado` (HTML rico), `perguntas[]` ({id, html, **comentario**}), `review` (veredito por bloco), `arquivado`, `pagamentoLancId/Mes/Valor`, `criadoEm/updatedAt`. Subcoleção **`remembers/{id}/versoes/{auto}`** = snapshot imutável de backup a cada gravação (rule: create+read auth, update/delete=false). Storage: imagens inline em `remembers/{caseId}/**`.
+
+**Fluxo do Kanban (6 colunas):** pendente → confecção → revisão (Peer-review) → reprovado → aprovado → utilizado. Arrastar e soltar + **"Salvar tudo" com modal de decisão por coluna** (`_remDecide`): confecção → "enviar p/ revisão | manter"; revisão → "aprovar (→aprovado) | reprovar (→reprovado)"; reprovado → "reenviar p/ revisão | manter". GOTCHA: `_remPersist` passa `opts.forceStatus` (o `_remSync` interno relê o dropdown e sobrescreveria o destino).
+
+**Regras de negócio principais:**
+- **Novo caso** nasce sempre em `pendente` (sem dropdown de Etapa no modal).
+- **Assunto opcional** no cadastro (card mostra "Definir Tema"); **obrigatório ao mover Produção→Peer-review** — abre `_remPickTema` exigindo 1+ assunto, senão não move.
+- **Professor** definido só ao entrar em Confecção (`openRemAskProf`); no modal do caso dá pra **Trocar** (`remConfirmProf`, não mexe na etapa) e **Remover** (`remRemoverProf`).
+- **Peer-review por bloco**: cada bloco (enunciado + perguntas) tem Aprovar/Reprovar; reprovar exige comentário "o que ajustar". No modo `reprovado` o criador vê os comentários (read-only) e ajusta.
+- **Pagamento ao aprovar**: ao entrar em Aprovado, oferece lançar pagamento ao prof (valor = tipo de sistema `sys-caso-remember` R$1000, editável em Financeiro→Cadastros→Valores automáticos). Cria lançamento em `financeiro.meses[mês].lancamentos` (mês fechado → cai no próximo via `_remMesPagamento`). Sair de Aprovado cancela. Financeiro tem **coluna própria "Caso clínico"** (separada de "Atividades extras"). Gated por `_isAdminEm('financeiro')`.
+- **Segurança contra perda**: versões/backup imutável + botão "⬇️ Backup" (.json) + "🗄️ Arquivar" (soft-delete recuperável; excluir definitivo só na área de arquivados com dupla confirmação).
+- **Card** exibe: ID discreto (#codigo + dot da categoria) · Assunto (só os códigos, ex.: "P5, P16") · Professor · Ano. Feedback central "Caso salvo" (`_remSavedFlash`) a cada gravação.
+- **Filtros** colapsável no topo do quadro (`#rem-filtros`): por Assunto (árvore dos 56) e Professor, com Aplicar/Limpar.
+- Colunas renomeáveis por duplo clique (`config/settings.rememberColLabels`).
+
+Pontos de inserção no index.html: TAB_GROUPS (~12678), array de toggle do `switchCoTab` (~26246) + wrapper (~30190). Quase tudo vive num bloco JS único do módulo (prefixo `rem`/`_rem`). Rules `remembers` + `versoes` + storage deployadas em 2026-06-22.
+
 ## Firestore Rules (resumo — APERTADAS em 2026-05-21)
 
 **Mudança crítica**: writes em coleções coord/prof agora exigem `request.auth.uid != null` (Firebase Auth). Login custom (sem Firebase Auth) virou **read-only** — toda escrita dá `permission-denied`. Comportamento desejado pra forçar migração.

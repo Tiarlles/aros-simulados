@@ -281,6 +281,28 @@ service cloud.firestore {
     }
 
     // ────────────────────────────────────────────────────────────────────────
+    // GROUP REMEMBER — casos clínicos (lembranças da prova oral TSA 2ª fase).
+    // Dado interno de coordenação/prof. Leitura e escrita exigem auth.
+    // ────────────────────────────────────────────────────────────────────────
+    match /remembers/{caseId} {
+      allow read: if isAuth();  // blindado: banco interno de casos, só logado
+      allow create, update: if isAuth()
+                            && request.resource.data.titulo is string
+                            && request.resource.data.titulo.size() > 0
+                            && request.resource.data.titulo.size() < 200
+                            && request.resource.data.status in ['pendente','confeccao','revisao','reprovado','aprovado','utilizado'];
+      allow delete: if isAuth();
+
+      // Versões/backup imutável — snapshot a cada gravação. Não pode ser editado
+      // nem apagado (rede de segurança contra perda/sobrescrita acidental).
+      match /versoes/{versaoId} {
+        allow read: if isAuth();
+        allow create: if isAuth();
+        allow update, delete: if false;
+      }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
     // RECURSOS DE PROVA — provas/questões editadas por coord (auth).
     // Contestações criadas por aluno anônimo (mantém aberto).
     // ────────────────────────────────────────────────────────────────────────

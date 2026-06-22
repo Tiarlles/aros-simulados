@@ -119,6 +119,17 @@ service firebase.storage {
     }
 
     // ────────────────────────────────────────────────────────────────────────
+    // GROUP REMEMBER — imagens inline no enunciado e perguntas dos casos.
+    // Path: remembers/{caseId}/{filename}. 15MB, apenas imagens.
+    // ────────────────────────────────────────────────────────────────────────
+    match /remembers/{caseId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.resource.size < 15 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if true;
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
     // DEX — PDFs anexados por perfil (referência adicional pra IA)
     // Read pelo Claude API acontece via URL assinada (bypassa rules).
     // Upload/delete exige auth.

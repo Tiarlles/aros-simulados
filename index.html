@@ -5177,6 +5177,92 @@ body.pro-rt-fs-on{overflow:hidden}
     </div>
 
     <!-- TAB: Features (kanban de ideias/tarefas) -->
+    <!-- ══ GROUP REMEMBER ══════════════════════════════════════════════════ -->
+    <style id="remember-styles">
+      .rem-ed{min-height:120px;max-height:460px;overflow-y:auto;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:0 0 var(--rs) var(--rs);font-size:13.5px;line-height:1.65;color:var(--text);outline:none;text-align:justify;text-justify:inter-word;hyphens:none;-webkit-hyphens:none;word-break:keep-all;overflow-wrap:break-word}
+      .rem-ed:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+      .rem-tb{display:flex;flex-wrap:wrap;gap:4px;padding:6px;background:var(--bg3);border:1px solid var(--border);border-bottom:none;border-radius:var(--rs) var(--rs) 0 0}
+      .rem-col{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;min-height:340px;transition:background .15s,box-shadow .15s,border-color .15s}
+      .rem-col.rem-col-over{background:var(--bg3);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim) inset}
+      .rem-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:11px 12px;cursor:grab;transition:transform .12s,box-shadow .15s,border-color .15s}
+      .rem-card:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.18);border-color:var(--accent-dim)}
+      .rem-card:active{cursor:grabbing}
+      .rem-badge{display:inline-flex;align-items:center;gap:3px;font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:999px;white-space:nowrap;line-height:1.4}
+      .rem-cat-seg{flex:1;padding:9px 6px;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--t2);transition:all .15s}
+      .rem-perg{border:1px solid var(--border);border-radius:var(--rs);background:var(--bg2);overflow:hidden}
+      .rem-perg-head{display:flex;align-items:center;gap:8px;padding:9px 11px;background:var(--bg3);cursor:pointer;user-select:none;transition:background .15s}
+      .rem-perg-head:hover{background:var(--bg)}
+      .rem-perg-tt{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:var(--accent)}
+      .rem-chev{display:inline-block;color:var(--accent);font-size:9px;transition:transform .15s}
+      .rem-chev.open{transform:rotate(90deg)}
+      .rem-perg-body{padding:11px}
+      .rem-collapsed{display:none}
+      .rem-cmt{margin-top:10px;border:1px dashed var(--border);border-radius:var(--rs);overflow:hidden}
+      .rem-cmt-head{display:flex;align-items:center;gap:7px;padding:8px 11px;cursor:pointer;user-select:none;font-size:12.5px;font-weight:600;color:var(--t2);background:color-mix(in srgb,var(--accent) 5%,transparent);transition:background .15s}
+      .rem-cmt-head:hover{background:color-mix(in srgb,var(--accent) 9%,transparent)}
+      .rem-cmt-body{padding:10px 11px}
+      .rem-box-status{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--green);opacity:0;transition:opacity .3s;white-space:nowrap}
+      .rem-box-status.show{opacity:1}
+      .rem-review{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)}
+      .rem-rev-btn{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;padding:5px 13px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--t2);transition:all .15s}
+      .rem-rev-btn:hover{border-color:var(--t2)}
+      .rem-rev-ok.on{background:rgba(63,185,80,.16);color:#3fb950;border-color:rgba(63,185,80,.55)}
+      .rem-rev-no.on{background:rgba(248,81,73,.16);color:#f85149;border-color:rgba(248,81,73,.55)}
+      .rem-rev-dot{font-size:11px;margin-left:6px}
+      #rem-saved-flash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:99999;opacity:0;transition:opacity .16s ease}
+      #rem-saved-flash.show{opacity:1}
+      #rem-saved-flash .rem-flash-card{display:flex;align-items:center;gap:13px;padding:18px 30px;background:var(--bg2);border:1px solid color-mix(in srgb,#3fb950 45%,var(--border));border-radius:16px;box-shadow:0 20px 55px rgba(0,0,0,.45),0 0 0 6px color-mix(in srgb,#3fb950 10%,transparent);color:var(--text);font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-weight:700;font-size:17px;transform:scale(.86);transition:transform .22s cubic-bezier(.2,1.5,.4,1)}
+      #rem-saved-flash.show .rem-flash-card{transform:scale(1)}
+      #rem-saved-flash .rem-flash-ic{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:#3fb950;color:#fff;font-size:19px;font-weight:900;flex-shrink:0}
+      .rem-head-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:12px}
+      .rem-req{color:#f85149;font-weight:700}
+      .rem-assunto-dd{border:1px solid var(--border);border-radius:var(--rs);background:var(--bg2);overflow:hidden}
+      .rem-assunto-field{display:flex;align-items:center;gap:8px;padding:9px 11px;cursor:pointer;min-height:42px}
+      .rem-assunto-field:hover{background:var(--bg3)}
+      .rem-assunto-chips{flex:1;display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-width:0}
+      .rem-assunto-chip{display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;background:var(--accent-dim);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,var(--border));border-radius:6px;padding:2px 4px 2px 7px}
+      .rem-assunto-chip button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:10px;padding:0 2px;line-height:1}
+      .rem-assunto-panel{padding:10px 11px;border-top:1px solid var(--border)}
+      .rem-assunto-list{max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+      .rem-assunto-item{display:flex;align-items:flex-start;gap:8px;padding:7px 8px;border-radius:7px;cursor:pointer;font-size:12.5px;line-height:1.35;color:var(--text)}
+      .rem-assunto-item:hover{background:var(--bg3)}
+      .rem-assunto-item input{margin-top:2px;flex-shrink:0;cursor:pointer}
+      .rem-assunto-item b{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:11px}
+    </style>
+    <div id="tab-rememberF1" class="hidden">
+      <div style="margin-bottom:16px">
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-spacing:-.3px;line-height:1.15">TSA · 1ª fase</h3>
+        <p style="font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;color:var(--accent);font-size:10.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:4px">Group Remember</p>
+      </div>
+      <div class="es" style="padding:48px 24px;text-align:center"><div style="font-size:34px;margin-bottom:8px">🚧</div><p style="color:var(--t2)">As funcionalidades da 1ª fase serão montadas num próximo momento.</p></div>
+    </div>
+
+    <div id="tab-rememberF2" class="hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-spacing:-.3px;line-height:1.15">Casos Clínicos · TSA 2ª fase</h3>
+          <p style="font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;color:var(--accent);font-size:10.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:4px">Lembranças da prova oral · confecção · banco de casos</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input id="rem-busca" class="fc" style="width:210px;height:36px" placeholder="🔎 Buscar caso..." oninput="remOnFiltro()"/>
+          <button class="btn btn-s btn-sm" id="rem-arq-btn" onclick="remToggleArquivados()" title="Ver casos arquivados (recuperáveis)">🗄️ Arquivados</button>
+          <button class="btn btn-s btn-sm" onclick="remExportBackup()" title="Baixar um backup .json de todos os casos">⬇️ Backup</button>
+          <button class="btn btn-p btn-sm" onclick="openRemModal()">+ Novo caso</button>
+        </div>
+      </div>
+      <div id="rem-filtros" style="margin-bottom:12px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg2);overflow:hidden">
+        <div onclick="remToggleFiltros()" style="display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none">
+          <span id="rem-filtros-chev" class="rem-chev">▶</span>
+          <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13.5px">Filtros</span>
+          <span id="rem-filtros-resumo" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;color:var(--accent)"></span>
+          <span style="flex:1"></span>
+          <button class="btn btn-s btn-sm" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();remLimparFiltros()">Limpar filtro</button>
+        </div>
+        <div id="rem-filtros-body" class="rem-collapsed" style="padding:0 14px 14px"></div>
+      </div>
+      <div id="remember-kanban" style="display:grid;grid-template-columns:repeat(5,minmax(218px,1fr));gap:12px;align-items:flex-start;overflow-x:auto;padding-bottom:8px"></div>
+    </div>
+
     <div id="tab-features" class="hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
         <div>
@@ -12676,6 +12762,10 @@ const TAB_GROUPS=[
     {id:'mentorias',label:'🎓 Coord. 1ª fase'},
     {id:'mentoriasF2',label:'🟨 Coord. 2ª fase'}
   ]},
+  {id:'groupRemember',label:'Group Remember',tabs:[
+    {id:'rememberF1',label:'🧠 TSA 1ª fase'},
+    {id:'rememberF2',label:'🗣️ TSA 2ª fase'}
+  ]},
   {id:'produtos',label:'Produtos',tabs:[
     {id:'produtos',label:'🛍️ Catálogo de Produtos'}
   ]},
@@ -19010,6 +19100,1029 @@ async function loadFeatures(){
   }catch(e){console.error('loadFeatures:',e);S.features=[];}
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// GROUP REMEMBER · TSA 2ª fase — quadro Kanban de casos clínicos (lembranças
+// da prova oral → confecção pelos profs → banco de casos pros simulados).
+// Coleção Firestore: remembers/{id}. Imagens inline no Storage: remembers/{id}/...
+// ════════════════════════════════════════════════════════════════════════════
+const _REM_COLS=[
+  {id:'pendente',label:'Pendentes',cor:'var(--t2)'},
+  {id:'confeccao',label:'Em confecção',cor:'var(--accent)'},
+  {id:'revisao',label:'Revisão',cor:'#d29922'},
+  {id:'reprovado',label:'Reprovado',cor:'#f85149'},
+  {id:'aprovado',label:'Aprovado',cor:'#3fb950'},
+  {id:'utilizado',label:'Utilizado',cor:'#a371f7'}
+];
+const _REM_CATS={
+  simulacao:{label:'Simulação',cor:'#2f81f7',bg:'rgba(47,129,247,.14)',bd:'rgba(47,129,247,.4)'},
+  oral:{label:'Oral online',cor:'#a371f7',bg:'rgba(163,113,247,.14)',bd:'rgba(163,113,247,.4)'},
+  criar:{label:'Criar',cor:'#3fb950',bg:'rgba(63,185,80,.14)',bd:'rgba(63,185,80,.4)'}
+};
+const _REM_CAT_ORDER=['simulacao','oral','criar'];
+const _REM_PROF_PEND=['confeccao','revisao','reprovado','aprovado','utilizado'];
+// Assuntos do edital (56 pontos) — mesma lista do PO MedReview.
+const _REM_ASSUNTOS=[
+  ['P1','Ética Médica e Bioética. Responsabilidade Profissional do Anestesiologista'],
+  ['P2','Organização da SBA, Cooperativismo e SUS'],
+  ['P3','Risco Profissional do Anestesiologista'],
+  ['P4','Avaliação e Preparo Pré-Anestésico'],
+  ['P5','Vias Aéreas'],
+  ['P6','Posicionamento'],
+  ['P7','Equipamentos'],
+  ['P8','Sistema Nervoso Central e Autônomo'],
+  ['P9','Fisiologia e Farmacologia do Sistema Cardiocirculatório'],
+  ['P10','Fisiologia e Farmacologia do Sistema Respiratório'],
+  ['P11','Farmacologia Geral'],
+  ['P12','Farmacologia dos Anestésicos Venosos'],
+  ['P13','Farmacologia dos Anestésicos Inalatórios'],
+  ['P14','Farmacologia dos Anestésicos Locais'],
+  ['P15','Transmissão e Bloqueio Neuromuscular'],
+  ['P16','Parada Cardíaca e Reanimação'],
+  ['P17','Bloqueios Subaracnóideo e Peridural'],
+  ['P18','Complicações da Anestesia'],
+  ['P19','Recuperação Pós-anestésica'],
+  ['P20','Metodologia Científica'],
+  ['P21','Monitorização'],
+  ['P22','Sistemas de Administração de Anestesia Inalatória'],
+  ['P23','Anestesia Inalatória'],
+  ['P24','Anestesia Venosa'],
+  ['P25','Bloqueios Periféricos'],
+  ['P26','Equilíbrio Hidroeletrolítico e Acidobásico'],
+  ['P27','Reposição Volêmica e Transfusão'],
+  ['P28','Hemostasia e Anticoagulação'],
+  ['P29','Fisiologia e Farmacologia do Sistema Urinário'],
+  ['P30','Anestesia em Urologia'],
+  ['P31','Anestesia em Obstetrícia'],
+  ['P32','Anestesia em Ortopedia'],
+  ['P33','Anestesia para Cirurgia Abdominal'],
+  ['P34','Anestesia para Otorrinolaringologia'],
+  ['P35','Anestesia para Oftalmologia'],
+  ['P36','Anestesia Ambulatorial'],
+  ['P37','Anestesia e Sistema Endócrino'],
+  ['P38','Anestesia em Urgências e no Trauma'],
+  ['P39','Anestesia para Cirurgia Plástica'],
+  ['P40','Anestesia Bucomaxilofacial e para Odontologia'],
+  ['P41','Anestesia para Cirurgia Torácica'],
+  ['P42','Anestesia e Sistema Cardiovascular'],
+  ['P43','Anestesia para Neurocirurgia'],
+  ['P44','Hipotermia e Hipotensão Arterial Induzida'],
+  ['P45','Choque'],
+  ['P46','Anestesia em Geriatria'],
+  ['P47','Anestesia em Pediatria'],
+  ['P48','Anestesia para Transplantes'],
+  ['P49','Anestesia para Procedimentos Fora do Centro Cirúrgico'],
+  ['P50','Dor Aguda e Inflamação'],
+  ['P51','Dor Crônica'],
+  ['P52','Suporte Ventilatório'],
+  ['P53','Qualidade e Segurança em Anestesia'],
+  ['P54','Gerenciamento do Centro Cirúrgico'],
+  ['P55','Medicina Paliativa'],
+  ['P56','Medicina aeroespacial e tratamento hiperbárico'],
+].map(([id,nome])=>({id,nome}));
+const _REM_ASSUNTO_MAP=Object.fromEntries(_REM_ASSUNTOS.map(a=>[a.id,a.nome]));
+const _remAssuntoNome=id=>_REM_ASSUNTO_MAP[id]?(id+' · '+_REM_ASSUNTO_MAP[id]):id;
+const _REM_PROVA=['TSA','TEA'];
+const _REM_ORIGEM=[['autoral','Autoral'],['oficial','Oficial']];
+// Código curto e único por caso (controle).
+function _remGenCodigo(){
+  const usados=new Set((S.remember||[]).map(c=>c.codigo).filter(Boolean));
+  let code,guard=0;
+  do{code='CC-'+Math.random().toString(36).slice(2,6).toUpperCase();guard++;}while(usados.has(code)&&guard<99);
+  return code;
+}
+function _remAssuntoResumo(c){
+  const ids=Array.isArray(c.assuntos)?c.assuntos:[];
+  if(!ids.length){
+    if(c.titulo&&c.titulo.trim()&&!/^CC-/.test(c.titulo))return _remEsc(c.titulo);
+    return '<span style="color:var(--t2);font-style:italic">Definir Tema</span>';
+  }
+  return `<span title="${_remEsc(ids.map(_remAssuntoNome).join(', '))}">${_remEsc(ids.join(', '))}</span>`;
+}
+function _remTituloAuto(e){
+  const ids=e.assuntos||[];
+  if(ids.length)return ids.map(_remAssuntoNome).join(' · ').slice(0,190);
+  if(e.titulo&&e.titulo.trim())return e.titulo.trim();
+  return e.codigo||'Caso';
+}
+
+function _remStrip(html){try{const d=document.createElement('div');d.innerHTML=html||'';return(d.textContent||'').replace(/\s+/g,' ').trim();}catch(e){return'';}}
+function _remSanitize(html){
+  try{
+    const d=document.createElement('div');d.innerHTML=html||'';
+    d.querySelectorAll('script,style,iframe,object,embed,link,meta,noscript').forEach(n=>n.remove());
+    d.querySelectorAll('*').forEach(n=>{
+      [...n.attributes].forEach(a=>{
+        const an=a.name.toLowerCase();
+        if(an.startsWith('on'))n.removeAttribute(a.name);
+        else if((an==='src'||an==='href')&&/^\s*javascript:/i.test(a.value))n.removeAttribute(a.name);
+      });
+    });
+    return d.innerHTML;
+  }catch(e){return html||'';}
+}
+const _remNovaPerg=()=>({id:'p_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),html:'',comentario:'',_open:false,_cmtOpen:false});
+// Feedback visual central ao salvar um caso.
+function _remSavedFlash(msg){
+  let el=document.getElementById('rem-saved-flash');
+  if(!el){el=document.createElement('div');el.id='rem-saved-flash';document.body.appendChild(el);}
+  el.innerHTML=`<div class="rem-flash-card"><span class="rem-flash-ic">✓</span><span>${_remEsc(msg||'Caso salvo')}</span></div>`;
+  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),1300);
+}
+const _remEsc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+
+async function loadRemember(){
+  try{
+    const snap=await getDocs(collection(db,'remembers'));
+    S.remember=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){console.error('loadRemember:',e);S.remember=S.remember||[];}
+}
+
+window.renderRememberF1=()=>{/* placeholder — funcionalidades da 1ª fase virão depois */};
+
+window.renderRememberF2=async()=>{
+  await loadRemember();
+  _remRenderBoard();
+};
+
+window.remOnFiltro=()=>{
+  S._remFiltro=document.getElementById('rem-busca')?.value||'';
+  _remRenderBoard();
+};
+
+window.remToggleArquivados=()=>{
+  S._remShowArq=!S._remShowArq;
+  const b=document.getElementById('rem-arq-btn');
+  if(b){b.textContent=S._remShowArq?'← Voltar ao quadro':'🗄️ Arquivados';b.classList.toggle('btn-p',S._remShowArq);b.classList.toggle('btn-s',!S._remShowArq);}
+  _remRenderBoard();
+};
+
+// Backup manual: baixa um .json com TODOS os casos (cópia off-line de segurança)
+window.remExportBackup=()=>{
+  try{
+    const stamp=new Date().toISOString();
+    const data=JSON.stringify({exportadoEm:stamp,total:(S.remember||[]).length,casos:S.remember||[]},null,2);
+    const blob=new Blob([data],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='remember-backup-'+stamp.slice(0,10)+'.json';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+  }catch(e){alert('Erro ao exportar backup: '+(e.message||e));}
+};
+
+// Nomes personalizados das colunas (override do label padrão). Persistido em
+// config/settings.rememberColLabels — o status id (pendente, confeccao, ...) NÃO muda.
+function _remColLabel(colId,def){const o=S.cfg&&S.cfg.rememberColLabels;return (o&&o[colId])||def;}
+async function _remSaveColLabel(colId,val){
+  S.cfg=S.cfg||{};
+  S.cfg.rememberColLabels=Object.assign({},S.cfg.rememberColLabels,{[colId]:val});
+  try{await setDoc(doc(db,'config','settings'),{rememberColLabels:S.cfg.rememberColLabels},{merge:true});}
+  catch(e){console.error('saveColLabel:',e);alert('Erro ao salvar o nome da coluna: '+(e.code||e.message));}
+}
+window.remEditColTitle=(ev,colId)=>{
+  ev.stopPropagation();
+  const el=ev.currentTarget;if(!el||el.dataset.editing)return;
+  const cur=el.textContent;
+  const input=document.createElement('input');
+  input.type='text';input.value=cur;input.maxLength=40;
+  input.style.cssText="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:"+(el.dataset.cor||'var(--text)')+";background:var(--bg);border:1px solid var(--accent);border-radius:6px;padding:2px 6px;width:150px;max-width:100%;outline:none";
+  el.replaceWith(input);
+  input.focus();input.select();
+  let done=false;
+  const commit=async(save)=>{
+    if(done)return;done=true;
+    const val=input.value.trim();
+    if(save&&val&&val!==cur)await _remSaveColLabel(colId,val);
+    _remRenderBoard();
+  };
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();commit(true);}else if(e.key==='Escape'){e.preventDefault();commit(false);}});
+  input.addEventListener('blur',()=>commit(true));
+};
+
+// ── Filtros do quadro (Assunto + Professor) ──
+function _remFiltrosResumo(){
+  const a=(S._remFiltroAssuntos||[]).length,p=(S._remFiltroProfs||[]).length;
+  const parts=[];if(a)parts.push(a+' assunto'+(a>1?'s':''));if(p)parts.push(p+' prof'+(p>1?'s':''));
+  const el=document.getElementById('rem-filtros-resumo');if(el)el.textContent=parts.length?('· '+parts.join(' · ')):'';
+}
+function _remFiltroAssListHTML(){
+  const dA=new Set(S._remFiltroDraftAssuntos||[]);
+  const t=(S._remFiltroAssTermo||'').toLowerCase().trim();
+  return _REM_ASSUNTOS.filter(x=>!t||(x.id+' '+x.nome).toLowerCase().includes(t)).map(x=>`<label class="rem-assunto-item"><input type="checkbox" ${dA.has(x.id)?'checked':''} onclick="remFiltroToggleAssunto('${x.id}')"/><span><b>${x.id}</b> · ${_remEsc(x.nome)}</span></label>`).join('');
+}
+function _remRenderFiltrosBody(){
+  const body=document.getElementById('rem-filtros-body');if(!body)return;
+  const dP=new Set(S._remFiltroDraftProfs||[]);
+  const profs=(S.profs||[]);
+  const profItems=profs.length?profs.map((p,i)=>`<label class="rem-assunto-item"><input type="checkbox" ${dP.has(p)?'checked':''} onclick="remFiltroToggleProf(${i})"/><span>${_remEsc(p)}</span></label>`).join(''):'<div style="padding:8px;color:var(--t2);font-size:12px">Nenhum professor cadastrado.</div>';
+  body.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;border-top:1px solid var(--border);padding-top:12px">
+    <div>
+      <div class="fl" style="margin-bottom:6px">Assunto</div>
+      <input class="fc" id="rem-filtros-ass-busca" placeholder="🔎 Buscar assunto..." value="${_remEsc(S._remFiltroAssTermo||'')}" oninput="remFiltroBuscaAssunto(this.value)" style="margin-bottom:8px"/>
+      <div id="rem-filtros-ass-list" class="rem-assunto-list" style="max-height:220px">${_remFiltroAssListHTML()}</div>
+    </div>
+    <div>
+      <div class="fl" style="margin-bottom:6px">Professor</div>
+      <div class="rem-assunto-list" style="max-height:252px">${profItems}</div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+    <button class="btn btn-s btn-sm" onclick="remLimparFiltros()">Limpar</button>
+    <button class="btn btn-p btn-sm" onclick="remAplicarFiltros()">Aplicar filtros</button>
+  </div>`;
+}
+window.remToggleFiltros=()=>{
+  const body=document.getElementById('rem-filtros-body'),ch=document.getElementById('rem-filtros-chev');
+  if(!body)return;const willOpen=body.classList.contains('rem-collapsed');
+  if(willOpen){
+    S._remFiltroDraftAssuntos=[...(S._remFiltroAssuntos||[])];
+    S._remFiltroDraftProfs=[...(S._remFiltroProfs||[])];
+    S._remFiltroAssTermo='';
+    _remRenderFiltrosBody();
+  }
+  body.classList.toggle('rem-collapsed',!willOpen);if(ch)ch.classList.toggle('open',willOpen);
+};
+window.remFiltroToggleAssunto=(id)=>{
+  S._remFiltroDraftAssuntos=S._remFiltroDraftAssuntos||[];
+  const i=S._remFiltroDraftAssuntos.indexOf(id);if(i>=0)S._remFiltroDraftAssuntos.splice(i,1);else S._remFiltroDraftAssuntos.push(id);
+};
+window.remFiltroToggleProf=(idx)=>{
+  const nome=(S.profs||[])[idx];if(nome==null)return;
+  S._remFiltroDraftProfs=S._remFiltroDraftProfs||[];
+  const i=S._remFiltroDraftProfs.indexOf(nome);if(i>=0)S._remFiltroDraftProfs.splice(i,1);else S._remFiltroDraftProfs.push(nome);
+};
+window.remFiltroBuscaAssunto=(t)=>{
+  S._remFiltroAssTermo=t||'';
+  const el=document.getElementById('rem-filtros-ass-list');if(el)el.innerHTML=_remFiltroAssListHTML();
+};
+window.remAplicarFiltros=()=>{
+  S._remFiltroAssuntos=[...(S._remFiltroDraftAssuntos||[])];
+  S._remFiltroProfs=[...(S._remFiltroDraftProfs||[])];
+  _remFiltrosResumo();_remRenderBoard();
+};
+window.remLimparFiltros=()=>{
+  S._remFiltroAssuntos=[];S._remFiltroProfs=[];
+  S._remFiltroDraftAssuntos=[];S._remFiltroDraftProfs=[];S._remFiltroAssTermo='';
+  _remFiltrosResumo();
+  const body=document.getElementById('rem-filtros-body');if(body&&!body.classList.contains('rem-collapsed'))_remRenderFiltrosBody();
+  _remRenderBoard();
+};
+
+function _remRenderBoard(){
+  const root=document.getElementById('remember-kanban');if(!root)return;
+  _remFiltrosResumo();
+  const showArq=!!S._remShowArq;
+  const termo=(S._remFiltro||'').trim().toLowerCase();
+  let casos=(S.remember||[]).filter(c=>(c.fase||'f2')==='f2');
+  if(termo)casos=casos.filter(c=>((c.codigo||'')+' '+(c.titulo||'')+' '+(Array.isArray(c.assuntos)?c.assuntos.map(_remAssuntoNome).join(' '):'')+' '+_remStrip(c.enunciado||'')).toLowerCase().includes(termo));
+  const _fA=S._remFiltroAssuntos||[],_fP=S._remFiltroProfs||[];
+  if(_fA.length)casos=casos.filter(c=>Array.isArray(c.assuntos)&&c.assuntos.some(a=>_fA.includes(a)));
+  if(_fP.length)casos=casos.filter(c=>_fP.includes(c.profNome||''));
+  if(showArq){
+    const arq=casos.filter(c=>c.arquivado);
+    root.style.gridTemplateColumns='1fr';
+    root.innerHTML=`<div class="rem-col" style="min-height:auto"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:1px dashed var(--border)"><div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:var(--t2)">🗄️ Arquivados — recuperáveis</div><span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--t2);background:var(--bg3);padding:2px 8px;border-radius:999px">${arq.length}</span></div><div style="display:flex;flex-direction:column;gap:8px">${arq.length?arq.map(_remArqCard).join(''):`<p style="color:var(--t2);font-size:12px;text-align:center;padding:24px;font-style:italic">Nenhum caso arquivado.</p>`}</div></div>`;
+    return;
+  }
+  root.style.gridTemplateColumns=`repeat(${_REM_COLS.length},minmax(208px,1fr))`;
+  casos=casos.filter(c=>!c.arquivado);
+  root.innerHTML=_REM_COLS.map(col=>{
+    const items=casos.filter(c=>(c.status||'pendente')===col.id)
+      .sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
+    return `<div class="rem-col" data-col="${col.id}" ondragover="remDragOver(event)" ondragleave="remDragLeave(event)" ondrop="remDrop(event,'${col.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed var(--border)">
+        <div class="rem-col-title" data-cor="${col.cor}" title="Duplo clique para renomear" ondblclick="remEditColTitle(event,'${col.id}')" style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:${col.cor};cursor:text;padding:2px 4px;margin:-2px -4px;border-radius:6px">${_remEsc(_remColLabel(col.id,col.label))}</div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--t2);background:var(--bg3);padding:2px 8px;border-radius:999px">${items.length}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;min-height:40px">${items.length?items.map(_remCard).join(''):`<p style="color:var(--t2);font-size:11.5px;text-align:center;padding:20px 6px;font-style:italic">Sem casos.</p>`}</div>
+    </div>`;
+  }).join('');
+}
+
+function _remArqCard(c){
+  const cat=_REM_CATS[c.categoria]||{label:c.categoria||'—',cor:'var(--t2)',bg:'var(--bg3)',bd:'var(--border)'};
+  return `<div class="rem-card" style="cursor:default;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span class="rem-badge" style="background:${cat.bg};color:${cat.cor};border:1px solid ${cat.bd}">${cat.label}</span>
+    <span style="font-weight:600;font-size:13px;flex:1;min-width:150px">${_remEsc(c.titulo||'(sem título)')}</span>
+    ${c.ano?`<span class="rem-badge" style="background:var(--bg3);color:var(--t2);border:1px solid var(--border)">${_remEsc(c.ano)}</span>`:''}
+    <button type="button" class="btn btn-s btn-sm" style="font-size:11px" onclick="restaurarRemCaso('${c.id}')">↩️ Restaurar</button>
+    <button type="button" class="btn btn-d btn-sm" style="font-size:11px" onclick="hardDelRemCaso('${c.id}')">🗑️ Excluir</button>
+  </div>`;
+}
+
+function _remCard(c){
+  const cat=_REM_CATS[c.categoria]||{cor:'var(--t2)'};
+  const assunto=_remAssuntoResumo(c);
+  const prof=c.profNome
+    ? `<span class="rem-badge" style="background:var(--bg3);color:var(--text);border:1px solid var(--border)">👨‍🏫 ${_remEsc(c.profNome)}</span>`
+    : (_REM_PROF_PEND.includes(c.status||'')?`<span class="rem-badge" style="background:rgba(210,153,34,.14);color:#d29922;border:1px solid rgba(210,153,34,.4)">⚠ atribuir prof</span>`:'');
+  return `<div class="rem-card" draggable="true" ondragstart="remDragStart(event,'${c.id}')" ondragend="remDragEnd(event)" onclick="openRemModal('${c.id}')">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
+      <span style="display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono','SF Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.4px;color:var(--t3)"><span style="width:6px;height:6px;border-radius:50%;background:${cat.cor};flex-shrink:0"></span>${c.codigo?'#'+_remEsc(c.codigo):'—'}</span>
+      ${c.ano?`<span class="rem-badge" style="background:var(--bg3);color:var(--t2);border:1px solid var(--border)">${_remEsc(c.ano)}</span>`:''}
+    </div>
+    <div style="font-weight:600;font-size:13.5px;line-height:1.32;${prof?'margin-bottom:8px':''}">${assunto}</div>
+    ${prof?`<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${prof}</div>`:''}
+  </div>`;
+}
+
+// ── Drag & drop entre colunas ──
+let _remDragId=null;
+window.remDragStart=(ev,id)=>{_remDragId=id;ev.dataTransfer.effectAllowed='move';ev.target.style.opacity='.4';};
+window.remDragEnd=(ev)=>{ev.target.style.opacity='';};
+window.remDragOver=(ev)=>{ev.preventDefault();ev.dataTransfer.dropEffect='move';ev.currentTarget.classList.add('rem-col-over');};
+window.remDragLeave=(ev)=>{ev.currentTarget.classList.remove('rem-col-over');};
+window.remDrop=async(ev,colId)=>{
+  ev.preventDefault();ev.currentTarget.classList.remove('rem-col-over');
+  const id=_remDragId;_remDragId=null;
+  if(!id)return;
+  const c=(S.remember||[]).find(x=>x.id===id);
+  if(!c||(c.status||'pendente')===colId)return;
+  const oldStatus=c.status||'pendente';
+  const precisaProf=colId==='confeccao'&&!c.profNome;
+  // Mover para Peer-review exige tema definido (1+). Se não tem, pede antes de mover.
+  let extraTemas=null;
+  if(colId==='revisao'&&!(c.assuntos&&c.assuntos.length)){
+    const temas=await _remPickTema(c.assuntos);
+    if(!temas)return; // cancelou → aborta o movimento
+    extraTemas=temas;
+  }
+  try{
+    await setDoc(doc(db,'remembers',id),{status:colId,...(extraTemas?{assuntos:extraTemas}:{}),updatedAt:new Date().toISOString()},{merge:true});
+    c.status=colId;if(extraTemas)c.assuntos=extraTemas;
+  }catch(e){console.error('remDrop:',e);alert('Erro ao mover: '+(e.code||e.message));return;}
+  await renderRememberF2();
+  if(precisaProf)openRemAskProf(id);
+  await _remHandleStatusPayment(id,oldStatus,colId);
+};
+
+// ── Pagamento ao professor quando o caso é aprovado (gancho do Financeiro) ──
+// Entra em "Aprovado" → oferece lançar pagamento (valor automático do sistema
+// 'sys-caso-remember'). Sai de "Aprovado" → cancela o lançamento daquele caso.
+async function _remHandleStatusPayment(caseId,oldStatus,newStatus){
+  if(oldStatus===newStatus)return;
+  if(newStatus==='aprovado'&&oldStatus!=='aprovado')await _remOfferPayment(caseId);
+  else if(oldStatus==='aprovado'&&newStatus!=='aprovado')await _remCancelPayment(caseId);
+}
+async function _remOfferPayment(caseId){
+  // Lançamento financeiro é ação de admin do Financeiro (mesma regra do resto da aba).
+  if(typeof _isAdminEm==='function'&&!_isAdminEm('financeiro'))return;
+  const c=(S.remember||[]).find(x=>x.id===caseId);if(!c)return;
+  if(c.pagamentoLancId)return; // já tem pagamento lançado pra este caso
+  if(!c.profNome){await arosAlert({title:'Sem professor',message:'Este caso não tem professor atribuído — não dá pra lançar o pagamento. Atribua um professor e mova de novo.',icon:'⚠️'});return;}
+  await loadFinanceiro();
+  const valor=_finTipoVal('sys-caso-remember',1000);
+  // Mês de destino: o atual; se a planilha do mês estiver FECHADA, joga pro próximo mês aberto.
+  const mes=_remMesPagamento();
+  const fechouMesAtual=mes!==_curMesISO();
+  const ok=await arosConfirm({title:'Registrar pagamento?',message:`Lançar ${_BRL(valor)} para ${c.profNome} em ${_mesNome(mes)} pelo caso aprovado "${c.titulo||''}"?${fechouMesAtual?'\n(O mês atual já está fechado — o valor cai no mês seguinte.)':''}`,confirmLabel:'Registrar pagamento',cancelLabel:'Mover sem pagar',icon:'💰'});
+  if(!ok)return; // mover sem pagar
+  const lancId='lanc_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
+  S.financeiro.meses=S.financeiro.meses||{};
+  S.financeiro.meses[mes]=S.financeiro.meses[mes]||{status:'aberto',lancamentos:[]};
+  const m=S.financeiro.meses[mes];m.lancamentos=m.lancamentos||[];
+  m.lancamentos.push({id:lancId,profNome:c.profNome,tipoId:'sys-caso-remember',descricao:'Caso clínico: '+(c.titulo||''),valor,qtd:1,criadoEm:new Date().toISOString(),origemRemember:caseId});
+  if((m.profsExcluidos||[]).includes(c.profNome))m.profsExcluidos=m.profsExcluidos.filter(n=>n!==c.profNome);
+  try{
+    await saveFinanceiroDoc();
+    await setDoc(doc(db,'remembers',caseId),{pagamentoLancId:lancId,pagamentoMes:mes,pagamentoValor:valor,updatedAt:new Date().toISOString()},{merge:true});
+    c.pagamentoLancId=lancId;c.pagamentoMes=mes;c.pagamentoValor=valor;
+    if(S._remEdit&&S._remEdit.id===caseId){S._remEdit.pagamentoLancId=lancId;S._remEdit.pagamentoMes=mes;S._remEdit.pagamentoValor=valor;}
+  }catch(e){console.error('remOfferPayment:',e);await arosAlert({title:'Erro',message:'Não foi possível lançar o pagamento: '+(e.code||e.message),icon:'❌'});return;}
+  const tf=document.getElementById('tab-financeiro');if(tf&&!tf.classList.contains('hidden')&&typeof renderFinanceiro==='function')renderFinanceiro();
+  const mr=document.getElementById('modal-remember');
+  if(mr&&!mr.classList.contains('hidden')&&S._remEdit&&S._remEdit.id===caseId){_remSync();_remRenderModalBody();}
+  _remRenderBoard();
+  if(typeof arosToast==='function')arosToast('💰 Registrado para pagamento — '+_mesNome(mes),'success',2800);
+}
+// Mês de lançamento: pula meses fechados (cai no próximo mês aberto).
+function _remMesPagamento(){
+  let mes=_curMesISO(),guard=0;
+  while(guard++<24){
+    const md=(S.financeiro.meses||{})[mes];
+    if(md&&md.status==='fechado'){mes=(typeof _proximoMes==='function')?_proximoMes(mes):mes;}
+    else break;
+  }
+  return mes;
+}
+async function _remCancelPayment(caseId){
+  const c=(S.remember||[]).find(x=>x.id===caseId);if(!c||!c.pagamentoLancId)return;
+  const lancId=c.pagamentoLancId;
+  await loadFinanceiro();
+  let removed=false;
+  Object.values(S.financeiro.meses||{}).forEach(m=>{
+    if(Array.isArray(m.lancamentos)){const before=m.lancamentos.length;m.lancamentos=m.lancamentos.filter(l=>l.id!==lancId);if(m.lancamentos.length!==before)removed=true;}
+  });
+  try{
+    if(removed)await saveFinanceiroDoc();
+    await setDoc(doc(db,'remembers',caseId),{pagamentoLancId:deleteField(),pagamentoMes:deleteField(),pagamentoValor:deleteField(),updatedAt:new Date().toISOString()},{merge:true});
+    delete c.pagamentoLancId;delete c.pagamentoMes;delete c.pagamentoValor;
+    if(S._remEdit&&S._remEdit.id===caseId){delete S._remEdit.pagamentoLancId;delete S._remEdit.pagamentoMes;delete S._remEdit.pagamentoValor;}
+  }catch(e){console.error('remCancelPayment:',e);}
+  const tf=document.getElementById('tab-financeiro');if(tf&&!tf.classList.contains('hidden')&&typeof renderFinanceiro==='function')renderFinanceiro();
+  const mr=document.getElementById('modal-remember');
+  if(mr&&!mr.classList.contains('hidden')&&S._remEdit&&S._remEdit.id===caseId){_remSync();_remRenderModalBody();}
+  _remRenderBoard();
+}
+
+// ── Modal de edição do caso ──
+function _remEnsureModal(){
+  if(document.getElementById('modal-remember'))return;
+  const div=document.createElement('div');
+  div.className='mo hidden';div.id='modal-remember';
+  div.innerHTML=`<div class="md" style="max-width:920px">
+    <div class="mh"><div><div class="m-title" id="rem-mtitle" style="font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-weight:700;font-size:20px;letter-spacing:-.3px">Caso clínico</div></div><button class="m-close" onclick="CM('modal-remember')">✕</button></div>
+    <div class="m-body" id="rem-mbody"></div>
+    <div class="m-foot">
+      <button class="btn btn-d btn-sm" id="rem-del" onclick="arquivarRemCaso()" style="margin-right:auto;display:none">🗄️ Arquivar</button>
+      <button class="btn btn-p" id="rem-save-btn" onclick="saveRemCaso()">💾 Salvar tudo</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+}
+
+window.openRemModal=(id)=>{
+  _remEnsureModal();
+  const c=id?(S.remember||[]).find(x=>x.id===id):null;
+  if(c){
+    S._remEdit={id:c.id,novo:false,titulo:c.titulo||'',codigo:c.codigo||_remGenCodigo(),ano:c.ano||'',categoria:c.categoria||'simulacao',tipoProva:c.tipoProva||'TSA',origem:c.origem||'autoral',assuntos:Array.isArray(c.assuntos)?[...c.assuntos]:[],status:c.status||'pendente',profNome:c.profNome||'',enunciado:c.enunciado||'',arquivado:!!c.arquivado,
+      pagamentoLancId:c.pagamentoLancId||'',pagamentoMes:c.pagamentoMes||'',pagamentoValor:c.pagamentoValor||0,
+      review:c.review?{enunciado:{...(c.review.enunciado||{})},perguntas:{...(c.review.perguntas||{})}}:{enunciado:{},perguntas:{}},
+      perguntas:(Array.isArray(c.perguntas)?c.perguntas:[]).map((p,i)=>({id:(p&&p.id)||('p_'+i+'_'+Math.random().toString(36).slice(2,5)),html:typeof p==='string'?p:((p&&p.html)||''),comentario:(p&&p.comentario)||'',_open:false,_cmtOpen:false}))};
+  }else{
+    S._remEdit={id:'rem_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),novo:true,titulo:'',codigo:_remGenCodigo(),ano:String(new Date().getFullYear()),categoria:'simulacao',tipoProva:'TSA',origem:'autoral',assuntos:[],status:'pendente',profNome:'',enunciado:'',review:{enunciado:{},perguntas:{}},perguntas:[_remNovaPerg(),_remNovaPerg(),_remNovaPerg()]};
+  }
+  if(!S._remEdit.perguntas.length)S._remEdit.perguntas=[_remNovaPerg()];
+  // Em revisão/reprovado, abre as perguntas pra ficarem visíveis ao revisor/criador.
+  if(S._remEdit.status==='revisao'||S._remEdit.status==='reprovado')S._remEdit.perguntas.forEach(p=>{p._open=true;});
+  _remRenderModalBody();
+  document.getElementById('modal-remember').classList.remove('hidden');
+  setTimeout(()=>{const t=document.getElementById('rem-titulo');if(t&&S._remEdit.novo)t.focus();},60);
+};
+
+function _remToolbar(edId,imgId,stId){
+  const sw=(v,t)=>`<button type="button" class="ftb-c" title="${t}" style="background:${v}" onclick="remColor('${edId}','foreColor','${v}')"></button>`;
+  const svgL='<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="2" y1="3" x2="14" y2="3"/><line x1="2" y1="7" x2="10" y2="7"/><line x1="2" y1="11" x2="13" y2="11"/></svg>';
+  const svgC='<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="2" y1="3" x2="14" y2="3"/><line x1="4" y1="7" x2="12" y2="7"/><line x1="3" y1="11" x2="13" y2="11"/></svg>';
+  const svgJ='<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="2" y1="3" x2="14" y2="3"/><line x1="2" y1="7" x2="14" y2="7"/><line x1="2" y1="11" x2="14" y2="11"/></svg>';
+  return `<div class="rem-tb">
+    <button type="button" class="ftb" onclick="remExec('${edId}','bold')" title="Negrito"><strong>B</strong></button>
+    <button type="button" class="ftb" onclick="remExec('${edId}','italic')" title="Itálico"><em>I</em></button>
+    <button type="button" class="ftb" onclick="remExec('${edId}','underline')" title="Sublinhado"><u>U</u></button>
+    <button type="button" class="ftb" onclick="remExec('${edId}','strikeThrough')" title="Riscado"><s>S</s></button>
+    <span class="ftb-sep"></span>
+    <button type="button" class="ftb" onclick="remExec('${edId}','insertUnorderedList')" title="Lista">• Lista</button>
+    <button type="button" class="ftb" onclick="remExec('${edId}','insertOrderedList')" title="Lista numerada">1. Lista</button>
+    <span class="ftb-sep"></span>
+    <button type="button" class="ftb" onclick="remExec('${edId}','justifyLeft')" title="Esquerda" style="padding:6px 8px">${svgL}</button>
+    <button type="button" class="ftb" onclick="remExec('${edId}','justifyCenter')" title="Centralizar" style="padding:6px 8px">${svgC}</button>
+    <button type="button" class="ftb" onclick="remExec('${edId}','justifyFull')" title="Justificar" style="padding:6px 8px">${svgJ}</button>
+    <span class="ftb-sep"></span>
+    ${sw('#e6edf3','Padrão')}${sw('#f85149','Vermelho')}${sw('#d29922','Amarelo')}${sw('#3fb950','Verde')}${sw('#2f81f7','Azul')}${sw('#a371f7','Roxo')}
+    <span class="ftb-sep"></span>
+    <input type="file" id="${imgId}" accept="image/*" style="display:none" onchange="remInsertImg('${edId}','${stId}',event)"/>
+    <button type="button" class="ftb" onclick="document.getElementById('${imgId}').click()" title="Anexar imagem (cursor define a posição)" style="background:rgba(47,129,247,.12);color:var(--accent);font-weight:700">📷 Imagem</button>
+    <span class="ftb-sep"></span>
+    <button type="button" class="ftb" onclick="remExec('${edId}','removeFormat');remExec('${edId}','unlink')" title="Limpar formatação">⌫ Limpar</button>
+    <span id="${stId}" style="margin-left:auto;align-self:center;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--t2)"></span>
+  </div>`;
+}
+
+function _remPergBlock(p,i){
+  const open=p._open!==false;
+  const cOpen=!!p._cmtOpen;
+  const hasC=_remStrip(p.comentario||'').length>0||/<img/i.test(p.comentario||'');
+  return `<div class="rem-perg" data-pid="${p.id}">
+    <div class="rem-perg-head" onclick="remTogglePerg('${p.id}')">
+      <span class="rem-chev ${open?'open':''}">▶</span><span class="rem-perg-tt">Pergunta ${i+1}</span>${_remVerdictDot(p.id)}
+      <span style="flex:1"></span>
+      <button type="button" class="btn btn-p btn-sm" style="font-size:11px;padding:4px 11px" onclick="event.stopPropagation();remSaveBox('rem-perg-st-${p.id}')">💾 Salvar</button>
+      <span id="rem-perg-st-${p.id}" class="rem-box-status"></span>
+      <button type="button" class="btn btn-d btn-sm" style="font-size:11px;padding:4px 9px" onclick="event.stopPropagation();remDelPergunta('${p.id}')" title="Remover pergunta">✕</button>
+    </div>
+    <div class="rem-perg-body ${open?'':'rem-collapsed'}">
+      ${_remToolbar('rem-perg-'+p.id,'rem-perg-img-'+p.id,'rem-perg-tbst-'+p.id)}
+      <div id="rem-perg-${p.id}" contenteditable="true" class="rem-ed" data-placeholder="Digite a pergunta...">${p.html||''}</div>
+      <div class="rem-cmt">
+        <div class="rem-cmt-head" onclick="remToggleComent('${p.id}')"><span class="rem-chev ${cOpen?'open':''}">▶</span><span>💬 Comentário${hasC?' <b style="color:var(--accent)">•</b>':''}</span></div>
+        <div class="rem-cmt-body ${cOpen?'':'rem-collapsed'}">
+          ${_remToolbar('rem-cmt-'+p.id,'rem-cmt-img-'+p.id,'rem-cmt-tbst-'+p.id)}
+          <div id="rem-cmt-${p.id}" contenteditable="true" class="rem-ed" data-placeholder="Comentário, observações ou gabarito desta pergunta...">${p.comentario||''}</div>
+        </div>
+      </div>
+      ${_remReviewBar(p.id)}
+    </div>
+  </div>`;
+}
+
+function _remRenderModalBody(){
+  const e=S._remEdit;if(!e)return;
+  document.getElementById('rem-mtitle').textContent=e.novo?'Novo caso clínico':'Editar caso clínico';
+  document.getElementById('rem-del').style.display=e.novo?'none':'';
+  const catSel='<select class="fc" id="rem-cat">'+_REM_CAT_ORDER.map(k=>`<option value="${k}" ${e.categoria===k?'selected':''}>${_REM_CATS[k].label}</option>`).join('')+'</select>';
+  const provaSel='<select class="fc" id="rem-tipoprova">'+_REM_PROVA.map(v=>`<option value="${v}" ${e.tipoProva===v?'selected':''}>${v}</option>`).join('')+'</select>';
+  const origemSel='<select class="fc" id="rem-origem">'+_REM_ORIGEM.map(([v,l])=>`<option value="${v}" ${e.origem===v?'selected':''}>${l}</option>`).join('')+'</select>';
+  const _revMode=e.status==='revisao',_reprMode=e.status==='reprovado';
+  const _enunDot=_remVerdictDot('enunciado');
+  document.getElementById('rem-mbody').innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:4px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--t3)" title="ID do caso">${e.codigo?'#'+_remEsc(e.codigo):''}</span>
+    </div>
+    <div class="rem-head-grid">
+      <div class="fg" style="margin:0"><label class="fl">Ano <span class="rem-req">*</span></label><input class="fc" id="rem-ano" type="number" min="2000" max="2100" placeholder="2025" value="${_remEsc(e.ano)}"/></div>
+      <div class="fg" style="margin:0"><label class="fl">Tipo de prova</label>${provaSel}</div>
+      <div class="fg" style="margin:0"><label class="fl">Tipo de Caso</label>${catSel}</div>
+      <div class="fg" style="margin:0"><label class="fl">Origem</label>${origemSel}</div>
+    </div>
+    <div class="fg">
+      <label class="fl">Assunto <span style="font-size:10.5px;font-weight:500;color:var(--t2)">— opcional agora; obrigatório ao enviar à revisão (pode marcar mais de um)</span></label>
+      <div class="rem-assunto-dd">
+        <div class="rem-assunto-field" onclick="remToggleAssuntos()">
+          <div id="rem-assunto-chips" class="rem-assunto-chips">${_remAssuntoChipsHTML()}</div>
+          <span id="rem-assunto-chev" class="rem-chev">▶</span>
+        </div>
+        <div id="rem-assunto-panel" class="rem-assunto-panel rem-collapsed">
+          <input class="fc" placeholder="🔎 Buscar assunto..." oninput="remFiltraAssuntos(this.value)" style="margin-bottom:8px"/>
+          <div id="rem-assunto-list" class="rem-assunto-list">${_remAssuntoListHTML('')}</div>
+        </div>
+      </div>
+    </div>
+    ${e.profNome?`<div class="fg">
+      <label class="fl">Professor responsável</label>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs)">
+        <span style="display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13.5px">👨‍🏫 ${_remEsc(e.profNome)}</span>
+        <span style="flex:1"></span>
+        <button type="button" class="btn btn-s btn-sm" onclick="openRemAskProf('${e.id}')">🔄 Trocar</button>
+        <button type="button" class="btn btn-d btn-sm" onclick="remRemoverProf('${e.id}')">✕ Remover</button>
+      </div>
+    </div>`:''}
+    ${e.pagamentoLancId?`<div class="fg">
+      <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.35);border-radius:var(--rs);font-size:12.5px;color:#3fb950;font-weight:600">💰 Pagamento lançado no Financeiro: ${_BRL(e.pagamentoValor||0)}${e.pagamentoMes?' · '+_mesNome(e.pagamentoMes):''}</div>
+    </div>`:''}
+    ${(_revMode||_reprMode)?`<div class="fg"><div id="rem-rev-resumo" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);font-size:12.5px">${_remReviewResumoHTML()}</div></div>`:''}
+    <div class="fg">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <label class="fl" style="margin:0">Enunciado${_enunDot}</label>
+        <span style="flex:1"></span>
+        <button type="button" class="btn btn-p btn-sm" style="font-size:11px;padding:4px 11px" onclick="remSaveBox('rem-enun-st')">💾 Salvar</button>
+        <span id="rem-enun-st" class="rem-box-status"></span>
+      </div>
+      ${_remToolbar('rem-enun','rem-enun-img','rem-enun-tbst')}
+      <div id="rem-enun" contenteditable="true" class="rem-ed" data-placeholder="Descreva o caso clínico...">${e.enunciado||''}</div>
+      ${_remReviewBar('enunciado')}
+    </div>
+    <div class="fg">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+        <label class="fl" style="margin:0">Perguntas</label>
+        <button type="button" class="btn btn-s btn-sm" onclick="remAddPergunta()">+ Pergunta</button>
+      </div>
+      <div id="rem-perg-list" style="display:flex;flex-direction:column;gap:12px">${e.perguntas.map((p,i)=>_remPergBlock(p,i)).join('')}</div>
+    </div>
+    <div id="rem-err" class="al al-e hidden"></div>`;
+}
+
+function _remSync(){
+  const e=S._remEdit;if(!e)return;
+  const a=document.getElementById('rem-ano');if(a)e.ano=a.value;
+  const cat=document.getElementById('rem-cat');if(cat)e.categoria=cat.value;
+  const tp=document.getElementById('rem-tipoprova');if(tp)e.tipoProva=tp.value;
+  const og=document.getElementById('rem-origem');if(og)e.origem=og.value;
+  const st=document.getElementById('rem-status');if(st)e.status=st.value;
+  const en=document.getElementById('rem-enun');if(en)e.enunciado=en.innerHTML;
+  e.perguntas.forEach(p=>{const el=document.getElementById('rem-perg-'+p.id);if(el)p.html=el.innerHTML;const c=document.getElementById('rem-cmt-'+p.id);if(c)p.comentario=c.innerHTML;});
+  // Comentários de "o que ajustar" da revisão (textareas .rem-ajuste)
+  e.review=e.review||{enunciado:{},perguntas:{}};e.review.perguntas=e.review.perguntas||{};
+  document.querySelectorAll('#modal-remember .rem-ajuste').forEach(ta=>{
+    const blk=ta.dataset.block;
+    if(blk==='enunciado'){e.review.enunciado=e.review.enunciado||{};e.review.enunciado.ajuste=ta.value;}
+    else{e.review.perguntas[blk]=e.review.perguntas[blk]||{};e.review.perguntas[blk].ajuste=ta.value;}
+  });
+}
+
+// ── Dropdown de Assunto (multi-seleção dos 56 pontos) ──
+function _remAssuntoChipsHTML(){
+  const sel=(S._remEdit&&S._remEdit.assuntos)||[];
+  if(!sel.length)return '<span style="color:var(--t2);font-style:italic">Definir tema — clique para selecionar</span>';
+  return sel.map(id=>`<span class="rem-assunto-chip" title="${_remEsc(_remAssuntoNome(id))}">${id}<button type="button" onclick="event.stopPropagation();remToggleAssunto('${id}')">✕</button></span>`).join('');
+}
+function _remAssuntoListHTML(termo){
+  const sel=new Set((S._remEdit&&S._remEdit.assuntos)||[]);
+  const t=(termo||'').toLowerCase().trim();
+  const items=_REM_ASSUNTOS.filter(a=>!t||(a.id+' '+a.nome).toLowerCase().includes(t));
+  if(!items.length)return '<div style="padding:10px;color:var(--t2);font-size:12.5px">Nada encontrado.</div>';
+  return items.map(a=>`<label class="rem-assunto-item"><input type="checkbox" ${sel.has(a.id)?'checked':''} onclick="remToggleAssunto('${a.id}')"/><span><b>${a.id}</b> · ${_remEsc(a.nome)}</span></label>`).join('');
+}
+window.remToggleAssuntos=()=>{
+  const p=document.getElementById('rem-assunto-panel'),ch=document.getElementById('rem-assunto-chev');
+  if(!p)return;const willOpen=p.classList.contains('rem-collapsed');
+  p.classList.toggle('rem-collapsed',!willOpen);if(ch)ch.classList.toggle('open',willOpen);
+};
+window.remToggleAssunto=(id)=>{
+  const e=S._remEdit;if(!e)return;e.assuntos=e.assuntos||[];
+  const i=e.assuntos.indexOf(id);
+  if(i>=0)e.assuntos.splice(i,1);else e.assuntos.push(id);
+  // ordena por número do ponto
+  e.assuntos.sort((a,b)=>(parseInt(a.slice(1))||0)-(parseInt(b.slice(1))||0));
+  const chips=document.getElementById('rem-assunto-chips');if(chips)chips.innerHTML=_remAssuntoChipsHTML();
+  const list=document.getElementById('rem-assunto-list');if(list)list.innerHTML=_remAssuntoListHTML(S._remAssuntoTermo||'');
+};
+window.remFiltraAssuntos=(termo)=>{
+  S._remAssuntoTermo=termo||'';
+  const list=document.getElementById('rem-assunto-list');if(list)list.innerHTML=_remAssuntoListHTML(S._remAssuntoTermo);
+};
+
+// ── Modal de seleção de tema (obrigatório ao enviar de Produção → Peer-review) ──
+let _remTemaResolve=null;
+function _remEnsureTemaModal(){
+  if(document.getElementById('modal-rem-tema'))return;
+  const div=document.createElement('div');div.className='mo hidden';div.id='modal-rem-tema';
+  div.innerHTML=`<div class="md" style="max-width:560px">
+    <div class="mh"><div><div class="m-title" style="font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px">Definir o tema do caso</div></div><button class="m-close" onclick="_remTemaClose(null)">✕</button></div>
+    <div class="m-body">
+      <p style="color:var(--t2);font-size:13px;margin:0 0 10px">Para enviar à revisão, selecione 1 ou mais assuntos do edital.</p>
+      <div id="rem-tema-chips" class="rem-assunto-chips" style="margin-bottom:8px;min-height:24px"></div>
+      <input class="fc" placeholder="🔎 Buscar assunto..." oninput="remTemaFiltra(this.value)" style="margin-bottom:8px"/>
+      <div id="rem-tema-list" class="rem-assunto-list" style="max-height:300px"></div>
+    </div>
+    <div class="m-foot"><button class="btn btn-p" onclick="remTemaConfirm()">Confirmar e enviar à revisão</button></div>
+  </div>`;
+  document.body.appendChild(div);
+}
+function _remTemaChipsHTML(){
+  const sel=S._remTemaPick||[];
+  if(!sel.length)return '<span style="color:var(--t2);font-style:italic">Nenhum tema selecionado</span>';
+  return sel.map(id=>`<span class="rem-assunto-chip" title="${_remEsc(_remAssuntoNome(id))}">${id}<button type="button" onclick="remTemaToggle('${id}')">✕</button></span>`).join('');
+}
+function _remTemaListHTML(termo){
+  const sel=new Set(S._remTemaPick||[]);
+  const t=(termo||'').toLowerCase().trim();
+  return _REM_ASSUNTOS.filter(a=>!t||(a.id+' '+a.nome).toLowerCase().includes(t)).map(a=>`<label class="rem-assunto-item"><input type="checkbox" ${sel.has(a.id)?'checked':''} onclick="remTemaToggle('${a.id}')"/><span><b>${a.id}</b> · ${_remEsc(a.nome)}</span></label>`).join('');
+}
+window.remTemaToggle=(id)=>{
+  S._remTemaPick=S._remTemaPick||[];
+  const i=S._remTemaPick.indexOf(id);
+  if(i>=0)S._remTemaPick.splice(i,1);else S._remTemaPick.push(id);
+  S._remTemaPick.sort((a,b)=>(parseInt(a.slice(1))||0)-(parseInt(b.slice(1))||0));
+  const ch=document.getElementById('rem-tema-chips');if(ch)ch.innerHTML=_remTemaChipsHTML();
+  const li=document.getElementById('rem-tema-list');if(li)li.innerHTML=_remTemaListHTML(S._remTemaTermo||'');
+};
+window.remTemaFiltra=(t)=>{S._remTemaTermo=t||'';const li=document.getElementById('rem-tema-list');if(li)li.innerHTML=_remTemaListHTML(S._remTemaTermo);};
+window.remTemaConfirm=()=>{
+  if(!(S._remTemaPick&&S._remTemaPick.length)){arosAlert({title:'Selecione um tema',message:'Escolha pelo menos 1 assunto para enviar à revisão.',icon:'⚠️'});return;}
+  _remTemaClose([...S._remTemaPick]);
+};
+window._remTemaClose=(val)=>{const m=document.getElementById('modal-rem-tema');if(m)m.classList.add('hidden');const r=_remTemaResolve;_remTemaResolve=null;if(r)r(val);};
+function _remPickTema(pre){
+  _remEnsureTemaModal();
+  S._remTemaPick=Array.isArray(pre)?[...pre]:[];S._remTemaTermo='';
+  document.getElementById('rem-tema-chips').innerHTML=_remTemaChipsHTML();
+  document.getElementById('rem-tema-list').innerHTML=_remTemaListHTML('');
+  document.getElementById('modal-rem-tema').classList.remove('hidden');
+  return new Promise(res=>{_remTemaResolve=res;});
+}
+
+// ── Revisão por bloco (peer-review) ──
+function _remBlockReview(blockKey){
+  const e=S._remEdit;if(!e)return{};
+  e.review=e.review||{enunciado:{},perguntas:{}};e.review.perguntas=e.review.perguntas||{};
+  return blockKey==='enunciado'?(e.review.enunciado=e.review.enunciado||{}):(e.review.perguntas[blockKey]=e.review.perguntas[blockKey]||{});
+}
+function _remVerdictDot(blockKey){
+  const e=S._remEdit;if(!e||(e.status!=='revisao'&&e.status!=='reprovado'))return'';
+  const v=_remBlockReview(blockKey).veredito||'';
+  if(v==='aprovado')return'<span class="rem-rev-dot" style="color:#3fb950" title="Aprovado na revisão">●</span>';
+  if(v==='reprovado')return'<span class="rem-rev-dot" style="color:#f85149" title="Reprovado — ajustar">●</span>';
+  return'';
+}
+function _remReviewBar(blockKey){
+  const e=S._remEdit;if(!e)return'';
+  const mode=e.status;if(mode!=='revisao'&&mode!=='reprovado')return'';
+  const r=_remBlockReview(blockKey);const v=r.veredito||'';
+  if(mode==='reprovado'){
+    if(v==='aprovado')return`<div class="rem-review" data-block="${blockKey}"><span class="rem-badge" style="background:rgba(63,185,80,.14);color:#3fb950;border:1px solid rgba(63,185,80,.4)">✓ Aprovado na revisão</span></div>`;
+    if(v==='reprovado')return`<div class="rem-review" data-block="${blockKey}"><div style="margin-bottom:6px"><span class="rem-badge" style="background:rgba(248,81,73,.14);color:#f85149;border:1px solid rgba(248,81,73,.4)">✗ Reprovado — ajustar</span></div><div style="padding:9px 12px;background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.3);border-radius:var(--rs);font-size:13px;color:var(--text);white-space:pre-wrap">${_remEsc(r.ajuste||'(sem comentário do revisor)')}</div></div>`;
+    return'';
+  }
+  return `<div class="rem-review" data-block="${blockKey}">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.5px;color:var(--t2);text-transform:uppercase">Revisão deste bloco:</span>
+      <button type="button" class="rem-rev-btn rem-rev-ok ${v==='aprovado'?'on':''}" onclick="remSetVeredito('${blockKey}','aprovado')">✓ Aprovar</button>
+      <button type="button" class="rem-rev-btn rem-rev-no ${v==='reprovado'?'on':''}" onclick="remSetVeredito('${blockKey}','reprovado')">✗ Reprovar</button>
+    </div>
+    <textarea class="rem-ajuste fc" data-block="${blockKey}" placeholder="O que precisa ser ajustado neste bloco? (obrigatório ao reprovar)" style="margin-top:8px;width:100%;min-height:68px;resize:vertical;${v==='reprovado'?'':'display:none'}">${_remEsc(r.ajuste||'')}</textarea>
+  </div>`;
+}
+function _remReviewCounts(){
+  const e=S._remEdit;const vs=[];
+  vs.push(_remBlockReview('enunciado').veredito||'');
+  (e.perguntas||[]).forEach(p=>vs.push(_remBlockReview(p.id).veredito||''));
+  return{total:vs.length,ap:vs.filter(v=>v==='aprovado').length,re:vs.filter(v=>v==='reprovado').length,pend:vs.filter(v=>!v).length};
+}
+function _remReviewResumoHTML(){
+  const c=_remReviewCounts();
+  return `<span style="font-family:'Space Grotesk',sans-serif;font-weight:700">🔍 Revisão por bloco</span>
+    <span class="rem-badge" style="background:rgba(63,185,80,.14);color:#3fb950;border:1px solid rgba(63,185,80,.4)">✓ ${c.ap} aprovados</span>
+    <span class="rem-badge" style="background:rgba(248,81,73,.14);color:#f85149;border:1px solid rgba(248,81,73,.4)">✗ ${c.re} reprovados</span>
+    <span class="rem-badge" style="background:var(--bg3);color:var(--t2);border:1px solid var(--border)">○ ${c.pend} pendentes</span>`;
+}
+function _remUpdateReviewResumo(){const el=document.getElementById('rem-rev-resumo');if(el)el.innerHTML=_remReviewResumoHTML();}
+window.remSetVeredito=(blockKey,veredito)=>{
+  const r=_remBlockReview(blockKey);
+  r.veredito=(r.veredito===veredito)?'':veredito;
+  if(r.veredito==='aprovado')r.ajuste='';
+  r.revisor=(S.currentUser&&(S.currentUser.nome||S.currentUser.email))||'';
+  r.ts=new Date().toISOString();
+  const wrap=document.querySelector('#modal-remember .rem-review[data-block="'+blockKey+'"]');
+  if(wrap){
+    const ok=wrap.querySelector('.rem-rev-ok'),no=wrap.querySelector('.rem-rev-no'),ta=wrap.querySelector('.rem-ajuste');
+    if(ok)ok.classList.toggle('on',r.veredito==='aprovado');
+    if(no)no.classList.toggle('on',r.veredito==='reprovado');
+    if(ta){ta.style.display=r.veredito==='reprovado'?'':'none';if(r.veredito==='aprovado')ta.value='';if(r.veredito==='reprovado')setTimeout(()=>ta.focus(),0);}
+  }
+  // atualiza o dot do cabeçalho (perguntas) sem re-render
+  const dotHost=blockKey==='enunciado'?null:document.querySelector('.rem-perg[data-pid="'+blockKey+'"] .rem-perg-tt');
+  _remUpdateReviewResumo();
+};
+// Re-render do corpo ao trocar a etapa pelo dropdown (mostra/esconde a revisão).
+window.remEtapaChange=()=>{_remSync();_remRenderModalBody();};
+
+window.remExec=(edId,cmd)=>{const ed=document.getElementById(edId);if(!ed)return;ed.focus();try{document.execCommand('styleWithCSS',false,true);}catch(e){}document.execCommand(cmd,false,null);};
+window.remColor=(edId,cmd,val)=>{const ed=document.getElementById(edId);if(!ed)return;ed.focus();try{document.execCommand('styleWithCSS',false,true);}catch(e){}document.execCommand(cmd,false,val);};
+window.remSetCat=(cat)=>{_remSync();S._remEdit.categoria=cat;_remRenderModalBody();};
+window.remAddPergunta=()=>{_remSync();const np=_remNovaPerg();np._open=true;S._remEdit.perguntas.push(np);_remRenderModalBody();setTimeout(()=>{const el=document.getElementById('rem-perg-'+np.id);if(el)el.focus();},50);};
+window.remDelPergunta=async(pid)=>{
+  const ok=await arosConfirm({title:'Remover pergunta?',message:'A pergunta e o comentário dela serão removidos deste caso. Essa ação só vale ao salvar.',danger:true,confirmLabel:'Remover',cancelLabel:'Cancelar',icon:'🗑️'});
+  if(!ok)return;
+  _remSync();
+  S._remEdit.perguntas=S._remEdit.perguntas.filter(p=>p.id!==pid);
+  if(S._remEdit.review&&S._remEdit.review.perguntas)delete S._remEdit.review.perguntas[pid];
+  if(!S._remEdit.perguntas.length)S._remEdit.perguntas=[_remNovaPerg()];
+  _remRenderModalBody();
+};
+// Colapso dos dropdowns — puro DOM (preserva o conteúdo digitado, sem re-render)
+window.remTogglePerg=(pid)=>{
+  const box=document.querySelector('.rem-perg[data-pid="'+pid+'"]');if(!box)return;
+  const body=box.querySelector('.rem-perg-body'),chev=box.querySelector('.rem-perg-head .rem-chev');
+  const willOpen=body.classList.contains('rem-collapsed');
+  body.classList.toggle('rem-collapsed',!willOpen);chev.classList.toggle('open',willOpen);
+  const p=S._remEdit&&S._remEdit.perguntas.find(x=>x.id===pid);if(p)p._open=willOpen;
+};
+window.remToggleComent=(pid)=>{
+  const box=document.querySelector('.rem-perg[data-pid="'+pid+'"]');if(!box)return;
+  const body=box.querySelector('.rem-cmt-body'),chev=box.querySelector('.rem-cmt-head .rem-chev');
+  const willOpen=body.classList.contains('rem-collapsed');
+  body.classList.toggle('rem-collapsed',!willOpen);chev.classList.toggle('open',willOpen);
+  const p=S._remEdit&&S._remEdit.perguntas.find(x=>x.id===pid);if(p)p._cmtOpen=willOpen;
+};
+
+window.remInsertImg=async(edId,stId,ev)=>{
+  const f=ev.target.files&&ev.target.files[0];if(!f){return;}
+  if(!f.type.startsWith('image/')){await arosAlert({title:'Atenção',message:'Selecione um arquivo de imagem.',icon:'⚠️'});ev.target.value='';return;}
+  const caseId=S._remEdit&&S._remEdit.id;
+  const st=document.getElementById(stId);if(st)st.textContent='⏳ enviando...';
+  try{
+    const path=`remembers/${caseId}/${Date.now()}_${f.name.replace(/[^\w.\-]/g,'_')}`;
+    const r=window._fbStorage.ref(window._fbStorage.storage,path);
+    await window._fbStorage.uploadBytes(r,f);
+    const url=await window._fbStorage.getDownloadURL(r);
+    const ed=document.getElementById(edId);
+    if(ed){ed.focus();document.execCommand('insertHTML',false,`<p><img src="${url}" alt="imagem" class="questao-img"/></p>`);}
+    if(st)st.textContent='✅ imagem inserida';
+    setTimeout(()=>{if(st)st.textContent='';},3000);
+  }catch(e){console.error('remInsertImg:',e);if(st)st.textContent='❌ '+(e.code||e.message);}
+  ev.target.value='';
+};
+
+// Snapshot imutável de backup a cada gravação (rede de segurança contra perda).
+// Best-effort: se falhar, só avisa no console — não bloqueia o salvar.
+async function _remSnapshot(caseId,payload){
+  try{await addDoc(collection(db,'remembers',caseId,'versoes'),{...payload,_snapAt:new Date().toISOString()});}
+  catch(e){console.warn('remSnapshot (backup) falhou:',e&&(e.code||e.message));}
+}
+
+// Motor de gravação compartilhado pelo "Salvar tudo", pelos "Salvar" de cada box
+// e pelo arquivar. closeModal → botão do rodapé; statusId → feedback inline do box.
+async function _remPersist(opts){
+  opts=opts||{};
+  _remSync();
+  const e=S._remEdit;if(!e)return false;
+  // Decisão do "Salvar tudo" tem prioridade sobre o que está no dropdown de Etapa
+  // (o _remSync acima relê o select; aqui forçamos o destino escolhido no modal).
+  if(opts.forceStatus)e.status=opts.forceStatus;
+  const _prevStatus=(S.remember||[]).find(x=>x.id===e.id)?.status;
+  const errEl=document.getElementById('rem-err');
+  const titulo=_remTituloAuto(e);
+  // Campos obrigatórios do cadastro — exigidos ao concluir o salvar (Salvar tudo).
+  if(opts.closeModal){
+    const faltam=[];
+    if(!(e.ano||'').toString().trim())faltam.push('Ano');
+    if(!e.tipoProva)faltam.push('Tipo de prova');
+    if(!e.categoria)faltam.push('Tipo de Caso');
+    if(!e.origem)faltam.push('Origem');
+    if(faltam.length){
+      if(errEl){errEl.textContent='Preencha o cadastro: '+faltam.join(', ')+'.';errEl.classList.remove('hidden');}
+      else await arosAlert({title:'Cadastro incompleto',message:'Preencha: '+faltam.join(', '),icon:'⚠️'});
+      return false;
+    }
+  }
+  if(errEl)errEl.classList.add('hidden');
+  // Revisão: todo bloco reprovado exige o comentário do que ajustar (na conclusão).
+  if(opts.closeModal){
+    const bad=[];
+    const chk=(label,r)=>{if(r&&r.veredito==='reprovado'&&!String(r.ajuste||'').trim())bad.push(label);};
+    chk('Enunciado',e.review&&e.review.enunciado);
+    (e.perguntas||[]).forEach((p,i)=>chk('Pergunta '+(i+1),e.review&&e.review.perguntas&&e.review.perguntas[p.id]));
+    if(bad.length){
+      if(errEl){errEl.textContent='Comente o que ajustar nos blocos reprovados: '+bad.join(', ')+'.';errEl.classList.remove('hidden');}
+      else await arosAlert({title:'Falta comentar',message:'Comente o que ajustar nos blocos reprovados: '+bad.join(', '),icon:'⚠️'});
+      return false;
+    }
+  }
+  const perguntas=e.perguntas.map(p=>({id:p.id,html:_remSanitize(p.html||''),comentario:_remSanitize(p.comentario||'')}))
+    .filter(p=>_remStrip(p.html)||/<img/i.test(p.html)||_remStrip(p.comentario)||/<img/i.test(p.comentario));
+  const payload={
+    fase:'f2',titulo,
+    codigo:e.codigo||_remGenCodigo(),
+    ano:(e.ano||'').toString().trim(),
+    categoria:e.categoria||'simulacao',
+    tipoProva:e.tipoProva||'TSA',
+    origem:e.origem||'autoral',
+    assuntos:Array.isArray(e.assuntos)?e.assuntos:[],
+    status:e.status||'pendente',
+    profNome:(e.profNome||'').trim(),
+    enunciado:_remSanitize(e.enunciado||''),
+    perguntas,
+    review:e.review||{enunciado:{},perguntas:{}},
+    arquivado:!!e.arquivado,
+    updatedAt:new Date().toISOString(),
+    ...(e.novo?{criadoEm:new Date().toISOString()}:{})
+  };
+  const btn=opts.closeModal?document.getElementById('rem-save-btn'):null;
+  if(btn){btn.disabled=true;btn.textContent='⏳ Salvando...';}
+  const stEl=opts.statusId?document.getElementById(opts.statusId):null;
+  if(stEl){stEl.textContent='⏳ salvando';stEl.style.color='var(--t2)';stEl.classList.add('show');}
+  try{
+    await setDoc(doc(db,'remembers',e.id),payload,{merge:true});
+    await _remSnapshot(e.id,payload);
+  }catch(err){
+    console.error('remPersist:',err);
+    if(btn){btn.disabled=false;btn.textContent='💾 Salvar tudo';}
+    if(stEl){stEl.textContent='❌ erro';stEl.style.color='var(--red)';}
+    if(errEl){errEl.innerHTML='❌ Erro ao salvar: <strong>'+((err&&err.code)||err.message||err)+'</strong><br><span style="font-size:11px">Verifique as Firestore Rules da coleção <code>remembers</code>.</span>';errEl.classList.remove('hidden');}
+    else await arosAlert({title:'Erro ao salvar',message:(err&&err.code)||err.message||String(err),icon:'❌'});
+    return false;
+  }
+  e.novo=false;
+  const idx=(S.remember||[]).findIndex(x=>x.id===e.id);
+  // Preserva campos fora do payload (ex.: vínculo de pagamento) ao atualizar o estado local.
+  const localDoc={...(idx>=0?S.remember[idx]:{}),id:e.id,...payload};
+  if(idx>=0)S.remember[idx]=localDoc;else (S.remember=S.remember||[]).push(localDoc);
+  _remRenderBoard();
+  _remSavedFlash('Caso salvo');
+  if(btn){btn.disabled=false;btn.textContent='💾 Salvar tudo';}
+  if(stEl){const hh=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});stEl.textContent='✓ salvo '+hh;stEl.style.color='var(--green)';clearTimeout(stEl._t);stEl._t=setTimeout(()=>stEl.classList.remove('show'),2800);}
+  if(opts.closeModal&&payload.status==='confeccao'&&!payload.profNome)openRemAskProf(e.id);
+  if(payload.status!==_prevStatus)await _remHandleStatusPayment(e.id,_prevStatus||'pendente',payload.status);
+  return true;
+}
+// Modal de decisão genérico (promise) — usado pelo "Salvar tudo" conforme a coluna.
+let _remDecideResolve=null;
+function _remEnsureDecideModal(){
+  if(document.getElementById('modal-rem-decide'))return;
+  const div=document.createElement('div');div.className='mo hidden';div.id='modal-rem-decide';
+  div.innerHTML=`<div class="md" style="max-width:480px">
+    <div class="mh"><div><div class="m-title" id="rem-decide-title" style="font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px"></div></div><button class="m-close" onclick="_remDecideClose(null)">✕</button></div>
+    <div class="m-body"><p id="rem-decide-msg" style="color:var(--t2);font-size:13.5px;line-height:1.5;margin:0"></p></div>
+    <div class="m-foot" id="rem-decide-foot" style="display:flex;flex-direction:column;align-items:stretch;gap:8px"></div>
+  </div>`;
+  document.body.appendChild(div);
+}
+window._remDecideClose=(val)=>{const m=document.getElementById('modal-rem-decide');if(m)m.classList.add('hidden');const r=_remDecideResolve;_remDecideResolve=null;if(r)r(val);};
+function _remDecide({title,message,options}){
+  _remEnsureDecideModal();
+  document.getElementById('rem-decide-title').textContent=title;
+  document.getElementById('rem-decide-msg').innerHTML=message||'';
+  document.getElementById('rem-decide-foot').innerHTML=options.map(o=>`<button class="btn ${o.kind||'btn-p'}" style="width:100%;justify-content:center;padding:13px 16px;font-size:14px" onclick="_remDecideClose('${o.value}')">${o.label}</button>`).join('');
+  document.getElementById('modal-rem-decide').classList.remove('hidden');
+  return new Promise(res=>{_remDecideResolve=res;});
+}
+
+window.saveRemCaso=async()=>{
+  _remSync();
+  const e=S._remEdit;if(!e)return;
+  const st=e.status;
+  let alvo=null; // status de destino escolhido (null = não muda)
+  if(st==='confeccao'){
+    const ch=await _remDecide({title:'Salvar caso',message:'Como deseja salvar este caso em produção?',options:[
+      {label:'Salvar e enviar para revisão',value:'revisao',kind:'btn-p'},
+      {label:'Salvar e manter em produção',value:'confeccao',kind:'btn-s'}
+    ]});
+    if(!ch)return; alvo=ch;
+  }else if(st==='revisao'){
+    const ch=await _remDecide({title:'Concluir revisão',message:'Qual a decisão da revisão deste caso?',options:[
+      {label:'Salvar e aprovar',value:'aprovado',kind:'btn-p'},
+      {label:'Salvar e reprovar',value:'reprovado',kind:'btn-d'}
+    ]});
+    if(!ch)return; alvo=ch;
+  }else if(st==='reprovado'){
+    const ch=await _remDecide({title:'Salvar ajustes',message:'O caso foi ajustado. O que deseja fazer?',options:[
+      {label:'Salvar e reenviar para revisão',value:'revisao',kind:'btn-p'},
+      {label:'Salvar e manter em reprovado',value:'reprovado',kind:'btn-s'}
+    ]});
+    if(!ch)return; alvo=ch;
+  }
+  // Enviar à revisão exige tema definido (1+). Se ainda não tem, pede agora.
+  if(alvo==='revisao'&&!(e.assuntos&&e.assuntos.length)){
+    const temas=await _remPickTema(e.assuntos);
+    if(!temas)return; // cancelou → não move nem salva
+    e.assuntos=temas;
+  }
+  if(alvo)e.status=alvo;
+  if(await _remPersist({closeModal:true,forceStatus:alvo}))CM('modal-remember');
+};
+window.remSaveBox=(statusId)=>_remPersist({statusId});
+
+window.arquivarRemCaso=async()=>{
+  const e=S._remEdit;if(!e||e.novo)return;
+  const ok=await arosConfirm({title:'Arquivar caso?',message:'O caso sai do quadro mas NÃO é apagado — fica em "Arquivados" e pode ser restaurado a qualquer momento.',confirmLabel:'Arquivar',cancelLabel:'Cancelar',icon:'🗄️'});
+  if(!ok)return;
+  _remSync();e.arquivado=true;
+  if(await _remPersist({}))CM('modal-remember');
+};
+window.restaurarRemCaso=async(id)=>{
+  try{
+    await setDoc(doc(db,'remembers',id),{arquivado:false,updatedAt:new Date().toISOString()},{merge:true});
+    const c=(S.remember||[]).find(x=>x.id===id);if(c)c.arquivado=false;
+  }catch(e){alert('Erro ao restaurar: '+(e.code||e.message));return;}
+  _remRenderBoard();
+};
+// Exclusão definitiva — só pela área de arquivados e com DUPLA confirmação.
+window.hardDelRemCaso=async(id)=>{
+  const c=(S.remember||[]).find(x=>x.id===id);
+  const ok1=await arosConfirm({title:'Excluir definitivamente?',message:'Isso apaga o caso de vez. Recomendamos manter arquivado em vez de excluir.',danger:true,confirmLabel:'Continuar',cancelLabel:'Cancelar',icon:'⚠️'});
+  if(!ok1)return;
+  const ok2=await arosConfirm({title:'Tem certeza absoluta?',message:'Confirme novamente para excluir "'+_remEsc((c&&c.titulo)||'')+'" permanentemente. Não dá pra desfazer.',danger:true,confirmLabel:'Excluir de vez',cancelLabel:'Cancelar',icon:'🗑️'});
+  if(!ok2)return;
+  try{await deleteDoc(doc(db,'remembers',id));S.remember=(S.remember||[]).filter(x=>x.id!==id);}
+  catch(e){alert('Erro ao excluir: '+(e.code||e.message));return;}
+  _remRenderBoard();
+};
+
+// ── Modal "Atribuir professor" (disparado ao mover caso pra Em confecção) ──
+function _remEnsureProfModal(){
+  if(document.getElementById('modal-rem-assignprof'))return;
+  const div=document.createElement('div');div.className='mo hidden';div.id='modal-rem-assignprof';
+  div.innerHTML=`<div class="md" style="max-width:460px">
+    <div class="mh"><div><div class="m-title" style="font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px">Atribuir professor</div></div><button class="m-close" onclick="CM('modal-rem-assignprof')">✕</button></div>
+    <div class="m-body">
+      <p style="color:var(--t2);font-size:13px;margin-bottom:12px">Quem vai confeccionar este caso?</p>
+      <div class="fg"><label class="fl">Professor</label><select class="fc" id="rem-assignprof-sel"></select></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-p" onclick="remConfirmProf()">Confirmar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+}
+window.remRemoverProf=async(caseId)=>{
+  const ok=await arosConfirm({title:'Remover professor?',message:'O professor deixará de estar vinculado a este caso.',danger:true,confirmLabel:'Remover',cancelLabel:'Cancelar',icon:'👤'});
+  if(!ok)return;
+  try{
+    await setDoc(doc(db,'remembers',caseId),{profNome:'',updatedAt:new Date().toISOString()},{merge:true});
+    const c=(S.remember||[]).find(x=>x.id===caseId);if(c)c.profNome='';
+  }catch(e){alert('Erro ao remover professor: '+(e.code||e.message));return;}
+  if(S._remEdit&&S._remEdit.id===caseId){_remSync();S._remEdit.profNome='';_remRenderModalBody();}
+  _remRenderBoard();
+  if(typeof arosToast==='function')arosToast('Professor removido do caso','info',2200);
+};
+window.openRemAskProf=(caseId)=>{
+  _remEnsureProfModal();
+  S._remProfTarget=caseId;
+  const c=(S.remember||[]).find(x=>x.id===caseId);
+  const sel=document.getElementById('rem-assignprof-sel');
+  sel.innerHTML='<option value="">— selecione —</option>'+(S.profs||[]).map(p=>`<option value="${_remEsc(p)}" ${c&&c.profNome===p?'selected':''}>${_remEsc(p)}</option>`).join('');
+  document.getElementById('modal-rem-assignprof').classList.remove('hidden');
+};
+window.remConfirmProf=async()=>{
+  const id=S._remProfTarget;const sel=document.getElementById('rem-assignprof-sel');
+  const prof=sel?sel.value:'';
+  if(!prof){await arosAlert({title:'Atenção',message:'Selecione um professor.',icon:'⚠️'});return;}
+  try{
+    // Só define/troca o professor — NÃO mexe na etapa (a coluna já foi ajustada
+    // no arrastar/salvar; trocar prof num caso já em revisão/aprovado preserva o status).
+    await setDoc(doc(db,'remembers',id),{profNome:prof,updatedAt:new Date().toISOString()},{merge:true});
+    await _remSnapshot(id,{profNome:prof});
+    const c=(S.remember||[]).find(x=>x.id===id);if(c)c.profNome=prof;
+  }catch(e){alert('Erro: '+(e.code||e.message));return;}
+  CM('modal-rem-assignprof');
+  // Se o modal do caso está aberto, reflete o novo professor sem perder o que foi digitado.
+  if(S._remEdit&&S._remEdit.id===id){_remSync();S._remEdit.profNome=prof;_remRenderModalBody();}
+  _remRenderBoard();
+};
+
+// Hook de debug (padrão do arquivo)
+window._remRenderBoard=_remRenderBoard;
+
 window.renderFeatures=async()=>{
   await loadFeatures();
   const root=document.getElementById('features-kanban');if(!root)return;
@@ -22581,6 +23694,7 @@ S.financeiro={profsFin:{},tipos:[],meses:{},notaFiscalCfg:{}};
 const FIN_DEFAULT_TIPOS=[
   {id:'sys-rodada',nome:'Rodada de simulado oficial',valorPadrao:200,system:true},
   {id:'sys-simextra',nome:'Simulado Extra',valorPadrao:1000,system:true},
+  {id:'sys-caso-remember',nome:'Caso clínico aprovado (Group Remember)',valorPadrao:1000,system:true},
   {id:'caso-inedito',nome:'Caso inédito',valorPadrao:800},
   {id:'mentoria',nome:'Mentoria',valorPadrao:6000},
   {id:'forum-duvidas',nome:'Fórum Dúvidas',valorPadrao:6000},
@@ -22605,7 +23719,7 @@ async function loadFinanceiro(){
       const d=s.data();
       let tipos=d.tipos&&d.tipos.length?d.tipos:FIN_DEFAULT_TIPOS;
       // Garante que os 2 tipos system existam (compat com cadastros antigos)
-      ['sys-rodada','sys-simextra'].forEach(sid=>{
+      ['sys-rodada','sys-simextra','sys-caso-remember'].forEach(sid=>{
         const def=FIN_DEFAULT_TIPOS.find(t=>t.id===sid);
         if(!tipos.find(t=>t.id===sid)){
           if(def)tipos=[def,...tipos];
@@ -22642,7 +23756,7 @@ function _ensureFinanceiroListener(){
     if(!snap.exists())return;
     const d=snap.data();
     let tipos=d.tipos&&d.tipos.length?d.tipos:FIN_DEFAULT_TIPOS;
-    ['sys-rodada','sys-simextra'].forEach(sid=>{
+    ['sys-rodada','sys-simextra','sys-caso-remember'].forEach(sid=>{
       const def=FIN_DEFAULT_TIPOS.find(t=>t.id===sid);
       if(!tipos.find(t=>t.id===sid)){
         if(def)tipos=[def,...tipos];
@@ -22774,9 +23888,13 @@ async function calcFinanceiroMes(anoMes){
     // Sim extras: alunos no mês com prof === nome
     const simExtrasDet=alunosNoMes.filter(a=>a.professor===nome).map(a=>({simNome:a.simNome,aluno:a.nome,data:a.dataAgendada,horario:a.horario}));
     const totalSimExtras=simExtrasDet.length*valExt;
-    // Manuais: lançamentos com profNome === nome
-    const manuaisDet=lancamentos.filter(l=>l.profNome===nome);
+    // Manuais: lançamentos com profNome === nome. Casos clínicos (Group Remember)
+    // saem em coluna própria; o resto fica em "Atividades extras".
+    const manuaisAll=lancamentos.filter(l=>l.profNome===nome);
+    const casoClinicoDet=manuaisAll.filter(l=>l.tipoId==='sys-caso-remember');
+    const manuaisDet=manuaisAll.filter(l=>l.tipoId!=='sys-caso-remember');
     const totalManuais=manuaisDet.reduce((sum,l)=>sum+(Number(l.valor)||0)*(Number(l.qtd)||1),0);
+    const totalCasoClinico=casoClinicoDet.reduce((sum,l)=>sum+(Number(l.valor)||0)*(Number(l.qtd)||1),0);
     // Mentorias: grupos onde mentorNome === nome e cobrem o mês (com pro-rata)
     // Genéricas: todos os tipos EXCETO 'TSA Oral'
     const mentoriasDet=mentoriasNoMes.filter(x=>x.grupo.mentorNome===nome&&x.grupo.tipo!=='TSA Oral').map(({grupo:g,ov})=>({
@@ -22796,7 +23914,7 @@ async function calcFinanceiroMes(anoMes){
       alunosQtd:(g.alunos||[]).length,
     }));
     const totalMentoriasTsaOral=mentoriasTsaOralDet.reduce((sum,m)=>sum+(Number(m.valor)||0),0);
-    const totalBruto=fixo+totalRodadas+totalSimExtras+totalManuais+totalMentorias+totalMentoriasTsaOral;
+    const totalBruto=fixo+totalRodadas+totalSimExtras+totalManuais+totalCasoClinico+totalMentorias+totalMentoriasTsaOral;
     // Desconto de plano de saúde só vale pra profs marcados no cadastro (temPlanoSaude).
     // Se o prof não tem plano, ignora qualquer valor lançado (não subtrai do total).
     const temPlanoSaude=!!cfg.temPlanoSaude;
@@ -22807,11 +23925,12 @@ async function calcFinanceiroMes(anoMes){
       rodadasQtd:rodadasDet.length,rodadasDet,totalRodadas,
       simExtrasQtd:simExtrasDet.length,simExtrasDet,totalSimExtras,
       manuaisQtd:manuaisDet.length,manuaisDet,totalManuais,
+      casoClinicoQtd:casoClinicoDet.length,casoClinicoDet,totalCasoClinico,
       mentoriasQtd:mentoriasDet.length,mentoriasDet,totalMentorias,
       mentoriasTsaOralQtd:mentoriasTsaOralDet.length,mentoriasTsaOralDet,totalMentoriasTsaOral,
       temPlanoSaude,descontoPlano,totalBruto,total:totalBruto-descontoPlano,
     };
-  }).filter(p=>p.fixo>0||p.totalRodadas>0||p.totalSimExtras>0||p.totalManuais>0||p.totalMentorias>0||p.totalMentoriasTsaOral>0);
+  }).filter(p=>p.fixo>0||p.totalRodadas>0||p.totalSimExtras>0||p.totalManuais>0||p.totalCasoClinico>0||p.totalMentorias>0||p.totalMentoriasTsaOral>0);
   return result;
 }
 
@@ -22987,6 +24106,7 @@ window.renderFinanceiro=async()=>{
         <th style="${thS};text-align:right">Mentoria</th>
         <th style="${thS};text-align:right">Mentoria TSA Oral</th>
         <th style="${thS};text-align:right">Atividades extras</th>
+        <th style="${thS};text-align:right" title="Casos clínicos aprovados (Group Remember) lançados no mês">Caso clínico</th>
         <th style="${thS};text-align:right" title="Desconto de plano de saúde do mês — subtraído do total. Só aparece pra profs marcados no Cadastro. Editável no mês aberto.">Plano de saúde</th>
         <th style="${thS};text-align:right">Total</th>
         <th style="${thS};text-align:center" title="Controle de solicitação de nota fiscal pro professor">Solicitar Nota</th>
@@ -23049,6 +24169,7 @@ window.renderFinanceiro=async()=>{
           <td style="${tdS};text-align:right;${tdNumStyle}">${(p.mentoriasQtd||0)>0?`${p.mentoriasQtd} grupo${p.mentoriasQtd>1?'s':''}${(p.mentoriasDet||[]).some(m=>m.parcial)?' <span style="font-family:\'JetBrains Mono\',monospace;font-size:8.5px;background:var(--yl);color:var(--yellow);padding:1px 5px;border-radius:4px;font-weight:700">PARCIAL</span>':''}<br><span style="${subNumStyle}">${_BRL(p.totalMentorias||0)}</span>`:'—'}</td>
           <td style="${tdS};text-align:right;${tdNumStyle}">${(p.mentoriasTsaOralQtd||0)>0?`${p.mentoriasTsaOralQtd} grupo${p.mentoriasTsaOralQtd>1?'s':''}${(p.mentoriasTsaOralDet||[]).some(m=>m.parcial)?' <span style="font-family:\'JetBrains Mono\',monospace;font-size:8.5px;background:var(--yl);color:var(--yellow);padding:1px 5px;border-radius:4px;font-weight:700">PARCIAL</span>':''}<br><span style="${subNumStyle}">${_BRL(p.totalMentoriasTsaOral||0)}</span>`:'—'}</td>
           <td style="${tdS};text-align:right;${tdNumStyle}">${p.manuaisQtd>0?`${p.manuaisQtd} ${p.manuaisQtd>1?'itens':'item'}<br><span style="${subNumStyle}">${_BRL(p.totalManuais)}</span>`:'—'}</td>
+          <td style="${tdS};text-align:right;${tdNumStyle}">${(p.casoClinicoQtd||0)>0?`${p.casoClinicoQtd} ${p.casoClinicoQtd>1?'casos':'caso'}<br><span style="${subNumStyle}">${_BRL(p.totalCasoClinico)}</span>`:'—'}</td>
           <td style="${tdS};text-align:right;${tdNumStyle}">${!p.temPlanoSaude
             ? '<span style="color:var(--t3)">—</span>'
             : ((isAdmin&&!fechado)
@@ -23434,6 +24555,10 @@ function _finBuildLinhas(p){
       const qtdLbl=(l.qtd||1)>1?`${l.qtd} × ${_BRL(l.valor)} = ${_BRL((l.valor||0)*(l.qtd||1))}`:_BRL(l.valor);
       linhas.push(`    - ${nomeT}${desc?': '+desc:''} · ${qtdLbl}`);
     });
+  }
+  if((p.totalCasoClinico||0)>0){
+    linhas.push(`• Casos clínicos — ${p.casoClinicoQtd} ${p.casoClinicoQtd===1?'caso':'casos'} = ${_BRL(p.totalCasoClinico)}`);
+    (p.casoClinicoDet||[]).forEach(l=>linhas.push(`    - ${l.descricao||'Caso clínico'} · ${_BRL((l.valor||0)*(l.qtd||1))}`));
   }
   if((p.descontoPlano||0)>0)linhas.push(`• Desconto plano de saúde: − ${_BRL(p.descontoPlano)}`);
   return linhas;
@@ -23866,6 +24991,10 @@ window._finSolicitarNotaPendencia=async(destMes,pendId)=>{
         const qtdLbl=(l.qtd||1)>1?`${l.qtd} × ${_BRL(l.valor)} = ${_BRL((l.valor||0)*(l.qtd||1))}`:_BRL(l.valor);
         linhas.push(`    - ${nomeT}${desc?': '+desc:''} · ${qtdLbl}`);
       });
+    }
+    if((p.totalCasoClinico||0)>0){
+      linhas.push(`• Casos clínicos — ${p.casoClinicoQtd} ${p.casoClinicoQtd===1?'caso':'casos'} = ${_BRL(p.totalCasoClinico)}`);
+      (p.casoClinicoDet||[]).forEach(l=>linhas.push(`    - ${l.descricao||'Caso clínico'} · ${_BRL((l.valor||0)*(l.qtd||1))}`));
     }
   }else{
     linhas.push('(detalhamento não disponível — pendência criada antes do snapshot completo)');
@@ -26243,7 +27372,7 @@ window.deleteUser=async()=>{
 
 // co tabs
 window.switchCoTab=(tab,btn)=>{
-  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','orcamento','mentorias','mentoriasF2','features','recProvas','recGestao','recFontes','recMetricas','comunicacao','senhasAcessos','senhasPublicas','auditoria','produtos','cruzarLista','po'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
+  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','orcamento','mentorias','mentoriasF2','rememberF1','rememberF2','features','recProvas','recGestao','recFontes','recMetricas','comunicacao','senhasAcessos','senhasPublicas','auditoria','produtos','cruzarLista','po'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
   document.querySelectorAll('.co-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   // Show "Novo Simulado" only on simulados tab
@@ -30188,6 +31317,8 @@ window.switchCoTab = (tab, btn) => {
   if(tab==='financeiro'){_ensureFinanceiroListener();renderFinanceiro();}
   if(tab==='mentorias') renderMentorias();
   if(tab==='mentoriasF2') renderMentoriasF2();
+  if(tab==='rememberF1') renderRememberF1();
+  if(tab==='rememberF2') renderRememberF2();
   if(tab==='revisao') renderRevisaoTab();
   if(tab==='features') renderFeatures();
   if(tab==='recProvas') renderRecProvas();
