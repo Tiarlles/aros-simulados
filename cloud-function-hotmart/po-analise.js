@@ -65,6 +65,28 @@ function _slug(s) {
 }
 function _modKey(cursoId, modulo) { return _slug(cursoId + '__' + modulo); }
 
+// Busca as aulas de um módulo de forma ROBUSTA: primeiro o == exato (rápido, indexado);
+// se não achar nada (diferença de espaço/acento/traço/caixa no nome do módulo ou do curso
+// — coisas que o slug das questões normaliza, mas o == não), varre poAulas e casa pelo nome
+// NORMALIZADO. Sem isso, a análise dizia "nenhuma aula existe" mesmo com aulas no módulo.
+async function _aulasDoModulo(db, modulo, cursoNome) {
+  const aulas = [];
+  const snap = await db.collection('poAulas').where('modulo', '==', modulo).get();
+  snap.forEach(d => { const a = d.data() || {}; if (Array.isArray(a.cursos) && a.cursos.includes(cursoNome)) aulas.push({ id: d.id, ...a }); });
+  if (!aulas.length) {
+    const wantMod = _slug(modulo), wantCur = _slug(cursoNome);
+    const all = await db.collection('poAulas').get();
+    all.forEach(d => {
+      const a = d.data() || {};
+      const cursoOk = Array.isArray(a.cursos) && a.cursos.some(c => _slug(c) === wantCur);
+      if (cursoOk && _slug(a.modulo) === wantMod) aulas.push({ id: d.id, ...a });
+    });
+    if (aulas.length) console.warn('IA PO: módulo casou via fallback normalizado', { modulo, cursoNome, n: aulas.length });
+  }
+  aulas.sort((x, y) => (Number(x.ordemPO ?? x.ordem ?? 0)) - (Number(y.ordemPO ?? y.ordem ?? 0)));
+  return aulas;
+}
+
 // Remove tags/base64 de um enunciado_html, devolve texto puro enxuto.
 function _stripImagens(s) {
   return String(s || '')
@@ -286,15 +308,8 @@ exports.analisarModuloPO = onRequest(
     try {
       const db = admin.firestore();
 
-      // 1) Aulas do módulo: pega as que têm esse `modulo` e pertencem ao curso (por nome).
-      const aulasSnap = await db.collection('poAulas').where('modulo', '==', modulo).get();
-      let aulasRaw = [];
-      aulasSnap.forEach(d => {
-        const a = d.data() || {};
-        if (Array.isArray(a.cursos) && a.cursos.includes(cursoNome)) aulasRaw.push({ id: d.id, ...a });
-      });
-      // ordena por ordemPO (fallback ordem)
-      aulasRaw.sort((x, y) => (Number(x.ordemPO ?? x.ordem ?? 0)) - (Number(y.ordemPO ?? y.ordem ?? 0)));
+      // 1) Aulas do módulo (robusto a diferenças no nome do módulo/curso — ver _aulasDoModulo).
+      const aulasRaw = await _aulasDoModulo(db, modulo, cursoNome);
 
       // 2) Transcrições (poTranscricoes/{vimeoId}) das aulas com vídeo — em paralelo.
       const vimeoIds = [...new Set(aulasRaw.map(a => String(a.vimeoId || '')).filter(Boolean))];
@@ -932,11 +947,8 @@ exports.analisarTSAOralPO = onRequest(
     try {
       const db = admin.firestore();
 
-      // 1) Aulas do módulo (mesmo critério da análise normal).
-      const aulasSnap = await db.collection('poAulas').where('modulo', '==', modulo).get();
-      let aulasRaw = [];
-      aulasSnap.forEach(d => { const a = d.data() || {}; if (Array.isArray(a.cursos) && a.cursos.includes(cursoNome)) aulasRaw.push({ id: d.id, ...a }); });
-      aulasRaw.sort((x, y) => (Number(x.ordemPO ?? x.ordem ?? 0)) - (Number(y.ordemPO ?? y.ordem ?? 0)));
+      // 1) Aulas do módulo (mesmo critério da análise normal, robusto — ver _aulasDoModulo).
+      const aulasRaw = await _aulasDoModulo(db, modulo, cursoNome);
 
       // 2) Transcrições.
       const vimeoIds = [...new Set(aulasRaw.map(a => String(a.vimeoId || '')).filter(Boolean))];
