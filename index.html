@@ -5737,6 +5737,50 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-po .po-addaula-btn:hover{background:var(--accent-dim);border-color:var(--accent)}
         #tab-po .po-add-col{width:24px;height:24px;border-radius:7px;border:1px dashed var(--border2);background:transparent;color:var(--t2);cursor:pointer;font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
         #tab-po .po-add-col:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+        /* Coluna THUMB — botão GERAR por aula */
+        #tab-po .po-col-thumb{text-align:center;padding:4px 6px !important}
+        #tab-po thead .po-col-thumb{text-align:center}
+        #tab-po .po-thumb-btn{font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.11em;padding:5px 14px;border-radius:9px;cursor:pointer;color:#fff;border:1px solid transparent;background:linear-gradient(135deg,#7c3aed,#a371f7);box-shadow:0 2px 10px -3px color-mix(in srgb,#a371f7 65%,transparent);transition:transform .14s,box-shadow .18s,filter .18s}
+        #tab-po .po-thumb-btn:hover{transform:translateY(-1px);filter:brightness(1.08);box-shadow:0 6px 18px -4px color-mix(in srgb,#a371f7 78%,transparent)}
+        #tab-po .po-thumb-btn:active{transform:translateY(0)}
+        /* Família de botões moderna (tech) usada nos modais da thumb */
+        .tb-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.01em;padding:9px 17px;border-radius:11px;cursor:pointer;border:1px solid color-mix(in srgb,var(--accent) 24%,var(--border));background:color-mix(in srgb,var(--bg3) 65%,transparent);color:var(--text);transition:transform .14s,box-shadow .18s,border-color .18s,background .18s,filter .18s}
+        .tb-btn:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--accent) 55%,var(--border));box-shadow:0 6px 18px -7px color-mix(in srgb,var(--accent) 60%,transparent)}
+        .tb-btn:active{transform:translateY(0)}
+        .tb-btn:disabled{opacity:.45;cursor:default;transform:none;box-shadow:none;filter:none}
+        .tb-btn.primary{border-color:transparent;color:#fff;background:linear-gradient(135deg,#6d28d9,#a371f7);box-shadow:0 4px 18px -5px color-mix(in srgb,#a371f7 65%,transparent)}
+        .tb-btn.primary:hover{filter:brightness(1.07);box-shadow:0 8px 26px -7px color-mix(in srgb,#a371f7 78%,transparent)}
+        .tb-btn.ghost{background:transparent;color:var(--t2);border-color:var(--border2)}
+        .tb-btn.ghost:hover{color:var(--text);border-color:var(--accent)}
+        .tb-btn.sm{font-size:11.5px;padding:7px 13px;border-radius:9px}
+        #tab-po .po-thumb-na{color:var(--t3,var(--t2));opacity:.6}
+        #tab-po .po-thumb-cell{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px}
+        #tab-po .po-thumb-toggle{font-size:9.5px}
+        #tab-po .po-thumb-toggle span{padding:1px 7px}
+        #tab-po .po-rg-toggle.po-thumb-toggle .po-rg-sim.on{background:color-mix(in srgb,#3fb950 88%,transparent);color:#fff}
+        #tab-po .po-rg-toggle.po-thumb-toggle span{padding:1px 7px}
+        /* Modais da thumb (renderizados no body, escopo por id) */
+        #po-thumb-modal,#po-promptthumb-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-thumb-modal.show,#po-promptthumb-modal.show{display:block}
+        #po-thumb-modal .po-modal-back,#po-promptthumb-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-thumb-modal .po-modal,#po-promptthumb-modal .po-modal{position:relative;max-width:680px;width:min(94vw,680px);margin:9vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-thumb-modal .po-modal-head,#po-promptthumb-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-thumb-modal .po-modal-head h3,#po-promptthumb-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--text)}
+        #po-thumb-modal .po-modal-x,#po-promptthumb-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-thumb-modal .po-modal-x:hover,#po-promptthumb-modal .po-modal-x:hover{color:var(--text)}
+        #po-thumb-modal .po-modal-body,#po-promptthumb-modal .po-modal-body{padding:18px 20px;max-height:74vh;overflow:auto}
+        #po-thumb-modal .po-modal-label,#po-promptthumb-modal .po-modal-label{font-size:12px;font-weight:600;color:var(--t2);margin:0 0 6px}
+        #po-thumb-modal .po-modal-hint,#po-promptthumb-modal .po-modal-hint{font-size:12px;color:var(--t2);margin:6px 0 0}
+        #po-thumb-modal .po-modal-foot,#po-promptthumb-modal .po-modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        /* Caixa de prompt gerado (copiável) + textarea de instrução, dentro dos po-modal */
+        .po-thumb-box{position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 14px 12px;font-size:12.5px;line-height:1.55;color:var(--text);white-space:pre-wrap;max-height:46vh;overflow:auto}
+        .po-thumb-copy{margin-top:10px}
+        .po-thumb-ta{width:100%;min-height:240px;resize:vertical;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;line-height:1.55;color:var(--text)}
+        .po-thumb-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+        .po-thumb-row>div{flex:1;min-width:180px}
+        .po-thumb-inp{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:9px 11px;font-size:13px;color:var(--text)}
+        .po-thumb-sec{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+        .po-thumb-load{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--text);padding:8px 2px}
         /* Modal de nova coluna (renderizado no body, escopo global por id) */
         #po-col-modal{position:fixed;inset:0;z-index:9999;display:none}
         #po-col-modal.show{display:block}
@@ -5840,6 +5884,11 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-po .po-mod-qbadge{margin-left:10px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-dim);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:6px;padding:1px 6px;text-transform:none;letter-spacing:0}
         #tab-po .po-mod-analisar{margin-left:12px;border:1px solid color-mix(in srgb,var(--accent) 40%,var(--border));background:var(--bg2);color:var(--accent);font-family:'Plus Jakarta Sans',sans-serif;font-size:10.5px;font-weight:700;text-transform:none;letter-spacing:0;padding:3px 9px;border-radius:7px;cursor:pointer;transition:background .15s,border-color .15s}
         #tab-po .po-mod-analisar:hover{background:var(--accent-dim);border-color:var(--accent)}
+        #tab-po .po-mod-ignorar{margin-left:8px;border:1px solid var(--border);background:transparent;color:var(--t2);font-family:'Plus Jakarta Sans',sans-serif;font-size:10.5px;font-weight:700;text-transform:none;letter-spacing:0;padding:3px 9px;border-radius:7px;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+        #tab-po .po-mod-ignorar:hover{background:color-mix(in srgb,#e5484d 12%,transparent);border-color:#e5484d;color:#e5484d}
+        #tab-po .po-mod-ignorar.on{border-color:#e5484d;color:#e5484d;background:color-mix(in srgb,#e5484d 10%,transparent)}
+        #tab-po .po-mod-ignorado td{opacity:.5}
+        #tab-po .po-mod-ignorado .po-mod-ignorar{opacity:1}
         #tab-po .po-apost-rowbtn{display:inline-flex;align-items:center;gap:6px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;padding:5px 12px;border-radius:8px;cursor:pointer;transition:filter .15s;color:var(--ac,var(--t2));border:1px solid color-mix(in srgb,var(--ac,var(--border)) 45%,var(--border));background:color-mix(in srgb,var(--ac,transparent) 12%,var(--bg2))}
         #tab-po .po-apost-rowbtn:hover{filter:brightness(1.15)}
         #tab-po .po-apost-row-tr .po-mod-cell{padding-top:8px;padding-bottom:4px}
@@ -6386,6 +6435,30 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-po .po-an-load,#po-mod-modal .po-an-load{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--text);margin-top:14px}
         #tab-po .po-an-spin{width:15px;height:15px;border-radius:50%;border:2px solid color-mix(in srgb,var(--accent) 30%,transparent);border-top-color:var(--accent);display:inline-block;animation:po-an-rot .7s linear infinite;flex:none}
         #tab-po .po-imp-erro{margin-top:14px;padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 35%,transparent);color:#f85149;font-size:12.5px}
+        /* Relatório do produto — dropdown colapsável com 2 abas (Aulas / Materiais) */
+        #tab-po .po-prodv{margin-top:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--bg2)}
+        #tab-po .po-prodv-toggle{width:100%;display:flex;align-items:center;gap:10px;padding:13px 16px;background:transparent;border:none;cursor:pointer;text-align:left;color:var(--text);font-family:inherit}
+        #tab-po .po-prodv-toggle:hover{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+        #tab-po .po-prodv-chev{font-size:12px;color:var(--t2);transition:transform .18s;flex:none}
+        #tab-po .po-prodv-toggle.open .po-prodv-chev{transform:rotate(90deg)}
+        #tab-po .po-prodv-tit{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14.5px}
+        #tab-po .po-prodv-sub{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--t2)}
+        #tab-po .po-prodv-body{padding:6px 16px 16px;display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--border)}
+        #tab-po .po-prodv-list{display:flex;flex-direction:column;gap:8px}
+        #tab-po .po-prodv-acao{padding:11px 14px;border-radius:11px;background:color-mix(in srgb,var(--nc) 9%,var(--bg2));border:1px solid color-mix(in srgb,var(--nc) 26%,var(--border));border-left:4px solid var(--nc)}
+        #tab-po .po-prodv-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+        #tab-po .po-prodv-titxt{font-weight:600;font-size:13.5px;color:var(--text)}
+        #tab-po .po-prodv-mod{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--t2);margin-top:3px;text-transform:uppercase;letter-spacing:.04em}
+        #tab-po .po-prodv-ibtn{margin-left:auto;width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--t2);font-family:Georgia,serif;font-style:italic;font-weight:700;font-size:13px;cursor:pointer;flex:none;line-height:1}
+        #tab-po .po-prodv-ibtn:hover,#tab-po .po-prodv-ibtn.on{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+        #tab-po .po-prodv-det{margin-top:8px}
+        #tab-po .po-prodv-vazio{padding:14px;font-size:12.5px;color:var(--t2);text-align:center}
+        #tab-po .po-prodv-subfilt{display:flex;gap:6px;flex-wrap:wrap;padding:2px 0 2px}
+        #tab-po .po-prodv-fchip{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.02em;padding:4px 11px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--t2);cursor:pointer;transition:.15s}
+        #tab-po .po-prodv-fchip:hover{color:var(--text);border-color:var(--border2)}
+        #tab-po .po-prodv-fchip.on{background:color-mix(in srgb,var(--accent) 14%,transparent);border-color:color-mix(in srgb,var(--accent) 45%,var(--border));color:var(--accent)}
+        #tab-po .po-prodv-fc{font-size:9.5px;background:color-mix(in srgb,var(--t2) 16%,transparent);padding:1px 6px;border-radius:8px}
+        #tab-po .po-prodv-fchip.on .po-prodv-fc{background:color-mix(in srgb,var(--accent) 24%,transparent)}
       </style>
       <div id="po-root"></div>
     </div>
@@ -37902,7 +37975,7 @@ S._poAvisoDemo=''; // aviso discreto quando caiu no fallback demo
 function _poSlug(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||'_';}
 
 async function _poSaveConfig(){
-  await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,colAulaW:S.poColAulaW,cursos:S.poCursos,modOrdem:S.poModOrdem||{},modExtra:S.poModExtra||{}},{merge:true});
+  await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,colAulaW:S.poColAulaW,cursos:S.poCursos,modOrdem:S.poModOrdem||{},modExtra:S.poModExtra||{},modulosIgnorados:S.poModulosIgnorados||{}},{merge:true});
 }
 
 // Carrega tudo do Firestore. Mantém o demo se a coleção estiver vazia ou sem auth.
@@ -37918,6 +37991,7 @@ async function loadPO(){
       if(Array.isArray(d.cursos)&&d.cursos.length)S.poCursos=d.cursos;
       if(d.modOrdem&&typeof d.modOrdem==='object')S.poModOrdem=d.modOrdem;
       if(d.modExtra&&typeof d.modExtra==='object')S.poModExtra=d.modExtra;
+      if(d.modulosIgnorados&&typeof d.modulosIgnorados==='object')S.poModulosIgnorados=d.modulosIgnorados;
       _duracaoInjetada=!!d.duracaoColInjetada;
       _trilhaRenamed=!!d.trilhaColsRenamed;
       _apostilaColRemovida=!!d.apostilaColRemovida;
@@ -37930,6 +38004,7 @@ async function loadPO(){
       if(d.temaModulo&&typeof d.temaModulo==='object')S.poTemaModulo=d.temaModulo;
       if(d.analiseProduto&&typeof d.analiseProduto==='object')S.poAnaliseProduto=d.analiseProduto;
       if(d.analisePrompt&&typeof d.analisePrompt==='object')S.poAnalisePrompt=d.analisePrompt;
+      if(typeof d.promptThumb==='string')S.poPromptThumb=d.promptThumb;
     }
   }catch(e){ /* sem permissão de leitura: segue com defaults */ }
 
@@ -38062,6 +38137,12 @@ async function _poSaveAula(a,patch){
 window.poToggleRegravar=async(aulaId)=>{
   const a=_poFindAulaById(aulaId);if(!a)return;
   await _poSaveAula(a,{regravar:!a.regravar});
+  _poRefreshTabela();
+};
+// Coluna "Thumb": slider Sim/Não que marca se a capa já foi LANÇADA no sistema (poAulas.thumbLancada).
+window.poToggleThumbLancada=async(aulaId)=>{
+  const a=_poFindAulaById(aulaId);if(!a)return;
+  await _poSaveAula(a,{thumbLancada:!a.thumbLancada});
   _poRefreshTabela();
 };
 // Paleta pra cores automáticas de novas opções de tag.
@@ -38795,7 +38876,7 @@ window.poImportLaravelConfirmar=async()=>{
     const existDocs=exist.docs;
     // Indexa o enriquecimento manual das aulas atuais por laravelId, pra preservar no re-import
     // (o Laravel não manda esses campos — sem isso, re-importar zeraria Status Aula/Prof/Conteúdo).
-    const _PRESERVAR=['status','prof','conteudo','categoria','apostila','fichaResumo','slides','livros','transcricaoPalavras','transcricaoLang','conteudoPreview','transcricaoEm','regravar'];
+    const _PRESERVAR=['status','prof','conteudo','categoria','apostila','fichaResumo','slides','livros','transcricaoPalavras','transcricaoLang','conteudoPreview','transcricaoEm','regravar','thumbLancada'];
     const prevByLid={};
     existDocs.forEach(dd=>{const a=dd.data()||{};if(a.laravelId!=null)prevByLid[a.laravelId]=a;});
     let op=0,batch=writeBatch(db);
@@ -39256,11 +39337,12 @@ function _poAulaRowHTML(a,pos){
   return `<tr class="po-aula-row" draggable="false" data-aula-id="${aid}" data-modulo="${mod}">
     <td class="po-col-aula"><span class="po-grip" onmousedown="this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span><input type="checkbox" class="po-sel-aula"${S.poSel&&S.poSel.aulas.has(a.id)?' checked':''} onclick="event.stopPropagation();poToggleSelAula('${aid}',this.checked)"><span class="po-num">${pos!=null?pos:''}</span><span class="po-aula-nome" onclick="event.stopPropagation();poEditarNomeAula('${aid}',this)">${_poEsc(a.titulo)}</span> ${dem}</td>
     ${cells}
+    <td class="po-col-thumb"><div class="po-thumb-cell">${a.vimeoId?`<button type="button" class="po-thumb-btn" onclick="event.stopPropagation();poGerarThumb('${aid}')" title="Gerar prompt da capa (thumb) desta aula">GERAR</button>`:`<span class="po-thumb-na" title="Sem vídeo do Vimeo — não dá pra ler a transcrição">—</span>`}<span class="po-rg-toggle po-thumb-toggle" title="${a.thumbLancada?'Thumb já lançada no sistema — clique pra desmarcar':'Thumb ainda NÃO lançada — clique quando lançar'}" onclick="event.stopPropagation();poToggleThumbLancada('${aid}')"><span class="po-rg-nao${a.thumbLancada?'':' on'}">Não</span><span class="po-rg-sim${a.thumbLancada?' on':''}">Sim</span></span></div></td>
     <td class="po-col-add"></td>
   </tr>`;
 }
 function _poTableRowsHTML(aulas,q){
-  const span=S.poColunas.length+2; // 1 (Aula fixa) + colunas + 1 (＋)
+  const span=S.poColunas.length+3; // 1 (Aula fixa) + colunas + 1 (Thumb) + 1 (＋)
   if(!S.poModAbertos)S.poModAbertos=new Set();
   const grupos=_poGroupByMod(aulas);
   if(!grupos.length)return `<tr><td colspan="${span}"><div class="po-empty"><div class="po-ei">🔍</div><p>Nenhuma aula ${q?'encontrada para esta busca':'cadastrada'}.</p></div></td></tr>`;
@@ -39281,12 +39363,14 @@ function _poTableRowsHTML(aulas,q){
     const apLabel=apos.length>1?`${apStatus} (${apos.length})`:apStatus;
     const apTitle=apos.length?`Apostila do módulo: ${apStatus} — ${apos.length} cadastrada(s)`:'Sem apostila cadastrada (Pendente)';
     const apostRow=`<tr class="po-apost-row-tr"><td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><button type="button" class="po-apost-rowbtn" style="--ac:${apCor}" onclick="poAbrirApostilas('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="${apTitle}">📚 Apostila do módulo: ${apLabel}</button></span></td></tr>`;
+    const ignorado=_poModIgnorado(S.poCursoAtual,g.modulo);
     const btnAnalisar=`<button type="button" class="po-mod-analisar" onclick="event.stopPropagation();poAbrirAnaliseModulo('${_poEsc(S.poCursoAtual)}','${encodeURIComponent(g.modulo)}')" title="Analisar este módulo com a IA">🤖 Analisar</button>`;
+    const btnIgnorar=`<button type="button" class="po-mod-ignorar${ignorado?' on':''}" onclick="event.stopPropagation();poToggleIgnorarModulo('${encodeURIComponent(g.modulo)}')" title="${ignorado?'Módulo ignorado: não é puxado da API nem entra na análise do produto. Clique pra reativar.':'Ignorar este módulo: deixa de ser puxado da API e some da análise/consolidação do produto.'}">${ignorado?'🚫 Ignorado':'Ignorar'}</button>`;
     const progBar=_poProgBar2(S.poCursoAtual,g.modulo);
     const modSelMarcado=(S.poSel&&S.poSel.modulos&&S.poSel.modulos.has(g.modulo))||(g.aulas.length&&g.aulas.every(a=>S.poSel&&S.poSel.aulas.has(a.id)));
     const modChk=`<input type="checkbox" class="po-sel-mod"${modSelMarcado?' checked':''} data-modulo="${_poEsc(g.modulo)}" onclick="event.stopPropagation();poToggleSelModulo('${encodeURIComponent(g.modulo)}',this.checked)">`;
-    out+=`<tr class="po-mod-row${open?' open':''}" draggable="false" data-modulo="${_poEsc(g.modulo)}" onclick="poModRowClick(event,'${encodeURIComponent(g.modulo)}')">
-      <td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><span class="po-grip" onmousedown="event.stopPropagation();this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span>${modChk}<span class="po-chev">▸</span><span class="po-mod-nome" ondblclick="event.stopPropagation();poModNomeEdit(event,'${encodeURIComponent(g.modulo)}',this)" title="Duplo-clique pra renomear">${_poEsc(g.modulo)}</span>${at}${btnAnalisar}${progBar}</span></td>
+    out+=`<tr class="po-mod-row${open?' open':''}${ignorado?' po-mod-ignorado':''}" draggable="false" data-modulo="${_poEsc(g.modulo)}" onclick="poModRowClick(event,'${encodeURIComponent(g.modulo)}')">
+      <td class="po-mod-cell" colspan="${span}"><span class="po-mod-inner"><span class="po-grip" onmousedown="event.stopPropagation();this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span>${modChk}<span class="po-chev">▸</span><span class="po-mod-nome" ondblclick="event.stopPropagation();poModNomeEdit(event,'${encodeURIComponent(g.modulo)}',this)" title="Duplo-clique pra renomear">${_poEsc(g.modulo)}</span>${at}${ignorado?'':btnAnalisar}${btnIgnorar}${ignorado?'':progBar}</span></td>
     </tr>`;
     if(open){
       out+=apostRow;
@@ -39422,11 +39506,13 @@ function _poRenderCurso(root){
           <colgroup>
             <col style="width:${S.poColAulaW}px">
             ${S.poColunas.map(c=>`<col style="width:${c.w||120}px">`).join('')}
+            <col style="width:170px">
             <col style="width:42px">
           </colgroup>
           <thead><tr>
             <th class="po-col-aula"><div class="po-th-top"><span class="po-th-label">Aula</span></div>${_poColFiltroControl({id:'__aula',type:'texto'})}<span class="po-rsz" data-ci="-1"></span></th>
             ${S.poColunas.map((c,i)=>`<th data-ci="${i}" ondragover="poColDragOver(event,${i})" ondragleave="poColDragLeave(event,${i})" ondrop="poColDrop(event,${i})"><div class="po-th-top"><span class="po-col-grip" draggable="true" title="Arraste para reordenar a coluna" ondragstart="poColDragStart(event,${i})" ondragend="poColDragEnd(event)">⠿</span><span class="po-th-label" title="${_poEsc(c.label)}" ondblclick="event.stopPropagation();poEditarNomeColuna(${i},this)">${_poEsc(c.label)}</span>${c.type==='status'?`<button type="button" class="po-col-cfg" title="Gerenciar opções" onclick="event.stopPropagation();poGerenciarOpcoes(${i})">⚙</button>`:''}<button type="button" class="po-col-del" title="Excluir coluna" onclick="poExcluirColuna('${c.id}')">✕</button></div>${_poColFiltroControl(c)}<span class="po-rsz" data-ci="${i}"></span></th>`).join('')}
+            <th class="po-col-thumb"><div class="po-th-top"><span class="po-th-label">Thumb</span></div></th>
             <th class="po-col-add"><button type="button" class="po-add-col" onclick="poNovaColuna()" title="Nova coluna">＋</button></th>
           </tr></thead>
           <tbody>${rows}</tbody>
@@ -39443,11 +39529,11 @@ function _poRenderCurso(root){
   try{_poBindDrag();}catch(e){}
   _poUpdateModIndeterminate();
   _poUpdateSelBar();
-  // Restaura a última análise do produto salva, se houver (só se o box estiver aberto e o alvo no DOM).
-  S._poProdTab=null;
+  // Monta o relatório do produto (dropdown fechado por padrão ao (re)abrir a view do curso).
+  S._poProdAberto=false;
   if(document.getElementById('po-prod-timeline')){
     if(S._poProdBatch&&S._poProdAnalisando){ try{_poProdRenderProgress();}catch(e){} }
-    else if(S.poAnaliseProduto&&S.poAnaliseProduto[S.poCursoAtual]){try{_poRenderAnaliseProduto(S.poAnaliseProduto[S.poCursoAtual]);}catch(e){}}
+    else { try{_poRenderProduto();}catch(e){} }
   }
 }
 // Box "Inteligência do Produto" — dropdown colapsável no topo da view do curso.
@@ -39492,6 +39578,7 @@ function _poIABoxHTML(c){
         <button type="button" class="po-iq-tool" onclick="poAbrirEdital()">📋 Edital do produto</button>
         <button type="button" class="po-iq-tool" onclick="poAbrirPesos()">⚖️ Pesos da priorização</button>
         <button type="button" class="po-iq-tool" onclick="poAbrirPromptIA()">✍️ Prompt da IA</button>
+        <button type="button" class="po-iq-tool" onclick="poAbrirPromptThumb()">🖼️ Prompt Thumb</button>
         <button type="button" class="po-iq-tool" onclick="poTestarIncidencia()" title="Testa a conexão com a API de incidência das provas — sem IA, sem custo">🔌 Testar API de incidência</button>
       </div>
       <div class="po-iq-run">
@@ -39649,6 +39736,20 @@ window._poReordenarModulos=function(cursoId,fromMod,toMod){
   S.poModOrdem[cursoId]=ordem;
   _poRefreshTabela();
   _poSaveConfig().catch(e=>console.warn('poConfig save (modOrdem):',e));
+};
+// Módulo "ignorado": não é puxado da API (sincronização Laravel) nem entra na
+// análise/consolidação/incidência do produto. Guardado em poConfig.modulosIgnorados[cursoId]=[nome,...].
+function _poModIgnorado(cid,mod){const a=(S.poModulosIgnorados&&S.poModulosIgnorados[cid])||[];return Array.isArray(a)&&a.includes(mod);}
+window.poToggleIgnorarModulo=(key)=>{
+  const mod=decodeURIComponent(key);const cid=S.poCursoAtual;if(!cid)return;
+  if(!S.poModulosIgnorados)S.poModulosIgnorados={};
+  let arr=Array.isArray(S.poModulosIgnorados[cid])?S.poModulosIgnorados[cid].slice():[];
+  const ativar=!arr.includes(mod); // ativar = passar a ignorar
+  if(ativar)arr.push(mod);else arr=arr.filter(m=>m!==mod);
+  S.poModulosIgnorados[cid]=arr;
+  _poRefreshTabela();
+  _poSaveConfig().then(()=>arosToast(ativar?`"${mod}" agora é ignorado — não puxa da API nem entra na análise.`:`"${mod}" voltou a ser considerado.`,'ok',3500))
+    .catch(e=>{console.warn('poConfig save (modulosIgnorados):',e);arosToast('Não consegui salvar a alteração.','err',3000);});
 };
 window.poToggleMod=(key)=>{
   if(S._poDragging)return; // ignora o click sintético no fim de um drag
@@ -40217,6 +40318,25 @@ const PUXAR_QUESTOES_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfu
 const ANALISE_PO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/analisarModuloPO';
 const ANALISE_PRODUTO_PO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/analisarProdutoPO';
 const ANALISE_ORAL_PO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/analisarTSAOralPO';
+const THUMB_PROMPT_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/gerarPromptThumb';
+// Instrução PADRÃO da thumb (espelha DEFAULT_PROMPT_THUMB do thumb-prompt.js) — já vem montada no editor.
+const _PO_THUMB_DEFAULT_INSTR=`Você é diretor de arte de um curso de anestesiologia. Vou te dar o NOME de uma aula e a TRANSCRIÇÃO dela. Crie UM prompt pronto para o DALL·E 3 gerar a CAPA (thumbnail) dessa aula.
+
+REGRA DO TÍTULO (a mais importante): o texto da capa deve ser o NOME DA AULA fornecido (não invente nem parafraseie; no máximo ajuste capitalização). Esse título tem que ser o ELEMENTO VISUAL DOMINANTE da capa:
+- MUITO GRANDE e em NEGRITO pesado, ocupando uma faixa larga (cerca de 1/4 a 1/3 da altura da imagem), em no máximo 2 linhas.
+- EMBUTIDO na arte, dentro de um banner/painel horizontal de fundo sólido ou semitransparente de ALTO CONTRASTE (letra clara sobre fundo escuro ou vice-versa), com contorno/sombra para destacar.
+- Posicionado numa área LIMPA (topo ou faixa) com margem livre — os personagens e elementos da cena NÃO podem invadir, cobrir ou competir com o título.
+- Deve permanecer NÍTIDO e perfeitamente LEGÍVEL mesmo quando a imagem é vista PEQUENA, em um celular (thumbnail reduzida). Priorize legibilidade do título acima de qualquer detalhe.
+
+A TRANSCRIÇÃO é SECUNDÁRIA — use apenas para entender o tema e compor a cena/ilustração ao redor do título.
+
+A capa deve:
+- Ser uma ILUSTRAÇÃO 3D no estilo de filme de animação da Pixar / DreamWorks: personagens expressivos e carismáticos, iluminação cinematográfica quente, cores vivas, acabamento premium.
+- Representar de forma criativa e clara o tema central da aula.
+- Ter composição WIDESCREEN 16:9 (1920x1080).
+- Ser apropriada e amigável: nada gráfico, sangrento ou perturbador.
+
+Responda SOMENTE com o prompt final para o DALL·E, em português, sem comentários nem aspas nem "Prompt:". Seja detalhado na cena, personagens, paleta, iluminação, enquadramento 16:9 e — com ênfase — no tamanho, posição e legibilidade mobile do título (o nome da aula).`;
 S.poTemaModulo={};   // {cursoId:{modulo:[catIds]}}
 S._poFiltros=null;   // cache de {categorias,tipos,anos}
 S._poMapaAtual=null; // estado do modal de mapeamento {cid}
@@ -40229,6 +40349,110 @@ async function _poApiPost(url,body){
   if(!resp.ok)throw new Error(data.error||`Erro ${resp.status}`);
   return data;
 }
+// ===== THUMB: gera um prompt de capa (DALL·E) a partir do título + transcrição da aula =====
+S._poThumb=null; S._poThumbInstrDefault=null;
+window.poGerarThumb=async(aulaId)=>{
+  const a=_poFindAulaById(aulaId); if(!a){arosToast('Aula não encontrada.','err',2500);return;}
+  if(!a.vimeoId){arosToast('Esta aula não tem vídeo do Vimeo.','err',2800);return;}
+  S._poThumb={modo:'load',titulo:a.titulo||''}; _poThumbResultRender();
+  try{
+    const r=await _poApiPost(THUMB_PROMPT_ENDPOINT,{titulo:a.titulo||'',vimeoId:String(a.vimeoId),aulaId:a.id});
+    if(r&&r.ok&&r.prompt)S._poThumb={modo:'ok',titulo:r.titulo||a.titulo||'',prompt:r.prompt};
+    else S._poThumb={modo:'vazio',titulo:a.titulo||'',msg:(r&&r.motivo==='sem_transcricao')?'Esta aula ainda não tem transcrição puxada. Puxe a transcrição primeiro (📄 na coluna Conteúdo da aula).':'Não consegui gerar.'};
+  }catch(e){ S._poThumb={modo:'erro',titulo:a.titulo||'',msg:e.message||String(e)}; }
+  _poThumbResultRender();
+};
+function _poThumbResultRender(){
+  const t=S._poThumb; if(!t)return;
+  let host=document.getElementById('po-thumb-modal');
+  if(!host){host=document.createElement('div');host.id='po-thumb-modal';document.body.appendChild(host);}
+  const close=`document.getElementById('po-thumb-modal').classList.remove('show')`;
+  let inner='';
+  if(t.modo==='load')inner=`<div class="po-thumb-load">⏳ Lendo a transcrição e gerando o prompt da capa…</div>`;
+  else if(t.modo==='ok')inner=`<div class="po-thumb-box" id="po-thumb-out">${_poEsc(t.prompt)}</div><div class="po-thumb-copy"><button type="button" class="tb-btn primary sm" onclick="poThumbCopiar()">📋 Copiar prompt</button> <span class="po-modal-hint">Cole no DALL·E pra gerar a capa (16:9).</span></div>`;
+  else if(t.modo==='vazio')inner=`<div class="po-thumb-load">📄 ${_poEsc(t.msg||'Sem transcrição.')}</div>`;
+  else inner=`<div style="color:#f85149;font-size:12.5px;padding:8px 2px">⚠️ ${_poEsc(t.msg||'Erro')}</div>`;
+  host.innerHTML=`<div class="po-modal-back" onclick="${close}"></div>
+    <div class="po-modal" role="dialog">
+      <div class="po-modal-head"><h3>🖼️ Prompt da thumb — ${_poEsc(t.titulo||'')}</h3><button type="button" class="po-modal-x" onclick="${close}">✕</button></div>
+      <div class="po-modal-body">${inner}</div>
+    </div>`;
+  host.classList.add('show');
+}
+window.poThumbCopiar=()=>{ const el=document.getElementById('po-thumb-out'); const txt=el?el.textContent:''; if(txt&&navigator.clipboard?.writeText)navigator.clipboard.writeText(txt).then(()=>arosToast('Prompt copiado ✓','success',1800),()=>arosToast('Não consegui copiar','err',2200)); };
+
+// ===== Prompt Thumb: configurar a instrução + Thumb Avulsa (título + ID do Vimeo) =====
+S._poPromptThumbDraft=null; S._poThumbAvulsa=null;
+window.poAbrirPromptThumb=()=>{
+  S._poThumbInstrDefault=_PO_THUMB_DEFAULT_INSTR;
+  // Abre já com o que está salvo OU, se nunca salvou, com o prompt padrão montado.
+  S._poPromptThumbDraft=String(S.poPromptThumb||'').trim()||_PO_THUMB_DEFAULT_INSTR;
+  S._poThumbAvulsa={aberto:false};
+  _poPromptThumbRender();
+};
+window.poPromptThumbClose=()=>{const h=document.getElementById('po-promptthumb-modal');if(h){h.classList.remove('show');h.innerHTML='';}S._poPromptThumbDraft=null;S._poThumbAvulsa=null;};
+function _poPromptThumbCapture(){ const ta=document.getElementById('po-pt-ta'); if(ta&&S._poPromptThumbDraft!=null)S._poPromptThumbDraft=ta.value; }
+window.poPromptThumbRestaurar=()=>{ _poPromptThumbCapture(); if(S._poThumbInstrDefault!=null)S._poPromptThumbDraft=S._poThumbInstrDefault; _poPromptThumbRender(); arosToast('Texto padrão restaurado (salve pra aplicar).','success',2600); };
+window.poPromptThumbSalvar=async()=>{
+  _poPromptThumbCapture(); const novo=String(S._poPromptThumbDraft||'').trim(); S.poPromptThumb=novo;
+  try{ await setDoc(doc(db,'config','poConfig'),{promptThumb:novo},{merge:true}); arosToast('Prompt da thumb salvo ✓','success',2400); }
+  catch(e){ arosToast('Erro ao salvar: '+(e.message||e),'err',3500); }
+};
+window.poThumbAvulsaToggle=()=>{ _poPromptThumbCapture(); if(!S._poThumbAvulsa)S._poThumbAvulsa={}; S._poThumbAvulsa.aberto=!S._poThumbAvulsa.aberto; _poPromptThumbRender(); };
+window.poThumbAvulsaGerar=async()=>{
+  _poPromptThumbCapture();
+  const titulo=String((document.getElementById('po-av-titulo')||{}).value||'').trim();
+  const vimeoId=String((document.getElementById('po-av-vimeo')||{}).value||'').replace(/\D/g,'');
+  if(!titulo){arosToast('Digite o título da aula.','err',2500);return;}
+  if(!vimeoId){arosToast('Cole o ID (ou link) do vídeo no Vimeo.','err',2500);return;}
+  S._poThumbAvulsa.busy=true; S._poThumbAvulsa.res={modo:'load'}; S._poThumbAvulsa.titulo=titulo; S._poThumbAvulsa.vimeoId=vimeoId; _poPromptThumbRender();
+  try{
+    const r=await _poApiPost(THUMB_PROMPT_ENDPOINT,{titulo,vimeoId});
+    if(r&&r.ok&&r.prompt)S._poThumbAvulsa.res={modo:'ok',prompt:r.prompt};
+    else S._poThumbAvulsa.res={modo:'vazio',msg:(r&&r.motivo==='sem_transcricao')?'O Vimeo não tem legenda pra esse ID (ou o vídeo não está na nossa conta).':'Não consegui gerar.'};
+  }catch(e){ S._poThumbAvulsa.res={modo:'erro',msg:e.message||String(e)}; }
+  S._poThumbAvulsa.busy=false; _poPromptThumbRender();
+};
+window.poThumbAvulsaCopiar=()=>{ const el=document.getElementById('po-av-out'); const txt=el?el.textContent:''; if(txt&&navigator.clipboard?.writeText)navigator.clipboard.writeText(txt).then(()=>arosToast('Prompt copiado ✓','success',1800),()=>arosToast('Não consegui copiar','err',2200)); };
+function _poPromptThumbRender(){
+  let host=document.getElementById('po-promptthumb-modal');
+  if(!host){host=document.createElement('div');host.id='po-promptthumb-modal';document.body.appendChild(host);}
+  if(S._poPromptThumbDraft==null){host.classList.remove('show');host.innerHTML='';return;}
+  const av=S._poThumbAvulsa||{}; let avRes='';
+  if(av.res){
+    if(av.res.modo==='load')avRes=`<div class="po-thumb-load">⏳ Puxando transcrição e gerando…</div>`;
+    else if(av.res.modo==='ok')avRes=`<div class="po-thumb-box" id="po-av-out">${_poEsc(av.res.prompt)}</div><div class="po-thumb-copy"><button type="button" class="tb-btn primary sm" onclick="poThumbAvulsaCopiar()">📋 Copiar prompt</button></div>`;
+    else if(av.res.modo==='vazio')avRes=`<div class="po-thumb-load">📄 ${_poEsc(av.res.msg||'')}</div>`;
+    else avRes=`<div style="color:#f85149;font-size:12.5px;padding:8px 2px">⚠️ ${_poEsc(av.res.msg||'')}</div>`;
+  }
+  const carregando=S._poThumbInstrDefault==null&&!S._poPromptThumbDraft;
+  const avTit=_poEsc(av.titulo||''), avVid=_poEsc(av.vimeoId||'');
+  const avBlock=av.aberto?`<div class="po-thumb-sec">
+    <div class="po-modal-label">Thumb avulsa — gere um prompt a partir de qualquer vídeo (sem precisar estar na planilha)</div>
+    <div class="po-thumb-row">
+      <div><div class="po-modal-hint">Título da aula</div><input type="text" id="po-av-titulo" class="po-thumb-inp" value="${avTit}" placeholder="Ex.: Trabalho de parto — partoanalgesia"></div>
+      <div><div class="po-modal-hint">ID do Vimeo (ou link)</div><input type="text" id="po-av-vimeo" class="po-thumb-inp" value="${avVid}" placeholder="Ex.: 1012200005"></div>
+    </div>
+    <button type="button" class="tb-btn primary sm" onclick="poThumbAvulsaGerar()"${av.busy?' disabled':''}>${av.busy?'Gerando…':'⚙️ Gerar prompt'}</button>
+    ${avRes}
+  </div>`:'';
+  host.innerHTML=`<div class="po-modal-back" onclick="poPromptThumbClose()"></div>
+    <div class="po-modal" role="dialog">
+      <div class="po-modal-head"><h3>🖼️ Prompt Thumb</h3><button type="button" class="po-modal-x" onclick="poPromptThumbClose()">✕</button></div>
+      <div class="po-modal-body">
+        <div class="po-modal-label">Instrução da IA pra montar o prompt da capa — vale pro botão GERAR de cada aula e pra thumb avulsa</div>
+        <textarea id="po-pt-ta" class="po-thumb-ta" placeholder="${carregando?'Carregando o texto padrão…':''}">${_poEsc(S._poPromptThumbDraft||'')}</textarea>
+        <button type="button" class="tb-btn ghost sm" style="margin-top:10px" onclick="poThumbAvulsaToggle()">${av.aberto?'▾':'▸'} 🎬 Thumb avulsa</button>
+        ${avBlock}
+      </div>
+      <div class="po-modal-foot">
+        <button type="button" class="tb-btn ghost" onclick="poPromptThumbRestaurar()">↩︎ Restaurar padrão</button>
+        <button type="button" class="tb-btn primary" onclick="poPromptThumbSalvar()">💾 Salvar instrução</button>
+      </div>
+    </div>`;
+  host.classList.add('show');
+}
+
 async function _poCarregarFiltros(force){
   if(S._poFiltros&&!force)return S._poFiltros;
   const d=await _poApiPost(FILTROS_PO_ENDPOINT,{});
@@ -40525,24 +40749,62 @@ window.poPesosSalvar=async()=>{
   catch(e){ console.warn('poPesos save',e); arosToast('Falha ao salvar os pesos: '+((e&&e.message)||e),'err',5000); }
 };
 
-// Análise do PRODUTO inteiro: consolida (via IA) os módulos JÁ analisados.
+// Análise do PRODUTO inteiro: consolida (SEM IA) as ações que cada módulo já gerou.
 async function _poSaveAnaliseProduto(cid){ try{ await setDoc(doc(db,'config','poConfig'),{analiseProduto:{[cid]:S.poAnaliseProduto[cid]}},{merge:true}); }catch(e){console.warn('analiseProduto save',e);} }
-window.poProdSetTab=(prova)=>{ S._poProdTab=prova; const cid=S.poCursoAtual; if(cid&&S.poAnaliseProduto[cid])_poRenderAnaliseProduto(S.poAnaliseProduto[cid]); };
-window.poAnalisarProduto=async()=>{
+// Junta as ações de todos os módulos do curso (menos os ignorados e as dispensadas),
+// classifica em aula/material e calcula a prioridade — tudo local, sem chamar a IA.
+// Subtipo de um material pendente (pro sub-filtro da aba Materiais). Casa pelo título
+// (mais confiável: "Criar apostila…", "Criar ficha resumo…", "trilha de flashcards…")
+// e, na dúvida, pela nota dominante entre os critérios de apoio.
+const _PO_MAT_LBL={apostila:'Apostila',ficha:'Ficha resumo',flashcards:'Flashcards',questoes:'Questões'};
+const _PO_MAT_ORDEM=['apostila','ficha','flashcards','questoes'];
+function _poMaterialSubtipo(a){
+  const t=String(a&&a.titulo||'').toLowerCase();
+  if(/flashcard|flash\s*card/.test(t))return 'flashcards';
+  if(/ficha[\s-]*resumo|ficha\s*de\s*resumo/.test(t))return 'ficha';
+  if(/apostila/.test(t))return 'apostila';
+  if(/quest(õ|o)es|trilha\s*de\s*quest/.test(t))return 'questoes';
+  const n=(a&&a.notas)||{};
+  const cand=[['flashcards',n.trilhaFlashcards||0],['ficha',n.fichaResumo||0],['apostila',n.apostila||0],['questoes',n.trilhaQuestoes||0]];
+  cand.sort((x,y)=>y[1]-x[1]);
+  return cand[0][1]>0?cand[0][0]:'apostila';
+}
+function _poBuildProdutoWorklist(cid){
+  const mods=_poGroupByMod(_poAulasDoCurso(cid)).map(g=>g.modulo).filter(m=>!_poModIgnorado(cid,m));
+  const itens=[];
+  mods.forEach(modulo=>{
+    const k=_poModKey(cid,modulo);
+    const an=(S._poAnalises&&S._poAnalises[k])||(S.poModQuestoes[k]&&S.poModQuestoes[k].analise);
+    if(!an||!Array.isArray(an.acoes))return;
+    const dis=_poDispSet(k);
+    an.acoes.forEach(a=>{
+      if(dis.has(_poNormTit(a.titulo)))return;
+      // tags de prova: TSA Oral é avaliado por módulo (sai da consolidação); 'Geral' não vira tag
+      const provas=(Array.isArray(a.provas)?a.provas:[]).filter(p=>p!=='TSAOral'&&p!=='Geral');
+      const tipo=_poAcaoEhApoio(a)?'material':'aula';
+      itens.push({modulo,titulo:String(a.titulo||'').trim()||'(sem título)',porque:String(a.porque||''),aula:a.aula||'',provas,tipo,subtipo:tipo==='material'?_poMaterialSubtipo(a):null,_p:_poPrioridade(a.notas)});
+    });
+  });
+  itens.sort((x,y)=>y._p-x._p);
+  return itens;
+}
+// Consolida (local) e re-renderiza: grava só um marcador (timestamp + nº de módulos) e abre o dropdown.
+function _poConsolidarProdutoLocal(cid){
+  const mods=_poGroupByMod(_poAulasDoCurso(cid)).map(g=>g.modulo).filter(m=>!_poModIgnorado(cid,m));
+  const n=mods.filter(m=>{const k=_poModKey(cid,m);const an=(S._poAnalises&&S._poAnalises[k])||(S.poModQuestoes[k]&&S.poModQuestoes[k].analise);return an&&Array.isArray(an.acoes);}).length;
+  S.poAnaliseProduto[cid]={meta:{em:new Date().toISOString(),nModulos:n,local:true}};
+  S._poProdAberto=true; // abre pra mostrar o resultado que o usuário acabou de gerar
+  _poSaveAnaliseProduto(cid);
+  _poRenderProduto();
+}
+window.poProdToggleAberto=()=>{ S._poProdAberto=!S._poProdAberto; _poRenderProduto(); };
+window.poProdSetAba=(tipo)=>{ S._poProdTab2=(tipo==='material'?'material':'aula'); _poRenderProduto(); };
+window.poProdSetMatFiltro=(f)=>{ S._poProdMatFiltro=f||'todos'; _poRenderProduto(); };
+window.poProdToggleInfo=(kEnc)=>{ const k=decodeURIComponent(kEnc); if(!S._poProdInfo)S._poProdInfo=new Set(); if(S._poProdInfo.has(k))S._poProdInfo.delete(k);else S._poProdInfo.add(k); _poRenderProduto(); };
+window.poAnalisarProduto=()=>{
   const cid=S.poCursoAtual; const curso=(S.poCursos||[]).find(c=>c.id===cid);
   if(!cid||!curso){arosToast('Abra um curso primeiro.','err',2500);return;}
-  if(S._poProdAnalisando)return;
-  const el=document.getElementById('po-prod-timeline'); if(!el)return;
-  S._poProdAnalisando=true;
-  el.innerHTML=`<div class="po-an-load"><span class="po-an-spin"></span> Consolidando as análises já salvas dos módulos… (a IA usa só os resultados salvos, não reprocessa tudo)</div>`;
-  el.scrollIntoView({behavior:'smooth',block:'nearest'});
-  try{
-    const r=await _poApiPost(ANALISE_PRODUTO_PO_ENDPOINT,{cursoId:cid,cursoNome:curso.nome});
-    S.poAnaliseProduto[cid]=r.analise;
-    _poSaveAnaliseProduto(cid);
-    _poRenderAnaliseProduto(r.analise);
-  }catch(e){ el.innerHTML=`<div class="po-imp-erro">⚠️ ${_poEsc(e.message||String(e))}</div>`; }
-  finally{ S._poProdAnalisando=false; }
+  _poConsolidarProdutoLocal(cid); // consolidação é local (sem IA) — junta o que os módulos já produziram
 };
 // ── Análise do produto em LOTE (Rápida / Completa) com progresso + cancelar ──
 function _poProdRenderProgress(){
@@ -40583,7 +40845,7 @@ async function _poProdRun(cid, modo){ // modo: 'rapida'|'completa'
   if(!cid||!curso){arosToast('Abra um curso primeiro.','err',2500);return;}
   if(S._poProdAnalisando)return;
   S._poProdMenuOpen=false;
-  const todos=_poGroupByMod(_poAulasDoCurso(cid)).map(g=>g.modulo);
+  const todos=_poGroupByMod(_poAulasDoCurso(cid)).map(g=>g.modulo).filter(m=>!_poModIgnorado(cid,m));
   const modulos = modo==='completa' ? todos : todos.filter(m=>!(S._poAnalises[_poModKey(cid,m)]||(S.poModQuestoes[_poModKey(cid,m)]&&S.poModQuestoes[_poModKey(cid,m)].analise)));
   // Confirmação ANTES de gastar IA — na Rápida lista QUAIS módulos serão analisados (pra conferir).
   if(modulos.length){
@@ -40603,9 +40865,7 @@ async function _poProdRun(cid, modo){ // modo: 'rapida'|'completa'
       if(r.erros&&r.erros.length) arosToast(`${r.erros.length} módulo(s) falharam na análise.`,'err',4000);
     } else if(modo==='rapida'){ arosToast('Todos os módulos já estavam analisados — consolidando.','info',3000); }
     if(!cancelado){
-      const el=document.getElementById('po-prod-timeline'); if(el)el.innerHTML=`<div class="po-an-load"><span class="po-an-spin"></span> Consolidando a análise do produto…</div>`;
-      const rc=await _poApiPost(ANALISE_PRODUTO_PO_ENDPOINT,{cursoId:cid,cursoNome:curso.nome});
-      S.poAnaliseProduto[cid]=rc.analise; _poSaveAnaliseProduto(cid); _poRenderAnaliseProduto(rc.analise);
+      _poConsolidarProdutoLocal(cid); // consolidação local (sem IA): monta a lista de Aulas/Materiais pendentes
     } else { const el=document.getElementById('po-prod-timeline'); if(el)el.innerHTML=`<div class="po-tl-empty">Análise cancelada. Os módulos já analisados foram salvos — rode a Análise rápida pra continuar de onde parou.</div>`; }
   }catch(e){ const el=document.getElementById('po-prod-timeline'); if(el)el.innerHTML=`<div class="po-imp-erro">⚠️ ${_poEsc((e&&e.message)||String(e))}</div>`; }
   finally{ S._poProdAnalisando=false; S._poProdBatch=null; }
@@ -40632,39 +40892,61 @@ window.poTestarIncidencia=async()=>{
       okLabel:'Fechar'});
   }finally{ S._poProdTestando=false; }
 };
-function _poRenderAnaliseProduto(an){
-  const el=document.getElementById('po-prod-timeline'); if(!el||!an)return;
-  const m=an.meta||{};
-  if(!m.nModulos){ el.innerHTML=`<div class="po-tl-empty">${_poEsc(an.resumoGeral||'Nenhum módulo analisado ainda.')}</div>`; return; }
-  const provas=_PO_PROVAS_ORDEM.filter(p=>p!=='Geral'&&an.porProva&&an.porProva[p]&&(an.porProva[p].ranking||[]).length);
-  let aba=S._poProdTab||(provas[0]||'TEA');
-  if(!provas.includes(aba))aba=provas[0]||'TEA';
-  const blk=(an.porProva&&an.porProva[aba])||{ranking:[],panorama:''};
-  const tabs=provas.map(p=>`<button type="button" class="po-an-tab${aba===p?' on':''}" onclick="poProdSetTab('${p}')">${_PO_PROVA_LBL[p]||p}<span class="po-an-tabc">${(an.porProva[p].ranking||[]).length}</span></button>`).join('');
-  const rows=(blk.ranking||[]).map((r,i)=>{
-    const nvm=_PO_NIVEL[r.nivel]||_PO_NIVEL.media;
-    return `<tr class="po-an-tr">
-      <td class="po-an-c-rank">${i+1}</td>
-      <td class="po-an-c-niv"><span class="po-an-dot" style="--nc:${nvm.cor}" title="${nvm.lbl}"></span></td>
-      <td class="po-an-c-acao">
-        <div class="po-an-tit">${_poEsc(r.modulo)} <span class="po-an-pchip" title="${r.incQ?`incidência oficial — ${r.incQ} questões na prova (últimos 5 anos + o atual)`:'incidência nesta prova'}">${_poEsc(r.incLabel||((r.incidencia||0)+'q'))}</span> <span class="po-an-badge sm" style="--nc:${nvm.cor}">${nvm.lbl}</span></div>
-        ${r.porque?`<div class="po-an-por">${_poEsc(r.porque)}</div>`:''}
-      </td></tr>`;
-  }).join('')||`<tr><td colspan="3" class="po-mut" style="padding:14px">Sem módulos relevantes para esta prova.</td></tr>`;
-  const _anosTxt=(Array.isArray(m.incidenciaAnos)&&m.incidenciaAnos.length)?`${m.incidenciaAnos[0]}–${m.incidenciaAnos[m.incidenciaAnos.length-1]}`:'';
-  const incBadge=m.incidenciaOficial
-    ?`<span class="po-an-saved po-an-inc-ok" title="Incidência oficial recebida da API (analise-provas/incidencia). Recorte: ${_anosTxt||'últimos 5 anos + o atual'}.">📊 Incidência oficial${_anosTxt?` · ${_anosTxt}`:''}</span>`
-    :`<span class="po-an-saved po-an-inc-off" title="A API não retornou incidência oficial — o ranking está usando a contagem de questões. Verifique se os temas dos módulos estão mapeados em 🧩 Temas dos módulos.">⚠️ Incidência: contagem de questões</span>`;
-  el.innerHTML=`<div class="po-an-wrap">
-    <div class="po-an-head"><span class="po-an-h-tit">🧠 Análise do produto</span>${incBadge}${m.em?`<span class="po-an-saved">💾 ${m.nModulos} módulo(s) · ${_poDataFmt(m.em)}</span>`:''}</div>
-    ${an.resumoGeral?`<div class="po-an-resumo">${_poEsc(an.resumoGeral)}</div>`:''}
-    <div class="po-an-tabs">${tabs}</div>
-    ${blk.panorama?`<div class="po-an-prov-pano">${_poEsc(blk.panorama)}</div>`:''}
-    <table class="po-an-tbl"><tbody>${rows}</tbody></table>
-    <div class="po-an-foot">Ranking por prova, priorizando incidência oficial (% das questões nos últimos 5 anos + o atual) + gravidade. Re-analise quando atualizar módulos. <button type="button" class="btn btn-g po-an-reorder" onclick="poAnalisarProdutoRapida()">🔄 Re-analisar produto</button></div>
+// Relatório do produto: dropdown fechado por padrão, 2 abas (Aulas / Materiais),
+// cada ação com módulo + tags de prova + "i" pro motivo. Cor de fundo = prioridade.
+function _poRenderProduto(){
+  const el=document.getElementById('po-prod-timeline'); if(!el)return;
+  const cid=S.poCursoAtual; if(!cid)return;
+  const itens=_poBuildProdutoWorklist(cid);
+  const meta=(S.poAnaliseProduto&&S.poAnaliseProduto[cid]&&S.poAnaliseProduto[cid].meta)||{};
+  if(!itens.length){
+    el.innerHTML=`<div class="po-tl-empty">Nenhuma ação pendente ainda. Rode a <b>Análise rápida</b> ou <b>completa</b> pra analisar os módulos — a lista do produto se monta a partir delas.</div>`;
+    return;
+  }
+  const aulas=itens.filter(i=>i.tipo==='aula');
+  const mats=itens.filter(i=>i.tipo==='material');
+  const aba=S._poProdTab2==='material'?'material':'aula';
+  // sub-filtro da aba Materiais por tipo (apostila / ficha resumo / flashcards / questões)
+  const matSubs=_PO_MAT_ORDEM.filter(s=>mats.some(i=>i.subtipo===s));
+  let matFiltro=S._poProdMatFiltro||'todos';
+  if(matFiltro!=='todos'&&!matSubs.includes(matFiltro))matFiltro='todos';
+  let lista=aba==='material'?mats:aulas;
+  if(aba==='material'&&matFiltro!=='todos')lista=lista.filter(i=>i.subtipo===matFiltro);
+  const aberto=!!S._poProdAberto;
+  if(!S._poProdInfo)S._poProdInfo=new Set();
+  const rows=lista.map(it=>{
+    const nv=_poNivelDe(it._p),nvm=_PO_NIVEL[nv];
+    const chips=it.provas.map(p=>`<span class="po-an-pchip">${_PO_PROVA_LBL[p]||p}</span>`).join('');
+    const ik=it.modulo+' '+it.titulo;
+    const infoOpen=S._poProdInfo.has(ik);
+    const ibtn=it.porque?`<button type="button" class="po-prodv-ibtn${infoOpen?' on':''}" title="Por que esta ação?" onclick="poProdToggleInfo('${encodeURIComponent(ik)}')">i</button>`:'';
+    const det=(infoOpen&&it.porque)?`<div class="po-prodv-det"><div class="po-an-por">${_poFmtPorque(it.porque)}</div></div>`:'';
+    return `<div class="po-prodv-acao" style="--nc:${nvm.cor}">
+      <div class="po-prodv-head"><span class="po-prodv-titxt">${_poEsc(it.titulo)}</span>${chips}${ibtn}</div>
+      <div class="po-prodv-mod">${_poEsc(it.modulo)}</div>
+      ${det}
+    </div>`;
+  }).join('')||`<div class="po-prodv-vazio">Nada pendente nesta aba. 🎉</div>`;
+  const tab=(t,lbl,n)=>`<button type="button" class="po-an-tab${aba===t?' on':''}" onclick="poProdSetAba('${t}')">${lbl}<span class="po-an-tabc">${n}</span></button>`;
+  const matChip=(f,lbl,n)=>`<button type="button" class="po-prodv-fchip${matFiltro===f?' on':''}" onclick="poProdSetMatFiltro('${f}')">${lbl}<span class="po-prodv-fc">${n}</span></button>`;
+  const subBar=(aba==='material'&&matSubs.length)?`<div class="po-prodv-subfilt">${matChip('todos','Todos',mats.length)}${matSubs.map(s=>matChip(s,_PO_MAT_LBL[s],mats.filter(i=>i.subtipo===s).length)).join('')}</div>`:'';
+  const dataTxt=meta.em?_poDataFmt(meta.em):'';
+  el.innerHTML=`<div class="po-prodv">
+    <button type="button" class="po-prodv-toggle${aberto?' open':''}" onclick="poProdToggleAberto()">
+      <span class="po-prodv-chev">▸</span>
+      <span class="po-prodv-tit">🧠 Análise do produto</span>
+      <span class="po-prodv-sub">${aulas.length} aula(s) · ${mats.length} material(is)${dataTxt?` · ${dataTxt}`:''}</span>
+    </button>
+    ${aberto?`<div class="po-prodv-body">
+      <div class="po-an-tabs">${tab('aula','Aulas Pendentes',aulas.length)}${tab('material','Materiais Pendentes',mats.length)}</div>
+      ${subBar}
+      <div class="po-prodv-list">${rows}</div>
+      <div class="po-an-foot">Lista montada a partir das análises dos módulos. <button type="button" class="btn btn-g po-an-reorder" onclick="poAnalisarProdutoRapida()">🔄 Atualizar</button></div>
+    </div>`:''}
   </div>`;
-  el.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
+// alias: chamado de alguns pontos antigos com o objeto salvo — ignora o arg e remonta ao vivo.
+function _poRenderAnaliseProduto(){ _poRenderProduto(); }
 window.poAbrirAnaliseModulo=(cid,modEnc)=>{
   S._poModAtual={cid,modulo:decodeURIComponent(modEnc)};
   S._poModErro={};S._poAnTab='Todas';S._poOralOpen=false; // box TSA Oral começa FECHADO ao abrir o módulo

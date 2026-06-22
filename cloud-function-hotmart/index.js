@@ -35,6 +35,9 @@ exports.analisarProdutoPO = require('./po-analise').analisarProdutoPO;
 // IA de análise do PO — TSA Oral (análise separada, só lacunas; não mexe nas barras)
 exports.analisarTSAOralPO = require('./po-analise').analisarTSAOralPO;
 
+// Gerador de prompt de THUMB (capa da aula) pro DALL·E — lê a transcrição + título (Sonnet, ANTHROPIC_API_KEY_PO)
+exports.gerarPromptThumb = require('./thumb-prompt').gerarPromptThumb;
+
 // Helper que faz UPSERT em alunosAprovados (Cruzar Lista) a partir do webhook Hotmart
 const { upsertAluno } = require('./hotmart-alunos');
 

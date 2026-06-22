@@ -543,8 +543,10 @@ async function incidenciaTree(escopoIds, anos, tentativa = 0) {
 }
 // Cruza o temaModulo de UM curso × incidência oficial → {modulo: {TEA:{q,pct}, TSA, MEs}}.
 // Retorna null se não dá pra calcular (sem token ou sem mapeamento de temas).
-async function incidenciaOficialPorModulo(temaModuloCurso) {
+async function incidenciaOficialPorModulo(temaModuloCurso, ignorados) {
   if (!LARAVEL_TOKEN || !temaModuloCurso || !Object.keys(temaModuloCurso).length) return null;
+  const ign = ignorados instanceof Set ? ignorados : new Set();
+  const _normMod = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
   const anos = anosIncidencia();
   const trees = {};
   for (const prova of Object.keys(ESCOPOS_PROVA)) {
@@ -553,6 +555,7 @@ async function incidenciaOficialPorModulo(temaModuloCurso) {
   }
   const porMod = {};
   Object.entries(temaModuloCurso).forEach(([modulo, pcodes]) => {
+    if (ign.has(_normMod(modulo))) return; // módulo ignorado: fora da incidência do produto
     const ids = (Array.isArray(pcodes) ? pcodes : []).map(Number).filter(Boolean);
     const rec = {};
     Object.keys(ESCOPOS_PROVA).forEach(prova => {
@@ -576,15 +579,17 @@ async function atualizarIncidenciaSalva(cursoId) {
   const analise = cfg.analiseProduto && cfg.analiseProduto[cursoId];
   if (!analise || !analise.porProva) return { cursoId, atualizado: false, motivo: 'sem análise salva' };
   const tmCurso = cfg.temaModulo && cfg.temaModulo[cursoId];
-  const incOf = await incidenciaOficialPorModulo(tmCurso);
-  if (!incOf) return { cursoId, atualizado: false, motivo: 'sem incidência (token/temas)' };
   const _norm = t => String(t || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const ign = new Set(((cfg.modulosIgnorados && cfg.modulosIgnorados[cursoId]) || []).map(_norm));
+  const incOf = await incidenciaOficialPorModulo(tmCurso, ign);
+  if (!incOf) return { cursoId, atualizado: false, motivo: 'sem incidência (token/temas)' };
   const incOfPorMod = {};
   Object.entries(incOf.porMod).forEach(([mod, rec]) => { incOfPorMod[_norm(mod)] = rec; });
   let linhas = 0;
   ['MEs', 'TEA', 'TSA'].forEach(prova => {
     const blk = analise.porProva[prova];
     if (!blk || !Array.isArray(blk.ranking)) return;
+    if (ign.size) blk.ranking = blk.ranking.filter(r => !ign.has(_norm(r.modulo))); // tira módulos ignorados do ranking salvo
     blk.ranking.forEach(r => {
       const of = incOfPorMod[_norm(r.modulo)];
       if (of && of[prova]) {
@@ -692,6 +697,10 @@ exports.analisarProdutoPO = onRequest(
       // Prompt customizado do produto (editável pela tela).
       const cfgSnap = await db.collection('config').doc('poConfig').get();
       const promptCustom = cfgSnap.exists && cfgSnap.data().analisePrompt && cfgSnap.data().analisePrompt.produto;
+      // Módulos ignorados (config/poConfig.modulosIgnorados[cursoId]): fora da consolidação e da incidência.
+      const _cfgData = cfgSnap.exists ? (cfgSnap.data() || {}) : {};
+      const _normMod = t => String(t || '').toLowerCase().replace(/\s+/g, ' ').trim();
+      const ignSet = new Set(((_cfgData.modulosIgnorados && _cfgData.modulosIgnorados[cursoId]) || []).map(_normMod));
 
       // ── Atalho "só incidência": busca a incidência oficial por módulo SEM chamar
       // a IA (custo de crédito = 0). Só precisa dos temas mapeados (temaModulo).
@@ -701,7 +710,7 @@ exports.analisarProdutoPO = onRequest(
           res.status(200).json({ ok: true, soIncidencia: true, incidencia: null, motivo: 'Nenhum módulo deste produto tem temas mapeados (🧩 Temas dos módulos).' });
           return;
         }
-        const incOf = await incidenciaOficialPorModulo(tmCurso);
+        const incOf = await incidenciaOficialPorModulo(tmCurso, ignSet);
         if (!incOf) { res.status(502).json({ error: 'Não consegui buscar a incidência (API indisponível ou token ausente).' }); return; }
         console.log('IA PO incidência (sem IA)', { user: decoded.email || decoded.uid, curso: cursoNome || cursoId, n_modulos: Object.keys(incOf.porMod).length, anos: incOf.anos.join(',') });
         res.status(200).json({ ok: true, soIncidencia: true, incidencia: incOf });
@@ -721,6 +730,8 @@ exports.analisarProdutoPO = onRequest(
         const acoes = an.acoes.filter(a => !disp.has(_norm(a.titulo)));
         mods.push({ modulo: x.modulo || an.meta?.modulo || '(módulo)', resumo: an.resumo || '', acoes, porProva });
       });
+      // Remove módulos ignorados da consolidação (some do ranking/panorama do produto).
+      if (ignSet.size) { for (let i = mods.length - 1; i >= 0; i--) if (ignSet.has(_normMod(mods[i].modulo))) mods.splice(i, 1); }
 
       if (!mods.length) {
         res.status(200).json({ ok: true, analise: { resumoGeral: 'Nenhum módulo deste produto foi analisado ainda. Analise os módulos individualmente primeiro — a análise do produto consolida esses resultados.', porProva: {}, meta: { cursoId, cursoNome, nModulos: 0, em: new Date().toISOString() } } });
@@ -731,7 +742,7 @@ exports.analisarProdutoPO = onRequest(
       // cruzando o mapeamento de temas do curso. Se não der, cai na contagem crua.
       const temaModuloCurso = (cfgSnap.exists && cfgSnap.data().temaModulo && cfgSnap.data().temaModulo[cursoId]) || null;
       let incOf = null;
-      try { incOf = await incidenciaOficialPorModulo(temaModuloCurso); }
+      try { incOf = await incidenciaOficialPorModulo(temaModuloCurso, ignSet); }
       catch (e) { console.warn('IA PO produto: incidência oficial falhou', e.message); }
       if (incOf) mods.forEach(m => { m.incOficial = incOf.porMod[m.modulo] || null; });
 

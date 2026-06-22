@@ -50,6 +50,9 @@ function _slug(s) {
     .replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || '_';
 }
 
+// Normaliza nome de módulo p/ comparar com a lista de ignorados (casa com o _norm do po-analise/frontend).
+function _norm(s) { return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+
 const _sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // GET com retry/backoff em 429 (rate limit) e 5xx transitórios. Respeita Retry-After.
@@ -129,17 +132,33 @@ function apostilasDaAula(c) {
 // Busca todo o currículo de um curso no Laravel → lista de aulas mapeadas (+ ordem dos
 // módulos + apostilas detectadas por módulo).
 async function buscarCursoLaravel(courseId, nome) {
+  // Módulos marcados como "ignorados" na tela do PO (config/poConfig.modulosIgnorados[cursoId]):
+  // não puxa da API, não cria/atualiza aulas, não transcreve nem importa apostilas.
+  const cursoId = _slug(nome);
+  let ignorados = new Set();
+  try {
+    const cfg = (await admin.firestore().collection('config').doc('poConfig').get()).data() || {};
+    const arr = (cfg.modulosIgnorados && cfg.modulosIgnorados[cursoId]) || [];
+    if (Array.isArray(arr)) ignorados = new Set(arr.map(_norm));
+  } catch (e) { console.warn('modulosIgnorados read falhou:', e?.message || e); }
+
   const modulos = await laravelGet(`/curso/${courseId}/modulos`);
   const lista = Array.isArray(modulos) ? modulos : (modulos.data || modulos.modulos || []);
   const aulas = [];
   const modOrdem = [];
   const apostilasPorModulo = {}; // {moduloNome: [labels]}
+  const pulados = [];
   let ordemPO = 0;
   for (const mod of lista) {
+    // Pula SEM nem buscar os conteúdos quando o nome do módulo na lista já bate com um ignorado.
+    const nomeLista = _norm(mod.name || mod.title || mod.module_name || mod.nome);
+    if (nomeLista && ignorados.has(nomeLista)) { pulados.push(mod.name || mod.title || nomeLista); continue; }
     await _sleep(120); // respiro entre módulos p/ não estourar o rate limit do Laravel
     const cont = await laravelGet(`/modulo/${mod.id}/conteudos`);
     const conteudos = Array.isArray(cont) ? cont : (cont.data || cont.conteudos || []);
     for (const c of conteudos) {
+      // Defesa: se o nome da lista não casou mas o module_name da aula está ignorado, pula também.
+      if (ignorados.has(_norm(c.module_name || '(sem módulo)'))) continue;
       const a = mapAula(c, nome, ordemPO++);
       if (!modOrdem.includes(a.modulo)) modOrdem.push(a.modulo);
       aulas.push(a);
@@ -147,6 +166,7 @@ async function buscarCursoLaravel(courseId, nome) {
       if (aps.length) (apostilasPorModulo[a.modulo] = apostilasPorModulo[a.modulo] || []).push(...aps);
     }
   }
+  if (pulados.length) console.log(`Sync ${nome}: ${pulados.length} módulo(s) ignorado(s) (não puxados):`, pulados.join(' · '));
   return { aulas, modOrdem, apostilasPorModulo };
 }
 
