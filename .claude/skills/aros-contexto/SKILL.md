@@ -2801,6 +2801,21 @@ Polimento mobile (2026-05-20, mesmo dia):
 - **Fonte dos card titles** trocada de Fraunces (serif) pra Space Grotesk (consistente com o hero).
 - **Servidor local pra testar mobile**: `python3 -m http.server 8080` + IP via `ipconfig getifaddr en0` + iPhone no mesmo Wi-Fi acessa `http://<ip>:8080`. Iteração ao vivo com pull-to-refresh.
 
+### Rodada 2026-06-22 — ignorar módulos, relatório do produto LOCAL, feature THUMB, filtros de coluna, fixes
+
+**Ignorar módulos.** Cabeçalho de cada módulo no PO tem botão **Ignorar** (`poToggleIgnorarModulo` → `config/poConfig.modulosIgnorados[cursoId]=[nome,...]`). Módulo ignorado: NÃO é puxado da API (a `sincronizar-laravel.js` pula no `buscarCursoLaravel`, casando por nome normalizado), NÃO entra na análise/consolidação/incidência (filtro no front + `po-analise.js incidenciaOficialPorModulo`/consolidação). Linha escurecida, esconde "Analisar".
+
+**Relatório do produto reescrito — agora LOCAL, sem IA.** A consolidação deixou de chamar `analisarProdutoPO`; vira `_poRenderProduto`/`_poBuildProdutoWorklist` no front, que junta as `acoes` que cada módulo já gerou (menos ignorados/dispensados). Dropdown fechado por padrão, 2 abas **Aulas Pendentes** / **Materiais Pendentes** (split por `_poAcaoEhApoio`), sub-filtro de materiais (`_poMaterialSubtipo`: apostila/ficha/flashcards/questões), tags de prova por ação (sem TSAOral/Geral), "i" pro motivo, cor de fundo = prioridade (`_poNivelDe`/`_poPrioridade`). Sem resumo no topo, sem % de incidência. Análise rápida/completa por módulo continuam usando IA; só a consolidação ficou local.
+
+**Feature THUMB.** Coluna fixa **THUMB** (entre colunas e "＋"; `span = poColunas.length+3`). Por aula: botão **GERAR** (gradiente roxo `po-thumb-btn`) → chama a Cloud Function nova **`gerarPromptThumb`** (`thumb-prompt.js`, Sonnet, `ANTHROPIC_API_KEY_PO`) que lê a transcrição (`poTranscricoes/{vimeoId}` ou puxa do Vimeo) + nome da aula e devolve um **prompt pronto pro DALL·E** (capa estilo Pixar/DreamWorks, 16:9, título=nome da aula como elemento dominante legível em mobile) — só pra copiar, não gera imagem. Ao lado, slider **Sim/Não** (`poToggleThumbLancada` → `poAulas.thumbLancada`, "Sim" verde = lançada; em `_PRESERVAR`). Botão **🖼️ Prompt Thumb** na barra da Inteligência do Produto (`poAbrirPromptThumb`): edita a instrução (já vem montada com `_PO_THUMB_DEFAULT_INSTR`; salva em `config/poConfig.promptThumb`) + **Thumb avulsa** (título + ID do Vimeo → gera prompt sem precisar da aula na planilha). Botões `.tb-btn` (gradiente/glow). Ver [[project_aros_thumb]].
+
+**Filtros de coluna personalizados** (`_poColFiltroControl` + `_poFiltraAulas`): Avaliação = faixas (1-3,5 / 3,6-4 / 4,1-4,5 / 4,6-5 via `_poRating`/`_PO_AVAL_RANGES`); Ano = anos presentes nos resultados; Transcrição(`conteudo`)/Erro/Dúvida/Regravar/Thumb = Sim/Não; Vídeo e Duração sem filtro. "Erro/Dúvida aberta" = `a.erroAberto`/`a.duvidaAberta` (status ≠ resolvido), com backfill em memória no `loadPO` (lê `poErros`/`poDuvidas` em massa, sem escrever).
+
+**Fixes importantes.**
+- **Busca de aulas do módulo robusta** (`_aulasDoModulo` em `po-analise.js`, usada na análise de módulo E TSA Oral): o `where('modulo','==',modulo)` exato (com trim) falhava quando o nome do módulo/curso da aula tinha qualquer diferença (espaço/acento/traço/caixa) — aí a IA recebia ZERO aula e dizia "nenhuma aula existe", recomendando gravar aulas que já existiam transcritas (enquanto as questões/edital, por slug, entravam normal). Agora cai num **fallback normalizado** (slug) quando o == não acha nada.
+- **Barra de Materiais** (`_poSaudeMateriais`): apostila pronta = status **'Finalizado'** (vocabulário PO_APOST_STATUS), não 'Lançada' — antes a apostila finalizada contava como pendente e desequilibrava o %.
+- **Transcrição Vimeo — 3º modo de falha (ID errado do Laravel):** ver [[project_aros_transcricao_vimeo]]. O re-pull manual sempre usa o `a.vimeoId` gravado e não há campo na tela pra editar o ID; corrige no Laravel + Sincronizar.
+
 ---
 
 ## Painel do Dia — Simulado Presencial (grade/rodízio/estações · controle ao vivo) (2026-06-04)
