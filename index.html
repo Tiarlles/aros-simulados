@@ -41773,6 +41773,10 @@ window.poGerarThumb=async(aulaId)=>{
   const a=_poFindAulaById(aulaId); if(!a){arosToast('Aula não encontrada.','err',2500);return;}
   if(!a.vimeoId){arosToast('Esta aula não tem vídeo do Vimeo.','err',2800);return;}
   if(a._thumbGen){arosToast('Já estou gerando o prompt desta aula…','info',2200);return;}
+  if(a.thumbPrompt){
+    const ok=await arosConfirm({title:'Gerar o prompt de novo?',icon:'🖼️',message:'Esta aula já tem um prompt de capa gerado.\n\nGerar de novo vai SUBSTITUIR o atual e faz uma nova chamada de IA (gera custo). Quer continuar?',confirmLabel:'Gerar de novo',cancelLabel:'Cancelar'});
+    if(!ok)return;
+  }
   a._thumbGen=true; _poRefreshTabela();
   arosToast('🖼️ Gerando o prompt da capa… pode continuar trabalhando, eu aviso quando terminar.','info',4000);
   try{
