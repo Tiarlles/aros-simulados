@@ -5851,7 +5851,12 @@ body.pro-rt-fs-on{overflow:hidden}
         .tb-btn.ghost:hover{color:var(--text);border-color:var(--accent)}
         .tb-btn.sm{font-size:11.5px;padding:7px 13px;border-radius:9px}
         #tab-po .po-thumb-na{color:var(--t3,var(--t2));opacity:.6}
-        #tab-po .po-thumb-cell{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px}
+        #tab-po .po-thumb-cell{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+        #tab-po .po-thumb-gen-btn{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;padding:3px 9px;border-radius:7px;cursor:pointer;color:#fff;border:1px solid transparent;background:linear-gradient(135deg,#7c3aed,#a371f7);box-shadow:0 1px 7px -3px color-mix(in srgb,#a371f7 60%,transparent);transition:transform .14s,filter .18s;white-space:nowrap}
+        #tab-po .po-thumb-gen-btn:hover{transform:translateY(-1px);filter:brightness(1.1)}
+        #tab-po .po-thumb-gen-btn:active{transform:translateY(0)}
+        #tab-po .po-fc-chip.thumb{border-color:color-mix(in srgb,#a371f7 50%,var(--border));background:color-mix(in srgb,#a371f7 10%,transparent);color:#a371f7}
+        #tab-po .po-fc-chip.thumb:hover{border-color:#a371f7}
         /* Colunas Resumo LM + Flashcards */
         #tab-po .po-col-resumo,#tab-po .po-col-fc{text-align:center;padding:4px 6px !important}
         #tab-po thead .po-col-resumo,#tab-po thead .po-col-fc{text-align:center}
@@ -40188,7 +40193,7 @@ window.poImportLaravelConfirmar=async()=>{
     const existDocs=exist.docs;
     // Indexa o enriquecimento manual das aulas atuais por laravelId, pra preservar no re-import
     // (o Laravel não manda esses campos — sem isso, re-importar zeraria Status Aula/Prof/Conteúdo).
-    const _PRESERVAR=['status','prof','conteudo','categoria','apostila','fichaResumo','slides','livros','transcricaoPalavras','transcricaoLang','conteudoPreview','transcricaoEm','regravar','thumbLancada'];
+    const _PRESERVAR=['status','prof','conteudo','categoria','apostila','fichaResumo','slides','livros','transcricaoPalavras','transcricaoLang','conteudoPreview','transcricaoEm','regravar','thumbLancada','thumbPrompt'];
     const prevByLid={};
     existDocs.forEach(dd=>{const a=dd.data()||{};if(a.laravelId!=null)prevByLid[a.laravelId]=a;});
     let op=0,batch=writeBatch(db);
@@ -40676,7 +40681,7 @@ function _poAulaRowHTML(a,pos){
   return `<tr class="po-aula-row" draggable="false" data-aula-id="${aid}" data-modulo="${mod}">
     <td class="po-col-aula"><span class="po-grip" onmousedown="this.closest('tr').draggable=true" onmouseup="this.closest('tr').draggable=false" onclick="event.stopPropagation()" title="Arraste pra reordenar">⠿</span><input type="checkbox" class="po-sel-aula"${S.poSel&&S.poSel.aulas.has(a.id)?' checked':''} onclick="event.stopPropagation();poToggleSelAula('${aid}',this.checked)"><span class="po-num">${pos!=null?pos:''}</span><span class="po-aula-nome" onclick="event.stopPropagation();poEditarNomeAula('${aid}',this)">${_poEsc(a.titulo)}</span> ${dem}</td>
     ${cells}
-    <td class="po-col-thumb"><div class="po-thumb-cell">${a.vimeoId?`<button type="button" class="po-thumb-btn" onclick="event.stopPropagation();poGerarThumb('${aid}')" title="Gerar prompt da capa (thumb) desta aula">GERAR</button>`:`<span class="po-thumb-na" title="Sem vídeo do Vimeo — não dá pra ler a transcrição">—</span>`}<span class="po-rg-toggle po-thumb-toggle" title="${a.thumbLancada?'Thumb já lançada no sistema — clique pra desmarcar':'Thumb ainda NÃO lançada — clique quando lançar'}" onclick="event.stopPropagation();poToggleThumbLancada('${aid}')"><span class="po-rg-nao${a.thumbLancada?'':' on'}">Não</span><span class="po-rg-sim${a.thumbLancada?' on':''}">Sim</span></span></div></td>
+    <td class="po-col-thumb">${_poThumbCellHTML(a,aid)}</td>
     <td class="po-col-resumo"><button type="button" class="po-resumo-btn${a.fcResumoLen?' on':''}" onclick="event.stopPropagation();poAbrirResumoLM('${aid}')" title="${a.fcResumoLen?'Resumo do livro salvo — clique pra ver/editar':'Colar o resumo do livro (NotebookLM)'}">${a.fcResumoLen?'✓ Resumo':'＋ Resumo'}</button></td>
     <td class="po-col-fc">${_poFcCellHTML(a,aid)}</td>
     <td class="po-col-add"></td>
@@ -40693,6 +40698,14 @@ function _poFcCellHTML(a,aid){
   const chip=has?`<button type="button" class="po-fc-chip" onclick="event.stopPropagation();poAbrirCuradoria('${aid}')" title="Abrir o deck — ${apr} de ${rev} aprovados (${pct}%)">DECK</button>`:'';
   const bar=has?`<div class="po-fc-barwrap" title="${pct}% aprovados"><span class="po-fc-pct">${pct}%</span><div class="po-fc-bar"><span style="width:${pct}%"></span></div></div>`:'';
   return `<div class="po-fc-wrap"><div class="po-fc-row">${chip}<button type="button" class="po-fc-btn" onclick="event.stopPropagation();poGerarCards('${aid}')" title="Gerar flashcards com IA">Gerar</button></div>${bar}</div>`;
+}
+// Célula da coluna Thumb: botão Gerar pequeno (roda em segundo plano) + chip "Prompt" (copia ao clicar) + slider Sim/Não (lançada).
+function _poThumbCellHTML(a,aid){
+  const slider=`<span class="po-rg-toggle po-thumb-toggle" title="${a.thumbLancada?'Thumb já lançada no sistema — clique pra desmarcar':'Thumb ainda NÃO lançada — clique quando lançar'}" onclick="event.stopPropagation();poToggleThumbLancada('${aid}')"><span class="po-rg-nao${a.thumbLancada?'':' on'}">Não</span><span class="po-rg-sim${a.thumbLancada?' on':''}">Sim</span></span>`;
+  if(!a.vimeoId) return `<div class="po-thumb-cell"><span class="po-thumb-na" title="Sem vídeo do Vimeo — não dá pra ler a transcrição">—</span>${slider}</div>`;
+  if(a._thumbGen) return `<div class="po-thumb-cell"><span class="po-fc-gen" title="Gerando o prompt da capa — pode continuar trabalhando"><span class="po-fc-spin"></span>gerando…</span>${slider}</div>`;
+  const chip=a.thumbPrompt?`<button type="button" class="po-fc-chip thumb" onclick="event.stopPropagation();poThumbCopiarChip('${aid}')" title="Copiar o prompt da capa (pra colar no GPT/DALL·E)">Prompt</button>`:'';
+  return `<div class="po-thumb-cell">${chip}<button type="button" class="po-thumb-gen-btn" onclick="event.stopPropagation();poGerarThumb('${aid}')" title="Gerar prompt da capa (thumb) desta aula">Gerar</button>${slider}</div>`;
 }
 function _poTableRowsHTML(aulas,q){
   const span=S.poColunas.length+5; // 1 (Aula fixa) + colunas + 1 (Thumb) + 1 (Resumo) + 1 (Flashcards) + 1 (＋)
@@ -41754,16 +41767,31 @@ async function _poApiPost(url,body){
 }
 // ===== THUMB: gera um prompt de capa (DALL·E) a partir do título + transcrição da aula =====
 S._poThumb=null; S._poThumbInstrDefault=null;
+// Geração do prompt da thumb em SEGUNDO PLANO (igual flashcards): não abre modal, não trava.
+// Feedback na célula (spinner) + toasts; quando pronto, salva em poAulas.thumbPrompt e aparece o chip "Prompt".
 window.poGerarThumb=async(aulaId)=>{
   const a=_poFindAulaById(aulaId); if(!a){arosToast('Aula não encontrada.','err',2500);return;}
   if(!a.vimeoId){arosToast('Esta aula não tem vídeo do Vimeo.','err',2800);return;}
-  S._poThumb={modo:'load',titulo:a.titulo||''}; _poThumbResultRender();
+  if(a._thumbGen){arosToast('Já estou gerando o prompt desta aula…','info',2200);return;}
+  if(a.thumbPrompt){
+    const ok=await arosConfirm({title:'Gerar o prompt de novo?',icon:'🖼️',message:'Esta aula já tem um prompt de capa gerado.\n\nGerar de novo vai SUBSTITUIR o atual e faz uma nova chamada de IA (gera custo). Quer continuar?',confirmLabel:'Gerar de novo',cancelLabel:'Cancelar'});
+    if(!ok)return;
+  }
+  a._thumbGen=true; _poRefreshTabela();
+  arosToast('🖼️ Gerando o prompt da capa… pode continuar trabalhando, eu aviso quando terminar.','info',4000);
   try{
     const r=await _poApiPost(THUMB_PROMPT_ENDPOINT,{titulo:a.titulo||'',vimeoId:String(a.vimeoId),aulaId:a.id});
-    if(r&&r.ok&&r.prompt)S._poThumb={modo:'ok',titulo:r.titulo||a.titulo||'',prompt:r.prompt};
-    else S._poThumb={modo:'vazio',titulo:a.titulo||'',msg:(r&&r.motivo==='sem_transcricao')?'Esta aula ainda não tem transcrição puxada. Puxe a transcrição primeiro (📄 na coluna Conteúdo da aula).':'Não consegui gerar.'};
-  }catch(e){ S._poThumb={modo:'erro',titulo:a.titulo||'',msg:e.message||String(e)}; }
-  _poThumbResultRender();
+    a._thumbGen=false;
+    if(r&&r.ok&&r.prompt){ await _poSaveAula(a,{thumbPrompt:r.prompt}); _poRefreshTabela(); arosToast(`✓ Prompt da capa pronto em "${a.titulo}" — clique no chip "Prompt" pra copiar.`,'success',5500); }
+    else { _poRefreshTabela(); arosToast((r&&r.motivo==='sem_transcricao')?'Esta aula ainda não tem transcrição puxada. Puxe a transcrição primeiro (📄 na coluna Conteúdo da aula).':'Não consegui gerar o prompt. Tente de novo.','err',5500); }
+  }catch(e){ a._thumbGen=false; _poRefreshTabela(); arosToast('Erro ao gerar o prompt: '+(e.message||e),'err',5500); }
+};
+// Copia o prompt salvo da aula pro clipboard (pra colar no GPT/DALL·E).
+window.poThumbCopiarChip=(aulaId)=>{
+  const a=_poFindAulaById(aulaId); const txt=a&&a.thumbPrompt;
+  if(!txt){arosToast('Sem prompt salvo nesta aula.','err',2200);return;}
+  if(navigator.clipboard?.writeText) navigator.clipboard.writeText(txt).then(()=>arosToast('Prompt copiado ✓ — cole no GPT/DALL·E','success',2400),()=>arosToast('Não consegui copiar','err',2200));
+  else arosToast('Navegador não permite copiar automático.','err',2400);
 };
 function _poThumbResultRender(){
   const t=S._poThumb; if(!t)return;
