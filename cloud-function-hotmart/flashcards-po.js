@@ -326,6 +326,32 @@ exports.gerarFlashcardsPO = onRequest(
     // acao:'default' → devolve a instrução padrão (pro "restaurar padrão" da tela).
     if (req.body?.acao === 'default') { res.status(200).json({ ok: true, default: DEFAULT_PROMPT_FLASHCARDS }); return; }
 
+    // acao:'montar' → só JUNTA o conteúdo (transcrição + questões/comentários + Resumo LM) e
+    // devolve o texto pronto pra copiar. NÃO chama a IA (sem custo). Usado pelo botão "Copiar".
+    if (req.body?.acao === 'montar') {
+      const aulaId = String(req.body?.aulaId || '').trim();
+      if (!aulaId) { res.status(400).json({ error: 'Informe a aula (aulaId).' }); return; }
+      const db = admin.firestore();
+      const aulaSnap = await db.collection('poAulas').doc(aulaId).get();
+      if (!aulaSnap.exists) { res.status(404).json({ error: 'Aula não encontrada.' }); return; }
+      const aula = aulaSnap.data() || {};
+      const resumoLM = String(((await db.collection('poFlashcards').doc(aulaId).get()).data() || {}).resumoLM || '').trim();
+      const transc = (await obterTextoTranscricao(aula.vimeoId)).slice(0, TRANSC_CAP);
+      let questoes = [];
+      try {
+        const ids = await idsDaTrilha(aula);
+        if (ids.length) { questoes = (await questoesPorIds(ids)).map(_adaptarQuestao); await anexarComentarios(questoes); }
+      } catch (e) { console.warn('montar: trilha/questões falhou', e?.message || e); }
+      const partes = [`# AULA: ${aula.titulo || ''}`];
+      if (transc) partes.push(`## TRANSCRIÇÃO\n\n${transc}`);
+      if (questoes.length) partes.push(`## QUESTÕES DA TRILHA (com comentário do professor)\n\n${blocoQuestoes(questoes)}`);
+      if (resumoLM) partes.push(`## RESUMO DO LIVRO (NotebookLM)\n\n${resumoLM}`);
+      const texto = partes.join('\n\n———\n\n');
+      const vazio = !(transc || questoes.length || resumoLM);
+      res.status(200).json({ ok: true, texto, vazio, stats: { transcricaoChars: transc.length, questoes: questoes.length, resumoChars: resumoLM.length } });
+      return;
+    }
+
     if (!ANTHROPIC_API_KEY) { res.status(500).json({ error: 'IA não configurada no servidor (ANTHROPIC_API_KEY_PO).' }); return; }
 
     const aulaId = String(req.body?.aulaId || '').trim();

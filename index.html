@@ -5858,8 +5858,10 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-po .po-fc-chip.thumb{border-color:color-mix(in srgb,#a371f7 50%,var(--border));background:color-mix(in srgb,#a371f7 10%,transparent);color:#a371f7}
         #tab-po .po-fc-chip.thumb:hover{border-color:#a371f7}
         /* Colunas Resumo LM + Flashcards */
-        #tab-po .po-col-resumo,#tab-po .po-col-fc{text-align:center;padding:4px 6px !important}
-        #tab-po thead .po-col-resumo,#tab-po thead .po-col-fc{text-align:center}
+        #tab-po .po-col-resumo,#tab-po .po-col-fc,#tab-po .po-col-copia{text-align:center;padding:4px 6px !important}
+        #tab-po thead .po-col-resumo,#tab-po thead .po-col-fc,#tab-po thead .po-col-copia{text-align:center}
+        #tab-po .po-copia-btn{font-family:'Space Grotesk',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.03em;padding:4px 10px;border-radius:8px;cursor:pointer;color:var(--t2);border:1px solid var(--border2);background:transparent;transition:border-color .16s,color .16s;white-space:nowrap}
+        #tab-po .po-copia-btn:hover{color:var(--text);border-color:var(--accent)}
         #tab-po .po-resumo-btn{font-family:'Space Grotesk',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.04em;padding:5px 11px;border-radius:9px;cursor:pointer;color:var(--t2);border:1px solid var(--border2);background:transparent;transition:border-color .16s,color .16s,background .16s;white-space:nowrap}
         #tab-po .po-resumo-btn:hover{color:var(--text);border-color:var(--accent)}
         #tab-po .po-resumo-btn.on{color:#3fb950;border-color:color-mix(in srgb,#3fb950 55%,var(--border))}
@@ -40684,6 +40686,7 @@ function _poAulaRowHTML(a,pos){
     <td class="po-col-thumb">${_poThumbCellHTML(a,aid)}</td>
     <td class="po-col-resumo"><button type="button" class="po-resumo-btn${a.fcResumoLen?' on':''}" onclick="event.stopPropagation();poAbrirResumoLM('${aid}')" title="${a.fcResumoLen?'Resumo do livro salvo — clique pra ver/editar':'Colar o resumo do livro (NotebookLM)'}">${a.fcResumoLen?'✓ Resumo':'＋ Resumo'}</button></td>
     <td class="po-col-fc">${_poFcCellHTML(a,aid)}</td>
+    <td class="po-col-copia">${_poCopiaCellHTML(a,aid)}</td>
     <td class="po-col-add"></td>
   </tr>`;
 }
@@ -40707,8 +40710,13 @@ function _poThumbCellHTML(a,aid){
   const chip=a.thumbPrompt?`<button type="button" class="po-fc-chip thumb" onclick="event.stopPropagation();poThumbCopiarChip('${aid}')" title="Copiar o prompt da capa (pra colar no GPT/DALL·E)">Prompt</button>`:'';
   return `<div class="po-thumb-cell">${chip}<button type="button" class="po-thumb-gen-btn" onclick="event.stopPropagation();poGerarThumb('${aid}')" title="Gerar prompt da capa (thumb) desta aula">Gerar</button>${slider}</div>`;
 }
+// Célula da coluna Copiar: junta transcrição + questões/comentários + Resumo LM e copia pro clipboard.
+function _poCopiaCellHTML(a,aid){
+  if(a._copiaGen) return `<span class="po-fc-gen" title="Montando o conteúdo…"><span class="po-fc-spin"></span></span>`;
+  return `<button type="button" class="po-copia-btn" onclick="event.stopPropagation();poCopiarConteudoAula('${aid}')" title="Copiar transcrição + questões/comentários + Resumo LM desta aula">📋 Copiar</button>`;
+}
 function _poTableRowsHTML(aulas,q){
-  const span=S.poColunas.length+5; // 1 (Aula fixa) + colunas + 1 (Thumb) + 1 (Resumo) + 1 (Flashcards) + 1 (＋)
+  const span=S.poColunas.length+6; // 1 (Aula fixa) + colunas + 1 (Thumb) + 1 (Resumo) + 1 (Flashcards) + 1 (Copiar) + 1 (＋)
   if(!S.poModAbertos)S.poModAbertos=new Set();
   const grupos=_poGroupByMod(aulas);
   if(!grupos.length)return `<tr><td colspan="${span}"><div class="po-empty"><div class="po-ei">🔍</div><p>Nenhuma aula ${q?'encontrada para esta busca':'cadastrada'}.</p></div></td></tr>`;
@@ -40875,6 +40883,7 @@ function _poRenderCurso(root){
             <col style="width:170px">
             <col style="width:96px">
             <col style="width:150px">
+            <col style="width:88px">
             <col style="width:42px">
           </colgroup>
           <thead><tr>
@@ -40883,6 +40892,7 @@ function _poRenderCurso(root){
             <th class="po-col-thumb"><div class="po-th-top"><span class="po-th-label">Thumb</span></div>${_poColFiltroControl({id:'__thumb',type:'thumb'})}</th>
             <th class="po-col-resumo"><div class="po-th-top"><span class="po-th-label" title="Resumo do livro (NotebookLM) colado pela coord — entra na geração dos cards">Resumo LM</span></div></th>
             <th class="po-col-fc"><div class="po-th-top"><span class="po-th-label" title="Gere e cure os flashcards desta aula">Flashcards</span></div></th>
+            <th class="po-col-copia"><div class="po-th-top"><span class="po-th-label" title="Copiar transcrição + questões/comentários + Resumo LM desta aula">Copiar</span></div></th>
             <th class="po-col-add"><button type="button" class="po-add-col" onclick="poNovaColuna()" title="Nova coluna">＋</button></th>
           </tr></thead>
           <tbody>${rows}</tbody>
@@ -41792,6 +41802,21 @@ window.poThumbCopiarChip=(aulaId)=>{
   if(!txt){arosToast('Sem prompt salvo nesta aula.','err',2200);return;}
   if(navigator.clipboard?.writeText) navigator.clipboard.writeText(txt).then(()=>arosToast('Prompt copiado ✓ — cole no GPT/DALL·E','success',2400),()=>arosToast('Não consegui copiar','err',2200));
   else arosToast('Navegador não permite copiar automático.','err',2400);
+};
+// Copia texto pro clipboard com fallback (execCommand) caso o navegador bloqueie o writeText assíncrono.
+function _poCopyFallback(txt){ try{ const ta=document.createElement('textarea'); ta.value=txt; ta.style.cssText='position:fixed;left:-9999px;top:0'; document.body.appendChild(ta); ta.focus(); ta.select(); const ok=document.execCommand('copy'); ta.remove(); return ok; }catch(e){ return false; } }
+async function _poCopyText(txt){ try{ if(navigator.clipboard?.writeText){ await navigator.clipboard.writeText(txt); return true; } }catch(e){} return _poCopyFallback(txt); }
+// Botão "Copiar": monta no servidor (sem IA/custo) transcrição + questões/comentários + Resumo LM e copia.
+window.poCopiarConteudoAula=async(aulaId)=>{
+  const a=_poFindAulaById(aulaId); if(!a){arosToast('Aula não encontrada.','err',2500);return;}
+  if(a._copiaGen)return;
+  a._copiaGen=true; _poRefreshTabela();
+  try{
+    const r=await _poApiPost(FLASHCARDS_ENDPOINT,{acao:'montar',aulaId});
+    a._copiaGen=false; _poRefreshTabela();
+    if(r&&r.ok&&!r.vazio&&r.texto){ const ok=await _poCopyText(r.texto); const kc=Math.round(r.texto.length/1000); arosToast(ok?`✓ Conteúdo copiado (${kc}k caracteres) — cole onde quiser`:'Montei o conteúdo mas o navegador bloqueou a cópia. Tente de novo.',ok?'success':'err',3200); }
+    else arosToast('Esta aula não tem transcrição, questões na trilha nem Resumo LM pra copiar.','err',3800);
+  }catch(e){ a._copiaGen=false; _poRefreshTabela(); arosToast('Erro ao montar o conteúdo: '+(e.message||e),'err',4000); }
 };
 function _poThumbResultRender(){
   const t=S._poThumb; if(!t)return;
