@@ -5858,14 +5858,15 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-po .po-resumo-btn{font-family:'Space Grotesk',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.04em;padding:5px 11px;border-radius:9px;cursor:pointer;color:var(--t2);border:1px solid var(--border2);background:transparent;transition:border-color .16s,color .16s,background .16s;white-space:nowrap}
         #tab-po .po-resumo-btn:hover{color:var(--text);border-color:var(--accent)}
         #tab-po .po-resumo-btn.on{color:#3fb950;border-color:color-mix(in srgb,#3fb950 55%,var(--border))}
-        #tab-po .po-fc-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
-        #tab-po .po-fc-btn{font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;padding:5px 12px;border-radius:9px;cursor:pointer;color:#fff;border:1px solid transparent;background:linear-gradient(135deg,#0e7490,#22a3c3);box-shadow:0 2px 10px -3px color-mix(in srgb,#22a3c3 65%,transparent);transition:transform .14s,box-shadow .18s,filter .18s;white-space:nowrap}
-        #tab-po .po-fc-btn:hover{transform:translateY(-1px);filter:brightness(1.09);box-shadow:0 6px 18px -4px color-mix(in srgb,#22a3c3 78%,transparent)}
+        #tab-po .po-fc-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+        #tab-po .po-fc-row{display:flex;align-items:center;justify-content:center;gap:6px}
+        #tab-po .po-fc-btn{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;padding:3px 9px;border-radius:7px;cursor:pointer;color:#fff;border:1px solid transparent;background:linear-gradient(135deg,#0e7490,#22a3c3);box-shadow:0 1px 7px -3px color-mix(in srgb,#22a3c3 60%,transparent);transition:transform .14s,filter .18s;white-space:nowrap}
+        #tab-po .po-fc-btn:hover{transform:translateY(-1px);filter:brightness(1.1)}
         #tab-po .po-fc-btn:active{transform:translateY(0)}
-        #tab-po .po-fc-chip{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.02em;padding:2px 8px;border-radius:7px;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--t2);transition:color .16s,border-color .16s}
-        #tab-po .po-fc-chip:hover{color:var(--text);border-color:var(--accent)}
-        #tab-po .po-fc-chip.ok{color:#3fb950;border-color:color-mix(in srgb,#3fb950 50%,var(--border))}
-        #tab-po .po-fc-chip.rasc{color:#d29922;border-color:color-mix(in srgb,#d29922 50%,var(--border))}
+        #tab-po .po-fc-chip{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;padding:3px 9px;border-radius:7px;cursor:pointer;border:1px solid color-mix(in srgb,#3fb950 45%,var(--border));background:color-mix(in srgb,#3fb950 8%,transparent);color:#3fb950;transition:filter .16s,border-color .16s}
+        #tab-po .po-fc-chip:hover{filter:brightness(1.15);border-color:#3fb950}
+        #tab-po .po-fc-bar{width:100%;max-width:118px;height:4px;border-radius:3px;background:var(--border);overflow:hidden}
+        #tab-po .po-fc-bar>span{display:block;height:100%;background:#3fb950;border-radius:3px;transition:width .35s}
         #tab-po .po-fc-gen{display:inline-flex;align-items:center;gap:7px;font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:600;letter-spacing:.08em;color:#22a3c3}
         #tab-po .po-fc-spin{width:12px;height:12px;border:2px solid color-mix(in srgb,#22a3c3 30%,transparent);border-top-color:#22a3c3;border-radius:50%;animation:poFcSpin .7s linear infinite}
         @keyframes poFcSpin{to{transform:rotate(360deg)}}
@@ -5911,6 +5912,15 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-curadoria-modal .po-cur-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 18px;border-top:1px solid var(--border);background:var(--bg3)}
         #po-curadoria-modal .po-cur-stats{font-size:12px;color:var(--t2)}
         #po-curadoria-modal .po-cur-stats b{color:var(--text);font-weight:600}
+        #po-curadoria-modal .po-cur-status{display:flex;flex-direction:column;gap:5px;margin-top:4px}
+        #po-curadoria-modal .po-cur-stnums{font-size:12.5px;color:var(--t2)}
+        #po-curadoria-modal .po-cur-stnums b{color:var(--text);font-weight:600}
+        #po-curadoria-modal .po-cur-stnums b.ap{color:#3fb950}
+        #po-curadoria-modal .po-cur-stnums .ds{color:#f85149}
+        #po-curadoria-modal .po-cur-pct{font-family:'JetBrains Mono',monospace;font-weight:700;color:#3fb950;margin-left:3px}
+        #po-curadoria-modal .po-cur-gen{color:var(--t3,var(--t2));font-size:11px}
+        #po-curadoria-modal .po-cur-bar{width:300px;max-width:62vw;height:6px;border-radius:4px;background:var(--border);overflow:hidden}
+        #po-curadoria-modal .po-cur-bar>span{display:block;height:100%;background:#3fb950;border-radius:4px;transition:width .3s}
         .po-cur-card{position:relative;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:11px;transition:opacity .15s,border-color .15s}
         .po-cur-card.ok{border-color:color-mix(in srgb,#3fb950 60%,var(--border));background:color-mix(in srgb,#3fb950 11%,var(--bg))}
         .po-cur-card.drop{border-color:color-mix(in srgb,#f85149 55%,var(--border));background:color-mix(in srgb,#f85149 11%,var(--bg));opacity:.7}
@@ -40636,9 +40646,21 @@ function _poAulaRowHTML(a,pos){
     ${cells}
     <td class="po-col-thumb"><div class="po-thumb-cell">${a.vimeoId?`<button type="button" class="po-thumb-btn" onclick="event.stopPropagation();poGerarThumb('${aid}')" title="Gerar prompt da capa (thumb) desta aula">GERAR</button>`:`<span class="po-thumb-na" title="Sem vídeo do Vimeo — não dá pra ler a transcrição">—</span>`}<span class="po-rg-toggle po-thumb-toggle" title="${a.thumbLancada?'Thumb já lançada no sistema — clique pra desmarcar':'Thumb ainda NÃO lançada — clique quando lançar'}" onclick="event.stopPropagation();poToggleThumbLancada('${aid}')"><span class="po-rg-nao${a.thumbLancada?'':' on'}">Não</span><span class="po-rg-sim${a.thumbLancada?' on':''}">Sim</span></span></div></td>
     <td class="po-col-resumo"><button type="button" class="po-resumo-btn${a.fcResumoLen?' on':''}" onclick="event.stopPropagation();poAbrirResumoLM('${aid}')" title="${a.fcResumoLen?'Resumo do livro salvo — clique pra ver/editar':'Colar o resumo do livro (NotebookLM)'}">${a.fcResumoLen?'✓ Resumo':'＋ Resumo'}</button></td>
-    <td class="po-col-fc">${a._fcGen?`<span class="po-fc-gen" title="Gerando flashcards com IA — pode continuar trabalhando"><span class="po-fc-spin"></span>gerando…</span>`:`<div class="po-fc-cell"><button type="button" class="po-fc-btn" onclick="event.stopPropagation();poGerarCards('${aid}')" title="Gerar flashcards desta aula com IA">GERAR CARDS</button>${a.fcStatus?`<button type="button" class="po-fc-chip ${a.fcStatus==='aprovado'?'ok':'rasc'}" onclick="event.stopPropagation();poAbrirCuradoria('${aid}')" title="Abrir a curadoria dos cards">${a.fcStatus==='aprovado'?'deck '+(a.fcDeckN||0):'rasc. '+(a.fcDeckN||0)}</button>`:''}</div>`}</td>
+    <td class="po-col-fc">${_poFcCellHTML(a,aid)}</td>
     <td class="po-col-add"></td>
   </tr>`;
+}
+// Célula da coluna Flashcards: chip DECK (esq) + botão Gerar (dir) na mesma linha,
+// e uma barrinha fina embaixo refletindo o % de aprovados do deck (não aumenta a linha).
+function _poFcCellHTML(a,aid){
+  if(a._fcGen) return `<span class="po-fc-gen" title="Gerando flashcards com IA — pode continuar trabalhando"><span class="po-fc-spin"></span>gerando…</span>`;
+  const rev=(a.fcRevisaveis!=null?a.fcRevisaveis:a.fcDeckN)||0;   // total revisável (exclui descartados)
+  const apr=a.fcAprovados||0;
+  const has=!!(a.fcHasDeck||a.fcStatus||rev>0);
+  const pct=rev?Math.round(apr/rev*100):0;
+  const chip=has?`<button type="button" class="po-fc-chip" onclick="event.stopPropagation();poAbrirCuradoria('${aid}')" title="Abrir o deck — ${apr} de ${rev} aprovados (${pct}%)">DECK</button>`:'';
+  const bar=has?`<div class="po-fc-bar" title="${pct}% aprovados"><span style="width:${pct}%"></span></div>`:'';
+  return `<div class="po-fc-wrap"><div class="po-fc-row">${chip}<button type="button" class="po-fc-btn" onclick="event.stopPropagation();poGerarCards('${aid}')" title="Gerar flashcards com IA">Gerar</button></div>${bar}</div>`;
 }
 function _poTableRowsHTML(aulas,q){
   const span=S.poColunas.length+5; // 1 (Aula fixa) + colunas + 1 (Thumb) + 1 (Resumo) + 1 (Flashcards) + 1 (＋)
@@ -41894,8 +41916,8 @@ window.poGerarCards=async(aulaId)=>{
     const r=await _poApiPost(FLASHCARDS_ENDPOINT,{aulaId});
     a._fcGen=false;
     if(r&&r.ok&&Array.isArray(r.cards)&&r.cards.length){
-      await _poSaveAula(a,{fcStatus:'rascunho',fcDeckN:r.cards.length}); _poRefreshTabela();
-      arosToast(`✓ ${r.cards.length} cards prontos em "${a.titulo}" — clique no chip "rasc." pra curar.`,'success',6000);
+      await _poSaveAula(a,{fcHasDeck:true,fcRevisaveis:r.cards.length,fcAprovados:0,fcDeckN:r.cards.length}); _poRefreshTabela();
+      arosToast(`✓ ${r.cards.length} cards prontos em "${a.titulo}" — clique no chip DECK pra revisar.`,'success',6000);
     } else {
       _poRefreshTabela();
       arosToast((r&&r.motivo==='sem_insumos')?(r.detalhe||'Esta aula não tem transcrição, questões na trilha nem Resumo LM.'):'A IA não devolveu cards. Tente de novo.','err',6000);
@@ -41908,7 +41930,10 @@ window.poAbrirCuradoria=async(aulaId)=>{
   try{
     const snap=await getDoc(doc(db,'poFlashcards',aulaId)); const d=snap.exists()?snap.data():{};
     const base=(Array.isArray(d.deck)&&d.deck.length)?d.deck:(Array.isArray(d.rascunho)?d.rascunho:[]);
-    S._poCur.cards=base.map(c=>({...c,_estado:''})); S._poCur.stats=d.rascunhoStats||null;
+    S._poCur.cards=base.map(c=>({...c,_estado:(c.estado==='aprovado'||c.aprovado)?'ok':(c.estado==='descartado'?'drop':'')}));
+    // descartados vão pro fim da lista (ordenação estável preserva o resto)
+    S._poCur.cards.sort((x,y)=>(x._estado==='drop'?1:0)-(y._estado==='drop'?1:0));
+    S._poCur.stats=d.rascunhoStats||null;
   }catch(e){ S._poCur.erro=e.message||String(e); }
   if(S._poCur)S._poCur.load=false; _poCuradoriaRender();
 };
@@ -41923,18 +41948,21 @@ function _poCurCapture(){
   });
 }
 window.poCurAprovar=(i)=>{ _poCurCapture(); const c=S._poCur&&S._poCur.cards[i]; if(c)c._estado=(c._estado==='ok')?'':'ok'; _poCuradoriaRender(); };
-window.poCurDescartar=(i)=>{ _poCurCapture(); const c=S._poCur&&S._poCur.cards[i]; if(c)c._estado=(c._estado==='drop')?'':'drop'; _poCuradoriaRender(); };
+window.poCurDescartar=(i)=>{ _poCurCapture(); if(!S._poCur)return; const arr=S._poCur.cards, c=arr[i]; if(!c)return; if(c._estado==='drop'){ c._estado=''; } else { c._estado='drop'; arr.splice(i,1); arr.push(c); } _poCuradoriaRender(); };
 window.poCurAddCard=()=>{ _poCurCapture(); if(S._poCur){S._poCur.cards.push({frente:'',verso:'',tags:[],dificuldade:3,fonte:'manual',_estado:'ok'}); _poCuradoriaRender(); const el=document.querySelector('#po-curadoria-modal .po-cur-body'); if(el)el.scrollTop=el.scrollHeight; } };
 window.poCuradoriaSalvar=async()=>{
   if(!S._poCur)return; _poCurCapture();
   const aulaId=S._poCur.aulaId;
-  const deck=S._poCur.cards.filter(c=>c._estado!=='drop'&&String(c.frente||'').trim()&&String(c.verso||'').trim())
-    .map(c=>({frente:String(c.frente).trim(),verso:String(c.verso).trim(),tags:(c.tags||[]).slice(0,4),dificuldade:c.dificuldade||3,fonte:c.fonte||'manual',aprovado:c._estado==='ok'}));
-  if(!deck.length){arosToast('Nenhum card válido pra salvar.','err',2600);return;}
+  // salva TODOS os cards (inclui descartados, que ficam no fim) com o estado de cada um
+  const all=S._poCur.cards.filter(c=>String(c.frente||'').trim()&&String(c.verso||'').trim())
+    .map(c=>({frente:String(c.frente).trim(),verso:String(c.verso).trim(),tags:(c.tags||[]).slice(0,4),dificuldade:c.dificuldade||3,fonte:c.fonte||'manual',estado:c._estado==='ok'?'aprovado':(c._estado==='drop'?'descartado':'pendente')}));
+  if(!all.length){arosToast('Nenhum card válido pra salvar.','err',2600);return;}
+  const revisaveis=all.filter(c=>c.estado!=='descartado').length;
+  const aprovados=all.filter(c=>c.estado==='aprovado').length;
   try{
-    await setDoc(doc(db,'poFlashcards',aulaId),{aulaId,deck,deckN:deck.length,deckEm:new Date().toISOString(),status:'aprovado'},{merge:true});
-    const a=_poFindAulaById(aulaId); if(a)await _poSaveAula(a,{fcStatus:'aprovado',fcDeckN:deck.length});
-    arosToast('Deck salvo ✓ ('+deck.length+' cards)','success',2800); poCuradoriaClose(); _poRefreshTabela();
+    await setDoc(doc(db,'poFlashcards',aulaId),{aulaId,deck:all,deckN:revisaveis,deckEm:new Date().toISOString(),status:(revisaveis>0&&aprovados>=revisaveis)?'aprovado':'em-revisao'},{merge:true});
+    const a=_poFindAulaById(aulaId); if(a)await _poSaveAula(a,{fcHasDeck:true,fcRevisaveis:revisaveis,fcAprovados:aprovados,fcDeckN:revisaveis});
+    arosToast(`Deck salvo ✓ (${aprovados}/${revisaveis} aprovados)`,'success',2800); poCuradoriaClose(); _poRefreshTabela();
   }catch(e){ arosToast('Erro ao salvar o deck: '+(e.message||e),'err',3500); }
 }
 function _poCuradoriaRender(){
@@ -41956,15 +41984,18 @@ function _poCuradoriaRender(){
     body=`<div class="po-cur-body">${cards}<button type="button" class="tb-btn ghost sm" style="width:100%;margin-top:4px" onclick="poCurAddCard()">＋ Adicionar card manual</button></div>`;
   }
   const st2=st.stats;
-  const sub=st2?`<span class="po-cur-stats">Gerados <b>${st2.total}</b> · questões ${st2.porFonte?.questoes||0} · transcrição ${st2.porFonte?.transcricao||0} · livro ${st2.porFonte?.livro||0}${st2.custoUsd?` · ~$${st2.custoUsd}`:''}</span>`:`<span class="po-cur-stats">Curadoria — edite, descarte ou some cards antes de salvar o deck</span>`;
-  const mantidos=st.cards?st.cards.filter(c=>c._estado!=='drop').length:0;
+  const revisaveis=st.cards?st.cards.filter(c=>c._estado!=='drop').length:0;
   const aprovados=st.cards?st.cards.filter(c=>c._estado==='ok').length:0;
+  const pendentes=revisaveis-aprovados;
   const descartados=st.cards?st.cards.filter(c=>c._estado==='drop').length:0;
+  const pct=revisaveis?Math.round(aprovados/revisaveis*100):0;
+  const head=(st.load||st.erro)?`<span class="po-cur-stats">Curadoria do deck</span>`
+    :`<div class="po-cur-status"><span class="po-cur-stnums"><b>${pendentes}</b> pendentes de revisão · <b class="ap">${aprovados}</b> aprovados <span class="po-cur-pct">${pct}%</span>${descartados?` · <span class="ds">${descartados} descartados</span>`:''}${st2&&st2.custoUsd?` <span class="po-cur-gen">· gerado ~$${st2.custoUsd}</span>`:''}</span><div class="po-cur-bar"><span style="width:${pct}%"></span></div></div>`;
   const foot=(st.load||st.erro)?`<div class="po-cur-foot"><span></span><button type="button" class="tb-btn ghost" onclick="poCuradoriaClose()">Fechar</button></div>`
-    :`<div class="po-cur-foot"><span class="po-cur-stats"><b>${mantidos}</b> no deck · <span style="color:#3fb950">${aprovados} aprovados</span> · <span style="color:#f85149">${descartados} descartados</span></span><div style="display:flex;gap:9px"><button type="button" class="tb-btn ghost" onclick="poCuradoriaClose()">Fechar</button><button type="button" class="tb-btn primary" onclick="poCuradoriaSalvar()">💾 Salvar deck (${mantidos})</button></div></div>`;
+    :`<div class="po-cur-foot"><span class="po-cur-stats">${revisaveis} no deck · ${descartados} descartados</span><div style="display:flex;gap:9px"><button type="button" class="tb-btn ghost" onclick="poCuradoriaClose()">Fechar</button><button type="button" class="tb-btn primary" onclick="poCuradoriaSalvar()">💾 Salvar deck</button></div></div>`;
   host.innerHTML=`<div class="po-modal-back"></div>
     <div class="po-modal" role="dialog">
-      <div class="po-modal-head"><div><h3>🃏 Curadoria — ${_poEsc(st.titulo)}</h3>${sub}</div><button type="button" class="po-modal-x" onclick="poCuradoriaClose()">✕</button></div>
+      <div class="po-modal-head"><div><h3>🃏 Curadoria — ${_poEsc(st.titulo)}</h3>${head}</div><button type="button" class="po-modal-x" onclick="poCuradoriaClose()">✕</button></div>
       ${body}
       ${foot}
     </div>`;
