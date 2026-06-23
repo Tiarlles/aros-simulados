@@ -38,6 +38,9 @@ exports.analisarTSAOralPO = require('./po-analise').analisarTSAOralPO;
 // Gerador de prompt de THUMB (capa da aula) pro DALL·E — lê a transcrição + título (Sonnet, ANTHROPIC_API_KEY_PO)
 exports.gerarPromptThumb = require('./thumb-prompt').gerarPromptThumb;
 
+// Gerador de FLASHCARDS de uma aula — junta transcrição + questões da trilha + Resumo LM (Sonnet, ANTHROPIC_API_KEY_PO)
+exports.gerarFlashcardsPO = require('./flashcards-po').gerarFlashcardsPO;
+
 // Helper que faz UPSERT em alunosAprovados (Cruzar Lista) a partir do webhook Hotmart
 const { upsertAluno } = require('./hotmart-alunos');
 

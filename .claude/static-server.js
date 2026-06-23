@@ -1,6 +1,6 @@
 const http=require('http'),fs=require('fs'),path=require('path');
 const ROOT=path.resolve(__dirname,'..');
-const PORT=8766;
+const PORT=process.env.PORT||8766;
 const TYPES={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml'};
 http.createServer((req,res)=>{
   let p=decodeURIComponent(req.url.split('?')[0]);

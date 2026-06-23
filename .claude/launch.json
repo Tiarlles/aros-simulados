@@ -5,7 +5,8 @@
       "name": "aros-static",
       "runtimeExecutable": "node",
       "runtimeArgs": [".claude/static-server.js"],
-      "port": 8766
+      "port": 8766,
+      "autoPort": true
     }
   ]
 }

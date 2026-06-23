@@ -204,3 +204,4 @@ exports.puxarQuestoesPO = onRequest(
 exports._coletarPorCategorias = coletarPorCategorias;
 exports._adaptarQuestao = adaptarQuestao;
 exports._anosRecentes = anosRecentes;
+exports._stripHtml = stripHtml;
