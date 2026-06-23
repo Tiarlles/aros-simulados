@@ -2204,8 +2204,12 @@ Env vars em `.env` (gitignored):
 - Chama Anthropic SDK com `cache_control` no system + último PDF.
 - CORS restrito (origens listadas em `ALLOWED_ORIGINS`).
 
+**`gerarFlashcardsPO`** (`flashcards-po.js`) — gera flashcards de uma aula (transcrição + questões da trilha + gabarito comentado + Resumo LM), Sonnet 4.6, `ANTHROPIC_API_KEY_PO`. Ver rodada 2026-06-23 e [[project_aros_flashcards]].
+
+**Custos IA** (`custos-ia.js`) — `registrarCusto(categoria, custoUsd)` acumula em `config/poCustosIA` (por tipo + por mês). Chamado por `gerarFlashcardsPO`, `gerarPromptThumb` e as 3 `analisar*PO`. Tela 💰 Gastos API.
+
 **Pré-requisitos do deploy:**
-1. `cd cloud-function-hotmart && npm install` (instala `@anthropic-ai/sdk`, `firebase-admin`, `firebase-functions`).
+1. `cd cloud-function-hotmart && npm install` (instala `@anthropic-ai/sdk`, `firebase-admin`, `firebase-functions`). **Em worktree, rodar `npm install` na pasta da worktree** (o Firebase precisa do `node_modules` local pra analisar o source) e **copiar o `.env` do repo principal** antes de deployar função nova.
 2. `.env` deve existir com as 3 keys (HOTMART_TOKEN, SLACK_WEBHOOK, ANTHROPIC_API_KEY).
 3. Firebase analisa o source localmente — se `require()` falha, a function é silenciosamente removida do deploy. SEMPRE checar `firebase functions:list` após deploy.
 
@@ -2843,6 +2847,17 @@ Polimento mobile (2026-05-20, mesmo dia):
 - **Busca de aulas do módulo robusta** (`_aulasDoModulo` em `po-analise.js`, usada na análise de módulo E TSA Oral): o `where('modulo','==',modulo)` exato (com trim) falhava quando o nome do módulo/curso da aula tinha qualquer diferença (espaço/acento/traço/caixa) — aí a IA recebia ZERO aula e dizia "nenhuma aula existe", recomendando gravar aulas que já existiam transcritas (enquanto as questões/edital, por slug, entravam normal). Agora cai num **fallback normalizado** (slug) quando o == não acha nada.
 - **Barra de Materiais** (`_poSaudeMateriais`): apostila pronta = status **'Finalizado'** (vocabulário PO_APOST_STATUS), não 'Lançada' — antes a apostila finalizada contava como pendente e desequilibrava o %.
 - **Transcrição Vimeo — 3º modo de falha (ID errado do Laravel):** ver [[project_aros_transcricao_vimeo]]. O re-pull manual sempre usa o `a.vimeoId` gravado e não há campo na tela pra editar o ID; corrige no Laravel + Sincronizar.
+
+### Rodada 2026-06-23 — Flashcards por aula (IA + curadoria) + Gastos API
+
+**Feature FLASHCARDS.** Duas colunas fixas novas no PO depois da THUMB (`span = poColunas.length+5`): **Resumo LM** e **Flashcards**. Ver [[project_aros_flashcards]].
+- **Geração:** Cloud Function `gerarFlashcardsPO` (`flashcards-po.js`, Sonnet 4.6, `ANTHROPIC_API_KEY_PO`, prompt caching). Junta 3 fontes server-side: **transcrição** (`poTranscricoes`), **questões da trilha** (Laravel: curso→módulos[acha por nome]→conteúdos[acha por `laravelId`]→`trilhas[].json.ids` → `POST /v2/web/questoes {ids}`) **+ gabarito comentado** (`POST /web/comentario/gabarito {model_id,is_gabarito:true,model_type:'QUESTAO'}` → `content` HTML, limpo), e **Resumo LM** (`poFlashcards/{aulaId}.resumoLM`, colado). Fatia por tamanho (~9k), cobre tudo SEM piso/cota, dedup, **regra anti-travessão (—)** no prompt + limpeza `semTravessao()`. Salva rascunho em `poFlashcards/{aulaId}.rascunho` e devolve.
+- **Coluna Flashcards:** botão **Gerar** pequeno (roda em SEGUNDO PLANO via `a._fcGen` → spinner na célula `po-fc-gen`, não trava o painel) + chip **DECK** à esquerda (abre curadoria) + **barrinha de %** com número (`_poFcCellHTML`; markers `a.fcHasDeck/fcRevisaveis/fcAprovados`). **Coluna Resumo LM:** botão abre caixa grande pra colar (`poAbrirResumoLM`, salva em `poFlashcards`).
+- **Curadoria** (`_poCuradoriaRender`/`_poCurCardHTML`, modal `#po-curadoria-modal` — NÃO fecha clicando fora): 3 blocos por `_estado` (pendentes abertos no topo → aprovados recolhidos → descartados no fim; `_poCurMover` reposiciona). Cada card abre/fecha clicando no header (`poCurToggleOpen`, `_open`); **aprovar**(verde)/**descartar**(vermelho) por card (`poCurAprovar`/`poCurDescartar`). Status no topo (pendentes/aprovados/**% ao vivo**, descartados fora da conta) + barra grande. Texto **justificado**; SEM tags/dificuldade/fonte no card (dados persistem, só não exibidos). Preserva scrollTop entre renders. **Salvar deck** → `poFlashcards/{aulaId}.deck` (cada card com `estado`). Push pro Laravel = 2º momento (pendente).
+- **Editor de prompt:** botão **🃏 Prompt Flashcards** (`poAbrirPromptFlashcards`, `config/poConfig.promptFlashcards`, padrão `_PO_FC_DEFAULT_INSTR`).
+- **Rules:** `poFlashcards/{aulaId}` read/write se `isAuth()`.
+
+**Gastos API.** Botão **💰 Gastos API** na barra da Inteligência de Produto (`poAbrirGastosAPI`). Livro-caixa em `config/poCustosIA` (módulo `custos-ia.js` → `registrarCusto(categoria,custoUsd)` com `FieldValue.increment`): total por tipo (`analise`/`thumb`/`flashcards`) + por mês (`meses.{YYYY-MM}`). As 5 funções de IA (análise módulo/produto/oral, thumb, flashcards) registram custo. Tela mostra Por tipo (total) + Por mês (com quebra). Vale a partir do deploy de 2026-06-23 (sem retroativo). Cliente lê o doc direto (read aberto via `config/{cfgId}`).
 
 ---
 
