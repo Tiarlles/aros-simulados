@@ -5945,8 +5945,8 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-curadoria-modal .po-cur-stnums .ds{color:#f85149}
         #po-curadoria-modal .po-cur-pct{font-family:'JetBrains Mono',monospace;font-weight:700;color:#3fb950;margin-left:3px}
         #po-curadoria-modal .po-cur-gen{color:var(--t3,var(--t2));font-size:11px}
-        #po-curadoria-modal .po-cur-bar{width:300px;max-width:62vw;height:6px;border-radius:4px;background:var(--border);overflow:hidden}
-        #po-curadoria-modal .po-cur-bar>span{display:block;height:100%;background:#3fb950;border-radius:4px;transition:width .3s}
+        #po-curadoria-modal .po-cur-bar{width:460px;max-width:74vw;height:11px;border-radius:6px;background:var(--border);overflow:hidden}
+        #po-curadoria-modal .po-cur-bar>span{display:block;height:100%;background:#3fb950;border-radius:6px;transition:width .3s}
         .po-cur-card{position:relative;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:11px;transition:opacity .15s,border-color .15s}
         .po-cur-card.ok{border-color:color-mix(in srgb,#3fb950 60%,var(--border));background:color-mix(in srgb,#3fb950 11%,var(--bg))}
         .po-cur-card.drop{border-color:color-mix(in srgb,#f85149 55%,var(--border));background:color-mix(in srgb,#f85149 11%,var(--bg));opacity:.7}
@@ -5961,7 +5961,7 @@ body.pro-rt-fs-on{overflow:hidden}
         .po-cur-drop-btn{background:none;border:1px solid var(--border2);color:var(--t2);border-radius:8px;font-size:11px;padding:3px 11px;cursor:pointer}
         .po-cur-drop-btn:hover{color:#f85149;border-color:#f85149}
         .po-cur-drop-btn.on{color:#f85149;border-color:#f85149;background:color-mix(in srgb,#f85149 14%,transparent)}
-        .po-cur-ta{width:100%;resize:vertical;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;line-height:1.5;color:var(--text);margin-bottom:7px}
+        .po-cur-ta{width:100%;resize:vertical;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;line-height:1.5;color:var(--text);margin-bottom:7px;text-align:justify}
         .po-cur-ta.frente{min-height:42px;font-weight:600}
         .po-cur-ta.verso{min-height:70px}
         .po-cur-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -5969,11 +5969,11 @@ body.pro-rt-fs-on{overflow:hidden}
         .po-cur-dif{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 9px;font-size:12px;color:var(--text)}
         .po-cur-lbl{font-size:11px;color:var(--t2)}
         .po-cur-card.fechado{padding:0}
-        .po-cur-head{display:flex;align-items:center;gap:9px;padding:9px 13px;cursor:pointer}
+        .po-cur-head{display:flex;align-items:center;gap:9px;cursor:pointer}
+        .po-cur-card.fechado .po-cur-head{padding:9px 13px}
+        .po-cur-head.aberto{margin-bottom:9px}
         .po-cur-chev{color:var(--t2);font-size:10px;width:11px;flex:none}
-        .po-cur-chev.open{cursor:pointer}
         .po-cur-headtext{flex:1;min-width:0;font-size:12.5px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .po-cur-card.fechado .po-cur-aprovar{margin-left:0}
         /* Caixa de prompt gerado (copiável) + textarea de instrução, dentro dos po-modal */
         .po-thumb-box{position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 14px 12px;font-size:12.5px;line-height:1.55;color:var(--text);white-space:pre-wrap;max-height:46vh;overflow:auto}
         .po-thumb-copy{margin-top:10px}
@@ -42007,7 +42007,7 @@ window.poAbrirCuradoria=async(aulaId)=>{
   try{
     const snap=await getDoc(doc(db,'poFlashcards',aulaId)); const d=snap.exists()?snap.data():{};
     const base=(Array.isArray(d.deck)&&d.deck.length)?d.deck:(Array.isArray(d.rascunho)?d.rascunho:[]);
-    S._poCur.cards=base.map(c=>({...c,_estado:(c.estado==='aprovado'||c.aprovado)?'ok':(c.estado==='descartado'?'drop':''),_open:false}));
+    S._poCur.cards=base.map(c=>{ const e=(c.estado==='aprovado'||c.aprovado)?'ok':(c.estado==='descartado'?'drop':''); return {...c,_estado:e,_open:e===''}; });
     // blocos: pendentes → aprovados → descartados (ordenação estável preserva o resto)
     S._poCur.cards.sort((x,y)=>_poCurOrder(x._estado)-_poCurOrder(y._estado));
     S._poCur.stats=d.rascunhoStats||null;
@@ -42043,7 +42043,7 @@ function _poCurMover(i,novo){
 window.poCurAprovar=(i)=>{ _poCurCapture(); const c=S._poCur&&S._poCur.cards[i]; if(!c)return; _poCurMover(i, c._estado==='ok'?'':'ok'); _poCuradoriaRender(); };
 window.poCurDescartar=(i)=>{ _poCurCapture(); const c=S._poCur&&S._poCur.cards[i]; if(!c)return; _poCurMover(i, c._estado==='drop'?'':'drop'); _poCuradoriaRender(); };
 window.poCurToggleOpen=(i)=>{ _poCurCapture(); const c=S._poCur&&S._poCur.cards[i]; if(c)c._open=!c._open; _poCuradoriaRender(); };
-window.poCurAddCard=()=>{ _poCurCapture(); if(S._poCur){S._poCur.cards.push({frente:'',verso:'',tags:[],dificuldade:3,fonte:'manual',_estado:'ok'}); _poCuradoriaRender(); const el=document.querySelector('#po-curadoria-modal .po-cur-body'); if(el)el.scrollTop=el.scrollHeight; } };
+window.poCurAddCard=()=>{ _poCurCapture(); if(!S._poCur)return; const arr=S._poCur.cards; let idx=arr.findIndex(x=>x._estado!==''); if(idx<0)idx=arr.length; arr.splice(idx,0,{frente:'',verso:'',tags:[],dificuldade:3,fonte:'manual',_estado:'',_open:true}); _poCuradoriaRender(); const el=document.getElementById('cur-f-'+idx); if(el){el.focus();el.scrollIntoView({block:'center'});} };
 window.poCuradoriaSalvar=async()=>{
   if(!S._poCur)return; _poCurCapture();
   const aulaId=S._poCur.aulaId;
@@ -42063,25 +42063,24 @@ window.poCuradoriaSalvar=async()=>{
 // (dropdown: só o cabeçalho; clica pra abrir). Os botões aprovar/descartar ficam sempre visíveis.
 function _poCurCardHTML(c,i){
   const cls=c._estado==='ok'?' ok':(c._estado==='drop'?' drop':'');
-  const fechado=(c._estado==='ok'||c._estado==='drop')&&!c._open;
+  const aberto=c._open!==false; // qualquer card abre/fecha clicando; default aberto
   const apr=`<button type="button" class="po-cur-aprovar${c._estado==='ok'?' on':''}" onclick="event.stopPropagation();poCurAprovar(${i})" title="Aprovar">${c._estado==='ok'?'✓ aprovado':'aprovar'}</button>`;
   const dsc=`<button type="button" class="po-cur-drop-btn${c._estado==='drop'?' on':''}" onclick="event.stopPropagation();poCurDescartar(${i})" title="Descartar">${c._estado==='drop'?'✕ descartado':'descartar'}</button>`;
-  if(fechado){
+  if(!aberto){
     const snip=String(c.frente||'').replace(/\s+/g,' ').trim().slice(0,80);
     return `<div class="po-cur-card${cls} fechado"><div class="po-cur-head" onclick="poCurToggleOpen(${i})"><span class="po-cur-chev">▸</span><span class="po-cur-n">#${i+1}</span><span class="po-cur-headtext">${_poEsc(snip)||'(sem frente)'}</span>${apr}${dsc}</div></div>`;
   }
-  const recolher=(c._estado==='ok'||c._estado==='drop')?`<span class="po-cur-chev open" onclick="event.stopPropagation();poCurToggleOpen(${i})" title="Recolher">▾</span>`:'';
   return `<div class="po-cur-card${cls}">
-    <div class="po-cur-top">${recolher}<span class="po-cur-n">#${i+1}</span><span class="po-cur-fonte ${_poEsc(c.fonte||'manual')}">${_poEsc(c.fonte||'manual')}</span>${apr}${dsc}</div>
+    <div class="po-cur-head aberto" onclick="poCurToggleOpen(${i})"><span class="po-cur-chev">▾</span><span class="po-cur-n">#${i+1}</span>${apr}${dsc}</div>
     <textarea id="cur-f-${i}" class="po-cur-ta frente" placeholder="Frente (pergunta)">${_poEsc(c.frente||'')}</textarea>
     <textarea id="cur-v-${i}" class="po-cur-ta verso" placeholder="Verso (resposta)">${_poEsc(c.verso||'')}</textarea>
-    <div class="po-cur-meta"><span class="po-cur-lbl">tags</span><input id="cur-t-${i}" class="po-cur-inp" value="${_poEsc((c.tags||[]).join(', '))}" placeholder="ex.: bioetica, conceito"><span class="po-cur-lbl">dif.</span><select id="cur-d-${i}" class="po-cur-dif">${[1,2,3,4,5].map(n=>`<option value="${n}"${(c.dificuldade||3)===n?' selected':''}>${n}</option>`).join('')}</select></div>
   </div>`;
 }
 function _poCuradoriaRender(){
   let host=document.getElementById('po-curadoria-modal');
   if(!host){host=document.createElement('div');host.id='po-curadoria-modal';document.body.appendChild(host);}
   const st=S._poCur; if(!st){host.classList.remove('show');host.innerHTML='';return;}
+  const _prevBody=host.querySelector('.po-cur-body'); const _prevScroll=_prevBody?_prevBody.scrollTop:0; // preserva rolagem entre renders
   let body;
   if(st.load){
     body=`<div class="po-cur-body"><div style="text-align:center;padding:48px 20px;color:var(--t2)"><div style="font-size:26px;margin-bottom:10px">⏳</div>Carregando os cards…</div></div>`;
@@ -42108,6 +42107,7 @@ function _poCuradoriaRender(){
       ${foot}
     </div>`;
   host.classList.add('show');
+  const _newBody=host.querySelector('.po-cur-body'); if(_newBody&&_prevScroll)_newBody.scrollTop=_prevScroll; // restaura rolagem
 }
 
 async function _poCarregarFiltros(force){
