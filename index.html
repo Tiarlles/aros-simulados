@@ -5866,6 +5866,9 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-po .po-fc-chip:hover{color:var(--text);border-color:var(--accent)}
         #tab-po .po-fc-chip.ok{color:#3fb950;border-color:color-mix(in srgb,#3fb950 50%,var(--border))}
         #tab-po .po-fc-chip.rasc{color:#d29922;border-color:color-mix(in srgb,#d29922 50%,var(--border))}
+        #tab-po .po-fc-gen{display:inline-flex;align-items:center;gap:7px;font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:600;letter-spacing:.08em;color:#22a3c3}
+        #tab-po .po-fc-spin{width:12px;height:12px;border:2px solid color-mix(in srgb,#22a3c3 30%,transparent);border-top-color:#22a3c3;border-radius:50%;animation:poFcSpin .7s linear infinite}
+        @keyframes poFcSpin{to{transform:rotate(360deg)}}
         #tab-po .po-thumb-toggle{font-size:9.5px}
         #tab-po .po-thumb-toggle span{padding:1px 7px}
         #tab-po .po-rg-toggle.po-thumb-toggle .po-rg-sim.on{background:color-mix(in srgb,#3fb950 88%,transparent);color:#fff}
@@ -40629,7 +40632,7 @@ function _poAulaRowHTML(a,pos){
     ${cells}
     <td class="po-col-thumb"><div class="po-thumb-cell">${a.vimeoId?`<button type="button" class="po-thumb-btn" onclick="event.stopPropagation();poGerarThumb('${aid}')" title="Gerar prompt da capa (thumb) desta aula">GERAR</button>`:`<span class="po-thumb-na" title="Sem vídeo do Vimeo — não dá pra ler a transcrição">—</span>`}<span class="po-rg-toggle po-thumb-toggle" title="${a.thumbLancada?'Thumb já lançada no sistema — clique pra desmarcar':'Thumb ainda NÃO lançada — clique quando lançar'}" onclick="event.stopPropagation();poToggleThumbLancada('${aid}')"><span class="po-rg-nao${a.thumbLancada?'':' on'}">Não</span><span class="po-rg-sim${a.thumbLancada?' on':''}">Sim</span></span></div></td>
     <td class="po-col-resumo"><button type="button" class="po-resumo-btn${a.fcResumoLen?' on':''}" onclick="event.stopPropagation();poAbrirResumoLM('${aid}')" title="${a.fcResumoLen?'Resumo do livro salvo — clique pra ver/editar':'Colar o resumo do livro (NotebookLM)'}">${a.fcResumoLen?'✓ Resumo':'＋ Resumo'}</button></td>
-    <td class="po-col-fc"><div class="po-fc-cell"><button type="button" class="po-fc-btn" onclick="event.stopPropagation();poGerarCards('${aid}')" title="Gerar flashcards desta aula com IA">GERAR CARDS</button>${a.fcStatus?`<button type="button" class="po-fc-chip ${a.fcStatus==='aprovado'?'ok':'rasc'}" onclick="event.stopPropagation();poAbrirCuradoria('${aid}')" title="Abrir a curadoria dos cards">${a.fcStatus==='aprovado'?'deck '+(a.fcDeckN||0):'rasc. '+(a.fcDeckN||0)}</button>`:''}</div></td>
+    <td class="po-col-fc">${a._fcGen?`<span class="po-fc-gen" title="Gerando flashcards com IA — pode continuar trabalhando"><span class="po-fc-spin"></span>gerando…</span>`:`<div class="po-fc-cell"><button type="button" class="po-fc-btn" onclick="event.stopPropagation();poGerarCards('${aid}')" title="Gerar flashcards desta aula com IA">GERAR CARDS</button>${a.fcStatus?`<button type="button" class="po-fc-chip ${a.fcStatus==='aprovado'?'ok':'rasc'}" onclick="event.stopPropagation();poAbrirCuradoria('${aid}')" title="Abrir a curadoria dos cards">${a.fcStatus==='aprovado'?'deck '+(a.fcDeckN||0):'rasc. '+(a.fcDeckN||0)}</button>`:''}</div>`}</td>
     <td class="po-col-add"></td>
   </tr>`;
 }
@@ -41875,19 +41878,25 @@ function _poResumoLMRender(){
 
 // ----- Gerar Cards: chama a IA e abre a curadoria com o rascunho -----
 S._poCur=null;
+// Geração em SEGUNDO PLANO: não abre modal, não trava o painel. Feedback fica na própria
+// célula (spinner "gerando…") + toasts. Quando termina, o chip "rasc. N" aparece e o coord
+// abre a curadoria quando quiser (carrega o rascunho salvo no Firestore).
 window.poGerarCards=async(aulaId)=>{
   const a=_poFindAulaById(aulaId); if(!a){arosToast('Aula não encontrada.','err',2500);return;}
-  S._poCur={aulaId,titulo:a.titulo||'',load:true,cards:[],stats:null,erro:null}; _poCuradoriaRender();
+  if(a._fcGen){arosToast('Já estou gerando os cards desta aula…','info',2400);return;}
+  a._fcGen=true; _poRefreshTabela();
+  arosToast('🃏 Gerando flashcards… pode continuar trabalhando, eu aviso quando terminar.','info',4200);
   try{
     const r=await _poApiPost(FLASHCARDS_ENDPOINT,{aulaId});
+    a._fcGen=false;
     if(r&&r.ok&&Array.isArray(r.cards)&&r.cards.length){
-      S._poCur.cards=r.cards.map(c=>({...c,_drop:false})); S._poCur.stats=r.stats||null;
       await _poSaveAula(a,{fcStatus:'rascunho',fcDeckN:r.cards.length}); _poRefreshTabela();
+      arosToast(`✓ ${r.cards.length} cards prontos em "${a.titulo}" — clique no chip "rasc." pra curar.`,'success',6000);
     } else {
-      S._poCur.erro=(r&&r.motivo==='sem_insumos')?(r.detalhe||'Esta aula não tem transcrição, questões na trilha nem Resumo LM. Cole um resumo ou puxe a transcrição antes.'):'A IA não devolveu cards. Tente de novo.';
+      _poRefreshTabela();
+      arosToast((r&&r.motivo==='sem_insumos')?(r.detalhe||'Esta aula não tem transcrição, questões na trilha nem Resumo LM.'):'A IA não devolveu cards. Tente de novo.','err',6000);
     }
-  }catch(e){ S._poCur.erro=e.message||String(e); }
-  if(S._poCur)S._poCur.load=false; _poCuradoriaRender();
+  }catch(e){ a._fcGen=false; _poRefreshTabela(); arosToast('Erro ao gerar: '+(e.message||e),'err',6000); }
 };
 window.poAbrirCuradoria=async(aulaId)=>{
   const a=_poFindAulaById(aulaId); if(!a)return;
@@ -41929,7 +41938,7 @@ function _poCuradoriaRender(){
   const st=S._poCur; if(!st){host.classList.remove('show');host.innerHTML='';return;}
   let body;
   if(st.load){
-    body=`<div class="po-cur-body"><div style="text-align:center;padding:48px 20px;color:var(--t2)"><div style="font-size:26px;margin-bottom:10px">⏳</div>Gerando flashcards com a IA…<br><span style="font-size:12px">Lê transcrição + questões + Resumo LM, cobre tudo. Pode levar 1-2 min.</span></div></div>`;
+    body=`<div class="po-cur-body"><div style="text-align:center;padding:48px 20px;color:var(--t2)"><div style="font-size:26px;margin-bottom:10px">⏳</div>Carregando os cards…</div></div>`;
   } else if(st.erro){
     body=`<div class="po-cur-body"><div style="text-align:center;padding:40px 20px;color:#f85149">⚠️ ${_poEsc(st.erro)}</div></div>`;
   } else {
@@ -41946,7 +41955,7 @@ function _poCuradoriaRender(){
   const mantidos=st.cards?st.cards.filter(c=>!c._drop).length:0;
   const foot=(st.load||st.erro)?`<div class="po-cur-foot"><span></span><button type="button" class="tb-btn ghost" onclick="poCuradoriaClose()">Fechar</button></div>`
     :`<div class="po-cur-foot"><span class="po-cur-stats"><b>${mantidos}</b> de ${st.cards.length} mantidos</span><div style="display:flex;gap:9px"><button type="button" class="tb-btn ghost" onclick="poCuradoriaClose()">Fechar</button><button type="button" class="tb-btn primary" onclick="poCuradoriaSalvar()">💾 Salvar deck (${mantidos})</button></div></div>`;
-  host.innerHTML=`<div class="po-modal-back" onclick="poCuradoriaClose()"></div>
+  host.innerHTML=`<div class="po-modal-back"></div>
     <div class="po-modal" role="dialog">
       <div class="po-modal-head"><div><h3>🃏 Curadoria — ${_poEsc(st.titulo)}</h3>${sub}</div><button type="button" class="po-modal-x" onclick="poCuradoriaClose()">✕</button></div>
       ${body}

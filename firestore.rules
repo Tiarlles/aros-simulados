@@ -480,6 +480,9 @@ service cloud.firestore {
     // Threads de "Erro detectado" e "Dúvidas" por aula (fórum interno do PO).
     match /poErros/{aulaId}   { allow read: if isAuth(); allow create, update, delete: if isAuth(); }
     match /poDuvidas/{aulaId} { allow read: if isAuth(); allow create, update, delete: if isAuth(); }
+    // Flashcards por aula: Resumo LM (colado), rascunho gerado pela IA e deck curado.
+    // Cliente lê/escreve (curadoria); a Cloud Function gerarFlashcardsPO grava via Admin SDK.
+    match /poFlashcards/{aulaId} { allow read: if isAuth(); allow create, update, delete: if isAuth(); }
 
     // ────────────────────────────────────────────────────────────────────────
     // DEFAULT DENY — qualquer coleção/path não listada acima é bloqueada.
