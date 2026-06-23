@@ -5910,7 +5910,7 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-gastos-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
         #po-gastos-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--text)}
         #po-gastos-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
-        #po-gastos-modal .po-modal-body{padding:18px 20px}
+        #po-gastos-modal .po-modal-body{padding:18px 20px;max-height:70vh;overflow:auto}
         #po-gastos-modal .po-modal-foot{display:flex;justify-content:flex-end;padding:13px 20px;border-top:1px solid var(--border);background:var(--bg3)}
         .po-gasto-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--border);border-radius:11px;margin-bottom:9px}
         .po-gasto-lbl{flex:1;font-size:13.5px;color:var(--text)}
@@ -5920,6 +5920,12 @@ body.pro-rt-fs-on{overflow:hidden}
         .po-gasto-row.total .po-gasto-lbl{font-weight:700;font-family:'Space Grotesk',sans-serif}
         .po-gasto-row.total .po-gasto-v{font-size:17px}
         .po-gasto-note{font-size:11.5px;color:var(--t3,var(--t2));margin:12px 2px 0;line-height:1.5}
+        .po-gasto-sec{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--t2);text-transform:uppercase;margin:18px 2px 9px}
+        .po-gasto-sec:first-child{margin-top:0}
+        .po-gasto-mes{border:1px solid var(--border);border-radius:11px;padding:11px 14px;margin-bottom:9px}
+        .po-gasto-mesrow{display:flex;align-items:center;gap:12px}
+        .po-gasto-meslbl{flex:1;font-size:13.5px;font-weight:600;color:var(--text);text-transform:capitalize;font-family:'Space Grotesk',sans-serif}
+        .po-gasto-mesbreak{font-size:11px;color:var(--t3,var(--t2));margin-top:6px;font-family:'JetBrains Mono',monospace}
         /* Modal Curadoria de flashcards */
         #po-curadoria-modal{position:fixed;inset:0;z-index:9999;display:none}
         #po-curadoria-modal.show{display:block}
@@ -41909,8 +41915,17 @@ function _poGastosRender(){
     const rows=cats.map(c=>{ const o=d[c.k]||{}; const t=Number(o.total||0),n=Number(o.count||0); total+=t; totalN+=n;
       return `<div class="po-gasto-row"><span class="po-gasto-lbl">${c.ic} ${c.label}</span><span class="po-gasto-n">${n} ${n===1?'chamada':'chamadas'}</span><span class="po-gasto-v">${_poUsd(t)}</span></div>`; }).join('');
     const dt=d.atualizadoEm?new Date(d.atualizadoEm).toLocaleString('pt-BR'):'—';
+    // Por mês (mais recente primeiro)
+    const MES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    const meses=d.meses||{};
+    const chaves=Object.keys(meses).sort().reverse();
+    const mesRows= chaves.map(ym=>{ const mo=meses[ym]||{}; const t=Number(mo.total||0),n=Number(mo.count||0);
+      const a=Number((mo.analise||{}).total||0), th=Number((mo.thumb||{}).total||0), f=Number((mo.flashcards||{}).total||0);
+      const [yy,mm]=ym.split('-'); const lbl=(MES[(+mm)-1]||mm)+' / '+yy;
+      return `<div class="po-gasto-mes"><div class="po-gasto-mesrow"><span class="po-gasto-meslbl">${lbl}</span><span class="po-gasto-n">${n} ${n===1?'chamada':'chamadas'}</span><span class="po-gasto-v">${_poUsd(t)}</span></div><div class="po-gasto-mesbreak">📊 análise ${_poUsd(a)} · 🖼️ thumb ${_poUsd(th)} · 🃏 flashcards ${_poUsd(f)}</div></div>`; }).join('');
+    const secMes= chaves.length?`<div class="po-gasto-sec">Por mês</div>${mesRows}`:'';
     const vazio=!totalN?`<p class="po-gasto-note">Ainda não há gastos registrados (o registro vale a partir de agora).</p>`:'';
-    body=`<div class="po-gasto-list">${rows}<div class="po-gasto-row total"><span class="po-gasto-lbl">Total</span><span class="po-gasto-n">${totalN} ${totalN===1?'chamada':'chamadas'}</span><span class="po-gasto-v">${_poUsd(total)}</span></div></div>${vazio}<p class="po-gasto-note">Soma acumulada (USD, preço Claude Sonnet). Última chamada: ${dt}.</p>`;
+    body=`<div class="po-gasto-sec">Por tipo (total geral)</div><div class="po-gasto-list">${rows}<div class="po-gasto-row total"><span class="po-gasto-lbl">Total</span><span class="po-gasto-n">${totalN} ${totalN===1?'chamada':'chamadas'}</span><span class="po-gasto-v">${_poUsd(total)}</span></div></div>${secMes}${vazio}<p class="po-gasto-note">Soma acumulada (USD, preço Claude Sonnet). Última chamada: ${dt}.</p>`;
   }
   host.innerHTML=`<div class="po-modal-back" onclick="poGastosClose()"></div>
     <div class="po-modal" role="dialog">
@@ -42083,7 +42098,7 @@ function _poCuradoriaRender(){
   const descartados=st.cards?st.cards.filter(c=>c._estado==='drop').length:0;
   const pct=revisaveis?Math.round(aprovados/revisaveis*100):0;
   const head=(st.load||st.erro)?`<span class="po-cur-stats">Curadoria do deck</span>`
-    :`<div class="po-cur-status"><span class="po-cur-stnums"><b>${pendentes}</b> pendentes de revisão · <b class="ap">${aprovados}</b> aprovados <span class="po-cur-pct">${pct}%</span>${descartados?` · <span class="ds">${descartados} descartados</span>`:''}${st2&&st2.custoUsd?` <span class="po-cur-gen">· gerado ~$${st2.custoUsd}</span>`:''}</span><div class="po-cur-bar"><span style="width:${pct}%"></span></div></div>`;
+    :`<div class="po-cur-status"><span class="po-cur-stnums"><b>${pendentes}</b> pendentes de revisão · <b class="ap">${aprovados}</b> aprovados <span class="po-cur-pct">${pct}%</span>${descartados?` · <span class="ds">${descartados} descartados</span>`:''}</span><div class="po-cur-bar"><span style="width:${pct}%"></span></div></div>`;
   const foot=(st.load||st.erro)?`<div class="po-cur-foot"><span></span><button type="button" class="tb-btn ghost" onclick="poCuradoriaClose()">Fechar</button></div>`
     :`<div class="po-cur-foot"><span class="po-cur-stats">${revisaveis} no deck · ${descartados} descartados</span><div style="display:flex;gap:9px"><button type="button" class="tb-btn ghost" onclick="poCuradoriaClose()">Fechar</button><button type="button" class="tb-btn primary" onclick="poCuradoriaSalvar()">💾 Salvar deck</button></div></div>`;
   host.innerHTML=`<div class="po-modal-back"></div>

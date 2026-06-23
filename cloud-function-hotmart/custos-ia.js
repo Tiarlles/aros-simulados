@@ -24,8 +24,12 @@ async function registrarCusto(categoria, custoUsd) {
   try {
     const c = Number(custoUsd);
     if (!categoria || !isFinite(c) || c <= 0) return;
-    const upd = { atualizadoEm: new Date().toISOString() };
-    upd[categoria] = { total: FieldValue.increment(c), count: FieldValue.increment(1) };
+    const now = new Date();
+    const ym = now.toISOString().slice(0, 7); // YYYY-MM (UTC)
+    const inc = () => ({ total: FieldValue.increment(c), count: FieldValue.increment(1) });
+    const upd = { atualizadoEm: now.toISOString() };
+    upd[categoria] = inc();                                   // total acumulado por tipo
+    upd.meses = { [ym]: { ...inc(), [categoria]: inc() } };   // total do mês + por tipo no mês
     await admin.firestore().collection('config').doc('poCustosIA').set(upd, { merge: true });
   } catch (e) { console.warn('registrarCusto falhou', categoria, e && e.message); }
 }
