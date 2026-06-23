@@ -450,45 +450,56 @@ body:has(.mo:not(.hidden)){overflow:hidden}
 /* Container das tabs */
 #co-tabs-list{padding:8px 8px 6px;display:flex;flex-direction:column;gap:1px}
 
-/* Grupos */
-.co-group{margin-bottom:6px;position:relative}
-.co-group-header{width:100%;display:flex;align-items:center;gap:9px;padding:12px 12px 7px;background:transparent;border:none;font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--t3);cursor:pointer;border-radius:8px;transition:color .15s;text-align:left}
-.co-group-header::before{content:"//";color:var(--accent);opacity:.6;font-weight:800;letter-spacing:0;font-size:13px}
-.co-group-header:hover{color:var(--text)}
+/* Grupos — etiqueta de seção, claramente distinta das abas */
+.co-group{position:relative;padding-top:2px}
+.co-group + .co-group{margin-top:7px;border-top:1px solid color-mix(in srgb,var(--border) 60%,transparent)}
+.co-group-header{width:100%;display:flex;align-items:center;gap:8px;padding:13px 10px 6px;background:transparent;border:none;font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;font-size:10.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--t3);cursor:pointer;transition:color .15s;text-align:left}
+.co-group-header::before{content:"//";color:var(--accent);opacity:.55;font-weight:800;letter-spacing:0;font-size:11px;transition:opacity .15s}
+.co-group-header:hover{color:var(--t2)}
 .co-group-header:hover::before{opacity:1}
 .co-group-header > span:first-of-type{flex:1}
-.co-caret{font-size:8px;opacity:.5;transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.co-caret{font-size:8px;opacity:.45;transition:transform .28s cubic-bezier(.4,0,.2,1)}
 .co-group.collapsed .co-caret{transform:rotate(-90deg)}
-.co-group.collapsed .co-group-body{display:none}
-.co-group-body{display:flex;flex-direction:column;gap:1px;padding:2px 0 0}
+/* Corpo do grupo — animação fluida via grid-template-rows 1fr→0fr */
+.co-group-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .3s cubic-bezier(.33,1,.68,1),opacity .22s ease;opacity:1}
+.co-group.collapsed .co-group-body{grid-template-rows:0fr;opacity:0}
+.co-group-inner{overflow:hidden;min-height:0;display:flex;flex-direction:column;gap:2px}
 .co-group.empty{display:none}
 
 /* Abas */
-.co-tab{position:relative;display:flex;align-items:center;gap:8px;padding:11px 26px 11px 20px;font-size:13.5px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--t2);border-radius:8px;text-align:left;width:100%;font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;letter-spacing:.2px;line-height:1.35;transition:color .15s,background .15s,padding-left .2s}
+.co-tab{position:relative;display:flex;align-items:center;gap:11px;padding:9px 24px 9px 12px;font-size:13.5px;font-weight:550;cursor:pointer;border:none;background:transparent;color:var(--t2);border-radius:9px;text-align:left;width:100%;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:.1px;line-height:1.3;transition:color .15s,background .15s,padding-left .2s}
+.co-tab-ic{flex-shrink:0;width:18px;height:18px;display:grid;place-items:center;color:var(--t3);transition:color .15s}
+.co-tab-ic svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.75;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .co-tab-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .co-tab-adm{flex-shrink:0;font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;font-size:8.5px;font-weight:700;letter-spacing:1.2px;color:var(--t3);background:var(--bg3);border:1px solid var(--border);padding:2px 5px;border-radius:4px;text-transform:uppercase;line-height:1;transition:color .15s,border-color .15s,background .15s}
 .co-tab:not(.on):hover .co-tab-adm{color:var(--accent);border-color:var(--accent-dim);background:var(--accent-dim)}
 .co-tab.on .co-tab-adm{color:#fff;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}
-.co-tab::before{content:"";position:absolute;left:6px;top:50%;width:2px;height:0;background:var(--accent);border-radius:2px;transform:translateY(-50%);transition:height .25s cubic-bezier(.4,0,.2,1),opacity .15s,box-shadow .2s,width .2s;opacity:0}
-.co-tab:not(.on):hover{color:var(--text);background:rgba(47,129,247,.06);padding-left:22px}
-.co-tab:not(.on):hover::before{height:60%;opacity:1;box-shadow:0 0 8px var(--accent)}
-.co-tab.on{color:#fff;background:linear-gradient(90deg,rgba(47,129,247,.22) 0%,rgba(47,129,247,.04) 100%);padding-left:18px;box-shadow:0 1px 0 rgba(255,255,255,.05) inset}
-.co-tab.on::before{height:70%;opacity:1;width:3px;background:linear-gradient(180deg,var(--accent2),var(--accent));box-shadow:0 0 12px var(--accent),0 0 4px var(--accent)}
-.co-tab.on::after{content:"";position:absolute;right:12px;top:50%;width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent),0 0 4px var(--accent);transform:translateY(-50%)}
+.co-tab::before{content:"";position:absolute;left:4px;top:50%;width:2px;height:0;background:var(--accent);border-radius:2px;transform:translateY(-50%);transition:height .25s cubic-bezier(.4,0,.2,1),opacity .15s,box-shadow .2s,width .2s;opacity:0}
+.co-tab:not(.on):hover{color:var(--text);background:rgba(47,129,247,.06);padding-left:14px}
+.co-tab:not(.on):hover .co-tab-ic{color:var(--accent)}
+.co-tab:not(.on):hover::before{height:55%;opacity:1;box-shadow:0 0 8px var(--accent)}
+.co-tab.on{color:#fff;background:linear-gradient(90deg,rgba(47,129,247,.22) 0%,rgba(47,129,247,.04) 100%);box-shadow:0 1px 0 rgba(255,255,255,.05) inset}
+.co-tab.on .co-tab-ic{color:#fff}
+.co-tab.on::before{height:64%;opacity:1;width:3px;background:linear-gradient(180deg,var(--accent2),var(--accent));box-shadow:0 0 12px var(--accent),0 0 4px var(--accent)}
+.co-tab.on::after{content:"";position:absolute;right:11px;top:50%;width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent),0 0 4px var(--accent);transform:translateY(-50%)}
+:root[data-theme="light"] .co-tab.on .co-tab-ic{color:var(--accent)}
 :root[data-theme="light"] .co-tab.on{color:var(--accent);background:linear-gradient(90deg,rgba(9,105,218,.14) 0%,rgba(9,105,218,.02) 100%)}
 
 /* Head — user card no topo da sidebar (identificação clara de quem está logado) */
 .co-sidebar-head{padding:12px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(47,129,247,.06),transparent)}
 :root[data-theme="light"] .co-sidebar-head{background:linear-gradient(180deg,rgba(9,105,218,.04),transparent)}
 /* Foot — logout button */
-.co-sidebar-foot{margin-top:auto;padding:12px;border-top:1px solid var(--border);background:linear-gradient(180deg,transparent,rgba(0,0,0,.22));display:flex;flex-direction:column;gap:8px}
-:root[data-theme="light"] .co-sidebar-foot{background:linear-gradient(180deg,transparent,rgba(0,0,0,.03))}
 .co-user-info{position:relative;display:flex;align-items:center;gap:10px;padding:10px;background:linear-gradient(180deg,var(--bg3),var(--bg2));border:1px solid var(--border);border-radius:10px;overflow:hidden}
 .co-user-info::before{content:"";position:absolute;top:0;left:10px;right:10px;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.45}
 .co-avatar{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;background:linear-gradient(135deg,var(--accent2),var(--accent));box-shadow:0 4px 14px var(--accent-glow),0 0 0 1px rgba(255,255,255,.1) inset;flex-shrink:0;letter-spacing:-.3px;font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace}
 .co-user-meta{flex:1;min-width:0;overflow:hidden;line-height:1.25}
 .co-user-name{display:block;color:var(--text);font-size:13px;font-weight:700;letter-spacing:.1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .co-user-role{display:inline-block;margin-top:3px;font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent)}
+/* Botão Sair — discreto, dentro do card do usuário */
+.co-user-logout{flex-shrink:0;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:transparent;border:1px solid transparent;color:var(--t3);cursor:pointer;transition:color .15s,background .15s,border-color .15s;padding:0}
+.co-user-logout svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.85;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.co-user-logout:hover{color:var(--red);background:var(--rl);border-color:color-mix(in srgb,var(--red) 30%,transparent)}
+.co-user-logout:active{transform:scale(.92)}
 
 /* Conteúdo */
 .co-content{min-width:0;position:relative}
@@ -504,13 +515,16 @@ body:has(.mo:not(.hidden)){overflow:hidden}
 
 /* ── SUBGRUPOS DA SIDEBAR ── */
 .co-subgroup{margin:2px 0 3px;position:relative}
-.co-subgroup-header{width:100%;display:flex;align-items:center;gap:7px;padding:8px 12px 8px 18px;background:transparent;border:none;font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-size:13.5px;font-weight:500;letter-spacing:.2px;color:var(--t2);cursor:pointer;border-radius:8px;transition:color .15s,background .15s;text-align:left}
+.co-subgroup-header{width:100%;display:flex;align-items:center;gap:7px;padding:8px 12px 8px 12px;background:transparent;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:550;letter-spacing:.1px;color:var(--t2);cursor:pointer;border-radius:9px;transition:color .15s,background .15s;text-align:left}
 .co-subgroup-header:hover{color:var(--text);background:rgba(47,129,247,.05)}
 .co-sg-caret{font-size:9px;opacity:.6;transition:transform .2s cubic-bezier(.4,0,.2,1);color:var(--accent);width:10px;flex-shrink:0}
 .co-subgroup.collapsed .co-sg-caret{transform:rotate(-90deg)}
-.co-subgroup.collapsed .co-subgroup-body{display:none}
-.co-subgroup-body{display:flex;flex-direction:column;gap:1px;padding:2px 0 4px 0;margin-left:18px;border-left:1px dashed var(--border);padding-left:8px}
-.co-subgroup-body .co-tab{font-size:12.5px;padding:8px 22px 8px 14px}
+.co-subgroup-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .28s cubic-bezier(.33,1,.68,1),opacity .2s ease;opacity:1;margin-left:18px;border-left:1px dashed var(--border);padding-left:8px}
+.co-subgroup.collapsed .co-subgroup-body{grid-template-rows:0fr;opacity:0}
+.co-subgroup-inner{overflow:hidden;min-height:0;display:flex;flex-direction:column;gap:1px;padding:2px 0 4px}
+.co-subgroup-body .co-tab{font-size:12.5px;padding:8px 22px 8px 12px}
+.co-subgroup-body .co-tab .co-tab-ic{width:16px;height:16px}
+.co-subgroup-body .co-tab .co-tab-ic svg{width:16px;height:16px}
 .co-subgroup-body .co-tab.on::after{right:8px;width:4px;height:4px}
 
 /* ═══ MENU LABEL EDITOR (Configurações → Personalizar menu lateral) ═══ */
@@ -4341,9 +4355,6 @@ body.pro-rt-fs-on{overflow:hidden}
         <div class="co-user-info" id="co-user-info"></div>
       </div>
       <div id="co-tabs-list"></div>
-      <div class="co-sidebar-foot">
-        <button class="btn btn-s btn-sm" onclick="logout()" style="justify-content:center">↪ Sair</button>
-      </div>
     </div>
     <div class="co-content">
 
@@ -12994,6 +13005,44 @@ function userRoleLabel(u){
 }
 
 // Renderiza a sidebar agrupada (lê permissões do usuário logado para esconder abas/grupos vazios)
+// Ícones de traço (estilo Lucide, monocromáticos, herdam currentColor) por id de aba.
+// Substituem os emojis nos labels — visual mais sóbrio/técnico. Aba sem ícone mapeado
+// cai num fallback discreto (ponto).
+const _CO_ICONS={
+ simulados:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/>',
+ trocas:'<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
+ extra:'<circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/>',
+ simExtras:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+ desempenho:'<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+ checklist:'<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8M13 12h8M13 18h8"/>',
+ revisao:'<path d="m8 11 2 2 4-4"/><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+ professores:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+ listas:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+ senhasPublicas:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>',
+ mentorias:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+ mentoriasF2:'<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>',
+ rememberF1:'<path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>',
+ rememberF2:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+ produtos:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+ po:'<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
+ recProvas:'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
+ recGestao:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+ recFontes:'<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+ recMetricas:'<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>',
+ features:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
+ financeiro:'<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>',
+ orcamento:'<path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>',
+ cruzarLista:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+ comunicacao:'<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+ senhasAcessos:'<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/>',
+ usuarios:'<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
+ auditoria:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+ config:'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>'
+};
+const _coIcon=id=>`<span class="co-tab-ic">${_CO_ICONS[id]?`<svg viewBox="0 0 24 24" aria-hidden="true">${_CO_ICONS[id]}</svg>`:'<svg viewBox="0 0 24 24" aria-hidden=\"true\"><circle cx="12" cy="12" r="3"/></svg>'}</span>`;
+// Tira emoji/símbolos do começo do label (os ícones agora vêm do mapa acima).
+const _coStripEmoji=s=>String(s||'').replace(/^[^\p{L}\p{N}]+/u,'').trim()||String(s||'');
+
 function renderSidebar(){
   const container=document.getElementById('co-tabs-list');if(!container)return;
   const allowed=new Set(userTabs(S.currentUser));
@@ -13027,27 +13076,27 @@ function renderSidebar(){
       <button class="co-group-header" onclick="toggleGroup('${g.id}')">
         <span>${g.label}</span><span class="co-caret">▾</span>
       </button>
-      <div class="co-group-body">
+      <div class="co-group-body"><div class="co-group-inner">
         ${filtered.map(it=>{
           if(it.kind==='tab'){
             const t=it.tab;
             const adm=isAdmExclusiveTab(t.id)?'<span class="co-tab-adm">ADM</span>':'';
-            return `<button class="co-tab" data-tab="${t.id}" onclick="switchCoTab('${t.id}',this)"><span class="co-tab-label">${tabLabel(t)}</span>${adm}</button>`;
+            return `<button class="co-tab" data-tab="${t.id}" onclick="switchCoTab('${t.id}',this)">${_coIcon(t.id)}<span class="co-tab-label">${_coStripEmoji(tabLabel(t))}</span>${adm}</button>`;
           }
           const sgCol=collapsed.has(it.id);
           return `<div class="co-subgroup${sgCol?' collapsed':''}" data-subgroup="${it.id}">
             <button class="co-subgroup-header" onclick="toggleGroup('${it.id}')">
               <span class="co-sg-caret">▾</span><span>${(it.label||'').replace(/</g,'&lt;')}</span>
             </button>
-            <div class="co-subgroup-body">
+            <div class="co-subgroup-body"><div class="co-subgroup-inner">
               ${it.tabs.map(t=>{
                 const adm=isAdmExclusiveTab(t.id)?'<span class="co-tab-adm">ADM</span>':'';
-                return `<button class="co-tab" data-tab="${t.id}" onclick="switchCoTab('${t.id}',this)"><span class="co-tab-label">${tabLabel(t)}</span>${adm}</button>`;
+                return `<button class="co-tab" data-tab="${t.id}" onclick="switchCoTab('${t.id}',this)">${_coIcon(t.id)}<span class="co-tab-label">${_coStripEmoji(tabLabel(t))}</span>${adm}</button>`;
               }).join('')}
-            </div>
+            </div></div>
           </div>`;
         }).join('')}
-      </div>
+      </div></div>
     </div>`;
   }).join('');
 }
@@ -26115,7 +26164,7 @@ function applyTabsByRole(){
     const u=S.currentUser;
     const nm=u.nome||u.username||'?';
     const initials=nm.trim().split(/\s+/).map(s=>s[0]||'').slice(0,2).join('').toUpperCase()||'?';
-    info.innerHTML=`<div class="co-avatar">${initials}</div><div class="co-user-meta"><span class="co-user-name">${nm}</span><span class="co-user-role">${userRoleLabel(u)}</span></div>`;
+    info.innerHTML=`<div class="co-avatar">${initials}</div><div class="co-user-meta"><span class="co-user-name">${nm}</span><span class="co-user-role">${userRoleLabel(u)}</span></div><button class="co-user-logout" onclick="logout()" title="Sair" aria-label="Sair"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>`;
   }
   _coUpdateTime();
   // Botão "+ Novo Simulado" só faz sentido para quem tem aba simulados

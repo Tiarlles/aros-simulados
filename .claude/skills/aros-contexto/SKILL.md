@@ -16,7 +16,7 @@ SPA monolítico single-file (HTML+CSS+JS vanilla, ~7500+ linhas em `index.html`)
 | Camada | Tecnologia |
 |---|---|
 | Frontend | HTML + CSS (variáveis dark/light) + JS vanilla. Sem framework. Sem build. Sem bundler. |
-| Fontes web | Plus Jakarta Sans (corpo), Fraunces (legado, sendo removido), **Space Grotesk** (abas/títulos do painel), **JetBrains Mono** (badges, mono subtitles, group headers `//`), Permanent Marker. |
+| Fontes web | Plus Jakarta Sans (corpo + **abas da sidebar** desde 2026-06-23), Fraunces (legado, sendo removido), **Space Grotesk** (títulos do painel), **JetBrains Mono** (badges, mono subtitles, group headers `//`), Permanent Marker. |
 | CDN externos | EmailJS (envio de email), SheetJS (export/import xlsx), Firebase JS SDK |
 | Banco | Firebase Firestore (projeto `simulados-confirmacao`) |
 | Storage | Firebase Storage (imagens de revisão, checklists, slides) |
@@ -331,9 +331,10 @@ Filtros aplicados em: `renderSimCards`, `popCoSel`, `simsAplicados` (Garantia), 
 
 **Tipografia por contexto:**
 - Corpo geral: **Plus Jakarta Sans** (15px).
-- Abas da sidebar de Coordenação (`.co-tab`): **Space Grotesk** 13.5px peso 500.
-- Headers de grupo na sidebar (`.co-group-header`): **JetBrains Mono** 12px peso 700 uppercase com prefixo `//` accent.
-- Subgrupos na sidebar (`.co-subgroup-header`): Space Grotesk 13.5px peso 500 (mesmo tamanho dos itens).
+- Abas da sidebar de Coordenação (`.co-tab`): **Plus Jakarta Sans** 13.5px peso 550 (redesign 2026-06-23 — antes era Space Grotesk, que parecia "infantil"). Cada aba tem **ícone SVG de traço** (estilo Lucide, mapa `_CO_ICONS` por id de aba, render via `_coIcon(id)`, classe `.co-tab-ic` 18px herda currentColor — fica accent no hover, branco no ativo). Emojis dos labels de `TAB_GROUPS` são removidos no render por `_coStripEmoji()` (regex tira símbolos do começo) — os emojis ficam só no fallback/editor de menu. Aba sem ícone mapeado → fallback ponto.
+- Headers de grupo na sidebar (`.co-group-header`): **JetBrains Mono** 10.5px peso 700 uppercase letter-spacing 1.8px, cor `--t3` (bem muted), prefixo `//` accent via `::before`, + linha divisória (`border-top`) entre grupos. Propositalmente discreto p/ contrastar com as abas (sans + ícone) — resolve "não dava p/ diferenciar grupo de aba".
+- Subgrupos na sidebar (`.co-subgroup-header`): Plus Jakarta Sans 13px peso 550.
+- **Dropdowns de grupo/subgrupo abrem/fecham com animação fluida** (`grid-template-rows:1fr→0fr` + `opacity`, transição `.3s cubic-bezier(.33,1,.68,1)`) — exige wrapper interno `.co-group-inner`/`.co-subgroup-inner` com `overflow:hidden;min-height:0` (o render envolve os itens nele). Substituiu o `display:none` instantâneo. `toggleGroup` só alterna a classe `.collapsed` (sem mudança de JS). Mecanismo de hover/glow das abas (`::before` trilho accent + `::after` ponto) preservado.
 - Títulos de página no painel (Painel da Coordenação / Simulados TSA Oral / Mentorias): **Space Grotesk** 22-26px peso 700 letter-spacing -.3px + subtítulo accent em **JetBrains Mono** 10.5-11px uppercase letter-spacing 2px.
 - Títulos de cards de simulado (`.sim-card-title`): **JetBrains Mono** 15px peso 700.
 - Labels mono accent (date chips, status badges, ADM badge): **JetBrains Mono** 8.5-10px peso 700 uppercase.
@@ -2125,6 +2126,8 @@ Grupo novo na sidebar da coordenação: **Group Remember**, com 2 abas — `reme
 - **Card** exibe: ID discreto (#codigo + dot da categoria) · Assunto (só os códigos, ex.: "P5, P16") · Professor · Ano. Feedback central "Caso salvo" (`_remSavedFlash`) a cada gravação.
 - **Filtros** colapsável no topo do quadro (`#rem-filtros`): por Assunto (árvore dos 56) e Professor, com Aplicar/Limpar.
 - Colunas renomeáveis por duplo clique (`config/settings.rememberColLabels`).
+
+**PENDENTE — Enviar caso aprovado p/ o sistema Laravel via API (em negociação com o dev, 2026-06-23):** da coluna Aprovado, botão pra exportar o caso pronto pro sistema deles. **Arquitetura decidida: rotear por Cloud Function** (nova `enviarCasoLaravel`), nunca POST direto do navegador — mesmo padrão de `sincronizarLaravel`/`vimeoTranscricao` etc. (browser → CF valida Firebase ID token → Laravel; chave da API do Laravel no `.env` da function, fora do JS público; evita CORS). CF lê o caso via Admin SDK, mapeia pro shape do Laravel, faz POST, grava de volta no `remembers/{id}` o ID retornado + `enviadoLaravelEm` (anti-duplicidade + selo "📤 Enviado" no card). **Bloqueado aguardando CONTRATO da API do dev:** (1) endpoint URL (+ staging?); (2) auth header esperado; (3) schema do JSON; (4) **assuntos: códigos P1–P56 ou taxonomia deles? (precisa de-para)**; (5) enunciado/perguntas em HTML rico — aceita HTML ou quer texto/markdown?; (6) **imagens inline** (storage `remembers/{caseId}/**`) — aceita URL e baixa, ou quer base64/multipart?; (7) resposta de sucesso (ID?) + formato de erro; (8) reenvio = upsert via `codigo` ou cria duplicado?; (9) destino (banco geral ou precisa de prova/módulo alvo). Decisões de produto a confirmar: gatilho (botão manual vs auto), pós-envio (vira Utilizado vs selo), reenvio (editar+reenviar vs trava), quem pode enviar.
 
 Pontos de inserção no index.html: TAB_GROUPS (~12678), array de toggle do `switchCoTab` (~26246) + wrapper (~30190). Quase tudo vive num bloco JS único do módulo (prefixo `rem`/`_rem`). Rules `remembers` + `versoes` + storage deployadas em 2026-06-22.
 
