@@ -5900,6 +5900,24 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-resumolm-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
         #po-resumolm-modal .po-rl-ta{width:100%;min-height:46vh;resize:vertical;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;line-height:1.6;color:var(--text)}
         #po-resumolm-modal .po-rl-count{font-size:11.5px;color:var(--t2)}
+        /* Modal Gastos API */
+        #po-gastos-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-gastos-modal.show{display:block}
+        #po-gastos-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-gastos-modal .po-modal{position:relative;max-width:560px;width:min(94vw,560px);margin:10vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-gastos-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-gastos-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--text)}
+        #po-gastos-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-gastos-modal .po-modal-body{padding:18px 20px}
+        #po-gastos-modal .po-modal-foot{display:flex;justify-content:flex-end;padding:13px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        .po-gasto-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--border);border-radius:11px;margin-bottom:9px}
+        .po-gasto-lbl{flex:1;font-size:13.5px;color:var(--text)}
+        .po-gasto-n{font-size:11.5px;color:var(--t2);font-family:'JetBrains Mono',monospace}
+        .po-gasto-v{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:#3fb950;min-width:64px;text-align:right}
+        .po-gasto-row.total{background:var(--bg3);border-color:var(--border2);margin-top:4px}
+        .po-gasto-row.total .po-gasto-lbl{font-weight:700;font-family:'Space Grotesk',sans-serif}
+        .po-gasto-row.total .po-gasto-v{font-size:17px}
+        .po-gasto-note{font-size:11.5px;color:var(--t3,var(--t2));margin:12px 2px 0;line-height:1.5}
         /* Modal Curadoria de flashcards */
         #po-curadoria-modal{position:fixed;inset:0;z-index:9999;display:none}
         #po-curadoria-modal.show{display:block}
@@ -40905,6 +40923,7 @@ function _poIABoxHTML(c){
         <button type="button" class="po-iq-tool" onclick="poAbrirPromptIA()">✍️ Prompt da IA</button>
         <button type="button" class="po-iq-tool" onclick="poAbrirPromptThumb()">🖼️ Prompt Thumb</button>
         <button type="button" class="po-iq-tool" onclick="poAbrirPromptFlashcards()">🃏 Prompt Flashcards</button>
+        <button type="button" class="po-iq-tool" onclick="poAbrirGastosAPI()">💰 Gastos API</button>
         <button type="button" class="po-iq-tool" onclick="poTestarIncidencia()" title="Testa a conexão com a API de incidência das provas — sem IA, sem custo">🔌 Testar API de incidência</button>
       </div>
       <div class="po-iq-run">
@@ -41855,6 +41874,41 @@ function _poPromptFcRender(){
         <button type="button" class="tb-btn ghost" onclick="poPromptFcRestaurar()">↩︎ Restaurar padrão</button>
         <button type="button" class="tb-btn primary" onclick="poPromptFcSalvar()">💾 Salvar instrução</button>
       </div>
+    </div>`;
+  host.classList.add('show');
+}
+
+// ===== Gastos API: total gasto com a IA, separado por tipo de chamada =====
+S._poGastos=null;
+function _poUsd(n){ return '$'+(Number(n||0)).toFixed(2); }
+window.poAbrirGastosAPI=async()=>{
+  S._poGastos={load:true,data:null,erro:null}; _poGastosRender();
+  try{ const snap=await getDoc(doc(db,'config','poCustosIA')); S._poGastos.data=snap.exists()?snap.data():{}; }
+  catch(e){ S._poGastos.erro=e.message||String(e); }
+  if(S._poGastos)S._poGastos.load=false; _poGastosRender();
+};
+window.poGastosClose=()=>{const h=document.getElementById('po-gastos-modal');if(h){h.classList.remove('show');h.innerHTML='';}S._poGastos=null;};
+function _poGastosRender(){
+  let host=document.getElementById('po-gastos-modal');
+  if(!host){host=document.createElement('div');host.id='po-gastos-modal';document.body.appendChild(host);}
+  const st=S._poGastos; if(!st){host.classList.remove('show');host.innerHTML='';return;}
+  const cats=[{k:'analise',label:'Análise de produto/módulo',ic:'📊'},{k:'thumb',label:'Geração de thumb',ic:'🖼️'},{k:'flashcards',label:'Geração de flashcards',ic:'🃏'}];
+  let body;
+  if(st.load){ body=`<div style="text-align:center;padding:36px;color:var(--t2)">⏳ Carregando…</div>`; }
+  else if(st.erro){ body=`<div style="text-align:center;padding:30px;color:#f85149">⚠️ ${_poEsc(st.erro)}</div>`; }
+  else{
+    const d=st.data||{}; let total=0,totalN=0;
+    const rows=cats.map(c=>{ const o=d[c.k]||{}; const t=Number(o.total||0),n=Number(o.count||0); total+=t; totalN+=n;
+      return `<div class="po-gasto-row"><span class="po-gasto-lbl">${c.ic} ${c.label}</span><span class="po-gasto-n">${n} ${n===1?'chamada':'chamadas'}</span><span class="po-gasto-v">${_poUsd(t)}</span></div>`; }).join('');
+    const dt=d.atualizadoEm?new Date(d.atualizadoEm).toLocaleString('pt-BR'):'—';
+    const vazio=!totalN?`<p class="po-gasto-note">Ainda não há gastos registrados (o registro vale a partir de agora).</p>`:'';
+    body=`<div class="po-gasto-list">${rows}<div class="po-gasto-row total"><span class="po-gasto-lbl">Total</span><span class="po-gasto-n">${totalN} ${totalN===1?'chamada':'chamadas'}</span><span class="po-gasto-v">${_poUsd(total)}</span></div></div>${vazio}<p class="po-gasto-note">Soma acumulada (USD, preço Claude Sonnet). Última chamada: ${dt}.</p>`;
+  }
+  host.innerHTML=`<div class="po-modal-back" onclick="poGastosClose()"></div>
+    <div class="po-modal" role="dialog">
+      <div class="po-modal-head"><h3>💰 Gastos com a API (IA)</h3><button type="button" class="po-modal-x" onclick="poGastosClose()">✕</button></div>
+      <div class="po-modal-body">${body}</div>
+      <div class="po-modal-foot"><button type="button" class="tb-btn ghost" onclick="poGastosClose()">Fechar</button></div>
     </div>`;
   host.classList.add('show');
 }

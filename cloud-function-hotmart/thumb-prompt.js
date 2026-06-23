@@ -12,6 +12,7 @@ const { onRequest } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const Anthropic = require('@anthropic-ai/sdk').default;
 const { obterTranscricao } = require('./vimeo-transcricao');
+const { calcCustoSonnet, registrarCusto } = require('./custos-ia');
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY_PO || '';
 const MODEL = 'claude-sonnet-4-6';
@@ -114,6 +115,7 @@ exports.gerarPromptThumb = onRequest(
       });
       const prompt = resp.content.filter(c => c.type === 'text').map(c => c.text).join('\n').trim();
       if (!prompt) { res.status(502).json({ error: 'A IA não devolveu um prompt. Tente de novo.' }); return; }
+      registrarCusto('thumb', calcCustoSonnet(resp.usage));
 
       console.log('thumb prompt', { user: decoded.email || decoded.uid, titulo, vimeoId, palavrasTransc: transc.split(/\s+/).filter(Boolean).length });
       res.status(200).json({ ok: true, prompt, titulo, vimeoId });

@@ -21,6 +21,7 @@ const admin = require('firebase-admin');
 const Anthropic = require('@anthropic-ai/sdk').default;
 const { obterTranscricao } = require('./vimeo-transcricao');
 const { _adaptarQuestao, _stripHtml } = require('./questoes-po');
+const { registrarCusto } = require('./custos-ia');
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY_PO || '';
 const LARAVEL_TOKEN = process.env.LARAVEL_TOKEN || '';
@@ -397,6 +398,7 @@ exports.gerarFlashcardsPO = onRequest(
         if (todos.length >= TETO_CARDS) { console.warn('flashcards: teto de segurança atingido', TETO_CARDS); break; }
       }
 
+      registrarCusto('flashcards', custoUsd);
       const cards = dedup(todos).slice(0, TETO_CARDS).map((c, i) => ({ id: 'c' + i + '_' + Math.abs(hash(c.frente)), ...c, status: 'rascunho' }));
       if (!cards.length) { res.status(502).json({ error: 'A IA não devolveu cards válidos. Tente de novo.' }); return; }
 

@@ -11,6 +11,7 @@
 const { onRequest } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const Anthropic = require('@anthropic-ai/sdk').default;
+const { calcCustoSonnet, registrarCusto } = require('./custos-ia');
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY_PO || '';
 const MODEL = 'claude-sonnet-4-6';
@@ -486,6 +487,7 @@ exports.analisarModuloPO = onRequest(
       catch (e) { console.warn('PO análise: falha ao persistir', e.message); }
 
       const usage = resp.usage || {};
+      registrarCusto('analise', calcCustoSonnet(usage));
       console.log('IA PO OK', {
         user: decoded.email || decoded.uid, curso: cursoNome, modulo,
         n_aulas: aulas.length, n_transc: resultado.meta.nTranscricoes, n_questoes: resultado.meta.nQuestoes,
@@ -836,6 +838,7 @@ exports.analisarProdutoPO = onRequest(
       };
 
       const usage = resp.usage || {};
+      registrarCusto('analise', calcCustoSonnet(usage));
       console.log('IA PO produto OK', {
         user: decoded.email || decoded.uid, curso: cursoNome, n_modulos: mods.length,
         input_tokens: usage.input_tokens, output_tokens: usage.output_tokens,
@@ -1017,6 +1020,7 @@ exports.analisarTSAOralPO = onRequest(
       catch (e) { console.warn('PO oral: falha ao persistir', e.message); }
 
       const usage = resp.usage || {};
+      registrarCusto('analise', calcCustoSonnet(usage));
       console.log('IA PO oral OK', {
         user: decoded.email || decoded.uid, curso: cursoNome, modulo,
         n_aulas: aulas.length, casos_chars: casosClinicos.length, n_temas_oral: oralTemas.length, n_lacunas: lacunas.length,
