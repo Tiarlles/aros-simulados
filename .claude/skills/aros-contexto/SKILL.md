@@ -40,7 +40,8 @@ SPA monolítico single-file (HTML+CSS+JS vanilla, ~7500+ linhas em `index.html`)
 ## URLs e endpoints
 
 - **Site público:** `https://aros.anestreview.com.br` (GitHub Pages com CNAME) — repo [Tiarlles/aros-simulados](https://github.com/Tiarlles/aros-simulados)
-- **Logo header:** `https://aros.anestreview.com.br/assets/assets/logo-anestreview.png` (PNG transparente, subido manualmente no repo em `assets/logo-anestreview.png` — caminho final tem `/assets/assets/` por causa da estrutura de pastas)
+- **Logo header (atual):** `/assets/assets/logo-medreview.png` (PNG branded MEDREVIEW, caminho absoluto de root pra funcionar em local + produção). Subido manualmente no repo em `assets/assets/logo-medreview.png`. **Substituiu** o `logo-anestreview.png` legado em 2026-05-29.
+- **Logo header (legado):** `https://aros.anestreview.com.br/assets/assets/logo-anestreview.png` — não usado mais; arquivo ainda no repo por compat.
 - **Cloud Function (webhook):**
   - alias: `https://us-central1-simulados-confirmacao.cloudfunctions.net/hotmartWebhook`
   - cloud run: `https://hotmartwebhook-57xrhneaga-uc.a.run.app`
@@ -477,6 +478,12 @@ Filtros aplicados em: `renderSimCards`, `popCoSel`, `simsAplicados` (Garantia), 
 - H1: `clamp(28px, 8vw, 40px)` (era 38-72px).
 - **Importante**: o `::before` do hero tem `inset: -40px -10% -10%` (gradient mesh extending 10% pros lados). Pra evitar **horizontal overflow no mobile**, o `.home-hero` precisa de `overflow:hidden; border-radius:24px`. Bug 2026-05-20: usuário viu cards "perdidos" deslocados pra esquerda — era esse overflow horizontal criando scroll.
 
+**Link local pra testar no navegador do Mac (REGRA — sempre que o usuário pedir "link local"):**
+- Subir servidor: `python3 -m http.server 8765 --bind 127.0.0.1` (rodar em background na worktree atual).
+- **SEMPRE mandar a URL com `localhost`, NUNCA `127.0.0.1`:** `http://localhost:8765/index.html`.
+- **Por quê:** o login com Google (Firebase Auth) só funciona em domínio autorizado. `localhost` está autorizado; `127.0.0.1` **não** está → o popup do Google falha. Bug observado em 2026-05-30.
+- O servidor `python3 -m http.server` aceita ambos (localhost resolve pra 127.0.0.1), então o bind em 127.0.0.1 não impede — o que importa é a URL que você manda ser `localhost`.
+
 **Teste local em iPhone real (recomendado pelo usuário):**
 1. No Mac terminal: `cd <path>` → `python3 -m http.server 8080` (8000 pode estar ocupada).
 2. Pegar IP: `ipconfig getifaddr en0`.
@@ -514,6 +521,14 @@ Filtros aplicados em: `renderSimCards`, `popCoSel`, `simsAplicados` (Garantia), 
 - **Auto-troca FIFO** ao solicitar (vaga direta + match casado).
 - Box "Solicitar Simulado Extra" **abaixo** dos cards, alinhado à grid (single-cell `.sim-cards`), com glow accent pulsante. Texto curto em Space Grotesk + tag mono accent. Fluxo multi-step abre num modal.
 
+**Escala (aluno) — visão pós-deadline (2026-05-29):**
+- Box `<details>` "⚠️ Alunos que não confirmaram" no **rodapé de cada dia** (sábado e domingo). Aparece quando `exp=true` (deadline passou).
+- Inclui **TODOS** os não-confirmados de `S.students` (pending, swap, absent — auto-ausentes têm `dia=null` + `originalDia` preservado).
+- Mesmo conteúdo nos 2 dias (não tenta segregar). Cada linha mostra chip com `originalDia` + `originalRodada` ao lado do nome.
+- Reusa `alunoRowHTML(s, exp, extraAfterName)` — assinatura ganhou 3º param opcional (refator pra evitar regex frágil em nomes com `<`/`>`).
+- **Auto-abre quando search ativa** (expandAll passado por `searchAluno`).
+- Localização: `renderAlunoDay` ~linha 23282, `renderNaoConfirmaramBox` logo abaixo.
+
 ### Visão Coordenação (sidebar agrupada e customizável)
 Grupos default (em `TAB_GROUPS`):
 - **Simulados:** Simulados TSA Oral, Trocas, Solicitação Sim Extra, Simulados Extras, Desempenho, Checklist, Revisão de Casos
@@ -541,6 +556,18 @@ Renderização da sidebar usa `_menuEffectiveGroups()` que:
 **Modal de edição de usuário** também consome `_menuEffectiveGroups()` — checkboxes de permissão respeitam grupos/subgrupos/ordem custom.
 
 A aba Coordenação fica **oculta na visão inicial** (`tab-co` com `display:none`). Acesso via hash `#admin` ou `#coord` na URL.
+
+**Sidebar colapsável (2026-05-29):**
+- Botão `☰` (id `co-sidebar-toggle-btn`, classe `.co-sidebar-toggle`) ao lado do título "Painel da Coordenação". Estilo dark glass com `backdrop-filter:blur(18px)` + borda neon accent + pulso `coTogglePulse 2.6s`. Versão light mode também.
+- Layout `.co-layout.sidebar-closed` colapsa `grid-template-columns:0 1fr`.
+- `toggleCoSidebar()` toggle + persiste em `localStorage['aros_co_sidebar_closed']`.
+- `_applyCoSidebarPref()` aplica preferência — **default = fechada na primeira visita** (quando localStorage null). Chamado em `openCoordPanel()` e em `switchView('coord')`.
+- **User info card** (avatar+nome+role) movido pro **topo** da sidebar (wrapper `.co-sidebar-head`). Logout button continua no foot.
+- **Grupos da sidebar fechados por padrão na primeira visita**: `renderSidebar` trata `localStorage.getItem('aros-sidebar-collapsed')==null` como "tudo colapsado".
+
+**Branding (2026-05-29):**
+- Eyebrow do painel coord: "AnestReview" → **"MEDREVIEW"**.
+- Logo `<img src>` trocada de `logo-anestreview.png` (URL absoluta de produção) → `/assets/assets/logo-medreview.png` (caminho **absoluto de root** pra funcionar local + prod). Arquivo novo em `assets/assets/logo-medreview.png`.
 
 ### Sistema de auth (login custom APOSENTADO em 2026-06-04 — só Firebase agora)
 Tela `co-login` tem **só Firebase Auth**: Google sign-in (`loginGoogle`) + Email/Password (`loginEmailFirebase`, com `sendPasswordResetEmail` no "Esqueci a senha"). O login custom legado (comparava `usuarios.senha` plaintext no cliente) foi **removido do `checkPass`** — todos os coord/profs já estavam migrados.
