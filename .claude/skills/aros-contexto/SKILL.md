@@ -2886,6 +2886,12 @@ Polimento mobile (2026-05-20, mesmo dia):
 
 **Gastos API.** Botão **💰 Gastos API** na barra da Inteligência de Produto (`poAbrirGastosAPI`). Livro-caixa em `config/poCustosIA` (módulo `custos-ia.js` → `registrarCusto(categoria,custoUsd)` com `FieldValue.increment`): total por tipo (`analise`/`thumb`/`flashcards`) + por mês (`meses.{YYYY-MM}`). As 5 funções de IA (análise módulo/produto/oral, thumb, flashcards) registram custo. Tela mostra Por tipo (total) + Por mês (com quebra). Vale a partir do deploy de 2026-06-23 (sem retroativo). Cliente lê o doc direto (read aberto via `config/{cfgId}`).
 
+**Ajustes da mesma rodada (em produção):**
+- **Coluna Copiar** (`po-col-copia`, `_poCopiaCellHTML`/`poCopiarConteudoAula`): botão "📋 Copiar" por aula que monta `gerarFlashcardsPO` **acao:'montar'** (sem IA/sem custo) e copia pro clipboard, em ordem: transcrição + questões/comentários da trilha + Resumo LM. `span = poColunas.length+6`. Copy com fallback `execCommand` (`_poCopyText`).
+- **Thumb agora em segundo plano** (igual flashcards): `poGerarThumb` não abre modal, spinner na célula (`a._thumbGen`), salva em `poAulas.thumbPrompt` (+ `_PRESERVAR`), chip roxo **Prompt** (`poThumbCopiarChip` copia) ao lado do botão Gerar (roxo, pequeno) na mesma linha do slider. **Confirmação (`arosConfirm`) antes de regerar** se já há prompt.
+- **Curadoria refinada:** 3 blocos (pendentes abertos no topo → aprovados recolhidos → descartados no fim), aprovar/descartar = dropdown recolhido (`_poCurMover`/`poCurToggleOpen`, qualquer card abre/fecha no clique), status de revisão (% ao vivo) + barra grande no topo, **preserva scroll** entre renders, texto **justificado**, SEM tags/dificuldade/fonte no card. Coluna Flashcards: chip **DECK** + barra de % (com número) + botão Gerar pequeno.
+- **CORS:** todas as functions do PO/IA liberam qualquer `localhost`/`127.0.0.1` (o server local usa porta automática — senão dá "Failed to fetch" no dev).
+
 ---
 
 ## Painel do Dia — Simulado Presencial (grade/rodízio/estações · controle ao vivo) (2026-06-04)
