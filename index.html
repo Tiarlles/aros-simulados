@@ -5865,7 +5865,9 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-po .po-fc-btn:active{transform:translateY(0)}
         #tab-po .po-fc-chip{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;padding:3px 9px;border-radius:7px;cursor:pointer;border:1px solid color-mix(in srgb,#3fb950 45%,var(--border));background:color-mix(in srgb,#3fb950 8%,transparent);color:#3fb950;transition:filter .16s,border-color .16s}
         #tab-po .po-fc-chip:hover{filter:brightness(1.15);border-color:#3fb950}
-        #tab-po .po-fc-bar{width:100%;max-width:118px;height:4px;border-radius:3px;background:var(--border);overflow:hidden}
+        #tab-po .po-fc-barwrap{display:flex;align-items:center;gap:5px;width:100%;max-width:138px}
+        #tab-po .po-fc-pct{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:#3fb950;min-width:26px;text-align:right}
+        #tab-po .po-fc-bar{flex:1;height:4px;border-radius:3px;background:var(--border);overflow:hidden}
         #tab-po .po-fc-bar>span{display:block;height:100%;background:#3fb950;border-radius:3px;transition:width .35s}
         #tab-po .po-fc-gen{display:inline-flex;align-items:center;gap:7px;font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:600;letter-spacing:.08em;color:#22a3c3}
         #tab-po .po-fc-spin{width:12px;height:12px;border:2px solid color-mix(in srgb,#22a3c3 30%,transparent);border-top-color:#22a3c3;border-radius:50%;animation:poFcSpin .7s linear infinite}
@@ -40677,7 +40679,7 @@ function _poFcCellHTML(a,aid){
   const has=!!(a.fcHasDeck||a.fcStatus||rev>0);
   const pct=rev?Math.round(apr/rev*100):0;
   const chip=has?`<button type="button" class="po-fc-chip" onclick="event.stopPropagation();poAbrirCuradoria('${aid}')" title="Abrir o deck — ${apr} de ${rev} aprovados (${pct}%)">DECK</button>`:'';
-  const bar=has?`<div class="po-fc-bar" title="${pct}% aprovados"><span style="width:${pct}%"></span></div>`:'';
+  const bar=has?`<div class="po-fc-barwrap" title="${pct}% aprovados"><span class="po-fc-pct">${pct}%</span><div class="po-fc-bar"><span style="width:${pct}%"></span></div></div>`:'';
   return `<div class="po-fc-wrap"><div class="po-fc-row">${chip}<button type="button" class="po-fc-btn" onclick="event.stopPropagation();poGerarCards('${aid}')" title="Gerar flashcards com IA">Gerar</button></div>${bar}</div>`;
 }
 function _poTableRowsHTML(aulas,q){
