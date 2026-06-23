@@ -5851,7 +5851,12 @@ body.pro-rt-fs-on{overflow:hidden}
         .tb-btn.ghost:hover{color:var(--text);border-color:var(--accent)}
         .tb-btn.sm{font-size:11.5px;padding:7px 13px;border-radius:9px}
         #tab-po .po-thumb-na{color:var(--t3,var(--t2));opacity:.6}
-        #tab-po .po-thumb-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+        #tab-po .po-thumb-cell{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+        #tab-po .po-thumb-gen-btn{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;padding:3px 9px;border-radius:7px;cursor:pointer;color:#fff;border:1px solid transparent;background:linear-gradient(135deg,#7c3aed,#a371f7);box-shadow:0 1px 7px -3px color-mix(in srgb,#a371f7 60%,transparent);transition:transform .14s,filter .18s;white-space:nowrap}
+        #tab-po .po-thumb-gen-btn:hover{transform:translateY(-1px);filter:brightness(1.1)}
+        #tab-po .po-thumb-gen-btn:active{transform:translateY(0)}
+        #tab-po .po-fc-chip.thumb{border-color:color-mix(in srgb,#a371f7 50%,var(--border));background:color-mix(in srgb,#a371f7 10%,transparent);color:#a371f7}
+        #tab-po .po-fc-chip.thumb:hover{border-color:#a371f7}
         /* Colunas Resumo LM + Flashcards */
         #tab-po .po-col-resumo,#tab-po .po-col-fc{text-align:center;padding:4px 6px !important}
         #tab-po thead .po-col-resumo,#tab-po thead .po-col-fc{text-align:center}
@@ -40698,10 +40703,9 @@ function _poFcCellHTML(a,aid){
 function _poThumbCellHTML(a,aid){
   const slider=`<span class="po-rg-toggle po-thumb-toggle" title="${a.thumbLancada?'Thumb já lançada no sistema — clique pra desmarcar':'Thumb ainda NÃO lançada — clique quando lançar'}" onclick="event.stopPropagation();poToggleThumbLancada('${aid}')"><span class="po-rg-nao${a.thumbLancada?'':' on'}">Não</span><span class="po-rg-sim${a.thumbLancada?' on':''}">Sim</span></span>`;
   if(!a.vimeoId) return `<div class="po-thumb-cell"><span class="po-thumb-na" title="Sem vídeo do Vimeo — não dá pra ler a transcrição">—</span>${slider}</div>`;
-  let topo;
-  if(a._thumbGen) topo=`<span class="po-fc-gen" title="Gerando o prompt da capa — pode continuar trabalhando"><span class="po-fc-spin"></span>gerando…</span>`;
-  else{ const chip=a.thumbPrompt?`<button type="button" class="po-fc-chip" onclick="event.stopPropagation();poThumbCopiarChip('${aid}')" title="Copiar o prompt da capa (pra colar no GPT/DALL·E)">Prompt</button>`:''; topo=`<div class="po-fc-row">${chip}<button type="button" class="po-fc-btn" onclick="event.stopPropagation();poGerarThumb('${aid}')" title="Gerar prompt da capa (thumb) desta aula">Gerar</button></div>`; }
-  return `<div class="po-thumb-cell">${topo}${slider}</div>`;
+  if(a._thumbGen) return `<div class="po-thumb-cell"><span class="po-fc-gen" title="Gerando o prompt da capa — pode continuar trabalhando"><span class="po-fc-spin"></span>gerando…</span>${slider}</div>`;
+  const chip=a.thumbPrompt?`<button type="button" class="po-fc-chip thumb" onclick="event.stopPropagation();poThumbCopiarChip('${aid}')" title="Copiar o prompt da capa (pra colar no GPT/DALL·E)">Prompt</button>`:'';
+  return `<div class="po-thumb-cell">${chip}<button type="button" class="po-thumb-gen-btn" onclick="event.stopPropagation();poGerarThumb('${aid}')" title="Gerar prompt da capa (thumb) desta aula">Gerar</button>${slider}</div>`;
 }
 function _poTableRowsHTML(aulas,q){
   const span=S.poColunas.length+5; // 1 (Aula fixa) + colunas + 1 (Thumb) + 1 (Resumo) + 1 (Flashcards) + 1 (＋)

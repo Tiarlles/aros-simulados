@@ -38,7 +38,7 @@ const ALLOWED_ORIGINS = [
 
 function setCors(req, res) {
   const origin = req.get('Origin') || '';
-  if (ALLOWED_ORIGINS.includes(origin)) {
+  if (ALLOWED_ORIGINS.includes(origin) || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
     res.set('Access-Control-Allow-Origin', origin);
     res.set('Vary', 'Origin');
   }
