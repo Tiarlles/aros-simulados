@@ -56,7 +56,9 @@ service cloud.firestore {
     //    Function quando aposentar o custom login.
     // ────────────────────────────────────────────────────────────────────────
     match /usuarios/{username} {
-      allow read: if true;
+      // blindado: lista de usuários (com email/senha) só legível por quem está
+      // logado (Firebase Auth). Login antigo aposentado — nada lê isto pré-login.
+      allow read: if isAuth();
       allow create, update: if isAuth()
                             && request.resource.data.username is string
                             && request.resource.data.senha is string
@@ -108,7 +110,7 @@ service cloud.firestore {
     // de aluno aqui).
     // ────────────────────────────────────────────────────────────────────────
     match /orcamentos/{eventoId} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: só coordenação logada
       allow create, update: if isAuth()
                             && request.resource.data.nome is string
                             && request.resource.data.nome.size() > 0
@@ -121,7 +123,10 @@ service cloud.firestore {
     // ⚠️  Slack webhook em config/simExtra ainda é leitura pública.
     // ────────────────────────────────────────────────────────────────────────
     match /config/{cfgId} {
-      allow read: if true;
+      // Leitura pública das configs que o front do aluno precisa (settings, menu,
+      // simExtra, etc.). EXCETO docs sensíveis (senhasAcessos, financeiro), que
+      // exigem login — protegidos por regras próprias logo abaixo.
+      allow read: if cfgId != 'senhasAcessos' && cfgId != 'financeiro' && cfgId != 'poConfig';
       // Write geral: exige auth (coord/admin editando configurações).
       // Exceção: config/simExtra pode receber update anônimo SE alterar somente
       // o campo `alunosGratuitos` (incremento de quotaUsada pelo aluno gratuito
@@ -133,11 +138,18 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Docs SENSÍVEIS dentro de config — leitura só para usuário logado (coord/prof).
+    // A escrita já é coberta pela regra wildcard acima (exige auth). Sem isto, o
+    // cofre de senhas e o financeiro ficavam legíveis por qualquer um na internet.
+    match /config/senhasAcessos { allow read: if isAuth(); }
+    match /config/financeiro    { allow read: if isAuth(); }
+    match /config/poConfig      { allow read: if isAuth(); }  // PO MEDREVIEW (interno) — schema de colunas/cursos
+
     // ────────────────────────────────────────────────────────────────────────
     // NOTAS — coord/prof lançam. Escrita exige auth.
     // ────────────────────────────────────────────────────────────────────────
     match /notas/{simId}/alunos/{matricula} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: notas só coordenação logada
       allow create, update: if isAuth();
       allow delete: if false;
     }
@@ -151,15 +163,29 @@ service cloud.firestore {
       allow delete: if false;
     }
     match /checklists/{simId}/respostas/{studentId} {
-      allow read, create, update: if true;  // aluno salva próprio
+      // TRAVA DE VERSÃO temporariamente DESLIGADA (2026-06-13): estava bloqueando profs
+      // que não recarregaram a página, parando o trabalho. Reativar SÓ no início da próxima
+      // aplicação, quando todos carregam a página do zero (código novo carimbado). A regra:
+      //   allow create, update: if request.resource.data.keys().hasAll(['_ckwTs'])
+      //                         && request.resource.data._ckwTs == request.time;
+      // Proteção atual contra clobber = gravação cirúrgica no código novo (vale p/ quem
+      // está na versão nova; abas antigas voltam a poder sobrescrever enquanto isto estiver off).
+      allow read, create, update: if true;
       allow delete: if false;
+    }
+    // Relatório final gerado (HTML do PDF aprovado pela coord). Contém histórico
+    // de notas → PROTEGIDO: só coord/prof logado lê e grava. Reaberto pelo link
+    // "Baixar PDF" na grade do checklist.
+    match /checklists/{simId}/relatorios/{studentId} {
+      allow read, create, update: if isAuth();
+      allow delete: if isAuth();
     }
 
     // ────────────────────────────────────────────────────────────────────────
     // DISPONIBILIDADE — prof/coord registra disponibilidade. Exige auth.
     // ────────────────────────────────────────────────────────────────────────
     match /disponibilidade/{simId}/profs/{profKey} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: só coordenação/prof logado
       allow create, update: if isAuth();
       allow delete: if isAuth();
     }
@@ -168,7 +194,7 @@ service cloud.firestore {
     // FEEDBACK GERAL — coord/prof escreve. Exige auth.
     // ────────────────────────────────────────────────────────────────────────
     match /feedbackGeral/{simId} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: só coordenação/prof logado
       allow create, update: if isAuth();
       allow delete: if false;
     }
@@ -177,7 +203,7 @@ service cloud.firestore {
     // FEATURES / TAREFAS (kanban interno). Exige auth.
     // ────────────────────────────────────────────────────────────────────────
     match /tarefas/{taskId} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: kanban interno só logado
       allow create, update: if isAuth()
                             && request.resource.data.titulo is string
                             && request.resource.data.titulo.size() > 0
@@ -192,7 +218,7 @@ service cloud.firestore {
     match /mentorias/{mentoriaId} {
       allow read: if true;
       allow create, update: if isAuth()
-                            && request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
+                            && request.resource.data.tipo in ['TEA','TSA','TSA Oral','ME1','ME2','ME3']
                             && request.resource.data.mentorNome is string
                             && request.resource.data.mentorNome.size() > 0;
       allow delete: if isAuth();
@@ -202,7 +228,7 @@ service cloud.firestore {
     match /blocosClinica/{blocoId} {
       allow read: if true;
       allow create, update: if isAuth()
-                            && request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
+                            && request.resource.data.tipo in ['TEA','TSA','TSA Oral','ME1','ME2','ME3']
                             && request.resource.data.titulo is string
                             && request.resource.data.titulo.size() > 0
                             && request.resource.data.tema is string;
@@ -213,7 +239,7 @@ service cloud.firestore {
     match /clinicas/{clinicaId} {
       allow read: if true;
       allow create, update: if isAuth()
-                            && request.resource.data.tipo in ['TEA','TSA','ME1','ME2','ME3']
+                            && request.resource.data.tipo in ['TEA','TSA','TSA Oral','ME1','ME2','ME3']
                             && request.resource.data.mentorNome is string
                             && request.resource.data.dataHora is string;
       allow delete: if isAuth();
@@ -238,7 +264,7 @@ service cloud.firestore {
       allow delete: if isAuth();
 
       match /comentarios/{cmtId} {
-        allow read: if true;
+        allow read: if isAuth();  // blindado: só coordenação/prof logado
         allow create, update: if isAuth()
                               && request.resource.data.profNome is string
                               && request.resource.data.profNome.size() > 0
@@ -247,10 +273,32 @@ service cloud.firestore {
       }
 
       match /historico/{histId} {
-        allow read: if true;
+        allow read: if isAuth();  // blindado: só coordenação/prof logado
         allow create, update: if isAuth()
                               && request.resource.data.editadoPor is string;
         allow delete: if false;
+      }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // GROUP REMEMBER — casos clínicos (lembranças da prova oral TSA 2ª fase).
+    // Dado interno de coordenação/prof. Leitura e escrita exigem auth.
+    // ────────────────────────────────────────────────────────────────────────
+    match /remembers/{caseId} {
+      allow read: if isAuth();  // blindado: banco interno de casos, só logado
+      allow create, update: if isAuth()
+                            && request.resource.data.titulo is string
+                            && request.resource.data.titulo.size() > 0
+                            && request.resource.data.titulo.size() < 200
+                            && request.resource.data.status in ['pendente','confeccao','revisao','reprovado','aprovado','utilizado'];
+      allow delete: if isAuth();
+
+      // Versões/backup imutável — snapshot a cada gravação. Não pode ser editado
+      // nem apagado (rede de segurança contra perda/sobrescrita acidental).
+      match /versoes/{versaoId} {
+        allow read: if isAuth();
+        allow create: if isAuth();
+        allow update, delete: if false;
       }
     }
 
@@ -260,18 +308,21 @@ service cloud.firestore {
     // ────────────────────────────────────────────────────────────────────────
     match /provas/{provaId} {
       allow read: if true;
+      // tipo: aceita qualquer string não-vazia (built-in TSA/TEA/ME1/ME2/ME3 + custom de recursosConfig.tiposCustom).
+      // status: aceita schema novo (rascunho/publicada) e legado (ativa/encerrada) — front usa novo, docs antigos ainda têm legado.
       allow create, update: if isAuth()
                             && request.resource.data.nome is string
                             && request.resource.data.nome.size() > 0
-                            && request.resource.data.tipo in ['TSA','TEA','ME1','ME2','ME3']
-                            && request.resource.data.status in ['ativa','encerrada'];
+                            && request.resource.data.tipo is string
+                            && request.resource.data.tipo.size() > 0
+                            && request.resource.data.status in ['rascunho','publicada','ativa','encerrada'];
       allow delete: if isAuth();
 
       match /questoes/{qId} {
         allow read: if true;
         allow create, update: if isAuth()
                               && request.resource.data.numero is number
-                              && request.resource.data.modo in ['estruturado','bloco','vf'];
+                              && request.resource.data.modo in ['estruturado','bloco'];
         allow delete: if isAuth();
 
         match /contestacoes/{cId} {
@@ -356,7 +407,7 @@ service cloud.firestore {
     // é gateada na UI; rules não distinguem permissões dentro de coord/prof.
     // ────────────────────────────────────────────────────────────────────────
     match /produtos/{produtoId} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: catálogo interno só logado
       allow create, update: if isAuth()
                             && request.resource.data.nome is string
                             && request.resource.data.nome.size() > 0
@@ -372,7 +423,7 @@ service cloud.firestore {
     // ⚠️  Reads abertos: refatorar pra exigir auth quando aposentar custom login.
     // ────────────────────────────────────────────────────────────────────────
     match /auditLog/{logId} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: log só admin logado (create segue aberto p/ legado)
       allow create: if request.resource.data.action is string
                     && request.resource.data.action.size() > 0
                     && request.resource.data.action.size() < 80;
@@ -386,7 +437,7 @@ service cloud.firestore {
     // Write: apenas outro admin pode adicionar/remover.
     // ────────────────────────────────────────────────────────────────────────
     match /adminUids/{uid} {
-      allow read: if true;
+      allow read: if isAuth();  // blindado: checagem do próprio UID só pós-login
       // Bootstrap único do primeiro admin (dono do projeto). UID hardcoded
       // pra evitar que qualquer Firebase Auth user vire admin sozinho.
       // Após o primeiro doc existir, só admin existente pode adicionar outros.
@@ -406,6 +457,32 @@ service cloud.firestore {
     match /alunosAprovados/{c}     { allow read, write: if isAdmin(); }
     match /provasAprovados/{p}     { allow read: if isAuth(); allow write: if isAdmin(); }
     match /resultadosAprovados/{r} { allow read: if isAuth(); allow write: if isAdmin(); }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // PO MEDREVIEW — Coordenação de Produto (gestão interna das aulas).
+    // Tudo exige login (dados internos de produção). Importação do Monday roda
+    // no app, gravando com a sessão logada do admin (Google/Email).
+    // ────────────────────────────────────────────────────────────────────────
+    match /poAulas/{aulaId} {
+      allow read: if isAuth();
+      allow create, update, delete: if isAuth();
+    }
+    match /poModQuestoes/{key} {
+      allow read: if isAuth();
+      allow create, update, delete: if isAuth();
+    }
+    // Transcrições das aulas (texto grande, carregado sob demanda; doc id = vimeoId).
+    // Gravadas só pela Cloud Function vimeoTranscricao (Admin SDK ignora rules); cliente só lê.
+    match /poTranscricoes/{vimeoId} {
+      allow read: if isAuth();
+      allow write: if false;
+    }
+    // Threads de "Erro detectado" e "Dúvidas" por aula (fórum interno do PO).
+    match /poErros/{aulaId}   { allow read: if isAuth(); allow create, update, delete: if isAuth(); }
+    match /poDuvidas/{aulaId} { allow read: if isAuth(); allow create, update, delete: if isAuth(); }
+    // Flashcards por aula: Resumo LM (colado), rascunho gerado pela IA e deck curado.
+    // Cliente lê/escreve (curadoria); a Cloud Function gerarFlashcardsPO grava via Admin SDK.
+    match /poFlashcards/{aulaId} { allow read: if isAuth(); allow create, update, delete: if isAuth(); }
 
     // ────────────────────────────────────────────────────────────────────────
     // DEFAULT DENY — qualquer coleção/path não listada acima é bloqueada.

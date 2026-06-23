@@ -39,7 +39,7 @@ npx -y firebase-tools deploy --only firestore:rules
 cd cloud-function-hotmart && npm install
 ```
 
-Env vars da Cloud Function ficam em `cloud-function-hotmart/.env` (gitignored): `HOTMART_TOKEN`, `SLACK_WEBHOOK`, `ANTHROPIC_API_KEY`. Editar e redeployar.
+Env vars da Cloud Function ficam em `cloud-function-hotmart/.env` (gitignored): `HOTMART_TOKEN`, `SLACK_WEBHOOK`, `ANTHROPIC_API_KEY` (Dex), `ANTHROPIC_API_KEY_FEEDBACK` (IA dos feedbacks — chave separada de propósito pra estimar custo isolado). Editar e redeployar.
 
 ## Cloud Function: Pergunte ao Dex (catálogo de produtos · IA)
 

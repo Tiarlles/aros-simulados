@@ -25,6 +25,7 @@ const MODEL_MAP = {
 // 'geral' é o default e fica no topo da lista
 const PERFIS = ['geral', 'suporte', 'vendas', 'marketing'];
 const DEFAULT_PERFIL = 'geral';
+const PERFIL_LABEL = { geral: 'Geral', suporte: 'Suporte', vendas: 'Vendas', marketing: 'Marketing' };
 function perfilToField(perfil) {
   return 'template' + perfil.charAt(0).toUpperCase() + perfil.slice(1);
 }
@@ -198,7 +199,7 @@ exports.perguntarDex = onRequest(
       const db = admin.firestore();
       // Lê produtos + jornada + dexPrompt + editais + datas importantes + tipos
       // (verticais usam sufixo; datasImportantesTipos é GLOBAL — sem sufixo)
-      const [snap, jornadaSnap, dexCfgSnap, editaisSnap, datasImpSnap, datasImpTiposSnap, provasAprovSnap] = await Promise.all([
+      const [snap, jornadaSnap, dexCfgSnap, editaisSnap, datasImpSnap, datasImpTiposSnap, provasAprovSnap, doresSnap, caixasExtraSnap] = await Promise.all([
         db.collection('produtos').get(),
         db.collection('config').doc(verticalDoc('jornadaCliente')).get(),
         db.collection('config').doc(verticalDoc('dexPrompt')).get(),
@@ -206,6 +207,12 @@ exports.perguntarDex = onRequest(
         db.collection('config').doc(verticalDoc('datasImportantes')).get(),
         db.collection('config').doc('datasImportantesTipos').get(),
         db.collection('provasAprovados').where('vertical', '==', vertical).get(),
+        db.collection('config').doc(verticalDoc('doresClientes')).get(),
+        // Auto-leitura: QUALQUER doc em `config` marcado com dexLer:true vira contexto
+        // pra IA, sem precisar de código novo aqui. Novos "boxes" só precisam gravar
+        // {dexLer:true, dexTitulo, dexDescricao} no seu doc de config. Filtro por
+        // vertical é feito em memória (campo `vertical` no doc; ausente = anestreview).
+        db.collection('config').where('dexLer', '==', true).get().catch(() => null),
       ]);
       // Aprovações (provas + resultados) da vertical. Resultados são chunkeados
       // em `in` queries de no máximo 30 IDs.
@@ -250,22 +257,30 @@ exports.perguntarDex = onRequest(
       const datasImpTipos = Array.isArray(datasImpTiposData.lista) ? datasImpTiposData.lista : [];
       const datasImpDeleted = Array.isArray(datasImpTiposData.deletedSystemIds) ? datasImpTiposData.deletedSystemIds : [];
       const datasImpFmt = formatarDatasImportantes(datasImpLista, datasImpTipos, datasImpDeleted, datasImpEscopos);
+      // Dores dos clientes — perfis de cliente com dores descritas (rich-text)
+      const doresLista = doresSnap.exists ? (Array.isArray(doresSnap.data()?.lista) ? doresSnap.data().lista : []) : [];
+      const doresFmt = formatarDores(doresLista);
+      // Auto-leitura genérica: qualquer box marcado com dexLer:true (exceto os que já
+      // têm leitor dedicado acima, pra não duplicar). Formata genericamente o conteúdo.
+      const caixasExtraFmt = formatarCaixasExtra(caixasExtraSnap, vertical);
 
       // Lê config editável (templates por perfil, modelo, maxTokens, pdfs)
       const dexCfg = dexCfgSnap.exists ? (dexCfgSnap.data() || {}) : {};
-      // Pega o template do perfil escolhido. Fallback: template legado (campo 'template')
-      // e por fim o exemplo embutido do perfil.
+      // Modelo NOVO: prompt ÚNICO (templateUnico) — um texto só, com instruções
+      // gerais + blocos condicionais por perfil escritos pelo admin. Quando presente,
+      // vale pra todos os perfis e o perfil ativo é injetado no system prompt.
+      // Fallback (legado): template por perfil → campo 'template' → exemplo embutido.
+      const templateUnico = String(dexCfg.templateUnico || '').trim();
+      const usandoUnico = !!templateUnico;
       const perfilField = perfilToField(perfil);
-      const customInstructions =
-        String(dexCfg[perfilField] || '').trim() ||
-        String(dexCfg.template || '').trim() ||
-        DEFAULT_INSTRUCTIONS[perfil];
-      // Jornada, Editais, Datas Importantes, Aprovações e Catálogo SEMPRE anexados automaticamente.
-      const systemPrompt = buildSystemPromptFromInstructions(customInstructions, catalogoFmt, jornadaTxt, editaisFmt, datasImpFmt, aprovacoesFmt, { avatarNome, verticalNome: verticalNomeFmt });
-
-      // PDFs anexados pra este perfil — viram blocos `document` no user message
-      const pdfsField = 'pdfs' + perfil.charAt(0).toUpperCase() + perfil.slice(1);
-      const pdfs = Array.isArray(dexCfg[pdfsField]) ? dexCfg[pdfsField].filter(p => p && p.url) : [];
+      const customInstructions = usandoUnico
+        ? templateUnico
+        : (String(dexCfg[perfilField] || '').trim() ||
+           String(dexCfg.template || '').trim() ||
+           DEFAULT_INSTRUCTIONS[perfil]);
+      // Jornada, Dores, Editais, Datas Importantes, Aprovações e Catálogo SEMPRE anexados automaticamente.
+      // perfilAtivo só é injetado no modo prompt único (pra resolver os condicionais "se o perfil for X").
+      const systemPrompt = buildSystemPromptFromInstructions(customInstructions, catalogoFmt, jornadaTxt, editaisFmt, datasImpFmt, aprovacoesFmt, { avatarNome, verticalNome: verticalNomeFmt, doresFmt, caixasExtraFmt, perfilAtivo: usandoUnico ? (PERFIL_LABEL[perfil] || perfil) : null });
 
       // Resolve modelo: aceita alias curto ('haiku', 'sonnet', 'opus') ou ID completo
       const modeloRaw = String(dexCfg.modelo || '').trim().toLowerCase();
@@ -275,50 +290,12 @@ exports.perguntarDex = onRequest(
       if (!Number.isFinite(maxTokens) || maxTokens < 256) maxTokens = DEFAULT_MAX_TOKENS;
       if (maxTokens > 4096) maxTokens = 4096;
 
-      // Monta blocos `document` dos PDFs com cache_control no último
-      // (cacheia o prefixo system + docs por ~5min na API).
-      const pdfBlocks = pdfs.map((p, i) => {
-        const block = {
-          type: 'document',
-          source: { type: 'url', url: String(p.url) },
-        };
-        if (p.label || p.name) {
-          block.title = String(p.label || p.name).slice(0, 120);
-        }
-        if (i === pdfs.length - 1) {
-          block.cache_control = { type: 'ephemeral' };
-        }
-        return block;
-      });
-
-      // Monta o array de mensagens:
-      // - Se NÃO há histórico: 1 user message com [PDFs + texto da pergunta]
-      // - Se há histórico: PDFs vão no PRIMEIRO user message do histórico
-      //   (ou seja, anexados ao content do primeiro user), depois o resto do
-      //   histórico segue como está, e por fim a nova pergunta como user.
+      // Monta o array de mensagens: histórico (se houver) + a nova pergunta.
       const messages = [];
       if (historico.length > 0) {
-        // Encontra o primeiro user no histórico — anexa PDFs no content dele
-        let firstUserIdx = historico.findIndex(m => m.role === 'user');
-        if (firstUserIdx < 0) firstUserIdx = 0; // fallback (não deveria acontecer)
-        historico.forEach((m, i) => {
-          if (i === firstUserIdx && pdfBlocks.length > 0) {
-            messages.push({
-              role: m.role,
-              content: [...pdfBlocks, { type: 'text', text: m.content }],
-            });
-          } else {
-            messages.push({ role: m.role, content: m.content });
-          }
-        });
-        messages.push({ role: 'user', content: pergunta });
-      } else {
-        // Sem histórico — primeira pergunta carrega os PDFs
-        const userContent = pdfBlocks.length > 0
-          ? [...pdfBlocks, { type: 'text', text: pergunta }]
-          : pergunta;
-        messages.push({ role: 'user', content: userContent });
+        historico.forEach(m => messages.push({ role: m.role, content: m.content }));
       }
+      messages.push({ role: 'user', content: pergunta });
 
       const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
       const resp = await client.messages.create({
@@ -348,8 +325,7 @@ exports.perguntarDex = onRequest(
         perfil,
         modelo,
         max_tokens: maxTokens,
-        prompt_custom: !!String(dexCfg[perfilField] || '').trim(),
-        pdfs_count: pdfs.length,
+        prompt_custom: usandoUnico || !!String(dexCfg[perfilField] || '').trim(),
         historico_msgs: historico.length,
         pergunta_len: pergunta.length,
         resposta_len: texto.length,
@@ -395,7 +371,15 @@ function buildSystemPromptFromInstructions(instructions, catalogoFmt, jornadaTxt
   const c = ctx || {};
   const avatarNome = c.avatarNome || 'Dex';
   const verticalNome = c.verticalNome || 'MedReview';
+  const doresFmt = c.doresFmt || '';
+  const caixasExtraFmt = c.caixasExtraFmt || '';
+  const perfilAtivo = c.perfilAtivo || null;
   const hojeBR = new Date().toLocaleDateString('pt-BR');
+  // Modo prompt único: avisa qual perfil quem-pergunta selecionou, pra IA seguir
+  // o bloco condicional certo ("se o perfil for X") dentro das instruções.
+  const perfilAtivoSec = perfilAtivo
+    ? `\n\n## PERFIL ATIVO NESTA CONSULTA\nQuem está perguntando selecionou o perfil **${perfilAtivo}**. Siga as instruções gerais acima E, adicionalmente, o bloco condicional correspondente ao perfil **${perfilAtivo}** (procure por uma seção do tipo "se o perfil ativo for ${perfilAtivo}"). Ignore os blocos condicionais dos demais perfis. Não mencione na resposta que existe um sistema de perfis — apenas comporte-se conforme o perfil ativo.`
+    : '';
   const headerVertical = `## IDENTIDADE\nVocê é ${avatarNome}, assistente do catálogo da vertical **${verticalNome}** do grupo MedReview. Só responda sobre produtos, jornada do cliente, editais e datas importantes desta vertical específica — não misture com outras verticais.\n\n`;
   const jornadaSec = jornadaTxt
     ? `=== JORNADA DO CLIENTE (${verticalNome}) ===\n\nContexto sobre o perfil do cliente, dores, jornada de compra e gatilhos.\n\n${jornadaTxt}\n\n=== FIM DA JORNADA ===\n\n`
@@ -409,7 +393,12 @@ function buildSystemPromptFromInstructions(instructions, catalogoFmt, jornadaTxt
   const aprovacoesSec = aprovacoesFmt
     ? `=== HISTÓRICO DE APROVAÇÕES (${verticalNome}) ===\n\nPercentual de aprovação dos NOSSOS alunos em provas da vertical. Use quando perguntarem sobre desempenho histórico, taxa de aprovação, ou efetividade dos produtos.\n\n${aprovacoesFmt}\n\n=== FIM DAS APROVAÇÕES ===\n\n`
     : '';
-  return `${headerVertical}${instructions}\n\n${ESTILO_UNIVERSAL}\n\n${jornadaSec}${editaisSec}${datasImpSec}${aprovacoesSec}=== CATÁLOGO DE PRODUTOS ${verticalNome.toUpperCase()} ===\n\n${catalogoFmt}\n\n=== FIM DO CATÁLOGO ===`;
+  const doresSec = doresFmt
+    ? `=== DORES DOS CLIENTES (${verticalNome}) ===\n\nPerfis de cliente cadastrados pela coordenação, com as dores, frustrações, medos e desejos de cada um. Use isso pra entender a quem cada produto se destina e pra montar argumentos de venda/copy que conectem com a dor real do cliente. Quando perguntarem "qual gancho usar pra X?" ou "que dor o produto Y resolve?", combine essas dores com os argumentos do catálogo.\n\n${doresFmt}\n\n=== FIM DAS DORES ===\n\n`
+    : '';
+  // Caixas extra auto-lidas (dexLer:true) — já vêm formatadas com cabeçalho próprio.
+  const caixasExtraSec = caixasExtraFmt ? `${caixasExtraFmt}\n\n` : '';
+  return `${headerVertical}${instructions}${perfilAtivoSec}\n\n${ESTILO_UNIVERSAL}\n\n${jornadaSec}${doresSec}${editaisSec}${datasImpSec}${aprovacoesSec}${caixasExtraSec}=== CATÁLOGO DE PRODUTOS ${verticalNome.toUpperCase()} ===\n\n${catalogoFmt}\n\n=== FIM DO CATÁLOGO ===`;
 }
 
 // Formata a lista de DATAS IMPORTANTES (calendário) como texto pra IA.
@@ -538,6 +527,72 @@ function formatarEditais(lista) {
     const info = stripHtml(e.info || '').trim();
     return `### ${nome} — Ano: ${ano}\n${info || '(sem informações cadastradas)'}`;
   }).join('\n\n---\n\n');
+}
+
+// Formata a lista de DORES DOS CLIENTES como texto plano pra incluir no prompt.
+// Cada item: nome/perfil do cliente + dores (HTML strippado pra texto).
+function formatarDores(lista) {
+  if (!Array.isArray(lista) || !lista.length) return '';
+  const ord = lista.slice().sort((a, b) =>
+    String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR'));
+  return ord.map(e => {
+    const nome = String(e.nome || '').trim() || '(sem nome)';
+    const info = stripHtml(e.info || '').trim();
+    return `### ${nome}\n${info || '(nenhuma dor descrita)'}`;
+  }).join('\n\n---\n\n');
+}
+
+// ─── Auto-leitura genérica de "boxes" ──────────────────────────────────────
+// Qualquer doc em `config` com dexLer:true vira contexto pra IA, sem precisar de
+// código dedicado aqui. O box só precisa gravar no seu doc: dexLer, dexTitulo,
+// dexDescricao (e opcional `vertical`). Doc-bases que já têm leitor próprio são
+// puladas (não duplicar). Suporta dois formatos de conteúdo: `lista:[{...}]` e `texto`.
+const FONTES_COM_LEITOR_PROPRIO = new Set([
+  'jornadaCliente', 'editais', 'datasImportantes', 'datasImportantesTipos', 'doresClientes',
+  'dexPrompt', 'catalogoConfig', 'settings', 'professores', 'menu', 'simExtra',
+  'slackTime', 'featurePack', 'recursosConfig',
+]);
+// Remove o sufixo de vertical do id do doc (ex: 'editais_tea' -> 'editais').
+function baseDocId(id, vertical) {
+  if (vertical && vertical !== 'anestreview' && id.endsWith('_' + vertical)) {
+    return id.slice(0, -(vertical.length + 1));
+  }
+  return id;
+}
+function formatarCaixasExtra(snap, vertical) {
+  if (!snap || snap.empty) return '';
+  const secoes = [];
+  snap.forEach(doc => {
+    const data = doc.data() || {};
+    if (data.dexLer !== true) return;
+    const docVert = data.vertical || 'anestreview'; // ausente = anestreview
+    if (docVert !== vertical) return;
+    const base = baseDocId(doc.id, vertical);
+    if (FONTES_COM_LEITOR_PROPRIO.has(base)) return;
+    const titulo = String(data.dexTitulo || base || 'INFORMAÇÕES').toUpperCase();
+    const descricao = String(data.dexDescricao || '').trim();
+    let corpo = '';
+    if (Array.isArray(data.lista) && data.lista.length) {
+      corpo = data.lista.map(item => {
+        if (!item || typeof item !== 'object') return '';
+        let nome = '';
+        const linhas = [];
+        for (const [k, v] of Object.entries(item)) {
+          if (k === 'id' || typeof v !== 'string') continue;
+          const t = stripHtml(v).trim();
+          if (!t) continue;
+          if (!nome) nome = t; else linhas.push(t);
+        }
+        if (!nome && !linhas.length) return '';
+        return `### ${nome}${linhas.length ? '\n' + linhas.join('\n') : ''}`;
+      }).filter(Boolean).join('\n\n---\n\n');
+    } else if (typeof data.texto === 'string' && stripHtml(data.texto).trim()) {
+      corpo = stripHtml(data.texto).trim();
+    }
+    if (!corpo) return;
+    secoes.push(`=== ${titulo} ===\n\n${descricao ? descricao + '\n\n' : ''}${corpo}\n\n=== FIM: ${titulo} ===`);
+  });
+  return secoes.join('\n\n');
 }
 
 // Schema novo: features de mentoria/bônus vivem em p.features com flags

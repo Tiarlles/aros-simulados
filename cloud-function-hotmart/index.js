@@ -10,6 +10,37 @@ const db = admin.firestore();
 // Re-exporta a function do Dex (pergunta IA sobre catálogo de produtos)
 exports.perguntarDex = require('./dex').perguntarDex;
 
+// Re-exporta a function de IA dos feedbacks (revisa feedback de caso + Feedback Geral)
+exports.gerarFeedbackIA = require('./feedback-ia').gerarFeedbackIA;
+
+// Re-exporta a function de convite de acesso (cria conta Auth + link de definição de senha)
+exports.criarAcessoConvite = require('./criar-acesso').criarAcessoConvite;
+
+// Re-exporta a function de transcrição via Vimeo (legenda do vídeo → texto no PO)
+exports.vimeoTranscricao = require('./vimeo-transcricao').vimeoTranscricao;
+exports.salvarTranscricaoManual = require('./vimeo-transcricao').salvarTranscricaoManual;
+
+// Re-exporta a sincronização Laravel → PO (botão manual + rotina semanal)
+exports.sincronizarLaravel = require('./sincronizar-laravel').sincronizarLaravel;
+exports.sincronizarLaravelAuto = require('./sincronizar-laravel').sincronizarLaravelAuto;
+
+// Re-exporta as functions de questões do PO via API (filtros + puxar por tema)
+exports.filtrosPO = require('./questoes-po').filtrosPO;
+exports.puxarQuestoesPO = require('./questoes-po').puxarQuestoesPO;
+
+// IA de análise do PO ("megabrain") — módulo (Sonnet, chave ANTHROPIC_API_KEY_PO)
+exports.analisarModuloPO = require('./po-analise').analisarModuloPO;
+// IA de análise do PO — produto inteiro (consolida os módulos já analisados)
+exports.analisarProdutoPO = require('./po-analise').analisarProdutoPO;
+// IA de análise do PO — TSA Oral (análise separada, só lacunas; não mexe nas barras)
+exports.analisarTSAOralPO = require('./po-analise').analisarTSAOralPO;
+
+// Gerador de prompt de THUMB (capa da aula) pro DALL·E — lê a transcrição + título (Sonnet, ANTHROPIC_API_KEY_PO)
+exports.gerarPromptThumb = require('./thumb-prompt').gerarPromptThumb;
+
+// Gerador de FLASHCARDS de uma aula — junta transcrição + questões da trilha + Resumo LM (Sonnet, ANTHROPIC_API_KEY_PO)
+exports.gerarFlashcardsPO = require('./flashcards-po').gerarFlashcardsPO;
+
 // Helper que faz UPSERT em alunosAprovados (Cruzar Lista) a partir do webhook Hotmart
 const { upsertAluno } = require('./hotmart-alunos');
 
