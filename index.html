@@ -19457,12 +19457,15 @@ window.remDrop=async(ev,colId)=>{
 };
 
 // ── Pagamento ao professor quando o caso é aprovado (gancho do Financeiro) ──
-// Entra em "Aprovado" → oferece lançar pagamento (valor automático do sistema
-// 'sys-caso-remember'). Sai de "Aprovado" → cancela o lançamento daquele caso.
+// "Aprovado" e "Utilizado" são os estados PAGOS. Entrar em Aprovado (vindo de um
+// estado não-pago) → oferece lançar pagamento. Sair do conjunto pago p/ qualquer
+// coluna não-paga (pendente, confecção, revisão, reprovado) → cancela. Mover
+// entre Aprovado↔Utilizado mantém o pagamento.
+function _remPago(s){return s==='aprovado'||s==='utilizado';}
 async function _remHandleStatusPayment(caseId,oldStatus,newStatus){
   if(oldStatus===newStatus)return;
-  if(newStatus==='aprovado'&&oldStatus!=='aprovado')await _remOfferPayment(caseId);
-  else if(oldStatus==='aprovado'&&newStatus!=='aprovado')await _remCancelPayment(caseId);
+  if(newStatus==='aprovado'&&!_remPago(oldStatus))await _remOfferPayment(caseId);
+  else if(_remPago(oldStatus)&&!_remPago(newStatus))await _remCancelPayment(caseId);
 }
 async function _remOfferPayment(caseId){
   // Lançamento financeiro é ação de admin do Financeiro (mesma regra do resto da aba).
@@ -20044,8 +20047,10 @@ window.remSaveBox=(statusId)=>_remPersist({statusId});
 
 window.arquivarRemCaso=async()=>{
   const e=S._remEdit;if(!e||e.novo)return;
-  const ok=await arosConfirm({title:'Arquivar caso?',message:'O caso sai do quadro mas NÃO é apagado — fica em "Arquivados" e pode ser restaurado a qualquer momento.',confirmLabel:'Arquivar',cancelLabel:'Cancelar',icon:'🗄️'});
+  const ok=await arosConfirm({title:'Arquivar caso?',message:'O caso sai do quadro mas NÃO é apagado — fica em "Arquivados" e pode ser restaurado a qualquer momento.'+(e.pagamentoLancId?' O pagamento lançado no Financeiro será removido.':''),confirmLabel:'Arquivar',cancelLabel:'Cancelar',icon:'🗄️'});
   if(!ok)return;
+  // Arquivar tira o caso do quadro → remove o pagamento da planilha (se houver).
+  if(e.pagamentoLancId)try{await _remCancelPayment(e.id);}catch(_){}
   _remSync();e.arquivado=true;
   if(await _remPersist({}))CM('modal-remember');
 };
@@ -20063,6 +20068,8 @@ window.hardDelRemCaso=async(id)=>{
   if(!ok1)return;
   const ok2=await arosConfirm({title:'Tem certeza absoluta?',message:'Confirme novamente para excluir "'+_remEsc((c&&c.titulo)||'')+'" permanentemente. Não dá pra desfazer.',danger:true,confirmLabel:'Excluir de vez',cancelLabel:'Cancelar',icon:'🗑️'});
   if(!ok2)return;
+  // Se havia pagamento lançado no Financeiro pra este caso, remove antes de apagar.
+  if(c&&c.pagamentoLancId)try{await _remCancelPayment(id);}catch(_){}
   try{await deleteDoc(doc(db,'remembers',id));S.remember=(S.remember||[]).filter(x=>x.id!==id);}
   catch(e){alert('Erro ao excluir: '+(e.code||e.message));return;}
   _remRenderBoard();
@@ -25432,6 +25439,14 @@ window.openFinRelatorio=async(profNome,anoMes)=>{
     const valorTxt=m.parcial?`${_BRL(m.valor)} <span style="color:var(--t2);font-size:11px">(de ${_BRL(m.valorCheio)})</span>`:_BRL(m.valor);
     return[m.tipo||'—',`${iniFmt} → ${fimFmt}`,m.alunosQtd||0,diasTxt,valorTxt];
   });
+  const casoRows=(p.casoClinicoDet||[]).map(l=>{
+    const base=[l.descricao||'Caso clínico',l.qtd,_BRL(l.valor),_BRL(l.valor*l.qtd)];
+    if(_relAtivAcoes){
+      const acoes=`<div style="display:flex;gap:4px;justify-content:center;white-space:nowrap"><button class="btn btn-s btn-sm" onclick="openFinLancamento('${anoMes}','${l.id}')" title="Editar" style="font-size:12px;padding:3px 8px">✏️</button><button class="btn btn-d btn-sm" onclick="_finDeleteAtividade('${anoMes}','${l.id}','${_safeNome}')" title="Remover" style="font-size:12px;padding:3px 8px">🗑️</button></div>`;
+      base.push(acoes);
+    }
+    return base;
+  });
   // Resumo: lista apenas atividades em que o prof TEM valor > 0 (esconde zerados)
   const resumoLinhas=[];
   if(p.fixo>0)resumoLinhas.push(`<div><strong>Salário fixo:</strong> ${_BRL(p.fixo)}</div>`);
@@ -25440,6 +25455,7 @@ window.openFinRelatorio=async(profNome,anoMes)=>{
   if((p.totalMentorias||0)>0)resumoLinhas.push(`<div><strong>Mentoria:</strong> ${(p.mentoriasQtd||0)} grupo${(p.mentoriasQtd||0)===1?'':'s'} = ${_BRL(p.totalMentorias||0)}</div>`);
   if((p.totalMentoriasTsaOral||0)>0)resumoLinhas.push(`<div><strong>Mentoria TSA Oral:</strong> ${(p.mentoriasTsaOralQtd||0)} grupo${(p.mentoriasTsaOralQtd||0)===1?'':'s'} = ${_BRL(p.totalMentoriasTsaOral||0)}</div>`);
   if(p.totalManuais>0)resumoLinhas.push(`<div><strong>Atividades extras:</strong> ${_BRL(p.totalManuais)}</div>`);
+  if((p.totalCasoClinico||0)>0)resumoLinhas.push(`<div><strong>Casos clínicos:</strong> ${p.casoClinicoQtd} ${p.casoClinicoQtd===1?'caso':'casos'} = ${_BRL(p.totalCasoClinico)}</div>`);
   if((p.descontoPlano||0)>0)resumoLinhas.push(`<div style="color:var(--red)"><strong>Desconto plano de saúde:</strong> − ${_BRL(p.descontoPlano)}</div>`);
   // Seções detalhadas: só renderiza as que têm registros
   const secoesDet=[];
@@ -25448,6 +25464,7 @@ window.openFinRelatorio=async(profNome,anoMes)=>{
   if(menRows.length)secoesDet.push(sec('Mentoria',detTab(menRows,['Tipo','Período','Alunos','Dias trabalhados no mês','Valor'])));
   if(menTsaOralRows.length)secoesDet.push(sec('Mentoria TSA Oral',detTab(menTsaOralRows,['Tipo','Período','Alunos','Dias trabalhados no mês','Valor'])));
   if(manRows.length)secoesDet.push(sec('Atividades extras',detTab(manRows,_relAtivAcoes?['Tipo','Descrição','Qtd','Unitário','Total','Ações']:['Tipo','Descrição','Qtd','Unitário','Total'])));
+  if(casoRows.length)secoesDet.push(sec('Casos clínicos',detTab(casoRows,_relAtivAcoes?['Descrição','Qtd','Unitário','Total','Ações']:['Descrição','Qtd','Unitário','Total'])));
   document.getElementById('fr-body').innerHTML=`
     <div style="background:var(--bg3);padding:14px;border-radius:var(--rs);margin-bottom:14px">
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:13px">
@@ -31314,7 +31331,7 @@ window.switchCoTab = (tab, btn) => {
   if(tab==='professores') window._initProfTab();
   if(tab==='extra'){renderSimExtraCfg();applySeCollapsedState();}
   if(tab==='simExtras') renderSimuladosExtras();
-  if(tab==='financeiro'){_ensureFinanceiroListener();renderFinanceiro();}
+  if(tab==='financeiro'){_ensureFinanceiroListener();loadFinanceiro().then(()=>renderFinanceiro());}
   if(tab==='mentorias') renderMentorias();
   if(tab==='mentoriasF2') renderMentoriasF2();
   if(tab==='rememberF1') renderRememberF1();
