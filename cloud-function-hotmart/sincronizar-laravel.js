@@ -18,13 +18,28 @@ const { obterTranscricao } = require('./vimeo-transcricao');
 const { atualizarIncidenciaSalva } = require('./po-analise');
 
 const LARAVEL_TOKEN = process.env.LARAVEL_TOKEN || '';
+// Token de OUTRA conta/login na MESMA API (api.grupomedreview.com.br) que enxerga
+// os cursos da vertical MedReview (Residência R1). Capturado do app medmembers.
+// IDEAL: trocar por um token Sanctum permanente gerado pelo dev (o de sessão expira).
+const LARAVEL_TOKEN_MEDREVIEW = process.env.LARAVEL_TOKEN_MEDREVIEW || '';
 const SLACK_WEBHOOK = process.env.SLACK_WEBHOOK || '';
 const LARAVEL_API = 'https://api.grupomedreview.com.br/api';
 
-// Cursos vigiados (course_id do Laravel → nome do curso no PO). Comece pelo
-// Extensive; adicione outros aqui conforme o Tiarlles for liberando.
+// Cursos vigiados. Cada item: { courseId (UUID Laravel), nome (nome NO PO) }.
+// Opcionais por curso:
+//   token      → token Laravel próprio (outra conta/login). Default: LARAVEL_TOKEN (Anest).
+//   apiBase    → base da API própria. Default: LARAVEL_API.
+//   forcarNome → true: as aulas são agrupadas pelo `nome` daqui, IGNORANDO o course_name
+//                da API. Use quando o course_name colide com outro curso (ex.: a MedReview
+//                também se chama "EXTENSIVE" na API e bateria com o Extensive da Anest).
 const CURSOS_VIGIADOS = [
   { courseId: '3df5bb00-db83-49a3-a334-f55af33b48f4', nome: 'Extensive' },
+  {
+    courseId: '43b2fb17-b7c1-4770-bb0e-0fc11355dfdb',
+    nome: 'Extensive R1',
+    token: LARAVEL_TOKEN_MEDREVIEW,
+    forcarNome: true,
+  },
 ];
 
 // Os campos editados à mão no PO (status, prof, conteudo, marcadores de transcrição, etc)
@@ -56,16 +71,20 @@ function _norm(s) { return String(s || '').toLowerCase().replace(/\s+/g, ' ').tr
 const _sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // GET com retry/backoff em 429 (rate limit) e 5xx transitórios. Respeita Retry-After.
-async function laravelGet(path, tentativa = 0) {
-  const resp = await fetch(`${LARAVEL_API}${path}`, {
-    headers: { Authorization: `Bearer ${LARAVEL_TOKEN}`, Accept: 'application/json' },
+// opts: { token, apiBase, tentativa } — default token/base = os da Anest (LARAVEL_TOKEN/LARAVEL_API).
+async function laravelGet(path, opts = {}) {
+  const token = opts.token || LARAVEL_TOKEN;
+  const apiBase = opts.apiBase || LARAVEL_API;
+  const tentativa = opts.tentativa || 0;
+  const resp = await fetch(`${apiBase}${path}`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
   });
   if ((resp.status === 429 || resp.status >= 500) && tentativa < 5) {
     const ra = Number(resp.headers.get('retry-after')) || 0;
     const espera = ra > 0 ? Math.min(ra * 1000, 30000) : Math.min(1000 * Math.pow(2, tentativa), 15000);
     console.warn(`Laravel ${path} → ${resp.status}; retry em ${espera}ms (tentativa ${tentativa + 1}/5)`);
     await _sleep(espera);
-    return laravelGet(path, tentativa + 1);
+    return laravelGet(path, { token, apiBase, tentativa: tentativa + 1 });
   }
   if (!resp.ok) {
     const txt = await resp.text();
@@ -75,12 +94,14 @@ async function laravelGet(path, tentativa = 0) {
 }
 
 // Mapeia um conteúdo do Laravel pros campos da aula do PO (espelha _poParseLaravel).
-function mapAula(c, cursoNomeDefault, ordemPO) {
+// forcarNome=true: agrupa pelo cursoNomeDefault (nome no PO), ignorando o course_name da API
+// (evita colisão quando dois cursos têm o mesmo course_name — ex.: MedReview "EXTENSIVE").
+function mapAula(c, cursoNomeDefault, ordemPO, forcarNome) {
   const title = String(c.title == null ? '' : c.title);
   let ordem = null, titulo = title;
   const m = title.match(/^\s*(\d+)\s*[-–]\s*(.+)$/);
   if (m) { ordem = Number(m[1]); titulo = m[2].trim(); }
-  const cursoNome = c.course_name || cursoNomeDefault;
+  const cursoNome = forcarNome ? cursoNomeDefault : (c.course_name || cursoNomeDefault);
   const modulo = c.module_name || '(sem módulo)';
   const vimeoId = String(c.video_external_id == null ? '' : c.video_external_id);
   const ratingNum = (c.rating != null) ? Number(c.rating) : null;
@@ -131,7 +152,8 @@ function apostilasDaAula(c) {
 
 // Busca todo o currículo de um curso no Laravel → lista de aulas mapeadas (+ ordem dos
 // módulos + apostilas detectadas por módulo).
-async function buscarCursoLaravel(courseId, nome) {
+async function buscarCursoLaravel(courseId, nome, fonte = {}) {
+  const { token, apiBase, forcarNome } = fonte;
   // Módulos marcados como "ignorados" na tela do PO (config/poConfig.modulosIgnorados[cursoId]):
   // não puxa da API, não cria/atualiza aulas, não transcreve nem importa apostilas.
   const cursoId = _slug(nome);
@@ -142,7 +164,7 @@ async function buscarCursoLaravel(courseId, nome) {
     if (Array.isArray(arr)) ignorados = new Set(arr.map(_norm));
   } catch (e) { console.warn('modulosIgnorados read falhou:', e?.message || e); }
 
-  const modulos = await laravelGet(`/curso/${courseId}/modulos`);
+  const modulos = await laravelGet(`/curso/${courseId}/modulos`, { token, apiBase });
   const lista = Array.isArray(modulos) ? modulos : (modulos.data || modulos.modulos || []);
   const aulas = [];
   const modOrdem = [];
@@ -154,12 +176,12 @@ async function buscarCursoLaravel(courseId, nome) {
     const nomeLista = _norm(mod.name || mod.title || mod.module_name || mod.nome);
     if (nomeLista && ignorados.has(nomeLista)) { pulados.push(mod.name || mod.title || nomeLista); continue; }
     await _sleep(120); // respiro entre módulos p/ não estourar o rate limit do Laravel
-    const cont = await laravelGet(`/modulo/${mod.id}/conteudos`);
+    const cont = await laravelGet(`/modulo/${mod.id}/conteudos`, { token, apiBase });
     const conteudos = Array.isArray(cont) ? cont : (cont.data || cont.conteudos || []);
     for (const c of conteudos) {
       // Defesa: se o nome da lista não casou mas o module_name da aula está ignorado, pula também.
       if (ignorados.has(_norm(c.module_name || '(sem módulo)'))) continue;
-      const a = mapAula(c, nome, ordemPO++);
+      const a = mapAula(c, nome, ordemPO++, forcarNome);
       if (!modOrdem.includes(a.modulo)) modOrdem.push(a.modulo);
       aulas.push(a);
       const aps = apostilasDaAula(c);
@@ -171,9 +193,10 @@ async function buscarCursoLaravel(courseId, nome) {
 }
 
 // Sincroniza um curso. dryRun=true só calcula o diff (não escreve nem transcreve).
-async function sincronizarCurso(courseId, nome, { dryRun }) {
+// fonte: { token, apiBase, forcarNome } — credencial/base/agrupamento próprios do curso.
+async function sincronizarCurso(courseId, nome, { dryRun, fonte = {} }) {
   const db = admin.firestore();
-  const { aulas, modOrdem, apostilasPorModulo } = await buscarCursoLaravel(courseId, nome);
+  const { aulas, modOrdem, apostilasPorModulo } = await buscarCursoLaravel(courseId, nome, fonte);
 
   // índice das aulas existentes por laravelId
   const snap = await db.collection('poAulas').get();
@@ -317,7 +340,17 @@ async function sincronizarCurso(courseId, nome, { dryRun }) {
 async function sincronizarTudo({ dryRun, courseId }) {
   const alvos = courseId ? CURSOS_VIGIADOS.filter(c => c.courseId === courseId) : CURSOS_VIGIADOS;
   const resultados = [];
-  for (const c of alvos) resultados.push(await sincronizarCurso(c.courseId, c.nome, { dryRun }));
+  for (const c of alvos) {
+    const fonte = { token: c.token, apiBase: c.apiBase, forcarNome: c.forcarNome };
+    // Cada curso é isolado: se um falhar (ex.: token expirado da MedReview), os demais
+    // (ex.: Extensive da Anest) continuam normalmente.
+    try {
+      resultados.push(await sincronizarCurso(c.courseId, c.nome, { dryRun, fonte }));
+    } catch (e) {
+      console.error(`Sync curso "${c.nome}" falhou:`, e?.message || e);
+      resultados.push({ curso: c.nome, erro: String(e?.message || e), novas: 0, atualizadas: 0, transcricoesNovas: 0, dryRun: !!dryRun });
+    }
+  }
   return resultados;
 }
 

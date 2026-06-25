@@ -6014,6 +6014,22 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-col-modal .po-opt-del{background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px;flex:none}
         #po-col-modal .po-opt-del:hover{color:#f85149}
         #po-col-modal .po-modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        /* Modal de novo curso (renderizado no body, escopo global por id) */
+        #po-novocurso-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-novocurso-modal.show{display:block}
+        #po-novocurso-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-novocurso-modal .po-modal{position:relative;max-width:480px;width:min(94vw,480px);margin:11vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-novocurso-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-novocurso-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text)}
+        #po-novocurso-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-novocurso-modal .po-modal-x:hover{color:var(--text)}
+        #po-novocurso-modal .po-modal-body{padding:18px 20px;max-height:64vh;overflow:auto}
+        #po-novocurso-modal .po-modal-label{font-size:12px;font-weight:600;color:var(--t2);margin:0 0 6px}
+        #po-novocurso-modal .po-modal-label:not(:first-child){margin-top:16px}
+        #po-novocurso-modal .po-inp{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:14px;font-family:inherit;box-sizing:border-box}
+        #po-novocurso-modal .po-inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+        #po-novocurso-modal .po-modal-hint{font-size:11.5px;color:var(--t3);margin:6px 0 0;line-height:1.45}
+        #po-novocurso-modal .po-modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
         /* Edição inline de células / nomes */
         #tab-po .po-cel-inp,#tab-po .po-cel-sel{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--accent);border-radius:6px;color:var(--text);font-size:11.5px;font-family:'Plus Jakarta Sans',sans-serif;padding:2px 5px;line-height:1.3}
         #tab-po .po-cel-inp:focus,#tab-po .po-cel-sel:focus{outline:none;box-shadow:0 0 0 2px var(--accent-dim)}
@@ -39756,6 +39772,66 @@ window.poExcluirSelecionadas=async()=>{
   S.poSel.aulas.clear();S.poSel.modulos.clear();
   _poRefreshTabela();
 };
+// ── Novo curso (cadastra um curso na vertical aberta) ──
+// O curso nasce vazio. Pra puxar aulas do Laravel, o course_id precisa estar
+// vigiado no robô (Cloud Function sincronizarLaravel). O campo "ID do Laravel"
+// aqui é referência/documentação — o vínculo de credencial fica no servidor.
+window.poNovoCurso=()=>{
+  if(!S.poVertical){alert('Abra uma vertical primeiro.');return;}
+  let host=document.getElementById('po-novocurso-modal');
+  if(!host){host=document.createElement('div');host.id='po-novocurso-modal';document.body.appendChild(host);}
+  const v=_verticalById(S.poVertical);
+  const errCss='display:none;margin-top:14px;padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 35%,transparent);color:#f85149;font-size:12.5px';
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poNovoCursoClose()"></div>
+    <div class="po-modal" role="dialog" aria-label="Novo curso">
+      <div class="po-modal-head"><h3>Novo curso · ${_poEsc(v.nome)}</h3><button type="button" class="po-modal-x" onclick="poNovoCursoClose()">✕</button></div>
+      <div class="po-modal-body">
+        <div class="po-modal-label">Nome do curso *</div>
+        <input type="text" id="po-nc-nome" class="po-inp" placeholder="Ex.: Extensive R1" onkeydown="if(event.key==='Enter')poNovoCursoSalvar()">
+        <p class="po-modal-hint">Precisa ser único e bater com o nome que o robô usa pra agrupar as aulas dessa vertical.</p>
+        <div class="po-modal-label">Descrição (opcional)</div>
+        <input type="text" id="po-nc-desc" class="po-inp" placeholder="Ex.: Residência Médica R1 — extensivo">
+        <div class="po-modal-label">Produto / loja (opcional)</div>
+        <input type="text" id="po-nc-prod" class="po-inp" placeholder="Ex.: Extensive R1">
+        <div class="po-modal-label">ID do curso no Laravel (opcional)</div>
+        <input type="text" id="po-nc-lid" class="po-inp" placeholder="Ex.: 43b2fb17-b7c1-4770-bb0e-0fc11355dfdb">
+        <p class="po-modal-hint">Referência do course_id no Laravel. O robô de sincronização guarda a credencial no servidor — esse campo é só pra registro.</p>
+        <div id="po-nc-err" style="${errCss}"></div>
+      </div>
+      <div class="po-modal-foot">
+        <button type="button" class="btn btn-g" onclick="poNovoCursoClose()">Cancelar</button>
+        <button type="button" class="btn btn-p" onclick="poNovoCursoSalvar()">Criar curso</button>
+      </div>
+    </div>`;
+  host.classList.add('show');
+  setTimeout(()=>{const i=document.getElementById('po-nc-nome');if(i)i.focus();},20);
+};
+window.poNovoCursoClose=()=>{const h=document.getElementById('po-novocurso-modal');if(h){h.classList.remove('show');h.innerHTML='';}};
+window.poNovoCursoSalvar=async()=>{
+  const nome=(document.getElementById('po-nc-nome')?.value||'').trim();
+  const desc=(document.getElementById('po-nc-desc')?.value||'').trim();
+  const prod=(document.getElementById('po-nc-prod')?.value||'').trim();
+  const lid=(document.getElementById('po-nc-lid')?.value||'').trim();
+  const err=document.getElementById('po-nc-err');
+  const fail=(m)=>{if(err){err.textContent=m;err.style.display='block';}};
+  if(!nome)return fail('Digite o nome do curso.');
+  const id=_poSlug(nome);
+  const cursos=S.poCursos||[];
+  if(cursos.some(c=>(c.nome||'').trim().toLowerCase()===nome.toLowerCase()))return fail('Já existe um curso com esse nome.');
+  if(cursos.some(c=>c.id===id))return fail('Esse nome gera um identificador que já está em uso. Use um nome um pouco diferente.');
+  const novo={id,vertical:S.poVertical,nome,descricao:desc,produtoId:prod||null,laravelCourseId:lid||null};
+  S.poCursos=cursos.concat(novo);
+  try{await _poSaveConfig();}
+  catch(e){
+    S.poCursos=(S.poCursos||[]).filter(c=>c.id!==id);
+    const perm=/permission|insufficient|PERMISSION_DENIED/i.test(String(e&&e.message||e));
+    return fail(perm?'Faça login (Google/Email) pra cadastrar.':'Erro ao salvar: '+(e.message||e));
+  }
+  poNovoCursoClose();
+  _poRender();
+  try{arosToast('Curso criado em '+_verticalById(S.poVertical).nome+'.','success',2600);}catch(e){}
+};
 // ── Novo módulo (pode nascer vazio; recebe aulas pelo "+ Nova aula" interno) ──
 window.poNovoModulo=()=>{
   if(!S.poCursoAtual){alert('Abra um curso primeiro.');return;}
@@ -40845,7 +40921,10 @@ function _poRenderCursos(root){
         <h2 class="po-title">${_poEsc(v.nome)} — Cursos</h2>
         <p class="po-sub">Cada card é um curso em coordenação. Abra para ver a planilha de aulas.</p>
       </div>
-      ${cursos.length?`<div class="po-grid">${cardsHtml}</div>`:`<div class="po-empty"><div class="po-ei">📭</div><p>Nenhum curso cadastrado nesta vertical ainda.</p></div>`}
+      <div class="po-toolbar" style="margin-bottom:18px">
+        <button type="button" class="btn btn-p" onclick="poNovoCurso()" title="Cadastrar um novo curso nesta vertical">➕ Novo curso</button>
+      </div>
+      ${cursos.length?`<div class="po-grid">${cardsHtml}</div>`:`<div class="po-empty"><div class="po-ei">📭</div><p>Nenhum curso cadastrado nesta vertical ainda.</p><p style="font-size:13px;color:var(--t3);margin-top:6px">Clique em <b>➕ Novo curso</b> acima para cadastrar o primeiro.</p></div>`}
     </div>`;
 }
 
