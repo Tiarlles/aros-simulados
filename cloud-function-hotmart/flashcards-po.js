@@ -498,6 +498,8 @@ function hash(s) {
 
 // expõe o núcleo p/ teste local em node (sem Firebase)
 exports._DEFAULT_PROMPT_FLASHCARDS = DEFAULT_PROMPT_FLASHCARDS;
+exports._obterTextoTranscricao = obterTextoTranscricao;
+exports._fonteDaAula = fonteDaAula;
 exports._idsDaTrilha = idsDaTrilha;
 exports._questoesPorIds = questoesPorIds;
 exports._comentarioDaQuestao = comentarioDaQuestao;
