@@ -39331,6 +39331,10 @@ async function loadPO(){
       if(d.analisePrompt&&typeof d.analisePrompt==='object')S.poAnalisePrompt=d.analisePrompt;
       if(typeof d.promptThumb==='string')S.poPromptThumb=d.promptThumb;
       if(typeof d.promptFlashcards==='string')S.poPromptFlashcards=d.promptFlashcards;
+      // Prompts POR PRODUTO (cada curso tem o seu; cai no global legado/default se não tiver).
+      if(d.promptThumbCurso&&typeof d.promptThumbCurso==='object')S.poPromptThumbCurso=d.promptThumbCurso;
+      if(d.promptFlashcardsCurso&&typeof d.promptFlashcardsCurso==='object')S.poPromptFlashcardsCurso=d.promptFlashcardsCurso;
+      if(d.analisePromptCurso&&typeof d.analisePromptCurso==='object')S.poAnalisePromptCurso=d.analisePromptCurso;
     }
   }catch(e){ /* sem permissão de leitura: segue com defaults */ }
 
@@ -39790,13 +39794,9 @@ window.poNovoCurso=()=>{
         <div class="po-modal-label">Nome do curso *</div>
         <input type="text" id="po-nc-nome" class="po-inp" placeholder="Ex.: Extensive R1" onkeydown="if(event.key==='Enter')poNovoCursoSalvar()">
         <p class="po-modal-hint">Precisa ser único e bater com o nome que o robô usa pra agrupar as aulas dessa vertical.</p>
-        <div class="po-modal-label">Descrição (opcional)</div>
-        <input type="text" id="po-nc-desc" class="po-inp" placeholder="Ex.: Residência Médica R1 — extensivo">
-        <div class="po-modal-label">Produto / loja (opcional)</div>
-        <input type="text" id="po-nc-prod" class="po-inp" placeholder="Ex.: Extensive R1">
-        <div class="po-modal-label">ID do curso no Laravel (opcional)</div>
-        <input type="text" id="po-nc-lid" class="po-inp" placeholder="Ex.: 43b2fb17-b7c1-4770-bb0e-0fc11355dfdb">
-        <p class="po-modal-hint">Referência do course_id no Laravel. O robô de sincronização guarda a credencial no servidor — esse campo é só pra registro.</p>
+        <div class="po-modal-label">ID do curso no Laravel</div>
+        <input type="text" id="po-nc-lid" class="po-inp" placeholder="Ex.: 43b2fb17-b7c1-4770-bb0e-0fc11355dfdb" onkeydown="if(event.key==='Enter')poNovoCursoSalvar()">
+        <p class="po-modal-hint">Cole o <b>course_id</b> do Laravel pra ligar a sincronização automática deste curso. Sem ele, o curso nasce vazio (você adiciona as aulas à mão). A credencial de acesso fica no servidor, por vertical.</p>
         <div id="po-nc-err" style="${errCss}"></div>
       </div>
       <div class="po-modal-foot">
@@ -39810,8 +39810,6 @@ window.poNovoCurso=()=>{
 window.poNovoCursoClose=()=>{const h=document.getElementById('po-novocurso-modal');if(h){h.classList.remove('show');h.innerHTML='';}};
 window.poNovoCursoSalvar=async()=>{
   const nome=(document.getElementById('po-nc-nome')?.value||'').trim();
-  const desc=(document.getElementById('po-nc-desc')?.value||'').trim();
-  const prod=(document.getElementById('po-nc-prod')?.value||'').trim();
   const lid=(document.getElementById('po-nc-lid')?.value||'').trim();
   const err=document.getElementById('po-nc-err');
   const fail=(m)=>{if(err){err.textContent=m;err.style.display='block';}};
@@ -39820,7 +39818,7 @@ window.poNovoCursoSalvar=async()=>{
   const cursos=S.poCursos||[];
   if(cursos.some(c=>(c.nome||'').trim().toLowerCase()===nome.toLowerCase()))return fail('Já existe um curso com esse nome.');
   if(cursos.some(c=>c.id===id))return fail('Esse nome gera um identificador que já está em uso. Use um nome um pouco diferente.');
-  const novo={id,vertical:S.poVertical,nome,descricao:desc,produtoId:prod||null,laravelCourseId:lid||null};
+  const novo={id,vertical:S.poVertical,nome,descricao:'',produtoId:null,laravelCourseId:lid||null};
   S.poCursos=cursos.concat(novo);
   try{await _poSaveConfig();}
   catch(e){
@@ -41869,7 +41867,7 @@ window.poGerarThumb=async(aulaId)=>{
   a._thumbGen=true; _poRefreshTabela();
   arosToast('🖼️ Gerando o prompt da capa… pode continuar trabalhando, eu aviso quando terminar.','info',4000);
   try{
-    const r=await _poApiPost(THUMB_PROMPT_ENDPOINT,{titulo:a.titulo||'',vimeoId:String(a.vimeoId),aulaId:a.id});
+    const r=await _poApiPost(THUMB_PROMPT_ENDPOINT,{titulo:a.titulo||'',vimeoId:String(a.vimeoId),aulaId:a.id,cursoId:S.poCursoAtual});
     a._thumbGen=false;
     if(r&&r.ok&&r.prompt){ await _poSaveAula(a,{thumbPrompt:r.prompt}); _poRefreshTabela(); arosToast(`✓ Prompt da capa pronto em "${a.titulo}" — clique no chip "Prompt" pra copiar.`,'success',5500); }
     else { _poRefreshTabela(); arosToast((r&&r.motivo==='sem_transcricao')?'Esta aula ainda não tem transcrição puxada. Puxe a transcrição primeiro (📄 na coluna Conteúdo da aula).':'Não consegui gerar o prompt. Tente de novo.','err',5500); }
@@ -41920,8 +41918,10 @@ window.poThumbCopiar=()=>{ const el=document.getElementById('po-thumb-out'); con
 S._poPromptThumbDraft=null; S._poThumbAvulsa=null;
 window.poAbrirPromptThumb=()=>{
   S._poThumbInstrDefault=_PO_THUMB_DEFAULT_INSTR;
-  // Abre já com o que está salvo OU, se nunca salvou, com o prompt padrão montado.
-  S._poPromptThumbDraft=String(S.poPromptThumb||'').trim()||_PO_THUMB_DEFAULT_INSTR;
+  // Abre com o prompt DESTE produto; se não tiver, cai no global legado e por fim no padrão.
+  const cid=S.poCursoAtual;
+  const perCurso=(S.poPromptThumbCurso||{})[cid];
+  S._poPromptThumbDraft=String(perCurso||S.poPromptThumb||'').trim()||_PO_THUMB_DEFAULT_INSTR;
   S._poThumbAvulsa={aberto:false};
   _poPromptThumbRender();
 };
@@ -41929,8 +41929,10 @@ window.poPromptThumbClose=()=>{const h=document.getElementById('po-promptthumb-m
 function _poPromptThumbCapture(){ const ta=document.getElementById('po-pt-ta'); if(ta&&S._poPromptThumbDraft!=null)S._poPromptThumbDraft=ta.value; }
 window.poPromptThumbRestaurar=()=>{ _poPromptThumbCapture(); if(S._poThumbInstrDefault!=null)S._poPromptThumbDraft=S._poThumbInstrDefault; _poPromptThumbRender(); arosToast('Texto padrão restaurado (salve pra aplicar).','success',2600); };
 window.poPromptThumbSalvar=async()=>{
-  _poPromptThumbCapture(); const novo=String(S._poPromptThumbDraft||'').trim(); S.poPromptThumb=novo;
-  try{ await setDoc(doc(db,'config','poConfig'),{promptThumb:novo},{merge:true}); arosToast('Prompt da thumb salvo ✓','success',2400); }
+  _poPromptThumbCapture(); const novo=String(S._poPromptThumbDraft||'').trim();
+  const cid=S.poCursoAtual; if(!cid){arosToast('Abra um curso primeiro.','err',2600);return;}
+  if(!S.poPromptThumbCurso)S.poPromptThumbCurso={}; S.poPromptThumbCurso[cid]=novo;
+  try{ await setDoc(doc(db,'config','poConfig'),{promptThumbCurso:{[cid]:novo}},{merge:true}); arosToast('Prompt da thumb salvo (só deste produto) ✓','success',2600); }
   catch(e){ arosToast('Erro ao salvar: '+(e.message||e),'err',3500); }
 };
 window.poThumbAvulsaToggle=()=>{ _poPromptThumbCapture(); if(!S._poThumbAvulsa)S._poThumbAvulsa={}; S._poThumbAvulsa.aberto=!S._poThumbAvulsa.aberto; _poPromptThumbRender(); };
@@ -41942,7 +41944,7 @@ window.poThumbAvulsaGerar=async()=>{
   if(!vimeoId){arosToast('Cole o ID (ou link) do vídeo no Vimeo.','err',2500);return;}
   S._poThumbAvulsa.busy=true; S._poThumbAvulsa.res={modo:'load'}; S._poThumbAvulsa.titulo=titulo; S._poThumbAvulsa.vimeoId=vimeoId; _poPromptThumbRender();
   try{
-    const r=await _poApiPost(THUMB_PROMPT_ENDPOINT,{titulo,vimeoId});
+    const r=await _poApiPost(THUMB_PROMPT_ENDPOINT,{titulo,vimeoId,cursoId:S.poCursoAtual});
     if(r&&r.ok&&r.prompt)S._poThumbAvulsa.res={modo:'ok',prompt:r.prompt};
     else S._poThumbAvulsa.res={modo:'vazio',msg:(r&&r.motivo==='sem_transcricao')?'O Vimeo não tem legenda pra esse ID (ou o vídeo não está na nossa conta).':'Não consegui gerar.'};
   }catch(e){ S._poThumbAvulsa.res={modo:'erro',msg:e.message||String(e)}; }
@@ -41971,11 +41973,12 @@ function _poPromptThumbRender(){
     <button type="button" class="tb-btn primary sm" onclick="poThumbAvulsaGerar()"${av.busy?' disabled':''}>${av.busy?'Gerando…':'⚙️ Gerar prompt'}</button>
     ${avRes}
   </div>`:'';
+  const _nc=(S.poCursos||[]).find(c=>c.id===S.poCursoAtual);
   host.innerHTML=`<div class="po-modal-back" onclick="poPromptThumbClose()"></div>
     <div class="po-modal" role="dialog">
-      <div class="po-modal-head"><h3>🖼️ Prompt Thumb</h3><button type="button" class="po-modal-x" onclick="poPromptThumbClose()">✕</button></div>
+      <div class="po-modal-head"><h3>🖼️ Prompt Thumb${_nc?' · '+_poEsc(_nc.nome):''}</h3><button type="button" class="po-modal-x" onclick="poPromptThumbClose()">✕</button></div>
       <div class="po-modal-body">
-        <div class="po-modal-label">Instrução da IA pra montar o prompt da capa — vale pro botão GERAR de cada aula e pra thumb avulsa</div>
+        <div class="po-modal-label">Instrução da IA pra montar o prompt da capa — vale pro botão GERAR de cada aula e pra thumb avulsa <b style="color:var(--accent)">(só deste produto)</b></div>
         <textarea id="po-pt-ta" class="po-thumb-ta" placeholder="${carregando?'Carregando o texto padrão…':''}">${_poEsc(S._poPromptThumbDraft||'')}</textarea>
         <button type="button" class="tb-btn ghost sm" style="margin-top:10px" onclick="poThumbAvulsaToggle()">${av.aberto?'▾':'▸'} 🎬 Thumb avulsa</button>
         ${avBlock}
@@ -41992,16 +41995,20 @@ function _poPromptThumbRender(){
 S._poPromptFcDraft=null; S._poFcInstrDefault=null;
 window.poAbrirPromptFlashcards=()=>{
   S._poFcInstrDefault=_PO_FC_DEFAULT_INSTR;
-  // Abre com o que está salvo OU, se nunca salvou, com o prompt padrão.
-  S._poPromptFcDraft=String(S.poPromptFlashcards||'').trim()||_PO_FC_DEFAULT_INSTR;
+  // Abre com o prompt DESTE produto; se não tiver, cai no global legado e por fim no padrão.
+  const cid=S.poCursoAtual;
+  const perCurso=(S.poPromptFlashcardsCurso||{})[cid];
+  S._poPromptFcDraft=String(perCurso||S.poPromptFlashcards||'').trim()||_PO_FC_DEFAULT_INSTR;
   _poPromptFcRender();
 };
 window.poPromptFcClose=()=>{const h=document.getElementById('po-promptfc-modal');if(h){h.classList.remove('show');h.innerHTML='';}S._poPromptFcDraft=null;};
 function _poPromptFcCapture(){ const ta=document.getElementById('po-fc-ta'); if(ta&&S._poPromptFcDraft!=null)S._poPromptFcDraft=ta.value; }
 window.poPromptFcRestaurar=()=>{ _poPromptFcCapture(); if(S._poFcInstrDefault!=null){ S._poPromptFcDraft=S._poFcInstrDefault; _poPromptFcRender(); arosToast('Texto padrão restaurado (salve pra aplicar).','success',2600); } else arosToast('O texto padrão ainda está carregando…','err',2200); };
 window.poPromptFcSalvar=async()=>{
-  _poPromptFcCapture(); const novo=String(S._poPromptFcDraft||'').trim(); S.poPromptFlashcards=novo;
-  try{ await setDoc(doc(db,'config','poConfig'),{promptFlashcards:novo},{merge:true}); arosToast('Prompt dos flashcards salvo ✓','success',2400); }
+  _poPromptFcCapture(); const novo=String(S._poPromptFcDraft||'').trim();
+  const cid=S.poCursoAtual; if(!cid){arosToast('Abra um curso primeiro.','err',2600);return;}
+  if(!S.poPromptFlashcardsCurso)S.poPromptFlashcardsCurso={}; S.poPromptFlashcardsCurso[cid]=novo;
+  try{ await setDoc(doc(db,'config','poConfig'),{promptFlashcardsCurso:{[cid]:novo}},{merge:true}); arosToast('Prompt dos flashcards salvo (só deste produto) ✓','success',2600); }
   catch(e){ arosToast('Erro ao salvar: '+(e.message||e),'err',3500); }
 };
 function _poPromptFcRender(){
@@ -42009,11 +42016,12 @@ function _poPromptFcRender(){
   if(!host){host=document.createElement('div');host.id='po-promptfc-modal';document.body.appendChild(host);}
   if(S._poPromptFcDraft==null){host.classList.remove('show');host.innerHTML='';return;}
   const carregando=S._poFcInstrDefault==null&&!S._poPromptFcDraft;
+  const _nc=(S.poCursos||[]).find(c=>c.id===S.poCursoAtual);
   host.innerHTML=`<div class="po-modal-back" onclick="poPromptFcClose()"></div>
     <div class="po-modal" role="dialog">
-      <div class="po-modal-head"><h3>🃏 Prompt Flashcards</h3><button type="button" class="po-modal-x" onclick="poPromptFcClose()">✕</button></div>
+      <div class="po-modal-head"><h3>🃏 Prompt Flashcards${_nc?' · '+_poEsc(_nc.nome):''}</h3><button type="button" class="po-modal-x" onclick="poPromptFcClose()">✕</button></div>
       <div class="po-modal-body">
-        <div class="po-modal-label">Instrução da IA pra gerar os flashcards de cada aula — vale pro botão Gerar Cards da coluna FLASHCARDS</div>
+        <div class="po-modal-label">Instrução da IA pra gerar os flashcards de cada aula — vale pro botão Gerar Cards da coluna FLASHCARDS <b style="color:var(--accent)">(só deste produto)</b></div>
         <textarea id="po-fc-ta" class="po-thumb-ta" placeholder="${carregando?'Carregando o texto padrão…':''}">${_poEsc(S._poPromptFcDraft||'')}</textarea>
       </div>
       <div class="po-modal-foot">
@@ -42122,7 +42130,7 @@ window.poGerarCards=async(aulaId)=>{
   a._fcGen=true; _poRefreshTabela();
   arosToast('🃏 Gerando flashcards… pode continuar trabalhando, eu aviso quando terminar.','info',4200);
   try{
-    const r=await _poApiPost(FLASHCARDS_ENDPOINT,{aulaId});
+    const r=await _poApiPost(FLASHCARDS_ENDPOINT,{aulaId,cursoId:S.poCursoAtual});
     a._fcGen=false;
     if(r&&r.ok&&Array.isArray(r.cards)&&r.cards.length){
       await _poSaveAula(a,{fcHasDeck:true,fcRevisaveis:r.cards.length,fcAprovados:0,fcDeckN:r.cards.length}); _poRefreshTabela();
@@ -42373,7 +42381,9 @@ S.poAnaliseProduto={}; // {cursoId: resultado da análise do produto (IA)}
 S._poIAOpen=false;     // box "Inteligência do Produto" começa fechado
 S._poProdMenuOpen=false;// menu Rápida/Completa fechado por padrão
 S._poProdBatch=null;   // {total,done,cancel,atual} durante análise em lote
-S.poAnalisePrompt={};  // {modulo, produto} — instruções editáveis dos prompts da IA
+S.poAnalisePrompt={};  // {modulo, produto} — instruções editáveis dos prompts da IA (global legado)
+// Prompts POR PRODUTO: mapas {cursoId: ...}. Override do produto sobre o global legado/default.
+S.poPromptThumbCurso={}; S.poPromptFlashcardsCurso={}; S.poAnalisePromptCurso={};
 
 // ── Tela: editar os prompts da IA (módulo + produto) ──
 S._poPromptDefaults=null;  // {modulo,produto} buscado da função
@@ -42382,7 +42392,9 @@ S._poPromptTab='modulo';
 const _PO_PROMPT_LBL={modulo:'🤖 Análise do módulo',produto:'🧠 Análise do produto'};
 window.poAbrirPromptIA=async()=>{
   S._poPromptTab='modulo';
-  S._poPromptDraft={modulo:String(S.poAnalisePrompt.modulo||''),produto:String(S.poAnalisePrompt.produto||'')};
+  // Prompt DESTE produto; se não tiver, cai no global legado e por fim no padrão (buscado abaixo).
+  const _pc=(S.poAnalisePromptCurso||{})[S.poCursoAtual]||{}; const _g=S.poAnalisePrompt||{};
+  S._poPromptDraft={modulo:String(_pc.modulo||_g.modulo||''),produto:String(_pc.produto||_g.produto||'')};
   _poPromptIARender();
   // busca os textos-padrão (pra preencher quando vazio e pro botão "restaurar")
   if(!S._poPromptDefaults){
@@ -42401,8 +42413,9 @@ window.poPromptIARestaurar=()=>{ if(!S._poPromptDefaults||!S._poPromptDraft)retu
 window.poPromptIASalvar=async()=>{
   _poPromptCapture();
   const novo={modulo:String(S._poPromptDraft.modulo||'').trim(),produto:String(S._poPromptDraft.produto||'').trim()};
-  S.poAnalisePrompt=novo;
-  try{ await setDoc(doc(db,'config','poConfig'),{analisePrompt:novo},{merge:true}); arosToast('Prompt salvo — vale na próxima análise.','success',2600); poPromptIAClose(); }
+  const cid=S.poCursoAtual; if(!cid){arosToast('Abra um curso primeiro.','err',2600);return;}
+  if(!S.poAnalisePromptCurso)S.poAnalisePromptCurso={}; S.poAnalisePromptCurso[cid]=novo;
+  try{ await setDoc(doc(db,'config','poConfig'),{analisePromptCurso:{[cid]:novo}},{merge:true}); arosToast('Prompt salvo (só deste produto) — vale na próxima análise.','success',2600); poPromptIAClose(); }
   catch(e){ arosToast('Erro ao salvar: '+(e.message||e),'err',3500); }
 };
 function _poPromptIARender(){
@@ -42413,12 +42426,13 @@ function _poPromptIARender(){
   const carregando=!S._poPromptDefaults;
   const val=String(S._poPromptDraft[tab]||'');
   const tabBtn=(t)=>`<button type="button" class="po-prompt-tab${tab===t?' on':''}" onclick="poPromptIASetTab('${t}')">${_PO_PROMPT_LBL[t]}</button>`;
+  const _nc=(S.poCursos||[]).find(c=>c.id===S.poCursoAtual);
   host.innerHTML=`
     <div class="po-modal-back" onclick="poPromptIAClose()"></div>
     <div class="po-modal po-modal-lg" role="dialog">
-      <div class="po-modal-head"><h3>✍️ Prompt da IA</h3><button type="button" class="po-modal-x" onclick="poPromptIAClose()">✕</button></div>
+      <div class="po-modal-head"><h3>✍️ Prompt da IA${_nc?' · '+_poEsc(_nc.nome):''}</h3><button type="button" class="po-modal-x" onclick="poPromptIAClose()">✕</button></div>
       <div class="po-modal-body">
-        <p class="po-imp-instr">Ajuste como a IA pensa em cada análise. Você edita só as <b>instruções/regras</b> — a parte técnica (lista de critérios e o formato da resposta) é montada automaticamente e não aparece aqui, pra não quebrar a leitura do resultado.</p>
+        <p class="po-imp-instr">Ajuste como a IA pensa em cada análise <b style="color:var(--accent)">(só deste produto)</b>. Você edita só as <b>instruções/regras</b> — a parte técnica (lista de critérios e o formato da resposta) é montada automaticamente e não aparece aqui, pra não quebrar a leitura do resultado.</p>
         <div class="po-prompt-tabs">${tabBtn('modulo')}${tabBtn('produto')}</div>
         ${carregando?`<div class="po-an-load"><span class="po-an-spin"></span> Carregando o texto padrão…</div>`:''}
         <textarea id="po-prompt-ta" class="po-inp po-prompt-ta" spellcheck="false" placeholder="Instruções da IA…">${_poEsc(val)}</textarea>

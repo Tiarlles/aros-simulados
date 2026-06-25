@@ -25,22 +25,47 @@ const LARAVEL_TOKEN_MEDREVIEW = process.env.LARAVEL_TOKEN_MEDREVIEW || '';
 const SLACK_WEBHOOK = process.env.SLACK_WEBHOOK || '';
 const LARAVEL_API = 'https://api.grupomedreview.com.br/api';
 
-// Cursos vigiados. Cada item: { courseId (UUID Laravel), nome (nome NO PO) }.
+// Token Laravel POR VERTICAL. Adicionar uma vertical com login/conta nova = só
+// acrescentar a env var + a linha aqui (1× por conta de login). Cursos NÃO precisam
+// de novo deploy: entram pelo painel (config/poConfig.cursos com laravelCourseId).
+const TOKENS_POR_VERTICAL = {
+  anestreview: LARAVEL_TOKEN,
+  medreview: LARAVEL_TOKEN_MEDREVIEW,
+};
+
+// Cursos vigiados BASE (garantidos, hardcoded). Cada item: { courseId (UUID Laravel), nome (nome NO PO) }.
 // Opcionais por curso:
-//   token      → token Laravel próprio (outra conta/login). Default: LARAVEL_TOKEN (Anest).
+//   token      → token Laravel próprio. Default: LARAVEL_TOKEN (Anest).
 //   apiBase    → base da API própria. Default: LARAVEL_API.
-//   forcarNome → true: as aulas são agrupadas pelo `nome` daqui, IGNORANDO o course_name
-//                da API. Use quando o course_name colide com outro curso (ex.: a MedReview
-//                também se chama "EXTENSIVE" na API e bateria com o Extensive da Anest).
-const CURSOS_VIGIADOS = [
+//   forcarNome → true: agrupa as aulas pelo `nome` daqui, IGNORANDO o course_name da API
+//                (evita colisão — ex.: MedReview também se chama "EXTENSIVE" na API).
+// A lista REAL usada em runtime é base + cursos do painel (ver montarCursosVigiados()).
+const CURSOS_BASE = [
   { courseId: '3df5bb00-db83-49a3-a334-f55af33b48f4', nome: 'Extensive' },
-  {
-    courseId: '43b2fb17-b7c1-4770-bb0e-0fc11355dfdb',
-    nome: 'Extensive R1',
-    token: LARAVEL_TOKEN_MEDREVIEW,
-    forcarNome: true,
-  },
+  { courseId: '43b2fb17-b7c1-4770-bb0e-0fc11355dfdb', nome: 'Extensive R1', token: LARAVEL_TOKEN_MEDREVIEW, forcarNome: true },
 ];
+
+// Monta a lista vigiada em runtime: CURSOS_BASE + todo curso do painel
+// (config/poConfig.cursos) que tenha `laravelCourseId` E um token configurado pra
+// sua vertical. Dedup por courseId. Cursos do painel entram com forcarNome=true
+// (o nome do PO é a fonte de verdade do agrupamento, e é único por validação da tela).
+async function montarCursosVigiados() {
+  const lista = CURSOS_BASE.map(c => ({ ...c }));
+  const vistos = new Set(lista.map(c => String(c.courseId)));
+  try {
+    const cfg = (await admin.firestore().collection('config').doc('poConfig').get()).data() || {};
+    const cursos = Array.isArray(cfg.cursos) ? cfg.cursos : [];
+    for (const c of cursos) {
+      const cid = String(c.laravelCourseId || '').trim();
+      if (!cid || vistos.has(cid)) continue;
+      const token = TOKENS_POR_VERTICAL[c.vertical];
+      if (!token) { console.warn(`Curso "${c.nome}" (vertical ${c.vertical}) tem ID Laravel mas a vertical não tem token no servidor — pulado.`); continue; }
+      lista.push({ courseId: cid, nome: c.nome, token, forcarNome: true });
+      vistos.add(cid);
+    }
+  } catch (e) { console.warn('montarCursosVigiados: leitura de poConfig.cursos falhou:', e?.message || e); }
+  return lista;
+}
 
 // Os campos editados à mão no PO (status, prof, conteudo, marcadores de transcrição, etc)
 // são preservados implicitamente: o update só toca nos CAMPOS_LARAVEL (definidos abaixo).
@@ -338,7 +363,8 @@ async function sincronizarCurso(courseId, nome, { dryRun, fonte = {} }) {
 }
 
 async function sincronizarTudo({ dryRun, courseId }) {
-  const alvos = courseId ? CURSOS_VIGIADOS.filter(c => c.courseId === courseId) : CURSOS_VIGIADOS;
+  const vigiados = await montarCursosVigiados();
+  const alvos = courseId ? vigiados.filter(c => c.courseId === courseId) : vigiados;
   const resultados = [];
   for (const c of alvos) {
     const fonte = { token: c.token, apiBase: c.apiBase, forcarNome: c.forcarNome };
