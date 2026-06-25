@@ -41,8 +41,8 @@ const TOKENS_POR_VERTICAL = {
 //                (evita colisão — ex.: MedReview também se chama "EXTENSIVE" na API).
 // A lista REAL usada em runtime é base + cursos do painel (ver montarCursosVigiados()).
 const CURSOS_BASE = [
-  { courseId: '3df5bb00-db83-49a3-a334-f55af33b48f4', nome: 'Extensive' },
-  { courseId: '43b2fb17-b7c1-4770-bb0e-0fc11355dfdb', nome: 'Extensive R1', token: LARAVEL_TOKEN_MEDREVIEW, forcarNome: true },
+  { courseId: '3df5bb00-db83-49a3-a334-f55af33b48f4', nome: 'Extensive', vertical: 'anestreview' },
+  { courseId: '43b2fb17-b7c1-4770-bb0e-0fc11355dfdb', nome: 'Extensive R1', vertical: 'medreview', token: LARAVEL_TOKEN_MEDREVIEW, forcarNome: true },
 ];
 
 // Monta a lista vigiada em runtime: CURSOS_BASE + todo curso do painel
@@ -60,7 +60,7 @@ async function montarCursosVigiados() {
       if (!cid || vistos.has(cid)) continue;
       const token = TOKENS_POR_VERTICAL[c.vertical];
       if (!token) { console.warn(`Curso "${c.nome}" (vertical ${c.vertical}) tem ID Laravel mas a vertical não tem token no servidor — pulado.`); continue; }
-      lista.push({ courseId: cid, nome: c.nome, token, forcarNome: true });
+      lista.push({ courseId: cid, nome: c.nome, vertical: c.vertical, token, forcarNome: true });
       vistos.add(cid);
     }
   } catch (e) { console.warn('montarCursosVigiados: leitura de poConfig.cursos falhou:', e?.message || e); }
@@ -362,9 +362,13 @@ async function sincronizarCurso(courseId, nome, { dryRun, fonte = {} }) {
   return resumo;
 }
 
-async function sincronizarTudo({ dryRun, courseId }) {
+// vertical: filtra só os cursos daquela vertical (botão manual). courseId: filtra um curso.
+// Sem nenhum dos dois (sync automática): puxa TODAS as verticais e produtos.
+async function sincronizarTudo({ dryRun, courseId, vertical }) {
   const vigiados = await montarCursosVigiados();
-  const alvos = courseId ? vigiados.filter(c => c.courseId === courseId) : vigiados;
+  let alvos = vigiados;
+  if (vertical) alvos = alvos.filter(c => c.vertical === vertical);
+  if (courseId) alvos = alvos.filter(c => c.courseId === courseId);
   const resultados = [];
   for (const c of alvos) {
     const fonte = { token: c.token, apiBase: c.apiBase, forcarNome: c.forcarNome };
@@ -397,8 +401,9 @@ exports.sincronizarLaravel = onRequest(
 
     const dryRun = !!req.body?.dryRun;
     const courseId = req.body?.courseId ? String(req.body.courseId) : null;
+    const vertical = req.body?.vertical ? String(req.body.vertical) : null;
     try {
-      const resultados = await sincronizarTudo({ dryRun, courseId });
+      const resultados = await sincronizarTudo({ dryRun, courseId, vertical });
       res.status(200).json({ ok: true, dryRun, resultados });
     } catch (err) {
       console.error('sincronizarLaravel erro:', err?.message || err);

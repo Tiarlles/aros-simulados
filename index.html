@@ -40559,7 +40559,10 @@ async function _poSyncCall(dryRun){
   const u=window._fbAuth?.auth?.currentUser;
   if(!u)throw new Error('Faça login (Google/Email) pra sincronizar.');
   const token=await u.getIdToken();
-  const resp=await fetch(SINCRONIZAR_ENDPOINT,{method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({dryRun})});
+  // Botão manual: só a vertical aberta (a sync automática de segunda puxa todas).
+  const _c=(S.poCursos||[]).find(x=>x.id===S.poCursoAtual);
+  const vertical=(_c&&_c.vertical)||S.poVertical||null;
+  const resp=await fetch(SINCRONIZAR_ENDPOINT,{method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({dryRun,vertical})});
   let data={};try{data=await resp.json();}catch(_){}
   if(!resp.ok)throw new Error(data.error||`Erro ${resp.status}`);
   return data.resultados||[];
