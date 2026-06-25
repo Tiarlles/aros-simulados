@@ -92,6 +92,7 @@ exports.gerarPromptThumb = onRequest(
 
     const titulo = String(req.body?.titulo || '').trim();
     const vimeoId = String(req.body?.vimeoId || '').replace(/\D/g, '');
+    const cursoId = String(req.body?.cursoId || '').trim();
     if (!titulo) { res.status(400).json({ error: 'Informe o título da aula.' }); return; }
     if (!vimeoId) { res.status(400).json({ error: 'Informe o ID do vídeo no Vimeo.' }); return; }
 
@@ -99,11 +100,14 @@ exports.gerarPromptThumb = onRequest(
       const transc = await obterTextoTranscricao(vimeoId);
       if (!transc) { res.status(200).json({ ok: false, motivo: 'sem_transcricao' }); return; }
 
-      // Instrução editável (config/poConfig.promptThumb) ou o padrão.
+      // Instrução editável, POR PRODUTO. Cascata: promptThumbCurso[cursoId] →
+      // promptThumb (global legado) → DEFAULT. Edição de um produto não afeta outro.
       let instr = DEFAULT_PROMPT_THUMB;
       try {
         const cfg = (await admin.firestore().collection('config').doc('poConfig').get()).data() || {};
-        if (cfg.promptThumb && String(cfg.promptThumb).trim()) instr = String(cfg.promptThumb).trim();
+        const porCurso = cursoId && cfg.promptThumbCurso && cfg.promptThumbCurso[cursoId];
+        if (porCurso && String(porCurso).trim()) instr = String(porCurso).trim();
+        else if (cfg.promptThumb && String(cfg.promptThumb).trim()) instr = String(cfg.promptThumb).trim();
       } catch (e) { /* usa o padrão */ }
 
       const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });

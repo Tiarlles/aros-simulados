@@ -407,7 +407,9 @@ exports.analisarModuloPO = onRequest(
       const editalModulo = String(md.editalModulo || '').trim();
       const edital = editalModulo || editalCurso;
       const editalFonte = editalModulo ? 'módulo' : (editalCurso ? 'curso' : '');
-      const promptCustom = cfg.analisePrompt && cfg.analisePrompt.modulo;
+      // Prompt POR PRODUTO. Cascata: analisePromptCurso[cursoId].modulo → analisePrompt.modulo (global legado) → default.
+      const promptCustom = (cfg.analisePromptCurso && cfg.analisePromptCurso[cursoId] && cfg.analisePromptCurso[cursoId].modulo)
+        || (cfg.analisePrompt && cfg.analisePrompt.modulo);
 
       const ctx = { cursoNome, modulo, edital, editalFonte, aulas, questoes, pedidos, oralTemas, atualizacaoConteudo, transcricaoAvulsa, apostilaStatus, dispensadas, erros, duvidasDemanda, regravarManual };
       const systemPrompt = buildSystemPrompt(promptCustom);
@@ -711,9 +713,12 @@ exports.analisarProdutoPO = onRequest(
 
     try {
       const db = admin.firestore();
-      // Prompt customizado do produto (editável pela tela).
+      // Prompt customizado do produto, POR PRODUTO (editável pela tela).
+      // Cascata: analisePromptCurso[cursoId].produto → analisePrompt.produto (global legado) → default.
       const cfgSnap = await db.collection('config').doc('poConfig').get();
-      const promptCustom = cfgSnap.exists && cfgSnap.data().analisePrompt && cfgSnap.data().analisePrompt.produto;
+      const _cfgD = cfgSnap.exists ? (cfgSnap.data() || {}) : {};
+      const promptCustom = (_cfgD.analisePromptCurso && _cfgD.analisePromptCurso[cursoId] && _cfgD.analisePromptCurso[cursoId].produto)
+        || (_cfgD.analisePrompt && _cfgD.analisePrompt.produto);
       // Módulos ignorados (config/poConfig.modulosIgnorados[cursoId]): fora da consolidação e da incidência.
       const _cfgData = cfgSnap.exists ? (cfgSnap.data() || {}) : {};
       const _normMod = t => String(t || '').toLowerCase().replace(/\s+/g, ' ').trim();

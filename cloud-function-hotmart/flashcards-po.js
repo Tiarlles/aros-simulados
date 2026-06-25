@@ -25,11 +25,35 @@ const { registrarCusto } = require('./custos-ia');
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY_PO || '';
 const LARAVEL_TOKEN = process.env.LARAVEL_TOKEN || '';
+const LARAVEL_TOKEN_MEDREVIEW = process.env.LARAVEL_TOKEN_MEDREVIEW || '';
 const LARAVEL_API = 'https://api.grupomedreview.com.br/api';
 const MODEL = 'claude-sonnet-4-6';
 
-// Curso (nome no PO → courseId no Laravel). Espelha CURSOS_VIGIADOS do sync.
+// Curso (nome no PO → courseId no Laravel). Fallback p/ Anest quando a aula não casa no poConfig.
 const CURSOS = [{ courseId: '3df5bb00-db83-49a3-a334-f55af33b48f4', nome: 'Extensive' }];
+
+// Token Laravel POR VERTICAL — o banco de questões/trilhas é separado por conta:
+// o token da Anest NÃO enxerga as questões da R1 e vice-versa (testado).
+const TOKENS_POR_VERTICAL = { anestreview: LARAVEL_TOKEN, medreview: LARAVEL_TOKEN_MEDREVIEW };
+
+// Resolve a "fonte" da aula (token + courseIds no Laravel) pela vertical do seu curso.
+// Lê config/poConfig.cursos (nome → {vertical, laravelCourseId}); cai na Anest se não casar.
+async function fonteDaAula(aula) {
+  let token = LARAVEL_TOKEN, courseIds = CURSOS.map(c => c.courseId); // fallback Anest
+  try {
+    const nomes = Array.isArray(aula.cursos) ? aula.cursos : [];
+    const cfg = (await admin.firestore().collection('config').doc('poConfig').get()).data() || {};
+    const cursos = Array.isArray(cfg.cursos) ? cfg.cursos : [];
+    const match = cursos.find(c => nomes.includes(c.nome));
+    if (match) {
+      const tk = TOKENS_POR_VERTICAL[match.vertical];
+      if (tk) token = tk;
+      const cid = String(match.laravelCourseId || '').trim();
+      if (cid) courseIds = [cid];
+    }
+  } catch (e) { console.warn('fonteDaAula: leitura poConfig falhou', e?.message || e); }
+  return { token, apiBase: LARAVEL_API, courseIds };
+}
 
 const MAX_CHUNK_CHARS = 9000;     // tamanho-alvo de cada pedaço de transcrição/livro
 const OVERLAP_CHARS = 600;        // sobreposição entre pedaços (preserva contexto)
@@ -121,19 +145,19 @@ async function obterTextoTranscricao(vimeoId) {
 }
 
 // ── Laravel: GET simples + busca de questões por IDs (POST /v2/web/questoes {ids}, paginado).
-async function laravelGet(path) {
-  const r = await fetch(`${LARAVEL_API}${path}`, { headers: { Authorization: `Bearer ${LARAVEL_TOKEN}`, Accept: 'application/json' } });
+async function laravelGet(path, token = LARAVEL_TOKEN) {
+  const r = await fetch(`${LARAVEL_API}${path}`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
   if (!r.ok) throw new Error(`Laravel GET ${path} → ${r.status}`);
   return r.json();
 }
-async function questoesPorIds(ids) {
+async function questoesPorIds(ids, token = LARAVEL_TOKEN) {
   const want = ids.map(String);
   const out = [];
   let page = 1, total = Infinity, perdas = 0;
   while (out.length < total) {
     const r = await fetch(`${LARAVEL_API}/v2/web/questoes?page=${page}`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${LARAVEL_TOKEN}`, Accept: 'application/json', 'Content-Type': 'application/json' },
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify({ ids: want }),
     });
     if (!r.ok) throw new Error(`Laravel questoes(ids) p${page} → ${r.status}`);
@@ -151,11 +175,11 @@ async function questoesPorIds(ids) {
 // ── Comentário (gabarito comentado) de uma questão. Texto rico do professor,
 // ótimo insumo pros cards. Endpoint POST /web/comentario/gabarito {model_id, model_type:'QUESTAO'}.
 const COMENTARIO_CAP = 6000; // chars por comentário (o bloco de questões é chunkado depois)
-async function comentarioDaQuestao(id) {
+async function comentarioDaQuestao(id, token = LARAVEL_TOKEN) {
   try {
     const r = await fetch(`${LARAVEL_API}/web/comentario/gabarito`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${LARAVEL_TOKEN}`, Accept: 'application/json', 'Content-Type': 'application/json' },
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify({ model_id: Number(id), is_gabarito: true, model_type: 'QUESTAO' }),
     });
     if (!r.ok) return '';
@@ -164,11 +188,11 @@ async function comentarioDaQuestao(id) {
   } catch (e) { return ''; }
 }
 // Busca os comentários de várias questões em paralelo (lotes), anexa em q.comentario.
-async function anexarComentarios(questoes) {
+async function anexarComentarios(questoes, token = LARAVEL_TOKEN) {
   const LOTE = 6;
   for (let i = 0; i < questoes.length; i += LOTE) {
     const lote = questoes.slice(i, i + LOTE);
-    const coms = await Promise.all(lote.map(q => comentarioDaQuestao(q.id)));
+    const coms = await Promise.all(lote.map(q => comentarioDaQuestao(q.id, token)));
     lote.forEach((q, k) => { q.comentario = coms[k] || ''; });
   }
   return questoes;
@@ -177,22 +201,21 @@ async function anexarComentarios(questoes) {
 // ── Acha os IDs de questão da trilha da aula no Laravel.
 // Caminho: curso (pelo nome no PO) → módulos (acha pelo nome) → conteúdos (acha pelo laravelId)
 // → trilhas[].json.ids. Devolve [] se a aula não tem trilha montada.
-async function idsDaTrilha(aula) {
+async function idsDaTrilha(aula, fonte = {}) {
   const laravelId = aula.laravelId;
   const modNome = String(aula.modulo || '').trim();
   if (!laravelId || !modNome) return [];
-  const nomesCurso = Array.isArray(aula.cursos) ? aula.cursos : [];
-  const courseIds = CURSOS.filter(c => nomesCurso.includes(c.nome)).map(c => c.courseId);
-  if (!courseIds.length) courseIds.push(...CURSOS.map(c => c.courseId)); // fallback: tenta os conhecidos
+  const token = fonte.token || LARAVEL_TOKEN;
+  const courseIds = (Array.isArray(fonte.courseIds) && fonte.courseIds.length) ? fonte.courseIds : CURSOS.map(c => c.courseId);
 
   for (const courseId of courseIds) {
     let modulos;
-    try { modulos = await laravelGet(`/curso/${courseId}/modulos`); } catch (e) { continue; }
+    try { modulos = await laravelGet(`/curso/${courseId}/modulos`, token); } catch (e) { continue; }
     const lista = Array.isArray(modulos) ? modulos : (modulos.data || []);
     const mod = lista.find(m => String(m.nome || m.name || m.title || '').trim() === modNome);
     if (!mod) continue;
     let cont;
-    try { cont = await laravelGet(`/modulo/${mod.id}/conteudos`); } catch (e) { continue; }
+    try { cont = await laravelGet(`/modulo/${mod.id}/conteudos`, token); } catch (e) { continue; }
     const arr = Array.isArray(cont) ? cont : (cont.data || []);
     const c = arr.find(x => String(x.id) === String(laravelId));
     if (!c || !Array.isArray(c.trilhas)) continue;
@@ -339,8 +362,9 @@ exports.gerarFlashcardsPO = onRequest(
       const transc = (await obterTextoTranscricao(aula.vimeoId)).slice(0, TRANSC_CAP);
       let questoes = [];
       try {
-        const ids = await idsDaTrilha(aula);
-        if (ids.length) { questoes = (await questoesPorIds(ids)).map(_adaptarQuestao); await anexarComentarios(questoes); }
+        const fonte = await fonteDaAula(aula);
+        const ids = await idsDaTrilha(aula, fonte);
+        if (ids.length) { questoes = (await questoesPorIds(ids, fonte.token)).map(_adaptarQuestao); await anexarComentarios(questoes, fonte.token); }
       } catch (e) { console.warn('montar: trilha/questões falhou', e?.message || e); }
       const partes = [`# AULA: ${aula.titulo || ''}`];
       if (transc) partes.push(`## TRANSCRIÇÃO\n\n${transc}`);
@@ -355,6 +379,7 @@ exports.gerarFlashcardsPO = onRequest(
     if (!ANTHROPIC_API_KEY) { res.status(500).json({ error: 'IA não configurada no servidor (ANTHROPIC_API_KEY_PO).' }); return; }
 
     const aulaId = String(req.body?.aulaId || '').trim();
+    let cursoId = String(req.body?.cursoId || '').trim();
     if (!aulaId) { res.status(400).json({ error: 'Informe a aula (aulaId).' }); return; }
 
     try {
@@ -362,6 +387,10 @@ exports.gerarFlashcardsPO = onRequest(
       const aulaSnap = await db.collection('poAulas').doc(aulaId).get();
       if (!aulaSnap.exists) { res.status(404).json({ error: 'Aula não encontrada.' }); return; }
       const aula = aulaSnap.data() || {};
+      // Reserva: se o frontend não mandou cursoId, deriva do 1º curso da aula (slug = id no PO).
+      if (!cursoId && Array.isArray(aula.cursos) && aula.cursos[0]) {
+        cursoId = String(aula.cursos[0]).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+      }
 
       // Resumo do livro (colado na coluna Resumo LM) fica em poFlashcards/{aulaId}.resumoLM.
       const fcRef = db.collection('poFlashcards').doc(aulaId);
@@ -374,11 +403,12 @@ exports.gerarFlashcardsPO = onRequest(
       // 2) Questões da trilha (IDs no Laravel → conteúdo por ID → adapta)
       let questoes = [];
       try {
-        const ids = await idsDaTrilha(aula);
+        const fonte = await fonteDaAula(aula);
+        const ids = await idsDaTrilha(aula, fonte);
         if (ids.length) {
-          const brutas = await questoesPorIds(ids);
+          const brutas = await questoesPorIds(ids, fonte.token);
           questoes = brutas.map(_adaptarQuestao);
-          await anexarComentarios(questoes); // gabarito comentado do professor (insumo rico)
+          await anexarComentarios(questoes, fonte.token); // gabarito comentado do professor (insumo rico)
         }
       } catch (e) { console.warn('flashcards: trilha/questões falhou', e?.message || e); }
 
@@ -397,11 +427,14 @@ exports.gerarFlashcardsPO = onRequest(
         return;
       }
 
-      // Instrução editável (config/poConfig.promptFlashcards) ou o padrão.
+      // Instrução editável, POR PRODUTO. Cascata: promptFlashcardsCurso[cursoId] →
+      // promptFlashcards (global legado) → DEFAULT. Edição de um produto não afeta outro.
       let systemPrompt = DEFAULT_PROMPT_FLASHCARDS;
       try {
         const cfg = (await db.collection('config').doc('poConfig').get()).data() || {};
-        if (cfg.promptFlashcards && String(cfg.promptFlashcards).trim()) systemPrompt = String(cfg.promptFlashcards).trim();
+        const porCurso = cursoId && cfg.promptFlashcardsCurso && cfg.promptFlashcardsCurso[cursoId];
+        if (porCurso && String(porCurso).trim()) systemPrompt = String(porCurso).trim();
+        else if (cfg.promptFlashcards && String(cfg.promptFlashcards).trim()) systemPrompt = String(cfg.promptFlashcards).trim();
       } catch (e) { /* usa o padrão */ }
 
       // Gera em lotes (aproveita o prompt caching e respeita rate limit).
