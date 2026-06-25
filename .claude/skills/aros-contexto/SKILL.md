@@ -2892,6 +2892,24 @@ Polimento mobile (2026-05-20, mesmo dia):
 - **Curadoria refinada:** 3 blocos (pendentes abertos no topo → aprovados recolhidos → descartados no fim), aprovar/descartar = dropdown recolhido (`_poCurMover`/`poCurToggleOpen`, qualquer card abre/fecha no clique), status de revisão (% ao vivo) + barra grande no topo, **preserva scroll** entre renders, texto **justificado**, SEM tags/dificuldade/fonte no card. Coluna Flashcards: chip **DECK** + barra de % (com número) + botão Gerar pequeno.
 - **CORS:** todas as functions do PO/IA liberam qualquer `localhost`/`127.0.0.1` (o server local usa porta automática — senão dá "Failed to fetch" no dev).
 
+### Rodada 2026-06-25 — Multi-vertical, prompts por produto, MegaBrain API
+
+**Verticais (4):** `VERTICAIS` em index.html — `anestreview` (💉 Anest), `oftreview` (👁️ Oft), `ortopreview` (🦴 Ortop), `medreview` (🎓 MedReview R1). Cursos têm campo `vertical`; `_poCursosDaVertical(vid)` filtra. Aulas (`poAulas`) são uma coleção FLAT entre todas as verticais, agrupadas a um curso **pelo NOME** (`a.cursos[].includes(c.nome)`).
+
+**Curso MedReview "Extensive R1":** mesma API Laravel da Anest (`api.grupomedreview.com.br`), mas **token por vertical** — o banco de aulas E de questões é separado por conta (testado: token Anest não vê R1 e vice-versa). `LARAVEL_TOKEN_MEDREVIEW` no .env. Cuidado de colisão: o `course_name` da R1 na API é "EXTENSIVE" (igual Anest) → no robô usa `forcarNome:true` p/ agrupar como "Extensive R1".
+
+**Botão "➕ Novo curso"** (`poNovoCurso`/`poNovoCursoSalvar`, modal `#po-novocurso-modal`): cadastra curso em qualquer vertical. Campos: **Nome** + **ID do curso no Laravel** (`laravelCourseId`). Cria `{id:_poSlug(nome),vertical:S.poVertical,nome,laravelCourseId}` em `config/poConfig.cursos`. O ID liga a sincronização automática.
+
+**Robô self-service** (`sincronizar-laravel.js`): `montarCursosVigiados()` = `CURSOS_BASE` (Anest+MedReview hardcoded) + todo curso do `poConfig.cursos` com `laravelCourseId` (forcarNome=true, dedup por courseId). `TOKENS_POR_VERTICAL` (anestreview→`LARAVEL_TOKEN`, medreview→`LARAVEL_TOKEN_MEDREVIEW`). Conta de login nova = 1× add token no .env + linha no map. Curso novo em vertical já configurada = criar+colar ID+puxar, **sem deploy**.
+
+**Sync por vertical:** botão manual (`_poSyncCall`) manda `vertical` (do curso aberto) → `sincronizarTudo({vertical})` filtra só aquela vertical. A automática de segunda (`sincronizarLaravelAuto`) NÃO passa vertical → puxa TODAS.
+
+**Questões token-aware** (`flashcards-po.js`): `fonteDaAula(aula)` resolve `{token,courseIds}` pela vertical do curso (via poConfig.cursos). `idsDaTrilha/questoesPorIds/comentarioDaQuestao/anexarComentarios/laravelGet` aceitam token. Conserta Copiar/Flashcards da R1.
+
+**Prompts de IA POR PRODUTO** (era global): chaves novas em `config/poConfig` — `promptThumbCurso[cursoId]`, `promptFlashcardsCurso[cursoId]`, `analisePromptCurso[cursoId]={modulo,produto}`. Cascata **produto → global legado → default**. Editores (thumb/fc/análise) abrem/salvam por `S.poCursoAtual`, título mostra o produto, badge "(só deste produto)". Backend (thumb-prompt.js, flashcards-po.js, po-analise.js) lê a chave do produto; thumb/fc recebem `cursoId` no req. Editar num produto NÃO afeta outro.
+
+**MegaBrain API** (`megabrain-api.js`, function `megabrain`): API de leitura pro MCG (gerador de Hot Topics). URL `https://us-central1-simulados-confirmacao.cloudfunctions.net/megabrain`. `GET /lessons?course=&q=&page=` (lista, 50/pág) + `GET /lessons/{id}/content` (transcrição + questões comentadas estruturadas `{label,statement,alternatives[],answer,comment}`). **Auth com escopo POR VERTICAL:** `MEGABRAIN_KEY_<VERTICAL>` no .env só vê aquela vertical (fora=404); `MEGABRAIN_API_KEY` master vê tudo. Header `Authorization: Bearer` ou `X-API-Key`. Reusa os helpers token-aware do flashcards-po. Doc de handoff p/ o dev do MCG: gerado em ~/Downloads/megabrain-api-handoff.md.
+
 ---
 
 ## Painel do Dia — Simulado Presencial (grade/rodízio/estações · controle ao vivo) (2026-06-04)
