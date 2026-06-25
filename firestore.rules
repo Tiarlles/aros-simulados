@@ -417,6 +417,18 @@ service cloud.firestore {
     }
 
     // ────────────────────────────────────────────────────────────────────────
+    // LIVROS — compilações de apostilas em capítulos (derivadas do PO).
+    // ────────────────────────────────────────────────────────────────────────
+    match /livros/{livroId} {
+      allow read: if isAuth();
+      allow create, update: if isAuth()
+                            && request.resource.data.nome is string
+                            && request.resource.data.nome.size() > 0
+                            && request.resource.data.nome.size() < 300;
+      allow delete: if isAuth();
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
     // AUDIT LOG — append-only. Read aberto pra admin ler. Create aberto pra
     // capturar ações de quem ainda usa login custom (sem Firebase Auth).
     // Update/delete bloqueados — log é imutável.

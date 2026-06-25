@@ -2148,6 +2148,83 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-empty{padding:48px 24px;text-align:center;color:var(--t2)}
 #tab-produtos .pro-empty .pro-empty-icon{font-size:48px;margin-bottom:12px;opacity:.6}
 
+/* ── Livros ── */
+#tab-produtos .pro-livros-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-top:6px}
+#tab-produtos .pro-livro-card{display:flex;flex-direction:column;text-align:left;background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;padding:0;font-family:inherit;color:var(--text);transition:transform .15s var(--ease-out-soft),box-shadow .2s,border-color .2s}
+#tab-produtos .pro-livro-card:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:0 10px 28px -12px var(--accent-glow)}
+#tab-produtos .pro-livro-card-capa{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--bg3)}
+#tab-produtos .pro-livro-capa-ph{display:flex;align-items:center;justify-content:center;font-size:42px;color:var(--t3);background:linear-gradient(135deg,var(--bg3),var(--bg2))}
+#tab-produtos .pro-livro-card-body{padding:11px 12px 13px;display:flex;flex-direction:column;gap:3px}
+#tab-produtos .pro-livro-card-nome{font-weight:700;font-size:14px;line-height:1.25;font-family:'Space Grotesk',sans-serif}
+#tab-produtos .pro-livro-card-isbn{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.5px;color:var(--t2)}
+#tab-produtos .pro-livro-card-curso{font-size:12px;color:var(--t2)}
+#tab-produtos .pro-livro-card-caps{margin-top:3px;font-size:11px;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace;letter-spacing:.4px}
+/* detalhe */
+#tab-produtos .pro-livro-det-head{display:flex;gap:20px;align-items:flex-start;margin:6px 0 22px;flex-wrap:wrap}
+#tab-produtos .pro-livro-det-capa{width:150px;aspect-ratio:3/4;object-fit:cover;border-radius:12px;border:1px solid var(--border);flex-shrink:0;font-size:54px}
+#tab-produtos .pro-livro-det-info{flex:1;min-width:220px;display:flex;flex-direction:column;gap:8px}
+#tab-produtos .pro-livro-det-nome{margin:0;font-family:'Space Grotesk',sans-serif;font-size:22px;line-height:1.2}
+#tab-produtos .pro-livro-det-curso{color:var(--t2);font-size:13px}
+#tab-produtos .pro-livro-det-isbn-l{display:flex;flex-direction:column;gap:4px;max-width:260px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t2)}
+#tab-produtos .pro-livro-det-isbn-ro{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--t2)}
+#tab-produtos .pro-livro-det-acts{display:flex;gap:8px;margin-top:4px}
+#tab-produtos .pro-livro-caps-titulo{font-family:'Space Grotesk',sans-serif;font-size:15px;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;color:var(--t2)}
+#tab-produtos .pro-livro-caps{display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+#tab-produtos .pro-livro-cap{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--bg2);border-bottom:1px solid var(--border)}
+#tab-produtos .pro-livro-cap:last-child{border-bottom:none}
+#tab-produtos .pro-livro-cap-n{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);min-width:54px}
+#tab-produtos .pro-livro-cap-main{flex:1;min-width:0}
+#tab-produtos .pro-livro-cap-tit{font-size:14px;font-weight:600;line-height:1.3}
+#tab-produtos .pro-livro-cap-tit a{color:var(--accent);text-decoration:none}
+#tab-produtos .pro-livro-cap-tit a:hover{text-decoration:underline}
+#tab-produtos .pro-livro-cap-mod{font-size:11px;color:var(--t2);margin-top:2px}
+#tab-produtos .pro-livro-cap-data{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2)}
+/* modal */
+#tab-produtos .pro-livro-modal-cols{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+#tab-produtos .pro-livro-modal-capacol{display:flex;flex-direction:column;gap:8px;align-items:center;flex-shrink:0}
+#tab-produtos .pro-livro-modal-capa{width:110px;aspect-ratio:3/4;object-fit:cover;border-radius:10px;border:1px solid var(--border);font-size:38px}
+#tab-produtos .pro-livro-modal-capabtn{cursor:pointer}
+#tab-produtos .pro-livro-modal-fields{flex:1;min-width:220px;display:flex;flex-direction:column;gap:12px}
+#tab-produtos .pro-livro-modal-modsblock{margin-top:16px}
+#tab-produtos .pro-livro-modal-hint{color:var(--t2);font-size:13px;margin:4px 0}
+#tab-produtos .pro-livro-modal-mods-tools{display:flex;gap:8px;align-items:center;color:var(--t2);font-size:11px;margin-bottom:8px}
+#tab-produtos .pro-livro-link{background:none;border:none;color:var(--accent);cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;padding:0}
+#tab-produtos .pro-livro-modal-mods{display:flex;flex-direction:column;gap:2px;max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:6px;background:var(--bg3)}
+#tab-produtos .pro-livro-modal-mod{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;cursor:pointer;transition:background .12s}
+#tab-produtos .pro-livro-modal-mod:hover{background:var(--bg2)}
+#tab-produtos .pro-livro-modal-mod input{flex-shrink:0}
+#tab-produtos .pro-livro-modal-mod-nome{flex:1;font-size:13px}
+#tab-produtos .pro-livro-modal-mod-n{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)}
+@media(max-width:560px){#tab-produtos .pro-livro-det-capa{width:110px}}
+
+/* ── Botões tech da toolbar do catálogo (Livros / Gerenciar pack) ── */
+#tab-produtos .pro-tech-btn{position:relative;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg,#161d2b 0%,#0e1521 100%);border:1px solid var(--border);color:var(--text);padding:12px 18px;border-radius:13px;font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:700;letter-spacing:.2px;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 2px 6px rgba(0,0,0,.28);transition:border-color .22s,box-shadow .22s,transform .15s,background .22s;flex-shrink:0;overflow:hidden}
+#tab-produtos .pro-tech-btn::before{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);transition:left .6s var(--ease-out-soft,cubic-bezier(.16,1,.3,1));pointer-events:none}
+#tab-produtos .pro-tech-btn:hover::before{left:100%}
+#tab-produtos .pro-tech-btn:hover{transform:translateY(-1px)}
+#tab-produtos .pro-tech-btn:active{transform:translateY(0)}
+#tab-produtos .pro-tech-btn-ico{font-size:14px;line-height:1}
+/* violeta — Livros */
+#tab-produtos .pro-tech-btn.tv{border-color:color-mix(in srgb,#a78bfa 38%,var(--border));color:#ede9fe;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px rgba(167,139,250,.08),0 2px 6px rgba(0,0,0,.3),0 0 16px rgba(167,139,250,.12)}
+#tab-produtos .pro-tech-btn.tv:hover{border-color:#a78bfa;color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 0 0 1px rgba(167,139,250,.22),0 6px 18px rgba(0,0,0,.4),0 0 26px rgba(167,139,250,.32);background:linear-gradient(180deg,#1c2233 0%,#121826 100%)}
+#tab-produtos .pro-tech-btn.tv .pro-tech-btn-ico{filter:drop-shadow(0 0 6px rgba(167,139,250,.6))}
+/* esmeralda — Gerenciar pack */
+#tab-produtos .pro-tech-btn.te{border-color:color-mix(in srgb,#34d399 34%,var(--border));color:#d1fae5;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px rgba(52,211,153,.07),0 2px 6px rgba(0,0,0,.3),0 0 16px rgba(52,211,153,.1)}
+#tab-produtos .pro-tech-btn.te:hover{border-color:#34d399;color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 0 0 1px rgba(52,211,153,.2),0 6px 18px rgba(0,0,0,.4),0 0 26px rgba(52,211,153,.28);background:linear-gradient(180deg,#13241d 0%,#0d1916 100%)}
+#tab-produtos .pro-tech-btn.te .pro-tech-btn-ico{filter:drop-shadow(0 0 6px rgba(52,211,153,.55))}
+
+/* ── Modal de cadastro de livro — moderno, com cabeçalho/rodapé fixos e corpo rolável ── */
+#tab-produtos .pro-livro-modal-card{max-width:640px;width:min(96vw,640px);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;border-radius:24px;background:color-mix(in srgb, var(--bg2) 80%, transparent);backdrop-filter:blur(40px) saturate(185%);-webkit-backdrop-filter:blur(40px) saturate(185%);border:1px solid color-mix(in srgb,#a78bfa 16%,var(--border));box-shadow:0 44px 130px -34px rgba(0,0,0,.74),0 0 0 1px var(--accent-dim),0 0 44px -14px rgba(167,139,250,.2),inset 0 1px 0 rgba(255,255,255,.05)}
+#tab-produtos .pro-livro-modal-card .mh{padding:20px 24px 16px;background:color-mix(in srgb, var(--bg2) 55%, transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid color-mix(in srgb,#a78bfa 12%,var(--border));position:static}
+#tab-produtos .pro-livro-modal-card .m-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.4px}
+#tab-produtos .pro-livro-modal-card .m-body{overflow-y:auto;flex:1;padding:22px 24px}
+#tab-produtos .pro-livro-modal-card .m-foot{padding:16px 24px 20px;background:color-mix(in srgb, var(--bg2) 55%, transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid color-mix(in srgb,#a78bfa 12%,var(--border));position:static}
+#tab-produtos .pro-livro-modal-card .fl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t2)}
+#tab-produtos .pro-livro-modal-card .m-close:hover{border-color:#a78bfa;color:#fff}
+#tab-produtos .pro-livro-modal-capa{box-shadow:0 8px 22px -10px rgba(0,0,0,.6)}
+#tab-produtos .pro-livro-modal-mods{max-height:300px;background:color-mix(in srgb, var(--bg3) 70%, transparent)}
+#tab-produtos .pro-livro-modal-mod input{accent-color:#a78bfa}
+
 /* Página de detalhe */
 #tab-produtos .pro-back{display:inline-flex;align-items:center;gap:6px;background:transparent;border:none;color:var(--t2);font-size:13px;font-weight:500;cursor:pointer;padding:6px 0;margin-bottom:14px;font-family:'Plus Jakarta Sans',sans-serif;transition:color .15s}
 #tab-produtos .pro-back:hover{color:var(--accent)}
@@ -38586,6 +38663,10 @@ function _verticalNome(id){return _verticalById(id).nome;}
 S.verticalAtual=(()=>{try{const v=localStorage.getItem('aros.catalogo.vertical');return VERTICAIS.find(x=>x.id===v)?v:null;}catch(e){return null;}})();
 S.produtos=[];
 S.produtosLoaded=false;
+S.livros=[];              // coleção `livros` (compilações de apostilas em capítulos)
+S._livrosPoLoading=false; // evita disparar loadPO duas vezes
+S._livroAtual=null;       // id do livro aberto no detalhe
+S._livroModal=null;       // draft do modal novo/editar (null = fechado)
 // 'verticals' = seletor de vertical (default quando nenhuma escolhida)
 // 'list' | 'detail' | 'edit' | 'new' = dentro de uma vertical
 S.produtosView=S.verticalAtual?'list':'verticals';
@@ -38703,6 +38784,7 @@ let _proDoresUnsub=null;
 let _proDatasImpUnsub=null;
 let _datasImpTiposUnsub=null;
 let _proUnsub=null;
+let _proLivrosUnsub=null;
 let _proCatUnsub=null;
 let _proDexCfgUnsub=null;
 let _proAprovacoesProvasUnsub=null;
@@ -43304,6 +43386,12 @@ window.initProdutos=function(){
   // Listeners por vertical: só sintoniza se uma vertical foi escolhida
   if(S.verticalAtual&&!_proCatUnsub)_proRebindVerticalListeners();
   _ensureSlackTimeListener();
+  if(!_proLivrosUnsub){
+    _proLivrosUnsub=onSnapshot(collection(db,'livros'),snap=>{
+      S.livros=snap.docs.map(d=>({id:d.id,...d.data()}));
+      if(S.produtosLoaded&&(S.produtosView==='livros'||S.produtosView==='livro'))_proRender();
+    },err=>{console.warn('livros onSnapshot:',err);});
+  }
   if(_proUnsub)return _proRender();
   _proUnsub=onSnapshot(collection(db,'produtos'),snap=>{
     S.produtos=snap.docs.map(d=>({id:d.id,...d.data()}));
@@ -43364,6 +43452,8 @@ function _proRender(){
   // Antes de qualquer view de produto, seletor de vertical (se nenhuma escolhida)
   if(S.produtosView==='verticals'||!S.verticalAtual)return _proRenderVerticals(root);
   if(!S.produtosLoaded){root.innerHTML='<div class="ld" style="padding:24px"><div class="sp"></div> Carregando catálogo...</div>';return;}
+  if(S.produtosView==='livros')return _proRenderLivros(root);
+  if(S.produtosView==='livro')return _proRenderLivroDetail(root);
   if(S.produtosView==='detail')return _proRenderDetail(root);
   if(S.produtosView==='edit'||S.produtosView==='new')return _proRenderEdit(root);
   if(S.produtosView==='datas')return _proRenderDatas(root);
@@ -43519,7 +43609,8 @@ function _proRenderList(root){
       <button class="pro-dex-btn${dexBtnOn}" onclick="proDexToggle()" title="Pergunte ${avatarArtigo} ${_proEscAttr(avatarNome)} sobre o catálogo">
         <span class="pro-dex-btn-ico">🤖</span> <span class="pro-dex-btn-label">Pergunte ${avatarArtigo} ${_proEsc(avatarNome)}</span>
       </button>
-      ${canEdit?`<button class="btn btn-s btn-sm" type="button" onclick="proAbrirFeatPackModal()" title="Features pré-prontas que aparecem em todo produto novo desta vertical">📦 Gerenciar pack</button>`:''}
+      <button class="pro-tech-btn tv pro-livros-entry" type="button" onclick="proLivrosAbrir()" title="Livros (compilações de apostilas em capítulos)"><span class="pro-tech-btn-ico">📚</span> <span>Livros</span></button>
+      ${canEdit?`<button class="pro-tech-btn te" type="button" onclick="proAbrirFeatPackModal()" title="Features pré-prontas que aparecem em todo produto novo desta vertical"><span class="pro-tech-btn-ico">📦</span> <span>Gerenciar pack</span></button>`:''}
     </div>
     <div id="pro-featpack-modal-wrap">${S._featPackModalOpen?_proFeatPackModalHTML():''}</div>
     <div class="pro-search-row">
@@ -43556,6 +43647,387 @@ function _proRowHTML(p){
       <div class="pro-card-resp">${respHtml}</div>
     </div>
     <span class="pro-badge s-${st}">${_proEsc(PRO_STATUS_LABEL[st]||st)}</span>
+  </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// LIVROS — compilações de apostilas (por curso) organizadas em capítulos.
+// Os capítulos NÃO são editados à mão: derivam das apostilas dos módulos
+// escolhidos (S.poModQuestoes), na ordem do currículo (S.poModOrdem).
+// ════════════════════════════════════════════════════════════════════════
+
+// Garante que os dados do PO (cursos, ordem de módulos, apostilas) estejam
+// carregados. Eles NÃO são carregados pela aba Produtos por padrão. Dispara
+// loadPO() uma única vez e re-renderiza ao terminar.
+function _livrosEnsurePO(){
+  if(S._poLoaded)return;              // dados já em memória (re-sincroniza se foram resetados)
+  if(S._livrosPoLoading)return;       // já tem uma carga em andamento
+  S._livrosPoLoading=true;
+  Promise.resolve().then(()=>loadPO()).catch(()=>{}).finally(()=>{
+    S._livrosPoLoading=false;
+    if(S.produtosView==='livros'||S.produtosView==='livro')_proRender();
+  });
+}
+// true quando o PO já está em memória (caso contrário, mostra spinner).
+function _livrosPoPronto(){return !!S._poLoaded;}
+
+// Conta apostilas "reais" (descarta casca vazia) de um módulo de um curso.
+function _livroApostilasCount(cursoId,modulo){
+  const b=S.poModQuestoes[_poModKey(cursoId,modulo)];
+  const aps=(b&&Array.isArray(b.apostilas))?b.apostilas:[];
+  return aps.filter(a=>String(a.titulo||'').trim()||String(a.link||'').trim()).length;
+}
+
+// Deriva os capítulos do livro a partir das apostilas dos módulos escolhidos,
+// na ordem do currículo. Retorna [{n,titulo,link,modulo,addedAt}].
+function _livroCapitulos(livro){
+  const ord=S.poModOrdem[livro.cursoId]||[];
+  const sel=Array.isArray(livro.modulos)?livro.modulos:[];
+  const mods=ord.filter(m=>sel.includes(m));
+  // módulos selecionados que não estão na ordem do currículo entram ao final
+  sel.forEach(m=>{if(!mods.includes(m))mods.push(m);});
+  let n=0;const caps=[];
+  for(const m of mods){
+    const b=S.poModQuestoes[_poModKey(livro.cursoId,m)];
+    const aps=(b&&Array.isArray(b.apostilas))?b.apostilas:[];
+    for(const a of aps){
+      if(!String(a.titulo||'').trim()&&!String(a.link||'').trim())continue;
+      n++;caps.push({n,titulo:a.titulo||'(sem título)',link:a.link||'',modulo:m,addedAt:a.addedAt||''});
+    }
+  }
+  return caps;
+}
+
+function _livroFmtData(iso){
+  const s=String(iso||'').trim();if(!s)return '—';
+  const d=new Date(s);if(isNaN(d.getTime()))return '—';
+  const p=x=>String(x).padStart(2,'0');
+  return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`;
+}
+
+window.proLivrosAbrir=()=>{S.produtosView='livros';S._livroAtual=null;S._livroModal=null;_livrosEnsurePO();_proRender();};
+window.proLivrosVoltar=()=>{S.produtosView='list';S._livroModal=null;_proRender();};
+window.proLivroAbrir=(id)=>{S.produtosView='livro';S._livroAtual=id;_livrosEnsurePO();_proRender();};
+
+function _proRenderLivros(root){
+  const vert=S.verticalAtual;
+  const vertObj=_verticalById(vert);
+  const canEdit=_proCanEdit();
+  const pronto=_livrosPoPronto();
+  const livros=(S.livros||[]).filter(l=>l.vertical===vert).slice().sort((a,b)=>{
+    const oa=(typeof a.ordem==='number')?a.ordem:Number.MAX_SAFE_INTEGER;
+    const ob=(typeof b.ordem==='number')?b.ordem:Number.MAX_SAFE_INTEGER;
+    if(oa!==ob)return oa-ob;
+    return String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR');
+  });
+  let gridHtml;
+  if(!pronto){
+    gridHtml=`<div class="ld" style="padding:24px"><div class="sp"></div> Carregando livros...</div>`;
+  }else if(!livros.length){
+    gridHtml=`<div class="pro-empty"><div class="pro-empty-icon">📚</div><p>Nenhum livro cadastrado ainda nesta vertical.</p></div>`;
+  }else{
+    gridHtml=`<div class="pro-livros-grid">${livros.map(l=>_proLivroCardHTML(l)).join('')}</div>`;
+  }
+  root.innerHTML=`
+    <div class="pro-vert-breadcrumb" style="--vert-cor-atual:${vertObj.cor}">
+      <button class="pro-vert-breadcrumb-btn" type="button" onclick="proLivrosVoltar()" title="Voltar pro catálogo">← Catálogo</button>
+      <span>/</span>
+      <span class="pro-vert-breadcrumb-atual">📚 Livros</span>
+    </div>
+    <div class="pro-header">
+      <h3 class="pro-title">📚 Livros · ${_proEsc(vertObj.nome)}</h3>
+    </div>
+    <div class="pro-actions">
+      ${canEdit?(pronto?`<button class="btn btn-p" type="button" onclick="proLivroNovo()">＋ Novo livro</button>`:`<button class="btn btn-p" type="button" disabled title="Carregando cursos...">＋ Novo livro</button>`):''}
+    </div>
+    ${gridHtml}
+    <div id="pro-livro-modal-wrap">${S._livroModal?_proLivroModalHTML():''}</div>
+  `;
+}
+
+function _proLivroCardHTML(l){
+  const curso=(S.poCursos||[]).find(c=>c.id===l.cursoId);
+  const nCaps=_livrosPoPronto()?_livroCapitulos(l).length:0;
+  const capa=String(l.capaUrl||'').trim();
+  const capaHtml=capa
+    ?`<img class="pro-livro-card-capa" src="${_proEscAttr(capa)}" alt="" loading="lazy"/>`
+    :`<div class="pro-livro-card-capa pro-livro-capa-ph">📕</div>`;
+  const isbn=String(l.isbn||'').trim();
+  return `<button type="button" class="pro-livro-card" onclick="proLivroAbrir('${_proEscAttr(l.id)}')">
+    ${capaHtml}
+    <div class="pro-livro-card-body">
+      <div class="pro-livro-card-nome">${_proEsc(l.nome||'Sem nome')}</div>
+      ${isbn?`<div class="pro-livro-card-isbn">ISBN ${_proEsc(isbn)}</div>`:''}
+      <div class="pro-livro-card-curso">${_proEsc(curso?curso.nome:(l.cursoId||'—'))}</div>
+      <div class="pro-livro-card-caps">${nCaps} ${nCaps===1?'capítulo':'capítulos'}</div>
+    </div>
+  </button>`;
+}
+
+function _proRenderLivroDetail(root){
+  const vertObj=_verticalById(S.verticalAtual);
+  const livro=(S.livros||[]).find(l=>l.id===S._livroAtual);
+  if(!livro){
+    root.innerHTML=`
+      <div class="pro-vert-breadcrumb" style="--vert-cor-atual:${vertObj.cor}">
+        <button class="pro-vert-breadcrumb-btn" type="button" onclick="proLivrosAbrir()" title="Voltar pra lista">← Livros</button>
+      </div>
+      <div class="pro-empty"><div class="pro-empty-icon">📕</div><p>Livro não encontrado.</p></div>`;
+    return;
+  }
+  const canEdit=_proCanEdit();
+  const pronto=_livrosPoPronto();
+  const curso=(S.poCursos||[]).find(c=>c.id===livro.cursoId);
+  const capa=String(livro.capaUrl||'').trim();
+  const capaHtml=capa
+    ?`<img class="pro-livro-det-capa" src="${_proEscAttr(capa)}" alt=""/>`
+    :`<div class="pro-livro-det-capa pro-livro-capa-ph">📕</div>`;
+  const caps=pronto?_livroCapitulos(livro):[];
+  let capsHtml;
+  if(!pronto){
+    capsHtml=`<div class="ld" style="padding:18px"><div class="sp"></div> Carregando capítulos...</div>`;
+  }else if(!caps.length){
+    capsHtml=`<div class="pro-empty"><div class="pro-empty-icon">📄</div><p>Nenhum capítulo ainda — as apostilas aparecem aqui automaticamente conforme entram na sincronização.</p></div>`;
+  }else{
+    capsHtml=`<div class="pro-livro-caps">${caps.map(c=>{
+      const tit=c.link
+        ?`<a href="${_proEscAttr(c.link)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${_proEsc(c.titulo)}</a>`
+        :_proEsc(c.titulo);
+      return `<div class="pro-livro-cap">
+        <span class="pro-livro-cap-n">Cap ${c.n}</span>
+        <div class="pro-livro-cap-main">
+          <div class="pro-livro-cap-tit">${tit}</div>
+          <div class="pro-livro-cap-mod">${_proEsc(c.modulo)}</div>
+        </div>
+        <span class="pro-livro-cap-data">${_livroFmtData(c.addedAt)}</span>
+      </div>`;
+    }).join('')}</div>`;
+  }
+  const isbnVal=_proEscAttr(livro.isbn||'');
+  const isbnHtml=canEdit
+    ?`<label class="pro-livro-det-isbn-l">ISBN
+        <input type="text" id="pro-livro-det-isbn" class="fc" value="${isbnVal}" placeholder="—"
+               onblur="proLivroSetIsbn('${_proEscAttr(livro.id)}',this.value)"/>
+      </label>`
+    :(String(livro.isbn||'').trim()?`<div class="pro-livro-det-isbn-ro">ISBN ${_proEsc(livro.isbn)}</div>`:'');
+  root.innerHTML=`
+    <div class="pro-vert-breadcrumb" style="--vert-cor-atual:${vertObj.cor}">
+      <button class="pro-vert-breadcrumb-btn" type="button" onclick="proLivrosAbrir()" title="Voltar pra lista">← Livros</button>
+      <span>/</span>
+      <span class="pro-vert-breadcrumb-atual">${_proEsc(livro.nome||'Livro')}</span>
+    </div>
+    <div class="pro-livro-det-head">
+      ${capaHtml}
+      <div class="pro-livro-det-info">
+        <h3 class="pro-livro-det-nome">${_proEsc(livro.nome||'Sem nome')}</h3>
+        <div class="pro-livro-det-curso">${_proEsc(curso?curso.nome:(livro.cursoId||'—'))}</div>
+        ${isbnHtml}
+        ${canEdit?`<div class="pro-livro-det-acts">
+          <button class="btn btn-s btn-sm" type="button" onclick="proLivroEditar('${_proEscAttr(livro.id)}')">✏️ Editar</button>
+          <button class="btn btn-s btn-sm" type="button" onclick="proLivroExcluir('${_proEscAttr(livro.id)}')">🗑 Excluir</button>
+        </div>`:''}
+      </div>
+    </div>
+    <h4 class="pro-livro-caps-titulo">Capítulos</h4>
+    ${capsHtml}
+    <div id="pro-livro-modal-wrap">${S._livroModal?_proLivroModalHTML():''}</div>
+  `;
+}
+
+window.proLivroSetIsbn=async(id,valor)=>{
+  const livro=(S.livros||[]).find(l=>l.id===id);if(!livro)return;
+  const v=String(valor||'').trim();
+  if(v===String(livro.isbn||'').trim())return;
+  livro.isbn=v;
+  try{await setDoc(doc(db,'livros',id),{isbn:v,updatedAt:serverTimestamp()},{merge:true});}
+  catch(e){console.warn('livro isbn:',e);alert('Não foi possível salvar o ISBN.');}
+};
+
+window.proLivroExcluir=async(id)=>{
+  const livro=(S.livros||[]).find(l=>l.id===id);if(!livro)return;
+  if(!confirm(`Excluir o livro "${livro.nome||''}"? Isso não apaga as apostilas — só a compilação.`))return;
+  try{
+    if(livro.capaPath){try{await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,livro.capaPath));}catch(e){}}
+    await deleteDoc(doc(db,'livros',id));
+    proLivrosAbrir();
+  }catch(e){console.warn('livro excluir:',e);alert('Não foi possível excluir o livro.');}
+};
+
+// ── Modal Novo / Editar ──────────────────────────────────────────────────
+function _proLivroUid(){return 'livro_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);}
+
+window.proLivroNovo=()=>{
+  _livrosEnsurePO();
+  S._livroModal={
+    id:_proLivroUid(),novo:true,nome:'',isbn:'',cursoId:'',modulos:[],
+    capaFile:null,capaPreview:'',capaUrl:'',capaPath:'',ordem:(S.livros||[]).length,
+    salvando:false
+  };
+  _proRender();
+};
+
+window.proLivroEditar=(id)=>{
+  _livrosEnsurePO();
+  const livro=(S.livros||[]).find(l=>l.id===id);if(!livro)return;
+  S._livroModal={
+    id:livro.id,novo:false,nome:livro.nome||'',isbn:livro.isbn||'',cursoId:livro.cursoId||'',
+    modulos:Array.isArray(livro.modulos)?livro.modulos.slice():[],
+    capaFile:null,capaPreview:'',capaUrl:livro.capaUrl||'',capaPath:livro.capaPath||'',
+    ordem:(typeof livro.ordem==='number')?livro.ordem:(S.livros||[]).length,salvando:false
+  };
+  _proRender();
+};
+
+window.proLivroModalFechar=()=>{S._livroModal=null;_proRender();};
+
+function _proLivroModalRefresh(){
+  const wrap=document.getElementById('pro-livro-modal-wrap');
+  if(wrap)wrap.innerHTML=S._livroModal?_proLivroModalHTML():'';
+}
+
+window.proLivroModalSet=(campo,valor)=>{
+  if(!S._livroModal)return;
+  S._livroModal[campo]=valor;
+  if(campo==='cursoId'){S._livroModal.modulos=[];_proLivroModalRefresh();}
+};
+
+window.proLivroModalCapa=(input)=>{
+  if(!S._livroModal)return;
+  const f=input.files&&input.files[0];if(!f)return;
+  S._livroModal.capaFile=f;
+  const rd=new FileReader();
+  rd.onload=()=>{S._livroModal.capaPreview=rd.result;_proLivroModalRefresh();};
+  rd.readAsDataURL(f);
+};
+
+window.proLivroModalToggleMod=(modulo)=>{
+  if(!S._livroModal)return;
+  const arr=S._livroModal.modulos;
+  const i=arr.indexOf(modulo);
+  if(i>=0)arr.splice(i,1);else arr.push(modulo);
+  // o próprio checkbox nativo já reflete o estado; não redesenha o modal (evita o flash)
+};
+
+window.proLivroModalTodos=(marcar)=>{
+  if(!S._livroModal)return;
+  const cid=S._livroModal.cursoId;
+  S._livroModal.modulos=marcar?((S.poModOrdem[cid]||[]).slice()):[];
+  // atualiza só os checkboxes, sem redesenhar o modal inteiro
+  const wrap=document.getElementById('pro-livro-modal-wrap');
+  if(wrap)wrap.querySelectorAll('.pro-livro-modal-mods input[type=checkbox]').forEach(cb=>{cb.checked=marcar;});
+};
+
+window.proLivroSalvar=async()=>{
+  const m=S._livroModal;if(!m||m.salvando)return;
+  const nome=String(m.nome||'').trim();
+  if(!nome){alert('Dá um nome pro livro.');return;}
+  if(!m.cursoId){alert('Escolhe o curso.');return;}
+  m.salvando=true;_proLivroModalRefresh();
+  try{
+    let capaUrl=m.capaUrl||'',capaPath=m.capaPath||'';
+    if(m.capaFile){
+      const nomeArq=m.capaFile.name.replace(/[^\w.\-]/g,'_');
+      const path=`livros/${S.verticalAtual}/${m.id}/capa_${Date.now()}_${nomeArq}`;
+      const r=window._fbStorage.ref(window._fbStorage.storage,path);
+      await window._fbStorage.uploadBytes(r,m.capaFile);
+      capaUrl=await window._fbStorage.getDownloadURL(r);
+      const antigo=m.capaPath;
+      capaPath=path;
+      if(antigo&&antigo!==path){try{await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,antigo));}catch(e){}}
+    }
+    const payload={
+      vertical:S.verticalAtual,cursoId:m.cursoId,nome,isbn:String(m.isbn||'').trim(),
+      capaUrl,capaPath,modulos:Array.isArray(m.modulos)?m.modulos.slice():[],
+      ordem:(typeof m.ordem==='number')?m.ordem:0,updatedAt:serverTimestamp()
+    };
+    if(m.novo)payload.createdAt=serverTimestamp();
+    await setDoc(doc(db,'livros',m.id),payload,{merge:true});
+    const abrirId=m.id;
+    S._livroModal=null;
+    if(S.produtosView==='livro'){S._livroAtual=abrirId;}
+    _proRender();
+  }catch(e){
+    console.warn('livro salvar:',e);
+    alert('Não foi possível salvar o livro.');
+    if(S._livroModal){S._livroModal.salvando=false;_proLivroModalRefresh();}
+  }
+};
+
+function _proLivroModalHTML(){
+  const m=S._livroModal;if(!m)return '';
+  const cursos=_poCursosDaVertical(S.verticalAtual);
+  const cursosOpts=cursos.map(c=>`<option value="${_proEscAttr(c.id)}"${c.id===m.cursoId?' selected':''}>${_proEsc(c.nome)}</option>`).join('');
+  const capaPrev=m.capaPreview||m.capaUrl||'';
+  const capaPrevHtml=capaPrev
+    ?`<img class="pro-livro-modal-capa" src="${_proEscAttr(capaPrev)}" alt=""/>`
+    :`<div class="pro-livro-modal-capa pro-livro-capa-ph">📕</div>`;
+  let modsHtml;
+  if(!m.cursoId){
+    modsHtml=`<p class="pro-livro-modal-hint">Escolhe um curso pra ver os módulos.</p>`;
+  }else{
+    const mods=S.poModOrdem[m.cursoId]||[];
+    if(!mods.length){
+      modsHtml=`<p class="pro-livro-modal-hint">Esse curso ainda não tem módulos carregados.</p>`;
+    }else{
+      modsHtml=`<div class="pro-livro-modal-mods-tools">
+          <button type="button" class="pro-livro-link" onclick="proLivroModalTodos(true)">Marcar todos</button>
+          <span>·</span>
+          <button type="button" class="pro-livro-link" onclick="proLivroModalTodos(false)">Limpar</button>
+        </div>
+        <div class="pro-livro-modal-mods">${mods.map(mod=>{
+          const on=m.modulos.includes(mod);
+          const n=_livroApostilasCount(m.cursoId,mod);
+          return `<label class="pro-livro-modal-mod">
+            <input type="checkbox"${on?' checked':''} onchange="proLivroModalToggleMod(decodeURIComponent('${encodeURIComponent(mod)}'))"/>
+            <span class="pro-livro-modal-mod-nome">${_proEsc(mod)}</span>
+            <span class="pro-livro-modal-mod-n">${n} ap.</span>
+          </label>`;
+        }).join('')}</div>`;
+    }
+  }
+  const salv=m.salvando;
+  return `<div class="mo" data-no-backdrop-close>
+    <div class="md pro-livro-modal-card" style="max-width:640px">
+      <div class="mh">
+        <div><div class="m-title">${m.novo?'＋ Novo livro':'✏️ Editar livro'}</div></div>
+        <button class="m-close" type="button" onclick="proLivroModalFechar()">✕</button>
+      </div>
+      <div class="m-body pro-livro-modal-body">
+        <div class="pro-livro-modal-cols">
+          <div class="pro-livro-modal-capacol">
+            ${capaPrevHtml}
+            <label class="btn btn-s btn-sm pro-livro-modal-capabtn">
+              📷 Capa
+              <input type="file" accept="image/*" style="display:none" onchange="proLivroModalCapa(this)"/>
+            </label>
+          </div>
+          <div class="pro-livro-modal-fields">
+            <div class="fg"><label class="fl">Nome</label>
+              <input type="text" class="fc" value="${_proEscAttr(m.nome)}" placeholder="Volume 1 — ..."
+                     oninput="proLivroModalSet('nome',this.value)"/>
+            </div>
+            <div class="fg"><label class="fl">ISBN <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional)</span></label>
+              <input type="text" class="fc" value="${_proEscAttr(m.isbn)}" placeholder="978-..."
+                     oninput="proLivroModalSet('isbn',this.value)"/>
+            </div>
+            <div class="fg"><label class="fl">Curso</label>
+              <select class="fc" onchange="proLivroModalSet('cursoId',this.value)">
+                <option value="">— escolher —</option>
+                ${cursosOpts}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="fg pro-livro-modal-modsblock">
+          <label class="fl">Módulos / Pontos</label>
+          ${modsHtml}
+        </div>
+      </div>
+      <div class="m-foot">
+        <button type="button" class="btn btn-s" onclick="proLivroModalFechar()" ${salv?'disabled':''}>Cancelar</button>
+        <button type="button" class="btn btn-p" onclick="proLivroSalvar()" ${salv?'disabled':''}>${salv?'Salvando…':'Salvar'}</button>
+      </div>
+    </div>
   </div>`;
 }
 

@@ -2954,3 +2954,19 @@ Campos no doc do aluno (`simulados/{id}/alunos/{aId}`): **`grupoPainel`** (id do
 - **Linha do aluno em 1 linha só** (`flex-wrap:nowrap`): nome (encolhe c/ ellipsis) · status select (170px) · presença · ↔️ Mover · ↺ · ✕.
 - **Ausente = linha vermelha na hora:** classe `status-absent` aplicada quando `presenca==='ausente'` (render) + `_applyPresVisual` agora também pinta a `.aluno-row` (feedback instantâneo otimista, antes do snapshot).
 - **No-show 30 min (já existia):** `togglePresBtn` carimba `presencaAusenteAt`; `_noShowSweep` (interval 60s, `NO_SHOW_MIN=30`) move quem está ausente há ≥30min pra `status:'absent'` → cai no painel de ausentes do rodapé (`renderNotGoingPanel` → `#co-not-going`). Não puxa fila de espera (não faz sentido no meio da rodada).
+
+### Livros — compilações de apostilas em capítulos (Catálogo de Produtos, 2026-06-25)
+
+Seção **Livros** dentro da aba Produtos. Botão **📚 Livros** (estilo tech violeta `.pro-tech-btn.tv`) na toolbar do catálogo, à direita do "Pergunte ao Dex"; o "Gerenciar pack" virou `.pro-tech-btn.te` (esmeralda). Um livro = um **curso** (vertical+curso de `S.poCursos`), com **capa, nome, ISBN** e uma seleção manual de Pontos/módulos. Os **capítulos são derivados automaticamente** das apostilas — o coord não digita capítulo nenhum.
+
+**Coleção `livros/{id}`:** `{vertical, cursoId, nome, isbn, capaUrl, capaPath, modulos[], ordem, createdAt, updatedAt}`. `modulos[]` = strings EXATAS de módulo (ex: "Ponto 1 – ..."). Listener `onSnapshot` em `initProdutos` popula `S.livros`; guard `if(!_proLivrosUnsub)` evita reassinar.
+
+**Derivação dos capítulos (`_livroCapitulos(livro)`):** percorre `S.poModOrdem[cursoId]` (ordem do currículo), filtra os módulos que estão em `livro.modulos`, e pra cada um lê `S.poModQuestoes[_poModKey(cursoId,modulo)].apostilas`. Cada apostila (descarta casca-vazia sem título E sem link) vira um capítulo numerado em sequência. Linha mostra título (link se `apostila.link`), Ponto e **data de entrada** (`apostila.addedAt` formatada, "—" se ausente). Apostila nova entra sozinha a cada sync do Laravel.
+
+**Carimbo de data:** `sincronizar-laravel.js` (auto-import de apostilas) agora grava `addedAt` nas apostilas `fonteLaravel` — preserva por `laravelLabel`, novas recebem ISO do dia. Apostilas anteriores só ganham data na 1ª sync pós-deploy (decisão UX: "—" até lá).
+
+**Views (dispatcher `_proRender`):** `produtosView` ganhou `'livros'` (grid de cards, `_proRenderLivros`) e `'livro'` (detalhe com capa + ISBN inline + lista de capítulos, `_proRenderLivroDetail`). Funções `window.proLivro*` (Abrir/Novo/Editar/Excluir/SetIsbn/Salvar) + modal `proLivroModal*`. Carga preguiçosa do PO via `_livrosEnsurePO()` → reusa `loadPO()` (guarda em `S._poLoaded`/`S._livrosPoLoading`); botão "＋ Novo livro" fica `disabled` enquanto o PO carrega.
+
+**Modal (`_proLivroModalHTML`, classe `.pro-livro-modal-card`):** glassy moderno (blur, borda violeta), **flex-column com cabeçalho/rodapé fixos e `.m-body` rolável** (`overflow-y:auto;flex:1`) — corrige o bug do ✕ que sumia quando a lista de módulos crescia (antes o card inteiro rolava). Checkbox de módulo **NÃO re-renderiza o modal** (só muta `S._livroModal.modulos`; checkbox nativo reflete) — evita o flicker; "Marcar todos/Limpar" mexe só nos `.checked` via DOM. Upload de capa pra `livros/${vertical}/${id}/capa_*` (Storage), com delete do `capaPath` antigo.
+
+**Rules:** `firestore.rules` bloco `match /livros/{livroId}` (read/write isAuth + valida nome). `storage.rules` bloco `match /livros/{livroId}/{allPaths=**}` (img ≤20MB, auth). Ambos deployados em 2026-06-25.

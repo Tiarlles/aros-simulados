@@ -314,7 +314,10 @@ async function sincronizarCurso(courseId, nome, { dryRun, fonte = {} }) {
       // manuais com conteúdo (descarta cascas vazias: sem nome E sem link).
       const manuais = prevApost.filter(a => !a.fonteLaravel && (String(a.titulo || '').trim() || String(a.link || '').trim()));
       const statusPrev = {}; prevApost.filter(a => a.fonteLaravel).forEach(a => { if (a.laravelLabel) statusPrev[a.laravelLabel] = a.status; });
-      const auto = labels.map(lbl => ({ titulo: lbl, link: '', status: statusPrev[lbl] || 'Finalizado', fonteLaravel: true, laravelLabel: lbl }));
+      // carimbo de entrada: preserva o addedAt já existente por label; carimba os novos (e os já existentes sem addedAt) com agora.
+      const addedAtPrev = {}; prevApost.filter(a => a.fonteLaravel && a.laravelLabel).forEach(a => { if (a.addedAt) addedAtPrev[a.laravelLabel] = a.addedAt; });
+      const nowIso = new Date().toISOString();
+      const auto = labels.map(lbl => ({ titulo: lbl, link: '', status: statusPrev[lbl] || 'Finalizado', fonteLaravel: true, laravelLabel: lbl, addedAt: addedAtPrev[lbl] || nowIso }));
       const novaLista = [...manuais, ...auto];
       // só escreve se mudou (evita writes à toa)
       if (JSON.stringify(novaLista) !== JSON.stringify(prevApost)) {
