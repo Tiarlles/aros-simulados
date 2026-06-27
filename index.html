@@ -2168,6 +2168,17 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-livro-det-isbn-l{display:flex;flex-direction:column;gap:4px;max-width:260px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t2)}
 #tab-produtos .pro-livro-det-isbn-ro{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--t2)}
 #tab-produtos .pro-livro-det-acts{display:flex;gap:8px;margin-top:4px}
+#tab-produtos .pro-livro-det-resumo{margin:2px 0 0;font-size:13.5px;line-height:1.45;color:var(--text);max-width:560px}
+#tab-produtos .pro-livro-det-amostra{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;font-size:12.5px;font-weight:700;color:#fff;background:#388bfd;text-decoration:none;padding:7px 13px;border-radius:9px;transition:filter .15s}
+#tab-produtos .pro-livro-det-amostra:hover{filter:brightness(1.1)}
+/* modal: dica de capa + resumo + amostra */
+#tab-produtos .pro-livro-capa-dim{margin:8px 0 0;font-size:10.5px;line-height:1.35;color:var(--t2);text-align:center;font-family:'JetBrains Mono',monospace;letter-spacing:.3px}
+#tab-produtos .pro-livro-resumo{resize:vertical;min-height:52px;font-family:inherit;line-height:1.4}
+#tab-produtos .pro-livro-resumo-count{text-align:right;font-size:10.5px;color:var(--t2);font-family:'JetBrains Mono',monospace;margin-top:3px}
+#tab-produtos .pro-livro-amostra-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+#tab-produtos .pro-livro-amostra-nome{font-size:12.5px;color:var(--text);word-break:break-word;max-width:100%}
+#tab-produtos .pro-livro-amostra-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#3fb950;background:color-mix(in srgb,#3fb950 14%,transparent);border:1px solid color-mix(in srgb,#3fb950 35%,transparent);padding:2px 7px;border-radius:6px}
+#tab-produtos .pro-livro-link-danger{color:#f85149}
 #tab-produtos .pro-livro-caps-titulo{font-family:'Space Grotesk',sans-serif;font-size:15px;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;color:var(--t2)}
 #tab-produtos .pro-livro-caps{display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);border-radius:12px;overflow:hidden}
 #tab-produtos .pro-livro-cap{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--bg2);border-bottom:1px solid var(--border)}
@@ -44014,7 +44025,9 @@ function _proRenderLivroDetail(root){
       <div class="pro-livro-det-info">
         <h3 class="pro-livro-det-nome">${_proEsc(livro.nome||'Sem nome')}</h3>
         <div class="pro-livro-det-curso">${_proEsc(curso?curso.nome:(livro.cursoId||'—'))}</div>
+        ${String(livro.resumo||'').trim()?`<p class="pro-livro-det-resumo">${_proEsc(livro.resumo)}</p>`:''}
         ${isbnHtml}
+        ${String(livro.amostraPdfUrl||'').trim()?`<a class="pro-livro-det-amostra" href="${_proEscAttr(livro.amostraPdfUrl)}" target="_blank" rel="noopener" title="Abrir PDF de amostra">📄 Baixar amostra</a>`:''}
         ${canEdit?`<div class="pro-livro-det-acts">
           <button class="btn btn-s btn-sm" type="button" onclick="proLivroEditar('${_proEscAttr(livro.id)}')">✏️ Editar</button>
           <button class="btn btn-s btn-sm" type="button" onclick="proLivroExcluir('${_proEscAttr(livro.id)}')">🗑 Excluir</button>
@@ -44052,9 +44065,10 @@ function _proLivroUid(){return 'livro_'+Date.now()+'_'+Math.random().toString(36
 window.proLivroNovo=()=>{
   _livrosEnsurePO();
   S._livroModal={
-    id:_proLivroUid(),novo:true,nome:'',isbn:'',cursoId:'',modulos:[],
-    capaFile:null,capaPreview:'',capaUrl:'',capaPath:'',ordem:(S.livros||[]).length,
-    salvando:false
+    id:_proLivroUid(),novo:true,nome:'',isbn:'',cursoId:'',modulos:[],resumo:'',
+    capaFile:null,capaPreview:'',capaUrl:'',capaPath:'',
+    amostraFile:null,amostraUrl:'',amostraPath:'',amostraNome:'',
+    ordem:(S.livros||[]).length,salvando:false
   };
   _proRender();
 };
@@ -44064,8 +44078,9 @@ window.proLivroEditar=(id)=>{
   const livro=(S.livros||[]).find(l=>l.id===id);if(!livro)return;
   S._livroModal={
     id:livro.id,novo:false,nome:livro.nome||'',isbn:livro.isbn||'',cursoId:livro.cursoId||'',
-    modulos:Array.isArray(livro.modulos)?livro.modulos.slice():[],
+    modulos:Array.isArray(livro.modulos)?livro.modulos.slice():[],resumo:livro.resumo||'',
     capaFile:null,capaPreview:'',capaUrl:livro.capaUrl||'',capaPath:livro.capaPath||'',
+    amostraFile:null,amostraUrl:livro.amostraPdfUrl||'',amostraPath:livro.amostraPdfPath||'',amostraNome:livro.amostraPdfNome||'',
     ordem:(typeof livro.ordem==='number')?livro.ordem:(S.livros||[]).length,salvando:false
   };
   _proRender();
@@ -44091,6 +44106,26 @@ window.proLivroModalCapa=(input)=>{
   const rd=new FileReader();
   rd.onload=()=>{S._livroModal.capaPreview=rd.result;_proLivroModalRefresh();};
   rd.readAsDataURL(f);
+};
+
+// PDF de amostra do conteúdo (sobe pro Storage no salvar).
+window.proLivroModalAmostra=(input)=>{
+  if(!S._livroModal)return;
+  const f=input.files&&input.files[0];if(!f)return;
+  if(f.type!=='application/pdf'){alert('A amostra precisa ser um PDF.');input.value='';return;}
+  if(f.size>20*1024*1024){alert('PDF muito grande (máx 20MB).');input.value='';return;}
+  S._livroModal.amostraFile=f;
+  S._livroModal.amostraNome=f.name;
+  _proLivroModalRefresh();
+};
+window.proLivroModalRemoverAmostra=()=>{
+  if(!S._livroModal)return;
+  // marca pra remover no salvar (limpa file + url); o path antigo é apagado no salvar
+  S._livroModal.amostraFile=null;
+  S._livroModal.amostraUrl='';
+  S._livroModal.amostraNome='';
+  S._livroModal._amostraRemover=true;
+  _proLivroModalRefresh();
 };
 
 window.proLivroModalToggleMod=(modulo)=>{
@@ -44128,9 +44163,26 @@ window.proLivroSalvar=async()=>{
       capaPath=path;
       if(antigo&&antigo!==path){try{await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,antigo));}catch(e){}}
     }
+    // PDF de amostra: upload novo / remoção
+    let amostraPdfUrl=m.amostraUrl||'',amostraPdfPath=m.amostraPath||'',amostraPdfNome=m.amostraNome||'';
+    if(m.amostraFile){
+      const nomeArq=m.amostraFile.name.replace(/[^\w.\-]/g,'_');
+      const path=`livros/${S.verticalAtual}/${m.id}/amostra_${Date.now()}_${nomeArq}`;
+      const r=window._fbStorage.ref(window._fbStorage.storage,path);
+      await window._fbStorage.uploadBytes(r,m.amostraFile);
+      amostraPdfUrl=await window._fbStorage.getDownloadURL(r);
+      const antigo=m.amostraPath;
+      amostraPdfPath=path;amostraPdfNome=m.amostraFile.name;
+      if(antigo&&antigo!==path){try{await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,antigo));}catch(e){}}
+    }else if(m._amostraRemover&&m.amostraPath){
+      try{await window._fbStorage.deleteObject(window._fbStorage.ref(window._fbStorage.storage,m.amostraPath));}catch(e){}
+      amostraPdfUrl='';amostraPdfPath='';amostraPdfNome='';
+    }
     const payload={
       vertical:S.verticalAtual,cursoId:m.cursoId,nome,isbn:String(m.isbn||'').trim(),
-      capaUrl,capaPath,modulos:Array.isArray(m.modulos)?m.modulos.slice():[],
+      resumo:String(m.resumo||'').trim().slice(0,200),
+      capaUrl,capaPath,amostraPdfUrl,amostraPdfPath,amostraPdfNome,
+      modulos:Array.isArray(m.modulos)?m.modulos.slice():[],
       ordem:(typeof m.ordem==='number')?m.ordem:0,updatedAt:serverTimestamp()
     };
     if(m.novo)payload.createdAt=serverTimestamp();
@@ -44193,6 +44245,7 @@ function _proLivroModalHTML(){
               📷 Capa
               <input type="file" accept="image/*" style="display:none" onchange="proLivroModalCapa(this)"/>
             </label>
+            <p class="pro-livro-capa-dim">Tamanho ideal:<br><b>900 × 1200 px</b> (proporção 3:4)</p>
           </div>
           <div class="pro-livro-modal-fields">
             <div class="fg"><label class="fl">Nome</label>
@@ -44210,6 +44263,24 @@ function _proLivroModalHTML(){
               </select>
             </div>
           </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Resumo do conteúdo <span style="color:var(--t2);font-weight:400;font-size:11px">(até 200 caracteres)</span></label>
+          <textarea class="fc pro-livro-resumo" maxlength="200" rows="2" placeholder="Um resumo curto do que o livro cobre…"
+                    oninput="proLivroModalSet('resumo',this.value);var c=document.getElementById('pro-livro-resumo-count');if(c)c.textContent=this.value.length+'/200'">${_proEsc(m.resumo||'')}</textarea>
+          <div class="pro-livro-resumo-count"><span id="pro-livro-resumo-count">${String(m.resumo||'').length}/200</span></div>
+        </div>
+        <div class="fg">
+          <label class="fl">PDF de amostra <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional · máx 20MB)</span></label>
+          ${(m.amostraFile||m.amostraUrl||m.amostraNome)?`<div class="pro-livro-amostra-row">
+            <span class="pro-livro-amostra-nome">📄 ${_proEsc(m.amostraNome||'amostra.pdf')}</span>
+            ${m.amostraUrl?`<a class="pro-livro-link" href="${_proEscAttr(m.amostraUrl)}" target="_blank" rel="noopener">ver</a>`:`<span class="pro-livro-amostra-tag">novo</span>`}
+            <button type="button" class="pro-livro-link pro-livro-link-danger" onclick="proLivroModalRemoverAmostra()">remover</button>
+          </div>`:''}
+          <label class="btn btn-s btn-sm pro-livro-modal-capabtn">
+            ${(m.amostraFile||m.amostraUrl||m.amostraNome)?'🔄 Trocar PDF':'📄 Escolher PDF'}
+            <input type="file" accept="application/pdf" style="display:none" onchange="proLivroModalAmostra(this)"/>
+          </label>
         </div>
         <div class="fg pro-livro-modal-modsblock">
           <label class="fl">Módulos / Pontos</label>

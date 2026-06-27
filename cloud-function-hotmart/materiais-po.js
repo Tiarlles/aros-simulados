@@ -10,6 +10,7 @@
 
 const { onRequest } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
+const { Readable } = require('stream');
 
 const LARAVEL_API = 'https://api.grupomedreview.com.br/api';
 const LARAVEL_TOKEN = process.env.LARAVEL_TOKEN || '';
@@ -158,14 +159,33 @@ async function baixarMaterial(conteudo, attId, token) {
   const r = await fetch(t.link, { headers: { Authorization: `Bearer ${token}`, Accept: '*/*' } });
   if (!r.ok) return { ok: false, status: 502, error: `Falha ao baixar do Laravel (${r.status})` };
   const ext = extDoLink(t.link);
-  const buffer = Buffer.from(await r.arrayBuffer());
-  return { ok: true, buffer, filename: nomeArquivo(t, ext), contentType: MIME[ext] || r.headers.get('content-type') || 'application/octet-stream' };
+  // Devolve o STREAM (r.body), NÃO o buffer: arquivos grandes (>~32MiB, ex.: apostila de 36MB)
+  // estouram o limite de resposta não-streaming do Cloud Run e quebram com 500.
+  return {
+    ok: true, body: r.body, filename: nomeArquivo(t, ext),
+    contentType: MIME[ext] || r.headers.get('content-type') || 'application/octet-stream',
+    contentLength: r.headers.get('content-length') || '',
+  };
+}
+// Pipa (streaming, CHUNKED) o resultado de baixarMaterial pra resposta HTTP.
+// NÃO seta Content-Length de propósito: com Content-Length o Cloud Run trata como resposta
+// NÃO-streaming e rejeita >~32MiB ("Response size was too large"). Sem ele = transfer chunked
+// = streaming de verdade, sem limite de tamanho (apostilas de dezenas de MB passam).
+function enviarDownload(d, res, extraHeaders) {
+  res.set('Content-Type', d.contentType);
+  if (extraHeaders) for (const k of Object.keys(extraHeaders)) res.set(k, extraHeaders[k]);
+  res.set('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(d.filename)}`);
+  res.flushHeaders && res.flushHeaders(); // garante envio dos headers antes do 1º chunk
+  const ns = Readable.fromWeb(d.body);
+  ns.on('error', e => { console.error('materiais stream erro:', e?.message || e); if (!res.headersSent) res.status(502).json({ error: 'Falha no stream do arquivo' }); else res.end(); });
+  ns.pipe(res);
 }
 
 // Helpers reutilizáveis pela MegaBrain API (megabrain-api.js).
 exports.acharConteudo = acharConteudo;
 exports.listarMateriais = listarMateriais;
 exports.baixarMaterial = baixarMaterial;
+exports.enviarDownload = enviarDownload;
 
 exports.materiaisPO = onRequest(
   { region: 'us-central1', invoker: 'public', cors: false, timeoutSeconds: 120, memory: '512MiB' },
@@ -186,14 +206,10 @@ exports.materiaisPO = onRequest(
         return;
       }
 
-      // download: proxy do arquivo (com o Bearer) — fonte única em baixarMaterial().
+      // download: proxy do arquivo (com o Bearer), STREAMING — fonte única em baixarMaterial().
       const d = await baixarMaterial(conteudo, b.attId, token);
       if (!d.ok) { res.status(d.status || 502).json({ error: d.error }); return; }
-      res.set('Content-Type', d.contentType);
-      res.set('Access-Control-Expose-Headers', 'Content-Disposition');
-      res.set('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(d.filename)}`);
-      res.set('Content-Length', String(d.buffer.length));
-      res.status(200).send(d.buffer);
+      enviarDownload(d, res, { 'Access-Control-Expose-Headers': 'Content-Disposition' });
     } catch (err) {
       console.error('materiaisPO erro:', err?.message || err);
       res.status(502).json({ error: String(err?.message || err) });

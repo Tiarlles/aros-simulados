@@ -13,7 +13,7 @@ const { onRequest } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const { _obterTextoTranscricao, _fonteDaAula, _idsDaTrilha, _questoesPorIds, _anexarComentarios } = require('./flashcards-po');
 const { _adaptarQuestao } = require('./questoes-po');
-const { acharConteudo: _acharConteudo, listarMateriais: _listarMateriais, baixarMaterial: _baixarMaterial } = require('./materiais-po');
+const { acharConteudo: _acharConteudo, listarMateriais: _listarMateriais, baixarMaterial: _baixarMaterial, enviarDownload: _enviarDownload } = require('./materiais-po');
 
 const MASTER_KEY = process.env.MEGABRAIN_API_KEY || '';
 const PAGE_SIZE = 50;
@@ -179,10 +179,7 @@ async function lessonMaterialDownload(req, res, lessonId, attId, scope) {
   if (!conteudo) return erro(res, 404, 'Aula não encontrada no Laravel');
   const d = await _baixarMaterial(conteudo, attId, token);
   if (!d.ok) return erro(res, d.status || 502, d.error || 'Falha no download');
-  res.set('Content-Type', d.contentType);
-  res.set('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(d.filename)}`);
-  res.set('Content-Length', String(d.buffer.length));
-  res.status(200).send(d.buffer);
+  _enviarDownload(d, res); // streaming (evita o limite de ~32MiB de resposta)
 }
 
 exports.megabrain = onRequest(
