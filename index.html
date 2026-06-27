@@ -6218,7 +6218,43 @@ body.pro-rt-fs-on{overflow:hidden}
         #po-apost-modal .po-apost-abrir.off{opacity:.25;pointer-events:none}
         #po-apost-modal .po-apost-del{flex:none;background:none;border:none;color:var(--t2);cursor:pointer;font-size:13px;padding:4px 7px;border-radius:6px}
         #po-apost-modal .po-apost-del:hover{color:#f85149;background:color-mix(in srgb,#f85149 15%,transparent)}
-        #po-apost-modal .po-apost-vazio{color:var(--t2);font-style:italic;font-size:12.5px;padding:8px 0}
+        #po-apost-modal .po-apost-vazio{color:var(--t2);font-style:italic;font-size:12.5px;padding:8px 0;line-height:1.5}
+        #po-apost-modal .po-apost-row2{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;background:var(--bg3);margin-bottom:8px}
+        #po-apost-modal .po-apost-info{flex:1;min-width:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+        #po-apost-modal .po-apost-nome{font-size:13px;font-weight:600;color:var(--text);word-break:break-word}
+        #po-apost-modal .po-apost-size{font-size:11px;color:var(--t2);font-family:'JetBrains Mono',monospace}
+        #po-apost-modal .po-apost-dl{flex:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:#fff;background:#3fb950;border:none;padding:8px 14px;border-radius:9px;cursor:pointer;white-space:nowrap;transition:filter .15s}
+        #po-apost-modal .po-apost-dl:hover:not(:disabled){filter:brightness(1.1)}
+        #po-apost-modal .po-apost-dl:disabled{opacity:.6;cursor:default}
+        #po-apost-modal .po-apost-semvinc{flex:none;font-size:11px;color:var(--t2);font-style:italic}
+        /* Botão da coluna Slides (célula) + modal de materiais */
+        #tab-po .po-mat-btn{display:inline-flex;align-items:center;gap:5px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:8px;cursor:pointer;color:#388bfd;border:1px solid color-mix(in srgb,#388bfd 40%,var(--border));background:color-mix(in srgb,#388bfd 10%,transparent);transition:filter .15s,background .15s;white-space:nowrap}
+        #tab-po .po-mat-btn:hover{background:color-mix(in srgb,#388bfd 18%,transparent)}
+        #po-mat-modal{position:fixed;inset:0;z-index:9999;display:none}
+        #po-mat-modal.show{display:block}
+        #po-mat-modal .po-modal-back{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+        #po-mat-modal .po-modal{position:relative;max-width:600px;width:min(94vw,600px);margin:9vh auto 0;background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif}
+        #po-mat-modal .po-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+        #po-mat-modal .po-modal-head h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text)}
+        #po-mat-modal .po-mod-sub{font-size:12px;color:var(--t2);margin-top:2px;font-family:'JetBrains Mono',monospace}
+        #po-mat-modal .po-modal-x{background:none;border:none;color:var(--t2);font-size:15px;cursor:pointer}
+        #po-mat-modal .po-modal-x:hover{color:var(--text)}
+        #po-mat-modal .po-modal-body{padding:16px 20px;max-height:66vh;overflow:auto}
+        #po-mat-modal .po-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3)}
+        #po-mat-modal .po-mat-load{display:flex;align-items:center;gap:10px;color:var(--t2);font-size:13px;padding:12px 0}
+        #po-mat-modal .po-mat-erro{color:#f85149;font-size:13px;padding:10px 12px;border-radius:9px;background:color-mix(in srgb,#f85149 12%,transparent);border:1px solid color-mix(in srgb,#f85149 32%,transparent)}
+        #po-mat-modal .po-mat-vazio{color:var(--t2);font-style:italic;font-size:13px;padding:10px 0}
+        #po-mat-modal .po-mat-lista{display:flex;flex-direction:column;gap:8px}
+        #po-mat-modal .po-mat-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;background:var(--bg3)}
+        #po-mat-modal .po-mat-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+        #po-mat-modal .po-mat-nome{font-size:13px;font-weight:600;color:var(--text);word-break:break-word}
+        #po-mat-modal .po-mat-meta{display:flex;align-items:center;gap:8px}
+        #po-mat-modal .po-mat-size{font-size:11px;color:var(--t2);font-family:'JetBrains Mono',monospace}
+        #po-mat-modal .po-mat-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:6px}
+        #po-mat-modal .po-mat-tag.apo{color:#3fb950;background:color-mix(in srgb,#3fb950 14%,transparent);border:1px solid color-mix(in srgb,#3fb950 35%,transparent)}
+        #po-mat-modal .po-mat-dl{flex:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:#fff;background:#388bfd;border:none;padding:8px 14px;border-radius:9px;cursor:pointer;white-space:nowrap;transition:filter .15s}
+        #po-mat-modal .po-mat-dl:hover:not(:disabled){filter:brightness(1.1)}
+        #po-mat-modal .po-mat-dl:disabled{opacity:.6;cursor:default}
         #tab-po .po-mod-del{margin-left:8px;border:1px solid color-mix(in srgb,var(--red) 35%,var(--border));background:transparent;color:var(--red);font-size:11px;line-height:1;padding:3px 7px;border-radius:7px;cursor:pointer;opacity:.55;transition:opacity .15s,background .15s}
         #tab-po .po-mod-del:hover{opacity:1;background:color-mix(in srgb,var(--red) 16%,transparent)}
         #tab-po .po-col-aula{position:relative}
@@ -39318,6 +39354,12 @@ function _poColCell(a,col){
     const tit=on?'Marcada para regravar — a IA vai gerar a ação (motivo: definido pela coordenação)':'Marcar esta aula para regravar';
     return `<span class="po-rg-toggle" title="${tit}" onclick="event.stopPropagation();poToggleRegravar('${_poEsc(a.id)}')"><span class="po-rg-nao${on?'':' on'}">Não</span><span class="po-rg-sim${on?' on':''}">Sim</span></span>`;
   }
+  // Coluna "Slides": botão que abre os materiais/anexos da aula (baixados do Laravel via proxy).
+  if(col.id==='slides'&&a){
+    return a.laravelId
+      ? `<button type="button" class="po-mat-btn" title="Baixar slides/anexos desta aula" onclick="event.stopPropagation();poAbrirMateriais('${_poEsc(a.id)}')">📥 Slides</button>`
+      : '<span class="po-mut" title="Aula sem vínculo com o Laravel — sincronize o curso pra baixar os anexos">—</span>';
+  }
   if(col.type==='link'){const u=String(val||'').trim();const ico=col.id==='video'?'▶':'🔗';return u?`<a class="po-vid" href="${_poEsc(u)}" target="_blank" rel="noopener" title="Abrir" onclick="event.stopPropagation()">${ico}</a>`:'<span class="po-mut">—</span>';}
   if(col.type==='status'){const s=String(val||'').trim();if(!s)return '<span class="po-mut">—</span>';const o=(col.opts||[]).find(x=>String(x.v).toLowerCase()===s.toLowerCase());return _poPill(o?o.cor:'#8b949e',s);}
   const t=String(val==null?'':val).trim();return t?_poEsc(t):'<span class="po-mut">—</span>';
@@ -39388,7 +39430,7 @@ async function _poSaveConfig(){
 // Carrega tudo do Firestore. Mantém o demo se a coleção estiver vazia ou sem auth.
 async function loadPO(){
   // 1) config (colunas + cursos)
-  let _duracaoInjetada=false, _trilhaRenamed=false, _apostilaColRemovida=false, _fichaStatusMig=false, _errDuvColsAdded=false, _regravarColAdded=false, _statusBackfill=false;
+  let _duracaoInjetada=false, _trilhaRenamed=false, _apostilaColRemovida=false, _fichaStatusMig=false, _errDuvColsAdded=false, _regravarColAdded=false, _statusBackfill=false, _slidesMatColAdded=false;
   try{
     const cfgSnap=await getDoc(doc(db,'config','poConfig'));
     if(cfgSnap.exists()){
@@ -39406,6 +39448,7 @@ async function loadPO(){
       _errDuvColsAdded=!!d.errDuvColsAdded;
       _regravarColAdded=!!d.regravarColAdded;
       _statusBackfill=!!d.statusPostadoBackfill;
+      _slidesMatColAdded=!!d.slidesMatColAdded;
       if(d.poPesos&&typeof d.poPesos==='object')S.poPesos={...S.poPesos,...d.poPesos};
       if(d.editais&&typeof d.editais==='object')S.poEditais=d.editais;
       if(d.temaModulo&&typeof d.temaModulo==='object')S.poTemaModulo=d.temaModulo;
@@ -39496,6 +39539,16 @@ async function loadPO(){
       }
       try{ await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,regravarColAdded:true},{merge:true}); }catch(e){ console.warn('migração regravar:',e); }
     }
+    // Migração one-time: (re)insere a coluna "Slides" — agora botão que baixa os anexos da aula
+    // do Laravel. Roda só uma vez (flag slidesMatColAdded); respeita exclusão manual posterior.
+    if(!_slidesMatColAdded){
+      if(!S.poColunas.some(c=>c.id==='slides')){
+        const colSl={id:'slides',label:'Slides',type:'link',w:84};
+        const iFicha=S.poColunas.findIndex(c=>c.id==='fichaResumo');
+        if(iFicha>=0)S.poColunas.splice(iFicha+1,0,colSl); else S.poColunas.push(colSl);
+      }
+      try{ await setDoc(doc(db,'config','poConfig'),{colunas:S.poColunas,slidesMatColAdded:true},{merge:true}); }catch(e){ console.warn('migração slides:',e); }
+    }
     // Migração one-time: preenche o Status Aula VAZIO como "Postado" (não toca em quem já tem status).
     // Agora que a barra de Aulas lê o status, aulas sem status apareciam como 0%.
     if(!_statusBackfill){
@@ -39579,6 +39632,8 @@ window.poCelEditar=(aulaId,ci,td)=>{
   if(col.type==='duvida'){poAbrirDuvidas(aulaId);return;}
   // Regravar: o toggle resolve o clique sozinho (não há edição inline).
   if(col.type==='regravar'){poToggleRegravar(aulaId);return;}
+  // Slides: a célula inteira abre os materiais da aula (não edita link inline).
+  if(col.id==='slides'){poAbrirMateriais(aulaId);return;}
   // Conteúdo com transcrição → abre o visualizador (read-only) em vez de editar.
   if(col.id==='conteudo'&&a.transcricaoPalavras){poVerTranscricao(aulaId);return;}
   const atual=String(_poCellVal(a,col)==null?'':_poCellVal(a,col));
@@ -41569,13 +41624,8 @@ const PO_APOST_STATUS=[
 function _poApostStatusCor(s){const f=PO_APOST_STATUS.find(x=>x.v===s);return f?f.cor:'#8b949e';}
 // Status efetivo da apostila DO MÓDULO (regra única, usada no badge E na IA):
 // sem nenhuma apostila cadastrada → "Pendente"; com apostilas → o status "menos pronto".
-function _poApostStatusModulo(apos){
-  apos=apos||[];
-  if(!apos.length)return 'Pendente';
-  const ordem=['Pendente','Em produção','Parcial','Finalizado'];
-  let pior=3;apos.forEach(a=>{const i=ordem.indexOf(a.status||'Pendente');if(i>=0&&i<pior)pior=i;});
-  return ordem[pior];
-}
+// Status do módulo é BINÁRIO agora: tem apostila (do Laravel) → Finalizado; não tem → Pendente.
+function _poApostStatusModulo(apos){ return (apos&&apos.length)?'Finalizado':'Pendente'; }
 function _poApostCor(apos){return _poApostStatusCor(_poApostStatusModulo(apos));}
 S._poApostAtual=null; // {cid, modulo}
 window.poAbrirApostilas=(cid,modEnc)=>{
@@ -41588,58 +41638,140 @@ window.poApostClose=()=>{
   try{_poRefreshTabela();}catch(e){} // atualiza o badge no cabeçalho
 };
 function _poApostList(){ const a=S._poApostAtual; if(!a)return null; return _poModQ(a.cid,a.modulo).apostilas; }
-window.poApostAdd=()=>{
-  const lst=_poApostList(); if(!lst)return;
-  lst.push({titulo:'',link:'',status:'Pendente'});
-  _poSaveModQuestoes(S._poApostAtual.cid,S._poApostAtual.modulo);
-  _poApostModalRender();
-};
-window.poApostDel=async(i)=>{
-  const lst=_poApostList(); if(!lst||!lst[i])return;
-  const ap=lst[i];
-  const desc=(ap.titulo||'').trim()||(ap.link||'').trim()||'esta apostila';
-  const ok=await arosConfirm({title:'Excluir apostila?',danger:true,icon:'🗑️',message:`Remover "${desc}" deste módulo? Esta ação não pode ser desfeita.`,confirmLabel:'🗑️ Excluir'});
-  if(!ok)return;
-  const lst2=_poApostList(); if(!lst2||!lst2[i])return; // revalida após o await
-  lst2.splice(i,1);
-  _poSaveModQuestoes(S._poApostAtual.cid,S._poApostAtual.modulo);
-  _poApostModalRender();
-};
-window.poApostSet=(i,campo,val)=>{
-  const lst=_poApostList(); if(!lst||!lst[i])return;
-  lst[i][campo]=val;
-  _poSaveModQuestoes(S._poApostAtual.cid,S._poApostAtual.modulo);
-  if(campo==='status')_poApostModalRender(); // re-render pra atualizar a cor do status
+// Download de uma apostila (vem do Laravel via proxy materiaisPO, igual à coluna Slides).
+window.poApostBaixar=async(i,btn)=>{
+  const lst=_poApostList(); const ap=lst&&lst[i]; if(!ap)return;
+  if(!ap.laravelId||!ap.attId){arosToast('Apostila ainda sem vínculo de download — rode a sincronização do curso pra habilitar.','err',4500);return;}
+  if(btn){btn.disabled=true;btn.dataset.lbl=btn.textContent;btn.textContent='⏳ Baixando…';}
+  try{
+    const ctx=_poMatCursoCtx();
+    const resp=await _poMatFetch({mode:'download',attId:ap.attId,courseId:ctx.courseId,vertical:ctx.vertical,laravelId:ap.laravelId,modulo:S._poApostAtual.modulo});
+    if(!resp.ok){let e={};try{e=await resp.json();}catch(_){}throw new Error(e.error||`Erro ${resp.status}`);}
+    const blob=await resp.blob();
+    let fname='';
+    const cd=resp.headers.get('Content-Disposition')||'';
+    const mm=cd.match(/filename\*=UTF-8''([^;]+)/i)||cd.match(/filename="?([^";]+)"?/i);
+    if(mm){try{fname=decodeURIComponent(mm[1]);}catch(_){fname=mm[1];}}
+    if(!fname)fname=String(ap.titulo||'apostila').replace(/[\/\\:*?"<>|]+/g,' ').trim()+'.pdf';
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fname;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+  }catch(e){arosToast(e.message||String(e),'err',4500);}
+  finally{if(btn){btn.disabled=false;btn.textContent=btn.dataset.lbl||'⬇ Baixar';}}
 };
 function _poApostModalRender(){
   let host=document.getElementById('po-apost-modal');
   if(!host){host=document.createElement('div');host.id='po-apost-modal';document.body.appendChild(host);}
   if(!S._poApostAtual){host.classList.remove('show');host.innerHTML='';return;}
   const {modulo}=S._poApostAtual;
-  const lst=_poApostList()||[];
+  const lst=(_poApostList()||[]).filter(a=>a&&a.fonteLaravel); // só as do Laravel (manual foi descontinuado)
   const rows=lst.length?lst.map((ap,i)=>{
-    const cor=_poApostStatusCor(ap.status||'Pendente');
-    const opts=PO_APOST_STATUS.map(s=>`<option value="${s.v}"${(ap.status||'Pendente')===s.v?' selected':''}>${s.v}</option>`).join('');
-    return `<div class="po-apost-row">
-      <input type="text" class="po-inp po-apost-tit" placeholder="Nome (opcional)" value="${_poEsc(ap.titulo||'')}" onchange="poApostSet(${i},'titulo',this.value)">
-      <input type="text" class="po-inp po-apost-link" placeholder="Cole o link da apostila…" value="${_poEsc(ap.link||'')}" onchange="poApostSet(${i},'link',this.value)">
-      <select class="po-inp po-apost-status" style="--sc:${cor}" onchange="poApostSet(${i},'status',this.value)">${opts}</select>
-      ${ap.link?`<a class="po-apost-abrir" href="${_poEsc(ap.link)}" target="_blank" rel="noopener" title="Abrir">🔗</a>`:'<span class="po-apost-abrir off">🔗</span>'}
-      <button type="button" class="po-apost-del" onclick="poApostDel(${i})" title="Excluir">✕</button>
+    const idx=(_poApostList()||[]).indexOf(ap);
+    const baixavel=!!(ap.laravelId&&ap.attId);
+    return `<div class="po-apost-row2">
+      <div class="po-apost-info"><span class="po-apost-nome">📕 ${_poEsc(ap.titulo||'Apostila')}</span>${ap.tamanho?`<span class="po-apost-size">${_poEsc(ap.tamanho)}</span>`:''}</div>
+      ${baixavel?`<button type="button" class="po-apost-dl" onclick="poApostBaixar(${idx},this)">⬇ Baixar</button>`:`<span class="po-apost-semvinc" title="Rode a sincronização do curso pra habilitar o download">sincronize</span>`}
     </div>`;
-  }).join(''):`<div class="po-apost-vazio">Nenhuma apostila ainda. Adicione a primeira abaixo.</div>`;
+  }).join(''):`<div class="po-apost-vazio">Nenhuma apostila disponível neste módulo. As apostilas aparecem aqui sozinhas quando o Laravel tiver o material marcado como apostila — a sincronização de segunda atualiza automaticamente.</div>`;
   host.innerHTML=`
     <div class="po-modal-back" onclick="poApostClose()"></div>
     <div class="po-modal po-modal-lg" role="dialog">
       <div class="po-modal-head"><div><h3>📚 Apostilas do módulo</h3><div class="po-mod-sub">${_poEsc(modulo)}</div></div><button type="button" class="po-modal-x" onclick="poApostClose()">✕</button></div>
       <div class="po-modal-body">
         <div class="po-apost-lista">${rows}</div>
-        <button type="button" class="btn btn-g" style="margin-top:12px" onclick="poApostAdd()">＋ Adicionar apostila</button>
       </div>
       <div class="po-modal-foot">
         <span></span>
         <button type="button" class="btn btn-p" onclick="poApostClose()">Concluído</button>
       </div>
+    </div>`;
+  host.classList.add('show');
+}
+
+// ── MATERIAIS (Slides/anexos) da aula — lista da API + download via proxy server-side ──
+// Os anexos vêm de tasks[] do Laravel; o link de download exige o token (server-side) e
+// expira, então a Cloud Function materiaisPO atua como proxy: lista e entrega o arquivo.
+const MATERIAIS_PO_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/materiaisPO';
+S._poMat=null; // {aid, titulo, fase:'loading'|'lista'|'erro', materiais:[], erro:'', baixando:Set}
+function _poMatCursoCtx(){
+  const _c=(S.poCursos||[]).find(x=>x.id===S.poCursoAtual)||null;
+  return { courseId:_c&&_c.laravelCourseId, vertical:(_c&&_c.vertical)||S.poVertical||'anestreview' };
+}
+async function _poMatFetch(body){
+  const u=window._fbAuth?.auth?.currentUser;
+  if(!u)throw new Error('Faça login (Google/Email) pra baixar materiais.');
+  const token=await u.getIdToken();
+  const resp=await fetch(MATERIAIS_PO_ENDPOINT,{method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  return resp;
+}
+window.poAbrirMateriais=async(aid)=>{
+  const a=_poFindAulaById(aid); if(!a)return;
+  if(!a.laravelId){arosToast('Aula sem vínculo com o Laravel — sincronize o curso primeiro.','err',3800);return;}
+  S._poMat={aid,titulo:String(a.titulo||''),fase:'loading',materiais:[],erro:'',baixando:new Set()};
+  _poMatModalRender();
+  try{
+    const ctx=_poMatCursoCtx();
+    const resp=await _poMatFetch({mode:'list',courseId:ctx.courseId,vertical:ctx.vertical,laravelId:a.laravelId,modulo:a.modulo});
+    let data={};try{data=await resp.json();}catch(_){}
+    if(!resp.ok)throw new Error(data.error||`Erro ${resp.status}`);
+    if(!S._poMat||S._poMat.aid!==aid)return; // modal já fechou/trocou
+    S._poMat.materiais=data.materiais||[]; S._poMat.fase='lista';
+  }catch(e){ if(S._poMat&&S._poMat.aid===aid){S._poMat.fase='erro';S._poMat.erro=e.message||String(e);} }
+  _poMatModalRender();
+};
+window.poMatClose=()=>{
+  const h=document.getElementById('po-mat-modal'); if(h){h.classList.remove('show');h.innerHTML='';}
+  S._poMat=null;
+};
+window.poMatBaixar=async(attId,btn)=>{
+  const m=S._poMat; const a=m&&_poFindAulaById(m.aid); if(!a)return;
+  if(m.baixando.has(attId))return;
+  m.baixando.add(attId);
+  if(btn){btn.disabled=true;btn.dataset.lbl=btn.textContent;btn.textContent='⏳ Baixando…';}
+  try{
+    const ctx=_poMatCursoCtx();
+    const resp=await _poMatFetch({mode:'download',attId,courseId:ctx.courseId,vertical:ctx.vertical,laravelId:a.laravelId,modulo:a.modulo});
+    if(!resp.ok){let e={};try{e=await resp.json();}catch(_){}throw new Error(e.error||`Erro ${resp.status}`);}
+    const blob=await resp.blob();
+    // nome do arquivo: Content-Disposition (se exposto) → senão o label do material
+    let fname='';
+    const cd=resp.headers.get('Content-Disposition')||'';
+    const mm=cd.match(/filename\*=UTF-8''([^;]+)/i)||cd.match(/filename="?([^";]+)"?/i);
+    if(mm){try{fname=decodeURIComponent(mm[1]);}catch(_){fname=mm[1];}}
+    if(!fname){const lbl=(m.materiais.find(x=>String(x.id)===String(attId))||{}).label||'material';fname=String(lbl).replace(/[\/\\:*?"<>|]+/g,' ').trim()+'.pdf';}
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');link.href=url;link.download=fname;document.body.appendChild(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+  }catch(e){arosToast(e.message||String(e),'err',4500);}
+  finally{ m.baixando.delete(attId); if(btn){btn.disabled=false;btn.textContent=btn.dataset.lbl||'⬇ Baixar';} }
+};
+function _poMatModalRender(){
+  let host=document.getElementById('po-mat-modal');
+  if(!host){host=document.createElement('div');host.id='po-mat-modal';document.body.appendChild(host);}
+  const m=S._poMat;
+  if(!m){host.classList.remove('show');host.innerHTML='';return;}
+  let corpo='';
+  if(m.fase==='loading'){
+    corpo=`<div class="po-mat-load"><span class="po-fc-spin"></span> Buscando anexos no Laravel…</div>`;
+  }else if(m.fase==='erro'){
+    corpo=`<div class="po-mat-erro">⚠️ ${_poEsc(m.erro||'Erro ao buscar materiais.')}</div>`;
+  }else if(!m.materiais.length){
+    corpo=`<div class="po-mat-vazio">Nenhum material/slide anexado a esta aula no Laravel.</div>`;
+  }else{
+    corpo=`<div class="po-mat-lista">${m.materiais.map(x=>`
+      <div class="po-mat-row">
+        <div class="po-mat-info">
+          <span class="po-mat-nome">${_poEsc(x.label)}</span>
+          <span class="po-mat-meta">${x.apostila?'<span class="po-mat-tag apo">apostila</span>':''}${x.tamanho?`<span class="po-mat-size">${_poEsc(x.tamanho)}</span>`:''}</span>
+        </div>
+        <button type="button" class="po-mat-dl" onclick="poMatBaixar('${_poEsc(x.id)}',this)">⬇ Baixar</button>
+      </div>`).join('')}</div>`;
+  }
+  host.innerHTML=`
+    <div class="po-modal-back" onclick="poMatClose()"></div>
+    <div class="po-modal" role="dialog">
+      <div class="po-modal-head"><div><h3>📥 Slides e Materiais</h3><div class="po-mod-sub">${_poEsc(m.titulo)}</div></div><button type="button" class="po-modal-x" onclick="poMatClose()">✕</button></div>
+      <div class="po-modal-body">${corpo}</div>
+      <div class="po-modal-foot"><span></span><button type="button" class="btn btn-p" onclick="poMatClose()">Fechar</button></div>
     </div>`;
   host.classList.add('show');
 }

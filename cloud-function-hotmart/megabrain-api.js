@@ -13,6 +13,7 @@ const { onRequest } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const { _obterTextoTranscricao, _fonteDaAula, _idsDaTrilha, _questoesPorIds, _anexarComentarios } = require('./flashcards-po');
 const { _adaptarQuestao } = require('./questoes-po');
+const { acharConteudo: _acharConteudo, listarMateriais: _listarMateriais, baixarMaterial: _baixarMaterial } = require('./materiais-po');
 
 const MASTER_KEY = process.env.MEGABRAIN_API_KEY || '';
 const PAGE_SIZE = 50;
@@ -33,6 +34,7 @@ function setCors(res) {
   res.set('Access-Control-Allow-Origin', '*'); // server-to-server; sem cookies/credenciais
   res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Authorization, X-API-Key, Content-Type');
+  res.set('Access-Control-Expose-Headers', 'Content-Disposition');
   res.set('Access-Control-Max-Age', '3600');
 }
 // Resolve o escopo da chave: { all:true } (master) | { vertical } | null (inválida/ausente).
@@ -139,6 +141,50 @@ async function lessonContent(req, res, lessonId, scope) {
   });
 }
 
+// Resolve a aula + valida escopo da chave. Devolve { a } ou manda o erro e retorna null.
+async function carregarAulaEscopada(req, res, lessonId, scope) {
+  const [doc, vmap] = await Promise.all([
+    admin.firestore().collection('poAulas').doc(lessonId).get(),
+    mapaVerticalPorCurso(),
+  ]);
+  if (!doc.exists) { erro(res, 404, 'Aula não encontrada'); return null; }
+  const a = doc.data() || {};
+  const vertical = verticalDaAula(a, vmap);
+  if (!scope.all && vertical !== scope.vertical) { erro(res, 404, 'Aula não encontrada'); return null; }
+  return { a, vertical };
+}
+
+// GET /lessons/{id}/materials — lista os slides + apostilas da aula (cada um com `type`).
+async function lessonMaterials(req, res, lessonId, scope) {
+  const r = await carregarAulaEscopada(req, res, lessonId, scope);
+  if (!r) return;
+  const { a, vertical } = r;
+  const base = {
+    lesson_id: lessonId, vertical,
+    course: (Array.isArray(a.cursos) && a.cursos[0]) || '', module: a.modulo || '',
+    title: a.titulo || a.nomeOriginal || '',
+  };
+  if (!a.laravelId) return res.status(200).json({ ...base, materials: [] });
+  const { conteudo } = await _acharConteudo({ vertical, laravelId: a.laravelId, modulo: a.modulo });
+  res.status(200).json({ ...base, materials: conteudo ? _listarMateriais(conteudo) : [] });
+}
+
+// GET /lessons/{id}/materials/{attId} — baixa o arquivo (proxy server-side, token no servidor).
+async function lessonMaterialDownload(req, res, lessonId, attId, scope) {
+  const r = await carregarAulaEscopada(req, res, lessonId, scope);
+  if (!r) return;
+  const { a, vertical } = r;
+  if (!a.laravelId) return erro(res, 404, 'Aula sem materiais');
+  const { conteudo, token } = await _acharConteudo({ vertical, laravelId: a.laravelId, modulo: a.modulo });
+  if (!conteudo) return erro(res, 404, 'Aula não encontrada no Laravel');
+  const d = await _baixarMaterial(conteudo, attId, token);
+  if (!d.ok) return erro(res, d.status || 502, d.error || 'Falha no download');
+  res.set('Content-Type', d.contentType);
+  res.set('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(d.filename)}`);
+  res.set('Content-Length', String(d.buffer.length));
+  res.status(200).send(d.buffer);
+}
+
 exports.megabrain = onRequest(
   { region: 'us-central1', invoker: 'public', cors: false, timeoutSeconds: 120, memory: '512MiB' },
   async (req, res) => {
@@ -150,10 +196,14 @@ exports.megabrain = onRequest(
 
     const path = String(req.path || '/').replace(/\/+$/, '') || '/';
     try {
+      const mMatDl = path.match(/^\/lessons\/([^/]+)\/materials\/([^/]+)$/);
+      if (mMatDl) return await lessonMaterialDownload(req, res, decodeURIComponent(mMatDl[1]), decodeURIComponent(mMatDl[2]), scope);
+      const mMat = path.match(/^\/lessons\/([^/]+)\/materials$/);
+      if (mMat) return await lessonMaterials(req, res, decodeURIComponent(mMat[1]), scope);
       const mContent = path.match(/^\/lessons\/([^/]+)\/content$/);
       if (mContent) return await lessonContent(req, res, decodeURIComponent(mContent[1]), scope);
       if (path === '/lessons' || path === '/') return await listLessons(req, res, scope);
-      return erro(res, 404, 'Rota não encontrada. Use GET /lessons ou GET /lessons/{id}/content');
+      return erro(res, 404, 'Rota não encontrada. Use GET /lessons, /lessons/{id}/content, /lessons/{id}/materials ou /lessons/{id}/materials/{attId}');
     } catch (err) {
       console.error('megabrain erro:', err?.message || err);
       return erro(res, 500, 'Erro interno: ' + String(err?.message || err));

@@ -28,9 +28,12 @@ const LARAVEL_API = 'https://api.grupomedreview.com.br/api';
 // Token Laravel POR VERTICAL. Adicionar uma vertical com login/conta nova = só
 // acrescentar a env var + a linha aqui (1× por conta de login). Cursos NÃO precisam
 // de novo deploy: entram pelo painel (config/poConfig.cursos com laravelCourseId).
+// MedReview ainda não tem login/token próprio: usa o LARAVEL_TOKEN (Anest), que já tem
+// acesso ao curso do MedReview na mesma API. Se um dia existir LARAVEL_TOKEN_MEDREVIEW,
+// ele é usado na frente automaticamente.
 const TOKENS_POR_VERTICAL = {
   anestreview: LARAVEL_TOKEN,
-  medreview: LARAVEL_TOKEN_MEDREVIEW,
+  medreview: LARAVEL_TOKEN_MEDREVIEW || LARAVEL_TOKEN,
 };
 
 // Cursos vigiados BASE (garantidos, hardcoded). Cada item: { courseId (UUID Laravel), nome (nome NO PO) }.
@@ -42,7 +45,7 @@ const TOKENS_POR_VERTICAL = {
 // A lista REAL usada em runtime é base + cursos do painel (ver montarCursosVigiados()).
 const CURSOS_BASE = [
   { courseId: '3df5bb00-db83-49a3-a334-f55af33b48f4', nome: 'Extensive', vertical: 'anestreview' },
-  { courseId: '43b2fb17-b7c1-4770-bb0e-0fc11355dfdb', nome: 'Extensive R1', vertical: 'medreview', token: LARAVEL_TOKEN_MEDREVIEW, forcarNome: true },
+  { courseId: '43b2fb17-b7c1-4770-bb0e-0fc11355dfdb', nome: 'Extensive R1', vertical: 'medreview', token: LARAVEL_TOKEN_MEDREVIEW || LARAVEL_TOKEN, forcarNome: true },
 ];
 
 // Monta a lista vigiada em runtime: CURSOS_BASE + todo curso do painel
@@ -167,12 +170,18 @@ const TRILHA_DO_LARAVEL = new Set(['Lançada', 'Pendente', '', null, undefined])
 
 // Apostilas anexadas a uma aula: itens de tasks[] type 'material' com flag apostila=true.
 // O Laravel embute os anexos no array tasks[] de cada conteúdo (o campo `attachments`
-// é só uma contagem). Devolve os títulos (label) das apostilas.
+// é só uma contagem). Devolve objetos com o vínculo de download (laravelId da aula + attId
+// do material) pra permitir o download via proxy (materiaisPO), além de label/tamanho.
 function apostilasDaAula(c) {
   return (Array.isArray(c.tasks) ? c.tasks : [])
-    .filter(t => t && t.type === 'material' && t.apostila === true)
-    .map(t => String(t.label || '').trim())
-    .filter(Boolean);
+    .filter(t => t && t.type === 'material' && t.apostila === true && t.link)
+    .map(t => ({
+      label: String(t.label || (t.data && t.data.metadata && t.data.metadata.original_name) || 'Apostila').trim() || 'Apostila',
+      laravelId: c.id,
+      attId: String(t.id),
+      tamanho: String(t.subtitle || (t.data && t.data.metadata && t.data.metadata.file_size_formatted) || ''),
+      bytes: Number((t.data && t.data.metadata && t.data.metadata.file_size) || 0) || null,
+    }));
 }
 
 // Busca todo o currículo de um curso no Laravel → lista de aulas mapeadas (+ ordem dos
@@ -193,7 +202,7 @@ async function buscarCursoLaravel(courseId, nome, fonte = {}) {
   const lista = Array.isArray(modulos) ? modulos : (modulos.data || modulos.modulos || []);
   const aulas = [];
   const modOrdem = [];
-  const apostilasPorModulo = {}; // {moduloNome: [labels]}
+  const apostilasPorModulo = {}; // {moduloNome: [{label,laravelId,attId,tamanho,bytes}]}
   const pulados = [];
   let ordemPO = 0;
   for (const mod of lista) {
@@ -264,7 +273,7 @@ async function sincronizarCurso(courseId, nome, { dryRun, fonte = {} }) {
     atualizadasTitulos: atualizadas.slice(0, 50).map(x => x.prev.nomeOriginal || x.prev.titulo),
     transcricoesPendentes: faltamTranscricao,
     transcricoesNovas: 0, semLegenda: 0, errosTranscricao: 0,
-    apostilasDetectadas: Object.values(apostilasPorModulo).reduce((s, arr) => s + new Set(arr).size, 0),
+    apostilasDetectadas: Object.values(apostilasPorModulo).reduce((s, arr) => s + new Set((arr || []).map(x => x.attId)).size, 0),
     apostilasModulos: Object.keys(apostilasPorModulo).length,
     dryRun: !!dryRun,
   };
@@ -300,30 +309,33 @@ async function sincronizarCurso(courseId, nome, { dryRun, fonte = {} }) {
   } catch (e) { console.warn('modOrdem update falhou:', e?.message || e); }
 
   // AUTO-IMPORT de apostilas (apostila=true no Laravel) → poModQuestoes[modKey].apostilas.
-  // Preserva as cadastradas à mão (sem fonteLaravel) e o status editado nas auto.
-  // Processa TODOS os módulos do currículo p/ também REMOVER apostila auto que sumiu do Laravel.
+  // 100% automático: NÃO preserva mais cadastros manuais — a lista vem só do Laravel, com o
+  // vínculo de download (laravelId da aula + attId do material) pro proxy materiaisPO.
+  // Processa TODOS os módulos do currículo p/ também REMOVER apostila que sumiu do Laravel.
   try {
     const cursoIdPO = _slug(nome);
     let importadas = 0;
     for (const modulo of modOrdem) {
-      const labels = Array.from(new Set(apostilasPorModulo[modulo] || []));
+      // dedup por attId (mesmo material pode reaparecer em aulas diferentes do módulo)
+      const vistos = new Set(); const itens = [];
+      for (const it of (apostilasPorModulo[modulo] || [])) { if (it && it.attId && !vistos.has(it.attId)) { vistos.add(it.attId); itens.push(it); } }
       const modKey = _slug(cursoIdPO + '__' + modulo);
       const ref = db.collection('poModQuestoes').doc(modKey);
       const prev = (await ref.get()).data() || {};
       const prevApost = Array.isArray(prev.apostilas) ? prev.apostilas : [];
-      // manuais com conteúdo (descarta cascas vazias: sem nome E sem link).
-      const manuais = prevApost.filter(a => !a.fonteLaravel && (String(a.titulo || '').trim() || String(a.link || '').trim()));
-      const statusPrev = {}; prevApost.filter(a => a.fonteLaravel).forEach(a => { if (a.laravelLabel) statusPrev[a.laravelLabel] = a.status; });
-      // carimbo de entrada: preserva o addedAt já existente por label; carimba os novos (e os já existentes sem addedAt) com agora.
-      const addedAtPrev = {}; prevApost.filter(a => a.fonteLaravel && a.laravelLabel).forEach(a => { if (a.addedAt) addedAtPrev[a.laravelLabel] = a.addedAt; });
+      // preserva só o carimbo de entrada (addedAt) por attId; status é sempre 'Finalizado'.
+      const addedAtPrev = {}; prevApost.forEach(a => { if (a && a.attId && a.addedAt) addedAtPrev[a.attId] = a.addedAt; });
       const nowIso = new Date().toISOString();
-      const auto = labels.map(lbl => ({ titulo: lbl, link: '', status: statusPrev[lbl] || 'Finalizado', fonteLaravel: true, laravelLabel: lbl, addedAt: addedAtPrev[lbl] || nowIso }));
-      const novaLista = [...manuais, ...auto];
+      const novaLista = itens.map(it => ({
+        titulo: it.label, status: 'Finalizado', fonteLaravel: true,
+        laravelId: it.laravelId, attId: it.attId, laravelLabel: it.label,
+        tamanho: it.tamanho || '', bytes: it.bytes || null, addedAt: addedAtPrev[it.attId] || nowIso,
+      }));
       // só escreve se mudou (evita writes à toa)
       if (JSON.stringify(novaLista) !== JSON.stringify(prevApost)) {
         await ref.set({ cursoId: cursoIdPO, modulo, apostilas: novaLista }, { merge: true });
       }
-      importadas += auto.length;
+      importadas += novaLista.length;
     }
     resumo.apostilasImportadas = importadas;
   } catch (e) { console.warn('auto-import apostilas falhou:', e?.message || e); resumo.apostilasImportadas = -1; }

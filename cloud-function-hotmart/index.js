@@ -28,6 +28,9 @@ exports.sincronizarLaravelAuto = require('./sincronizar-laravel').sincronizarLar
 exports.filtrosPO = require('./questoes-po').filtrosPO;
 exports.puxarQuestoesPO = require('./questoes-po').puxarQuestoesPO;
 
+// Materiais (Slides/anexos) de uma aula via API — lista + proxy de download (token server-side)
+exports.materiaisPO = require('./materiais-po').materiaisPO;
+
 // IA de análise do PO ("megabrain") — módulo (Sonnet, chave ANTHROPIC_API_KEY_PO)
 exports.analisarModuloPO = require('./po-analise').analisarModuloPO;
 // IA de análise do PO — produto inteiro (consolida os módulos já analisados)
