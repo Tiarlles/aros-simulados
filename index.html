@@ -2179,6 +2179,13 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-livro-cap-tit a:hover{text-decoration:underline}
 #tab-produtos .pro-livro-cap-mod{font-size:11px;color:var(--t2);margin-top:2px}
 #tab-produtos .pro-livro-cap-data{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2)}
+#tab-produtos .pro-livro-cap-tit-inp{width:100%;font-size:14px;font-weight:600;line-height:1.3;color:var(--text);background:transparent;border:1px solid transparent;border-radius:7px;padding:3px 7px;margin:-3px -7px;font-family:inherit;transition:border-color .15s,background .15s}
+#tab-produtos .pro-livro-cap-tit-inp:hover{border-color:var(--border)}
+#tab-produtos .pro-livro-cap-tit-inp:focus{outline:none;border-color:var(--accent);background:var(--bg);box-shadow:0 0 0 3px var(--accent-dim)}
+#tab-produtos .pro-livro-cap-dl{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:#fff;background:#3fb950;border:none;text-decoration:none;padding:7px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;transition:filter .15s}
+#tab-produtos .pro-livro-cap-dl:hover:not(:disabled){filter:brightness(1.1)}
+#tab-produtos .pro-livro-cap-dl:disabled{opacity:.6;cursor:default}
+#tab-produtos .pro-livro-cap-semvinc{flex-shrink:0;font-size:11px;color:var(--t2);font-style:italic}
 /* modal */
 #tab-produtos .pro-livro-modal-cols{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
 #tab-produtos .pro-livro-modal-capacol{display:flex;flex-direction:column;gap:8px;align-items:center;flex-shrink:0}
@@ -40792,7 +40799,15 @@ function _poFiltraAulas(cid,q){
   Object.keys(f).forEach(colId=>{
     const fv=String(f[colId]||'').trim();if(!fv)return;
     const fvl=fv.toLowerCase();
-    if(colId==='__aula'){aulas=aulas.filter(a=>String(a.modulo||'').toLowerCase().includes(fvl));return;}
+    if(colId==='__aula'){
+      // Filtro por APOSTILA do módulo: tem apostila registrada (sim) ou não (nao).
+      aulas=aulas.filter(a=>{
+        const mq=S.poModQuestoes[_poModKey(cid,a.modulo)];
+        const tem=!!(mq&&Array.isArray(mq.apostilas)&&mq.apostilas.length>0);
+        return fvl==='sim'?tem:!tem;
+      });
+      return;
+    }
     if(colId==='__thumb'){aulas=aulas.filter(a=>fvl==='sim'?!!a.thumbLancada:!a.thumbLancada);return;}
     const col=S.poColunas.find(c=>c.id===colId);if(!col)return;
     if(col.id==='avaliacao'){const r=_PO_AVAL_RANGES[fv];if(!r)return;aulas=aulas.filter(a=>{const v=_poRating(a);return v!=null&&v>=r[0]&&v<=r[1];});return;}
@@ -40815,6 +40830,8 @@ function _poColFiltroControl(col){
   const sel=v=>cur===v?' selected':'';
   const wrap=opts=>`<select class="po-th-filtro${on}" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" onchange="poSetColFiltro('${col.id}',this.value)">${opts}</select>`;
   const simNao=(sl,nl)=>wrap(`<option value="">Todos</option><option value="sim"${sel('sim')}>${sl||'Sim'}</option><option value="nao"${sel('nao')}>${nl||'Não'}</option>`);
+  // Coluna "Aula": o filtro do cabeçalho é por APOSTILA do módulo (tem / não tem registrada).
+  if(col.id==='__aula')return wrap(`<option value="">Apostilas: todas</option><option value="sim"${sel('sim')}>Tem apostila</option><option value="nao"${sel('nao')}>Não tem apostila</option>`);
   if(col.id==='__thumb'||col.type==='thumb')return simNao('Lançada','Não lançada');
   if(col.type==='regravar')return simNao();
   if(col.type==='erro')return simNao('Com erro aberto','Sem erro aberto');
@@ -41638,25 +41655,31 @@ window.poApostClose=()=>{
   try{_poRefreshTabela();}catch(e){} // atualiza o badge no cabeçalho
 };
 function _poApostList(){ const a=S._poApostAtual; if(!a)return null; return _poModQ(a.cid,a.modulo).apostilas; }
-// Download de uma apostila (vem do Laravel via proxy materiaisPO, igual à coluna Slides).
-window.poApostBaixar=async(i,btn)=>{
-  const lst=_poApostList(); const ap=lst&&lst[i]; if(!ap)return;
-  if(!ap.laravelId||!ap.attId){arosToast('Apostila ainda sem vínculo de download — rode a sincronização do curso pra habilitar.','err',4500);return;}
+// Baixa um material/apostila pelo proxy materiaisPO (login Firebase) → blob → download no
+// navegador. Fonte única usada pelo modal de apostila E pela exibição no Livro do catálogo.
+// ctx: {attId, laravelId, modulo, courseId(laravelCourseId), vertical}.
+async function _poBaixarMaterialBlob(ctx,nomeFallback,btn){
+  if(!ctx||!ctx.laravelId||!ctx.attId){arosToast('Apostila ainda sem vínculo de download — rode a sincronização do curso pra habilitar.','err',4500);return;}
   if(btn){btn.disabled=true;btn.dataset.lbl=btn.textContent;btn.textContent='⏳ Baixando…';}
   try{
-    const ctx=_poMatCursoCtx();
-    const resp=await _poMatFetch({mode:'download',attId:ap.attId,courseId:ctx.courseId,vertical:ctx.vertical,laravelId:ap.laravelId,modulo:S._poApostAtual.modulo});
+    const resp=await _poMatFetch({mode:'download',attId:ctx.attId,courseId:ctx.courseId,vertical:ctx.vertical,laravelId:ctx.laravelId,modulo:ctx.modulo});
     if(!resp.ok){let e={};try{e=await resp.json();}catch(_){}throw new Error(e.error||`Erro ${resp.status}`);}
     const blob=await resp.blob();
     let fname='';
     const cd=resp.headers.get('Content-Disposition')||'';
     const mm=cd.match(/filename\*=UTF-8''([^;]+)/i)||cd.match(/filename="?([^";]+)"?/i);
     if(mm){try{fname=decodeURIComponent(mm[1]);}catch(_){fname=mm[1];}}
-    if(!fname)fname=String(ap.titulo||'apostila').replace(/[\/\\:*?"<>|]+/g,' ').trim()+'.pdf';
+    if(!fname)fname=String(nomeFallback||'apostila').replace(/[\/\\:*?"<>|]+/g,' ').trim()+'.pdf';
     const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fname;document.body.appendChild(a);a.click();a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),5000);
   }catch(e){arosToast(e.message||String(e),'err',4500);}
   finally{if(btn){btn.disabled=false;btn.textContent=btn.dataset.lbl||'⬇ Baixar';}}
+}
+// Download de uma apostila no modal do módulo (contexto = curso aberto no PO).
+window.poApostBaixar=(i,btn)=>{
+  const lst=_poApostList(); const ap=lst&&lst[i]; if(!ap)return;
+  const ctx=_poMatCursoCtx();
+  _poBaixarMaterialBlob({attId:ap.attId,laravelId:ap.laravelId,modulo:S._poApostAtual.modulo,courseId:ctx.courseId,vertical:ctx.vertical},ap.tituloCustom||ap.titulo,btn);
 };
 function _poApostModalRender(){
   let host=document.getElementById('po-apost-modal');
@@ -41668,7 +41691,7 @@ function _poApostModalRender(){
     const idx=(_poApostList()||[]).indexOf(ap);
     const baixavel=!!(ap.laravelId&&ap.attId);
     return `<div class="po-apost-row2">
-      <div class="po-apost-info"><span class="po-apost-nome">📕 ${_poEsc(ap.titulo||'Apostila')}</span>${ap.tamanho?`<span class="po-apost-size">${_poEsc(ap.tamanho)}</span>`:''}</div>
+      <div class="po-apost-info"><span class="po-apost-nome">📕 ${_poEsc(ap.tituloCustom||ap.titulo||'Apostila')}</span>${ap.tamanho?`<span class="po-apost-size">${_poEsc(ap.tamanho)}</span>`:''}</div>
       ${baixavel?`<button type="button" class="po-apost-dl" onclick="poApostBaixar(${idx},this)">⬇ Baixar</button>`:`<span class="po-apost-semvinc" title="Rode a sincronização do curso pra habilitar o download">sincronize</span>`}
     </div>`;
   }).join(''):`<div class="po-apost-vazio">Nenhuma apostila disponível neste módulo. As apostilas aparecem aqui sozinhas quando o Laravel tiver o material marcado como apostila — a sincronização de segunda atualiza automaticamente.</div>`;
@@ -43811,7 +43834,10 @@ function _livroApostilasCount(cursoId,modulo){
 }
 
 // Deriva os capítulos do livro a partir das apostilas dos módulos escolhidos,
-// na ordem do currículo. Retorna [{n,titulo,link,modulo,addedAt}].
+// na ordem do currículo. Numeração sempre fixa e sequencial (1,2,3…) — NÃO atrelada
+// ao módulo. Cada apostila vira um capítulo. Retorna
+// [{n,titulo,link,modulo,addedAt,laravelId,attId}]. titulo = nome editado (tituloCustom)
+// se houver, senão o nome do Laravel.
 function _livroCapitulos(livro){
   const ord=S.poModOrdem[livro.cursoId]||[];
   const sel=Array.isArray(livro.modulos)?livro.modulos:[];
@@ -43823,12 +43849,40 @@ function _livroCapitulos(livro){
     const b=S.poModQuestoes[_poModKey(livro.cursoId,m)];
     const aps=(b&&Array.isArray(b.apostilas))?b.apostilas:[];
     for(const a of aps){
-      if(!String(a.titulo||'').trim()&&!String(a.link||'').trim())continue;
-      n++;caps.push({n,titulo:a.titulo||'(sem título)',link:a.link||'',modulo:m,addedAt:a.addedAt||''});
+      if(!String(a.titulo||'').trim()&&!String(a.link||'').trim()&&!String(a.attId||'').trim())continue;
+      n++;caps.push({
+        n,
+        titulo:(String(a.tituloCustom||'').trim()||a.titulo||'(sem título)'),
+        link:a.link||'',
+        modulo:m,
+        addedAt:a.addedAt||'',
+        laravelId:a.laravelId!=null?String(a.laravelId):'',
+        attId:a.attId!=null?String(a.attId):'',
+      });
     }
   }
   return caps;
 }
+// Renomeia a apostila inline na exibição do Livro. Salva como `tituloCustom` na apostila do
+// módulo (poModQuestoes) — esse nome NÃO é sobrescrito pela sincronização do Laravel.
+window.proLivroRenomearCap=(cursoId,encMod,attId,novoNome)=>{
+  if(!_proCanEdit())return;
+  const modulo=decodeURIComponent(encMod);
+  const b=S.poModQuestoes[_poModKey(cursoId,modulo)];
+  if(!b||!Array.isArray(b.apostilas))return;
+  const ap=b.apostilas.find(a=>String(a.attId)===String(attId));
+  if(!ap)return;
+  const nome=String(novoNome||'').trim();
+  if(nome&&nome!==String(ap.titulo||'').trim())ap.tituloCustom=nome;
+  else delete ap.tituloCustom; // vazio ou igual ao nome do Laravel → volta a seguir o Laravel
+  _poSaveModQuestoes(cursoId,modulo);
+  _proRender();
+};
+// Baixa o PDF de um capítulo (apostila) na exibição do Livro — proxy materiaisPO (login).
+window.proLivroBaixarCap=(cursoId,encMod,laravelId,attId,btn)=>{
+  const c=(S.poCursos||[]).find(x=>x.id===cursoId)||{};
+  _poBaixarMaterialBlob({attId,laravelId,modulo:decodeURIComponent(encMod),courseId:c.laravelCourseId,vertical:c.vertical||'anestreview'},'apostila',btn);
+};
 
 function _livroFmtData(iso){
   const s=String(iso||'').trim();if(!s)return '—';
@@ -43922,15 +43976,22 @@ function _proRenderLivroDetail(root){
     capsHtml=`<div class="pro-empty"><div class="pro-empty-icon">📄</div><p>Nenhum capítulo ainda — as apostilas aparecem aqui automaticamente conforme entram na sincronização.</p></div>`;
   }else{
     capsHtml=`<div class="pro-livro-caps">${caps.map(c=>{
-      const tit=c.link
-        ?`<a href="${_proEscAttr(c.link)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${_proEsc(c.titulo)}</a>`
-        :_proEsc(c.titulo);
+      const encMod=encodeURIComponent(c.modulo);
+      const titHtml=canEdit
+        ?`<input class="pro-livro-cap-tit-inp" value="${_proEscAttr(c.titulo)}" onchange="proLivroRenomearCap('${_proEscAttr(livro.cursoId)}','${encMod}','${_proEscAttr(c.attId)}',this.value)" title="Renomeie a apostila aqui. O nome editado NÃO é sobrescrito pela sincronização do Laravel.">`
+        :`<div class="pro-livro-cap-tit">${_proEsc(c.titulo)}</div>`;
+      const dl=(c.laravelId&&c.attId)
+        ?`<button type="button" class="pro-livro-cap-dl" onclick="proLivroBaixarCap('${_proEscAttr(livro.cursoId)}','${encMod}','${_proEscAttr(c.laravelId)}','${_proEscAttr(c.attId)}',this)" title="Baixar o PDF desta apostila">⬇ Baixar PDF</button>`
+        :(c.link
+          ?`<a class="pro-livro-cap-dl" href="${_proEscAttr(c.link)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Abrir">⬇ Abrir</a>`
+          :`<span class="pro-livro-cap-semvinc" title="Rode a sincronização do curso pra habilitar o download">sincronize</span>`);
       return `<div class="pro-livro-cap">
         <span class="pro-livro-cap-n">Cap ${c.n}</span>
         <div class="pro-livro-cap-main">
-          <div class="pro-livro-cap-tit">${tit}</div>
+          ${titHtml}
           <div class="pro-livro-cap-mod">${_proEsc(c.modulo)}</div>
         </div>
+        ${dl}
         <span class="pro-livro-cap-data">${_livroFmtData(c.addedAt)}</span>
       </div>`;
     }).join('')}</div>`;

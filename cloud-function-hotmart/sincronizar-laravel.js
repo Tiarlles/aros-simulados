@@ -323,14 +323,20 @@ async function sincronizarCurso(courseId, nome, { dryRun, fonte = {} }) {
       const ref = db.collection('poModQuestoes').doc(modKey);
       const prev = (await ref.get()).data() || {};
       const prevApost = Array.isArray(prev.apostilas) ? prev.apostilas : [];
-      // preserva só o carimbo de entrada (addedAt) por attId; status é sempre 'Finalizado'.
-      const addedAtPrev = {}; prevApost.forEach(a => { if (a && a.attId && a.addedAt) addedAtPrev[a.attId] = a.addedAt; });
+      // preserva por attId: o carimbo de entrada (addedAt) E o nome editado à mão na
+      // exibição do Livro (tituloCustom) — esse nome NÃO é sobrescrito pelo Laravel.
+      const addedAtPrev = {}; const customPrev = {};
+      prevApost.forEach(a => { if (a && a.attId) { if (a.addedAt) addedAtPrev[a.attId] = a.addedAt; if (a.tituloCustom) customPrev[a.attId] = a.tituloCustom; } });
       const nowIso = new Date().toISOString();
-      const novaLista = itens.map(it => ({
-        titulo: it.label, status: 'Finalizado', fonteLaravel: true,
-        laravelId: it.laravelId, attId: it.attId, laravelLabel: it.label,
-        tamanho: it.tamanho || '', bytes: it.bytes || null, addedAt: addedAtPrev[it.attId] || nowIso,
-      }));
+      const novaLista = itens.map(it => {
+        const o = {
+          titulo: it.label, status: 'Finalizado', fonteLaravel: true,
+          laravelId: it.laravelId, attId: it.attId, laravelLabel: it.label,
+          tamanho: it.tamanho || '', bytes: it.bytes || null, addedAt: addedAtPrev[it.attId] || nowIso,
+        };
+        if (customPrev[it.attId]) o.tituloCustom = customPrev[it.attId]; // nome editado preservado
+        return o;
+      });
       // só escreve se mudou (evita writes à toa)
       if (JSON.stringify(novaLista) !== JSON.stringify(prevApost)) {
         await ref.set({ cursoId: cursoIdPO, modulo, apostilas: novaLista }, { merge: true });
