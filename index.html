@@ -2171,6 +2171,14 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-livro-det-resumo{margin:2px 0 0;font-size:13.5px;line-height:1.45;color:var(--text);max-width:560px}
 #tab-produtos .pro-livro-det-amostra{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;font-size:12.5px;font-weight:700;color:#fff;background:#388bfd;text-decoration:none;padding:7px 13px;border-radius:9px;transition:filter .15s}
 #tab-produtos .pro-livro-det-amostra:hover{filter:brightness(1.1)}
+/* botões RESUMO / PDF AMOSTRA no topo do livro */
+#tab-produtos .pro-livro-actions{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 24px}
+#tab-produtos .pro-livro-act-btn{padding:14px 22px;border-radius:14px;font-size:13px;letter-spacing:.8px}
+#tab-produtos .pro-livro-act-btn .pro-tech-btn-lbl{font-family:'JetBrains Mono','SF Mono',monospace;font-weight:700}
+#tab-produtos .pro-livro-act-btn .pro-tech-btn-ico{font-size:15px}
+#tab-produtos .pro-livro-act-btn.copied{border-color:#3fb950!important;color:#fff!important;background:linear-gradient(180deg,#1a2a1f 0%,#10241a 100%)!important;box-shadow:0 0 0 1px rgba(63,185,80,.4),0 6px 18px rgba(0,0,0,.4),0 0 26px rgba(63,185,80,.35)!important}
+#tab-produtos .pro-livro-act-btn.copied .pro-tech-btn-ico{filter:drop-shadow(0 0 6px rgba(63,185,80,.7))}
+@media(max-width:560px){#tab-produtos .pro-livro-actions{flex-direction:column}#tab-produtos .pro-livro-act-btn{width:100%;justify-content:center}}
 /* modal: dica de capa + resumo + amostra */
 #tab-produtos .pro-livro-capa-dim{margin:8px 0 0;font-size:10.5px;line-height:1.35;color:var(--t2);text-align:center;font-family:'JetBrains Mono',monospace;letter-spacing:.3px}
 #tab-produtos .pro-livro-resumo{resize:vertical;min-height:52px;font-family:inherit;line-height:1.4}
@@ -2203,7 +2211,11 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-livro-modal-capa{width:110px;aspect-ratio:3/4;object-fit:cover;border-radius:10px;border:1px solid var(--border);font-size:38px}
 #tab-produtos .pro-livro-modal-capabtn{cursor:pointer}
 #tab-produtos .pro-livro-modal-fields{flex:1;min-width:220px;display:flex;flex-direction:column;gap:12px}
-#tab-produtos .pro-livro-modal-modsblock{margin-top:16px}
+#tab-produtos .pro-livro-modal-modsblock{margin-top:0;display:flex;flex-direction:column;min-height:0}
+#tab-produtos .pro-livro-modal-card .m-body .fg{margin:0}
+#tab-produtos .pro-livro-modal-row2{display:flex;gap:12px}
+#tab-produtos .pro-livro-modal-row2 .fg{flex:1;min-width:0}
+@media(max-width:480px){#tab-produtos .pro-livro-modal-row2{flex-direction:column}}
 #tab-produtos .pro-livro-modal-hint{color:var(--t2);font-size:13px;margin:4px 0}
 #tab-produtos .pro-livro-modal-mods-tools{display:flex;gap:8px;align-items:center;color:var(--t2);font-size:11px;margin-bottom:8px}
 #tab-produtos .pro-livro-link{background:none;border:none;color:var(--accent);cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;padding:0}
@@ -2235,12 +2247,12 @@ thead th{text-transform:uppercase;letter-spacing:.5px;font-size:11px}
 #tab-produtos .pro-livro-modal-card{max-width:640px;width:min(96vw,640px);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;border-radius:24px;background:color-mix(in srgb, var(--bg2) 80%, transparent);backdrop-filter:blur(40px) saturate(185%);-webkit-backdrop-filter:blur(40px) saturate(185%);border:1px solid color-mix(in srgb,#a78bfa 16%,var(--border));box-shadow:0 44px 130px -34px rgba(0,0,0,.74),0 0 0 1px var(--accent-dim),0 0 44px -14px rgba(167,139,250,.2),inset 0 1px 0 rgba(255,255,255,.05)}
 #tab-produtos .pro-livro-modal-card .mh{padding:20px 24px 16px;background:color-mix(in srgb, var(--bg2) 55%, transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid color-mix(in srgb,#a78bfa 12%,var(--border));position:static}
 #tab-produtos .pro-livro-modal-card .m-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.4px}
-#tab-produtos .pro-livro-modal-card .m-body{overflow-y:auto;flex:1;padding:22px 24px}
+#tab-produtos .pro-livro-modal-card .m-body{overflow-y:auto;flex:1 1 auto;min-height:0;padding:18px 22px;display:flex;flex-direction:column;gap:14px}
 #tab-produtos .pro-livro-modal-card .m-foot{padding:16px 24px 20px;background:color-mix(in srgb, var(--bg2) 55%, transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid color-mix(in srgb,#a78bfa 12%,var(--border));position:static}
 #tab-produtos .pro-livro-modal-card .fl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t2)}
 #tab-produtos .pro-livro-modal-card .m-close:hover{border-color:#a78bfa;color:#fff}
 #tab-produtos .pro-livro-modal-capa{box-shadow:0 8px 22px -10px rgba(0,0,0,.6)}
-#tab-produtos .pro-livro-modal-mods{max-height:300px;background:color-mix(in srgb, var(--bg3) 70%, transparent)}
+#tab-produtos .pro-livro-modal-mods{max-height:180px;background:color-mix(in srgb, var(--bg3) 70%, transparent)}
 #tab-produtos .pro-livro-modal-mod input{accent-color:#a78bfa}
 
 /* Página de detalhe */
@@ -44025,20 +44037,65 @@ function _proRenderLivroDetail(root){
       <div class="pro-livro-det-info">
         <h3 class="pro-livro-det-nome">${_proEsc(livro.nome||'Sem nome')}</h3>
         <div class="pro-livro-det-curso">${_proEsc(curso?curso.nome:(livro.cursoId||'—'))}</div>
-        ${String(livro.resumo||'').trim()?`<p class="pro-livro-det-resumo">${_proEsc(livro.resumo)}</p>`:''}
         ${isbnHtml}
-        ${String(livro.amostraPdfUrl||'').trim()?`<a class="pro-livro-det-amostra" href="${_proEscAttr(livro.amostraPdfUrl)}" target="_blank" rel="noopener" title="Abrir PDF de amostra">📄 Baixar amostra</a>`:''}
         ${canEdit?`<div class="pro-livro-det-acts">
           <button class="btn btn-s btn-sm" type="button" onclick="proLivroEditar('${_proEscAttr(livro.id)}')">✏️ Editar</button>
           <button class="btn btn-s btn-sm" type="button" onclick="proLivroExcluir('${_proEscAttr(livro.id)}')">🗑 Excluir</button>
         </div>`:''}
       </div>
     </div>
+    <div class="pro-livro-actions">
+      <button type="button" class="pro-tech-btn tv pro-livro-act-btn" onclick="proLivroCopiarResumo('${_proEscAttr(livro.id)}',this)" title="Copiar o resumo do conteúdo">
+        <span class="pro-tech-btn-ico">📋</span><span class="pro-tech-btn-lbl">RESUMO DO CONTEÚDO</span>
+      </button>
+      <button type="button" class="pro-tech-btn te pro-livro-act-btn" onclick="proLivroBaixarAmostra('${_proEscAttr(livro.id)}',this)" title="Baixar o PDF de amostra">
+        <span class="pro-tech-btn-ico">📄</span><span class="pro-tech-btn-lbl">PDF AMOSTRA</span>
+      </button>
+    </div>
     <h4 class="pro-livro-caps-titulo">Capítulos</h4>
     ${capsHtml}
     <div id="pro-livro-modal-wrap">${S._livroModal?_proLivroModalHTML():''}</div>
   `;
 }
+
+// Botão "RESUMO DO CONTEÚDO": copia o resumo pro clipboard (feedback no botão). Vazio → aviso.
+window.proLivroCopiarResumo=async(id,btn)=>{
+  const livro=(S.livros||[]).find(l=>l.id===id);if(!livro)return;
+  const txt=String(livro.resumo||'').trim();
+  if(!txt){ if(typeof arosToast==='function')arosToast('📭 Não tem conteúdo cadastrado','info',2800); return; }
+  let ok=false;
+  try{ await navigator.clipboard.writeText(txt); ok=true; }
+  catch(e){
+    try{const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();ok=document.execCommand('copy');ta.remove();}catch(_){ok=false;}
+  }
+  if(!ok){ if(typeof arosToast==='function')arosToast('Não consegui copiar — copie manualmente.','err',3000); return; }
+  // feedback visual claro no próprio botão
+  if(btn){
+    const lbl=btn.querySelector('.pro-tech-btn-lbl'), ico=btn.querySelector('.pro-tech-btn-ico');
+    const lt=lbl?lbl.textContent:'', it=ico?ico.textContent:'';
+    btn.classList.add('copied');
+    if(lbl)lbl.textContent='COPIADO!'; if(ico)ico.textContent='✓';
+    clearTimeout(btn._copyT);
+    btn._copyT=setTimeout(()=>{btn.classList.remove('copied'); if(lbl)lbl.textContent=lt; if(ico)ico.textContent=it;},1700);
+  }
+  if(typeof arosToast==='function')arosToast('📋 Resumo copiado!','success',2000);
+};
+// Botão "PDF AMOSTRA": baixa o PDF de amostra. Vazio → aviso.
+window.proLivroBaixarAmostra=async(id,btn)=>{
+  const livro=(S.livros||[]).find(l=>l.id===id);if(!livro)return;
+  const url=String(livro.amostraPdfUrl||'').trim();
+  if(!url){ if(typeof arosToast==='function')arosToast('📭 Não tem PDF cadastrado','info',2800); return; }
+  const nome=String(livro.amostraPdfNome||((livro.nome||'amostra')+'.pdf')).replace(/[\/\\:*?"<>|]+/g,' ').trim()||'amostra.pdf';
+  if(btn){btn.disabled=true;btn.dataset.lbl=(btn.querySelector('.pro-tech-btn-lbl')||{}).textContent;}
+  try{
+    const resp=await fetch(url); if(!resp.ok)throw 0;
+    const blob=await resp.blob();
+    const o=URL.createObjectURL(blob);const a=document.createElement('a');a.href=o;a.download=nome;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(o),5000);
+  }catch(e){
+    window.open(url,'_blank','noopener'); // fallback: abre numa nova aba
+  }
+  if(btn)btn.disabled=false;
+};
 
 window.proLivroSetIsbn=async(id,valor)=>{
   const livro=(S.livros||[]).find(l=>l.id===id);if(!livro)return;
@@ -44245,30 +44302,31 @@ function _proLivroModalHTML(){
               📷 Capa
               <input type="file" accept="image/*" style="display:none" onchange="proLivroModalCapa(this)"/>
             </label>
-            <p class="pro-livro-capa-dim">Tamanho ideal:<br><b>900 × 1200 px</b> (proporção 3:4)</p>
+            <p class="pro-livro-capa-dim"><b>900 × 1200 px</b><br>proporção 3:4</p>
           </div>
           <div class="pro-livro-modal-fields">
             <div class="fg"><label class="fl">Nome</label>
               <input type="text" class="fc" value="${_proEscAttr(m.nome)}" placeholder="Volume 1 — ..."
                      oninput="proLivroModalSet('nome',this.value)"/>
             </div>
-            <div class="fg"><label class="fl">ISBN <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional)</span></label>
-              <input type="text" class="fc" value="${_proEscAttr(m.isbn)}" placeholder="978-..."
-                     oninput="proLivroModalSet('isbn',this.value)"/>
+            <div class="pro-livro-modal-row2">
+              <div class="fg"><label class="fl">Curso</label>
+                <select class="fc" onchange="proLivroModalSet('cursoId',this.value)">
+                  <option value="">— escolher —</option>
+                  ${cursosOpts}
+                </select>
+              </div>
+              <div class="fg"><label class="fl">ISBN <span style="color:var(--t2);font-weight:400;font-size:11px">(opc)</span></label>
+                <input type="text" class="fc" value="${_proEscAttr(m.isbn)}" placeholder="978-..."
+                       oninput="proLivroModalSet('isbn',this.value)"/>
+              </div>
             </div>
-            <div class="fg"><label class="fl">Curso</label>
-              <select class="fc" onchange="proLivroModalSet('cursoId',this.value)">
-                <option value="">— escolher —</option>
-                ${cursosOpts}
-              </select>
+            <div class="fg"><label class="fl">Resumo do conteúdo <span style="color:var(--t2);font-weight:400;font-size:11px">(até 200)</span></label>
+              <textarea class="fc pro-livro-resumo" maxlength="200" rows="2" placeholder="Um resumo curto do que o livro cobre…"
+                        oninput="proLivroModalSet('resumo',this.value);var c=document.getElementById('pro-livro-resumo-count');if(c)c.textContent=this.value.length+'/200'">${_proEsc(m.resumo||'')}</textarea>
+              <div class="pro-livro-resumo-count"><span id="pro-livro-resumo-count">${String(m.resumo||'').length}/200</span></div>
             </div>
           </div>
-        </div>
-        <div class="fg">
-          <label class="fl">Resumo do conteúdo <span style="color:var(--t2);font-weight:400;font-size:11px">(até 200 caracteres)</span></label>
-          <textarea class="fc pro-livro-resumo" maxlength="200" rows="2" placeholder="Um resumo curto do que o livro cobre…"
-                    oninput="proLivroModalSet('resumo',this.value);var c=document.getElementById('pro-livro-resumo-count');if(c)c.textContent=this.value.length+'/200'">${_proEsc(m.resumo||'')}</textarea>
-          <div class="pro-livro-resumo-count"><span id="pro-livro-resumo-count">${String(m.resumo||'').length}/200</span></div>
         </div>
         <div class="fg">
           <label class="fl">PDF de amostra <span style="color:var(--t2);font-weight:400;font-size:11px">(opcional · máx 20MB)</span></label>
