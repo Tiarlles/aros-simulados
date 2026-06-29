@@ -26,6 +26,8 @@ const { registrarCusto } = require('./custos-ia');
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY_PO || '';
 const LARAVEL_TOKEN = process.env.LARAVEL_TOKEN || '';
 const LARAVEL_TOKEN_MEDREVIEW = process.env.LARAVEL_TOKEN_MEDREVIEW || '';
+// OftReview vive na mesma conta medmembers (o token MedReview enxerga os cursos de Oft).
+const LARAVEL_TOKEN_OFTREVIEW = process.env.LARAVEL_TOKEN_OFTREVIEW || '';
 const LARAVEL_API = 'https://api.grupomedreview.com.br/api';
 const MODEL = 'claude-sonnet-4-6';
 
@@ -34,7 +36,7 @@ const CURSOS = [{ courseId: '3df5bb00-db83-49a3-a334-f55af33b48f4', nome: 'Exten
 
 // Token Laravel POR VERTICAL — o banco de questões/trilhas é separado por conta:
 // o token da Anest NÃO enxerga as questões da R1 e vice-versa (testado).
-const TOKENS_POR_VERTICAL = { anestreview: LARAVEL_TOKEN, medreview: LARAVEL_TOKEN_MEDREVIEW };
+const TOKENS_POR_VERTICAL = { anestreview: LARAVEL_TOKEN, medreview: LARAVEL_TOKEN_MEDREVIEW, oftreview: LARAVEL_TOKEN_OFTREVIEW || LARAVEL_TOKEN_MEDREVIEW };
 
 // Resolve a "fonte" da aula (token + courseIds no Laravel) pela vertical do seu curso.
 // Lê config/poConfig.cursos (nome → {vertical, laravelCourseId}); cai na Anest se não casar.

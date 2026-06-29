@@ -22,6 +22,9 @@ const LARAVEL_TOKEN = process.env.LARAVEL_TOKEN || '';
 // os cursos da vertical MedReview (Residência R1). Capturado do app medmembers.
 // IDEAL: trocar por um token Sanctum permanente gerado pelo dev (o de sessão expira).
 const LARAVEL_TOKEN_MEDREVIEW = process.env.LARAVEL_TOKEN_MEDREVIEW || '';
+// OftReview vive na MESMA conta medmembers (o token MedReview enxerga os cursos de Oft).
+// Quando o dev der um token Sanctum dedicado de Oft, basta definir LARAVEL_TOKEN_OFTREVIEW.
+const LARAVEL_TOKEN_OFTREVIEW = process.env.LARAVEL_TOKEN_OFTREVIEW || '';
 const SLACK_WEBHOOK = process.env.SLACK_WEBHOOK || '';
 const LARAVEL_API = 'https://api.grupomedreview.com.br/api';
 
@@ -34,6 +37,7 @@ const LARAVEL_API = 'https://api.grupomedreview.com.br/api';
 const TOKENS_POR_VERTICAL = {
   anestreview: LARAVEL_TOKEN,
   medreview: LARAVEL_TOKEN_MEDREVIEW || LARAVEL_TOKEN,
+  oftreview: LARAVEL_TOKEN_OFTREVIEW || LARAVEL_TOKEN_MEDREVIEW || LARAVEL_TOKEN,
 };
 
 // Cursos vigiados BASE (garantidos, hardcoded). Cada item: { courseId (UUID Laravel), nome (nome NO PO) }.

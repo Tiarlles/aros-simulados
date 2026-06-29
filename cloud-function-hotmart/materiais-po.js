@@ -15,11 +15,14 @@ const { Readable } = require('stream');
 const LARAVEL_API = 'https://api.grupomedreview.com.br/api';
 const LARAVEL_TOKEN = process.env.LARAVEL_TOKEN || '';
 const LARAVEL_TOKEN_MEDREVIEW = process.env.LARAVEL_TOKEN_MEDREVIEW || '';
+// OftReview vive na mesma conta medmembers (o token MedReview enxerga os cursos de Oft).
+const LARAVEL_TOKEN_OFTREVIEW = process.env.LARAVEL_TOKEN_OFTREVIEW || '';
 // MedReview usa o LARAVEL_TOKEN (Anest) — que já tem acesso ao curso do MedReview na mesma
 // API — até existir um LARAVEL_TOKEN_MEDREVIEW próprio (que entra na frente se for definido).
 const TOKENS_POR_VERTICAL = {
   anestreview: LARAVEL_TOKEN,
   medreview: LARAVEL_TOKEN_MEDREVIEW || LARAVEL_TOKEN,
+  oftreview: LARAVEL_TOKEN_OFTREVIEW || LARAVEL_TOKEN_MEDREVIEW || LARAVEL_TOKEN,
 };
 
 const ALLOWED_ORIGINS = [
