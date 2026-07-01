@@ -470,7 +470,7 @@ body:has(.mo:not(.hidden)){overflow:hidden}
 .co-tab{position:relative;display:flex;align-items:center;gap:11px;padding:9px 24px 9px 12px;font-size:13.5px;font-weight:550;cursor:pointer;border:none;background:transparent;color:var(--t2);border-radius:9px;text-align:left;width:100%;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:.1px;line-height:1.3;transition:color .15s,background .15s,padding-left .2s}
 .co-tab-ic{flex-shrink:0;width:18px;height:18px;display:grid;place-items:center;color:var(--t3);transition:color .15s}
 .co-tab-ic svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.75;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.co-tab-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.co-tab-label{flex:1;min-width:0;white-space:normal;overflow-wrap:break-word;word-break:break-word}
 .co-tab-adm{flex-shrink:0;font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;font-size:8.5px;font-weight:700;letter-spacing:1.2px;color:var(--t3);background:var(--bg3);border:1px solid var(--border);padding:2px 5px;border-radius:4px;text-transform:uppercase;line-height:1;transition:color .15s,border-color .15s,background .15s}
 .co-tab:not(.on):hover .co-tab-adm{color:var(--accent);border-color:var(--accent-dim);background:var(--accent-dim)}
 .co-tab.on .co-tab-adm{color:#fff;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}
@@ -5830,6 +5830,347 @@ body.pro-rt-fs-on{overflow:hidden}
       <div id="pro-icon-pop" class="pro-icon-pop hidden" data-no-backdrop-close></div>
       <!-- Picker genérico (público-alvo, provas-alvo, tipo de feature) -->
       <div id="pro-picker-pop" class="pro-picker-pop hidden" data-no-backdrop-close></div>
+    </div>
+
+    <!-- TAB: Treinamento TSA Oral — Biblioteca de Temas -->
+    <div id="tab-cronoBib" class="hidden">
+      <style>
+        #tab-cronoBib .crono-wrap{max-width:1280px;margin:0 auto}
+        #tab-cronoBib .crono-head{margin:4px 0 22px}
+        #tab-cronoBib .crono-head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+        #tab-cronoBib .crono-refresh-btn{display:inline-flex;align-items:center;gap:9px;border:none;cursor:pointer;flex:none;
+          padding:10px 18px;border-radius:999px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;font-weight:600;color:#fff;
+          background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 65%,#7c3aed));
+          box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 38%,transparent);
+          transition:transform .2s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),box-shadow .2s,filter .2s}
+        #tab-cronoBib .crono-refresh-btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px color-mix(in srgb,var(--accent) 50%,transparent);filter:brightness(1.06)}
+        #tab-cronoBib .crono-refresh-btn:active{transform:translateY(0)}
+        #tab-cronoBib .crono-refresh-btn .ic{font-size:14px;line-height:1;display:inline-block;transition:transform .5s}
+        #tab-cronoBib .crono-refresh-btn:hover .ic{transform:rotate(180deg)}
+        #tab-cronoBib .crono-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--t2);margin:0 0 6px}
+        #tab-cronoBib .crono-title{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:600;letter-spacing:-.01em;margin:0;color:var(--text)}
+        #tab-cronoBib .crono-sub{color:var(--t2);font-size:14px;margin:6px 0 0}
+        #tab-cronoBib .crono-curso{margin:0 0 32px}
+        #tab-cronoBib .crono-curso-h{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;color:var(--text);margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:10px}
+        #tab-cronoBib .crono-curso-h small{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--t2);font-weight:400}
+        #tab-cronoBib .crono-grid{display:flex;flex-direction:column;gap:9px}
+        #tab-cronoBib .crono-grid-head{display:grid;grid-template-columns:1fr 150px 150px;gap:18px;padding:2px 18px 2px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--t2)}
+        #tab-cronoBib .crono-grid-head span:nth-child(2),#tab-cronoBib .crono-grid-head span:nth-child(3){text-align:center}
+        #tab-cronoBib .crono-card{position:relative;text-align:left;display:grid;grid-template-columns:1fr 150px 150px;align-items:center;gap:18px;
+          background:color-mix(in srgb,var(--bg2) 72%,transparent);
+          -webkit-backdrop-filter:blur(18px) saturate(150%);backdrop-filter:blur(18px) saturate(150%);
+          border:1px solid color-mix(in srgb,var(--text) 11%,transparent);border-radius:13px;padding:13px 18px;cursor:pointer;overflow:hidden;
+          transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),border-color .25s,box-shadow .25s}
+        #tab-cronoBib .crono-card:hover{transform:translateX(3px);border-color:color-mix(in srgb,var(--accent) 45%,transparent);box-shadow:0 8px 22px rgba(0,0,0,.24)}
+        #tab-cronoBib .crono-bib-bar{display:flex;justify-content:flex-end;margin:0 0 14px}
+        #tab-cronoBib .crono-sortprio{background:var(--bg3);border:1px solid var(--border);color:var(--t2);border-radius:999px;padding:8px 15px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.03em;transition:all .2s}
+        #tab-cronoBib .crono-sortprio:hover{color:var(--text);border-color:var(--accent)}
+        #tab-cronoBib .crono-sortprio.on{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 42%,transparent)}
+        #tab-cronoBib .crono-card-info{min-width:0;display:flex;align-items:center;gap:12px}
+        #tab-cronoBib .crono-card.off{opacity:.45}
+        #tab-cronoBib .crono-sw{flex:none;width:32px;height:18px;border-radius:999px;border:none;cursor:pointer;padding:0;position:relative;background:color-mix(in srgb,var(--text) 20%,transparent);transition:background .2s}
+        #tab-cronoBib .crono-sw.on{background:#22c55e}
+        #tab-cronoBib .crono-sw .knob{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));box-shadow:0 1px 2px rgba(0,0,0,.35)}
+        #tab-cronoBib .crono-sw.on .knob{transform:translateX(14px)}
+        #tab-cronoBib .crono-card-mod{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin:0;line-height:1.3;min-width:0}
+        #tab-cronoBib .crono-card-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--t2)}
+        #tab-cronoBib .crono-card-meta b{color:var(--text);font-weight:600}
+        #tab-cronoBib .crono-card .crono-pill{justify-self:center}
+        #tab-cronoBib .crono-badges{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
+        #tab-cronoBib .crono-badge{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;
+          -webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%)}
+        #tab-cronoBib .crono-badge.on{background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent)}
+        #tab-cronoBib .crono-badge.off{background:color-mix(in srgb,var(--text) 6%,transparent);color:var(--t2);border:1px solid var(--border)}
+        #tab-cronoBib .crono-card-meta small{opacity:.7;font-size:11px}
+        #tab-cronoBib .crono-card-acts{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0}
+        #tab-cronoBib .crono-act{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.03em;padding:6px 11px;border-radius:999px;cursor:pointer;white-space:nowrap;
+          -webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);transition:transform .15s,border-color .2s,background .2s}
+        #tab-cronoBib .crono-act:hover{transform:translateY(-1px)}
+        #tab-cronoBib .crono-act.on{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 42%,transparent)}
+        #tab-cronoBib .crono-act.off{background:color-mix(in srgb,var(--text) 6%,transparent);color:var(--t2);border:1px solid var(--border)}
+      </style>
+      <style>
+        /* Editor (modal) — escopado pelo id do modal porque ele é anexado ao <body>,
+           fora de #tab-cronoBib (senão o backdrop-filter de ancestrais prende o position:fixed). */
+        #crono-ed-modal .crono-ed-body{display:flex;flex-direction:column;gap:20px}
+        #crono-ed-modal .crono-ed-lbl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--t2);margin:0 0 8px;display:block}
+        #crono-ed-modal .crono-ed-ta{width:100%;min-height:90px;resize:vertical;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;line-height:1.5}
+        #crono-ed-modal .crono-tr-list{display:flex;flex-direction:column;gap:8px;margin:0 0 12px}
+        #crono-ed-modal .crono-tr-head{display:grid;grid-template-columns:1fr 52px 66px 30px;gap:8px;padding:0 2px 6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t2)}
+        #crono-ed-modal .crono-tr-head span:nth-child(2),#crono-ed-modal .crono-tr-head span:nth-child(3){text-align:center}
+        #crono-ed-modal .crono-tr-item{display:grid;grid-template-columns:1fr 52px 66px 30px;gap:8px;align-items:center;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:9px 11px}
+        #crono-ed-modal .crono-tr-item-txt{min-width:0}
+        #crono-ed-modal .crono-tr-c{text-align:center;font-weight:600;color:var(--text);font-size:13.5px}
+        #crono-ed-modal .crono-tr-t{text-align:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--accent)}
+        #crono-ed-modal .crono-tr-total{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:12.5px;color:var(--t2)}
+        #crono-ed-modal .crono-tr-total b{color:var(--text)}
+        #crono-ed-modal .crono-time-box{background:color-mix(in srgb,var(--accent) 7%,transparent);border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);border-radius:12px;padding:12px 14px}
+        #crono-ed-modal .crono-time-row{display:flex;align-items:center;gap:10px}
+        #crono-ed-modal .crono-time-row input{width:96px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:8px 11px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;text-align:center}
+        #crono-ed-modal .crono-time-row span{color:var(--t2);font-size:13px}
+        #crono-ed-modal .crono-tr-item-nome{font-weight:600;color:var(--text);font-size:13.5px}
+        #crono-ed-modal .crono-tr-item-desc{color:var(--t2);font-size:12.5px;margin-top:2px;line-height:1.4}
+        #crono-ed-modal .crono-tr-add{display:grid;grid-template-columns:1fr 1.2fr 92px auto;gap:8px;align-items:center}
+        #crono-ed-modal .crono-tr-add input{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:8px 11px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px}
+        #crono-ed-modal .crono-x{background:none;border:none;color:var(--t2);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;border-radius:6px}
+        #crono-ed-modal .crono-x:hover{color:#f87171;background:color-mix(in srgb,#f87171 14%,transparent)}
+        #crono-ed-modal .crono-ed-empty{color:var(--t2);font-size:12.5px;font-style:italic;padding:4px 0}
+        /* Hot topics (tabela Tema | Onde estudar?) */
+        #crono-ed-modal .crono-ht-head{display:grid;grid-template-columns:1fr 1.3fr 34px;gap:8px;padding:0 2px 6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t2)}
+        #crono-ed-modal .crono-ht-list{display:flex;flex-direction:column;gap:8px;margin:0 0 12px}
+        #crono-ed-modal .crono-ht-item{display:grid;grid-template-columns:1fr 1.3fr 34px;gap:8px;align-items:start;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:9px 11px}
+        #crono-ed-modal .crono-ht-item .t{font-weight:600;color:var(--text);font-size:13.5px;line-height:1.35;word-break:break-word}
+        #crono-ed-modal .crono-ht-item .o{color:var(--t2);font-size:12.5px;line-height:1.4;word-break:break-word}
+        #crono-ed-modal .crono-ht-add{display:grid;grid-template-columns:1fr 1.3fr auto;gap:8px;align-items:center}
+        #crono-ed-modal .crono-ht-add input{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:8px 11px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px}
+        /* ── Status (pendente/cadastrado/não se aplica) + prioridade — classes sem escopo p/ valer na linha E no modal ── */
+        .crono-st,.crono-pill{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+        .crono-st.pend,.crono-pill.pend{background:color-mix(in srgb,#ef4444 16%,transparent);color:#ef4444;border-color:color-mix(in srgb,#ef4444 40%,transparent)}
+        .crono-st.ok,.crono-pill.ok{background:color-mix(in srgb,#22c55e 16%,transparent);color:#22c55e;border-color:color-mix(in srgb,#22c55e 40%,transparent)}
+        .crono-st.na,.crono-pill.na{background:color-mix(in srgb,#9ca3af 16%,transparent);color:#9ca3af;border-color:color-mix(in srgb,#9ca3af 38%,transparent)}
+        /* Prioridade: tinta translúcida na linha do tema */
+        #tab-cronoBib .crono-card[data-prio=alta]{background:color-mix(in srgb,#ef4444 9%,var(--bg2));border-color:color-mix(in srgb,#ef4444 30%,transparent)}
+        #tab-cronoBib .crono-card[data-prio=media]{background:color-mix(in srgb,#f59e0b 9%,var(--bg2));border-color:color-mix(in srgb,#f59e0b 30%,transparent)}
+        #tab-cronoBib .crono-card[data-prio=baixa]{background:color-mix(in srgb,#22c55e 9%,var(--bg2));border-color:color-mix(in srgb,#22c55e 30%,transparent)}
+        #tab-cronoBib .crono-card{cursor:pointer}
+        #tab-cronoBib .crono-prio-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:6px;font-weight:600}
+        #tab-cronoBib .crono-prio-tag.alta{background:color-mix(in srgb,#ef4444 20%,transparent);color:#ef4444}
+        #tab-cronoBib .crono-prio-tag.media{background:color-mix(in srgb,#f59e0b 20%,transparent);color:#f59e0b}
+        #tab-cronoBib .crono-prio-tag.baixa{background:color-mix(in srgb,#22c55e 20%,transparent);color:#22c55e}
+        /* ── Editor do tema: prioridade + dropdowns ── */
+        #crono-ed-modal .crono-prio{margin-bottom:4px}
+        #crono-ed-modal .crono-prio-btns{display:flex;gap:8px}
+        #crono-ed-modal .crono-prio-b{flex:1;padding:9px 10px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--t2);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;transition:all .15s}
+        #crono-ed-modal .crono-prio-b[data-p=alta].sel{background:color-mix(in srgb,#ef4444 20%,transparent);color:#ef4444;border-color:#ef4444}
+        #crono-ed-modal .crono-prio-b[data-p=media].sel{background:color-mix(in srgb,#f59e0b 20%,transparent);color:#f59e0b;border-color:#f59e0b}
+        #crono-ed-modal .crono-prio-b[data-p=baixa].sel{background:color-mix(in srgb,#22c55e 20%,transparent);color:#22c55e;border-color:#22c55e}
+        #crono-ed-modal .crono-drop{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+        #crono-ed-modal .crono-drop-h{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;background:var(--bg3);border:none;cursor:pointer;color:var(--text);text-align:left;font-family:inherit}
+        #crono-ed-modal .crono-drop-caret{color:var(--t2);font-size:12px;transition:transform .2s}
+        #crono-ed-modal .crono-drop.open .crono-drop-caret{transform:rotate(90deg)}
+        #crono-ed-modal .crono-drop-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px}
+        #crono-ed-modal .crono-drop-time{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--accent)}
+        #crono-ed-modal .crono-drop-body{display:none;padding:14px;border-top:1px solid var(--border)}
+        #crono-ed-modal .crono-drop.open .crono-drop-body{display:block}
+        #crono-ed-modal .crono-link-add{display:flex;gap:8px;align-items:center;margin-top:2px}
+        #crono-ed-modal .crono-link-sel{flex:1;min-width:0;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:9px 11px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px}
+        #crono-ed-modal .crono-au-item{display:flex;align-items:center;gap:12px;padding:9px 4px;border-bottom:1px solid color-mix(in srgb,var(--text) 8%,transparent)}
+        #crono-ed-modal .crono-au-item:last-child{border-bottom:none}
+        #crono-ed-modal .crono-au-item.off{opacity:.42}
+        #crono-ed-modal .crono-au-item .t{flex:1;color:var(--text);font-size:13.5px;line-height:1.35;min-width:0}
+        #crono-ed-modal .crono-au-item .d{flex:none;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--t2)}
+        #crono-ed-modal .crono-sw{flex:none;width:32px;height:18px;border-radius:999px;border:none;cursor:pointer;padding:0;position:relative;background:color-mix(in srgb,var(--text) 20%,transparent);transition:background .2s}
+        #crono-ed-modal .crono-sw.on{background:#22c55e}
+        #crono-ed-modal .crono-sw .knob{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));box-shadow:0 1px 2px rgba(0,0,0,.35)}
+        #crono-ed-modal .crono-sw.on .knob{transform:translateX(14px)}
+        #crono-ed-modal .crono-na-toggle{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);color:var(--t2);font-size:12.5px;cursor:pointer;user-select:none}
+        #crono-ed-modal .crono-na-toggle input{width:15px;height:15px;accent-color:#9ca3af;cursor:pointer}
+      </style>
+      <div class="crono-wrap">
+        <div class="crono-head crono-head-row">
+          <div>
+            <p class="crono-eyebrow">Treinamento TSA Oral</p>
+            <h2 class="crono-title">Biblioteca de Temas</h2>
+          </div>
+          <button class="crono-refresh-btn" type="button" onclick="_cronoAtualizarBib()"><span class="ic">🔄</span><span>Atualizar</span></button>
+        </div>
+        <div id="crono-bib-body"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Treinamento TSA Oral — Trilhas de Casos Clínicos (biblioteca sincronizada da API) -->
+    <div id="tab-cronoTrilhasLib" class="hidden">
+      <style>
+        #tab-cronoTrilhasLib .ctl-wrap{max-width:1100px;margin:0 auto}
+        #tab-cronoTrilhasLib .ctl-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:4px 0 20px}
+        #tab-cronoTrilhasLib .ctl-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--t2);margin:0 0 6px}
+        #tab-cronoTrilhasLib .ctl-title{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:600;letter-spacing:-.01em;margin:0;color:var(--text)}
+        #tab-cronoTrilhasLib .ctl-sub{color:var(--t2);font-size:14px;margin:6px 0 0}
+        /* Botão sincronizar — pill moderno com gradiente do accent */
+        #tab-cronoTrilhasLib .ctl-sync-btn{display:inline-flex;align-items:center;gap:9px;border:none;cursor:pointer;
+          padding:11px 20px;border-radius:999px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;color:#fff;
+          background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 65%,#7c3aed));
+          box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 40%,transparent);
+          transition:transform .2s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),box-shadow .2s,filter .2s}
+        #tab-cronoTrilhasLib .ctl-sync-btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px color-mix(in srgb,var(--accent) 52%,transparent);filter:brightness(1.06)}
+        #tab-cronoTrilhasLib .ctl-sync-btn:active{transform:translateY(0)}
+        #tab-cronoTrilhasLib .ctl-sync-btn .ic{font-size:15px;line-height:1;display:inline-block;transition:transform .5s}
+        #tab-cronoTrilhasLib .ctl-sync-btn:hover .ic{transform:rotate(180deg)}
+        /* Card "Ajuste de tempo" */
+        #tab-cronoTrilhasLib .ctl-cfg{display:flex;align-items:center;gap:28px;flex-wrap:nowrap;
+          background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 8%,var(--bg2)),color-mix(in srgb,var(--accent) 3%,var(--bg2)));
+          border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);border-radius:16px;padding:16px 18px;margin:0 0 18px;
+          box-shadow:0 4px 16px rgba(0,0,0,.14)}
+        #tab-cronoTrilhasLib .ctl-cfg-h{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:0;white-space:nowrap}
+        #tab-cronoTrilhasLib .ctl-cfg-flds{display:flex;gap:24px;flex-wrap:nowrap;align-items:center}
+        #tab-cronoTrilhasLib .ctl-cfg .fld{display:flex;align-items:center;gap:10px}
+        #tab-cronoTrilhasLib .ctl-cfg .fld label{white-space:nowrap}
+        #tab-cronoTrilhasLib .ctl-cfg label{font-size:13px;color:var(--text);font-weight:500;display:flex;align-items:center;gap:7px}
+        #tab-cronoTrilhasLib .ctl-cfg label .u{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);background:color-mix(in srgb,var(--text) 8%,transparent);padding:2px 6px;border-radius:5px}
+        #tab-cronoTrilhasLib .ctl-cfg input{width:128px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:15px;text-align:center;transition:border-color .2s,box-shadow .2s}
+        #tab-cronoTrilhasLib .ctl-cfg input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
+        #tab-cronoTrilhasLib .ctl-grid{display:flex;flex-direction:column;gap:8px}
+        #tab-cronoTrilhasLib .ctl-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:color-mix(in srgb,var(--bg2) 72%,transparent);border:1px solid color-mix(in srgb,var(--text) 11%,transparent);border-radius:12px;padding:12px 16px}
+        #tab-cronoTrilhasLib .ctl-row .nome{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;color:var(--text);flex:1;min-width:220px}
+        #tab-cronoTrilhasLib .ctl-row .meta{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--t2)}
+        #tab-cronoTrilhasLib .ctl-row .meta b{color:var(--text);font-weight:600}
+        #tab-cronoTrilhasLib .ctl-row .tempo{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--accent);white-space:nowrap}
+        #tab-cronoTrilhasLib .ctl-row.off{opacity:.45}
+        #tab-cronoTrilhasLib .ctl-sw{flex:none;width:32px;height:18px;border-radius:999px;border:none;cursor:pointer;padding:0;position:relative;background:color-mix(in srgb,var(--text) 20%,transparent);transition:background .2s}
+        #tab-cronoTrilhasLib .ctl-sw.on{background:#22c55e}
+        #tab-cronoTrilhasLib .ctl-sw .knob{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1));box-shadow:0 1px 2px rgba(0,0,0,.35)}
+        #tab-cronoTrilhasLib .ctl-sw.on .knob{transform:translateX(14px)}
+        #tab-cronoTrilhasLib .ctl-tman{flex:none;width:70px;background:transparent;border:none;border-bottom:1px dashed color-mix(in srgb,var(--text) 22%,transparent);border-radius:0;padding:2px 3px;color:var(--t2);font-family:'JetBrains Mono',monospace;font-size:11.5px;text-align:center;transition:color .15s,border-color .15s}
+        #tab-cronoTrilhasLib .ctl-tman:hover,#tab-cronoTrilhasLib .ctl-tman:focus{color:var(--text);border-bottom-color:var(--accent);outline:none}
+        #tab-cronoTrilhasLib .ctl-tman::placeholder{color:var(--t2);opacity:.6;font-size:10.5px}
+      </style>
+      <div class="ctl-wrap">
+        <div class="ctl-head">
+          <div>
+            <p class="ctl-eyebrow">Treinamento TSA Oral</p>
+            <h2 class="ctl-title">Trilhas de Casos Clínicos</h2>
+            <p class="ctl-sub">Sincronizadas via Laravel</p>
+          </div>
+          <button class="ctl-sync-btn" type="button" onclick="_cronoSyncTrilhas()"><span class="ic">🔄</span><span>Sincronizar trilhas</span></button>
+        </div>
+        <div class="ctl-cfg">
+          <div class="ctl-cfg-h">Ajuste de tempo</div>
+          <div class="ctl-cfg-flds">
+            <div class="fld"><label>Quantos caracteres/minuto</label><input type="number" min="100" step="50" id="ctl-ritmo" onchange="_cronoSaveConfig()"/></div>
+            <div class="fld"><label>Quantos minutos por multimídia</label><input type="number" min="0" step="1" id="ctl-media" onchange="_cronoSaveConfig()"/></div>
+          </div>
+        </div>
+        <div id="ctl-body"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Treinamento TSA Oral — Geração de Cronograma (Fase 2) -->
+    <div id="tab-cronoGer" class="hidden">
+      <style>
+        #tab-cronoGer .cg-wrap{max-width:1160px;margin:0 auto}
+        #tab-cronoGer .cg-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--t2);margin:0 0 6px}
+        #tab-cronoGer .cg-title{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:600;letter-spacing:-.01em;margin:0 0 20px;color:var(--text)}
+        #tab-cronoGer .cg-list-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 16px}
+        #tab-cronoGer .cg-list-head h3{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;margin:0;color:var(--text)}
+        #tab-cronoGer .cg-new-btn{display:inline-flex;align-items:center;gap:10px;border:none;cursor:pointer;flex:none;
+          padding:11px 20px 11px 14px;border-radius:14px;font-family:'Space Grotesk',sans-serif;font-size:14.5px;font-weight:600;color:#fff;letter-spacing:.01em;
+          background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 60%,#7c3aed));
+          box-shadow:0 8px 22px color-mix(in srgb,var(--accent) 42%,transparent),inset 0 1px 0 color-mix(in srgb,#fff 25%,transparent);
+          transition:transform .22s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),box-shadow .22s,filter .22s}
+        #tab-cronoGer .cg-new-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 54%,transparent),inset 0 1px 0 color-mix(in srgb,#fff 25%,transparent);filter:brightness(1.05)}
+        #tab-cronoGer .cg-new-btn:active{transform:translateY(0)}
+        #tab-cronoGer .cg-new-btn .ic{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:color-mix(in srgb,#fff 22%,transparent);font-size:17px;font-weight:400;line-height:1;transition:transform .22s}
+        #tab-cronoGer .cg-new-btn:hover .ic{transform:rotate(90deg) scale(1.08)}
+        #tab-cronoGer .cg-turmas{display:flex;flex-direction:column;gap:9px}
+        #tab-cronoGer .cg-turma-card{display:flex;align-items:center;gap:14px;background:color-mix(in srgb,var(--bg2) 72%,transparent);border:1px solid color-mix(in srgb,var(--text) 11%,transparent);border-radius:13px;padding:14px 18px}
+        #tab-cronoGer .cg-turma-info{flex:1;min-width:0;cursor:pointer}
+        #tab-cronoGer .cg-turma-nome{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;color:var(--text)}
+        #tab-cronoGer .cg-turma-meta{font-size:12.5px;color:var(--t2);margin-top:3px}
+        #tab-cronoGer .cg-turma-meta b{color:var(--text)}
+        #tab-cronoGer .cg-turma-acts{display:flex;align-items:center;gap:8px;flex:none}
+        #tab-cronoGer .crono-x{background:none;border:none;color:var(--t2);cursor:pointer;font-size:15px;padding:4px 6px;border-radius:6px}
+        #tab-cronoGer .crono-x:hover{color:#f87171;background:color-mix(in srgb,#f87171 14%,transparent)}
+        #tab-cronoGer .cg-toolbar{display:flex;align-items:center;gap:12px;margin:0 0 16px}
+        #tab-cronoGer .cg-back{background:none;border:1px solid var(--border);color:var(--t2);border-radius:9px;padding:8px 13px;cursor:pointer;font-size:13px}
+        #tab-cronoGer .cg-back:hover{color:var(--text);border-color:var(--accent)}
+        #tab-cronoGer .cg-nome{background:transparent;border:none;border-bottom:1px dashed color-mix(in srgb,var(--text) 25%,transparent);color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;padding:4px 2px;flex:none;min-width:280px}
+        #tab-cronoGer .cg-nome:focus{outline:none;border-bottom-color:var(--accent)}
+        #tab-cronoGer .cg-tb-spacer{flex:1}
+        #tab-cronoGer .cg-config{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end;background:color-mix(in srgb,var(--accent) 5%,var(--bg2));border:1px solid color-mix(in srgb,var(--accent) 18%,transparent);border-radius:14px;padding:14px 18px;margin:0 0 20px}
+        #tab-cronoGer .cg-fld{display:flex;flex-direction:column;gap:6px}
+        #tab-cronoGer .cg-fld>span{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t2)}
+        #tab-cronoGer .cg-fld input[type=date]{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:8px 11px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color-scheme:dark}
+        #tab-cronoGer .cg-none{color:var(--t2);font-size:12px;font-style:italic}
+        #tab-cronoGer .cg-sim-box{background:color-mix(in srgb,var(--bg2) 70%,transparent);border:1px solid color-mix(in srgb,var(--text) 11%,transparent);border-radius:14px;padding:6px 16px;margin:0 0 20px}
+        #tab-cronoGer .cg-sim-box-h{display:flex;align-items:center;gap:11px;padding:9px 0;cursor:pointer}
+        #tab-cronoGer .cg-sim-box-h .cg-drop-caret{color:var(--t2);font-size:12px;transition:transform .2s}
+        #tab-cronoGer .cg-sim-box.open .cg-drop-caret{transform:rotate(90deg)}
+        #tab-cronoGer .cg-sim-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--t2)}
+        #tab-cronoGer .cg-sim-count{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:1px 8px;border-radius:999px}
+        #tab-cronoGer .cg-sim-box-h .btn{margin-left:auto}
+        #tab-cronoGer .cg-sim-body{display:none}
+        #tab-cronoGer .cg-sim-box.open .cg-sim-body{display:block;padding:6px 0 12px}
+        #tab-cronoGer .cg-sim-rows{display:flex;flex-direction:column;gap:9px}
+        #tab-cronoGer .cg-sim-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+        #tab-cronoGer .cg-sim-nome{flex:1;min-width:180px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:8px 11px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600}
+        #tab-cronoGer .cg-sim-nome:focus{outline:none;border-color:var(--accent)}
+        #tab-cronoGer .cg-sim-dt{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--t2)}
+        #tab-cronoGer .cg-sim-dt input[type=date]{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:7px 10px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color-scheme:dark}
+        #tab-cronoGer .cg-weeks{display:flex;flex-direction:column;gap:12px}
+        #tab-cronoGer .cg-week{background:color-mix(in srgb,var(--bg2) 70%,transparent);border:1px solid color-mix(in srgb,var(--text) 11%,transparent);border-radius:14px;overflow:hidden}
+        #tab-cronoGer .cg-weeks-bar{display:flex;justify-content:flex-end;margin:0 0 10px}
+        #tab-cronoGer .cg-expand-btn{background:var(--bg3);border:1px solid var(--border);color:var(--t2);border-radius:999px;padding:8px 15px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.03em;transition:all .2s}
+        #tab-cronoGer .cg-expand-btn:hover{color:var(--text);border-color:var(--accent)}
+        #tab-cronoGer .cg-week-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;background:color-mix(in srgb,var(--text) 4%,transparent);cursor:pointer}
+        #tab-cronoGer .cg-week.open .cg-week-head{border-bottom:1px solid var(--border)}
+        #tab-cronoGer .cg-week-head .cg-drop-caret{color:var(--t2);font-size:12px;transition:transform .2s}
+        #tab-cronoGer .cg-week.open .cg-drop-caret{transform:rotate(90deg)}
+        #tab-cronoGer .cg-week:not(.open) .cg-week-body{display:none}
+        #tab-cronoGer .cg-week-n{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;color:var(--text)}
+        #tab-cronoGer .cg-week-dt{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--t2)}
+        #tab-cronoGer .cg-ev{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.05em;padding:3px 9px;border-radius:6px}
+        #tab-cronoGer .cg-ev.simulado{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
+        #tab-cronoGer .cg-ev.prova{background:color-mix(in srgb,#ef4444 18%,transparent);color:#ef4444}
+        #tab-cronoGer .cg-ev.revisaoPre{background:color-mix(in srgb,#8b5cf6 18%,transparent);color:#a78bfa}
+        #tab-cronoGer .cg-week-time{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--accent)}
+        #tab-cronoGer .cg-week-dias{font-size:11px;color:var(--t2);display:flex;align-items:center;gap:6px}
+        #tab-cronoGer .cg-week-dias input{width:50px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:5px 7px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;text-align:center}
+        #tab-cronoGer .cg-week-body{display:block;padding:14px 16px}
+        #tab-cronoGer .cg-col-h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t2);margin:0 0 9px}
+        #tab-cronoGer .cg-week-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+        #tab-cronoGer .cg-rev-sec{margin-top:16px;padding-top:14px;border-top:1px dashed var(--border)}
+        #tab-cronoGer .cg-tema-chip.rev em{font-style:normal;color:var(--t2);font-size:11px;font-family:'JetBrains Mono',monospace}
+        #tab-cronoGer .cg-add-btn.rev{border-color:color-mix(in srgb,#8b5cf6 46%,var(--border));color:#a78bfa}
+        #tab-cronoGer .cg-add-btn.rev:hover{background:color-mix(in srgb,#8b5cf6 12%,transparent)}
+        #tab-cronoGer .cg-exam-box{margin-top:18px;background:color-mix(in srgb,var(--bg2) 70%,transparent);border:1px solid var(--border);border-radius:14px;padding:16px 18px}
+        #tab-cronoGer .cg-exam-line{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:9px}
+        #tab-cronoGer .cg-exam-t{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;flex:none;min-width:150px}
+        #tab-cronoGer .cg-exam-t.prova{color:#ef4444}
+        #tab-cronoGer .cg-exam-t.rev{color:#a78bfa}
+        #tab-cronoGer .cg-exam-d{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:var(--text)}
+        #tab-cronoGer .cg-exam-d i{color:var(--t2);font-style:normal;margin:0 4px}
+        #tab-cronoGer .cg-exam-note{color:var(--t2);font-size:12px;margin-top:2px}
+        #tab-cronoGer .cg-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;min-height:4px}
+        #tab-cronoGer .cg-tema-chip{display:inline-flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--border);border-radius:9px;padding:5px 8px 5px 10px;font-size:12.5px;color:var(--text)}
+        #tab-cronoGer .cg-tema-chip .tm{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--accent)}
+        #tab-cronoGer .cg-tema-chip.rev{border-style:dashed;border-left-style:solid;color:var(--t2)}
+        #tab-cronoGer .cg-tema-chip button{background:none;border:none;color:var(--t2);cursor:pointer;font-size:12px}
+        #tab-cronoGer .cg-tema-chip button:hover{color:#f87171}
+        #tab-cronoGer .cg-tema-chip.pri-alta{border-left-color:#ef4444;background:color-mix(in srgb,#ef4444 9%,var(--bg3))}
+        #tab-cronoGer .cg-tema-chip.pri-media{border-left-color:#f59e0b;background:color-mix(in srgb,#f59e0b 9%,var(--bg3))}
+        #tab-cronoGer .cg-tema-chip.pri-baixa{border-left-color:#22c55e;background:color-mix(in srgb,#22c55e 9%,var(--bg3))}
+        #tab-cronoGer .cg-tema-chip.pri-none{border-left-color:#9ca3af}
+        #tab-cronoGer .cg-add-btn{display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px dashed color-mix(in srgb,var(--accent) 42%,var(--border));color:var(--accent);border-radius:10px;padding:9px 14px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;transition:all .18s}
+        #tab-cronoGer .cg-add-btn:hover{background:color-mix(in srgb,var(--accent) 10%,transparent);border-style:solid;transform:translateY(-1px)}
+        #tab-cronoGer .cg-add-btn span{font-size:16px;line-height:1}
+        /* Picker de temas (modal, anexado ao body) */
+        #cg-picker-modal .cg-pk-group{margin-bottom:18px}
+        #cg-picker-modal .cg-pk-group:last-child{margin-bottom:0}
+        #cg-picker-modal .cg-pk-group-h{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin:0 0 10px;color:var(--t2)}
+        #cg-picker-modal .cg-pk-group-h .dot{width:9px;height:9px;border-radius:50%;flex:none}
+        #cg-picker-modal .cg-pk-group-h .n{margin-left:auto;background:color-mix(in srgb,var(--text) 8%,transparent);color:var(--t2);padding:1px 8px;border-radius:999px;font-size:10px}
+        #cg-picker-modal .cg-pk-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--border);border-radius:10px;padding:10px 13px;margin-bottom:7px;cursor:pointer;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;transition:transform .15s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),border-color .2s,background .2s}
+        #cg-picker-modal .cg-pk-item:hover{transform:translateX(4px);background:color-mix(in srgb,var(--accent) 9%,var(--bg3))}
+        #cg-picker-modal .cg-pk-item .dot{width:8px;height:8px;border-radius:50%;flex:none}
+        #cg-picker-modal .cg-pk-item .t{flex:1;font-size:13.5px;font-weight:500;min-width:0}
+        #cg-picker-modal .cg-pk-item .tm{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);flex:none}
+        #cg-picker-modal .pri-alta .dot{background:#ef4444}
+        #cg-picker-modal .pri-media .dot{background:#f59e0b}
+        #cg-picker-modal .pri-baixa .dot{background:#22c55e}
+        #cg-picker-modal .pri-none .dot{background:#9ca3af}
+        #cg-picker-modal .cg-pk-item.pri-alta{border-left-color:#ef4444}
+        #cg-picker-modal .cg-pk-item.pri-media{border-left-color:#f59e0b}
+        #cg-picker-modal .cg-pk-item.pri-baixa{border-left-color:#22c55e}
+        #cg-picker-modal .cg-pk-item.pri-none{border-left-color:#9ca3af}
+        #cg-picker-modal .cg-pk-group-h.pri-alta{color:#ef4444}
+        #cg-picker-modal .cg-pk-group-h.pri-media{color:#f59e0b}
+        #cg-picker-modal .cg-pk-group-h.pri-baixa{color:#22c55e}
+      </style>
+      <div class="cg-wrap">
+        <p class="cg-eyebrow">Treinamento TSA Oral</p>
+        <h2 class="cg-title">Geração de Cronograma</h2>
+        <div id="crono-ger-body"></div>
+      </div>
     </div>
 
     <!-- TAB: PO MEDREVIEW — Coordenação de Produto (gestão interna dos cursos) -->
@@ -13054,6 +13395,11 @@ const TAB_GROUPS=[
   {id:'poMedreview',label:'PO MEDREVIEW',tabs:[
     {id:'po',label:'🧭 Coordenação de Produto'}
   ]},
+  {id:'treinamento',label:'🎓 Treinamento TSA Oral',tabs:[
+    {id:'cronoBib',label:'📚 Biblioteca de Temas'},
+    {id:'cronoTrilhasLib',label:'🩺 Trilhas de Casos Clínicos'},
+    {id:'cronoGer',label:'🗓️ Geração de Cronograma'}
+  ]},
   {id:'recursos',label:'Recursos',tabs:[
     {id:'recProvas',label:'📚 Provas'},
     {id:'recGestao',label:'🛡️ Gestão de Recursos'},
@@ -13075,7 +13421,7 @@ const TAB_GROUPS=[
 const ALL_TABS=TAB_GROUPS.flatMap(g=>g.tabs.map(t=>t.id));
 // Abas historicamente reservadas a administradores. Hoje serve só como fallback —
 // o badge "ADM" no menu é decidido dinamicamente por isAdmExclusiveTab (ver abaixo).
-const ADMIN_ONLY_TABS=new Set(['usuarios','config','financeiro','orcamento','features','recProvas','recFontes','recMetricas','comunicacao','senhasAcessos','auditoria','cruzarLista','po']);
+const ADMIN_ONLY_TABS=new Set(['usuarios','config','financeiro','orcamento','features','recProvas','recFontes','recMetricas','comunicacao','senhasAcessos','auditoria','cruzarLista','po','cronoBib','cronoTrilhasLib','cronoGer']);
 // Únicas abas que têm camada de ADMIN separada (ações gated por _isAdminEm). Só elas
 // ganham o slider Admin no modal de usuário. Nas demais, "ver" = acesso total.
 const ADMIN_LAYER_TABS=new Set(['financeiro','orcamento','senhasAcessos','cruzarLista','produtos']);
@@ -27709,7 +28055,7 @@ window.deleteUser=async()=>{
 
 // co tabs
 window.switchCoTab=(tab,btn)=>{
-  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','orcamento','mentorias','mentoriasF2','rememberF1','rememberF2','features','recProvas','recGestao','recFontes','recMetricas','comunicacao','senhasAcessos','senhasPublicas','auditoria','produtos','cruzarLista','po'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
+  ['simulados','trocas','professores','listas','desempenho','checklist','revisao','config','usuarios','extra','simExtras','financeiro','orcamento','mentorias','mentoriasF2','rememberF1','rememberF2','features','recProvas','recGestao','recFontes','recMetricas','comunicacao','senhasAcessos','senhasPublicas','auditoria','produtos','cruzarLista','po','cronoBib','cronoTrilhasLib','cronoGer'].forEach(t=>{const el=document.getElementById(`tab-${t}`);if(el)el.classList.toggle('hidden',t!==tab);});
   document.querySelectorAll('.co-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   // Show "Novo Simulado" only on simulados tab
@@ -32737,6 +33083,1232 @@ window.switchCoTab=(tab,btn)=>{
     const cronEl=document.getElementById('cfg-cron-limit');
     if(cronEl)cronEl.value=S.cfg.cronometroLimite||'07:30';
   }
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// TREINAMENTO TSA ORAL — Biblioteca de Temas (Fase 1)
+// Cada módulo do PO é um "tema". Coord anexa trilhas de casos + hot topics.
+// Coleção: cronoTemas/{temaId} onde temaId = _poSlug(cursoNome+'__'+modulo).
+// Tempo estimado NÃO é salvo — calculado sempre de S.poAulas.
+// ════════════════════════════════════════════════════════════════════════════
+S.cronoTemas={};
+S._cronoLoaded=false;
+S._cronoBibSortPrio=false;
+window._cronoToggleSortPrio=()=>{ S._cronoBibSortPrio=!S._cronoBibSortPrio; renderCronoBib(); };
+S.cronoTrilhas={};          // {trilhaId: {id,titulo,totalCasos,totalProblemas,totalChars,mediaCount,...}}
+S._cronoTrilhasLoaded=false;
+S.cronoConfig={ritmoCharsMin:900,multimidiaMin:2,trilhasOff:[],trilhasTempoManual:{},temasOff:[]};
+const CRONO_TRILHAS_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/sincronizarTrilhasCasos';
+function _cronoEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+async function loadCronoTemas(){
+  try{
+    const snap=await getDocs(collection(db,'cronoTemas'));
+    const map={};
+    snap.forEach(d=>{map[d.id]={id:d.id,...d.data()};});
+    S.cronoTemas=map;
+    S._cronoLoaded=true;
+  }catch(e){console.error('loadCronoTemas:',e);}
+}
+async function loadCronoTrilhas(){
+  try{
+    const [snap,cfg]=await Promise.all([
+      getDocs(collection(db,'cronoTrilhas')),
+      getDoc(doc(db,'config','cronoConfig')).catch(()=>null)
+    ]);
+    const map={};
+    snap.forEach(d=>{map[d.id]={id:d.id,...d.data()};});
+    S.cronoTrilhas=map;
+    if(cfg&&cfg.exists()){const c=cfg.data()||{};
+      if(Number(c.ritmoCharsMin)>0)S.cronoConfig.ritmoCharsMin=Number(c.ritmoCharsMin);
+      if(Number(c.multimidiaMin)>=0)S.cronoConfig.multimidiaMin=Number(c.multimidiaMin);
+      S.cronoConfig.trilhasOff=Array.isArray(c.trilhasOff)?c.trilhasOff.map(String):[];
+      S.cronoConfig.trilhasTempoManual=(c.trilhasTempoManual&&typeof c.trilhasTempoManual==='object')?{...c.trilhasTempoManual}:{};
+      S.cronoConfig.temasOff=Array.isArray(c.temasOff)?c.temasOff.map(String):[];
+    }
+    S._cronoTrilhasLoaded=true;
+  }catch(e){console.error('loadCronoTrilhas:',e);}
+}
+// Tempo (min) de UMA trilha. Tempo MANUAL (config) tem prioridade; senão chars/ritmo + multimídia.
+function _cronoTrilhaMin(tr){
+  if(!tr)return 0;
+  const man=(S.cronoConfig.trilhasTempoManual||{})[tr.id];
+  if(Number(man)>0)return Number(man);
+  const ritmo=Number(S.cronoConfig.ritmoCharsMin)||900;
+  const mm=Number(S.cronoConfig.multimidiaMin)||0;
+  return Math.ceil((Number(tr.totalChars)||0)/ritmo)+(Number(tr.mediaCount)||0)*mm;
+}
+// Texto do tempo (manual > calculado > "erro laravel" quando a plataforma não entregou o conteúdo).
+function _cronoTrilhaTempoTxt(tr){
+  const man=(S.cronoConfig.trilhasTempoManual||{})[tr&&tr.id];
+  if(Number(man)>0)return '⏱ '+_cronoFmtDur(Number(man));
+  if(tr&&tr.contentError&&!(Number(tr.totalChars)>0))return '⚠ erro laravel';
+  return '⏱ '+_cronoFmtDur(_cronoTrilhaMin(tr));
+}
+// ON/OFF: trilha desconsiderada (não aparece no seletor da Biblioteca de Temas).
+function _cronoTrilhaOff(id){return (S.cronoConfig.trilhasOff||[]).map(String).includes(String(id));}
+// Ordem natural por número do Ponto: 1,2,…,10,11,21,21.1,21.1.2…
+function _cronoPontoKey(titulo){
+  // Aceita "PONTO" e "PONTOS" (plural), e pega o primeiro número (ex.: "PONTOS 50/51" → 50).
+  const m=String(titulo||'').match(/pontos?\s+(\d+(?:\.\d+)*)/i);
+  if(!m)return [Infinity];
+  return m[1].split('.').map(n=>parseInt(n,10)||0);
+}
+function _cronoTrilhaCmp(a,b){
+  const ka=_cronoPontoKey(a.titulo),kb=_cronoPontoKey(b.titulo);
+  const n=Math.max(ka.length,kb.length);
+  for(let i=0;i<n;i++){const d=(ka[i]||0)-(kb[i]||0);if(d)return d;}
+  return String(a.titulo||'').localeCompare(String(b.titulo||''),'pt-BR',{numeric:true});
+}
+async function _cronoPersistConfig(){
+  await setDoc(doc(db,'config','cronoConfig'),{
+    ritmoCharsMin:Number(S.cronoConfig.ritmoCharsMin)||900,
+    multimidiaMin:Number(S.cronoConfig.multimidiaMin)||0,
+    trilhasOff:(S.cronoConfig.trilhasOff||[]).map(String),
+    trilhasTempoManual:S.cronoConfig.trilhasTempoManual||{},
+    temasOff:(S.cronoConfig.temasOff||[]).map(String),
+    updatedAt:serverTimestamp()
+  },{merge:true});
+}
+window._cronoToggleTrilhaOff=async id=>{
+  id=String(id);
+  const off=S.cronoConfig.trilhasOff||(S.cronoConfig.trilhasOff=[]);
+  const i=off.map(String).indexOf(id);
+  if(i>=0)off.splice(i,1); else off.push(id);
+  try{ await _cronoPersistConfig(); renderCronoTrilhasLib(); arosToast(i>=0?'Trilha reativada':'Trilha desconsiderada','success',1400); }
+  catch(e){ if(i>=0)off.push(id); else off.splice(off.map(String).indexOf(id),1); console.error('toggleOff:',e); arosToast('Erro ao salvar: '+(e.message||e),'err',3000); }
+};
+window._cronoSetTrilhaTempo=async(id,val)=>{
+  id=String(id);
+  const min=Math.max(0,parseInt(val,10)||0);
+  const man=S.cronoConfig.trilhasTempoManual||(S.cronoConfig.trilhasTempoManual={});
+  const prev=man[id];
+  if(min>0)man[id]=min; else delete man[id];
+  try{ await _cronoPersistConfig(); renderCronoTrilhasLib(); arosToast(min>0?'Tempo manual salvo':'Tempo manual removido','success',1400); }
+  catch(e){ if(prev!=null)man[id]=prev; else delete man[id]; console.error('setTempo:',e); arosToast('Erro ao salvar: '+(e.message||e),'err',3000); }
+};
+// Vincula os ids de trilha de um tema aos docs da biblioteca (ignora ids que sumiram).
+function _cronoTemaTrilhas(t){
+  return ((t&&t.trilhaIds)||[]).map(id=>S.cronoTrilhas[id]).filter(Boolean);
+}
+// Tema desconsiderado: não aparece na montagem do cronograma (Fase 2).
+function _cronoTemaOff(temaId){return (S.cronoConfig.temasOff||[]).map(String).includes(String(temaId));}
+window._cronoToggleTemaOff=async temaId=>{
+  temaId=String(temaId);
+  const off=S.cronoConfig.temasOff||(S.cronoConfig.temasOff=[]);
+  const i=off.map(String).indexOf(temaId);
+  if(i>=0)off.splice(i,1); else off.push(temaId);
+  try{ await _cronoPersistConfig(); renderCronoBib(); arosToast(i>=0?'Tema reativado':'Tema desconsiderado','success',1400); }
+  catch(e){ if(i>=0)off.push(temaId); else off.splice(off.map(String).indexOf(temaId),1); console.error('toggleTemaOff:',e); arosToast('Erro ao salvar: '+(e.message||e),'err',3000); }
+};
+async function _cronoSaveConfig(){
+  S.cronoConfig.ritmoCharsMin=Math.max(100,parseInt((document.getElementById('ctl-ritmo')||{}).value,10)||900);
+  S.cronoConfig.multimidiaMin=Math.max(0,parseInt((document.getElementById('ctl-media')||{}).value,10)||0);
+  try{
+    await _cronoPersistConfig();
+    renderCronoTrilhasLib();
+    arosToast('Ritmo salvo — tempos recalculados','success',1600);
+  }catch(e){console.error('saveCronoConfig:',e);arosToast('Erro ao salvar ritmo: '+(e.message||e),'err',3000);}
+}
+window._cronoSaveConfig=_cronoSaveConfig;
+async function renderCronoTrilhasLib(){
+  const body=document.getElementById('ctl-body');
+  if(!body)return;
+  const rEl=document.getElementById('ctl-ritmo');if(rEl)rEl.value=S.cronoConfig.ritmoCharsMin;
+  const mEl=document.getElementById('ctl-media');if(mEl)mEl.value=S.cronoConfig.multimidiaMin;
+  if(!S._cronoTrilhasLoaded){body.innerHTML='<p style="color:var(--t2);font-size:14px">Carregando…</p>';await loadCronoTrilhas();
+    const r2=document.getElementById('ctl-ritmo');if(r2)r2.value=S.cronoConfig.ritmoCharsMin;
+    const m2=document.getElementById('ctl-media');if(m2)m2.value=S.cronoConfig.multimidiaMin;}
+  // Ordena por número do Ponto; as OFF vão pro final (e ficam translúcidas).
+  const list=Object.values(S.cronoTrilhas).sort((a,b)=>{
+    const oa=_cronoTrilhaOff(a.id)?1:0,ob=_cronoTrilhaOff(b.id)?1:0;
+    if(oa!==ob)return oa-ob;
+    return _cronoTrilhaCmp(a,b);
+  });
+  if(!list.length){body.innerHTML='<div class="es" style="padding:40px 0;text-align:center;color:var(--t2)"><div style="font-size:40px">🩺</div><p>Nenhuma trilha ainda. Clique em <b>Sincronizar trilhas</b>.</p></div>';return;}
+  body.innerHTML='<div class="ctl-grid">'+list.map(tr=>{
+    const off=_cronoTrilhaOff(tr.id);
+    const man=(S.cronoConfig.trilhasTempoManual||{})[tr.id];
+    return `<div class="ctl-row${off?' off':''}">
+      <button class="ctl-sw${off?'':' on'}" type="button" role="switch" aria-checked="${off?'false':'true'}" title="${off?'Reativar trilha':'Desconsiderar trilha'}" onclick="_cronoToggleTrilhaOff('${_cronoEsc(tr.id)}')"><span class="knob"></span></button>
+      <span class="nome">${_cronoEsc(tr.titulo)}</span>
+      <span class="meta"><span><b>${tr.totalCasos||0}</b> casos</span><span><b>${tr.totalProblemas||0}</b> problemas</span>${tr.mediaCount?`<span><b>${tr.mediaCount}</b> multimídia</span>`:''}</span>
+      <span class="tempo">${_cronoTrilhaTempoTxt(tr)}</span>
+      ${(tr.contentError&&!(Number(tr.totalChars)>0))?`<input class="ctl-tman" type="number" min="0" step="1" placeholder="tempo (min)" value="${man||''}" title="Informar o tempo manualmente (min)" onchange="_cronoSetTrilhaTempo('${_cronoEsc(tr.id)}',this.value)"/>`:''}
+    </div>`;
+  }).join('')+'</div>';
+}
+window.renderCronoTrilhasLib=renderCronoTrilhasLib;
+// Chama a Cloud Function que puxa as trilhas do Laravel (exige login). Retorna o JSON.
+async function _cronoFetchTrilhasSync(){
+  const u=window._fbAuth?.auth?.currentUser;
+  if(!u)throw new Error('Faça login (Google/Email) primeiro.');
+  const token=await u.getIdToken();
+  const resp=await fetch(CRONO_TRILHAS_ENDPOINT,{method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({})});
+  let data={};try{data=await resp.json();}catch(_){}
+  if(!resp.ok)throw new Error(data.error||`Erro ${resp.status}`);
+  return data;
+}
+// Recarrega as trilhas e limpa o tempo manual das que voltaram COM conteúdo.
+async function _cronoAplicarTrilhaSync(){
+  S._cronoTrilhasLoaded=false;
+  await loadCronoTrilhas();
+  const man=S.cronoConfig.trilhasTempoManual||{};
+  let limpou=false;
+  Object.values(S.cronoTrilhas).forEach(tr=>{ if(Number(tr.totalChars)>0 && man[tr.id]!=null){ delete man[tr.id]; limpou=true; } });
+  if(limpou){ try{ await _cronoPersistConfig(); }catch(e){ console.warn('limpar tempo manual:',e); } }
+}
+function _cronoAvisoTrilhasErro(data){
+  const errs=Array.isArray(data&&data.contentErrors)?data.contentErrors:[];
+  if(!errs.length)return;
+  const lst=errs.map(e=>'• '+_cronoEsc(e.titulo||('página '+e.page))).join('\n');
+  uiAlert(`${errs.length} trilha(s) vieram sem o conteúdo (a plataforma deu erro ao entregá-las) — aparecem como "erro laravel". Você pode informar o tempo manualmente nelas. Vale avisar o dev:\n\n${lst}`,{title:'⚠️ Trilhas sem conteúdo'});
+}
+window._cronoSyncTrilhas=async()=>{
+  if(!window._fbAuth?.auth?.currentUser){arosToast('Faça login (Google/Email) pra sincronizar.','err',3500);return;}
+  const body=document.getElementById('ctl-body');
+  if(body)body.innerHTML='<p style="color:var(--t2);font-size:14px">🔄 Sincronizando trilhas da plataforma… (pode levar ~1 min)</p>';
+  try{
+    const data=await _cronoFetchTrilhasSync();
+    await _cronoAplicarTrilhaSync();
+    renderCronoTrilhasLib();
+    arosToast(`✓ ${data.count||0} trilhas sincronizadas`,'success',2600);
+    _cronoAvisoTrilhasErro(data);
+  }catch(e){
+    console.error('syncTrilhas:',e);
+    renderCronoTrilhasLib();
+    arosToast('Erro ao sincronizar: '+(e.message||e),'err',4000);
+  }
+};
+// Botão "Atualizar" da Biblioteca: sincronização INTERNA (só recarrega do banco) —
+// pega as trilhas já sincronizadas na aba de Trilhas + aulas/produtos atuais do PO + temas.
+// NÃO chama o Laravel (isso é só no botão "Sincronizar trilhas" da aba de Trilhas).
+window._cronoAtualizarBib=async()=>{
+  const body=document.getElementById('crono-bib-body');
+  if(body)body.innerHTML='<p style="color:var(--t2);font-size:14px">🔄 Atualizando…</p>';
+  try{
+    S._poLoaded=false; S._cronoLoaded=false; S._cronoTrilhasLoaded=false;
+    await Promise.all([
+      loadPO().catch(e=>console.warn('atualizar loadPO:',e)),
+      loadCronoTemas().catch(e=>console.warn('atualizar loadTemas:',e)),
+      loadCronoTrilhas().catch(e=>console.warn('atualizar loadTrilhas:',e))
+    ]);
+    renderCronoBib();
+    arosToast('✓ Atualizado (trilhas, aulas e produtos)','success',2400);
+  }catch(e){
+    console.error('atualizarBib:',e);
+    renderCronoBib();
+    arosToast('Erro ao atualizar: '+(e.message||e),'err',4000);
+  }
+};
+// "mm:ss" ou "h:mm:ss" ou vazio → minutos (número)
+function _cronoParseDur(str){
+  const s=String(str||'').trim();
+  if(!s)return 0;
+  const parts=s.split(':').map(p=>parseInt(p,10));
+  if(parts.some(n=>isNaN(n)))return 0;
+  let h=0,m=0,sec=0;
+  if(parts.length===3){[h,m,sec]=parts;}
+  else if(parts.length===2){[m,sec]=parts;}
+  else if(parts.length===1){[sec]=parts;}
+  return h*60+m+sec/60;
+}
+function _cronoFmtDur(min){
+  const total=Math.round(min);
+  const h=Math.floor(total/60),m=total%60;
+  return h>0?`${h}h ${m}min`:`${m}min`;
+}
+// Agrupa aulas por curso→módulo. Retorna array ordenado por curso e módulo.
+function _cronoModulos(){
+  const out=[];
+  // Treinamento TSA Oral é exclusivo da vertical AnestReview — ignora cursos de outras verticais.
+  (S.poCursos||[]).filter(c=>(c.vertical||'anestreview')==='anestreview').forEach(curso=>{
+    const aulas=(S.poAulas&&S.poAulas[curso.id])||[];
+    const byMod=new Map();
+    aulas.forEach(a=>{
+      const mod=(a.modulo||'').trim();
+      if(!mod)return;
+      if(!byMod.has(mod))byMod.set(mod,[]);
+      byMod.get(mod).push(a);
+    });
+    const mods=[...byMod.entries()].map(([modulo,list])=>{
+      const totalMin=list.reduce((acc,a)=>acc+_cronoParseDur(a.duracao),0);
+      return{
+        cursoId:curso.id,cursoNome:curso.nome,modulo,
+        temaId:_poSlug(curso.nome+'__'+modulo),
+        aulas:list,nAulas:list.length,totalMin
+      };
+    });
+    mods.sort((x,y)=>x.modulo.localeCompare(y.modulo,'pt-BR',{numeric:true}));
+    out.push({cursoId:curso.id,cursoNome:curso.nome,mods});
+  });
+  return out;
+}
+async function renderCronoBib(){
+  const body=document.getElementById('crono-bib-body');
+  if(!body)return;
+  // Precisa dos dados do PO (cursos+aulas) pra listar os módulos + os temas cadastrados.
+  // Carrega os dois EM PARALELO (só o que ainda não estiver em memória) — depois da 1ª vez fica instantâneo.
+  if(!S._poLoaded||!S._cronoLoaded||!S._cronoTrilhasLoaded){
+    body.innerHTML='<p style="color:var(--t2);font-size:14px">Carregando módulos…</p>';
+    await Promise.all([
+      S._poLoaded?null:loadPO().catch(e=>console.warn('crono loadPO:',e)),
+      S._cronoLoaded?null:loadCronoTemas().catch(e=>console.warn('crono loadTemas:',e)),
+      S._cronoTrilhasLoaded?null:loadCronoTrilhas().catch(e=>console.warn('crono loadTrilhas:',e))
+    ]);
+  }
+  const grupos=_cronoModulos();
+  if(!grupos.length||grupos.every(g=>!g.mods.length)){
+    body.innerHTML='<div class="es" style="padding:40px 0;text-align:center;color:var(--t2)"><div style="font-size:40px">📭</div><p>Nenhum módulo encontrado. Cadastre aulas no PO primeiro.</p></div>';
+    return;
+  }
+  const _prioRank={alta:0,media:1,baixa:2};
+  let html=`<div class="crono-bib-bar"><button class="crono-sortprio${S._cronoBibSortPrio?' on':''}" type="button" onclick="_cronoToggleSortPrio()">⇅ Ordenar por prioridade</button></div>`;
+  grupos.forEach(g=>{
+    if(!g.mods.length)return;
+    html+=`<div class="crono-curso"><h3 class="crono-curso-h">${_cronoEsc(g.cursoNome)} <small>${g.mods.length} módulo${g.mods.length!==1?'s':''}</small></h3><div class="crono-grid">`;
+    html+=`<div class="crono-grid-head"><span></span><span>Casos Clínicos</span><span>Hot Topics</span></div>`;
+    // Off no fim; opcionalmente por prioridade (alta→média→baixa→sem). Sort estável preserva ordem por módulo.
+    g.mods.slice().sort((a,b)=>{
+      const oa=_cronoTemaOff(a.temaId)?1:0,ob=_cronoTemaOff(b.temaId)?1:0;
+      if(oa!==ob)return oa-ob;
+      if(S._cronoBibSortPrio){
+        const pa=_prioRank[(S.cronoTemas[a.temaId]||{}).prioridade]??3,pb=_prioRank[(S.cronoTemas[b.temaId]||{}).prioridade]??3;
+        if(pa!==pb)return pa-pb;
+      }
+      return 0;
+    }).forEach(m=>{
+      const t=S.cronoTemas[m.temaId]||{};
+      const tm=_cronoTemaTimes(m,t);
+      const off=_cronoTemaOff(m.temaId);
+      const trSt=t.trilhasNA?'na':(tm.nTrilhas>0?'ok':'pend');
+      const htSt=t.hotNA?'na':(tm.nHot>0?'ok':'pend');
+      const prioNome={alta:'Alta',media:'Média',baixa:'Baixa'}[t.prioridade]||'';
+      const prioTag=prioNome?` <span class="crono-prio-tag ${t.prioridade}">${prioNome}</span>`:'';
+      html+=`<div class="crono-card${off?' off':''}" data-crono-tema="${_cronoEsc(m.temaId)}"${t.prioridade?` data-prio="${t.prioridade}"`:''}>
+        <div class="crono-card-info">
+          <button class="crono-sw${off?'':' on'}" type="button" role="switch" aria-checked="${off?'false':'true'}" title="${off?'Reativar tema':'Desconsiderar tema'}" onclick="event.stopPropagation();_cronoToggleTemaOff('${_cronoEsc(m.temaId)}')"><span class="knob"></span></button>
+          <p class="crono-card-mod">${_cronoEsc(m.modulo)}${prioTag}</p>
+        </div>
+        <span class="crono-pill ${trSt}">${_CRONO_ST_LBL[trSt]}</span>
+        <span class="crono-pill ${htSt}">${_CRONO_ST_LBL[htSt]}</span>
+      </div>`;
+    });
+    html+='</div></div>';
+  });
+  body.innerHTML=html;
+  body.querySelectorAll('[data-crono-tema]').forEach(card=>card.addEventListener('click',()=>_cronoOpenTema(card.getAttribute('data-crono-tema'))));
+}
+// ── Estado transitório do editor de tema (auto-salva a cada mudança) ─────────
+let _cronoEdTrilhaIds=[];
+let _cronoEdTemaId=null;
+let _cronoEdHot=[];
+let _cronoEdInfo=null;
+let _cronoEdHtt=0;
+let _cronoEdTrilhasNA=false;
+let _cronoEdHotNA=false;
+let _cronoEdPrio='';
+let _cronoEdAulasOff=[];
+const _CRONO_ST_LBL={pend:'Pendente',ok:'Cadastrado',na:'Não se aplica'};
+function _cronoStatusOf(na,count){return na?'na':(count>0?'ok':'pend');}
+// Chave estável de uma aula (id do Firestore, laravelId, ou título como fallback).
+function _cronoAulaKey(a){return String((a&&(a.id||a.laravelId||a.titulo))||'');}
+// Tempo (min) das aulas de um módulo IGNORANDO as desativadas (aulasOff).
+function _cronoAulasMin(aulas,aulasOff){
+  const off=new Set((aulasOff||[]).map(String));
+  return (aulas||[]).filter(a=>!off.has(_cronoAulaKey(a))).reduce((s,a)=>s+_cronoParseDur(a.duracao),0);
+}
+// Normaliza hotTopics (aceita array novo [{tema,onde}] ou string legada).
+function _cronoNormHot(h){
+  if(Array.isArray(h))return h.map(x=>({id:x.id||'ht_'+Math.random().toString(36).slice(2,7),tema:x.tema||'',onde:x.onde||''})).filter(x=>x.tema);
+  if(typeof h==='string'&&h.trim())return[{id:'ht_'+Math.random().toString(36).slice(2,7),tema:h.trim(),onde:''}];
+  return[];
+}
+// Tempos estimados de um tema (aulas do PO + casos clínicos + hot topics).
+// Seção marcada "não se aplica" contribui 0 no tempo do bloco.
+function _cronoTemaTimes(m,t){
+  t=t||S.cronoTemas[m.temaId]||{};
+  const trs=_cronoTemaTrilhas(t);
+  const nTrilhas=trs.length;
+  const nCasos=trs.reduce((a,x)=>a+(Number(x.totalCasos)||0),0);
+  const nProblemas=trs.reduce((a,x)=>a+(Number(x.totalProblemas)||0),0);
+  const tCasos=t.trilhasNA?0:trs.reduce((a,x)=>a+_cronoTrilhaMin(x),0);
+  const tHot=t.hotNA?0:(Number(t.hotTopicsTempoMin)||0);
+  const tAulas=_cronoAulasMin(m.aulas,t.aulasOff);
+  return {nCasos,nProblemas,tCasos,tHot,tAulas,tBloco:tAulas+tCasos+tHot,
+    nTrilhas,
+    nHot:Array.isArray(t.hotTopics)?t.hotTopics.length:0};
+}
+async function _cronoPersist(partial){
+  const temaId=_cronoEdTemaId,info=_cronoEdInfo;
+  if(!temaId||!info)return false;
+  const data={cursoId:info.cursoId,cursoNome:info.cursoNome,modulo:info.modulo,updatedAt:serverTimestamp(),...partial};
+  await setDoc(doc(db,'cronoTemas',temaId),data,{merge:true});
+  const prev=S.cronoTemas[temaId]||{};
+  S.cronoTemas[temaId]={...prev,id:temaId,...data};
+  return true;
+}
+// ══ MODAL ÚNICO DO TEMA: prioridade + 2 dropdowns (casos clínicos / hot topics) ══
+function _cronoOpenTema(temaId){
+  const info=_cronoModulos().flatMap(g=>g.mods).find(m=>m.temaId===temaId);
+  if(!info){arosToast('Módulo não encontrado','err',2000);return;}
+  const t=S.cronoTemas[temaId]||{};
+  _cronoEdTemaId=temaId;
+  _cronoEdInfo={cursoId:info.cursoId,cursoNome:info.cursoNome,modulo:info.modulo,totalMin:info.totalMin,aulas:info.aulas||[]};
+  _cronoEdAulasOff=((t.aulasOff)||[]).map(String);
+  _cronoEdTrilhaIds=((t.trilhaIds)||[]).slice();
+  _cronoEdHot=_cronoNormHot(t.hotTopics);
+  _cronoEdHtt=Number(t.hotTopicsTempoMin)||0;
+  _cronoEdTrilhasNA=!!t.trilhasNA;
+  _cronoEdHotNA=!!t.hotNA;
+  _cronoEdPrio=t.prioridade||'';
+  let modal=document.getElementById('crono-ed-modal');if(modal)modal.remove();
+  modal=document.createElement('div');
+  modal.className='mo';modal.id='crono-ed-modal';modal.setAttribute('data-no-backdrop-close','');
+  modal.innerHTML=`
+    <div class="md" style="max-width:700px;max-height:92vh;display:flex;flex-direction:column">
+      <div class="mh">
+        <div><div class="m-title">${_cronoEsc(info.modulo)}</div><div class="m-sub" id="crono-ed-bloco">Tempo total estimado: ${_cronoFmtDur(_cronoEdBlocoMin())}</div></div>
+        <button class="m-close" onclick="_cronoCloseEditor()">✕</button>
+      </div>
+      <div class="m-body" style="overflow-y:auto">
+        <div class="crono-ed-body">
+          <div class="crono-prio">
+            <label class="crono-ed-lbl">Prioridade deste bloco no cronograma</label>
+            <div class="crono-prio-btns" id="crono-ed-prio">
+              <button type="button" class="crono-prio-b" data-p="alta" onclick="_cronoSetPrio('alta')">Alta</button>
+              <button type="button" class="crono-prio-b" data-p="media" onclick="_cronoSetPrio('media')">Média</button>
+              <button type="button" class="crono-prio-b" data-p="baixa" onclick="_cronoSetPrio('baixa')">Baixa</button>
+            </div>
+          </div>
+          <div class="crono-drop" id="crono-drop-tr">
+            <button type="button" class="crono-drop-h" onclick="_cronoToggleDrop('tr')">
+              <span class="crono-drop-caret">▸</span>
+              <span class="crono-drop-title">🩺 Trilhas de Casos Clínicos</span>
+              <span class="crono-st" id="crono-st-tr"></span>
+              <span class="crono-drop-time" id="crono-time-tr"></span>
+            </button>
+            <div class="crono-drop-body">
+              <div class="crono-tr-head"><span>Trilha</span><span>Casos</span><span>Tempo</span><span></span></div>
+              <div class="crono-tr-list" id="crono-ed-tr-list"></div>
+              <div class="crono-link-add">
+                <select id="crono-ed-tr-sel" class="crono-link-sel"></select>
+                <button class="btn btn-s btn-sm" type="button" onclick="_cronoLinkTrilha()">+ Vincular</button>
+              </div>
+              <label class="crono-na-toggle"><input type="checkbox" id="crono-ed-tr-na" onchange="_cronoSetNA('tr',this.checked)"/> Não se aplica a este tema</label>
+            </div>
+          </div>
+          <div class="crono-drop" id="crono-drop-ht">
+            <button type="button" class="crono-drop-h" onclick="_cronoToggleDrop('ht')">
+              <span class="crono-drop-caret">▸</span>
+              <span class="crono-drop-title">🔥 Hot Topics</span>
+              <span class="crono-st" id="crono-st-ht"></span>
+              <span class="crono-drop-time" id="crono-time-ht"></span>
+            </button>
+            <div class="crono-drop-body">
+              <div class="crono-time-box" style="margin-bottom:16px">
+                <label class="crono-ed-lbl">Tempo total de estudo dos hot topics</label>
+                <div class="crono-time-row"><input type="number" min="0" step="1" id="crono-ed-htt" value="${_cronoEdHtt||''}" placeholder="0"/> <span>min no total</span></div>
+              </div>
+              <label class="crono-ed-lbl">Hot topics (cada item é salvo na hora)</label>
+              <div class="crono-ht-head"><span>Tema</span><span>Onde estudar?</span><span></span></div>
+              <div class="crono-ht-list" id="crono-ed-ht-list"></div>
+              <div class="crono-ht-add">
+                <input id="crono-ed-ht-tema" placeholder="Tema *" maxlength="160"/>
+                <input id="crono-ed-ht-onde" placeholder="Onde estudar? (ex: Miller cap. 12)" maxlength="240"/>
+                <button class="btn btn-s btn-sm" type="button" onclick="_cronoAddHot()">+ Adicionar</button>
+              </div>
+              <label class="crono-na-toggle"><input type="checkbox" id="crono-ed-ht-na" onchange="_cronoSetNA('ht',this.checked)"/> Não se aplica a este tema</label>
+            </div>
+          </div>
+          <div class="crono-drop" id="crono-drop-au">
+            <button type="button" class="crono-drop-h" onclick="_cronoToggleDrop('au')">
+              <span class="crono-drop-caret">▸</span>
+              <span class="crono-drop-title">Aulas</span>
+              <span class="crono-drop-time" id="crono-time-au"></span>
+            </button>
+            <div class="crono-drop-body">
+              <div class="crono-au-list" id="crono-ed-au-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mh" style="border-top:1px solid var(--border);border-bottom:none;justify-content:flex-end;gap:10px">
+        <button class="btn btn-p btn-sm" type="button" onclick="_cronoCloseEditor()">Concluir</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  const trNa=document.getElementById('crono-ed-tr-na');if(trNa)trNa.checked=_cronoEdTrilhasNA;
+  const htNa=document.getElementById('crono-ed-ht-na');if(htNa)htNa.checked=_cronoEdHotNA;
+  _cronoUpdatePrio();
+  _cronoRenderTrilhas();
+  _cronoRenderHot();
+  _cronoRenderAulas();
+  _cronoUpdateHeaders();
+  const httEl=document.getElementById('crono-ed-htt');
+  if(httEl){httEl.addEventListener('input',()=>{_cronoEdHtt=Math.max(0,parseInt(httEl.value,10)||0);_cronoUpdateHeaders();});
+            httEl.addEventListener('change',()=>_cronoSaveHotState('Tempo salvo'));}
+  const selEl=document.getElementById('crono-ed-tr-sel');
+  if(selEl)selEl.addEventListener('change',()=>{if(selEl.value)_cronoLinkTrilha();});
+  const htNome=document.getElementById('crono-ed-ht-tema');
+  if(htNome)htNome.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('crono-ed-ht-onde').focus();}});
+  const htOnde=document.getElementById('crono-ed-ht-onde');
+  if(htOnde)htOnde.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();_cronoAddHot();}});
+}
+window._cronoToggleDrop=which=>{
+  const el=document.getElementById('crono-drop-'+which);
+  if(el)el.classList.toggle('open');
+};
+function _cronoUpdatePrio(){
+  const wrap=document.getElementById('crono-ed-prio');
+  if(!wrap)return;
+  wrap.querySelectorAll('.crono-prio-b').forEach(b=>b.classList.toggle('sel',b.getAttribute('data-p')===_cronoEdPrio));
+}
+window._cronoSetPrio=async p=>{
+  _cronoEdPrio=(_cronoEdPrio===p?'':p);
+  _cronoUpdatePrio();
+  try{await _cronoPersist({prioridade:_cronoEdPrio});}
+  catch(e){console.error('setPrio:',e);arosToast('Erro ao salvar prioridade: '+(e.message||e),'err',3000);}
+};
+// Tempo total do bloco em edição = aulas + casos clínicos (trilhas vinculadas) + hot topics.
+function _cronoEdBlocoMin(){
+  const tAulas=_cronoAulasMin(_cronoEdInfo&&_cronoEdInfo.aulas,_cronoEdAulasOff);
+  const tCasos=_cronoEdTrilhasNA?0:_cronoEdTrilhaIds.map(id=>S.cronoTrilhas[id]).filter(Boolean).reduce((a,x)=>a+_cronoTrilhaMin(x),0);
+  const tHot=_cronoEdHotNA?0:(Number(_cronoEdHtt)||0);
+  return tAulas+tCasos+tHot;
+}
+// ── Aulas do módulo (com slider ON/OFF; OFF vai pro fim e não conta no tempo) ──
+function _cronoRenderAulas(){
+  const wrap=document.getElementById('crono-ed-au-list');
+  if(!wrap)return;
+  const off=new Set(_cronoEdAulasOff.map(String));
+  const aulas=((_cronoEdInfo&&_cronoEdInfo.aulas)||[]).slice();
+  aulas.sort((a,b)=>{
+    const oa=off.has(_cronoAulaKey(a))?1:0,ob=off.has(_cronoAulaKey(b))?1:0;
+    if(oa!==ob)return oa-ob;
+    return ((a.ordem==null?9999:a.ordem)-(b.ordem==null?9999:b.ordem))||String(a.titulo||'').localeCompare(String(b.titulo||''),'pt-BR',{numeric:true});
+  });
+  wrap.innerHTML=aulas.length?aulas.map(a=>{
+    const k=_cronoAulaKey(a),isOff=off.has(k);
+    return `<div class="crono-au-item${isOff?' off':''}">
+      <button class="crono-sw${isOff?'':' on'}" type="button" role="switch" aria-checked="${isOff?'false':'true'}" title="${isOff?'Reativar aula':'Desativar aula'}" onclick="_cronoToggleAula('${_cronoEsc(k)}')"><span class="knob"></span></button>
+      <span class="t">${a.ordem!=null?_cronoEsc(a.ordem)+'. ':''}${_cronoEsc(a.titulo||'—')}</span>
+      <span class="d">${a.duracao?_cronoEsc(a.duracao):'—'}</span>
+    </div>`;
+  }).join(''):'<div class="crono-ed-empty">Sem aulas neste módulo.</div>';
+  const th=document.getElementById('crono-time-au');
+  if(th)th.textContent='⏱ '+_cronoFmtDur(_cronoAulasMin((_cronoEdInfo&&_cronoEdInfo.aulas),_cronoEdAulasOff));
+}
+window._cronoToggleAula=async key=>{
+  key=String(key);
+  const i=_cronoEdAulasOff.map(String).indexOf(key);
+  if(i>=0)_cronoEdAulasOff.splice(i,1); else _cronoEdAulasOff.push(key);
+  try{ await _cronoPersist({aulasOff:_cronoEdAulasOff.slice()}); _cronoRenderAulas(); _cronoUpdateHeaders(); }
+  catch(e){ if(i>=0)_cronoEdAulasOff.push(key); else _cronoEdAulasOff.splice(_cronoEdAulasOff.map(String).indexOf(key),1); console.error('toggleAula:',e); arosToast('Erro ao salvar: '+(e.message||e),'err',3000); }
+};
+function _cronoUpdateHeaders(){
+  const trSt=_cronoStatusOf(_cronoEdTrilhasNA,_cronoEdTrilhaIds.length);
+  const htSt=_cronoStatusOf(_cronoEdHotNA,_cronoEdHot.length);
+  const stTr=document.getElementById('crono-st-tr');
+  if(stTr){stTr.className='crono-st '+trSt;stTr.textContent=_CRONO_ST_LBL[trSt];}
+  const stHt=document.getElementById('crono-st-ht');
+  if(stHt){stHt.className='crono-st '+htSt;stHt.textContent=_CRONO_ST_LBL[htSt];}
+  const tmin=_cronoEdTrilhaIds.map(id=>S.cronoTrilhas[id]).filter(Boolean).reduce((a,x)=>a+_cronoTrilhaMin(x),0);
+  const tTr=document.getElementById('crono-time-tr');
+  if(tTr)tTr.textContent=_cronoEdTrilhasNA?'':(tmin?'⏱ '+_cronoFmtDur(tmin):'');
+  const tHt=document.getElementById('crono-time-ht');
+  if(tHt)tHt.textContent=_cronoEdHotNA?'':(_cronoEdHtt?'⏱ '+_cronoFmtDur(_cronoEdHtt):'');
+  const bl=document.getElementById('crono-ed-bloco');
+  if(bl)bl.textContent='Tempo total estimado: '+_cronoFmtDur(_cronoEdBlocoMin());
+}
+window._cronoSetNA=async(which,checked)=>{
+  try{
+    if(which==='tr'){_cronoEdTrilhasNA=checked;await _cronoSaveTrilhasState(checked?'Marcado: não se aplica':'');}
+    else{_cronoEdHotNA=checked;await _cronoSaveHotState(checked?'Marcado: não se aplica':'');}
+    _cronoUpdateHeaders();
+  }catch(e){console.error('setNA:',e);arosToast('Erro ao salvar: '+(e.message||e),'err',3000);}
+};
+// ── Trilhas de casos clínicos: vinculadas da biblioteca (cronoTrilhas) ──
+function _cronoRenderTrilhas(){
+  const wrap=document.getElementById('crono-ed-tr-list');
+  if(!wrap)return;
+  const trs=_cronoEdTrilhaIds.map(id=>S.cronoTrilhas[id]).filter(Boolean);
+  if(!trs.length){wrap.innerHTML='<div class="crono-ed-empty">Nenhuma trilha vinculada. Escolha abaixo.</div>';}
+  else{
+    wrap.innerHTML=trs.map(tr=>`<div class="crono-tr-item">
+        <div class="crono-tr-item-txt">
+          <div class="crono-tr-item-nome">${_cronoEsc(tr.titulo)}</div>
+          <div class="crono-tr-item-desc">${tr.totalProblemas||0} problemas${tr.mediaCount?' · '+tr.mediaCount+' multimídia':''}</div>
+        </div>
+        <div class="crono-tr-c">${tr.totalCasos||0}</div>
+        <div class="crono-tr-t">${_cronoTrilhaTempoTxt(tr)}</div>
+        <button class="crono-x" type="button" title="Desvincular" onclick="_cronoRemoveTrilha('${_cronoEsc(tr.id)}')">✕</button>
+      </div>`).join('');
+  }
+  // Popular o seletor com as trilhas ainda não vinculadas
+  const sel=document.getElementById('crono-ed-tr-sel');
+  if(sel){
+    const linked=new Set(_cronoEdTrilhaIds.map(String));
+    const opts=Object.values(S.cronoTrilhas).filter(t=>!linked.has(String(t.id))&&!_cronoTrilhaOff(t.id))
+      .sort(_cronoTrilhaCmp);
+    const totalLib=Object.keys(S.cronoTrilhas).length;
+    const ph=opts.length?'Escolher trilha…':(totalLib?'Todas já vinculadas':'Sincronize as trilhas na aba ao lado');
+    sel.innerHTML=`<option value="">${ph}</option>`+opts.map(t=>`<option value="${_cronoEsc(t.id)}">${_cronoEsc(t.titulo)} — ${t.totalCasos||0} casos · ${t.totalProblemas||0} probl.</option>`).join('');
+  }
+  const totEl=document.getElementById('crono-ed-tr-total');
+  if(totEl){
+    const nCasos=trs.reduce((a,x)=>a+(Number(x.totalCasos)||0),0);
+    const nProb=trs.reduce((a,x)=>a+(Number(x.totalProblemas)||0),0);
+    const tmin=trs.reduce((a,x)=>a+_cronoTrilhaMin(x),0);
+    totEl.innerHTML=`<b>${trs.length}</b> trilha${trs.length!==1?'s':''} · <b>${nCasos}</b> casos · <b>${nProb}</b> problemas · tempo estimado: <b>${_cronoFmtDur(tmin)}</b>`;
+  }
+}
+async function _cronoSaveTrilhasState(msg){
+  await _cronoPersist({trilhaIds:_cronoEdTrilhaIds.slice(),trilhasNA:_cronoEdTrilhasNA});
+  if(msg)arosToast(msg,'success',1500);
+}
+window._cronoLinkTrilha=async()=>{
+  const sel=document.getElementById('crono-ed-tr-sel');
+  const id=sel&&sel.value;
+  if(!id||_cronoEdTrilhaIds.includes(id))return;
+  _cronoEdTrilhaIds.push(id);
+  try{
+    await _cronoSaveTrilhasState('');
+    audit('CRONO_TRILHA_LINK',{collection:'cronoTemas',docId:_cronoEdTemaId},{meta:{trilhaId:id}});
+    _cronoRenderTrilhas();_cronoUpdateHeaders();
+    arosToast('Trilha vinculada','success',1500);
+  }catch(e){
+    _cronoEdTrilhaIds=_cronoEdTrilhaIds.filter(x=>x!==id);
+    _cronoRenderTrilhas();
+    console.error('linkTrilha:',e);arosToast('Erro ao vincular: '+(e.message||e),'err',3000);
+  }
+};
+window._cronoRemoveTrilha=async id=>{
+  const tr=S.cronoTrilhas[id];
+  const nome=(tr&&tr.titulo)||'esta trilha';
+  const ok=await uiConfirm(`Desvincular "${nome}" deste tema?`,{title:'Desvincular trilha',yesLabel:'Desvincular',noLabel:'Cancelar',yesClass:'btn-d'});
+  if(!ok)return;
+  const backup=_cronoEdTrilhaIds.slice();
+  _cronoEdTrilhaIds=_cronoEdTrilhaIds.filter(x=>x!==id);
+  try{
+    await _cronoSaveTrilhasState('');
+    audit('CRONO_TRILHA_UNLINK',{collection:'cronoTemas',docId:_cronoEdTemaId},{meta:{trilhaId:id}});
+    _cronoRenderTrilhas();_cronoUpdateHeaders();
+    arosToast('Trilha desvinculada','success',1500);
+  }catch(e){
+    _cronoEdTrilhaIds=backup;_cronoRenderTrilhas();
+    console.error('unlinkTrilha:',e);arosToast('Erro: '+(e.message||e),'err',3000);
+  }
+};
+// ── Hot topics ──
+function _cronoRenderHot(){
+  const wrap=document.getElementById('crono-ed-ht-list');
+  if(!wrap)return;
+  if(!_cronoEdHot.length){wrap.innerHTML='<div class="crono-ed-empty">Nenhum hot topic cadastrado ainda.</div>';return;}
+  wrap.innerHTML=_cronoEdHot.map(h=>`
+    <div class="crono-ht-item">
+      <div class="t">${_cronoEsc(h.tema)}</div>
+      <div class="o">${h.onde?_cronoEsc(h.onde):'<span style="opacity:.45">—</span>'}</div>
+      <button class="crono-x" type="button" title="Excluir hot topic" onclick="_cronoDelHot('${_cronoEsc(h.id)}')">🗑</button>
+    </div>`).join('');
+}
+async function _cronoSaveHotState(msg){
+  await _cronoPersist({hotTopics:_cronoEdHot,hotTopicsTempoMin:_cronoEdHtt,hotNA:_cronoEdHotNA});
+  if(msg)arosToast(msg,'success',1500);
+}
+window._cronoAddHot=async()=>{
+  const temaEl=document.getElementById('crono-ed-ht-tema');
+  const ondeEl=document.getElementById('crono-ed-ht-onde');
+  const tema=(temaEl.value||'').trim();
+  if(!tema){arosToast('Preencha o tema do hot topic','err',2000);temaEl.focus();return;}
+  const item={id:'ht_'+_poSlug(tema)+'_'+Math.random().toString(36).slice(2,6),tema,onde:(ondeEl.value||'').trim()};
+  _cronoEdHot.push(item);
+  try{
+    await _cronoSaveHotState('');
+    audit('CRONO_HOTTOPIC_ADD',{collection:'cronoTemas',docId:_cronoEdTemaId},{meta:{tema}});
+    temaEl.value='';ondeEl.value='';temaEl.focus();
+    _cronoRenderHot();_cronoUpdateHeaders();
+    arosToast('Hot topic salvo','success',1600);
+  }catch(e){
+    _cronoEdHot=_cronoEdHot.filter(x=>x.id!==item.id);
+    _cronoRenderHot();
+    console.error('addHot:',e);arosToast('Erro ao salvar: '+(e.message||e),'err',3000);
+  }
+};
+window._cronoDelHot=async id=>{
+  const item=_cronoEdHot.find(x=>x.id===id);
+  if(!item)return;
+  const ok1=await uiConfirm(`Excluir o hot topic "${item.tema}"?`,{title:'Excluir hot topic',yesLabel:'Excluir',noLabel:'Cancelar',yesClass:'btn-d'});
+  if(!ok1)return;
+  const ok2=await uiConfirm('Esta ação é definitiva e não pode ser desfeita. Confirmar exclusão?',{title:'Tem certeza?',yesLabel:'Sim, excluir',noLabel:'Voltar',yesClass:'btn-d'});
+  if(!ok2)return;
+  const backup=_cronoEdHot.slice();
+  _cronoEdHot=_cronoEdHot.filter(x=>x.id!==id);
+  try{
+    await _cronoSaveHotState('');
+    audit('CRONO_HOTTOPIC_DEL',{collection:'cronoTemas',docId:_cronoEdTemaId},{meta:{tema:item.tema}});
+    _cronoRenderHot();_cronoUpdateHeaders();
+    arosToast('Hot topic excluído','success',1600);
+  }catch(e){
+    _cronoEdHot=backup;_cronoRenderHot();
+    console.error('delHot:',e);arosToast('Erro ao excluir: '+(e.message||e),'err',3000);
+  }
+};
+window._cronoCloseEditor=()=>{
+  const m=document.getElementById('crono-ed-modal');
+  if(m)m.remove();
+  _cronoEdTemaId=null;_cronoEdTrilhaIds=[];_cronoEdHot=[];_cronoEdInfo=null;
+  _cronoEdHtt=0;_cronoEdTrilhasNA=false;_cronoEdHotNA=false;_cronoEdPrio='';_cronoEdAulasOff=[];
+  renderCronoBib();
+};
+window.renderCronoBib=renderCronoBib;
+// ════════════════════════════════════════════════════════════════════════════
+// GERAÇÃO DE CRONOGRAMA (Fase 2) — turmas, montagem por semana, export PDF.
+// Coleção cronoTurmas/{id}: { nome, dataInicio, dataFim, simulados[], prova,
+//   semanas:[{dias,temas[],revisoes[],nota}], ... }. Datas das semanas são calculadas.
+// ════════════════════════════════════════════════════════════════════════════
+S.cronoTurmas={};
+S._cronoTurmasLoaded=false;
+S._cronoGerTurmaId=null;
+let _cronoTemaMapCache=null;
+async function loadCronoTurmas(){
+  try{
+    const snap=await getDocs(collection(db,'cronoTurmas'));
+    const map={}; snap.forEach(d=>{map[d.id]={id:d.id,...d.data()};});
+    S.cronoTurmas=map; S._cronoTurmasLoaded=true;
+  }catch(e){console.error('loadCronoTurmas:',e);}
+}
+// ── Datas ──
+function _cronoParseDate(s){ if(!s)return null; const m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/); if(!m)return null; const d=new Date(+m[1],+m[2]-1,+m[3]); return isNaN(d.getTime())?null:d; }
+function _cronoFmtDate(d){ return d?String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0'):'—'; }
+function _cronoFmtDateY(d){ return d?_cronoFmtDate(d)+'/'+d.getFullYear():'—'; }
+// ── Temas ──
+function _cronoTemaMap(){ if(_cronoTemaMapCache)return _cronoTemaMapCache; const map=new Map(); _cronoModulos().flatMap(g=>g.mods).forEach(m=>map.set(m.temaId,m)); _cronoTemaMapCache=map; return map; }
+function _cronoModById(temaId){ return _cronoTemaMap().get(temaId)||null; }
+function _cronoTemaLabel(temaId){ const m=_cronoModById(temaId); return m?m.modulo:temaId; }
+function _cronoTemaBlocoMin(temaId){ const m=_cronoModById(temaId); return m?_cronoTemaTimes(m,S.cronoTemas[temaId]||{}).tBloco:0; }
+function _cronoAllTemas(){
+  const out=[]; _cronoModulos().forEach(g=>g.mods.forEach(m=>{ if(!_cronoTemaOff(m.temaId))out.push(m); }));
+  out.sort((a,b)=>String(a.cursoNome).localeCompare(String(b.cursoNome),'pt-BR')||_cronoTrilhaCmp({titulo:a.modulo},{titulo:b.modulo}));
+  return out;
+}
+// Gera N semanas de 7 dias cobrindo o período (última pode ser menor).
+function _cronoGenSemanas(dataInicio,dataFim){
+  const s=_cronoParseDate(dataInicio),e=_cronoParseDate(dataFim);
+  if(!s||!e||e<s)return [{dias:7,temas:[],revisoes:[],nota:''}];
+  const totalDias=Math.round((e-s)/86400000)+1;
+  const n=Math.max(1,Math.ceil(totalDias/7));
+  const arr=[]; let rem=totalDias;
+  for(let i=0;i<n;i++){ arr.push({dias:Math.min(7,Math.max(1,rem)),temas:[],revisoes:[],nota:''}); rem-=7; }
+  return arr;
+}
+// Normaliza simulados p/ [{id,nome,ini,fim}] (converte formato legado de string).
+function _cronoNormSims(turma){
+  return (turma.simulados||[]).map((s,i)=>{
+    if(typeof s==='string')return {id:'sim_'+i+'_'+Math.random().toString(36).slice(2,5),nome:'Simulado '+(i+1),ini:s,fim:s};
+    return {id:s.id||('sim_'+i+'_'+Math.random().toString(36).slice(2,5)),nome:s.nome||('Simulado '+(i+1)),ini:s.ini||'',fim:s.fim||s.ini||''};
+  });
+}
+// Revisão pré-prova: 1 dia por entrada (data única).
+function _cronoNormRevPre(turma){
+  return (turma.revisaoPreProva||[]).map((s,i)=>{
+    if(typeof s==='string')return {id:'rev_'+i+'_'+Math.random().toString(36).slice(2,5),nome:'Revisão '+(i+1),data:s};
+    return {id:s.id||('rev_'+i+'_'+Math.random().toString(36).slice(2,5)),nome:s.nome||('Revisão '+(i+1)),data:s.data||s.ini||''};
+  });
+}
+// Provas: 1 prova por dia (data única). Converte o formato legado (turma.prova string).
+function _cronoNormProvas(turma){
+  let arr=Array.isArray(turma.provas)?turma.provas:(turma.prova?[{nome:'Prova 1',data:turma.prova}]:[]);
+  return arr.map((s,i)=>{
+    if(typeof s==='string')return {id:'pv_'+i+'_'+Math.random().toString(36).slice(2,5),nome:'Prova '+(i+1),data:s};
+    return {id:s.id||('pv_'+i+'_'+Math.random().toString(36).slice(2,5)),nome:s.nome||('Prova '+(i+1)),data:s.data||s.ini||''};
+  });
+}
+// Semanas com datas + eventos (simulado por intervalo; prova e revisão = 1 dia cada) encaixados por data.
+function _cronoTurmaSemanas(turma){
+  const out=[]; const start=_cronoParseDate(turma.dataInicio); if(!start)return out;
+  const sims=_cronoNormSims(turma).map(s=>({nome:s.nome,ini:_cronoParseDate(s.ini),fim:_cronoParseDate(s.fim||s.ini)})).filter(s=>s.ini);
+  const revs=_cronoNormRevPre(turma).map(s=>({nome:s.nome,data:_cronoParseDate(s.data)})).filter(s=>s.data);
+  const provas=_cronoNormProvas(turma).map(s=>({nome:s.nome,data:_cronoParseDate(s.data)})).filter(s=>s.data);
+  const cursor=new Date(start);
+  (turma.semanas||[]).forEach((sm,i)=>{
+    const dias=Math.max(1,Number(sm.dias)||7);
+    const ini=new Date(cursor); const fim=new Date(cursor); fim.setDate(fim.getDate()+dias-1);
+    // Só simulados entram como evento da semana. Prova/revisão pré-prova são um bloco
+    // separado no FIM (o cronograma termina no dia anterior à 1ª prova oficial).
+    const eventos=[];
+    sims.forEach(s=>{ const sf=s.fim||s.ini; if(s.ini<=fim&&sf>=ini)eventos.push({tipo:'simulado',nome:s.nome,data:s.ini,fim:sf}); });
+    out.push({idx:i,dias,ini,fim,eventos,temas:sm.temas||[],revisoes:sm.revisoes||[],nota:sm.nota||''});
+    cursor.setDate(cursor.getDate()+dias);
+  });
+  return out;
+}
+// Datas de prova oficial + revisão pré-prova, ordenadas, formatadas (pro bloco final).
+function _cronoExamDatas(turma){
+  const fmt=d=>_cronoFmtDate(_cronoParseDate(d));
+  const provas=_cronoNormProvas(turma).filter(p=>p.data).sort((a,b)=>String(a.data).localeCompare(String(b.data)));
+  const revs=_cronoNormRevPre(turma).filter(r=>r.data).sort((a,b)=>String(a.data).localeCompare(String(b.data)));
+  return {provasTxt:provas.map(p=>fmt(p.data)),revsTxt:revs.map(r=>fmt(r.data)),hasAny:!!(provas.length||revs.length)};
+}
+function _cronoCurTurma(){ return S.cronoTurmas[S._cronoGerTurmaId]||null; }
+// Gravações serializadas: garante que a ORDEM das escritas = ordem das chamadas
+// (senão um onchange e um clique quase simultâneos podem gravar fora de ordem e
+// uma escrita antiga sobrescreve a nova, revertendo um nome já ajustado).
+let _cronoSaveQ=Promise.resolve();
+async function _cronoPersistTurma(turma){
+  S.cronoTurmas[turma.id]=turma; // mantém a MESMA referência viva (evita clobber in-memory)
+  const {id,updatedAt,..._d}=turma;
+  const p=_cronoSaveQ.catch(()=>{}).then(()=>setDoc(doc(db,'cronoTurmas',id),{..._d,updatedAt:serverTimestamp()},{merge:true}));
+  _cronoSaveQ=p;
+  return p;
+}
+// ── Render raiz ──
+async function renderCronoGer(){
+  const body=document.getElementById('crono-ger-body'); if(!body)return;
+  if(!S._poLoaded||!S._cronoLoaded||!S._cronoTrilhasLoaded||!S._cronoTurmasLoaded){
+    body.innerHTML='<p style="color:var(--t2);font-size:14px">Carregando…</p>';
+    await Promise.all([
+      S._poLoaded?null:loadPO().catch(e=>console.warn(e)),
+      S._cronoLoaded?null:loadCronoTemas().catch(e=>console.warn(e)),
+      S._cronoTrilhasLoaded?null:loadCronoTrilhas().catch(e=>console.warn(e)),
+      S._cronoTurmasLoaded?null:loadCronoTurmas().catch(e=>console.warn(e))
+    ]);
+  }
+  _cronoTemaMapCache=null;
+  const turma=_cronoCurTurma();
+  if(turma)_cronoRenderTurmaEditor(turma); else _cronoRenderTurmaList();
+}
+window.renderCronoGer=renderCronoGer;
+function _cronoRenderTurmaList(){
+  const body=document.getElementById('crono-ger-body'); if(!body)return;
+  const list=Object.values(S.cronoTurmas).sort((a,b)=>String(b.dataInicio||'').localeCompare(String(a.dataInicio||'')));
+  let html='<div class="cg-list-head"><h3>Turmas</h3><button class="cg-new-btn" type="button" onclick="_cronoNovaTurma()"><span class="ic">+</span><span>Novo Cronograma</span></button></div>';
+  if(!list.length){ html+='<div class="es" style="padding:44px 0;text-align:center;color:var(--t2)"><div style="font-size:40px">🗓️</div><p>Nenhuma turma ainda. Crie a primeira.</p></div>'; }
+  else{
+    html+='<div class="cg-turmas">'+list.map(t=>{
+      const s=_cronoParseDate(t.dataInicio),e=_cronoParseDate(t.dataFim);
+      const nSem=(t.semanas||[]).length;
+      return `<div class="cg-turma-card">
+        <div class="cg-turma-info" onclick="_cronoAbrirTurma('${_cronoEsc(t.id)}')">
+          <div class="cg-turma-nome">${_cronoEsc(t.nome||'(sem nome)')}</div>
+          <div class="cg-turma-meta">${_cronoFmtDateY(s)} – ${_cronoFmtDateY(e)} · <b>${nSem}</b> semana${nSem!==1?'s':''}</div>
+        </div>
+        <div class="cg-turma-acts">
+          <button class="btn btn-s btn-sm" type="button" onclick="_cronoAbrirTurma('${_cronoEsc(t.id)}')">Abrir</button>
+          <button class="crono-x" type="button" title="Excluir turma" onclick="_cronoExcluirTurma('${_cronoEsc(t.id)}')">🗑</button>
+        </div>
+      </div>`;
+    }).join('')+'</div>';
+  }
+  body.innerHTML=html;
+}
+window._cronoNovaTurma=async()=>{
+  let modal=document.getElementById('cg-nova-modal'); if(modal)modal.remove();
+  modal=document.createElement('div'); modal.className='mo'; modal.id='cg-nova-modal'; modal.setAttribute('data-no-backdrop-close','');
+  modal.innerHTML=`<div class="md" style="max-width:460px">
+    <div class="mh"><div><div class="m-title">Nova turma</div></div><button class="m-close" onclick="document.getElementById('cg-nova-modal').remove()">✕</button></div>
+    <div class="m-body">
+      <label class="crono-ed-lbl" style="display:block;margin-bottom:6px">Nome da turma</label>
+      <input class="fc" id="cg-nt-nome" placeholder="Ex: Turma TSA Oral 2026.1" maxlength="180" style="margin-bottom:14px"/>
+      <div style="display:flex;gap:12px">
+        <div style="flex:1"><label class="crono-ed-lbl" style="display:block;margin-bottom:6px">Início</label><input class="fc" type="date" id="cg-nt-ini"/></div>
+        <div style="flex:1"><label class="crono-ed-lbl" style="display:block;margin-bottom:6px">Fim</label><input class="fc" type="date" id="cg-nt-fim"/></div>
+      </div>
+    </div>
+    <div class="m-foot"><button class="btn btn-s" onclick="document.getElementById('cg-nova-modal').remove()">Cancelar</button><button class="btn btn-p" onclick="_cronoCriarTurma()">Criar</button></div>
+  </div>`;
+  document.body.appendChild(modal);
+  setTimeout(()=>{const el=document.getElementById('cg-nt-nome');if(el)el.focus();},40);
+};
+window._cronoCriarTurma=async()=>{
+  const nome=(document.getElementById('cg-nt-nome').value||'').trim();
+  const ini=document.getElementById('cg-nt-ini').value;
+  const fim=document.getElementById('cg-nt-fim').value;
+  if(!nome){arosToast('Dê um nome à turma','err',2000);return;}
+  if(!ini||!fim){arosToast('Informe início e fim','err',2000);return;}
+  if(_cronoParseDate(fim)<_cronoParseDate(ini)){arosToast('O fim não pode ser antes do início','err',2500);return;}
+  const id='turma_'+_poSlug(nome)+'_'+Math.random().toString(36).slice(2,6);
+  const turma={id,nome,dataInicio:ini,dataFim:fim,simulados:[],prova:'',semanas:_cronoGenSemanas(ini,fim)};
+  try{
+    await _cronoPersistTurma(turma);
+    audit('CRONO_TURMA_CRIADA',{collection:'cronoTurmas',docId:id},{meta:{nome}});
+    document.getElementById('cg-nova-modal')?.remove();
+    S._cronoGerTurmaId=id; renderCronoGer();
+    arosToast('Turma criada','success',1800);
+  }catch(e){console.error('criarTurma:',e);arosToast('Erro ao criar: '+(e.message||e),'err',3000);}
+};
+window._cronoAbrirTurma=id=>{ S._cronoGerTurmaId=id; _cronoOpenWeeks=new Set(); _cronoSimOpen=false; _cronoProvaOpen=false; _cronoRevOpen=false; renderCronoGer(); };
+window._cronoVoltarTurmas=()=>{ S._cronoGerTurmaId=null; renderCronoGer(); };
+window._cronoExcluirTurma=async id=>{
+  const t=S.cronoTurmas[id];
+  const ok=await uiConfirm(`Excluir a turma "${(t&&t.nome)||''}"? Esta ação não pode ser desfeita.`,{title:'Excluir turma',yesLabel:'Excluir',noLabel:'Cancelar',yesClass:'btn-d'});
+  if(!ok)return;
+  try{ await deleteDoc(doc(db,'cronoTurmas',id)); delete S.cronoTurmas[id]; audit('CRONO_TURMA_EXCLUIDA',{collection:'cronoTurmas',docId:id},{}); if(S._cronoGerTurmaId===id)S._cronoGerTurmaId=null; renderCronoGer(); arosToast('Turma excluída','success',1800); }
+  catch(e){console.error('excluirTurma:',e);arosToast('Erro ao excluir: '+(e.message||e),'err',3000);}
+};
+// ── Editor da turma ──
+// Só as semanas (reflow ao mudar datas/eventos, sem recriar os campos de cima — preserva o foco).
+function _cronoTemaPrio(id){ return (S.cronoTemas[id]||{}).prioridade||''; }
+function _cronoChip(id,sm,rev){
+  const pri=_cronoTemaPrio(id);
+  const del=rev?`_cronoSemDelRev(${sm.idx},'${_cronoEsc(id)}')`:`_cronoSemDelTema(${sm.idx},'${_cronoEsc(id)}')`;
+  const tm=rev?'':`<span class="tm">${_cronoFmtDur(_cronoTemaBlocoMin(id))}</span>`;
+  return `<span class="cg-tema-chip pri-${pri||'none'}${rev?' rev':''}"><span class="t">${_cronoEsc(_cronoTemaLabel(id))}</span>${tm}<button type="button" title="Remover" onclick="${del}">✕</button></span>`;
+}
+// 1-based nº da 1ª semana onde o tema aparece como estudo (pra anotar na revisão).
+function _cronoTemaVistoSemana(id){
+  const t=_cronoCurTurma(); if(!t)return null;
+  const arr=t.semanas||[];
+  for(let i=0;i<arr.length;i++){ if((arr[i].temas||[]).includes(id))return i+1; }
+  return null;
+}
+let _cronoOpenWeeks=new Set();
+window._cronoWeekToggle=idx=>{ if(_cronoOpenWeeks.has(idx))_cronoOpenWeeks.delete(idx); else _cronoOpenWeeks.add(idx); const el=document.getElementById('cg-week-'+idx); if(el)el.classList.toggle('open',_cronoOpenWeeks.has(idx)); };
+window._cronoToggleAllWeeks=()=>{ const t=_cronoCurTurma(); const n=t?(t.semanas||[]).length:0; if(_cronoOpenWeeks.size>=n&&n>0)_cronoOpenWeeks=new Set(); else{_cronoOpenWeeks=new Set();for(let i=0;i<n;i++)_cronoOpenWeeks.add(i);} _cronoRenderWeeks(); };
+function _cronoWeeksHTML(turma){
+  const semanas=_cronoTurmaSemanas(turma);
+  const nW=semanas.length;
+  const allOpen=nW>0&&_cronoOpenWeeks.size>=nW;
+  let html=`<div class="cg-weeks-bar"><button class="cg-expand-btn" type="button" onclick="_cronoToggleAllWeeks()">${allOpen?'▾ Recolher todas':'▸ Expandir todas'}</button></div><div class="cg-weeks">`;
+  semanas.forEach(sm=>{
+    const open=_cronoOpenWeeks.has(sm.idx);
+    const totalMin=sm.temas.reduce((a,id)=>a+_cronoTemaBlocoMin(id),0);
+    const badges=sm.eventos.map(ev=>{
+      const rng=(ev.fim&&ev.fim.getTime()!==ev.data.getTime())?_cronoFmtDate(ev.data)+'–'+_cronoFmtDate(ev.fim):_cronoFmtDate(ev.data);
+      const nome=_cronoEsc((ev.nome||(ev.tipo==='prova'?'Prova':ev.tipo==='revisaoPre'?'Revisão':'Simulado')).toUpperCase());
+      return `<span class="cg-ev ${ev.tipo}">${nome} · ${_cronoEsc(rng)}</span>`;
+    }).join('');
+    const temaChips=sm.temas.map(id=>_cronoChip(id,sm,false)).join('')||'<span class="cg-none">nenhum tema ainda</span>';
+    const revItems=sm.revisoes.map(id=>{
+      const pri=_cronoTemaPrio(id); const vs=_cronoTemaVistoSemana(id);
+      const nota=vs?('visto na semana '+vs):'ainda não estudado';
+      return `<span class="cg-tema-chip rev pri-${pri||'none'}"><span class="t">${_cronoEsc(_cronoTemaLabel(id))} <em>(${_cronoEsc(nota)})</em></span><button type="button" title="Remover" onclick="_cronoSemDelRev(${sm.idx},'${_cronoEsc(id)}')">✕</button></span>`;
+    }).join('');
+    const revSec=sm.revisoes.length?`<div class="cg-rev-sec"><div class="cg-col-h">Revisão</div><div class="cg-chips">${revItems}</div></div>`:'';
+    html+=`<div class="cg-week${open?' open':''}" id="cg-week-${sm.idx}">
+      <div class="cg-week-head" onclick="_cronoWeekToggle(${sm.idx})">
+        <span class="cg-drop-caret">▸</span>
+        <span class="cg-week-n">Semana ${sm.idx+1}</span>
+        <span class="cg-week-dt">${_cronoEsc(_cronoFmtDate(sm.ini))} – ${_cronoEsc(_cronoFmtDate(sm.fim))}</span>
+        ${badges}
+        <span class="cg-week-time">⏱ ${_cronoFmtDur(totalMin)}</span>
+        <button class="crono-x" type="button" title="Remover semana" onclick="event.stopPropagation();_cronoDelSemana(${sm.idx})">🗑</button>
+      </div>
+      <div class="cg-week-body">
+        <div class="cg-col-h">Temas de estudo</div>
+        <div class="cg-chips">${temaChips}</div>
+        ${revSec}
+        <div class="cg-week-actions">
+          <button class="cg-add-btn" type="button" onclick="_cronoOpenTemaPicker(${sm.idx},'tema')"><span>+</span> Adicionar tema de estudo</button>
+          <button class="cg-add-btn rev" type="button" onclick="_cronoOpenTemaPicker(${sm.idx},'rev')"><span>+</span> Adicionar revisão</button>
+        </div>
+      </div>
+    </div>`;
+  });
+  html+='</div><button class="btn btn-s" type="button" style="margin-top:14px" onclick="_cronoAddSemana()">+ Adicionar semana</button>';
+  return html;
+}
+// ── Picker de temas em árvore por prioridade (modal) ──
+let _cronoPickerWi=null,_cronoPickerMode='tema';
+function _cronoTemasUsados(){ const t=_cronoCurTurma(); const set=new Set(); if(t)(t.semanas||[]).forEach(sm=>(sm.temas||[]).forEach(id=>set.add(id))); return set; }
+window._cronoOpenTemaPicker=(wi,mode)=>{ _cronoPickerWi=wi; _cronoPickerMode=mode||'tema'; _cronoRenderPicker(); };
+window._cronoClosePicker=()=>{ const m=document.getElementById('cg-picker-modal'); if(m)m.remove(); };
+function _cronoRenderPicker(){
+  const t=_cronoCurTurma(); if(!t)return; const sem=t.semanas&&t.semanas[_cronoPickerWi]; if(!sem)return;
+  const mode=_cronoPickerMode;
+  // Tema: exclui os já usados como tema em QUALQUER semana (não repete). Revisão: só os já nesta semana.
+  const usados=mode==='tema'?_cronoTemasUsados():new Set(sem.revisoes||[]);
+  const disp=_cronoAllTemas().filter(m=>!usados.has(m.temaId));
+  const grupos=[{k:'alta',lbl:'Alta prioridade'},{k:'media',lbl:'Média prioridade'},{k:'baixa',lbl:'Baixa prioridade'},{k:'',lbl:'Sem prioridade definida'}];
+  let inner='';
+  grupos.forEach(g=>{
+    const items=disp.filter(m=>(_cronoTemaPrio(m.temaId))===g.k);
+    if(!items.length)return;
+    inner+=`<div class="cg-pk-group"><div class="cg-pk-group-h pri-${g.k||'none'}"><span class="dot"></span>${g.lbl}<span class="n">${items.length}</span></div>`;
+    inner+=items.map(m=>`<button class="cg-pk-item pri-${_cronoTemaPrio(m.temaId)||'none'}" type="button" onclick="_cronoPickerAdd('${_cronoEsc(m.temaId)}')"><span class="dot"></span><span class="t">${_cronoEsc(m.modulo)}</span><span class="tm">${_cronoFmtDur(_cronoTemaBlocoMin(m.temaId))}</span></button>`).join('');
+    inner+='</div>';
+  });
+  if(!inner)inner='<div class="cg-none" style="padding:20px 0;text-align:center">Nenhum tema disponível'+(mode==='tema'?' (todos já distribuídos)':'')+'.</div>';
+  let modal=document.getElementById('cg-picker-modal'); if(modal)modal.remove();
+  modal=document.createElement('div'); modal.className='mo'; modal.id='cg-picker-modal';
+  modal.innerHTML=`<div class="md" style="max-width:620px;max-height:88vh;display:flex;flex-direction:column">
+    <div class="mh"><div><div class="m-title">${mode==='rev'?'Adicionar revisão':'Adicionar tema'}</div><div class="m-sub">Semana ${_cronoPickerWi+1}${mode==='tema'?' · temas não se repetem entre semanas':''}</div></div><button class="m-close" onclick="_cronoClosePicker()">✕</button></div>
+    <div class="m-body" style="overflow-y:auto" id="cg-picker-body">${inner}</div>
+    <div class="mh" style="border-top:1px solid var(--border);border-bottom:none;justify-content:flex-end"><button class="btn btn-p btn-sm" type="button" onclick="_cronoClosePicker()">Concluir</button></div>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)_cronoClosePicker();});
+  document.body.appendChild(modal);
+}
+window._cronoPickerAdd=async id=>{
+  const t=_cronoCurTurma(); const sem=t&&t.semanas&&t.semanas[_cronoPickerWi]; if(!sem)return;
+  const key=_cronoPickerMode==='rev'?'revisoes':'temas';
+  sem[key]=sem[key]||[]; if(!sem[key].includes(id))sem[key].push(id);
+  const ok=await _cronoSaveTurma(t,''); if(!ok){renderCronoGer();_cronoClosePicker();return;}
+  _cronoRenderWeeks(); _cronoClosePicker();
+};
+function _cronoRenderWeeks(){ const t=_cronoCurTurma(); const wrap=document.getElementById('cg-weeks-wrap'); if(t&&wrap)wrap.innerHTML=_cronoWeeksHTML(t); }
+function _cronoRenderTurmaEditor(turma){
+  const body=document.getElementById('crono-ger-body'); if(!body)return;
+  const sims=_cronoNormSims(turma);
+  const simRows=sims.length?sims.map(s=>`<div class="cg-sim-row">
+      <input class="cg-sim-nome" value="${_cronoEsc(s.nome)}" maxlength="60" placeholder="Nome do simulado" onchange="_cronoSimField('${_cronoEsc(s.id)}','nome',this.value)"/>
+      <label class="cg-sim-dt"><span>Início</span><input type="date" value="${_cronoEsc(s.ini)}" onchange="_cronoSimField('${_cronoEsc(s.id)}','ini',this.value)"/></label>
+      <label class="cg-sim-dt"><span>Fim</span><input type="date" value="${_cronoEsc(s.fim)}" onchange="_cronoSimField('${_cronoEsc(s.id)}','fim',this.value)"/></label>
+      <button class="crono-x" type="button" title="Remover simulado" onclick="_cronoDelSim('${_cronoEsc(s.id)}')">🗑</button>
+    </div>`).join(''):'<div class="cg-none" style="padding:4px 0">Nenhum simulado ainda.</div>';
+  const provas=_cronoNormProvas(turma);
+  const provaRows=provas.length?provas.map(s=>`<div class="cg-sim-row">
+      <input class="cg-sim-nome" value="${_cronoEsc(s.nome)}" maxlength="80" placeholder="Nome da prova" onchange="_cronoProvaField('${_cronoEsc(s.id)}','nome',this.value)"/>
+      <label class="cg-sim-dt"><span>Dia</span><input type="date" value="${_cronoEsc(s.data)}" onchange="_cronoProvaField('${_cronoEsc(s.id)}','data',this.value)"/></label>
+      <button class="crono-x" type="button" title="Remover prova" onclick="_cronoDelProva('${_cronoEsc(s.id)}')">🗑</button>
+    </div>`).join(''):'<div class="cg-none" style="padding:4px 0">Nenhuma prova ainda.</div>';
+  const revs=_cronoNormRevPre(turma);
+  const revRows=revs.length?revs.map(s=>`<div class="cg-sim-row">
+      <input class="cg-sim-nome" value="${_cronoEsc(s.nome)}" maxlength="80" placeholder="Ex: Revisão (quem faz na sexta)" onchange="_cronoRevPreField('${_cronoEsc(s.id)}','nome',this.value)"/>
+      <label class="cg-sim-dt"><span>Dia</span><input type="date" value="${_cronoEsc(s.data)}" onchange="_cronoRevPreField('${_cronoEsc(s.id)}','data',this.value)"/></label>
+      <button class="crono-x" type="button" title="Remover dia de revisão" onclick="_cronoDelRevPre('${_cronoEsc(s.id)}')">🗑</button>
+    </div>`).join(''):'<div class="cg-none" style="padding:4px 0">Nenhum dia de revisão ainda.</div>';
+  body.innerHTML=`<div class="cg-editor">
+    <div class="cg-toolbar">
+      <button class="cg-back" type="button" onclick="_cronoVoltarTurmas()">← Turmas</button>
+      <input class="cg-nome" value="${_cronoEsc(turma.nome||'')}" maxlength="180" onchange="_cronoTurmaField('nome',this.value)"/>
+      <div class="cg-tb-spacer"></div>
+      <button class="crono-refresh-btn" type="button" onclick="_cronoExportarPDF()"><span class="ic">⬇</span><span>Exportar PDF</span></button>
+    </div>
+    <div class="cg-config">
+      <label class="cg-fld"><span>Início</span><input type="date" value="${_cronoEsc(turma.dataInicio||'')}" onchange="_cronoTurmaField('dataInicio',this.value)"/></label>
+      <label class="cg-fld"><span>Fim</span><input type="date" value="${_cronoEsc(turma.dataFim||'')}" onchange="_cronoTurmaField('dataFim',this.value)"/></label>
+    </div>
+    <div class="cg-sim-box${_cronoSimOpen?' open':''}" id="cg-sim-box">
+      <div class="cg-sim-box-h" onclick="_cronoSimBoxToggle()">
+        <span class="cg-drop-caret">▸</span>
+        <span class="cg-sim-title">Simulados</span>
+        <span class="cg-sim-count">${sims.length}</span>
+        <button class="btn btn-s btn-sm" type="button" onclick="event.stopPropagation();_cronoAddSim()">+ Adicionar simulado</button>
+      </div>
+      <div class="cg-sim-body"><div class="cg-sim-rows">${simRows}</div></div>
+    </div>
+    <div class="cg-sim-box${_cronoProvaOpen?' open':''}" id="cg-prova-box">
+      <div class="cg-sim-box-h" onclick="_cronoProvaBoxToggle()">
+        <span class="cg-drop-caret">▸</span>
+        <span class="cg-sim-title">Provas oficiais</span>
+        <span class="cg-sim-count">${provas.length}</span>
+        <button class="btn btn-s btn-sm" type="button" onclick="event.stopPropagation();_cronoAddProva()">+ Adicionar prova</button>
+      </div>
+      <div class="cg-sim-body"><div class="cg-sim-rows">${provaRows}</div></div>
+    </div>
+    <div class="cg-sim-box${_cronoRevOpen?' open':''}" id="cg-rev-box">
+      <div class="cg-sim-box-h" onclick="_cronoRevBoxToggle()">
+        <span class="cg-drop-caret">▸</span>
+        <span class="cg-sim-title">Revisão pré-prova</span>
+        <span class="cg-sim-count">${revs.length}</span>
+        <button class="btn btn-s btn-sm" type="button" onclick="event.stopPropagation();_cronoAddRevPre()">+ Adicionar dia de revisão</button>
+      </div>
+      <div class="cg-sim-body"><div class="cg-sim-rows">${revRows}</div></div>
+    </div>
+    <div id="cg-weeks-wrap">${_cronoWeeksHTML(turma)}</div>
+    ${(()=>{ const ex=_cronoExamDatas(turma); if(!ex.hasAny)return ''; return `<div class="cg-exam-box">
+      ${ex.provasTxt.length?`<div class="cg-exam-line"><span class="cg-exam-t prova">Prova oficial</span><span class="cg-exam-d">${ex.provasTxt.map(_cronoEsc).join(' <i>|</i> ')}</span></div>`:''}
+      ${ex.revsTxt.length?`<div class="cg-exam-line"><span class="cg-exam-t rev">Revisão pré-prova</span><span class="cg-exam-d">${ex.revsTxt.map(_cronoEsc).join(' <i>|</i> ')}</span></div><div class="cg-exam-note">Você participa da revisão no dia imediatamente antes da sua prova oficial.</div>`:''}
+    </div>`; })()}
+  </div>`;
+}
+async function _cronoSaveTurma(turma,msg){
+  try{ await _cronoPersistTurma(turma); if(msg)arosToast(msg,'success',1400); return true; }
+  catch(e){
+    console.error('saveTurma:',e); arosToast('Erro ao salvar: '+(e.message||e),'err',3000);
+    // Ressincroniza do banco pra descartar a mutação in-memory que não foi salva.
+    try{ S._cronoTurmasLoaded=false; await loadCronoTurmas(); }catch(_){}
+    return false;
+  }
+}
+window._cronoTurmaField=async(field,val)=>{
+  const t=_cronoCurTurma(); if(!t)return;
+  if(field==='nome'&&!String(val||'').trim()){arosToast('A turma precisa de um nome','err',2000);renderCronoGer();return;}
+  t[field]=val;
+  const ok=await _cronoSaveTurma(t,'');
+  if(!ok){renderCronoGer();return;}        // erro → re-render completo (já ressincronizado)
+  if(field!=='nome')_cronoRenderWeeks();   // datas: reflow só das semanas, sem recriar os inputs (preserva foco)
+};
+let _cronoSimOpen=false;
+window._cronoSimBoxToggle=()=>{ _cronoSimOpen=!_cronoSimOpen; const el=document.getElementById('cg-sim-box'); if(el)el.classList.toggle('open',_cronoSimOpen); };
+window._cronoAddSim=async()=>{
+  const t=_cronoCurTurma(); if(!t)return;
+  t.simulados=_cronoNormSims(t);
+  t.simulados.push({id:'sim_'+Math.random().toString(36).slice(2,7),nome:'Simulado '+(t.simulados.length+1),ini:'',fim:''});
+  _cronoSimOpen=true;
+  await _cronoSaveTurma(t,'Simulado adicionado'); renderCronoGer();
+};
+window._cronoDelSim=async id=>{
+  const t=_cronoCurTurma(); if(!t)return;
+  const s=_cronoNormSims(t).find(x=>x.id===id);
+  const ok=await uiConfirm(`Remover o simulado "${(s&&s.nome)||''}"? Esta ação não pode ser desfeita.`,{title:'Remover simulado',yesLabel:'Remover',noLabel:'Cancelar',yesClass:'btn-d'});
+  if(!ok)return;
+  t.simulados=_cronoNormSims(t).filter(x=>x.id!==id);
+  _cronoSimOpen=true;
+  await _cronoSaveTurma(t,''); renderCronoGer();
+};
+window._cronoSimField=async(id,field,val)=>{
+  const t=_cronoCurTurma(); if(!t)return;
+  t.simulados=_cronoNormSims(t);
+  const s=t.simulados.find(x=>x.id===id); if(!s)return;
+  s[field]=val;
+  const ok=await _cronoSaveTurma(t,''); if(!ok){renderCronoGer();return;}
+  _cronoRenderWeeks(); // reflow só das semanas (preserva foco nos inputs do simulado)
+};
+// ── Revisão pré-prova (mesma mecânica dos simulados) ──
+let _cronoRevOpen=false;
+window._cronoRevBoxToggle=()=>{ _cronoRevOpen=!_cronoRevOpen; const el=document.getElementById('cg-rev-box'); if(el)el.classList.toggle('open',_cronoRevOpen); };
+window._cronoAddRevPre=async()=>{
+  const t=_cronoCurTurma(); if(!t)return;
+  t.revisaoPreProva=_cronoNormRevPre(t);
+  t.revisaoPreProva.push({id:'rev_'+Math.random().toString(36).slice(2,7),nome:'Revisão '+(t.revisaoPreProva.length+1),data:''});
+  _cronoRevOpen=true;
+  await _cronoSaveTurma(t,'Dia de revisão adicionado'); renderCronoGer();
+};
+// ── Provas oficiais (1 prova por dia) ──
+let _cronoProvaOpen=false;
+window._cronoProvaBoxToggle=()=>{ _cronoProvaOpen=!_cronoProvaOpen; const el=document.getElementById('cg-prova-box'); if(el)el.classList.toggle('open',_cronoProvaOpen); };
+window._cronoAddProva=async()=>{
+  const t=_cronoCurTurma(); if(!t)return;
+  t.provas=_cronoNormProvas(t);
+  t.provas.push({id:'pv_'+Math.random().toString(36).slice(2,7),nome:'Prova '+(t.provas.length+1),data:''});
+  delete t.prova; delete t.provaFim; // aposenta o formato legado
+  _cronoProvaOpen=true;
+  await _cronoSaveTurma(t,'Prova adicionada'); renderCronoGer();
+};
+window._cronoDelProva=async id=>{
+  const t=_cronoCurTurma(); if(!t)return;
+  const s=_cronoNormProvas(t).find(x=>x.id===id);
+  const ok=await uiConfirm(`Remover a prova "${(s&&s.nome)||''}"? Esta ação não pode ser desfeita.`,{title:'Remover prova',yesLabel:'Remover',noLabel:'Cancelar',yesClass:'btn-d'});
+  if(!ok)return;
+  t.provas=_cronoNormProvas(t).filter(x=>x.id!==id);
+  delete t.prova; delete t.provaFim;
+  _cronoProvaOpen=true;
+  await _cronoSaveTurma(t,''); renderCronoGer();
+};
+window._cronoProvaField=async(id,field,val)=>{
+  const t=_cronoCurTurma(); if(!t)return;
+  t.provas=_cronoNormProvas(t);
+  const s=t.provas.find(x=>x.id===id); if(!s)return;
+  s[field]=val;
+  delete t.prova; delete t.provaFim;
+  const ok=await _cronoSaveTurma(t,''); if(!ok){renderCronoGer();return;}
+  _cronoRenderWeeks();
+};
+window._cronoDelRevPre=async id=>{
+  const t=_cronoCurTurma(); if(!t)return;
+  const s=_cronoNormRevPre(t).find(x=>x.id===id);
+  const ok=await uiConfirm(`Remover "${(s&&s.nome)||''}"? Esta ação não pode ser desfeita.`,{title:'Remover dia de revisão',yesLabel:'Remover',noLabel:'Cancelar',yesClass:'btn-d'});
+  if(!ok)return;
+  t.revisaoPreProva=_cronoNormRevPre(t).filter(x=>x.id!==id);
+  _cronoRevOpen=true;
+  await _cronoSaveTurma(t,''); renderCronoGer();
+};
+window._cronoRevPreField=async(id,field,val)=>{
+  const t=_cronoCurTurma(); if(!t)return;
+  t.revisaoPreProva=_cronoNormRevPre(t);
+  const s=t.revisaoPreProva.find(x=>x.id===id); if(!s)return;
+  s[field]=val;
+  const ok=await _cronoSaveTurma(t,''); if(!ok){renderCronoGer();return;}
+  _cronoRenderWeeks();
+};
+window._cronoSemDias=async(i,val)=>{ const t=_cronoCurTurma(); if(!t||!t.semanas[i])return; t.semanas[i].dias=Math.max(1,Math.min(60,parseInt(val,10)||7)); await _cronoSaveTurma(t,''); renderCronoGer(); };
+window._cronoSemAddTema=async(i,id)=>{ if(!id)return; const t=_cronoCurTurma(); if(!t||!t.semanas[i])return; t.semanas[i].temas=t.semanas[i].temas||[]; if(!t.semanas[i].temas.includes(id))t.semanas[i].temas.push(id); await _cronoSaveTurma(t,''); renderCronoGer(); };
+window._cronoSemDelTema=async(i,id)=>{ const t=_cronoCurTurma(); if(!t||!t.semanas[i])return; t.semanas[i].temas=(t.semanas[i].temas||[]).filter(x=>x!==id); await _cronoSaveTurma(t,''); renderCronoGer(); };
+window._cronoSemAddRev=async(i,id)=>{ if(!id)return; const t=_cronoCurTurma(); if(!t||!t.semanas[i])return; t.semanas[i].revisoes=t.semanas[i].revisoes||[]; if(!t.semanas[i].revisoes.includes(id))t.semanas[i].revisoes.push(id); await _cronoSaveTurma(t,''); renderCronoGer(); };
+window._cronoSemDelRev=async(i,id)=>{ const t=_cronoCurTurma(); if(!t||!t.semanas[i])return; t.semanas[i].revisoes=(t.semanas[i].revisoes||[]).filter(x=>x!==id); await _cronoSaveTurma(t,''); renderCronoGer(); };
+window._cronoAddSemana=async()=>{ const t=_cronoCurTurma(); if(!t)return; t.semanas=t.semanas||[]; t.semanas.push({dias:7,temas:[],revisoes:[],nota:''}); await _cronoSaveTurma(t,'Semana adicionada'); renderCronoGer(); };
+window._cronoDelSemana=async i=>{ const t=_cronoCurTurma(); if(!t||!t.semanas[i])return; const ok=await uiConfirm(`Remover a Semana ${i+1}?`,{title:'Remover semana',yesLabel:'Remover',noLabel:'Cancelar',yesClass:'btn-d'}); if(!ok)return; t.semanas.splice(i,1); await _cronoSaveTurma(t,''); renderCronoGer(); };
+// ── Export PDF (jsPDF, A4 retrato, compacto, claro c/ cabeçalho escuro) ──
+window._cronoExportarPDF=async()=>{
+  const t=_cronoCurTurma(); if(!t)return;
+  try{
+    const jsPDF=await _loadJsPDF();
+    const doc=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+    const W=210,H=297,MX=14; let y=0;
+    const accent=[37,99,235], dark=[17,24,39], gray=[107,114,128], line=[224,226,232];
+    const clean=s=>String(s==null?'':s).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu,'').replace(/\s+/g,' ').trim();
+    // Cabeçalho escuro
+    doc.setFillColor(...dark); doc.rect(0,0,W,30,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(16);
+    doc.text(clean(t.nome||'Cronograma'),MX,14);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(190,195,205);
+    const per=`${_cronoFmtDateY(_cronoParseDate(t.dataInicio))}  a  ${_cronoFmtDateY(_cronoParseDate(t.dataFim))}`;
+    doc.text('TREINAMENTO TSA ORAL  ·  '+per,MX,21);
+    if(t.prova)doc.text('Prova oficial: '+_cronoFmtDateY(_cronoParseDate(t.prova)),MX,26);
+    y=38;
+    const semanas=_cronoTurmaSemanas(t);
+    const ensure=(need)=>{ if(y+need>H-14){ doc.addPage(); y=18; } };
+    const wrap=(txt,size,maxw)=>{ doc.setFontSize(size); return doc.splitTextToSize(clean(txt),maxw); };
+    semanas.forEach(sm=>{
+      ensure(20);
+      // Barra da semana
+      doc.setFillColor(...accent); doc.rect(MX,y,3,7,'F');
+      doc.setTextColor(...dark); doc.setFont('helvetica','bold'); doc.setFontSize(11);
+      doc.text(`Semana ${sm.idx+1}`,MX+6,y+5);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...gray);
+      doc.text(`${_cronoFmtDate(sm.ini)} – ${_cronoFmtDate(sm.fim)}`,MX+40,y+5);
+      const totalMin=sm.temas.reduce((a,id)=>a+_cronoTemaBlocoMin(id),0);
+      doc.text('Tempo estimado: '+_cronoFmtDur(totalMin),W-MX-doc.getTextWidth('Tempo estimado: '+_cronoFmtDur(totalMin))-1,y+5);
+      y+=8;
+      sm.eventos.forEach(ev=>{ ensure(6); const col=ev.tipo==='prova'?[220,38,38]:(ev.tipo==='revisaoPre'?[139,92,246]:accent); doc.setTextColor(...col); doc.setFont('helvetica','bold'); doc.setFontSize(8.5); const rng=(ev.fim&&ev.fim.getTime()!==ev.data.getTime())?_cronoFmtDate(ev.data)+'-'+_cronoFmtDate(ev.fim):_cronoFmtDate(ev.data); const lbl=ev.nome||(ev.tipo==='prova'?'Prova':ev.tipo==='revisaoPre'?'Revisão':'Simulado'); doc.text('[ '+clean(lbl)+' ]  '+rng,MX+6,y+3.5); y+=5; });
+      const bloco=(label,lines,color)=>{
+        if(!lines.length)return;
+        ensure(5+lines.length*4.4);
+        doc.setTextColor(...(color||dark)); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+        doc.text(label,MX+6,y+3.5); y+=4.5;
+        doc.setFont('helvetica','normal'); doc.setTextColor(60,66,78); doc.setFontSize(8.5);
+        lines.forEach(ln=>{ const parts=wrap(ln,8.5,W-MX*2-12); parts.forEach(p=>{ ensure(4.4); doc.text(p,MX+10,y+3); y+=4.2; }); });
+        y+=1;
+      };
+      // Módulos + suas trilhas/hot topics
+      const modLines=sm.temas.map(id=>_cronoTemaLabel(id));
+      bloco('Módulos / temas',modLines);
+      const trilhaLines=[]; const hotLines=[];
+      sm.temas.forEach(id=>{
+        const doc2=S.cronoTemas[id]||{};
+        (doc2.trilhaIds||[]).forEach(tid=>{ const tr=S.cronoTrilhas[tid]; if(tr)trilhaLines.push(tr.titulo); });
+        (Array.isArray(doc2.hotTopics)?doc2.hotTopics:[]).forEach(h=>{ hotLines.push(h.tema+(h.onde?'  ('+h.onde+')':'')); });
+      });
+      bloco('Casos clínicos recomendados',trilhaLines,accent);
+      bloco('Hot topics',hotLines,[180,83,9]);
+      if(sm.revisoes.length)bloco('Revisão',sm.revisoes.map(id=>{const vs=_cronoTemaVistoSemana(id);return _cronoTemaLabel(id)+(vs?' (visto na semana '+vs+')':' (ainda não estudado)');}),gray);
+      // separador
+      ensure(4); doc.setDrawColor(...line); doc.setLineWidth(0.2); doc.line(MX,y+1,W-MX,y+1); y+=5;
+    });
+    // Bloco final: Prova oficial + Revisão pré-prova (o cronograma termina antes das provas)
+    const ex=_cronoExamDatas(t);
+    if(ex.hasAny){
+      ensure(50); y+=6;
+      const bx=MX, bw=W-MX*2, by=y; let yy=by+9;
+      if(ex.provasTxt.length){
+        doc.setTextColor(220,38,38); doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text('PROVA OFICIAL',bx+7,yy); yy+=7;
+        doc.setTextColor(...dark); doc.setFont('helvetica','normal'); doc.setFontSize(12); doc.text(ex.provasTxt.join('    |    '),bx+7,yy); yy+=(ex.revsTxt.length?11:4);
+      }
+      if(ex.revsTxt.length){
+        doc.setTextColor(139,92,246); doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text('REVISÃO PRÉ-PROVA',bx+7,yy); yy+=7;
+        doc.setTextColor(...dark); doc.setFont('helvetica','normal'); doc.setFontSize(12); doc.text(ex.revsTxt.join('    |    '),bx+7,yy); yy+=6;
+        doc.setTextColor(...gray); doc.setFont('helvetica','italic'); doc.setFontSize(8.5);
+        doc.splitTextToSize('Você participa da revisão no dia imediatamente antes da sua prova oficial.',bw-14).forEach(n=>{doc.text(n,bx+7,yy);yy+=4.2;});
+      }
+      doc.setDrawColor(...line); doc.setLineWidth(0.5); doc.roundedRect(bx,by,bw,(yy-by)+4,3,3,'S');
+      y=yy+8;
+    }
+    // Rodapé
+    const pgs=doc.internal.getNumberOfPages();
+    for(let p=1;p<=pgs;p++){ doc.setPage(p); doc.setFontSize(7.5); doc.setTextColor(...gray); doc.text('AROS · Anest-Review — gerado automaticamente',MX,H-8); doc.text(p+'/'+pgs,W-MX-6,H-8); }
+    doc.save('cronograma-'+_poSlug(t.nome||'turma')+'.pdf');
+    arosToast('PDF gerado','success',1800);
+  }catch(e){ console.error('exportarPDF:',e); arosToast('Erro ao gerar PDF: '+(e.message||e),'err',3500); }
+};
+
+// Treinamento TSA Oral — hook das sub-abas Biblioteca/Geração
+const _origSwitchCoTabCrono=window.switchCoTab;
+window.switchCoTab=(tab,btn)=>{
+  _origSwitchCoTabCrono(tab,btn);
+  if(tab==='cronoBib'){renderCronoBib();}
+  if(tab==='cronoTrilhasLib'){renderCronoTrilhasLib();}
+  if(tab==='cronoGer'){renderCronoGer();}
 };
 
 // ════════════════════════════════════════════════════════════════════════════

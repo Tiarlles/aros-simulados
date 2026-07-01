@@ -47,6 +47,10 @@ exports.gerarFlashcardsPO = require('./flashcards-po').gerarFlashcardsPO;
 // API de leitura "MegaBrain" pro MCG — GET /lessons + GET /lessons/{id}/content (API key)
 exports.megabrain = require('./megabrain-api').megabrain;
 
+// Trilhas de Casos Clínicos (TSA) — puxa da API do aluno (Laravel), soma caracteres/multimídia
+// por trilha e grava totais em cronoTrilhas (Treinamento TSA Oral · geração de cronograma)
+exports.sincronizarTrilhasCasos = require('./trilhas-casos').sincronizarTrilhasCasos;
+
 // Helper que faz UPSERT em alunosAprovados (Cruzar Lista) a partir do webhook Hotmart
 const { upsertAluno } = require('./hotmart-alunos');
 

@@ -497,6 +497,34 @@ service cloud.firestore {
     match /poFlashcards/{aulaId} { allow read: if isAuth(); allow create, update, delete: if isAuth(); }
 
     // ────────────────────────────────────────────────────────────────────────
+    // TREINAMENTO TSA ORAL — Biblioteca de Temas + Cronogramas por turma.
+    // Dado interno de coordenação. Leitura e escrita exigem login.
+    //  • cronoTemas/{temaId}: módulo (do PO) + trilhas de casos + hot topics.
+    //  • cronoTurmas/{turmaId}: turma com datas, eventos e distribuição por semana.
+    // ────────────────────────────────────────────────────────────────────────
+    match /cronoTemas/{temaId} {
+      allow read: if isAuth();
+      allow create, update: if isAuth()
+                            && request.resource.data.modulo is string
+                            && request.resource.data.modulo.size() > 0;
+      allow delete: if isAuth();
+    }
+    match /cronoTurmas/{turmaId} {
+      allow read: if isAuth();
+      allow create, update: if isAuth()
+                            && request.resource.data.nome is string
+                            && request.resource.data.nome.size() > 0
+                            && request.resource.data.nome.size() < 200;
+      allow delete: if isAuth();
+    }
+    // Trilhas de casos clínicos — espelho da API do Laravel. Só a Cloud Function
+    // (Admin SDK) escreve; o cliente apenas lê pra vincular trilhas aos módulos.
+    match /cronoTrilhas/{trilhaId} {
+      allow read: if isAuth();
+      allow write: if false;
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
     // DEFAULT DENY — qualquer coleção/path não listada acima é bloqueada.
     // ────────────────────────────────────────────────────────────────────────
     match /{document=**} {
