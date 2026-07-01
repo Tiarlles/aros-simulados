@@ -21078,14 +21078,15 @@ function _mentSobreposicaoMes(grupo,anoMes){
   const fim=_mentNormData(grupo?.fim,'fim');
   if(!ini||!fim)return null;
   if(!/^\d{4}-\d{2}$/.test(anoMes))return null;
-  const[y,m]=anoMes.split('-').map(Number);
-  const diasMes=new Date(y,m,0).getDate();
-  const iniMes=`${anoMes}-01`;
-  const fimMes=`${anoMes}-${String(diasMes).padStart(2,'0')}`;
+  // Sobreposição contra a janela de apuração do fechamento (16 do mês anterior → 15 do corrente,
+  // a partir de ago/2026). Rateio proporcional usa os dias da própria janela como base.
+  const per=_finPeriodo(anoMes);
+  const iniMes=per.ini, fimMes=per.fim;
+  const toEpoch=s=>{const[a,b,c]=s.split('-').map(Number);return Date.UTC(a,b-1,c);};
+  const diasMes=Math.round((toEpoch(fimMes)-toEpoch(iniMes))/86400000)+1;
   const start=ini>iniMes?ini:iniMes;
   const end=fim<fimMes?fim:fimMes;
   if(end<start)return null;
-  const toEpoch=s=>{const[a,b,c]=s.split('-').map(Number);return Date.UTC(a,b-1,c);};
   const dias=Math.round((toEpoch(end)-toEpoch(start))/86400000)+1;
   const parcial=dias!==diasMes;
   const valorMensal=Number(grupo?.valorMensal)||0;
@@ -24428,6 +24429,25 @@ const _finValSimExtra=()=>_finTipoVal('sys-simextra',FIN_DEFAULT_VAL_SIMEXTRA);
 const _BRL=v=>(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const _curMesISO=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;};
 const _mesNome=ym=>{const[a,m]=ym.split('-').map(Number);const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];return`${meses[m-1]} ${a}`;};
+// Janela de apuração de um fechamento (para NF). Retorna {ini,fim} em ISO (YYYY-MM-DD), ambos inclusivos.
+// Regra: até jun/2026 = mês-calendário cheio (fechamento antigo, não mexer no passado).
+//        jul/2026 = transição, 01/07 a 15/07 (jun já fechou cheio no modelo antigo).
+//        ago/2026 em diante = dia 16 do mês anterior a dia 15 do mês corrente.
+function _finPeriodo(anoMes){
+  const [y,m]=anoMes.split('-').map(Number);
+  const iso=(yy,mm,dd)=>`${yy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+  const diasMes=new Date(y,m,0).getDate();
+  if(anoMes<='2026-06') return {ini:iso(y,m,1), fim:iso(y,m,diasMes)};      // modelo antigo (mês cheio)
+  if(anoMes==='2026-07') return {ini:iso(y,m,1), fim:iso(y,m,15)};          // transição
+  const pd=new Date(y,m-2,1);                                               // mês anterior (m-1 é 0-based; -1 a mais)
+  return {ini:iso(pd.getFullYear(),pd.getMonth()+1,16), fim:iso(y,m,15)};   // 16 do anterior → 15 do corrente
+}
+// Rótulo curto da janela de apuração, ex: "16/07 a 15/08".
+function _finPeriodoLabel(anoMes){
+  const p=_finPeriodo(anoMes);
+  const br=iso=>{const[a,b,c]=iso.split('-');return`${c}/${b}`;};
+  return `${br(p.ini)} a ${br(p.fim)}`;
+}
 
 async function loadFinanceiro(){
   try{
@@ -24553,15 +24573,18 @@ async function calcFinanceiroMes(anoMes){
   const mesData=(S.financeiro.meses||{})[anoMes]||{};
   const descontoPlanoMap=mesData.descontoPlano||{};
   const lancamentos=mesData.lancamentos||[];
-  // 1. Rodadas oficiais: filtra sims oficiais cujo mês == anoMes (usa dataSab||dataDom)
+  // Janela de apuração do fechamento (dia 16 do mês anterior a dia 15 do corrente, a partir de ago/2026).
+  const per=_finPeriodo(anoMes);
+  const _naJanela=iso=>!!iso&&iso>=per.ini&&iso<=per.fim;
+  // 1. Rodadas oficiais: filtra sims oficiais cuja data cai na janela de apuração (usa dataSab||dataDom)
   const simsOf=S.sims.filter(s=>{
     if(s.isExtra)return false;
     const d=s.dataSab||s.dataDom||'';
-    return d.startsWith(anoMes);
+    return _naJanela(d);
   });
-  // 2. Sim extras: alunos com dataAgendada no mês
+  // 2. Sim extras: alunos com dataAgendada na janela de apuração
   const alunosEx=await loadSimExtraAlunosAll();
-  const alunosNoMes=alunosEx.filter(a=>(a.dataAgendada||'').startsWith(anoMes));
+  const alunosNoMes=alunosEx.filter(a=>_naJanela(a.dataAgendada||''));
 
   const valRodGlobal=_finValRodada();
   const valExtGlobal=_finValSimExtra();
@@ -24692,9 +24715,10 @@ window.renderFinanceiro=async()=>{
 
   // Botões admin
   document.getElementById('fin-admin-acts').innerHTML=isAdmin?'<button class="btn btn-s btn-sm" onclick="openFinCadastros()">⚙️ Cadastro / Configurações</button>':'';
-  document.getElementById('fin-status-box').innerHTML=fechado
+  const _perLbl=`<span title="Período de apuração para emissão da NF" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2);margin-left:10px">📅 Apuração ${_finPeriodoLabel(anoMes)}</span>`;
+  document.getElementById('fin-status-box').innerHTML=(fechado
     ?`<span style="color:var(--green)">🔒 Fechado em ${mesData.fechadoEm?fDT(mesData.fechadoEm):'—'}</span>`
-    :'<span style="color:var(--accent)">🔓 Aberto</span>';
+    :'<span style="color:var(--accent)">🔓 Aberto</span>')+_perLbl;
   const acts=[];
   if(isAdmin){
     if(fechado){
@@ -25330,7 +25354,7 @@ async function _finEnviarNotaInterno(profNome,anoMes,opts){
   // Monta detalhamento — incorpora os profs agregados (emitem junto) se houver.
   const nota=await _finMontaNotaTitular(profNome,anoMes,p);
   const detalhamento=nota.detalhamento;
-  const mesNomeStr=_mesNome(anoMes);
+  const mesNomeStr=`${_mesNome(anoMes)} (apuração ${_finPeriodoLabel(anoMes)})`;
   const fmtTotal=nota.fmtTotal;
   const assunto=regime==='rpa'
     ?`Solicitação de RPA — ${mesNomeStr}`
@@ -25428,7 +25452,7 @@ window._finSolicitarNota=async(profNome,anoMes,regimeArg)=>{
   // 3. Confirma envio (texto diferente pra primeira vez vs reenvio)
   const ja=(mesData.notasSolicitadas||{})[profNome];
   const fmtTotal=nota.fmtTotal;
-  const mesNomeStr=_mesNome(anoMes);
+  const mesNomeStr=`${_mesNome(anoMes)} (apuração ${_finPeriodoLabel(anoMes)})`;
   const emailsLabel=emailsProf.length>1?`${emailsProf.length} emails`:emailsProf[0];
   const emailsLista=emailsProf.map(e=>'   • '+e).join('\n');
   if(ja){
