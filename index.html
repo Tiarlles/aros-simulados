@@ -39626,6 +39626,15 @@ async function loadPO(){
 let _poTmpIdSeq=0;
 function _poEnsureIds(){for(const cid in S.poAulas){(S.poAulas[cid]||[]).forEach(a=>{if(!a.id)a.id='tmp_'+(++_poTmpIdSeq);});}}
 function _poFindAulaById(id){for(const cid in S.poAulas){const a=(S.poAulas[cid]||[]).find(x=>x.id===id);if(a)return a;}return null;}
+// Extrai o ID numérico do Vimeo de um link ou de um número cru. Aceita
+// "https://vimeo.com/1120818934", ".../video/1120818934", "1120818934/hash" e "1120818934".
+function _poExtractVimeoId(raw){
+  const s=String(raw==null?'':raw).trim();
+  if(!s)return '';
+  const m=s.match(/vimeo\.com\/(?:video\/)?(\d+)/i); if(m)return m[1];
+  if(/^\d+$/.test(s))return s;
+  const d=s.match(/\d{6,}/); return d?d[0]:'';
+}
 // Grava patch numa aula. Demo (id tmp_*) → só memória. Real → updateDoc best-effort.
 async function _poSaveAula(a,patch){
   if(!a)return;
@@ -39691,7 +39700,18 @@ window.poCelEditar=(aulaId,ci,td)=>{
   td.innerHTML='';td.appendChild(inp);
   inp.focus();inp.select();
   let done=false;
-  const salvar=async()=>{if(done)return;done=true;await _poSaveAula(a,{[col.id]:inp.value.trim()});_poRefreshTabela();};
+  const salvar=async()=>{
+    if(done)return;done=true;
+    const raw=inp.value.trim();
+    let patch={[col.id]:raw};
+    // Coluna de vídeo: mantém `vimeoId` (usado pela transcrição/thumb) em sincronia
+    // com o link, e normaliza a URL. Antes só salvava `video` e o vimeoId ficava velho.
+    if(col.id==='video'){
+      const vid=_poExtractVimeoId(raw);
+      patch={video:vid?('https://vimeo.com/'+vid):raw, vimeoId:vid};
+    }
+    await _poSaveAula(a,patch);_poRefreshTabela();
+  };
   inp.addEventListener('keydown',e=>{
     if(e.key==='Enter'){e.preventDefault();salvar();}
     else if(e.key==='Escape'){done=true;_poRefreshTabela();}
