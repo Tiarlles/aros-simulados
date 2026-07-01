@@ -247,21 +247,26 @@ async function povoarListasTurma(body, eventName) {
     });
     if (!prod) continue;
 
-    const colunas = Array.isArray(lista.colunas) ? lista.colunas : [];
-    const colPres = colunas.find(c => c && c.auto === 'presencial');
-    const colSit = colunas.find(c => c && c.auto === 'situacao');
-
+    try {
     await db.runTransaction(async (tx) => {
       const fresh = await tx.get(docSnap.ref);
       if (!fresh.exists) return;
       const d = fresh.data() || {};
       const alunos = Array.isArray(d.alunos) ? d.alunos.map(a => ({ ...a })) : [];
 
-      // Dedup: e-mail (preferencial) → cpf
+      // Colunas auto resolvidas do doc FRESCO (não do snapshot da query), pra não
+      // gravar em ids de coluna que a coord pode ter mudado nesse meio-tempo.
+      const colunas = Array.isArray(d.colunas) ? d.colunas : [];
+      const colPres = colunas.find(c => c && c.auto === 'presencial');
+      const colSit = colunas.find(c => c && c.auto === 'situacao');
+      const nomeNorm = normNome(data.nome);
+
+      // Dedup: e-mail (preferencial) → cpf → nome normalizado (só p/ linha manual sem e-mail)
       const idx = alunos.findIndex(a => {
         const ae = String((a && a.email) || '').toLowerCase().trim();
         if (emailLc && ae) return ae === emailLc;
         if (cpf && a && a.cpf) return String(a.cpf) === cpf;
+        if (nomeNorm && !ae && a && normNome(a.nome) === nomeNorm) return true;
         return false;
       });
 
@@ -305,6 +310,11 @@ async function povoarListasTurma(body, eventName) {
         results.push({ lista: docSnap.ref.id, action: 'criado' });
       }
     });
+    } catch (e) {
+      // Falha numa lista não pode impedir o processamento das demais.
+      console.error('povoarListasTurma: lista', docSnap.ref.id, 'falhou:', e && e.message || e);
+      results.push({ lista: docSnap.ref.id, action: 'erro', erro: (e && e.message) || String(e) });
+    }
   }
 
   return { action: results.length ? 'done' : 'skipped', results };

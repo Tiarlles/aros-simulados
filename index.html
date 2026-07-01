@@ -31663,6 +31663,7 @@ let _listaAlunos=[];      // linhas
 let _listaColunas=[];     // colunas dinâmicas (após Telefone)
 let _listaHotmart={enabled:false,produtos:[]}; // config de povoamento automático
 let _listaFilters={};     // {colKey: valorDoFiltro}
+let _listaOpenEmails=new Set(); // e-mails presentes quando o modal abriu (anti lost-update do webhook)
 
 function _le(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function _genColId(){return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
@@ -31915,6 +31916,7 @@ window.openNewLista=()=>{
   _listaColunas=defaultColunas();
   _listaHotmart=defaultHotmart();
   _listaFilters={};
+  _listaOpenEmails=new Set();
   document.getElementById('lista-title').textContent='Nova Lista de Alunos';
   document.getElementById('lista-n').value='';
   document.getElementById('lista-err').classList.add('hidden');
@@ -31937,6 +31939,7 @@ window.openEditLista=id=>{
   });
   _listaAlunos.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
   _listaFilters={};
+  _listaOpenEmails=new Set(_listaAlunos.map(a=>(a.email||'').toLowerCase().trim()).filter(Boolean));
   document.getElementById('lista-title').textContent='Editar Lista';
   document.getElementById('lista-n').value=l.nome||'';
   document.getElementById('lista-err').classList.add('hidden');
@@ -31957,7 +31960,24 @@ window.saveLista=async()=>{
     if(!_listaHotmart.produtos.length){errEl.textContent='Povoamento pela Hotmart está ativo, mas nenhum produto foi informado. Adicione ao menos um ID de produto ou desative o povoamento.';errEl.classList.remove('hidden');return;}
   }
   const id=window._editListaId||uid();
-  await setDoc(doc(db,'listas',id),{nome,colunas:_listaColunas,hotmart:_listaHotmart,alunos:_listaAlunos,updatedAt:new Date().toISOString()});
+  const ref=doc(db,'listas',id);
+  // Anti lost-update: reincorpora linhas que o webhook (ou outra aba) adicionou no banco
+  // depois que este modal abriu — que eu não tenho localmente e não removi de propósito.
+  let alunosToSave=_listaAlunos;
+  try{
+    const fresh=await getDoc(ref);
+    if(fresh.exists()){
+      const freshAlunos=Array.isArray(fresh.data().alunos)?fresh.data().alunos:[];
+      const localEmails=new Set(_listaAlunos.map(a=>(a.email||'').toLowerCase().trim()).filter(Boolean));
+      const merged=_listaAlunos.slice();
+      for(const fa of freshAlunos){
+        const fe=((fa&&fa.email)||'').toLowerCase().trim();
+        if(fe&&!localEmails.has(fe)&&!_listaOpenEmails.has(fe))merged.push(fa);
+      }
+      alunosToSave=merged;
+    }
+  }catch(e){console.warn('merge de linhas do webhook falhou; salvando estado local:',e);}
+  await setDoc(ref,{nome,colunas:_listaColunas,hotmart:_listaHotmart,alunos:alunosToSave,updatedAt:new Date().toISOString()});
   await loadListas();renderListasPanel();CM('modal-lista');
 };
 
