@@ -2531,6 +2531,43 @@ Decisão: o **Laravel** (produto real, onde os alunos assistem) é a **fonte de 
   - **Frontend (PO):** botão **"🔄 Sincronizar agora"** (`poAbrirSync` → modal `#po-sync-modal`): roda **preview primeiro** (mostra novas/atualizadas + listas), só escreve ao clicar **"Aplicar agora"** (`poSyncAplicar`), depois `loadPO()`+render. Endpoint `SINCRONIZAR_ENDPOINT`.
 - A **IA real de análise** (usa a transcrição como fonte) já está **no ar** — ver seção megabrain Fase 2. ⚠️ Tokens colados no chat e orientados a **regenerar**: **Vimeo PAT** (`6eed…342f`, conta OFT-Review) + Client secret do app Vimeo + a chave `ANTHROPIC_API_KEY_PO` (colada no chat em 2026-06-18). (O **Laravel token é permanente** — manter.)
 
+### 🔌 REFERÊNCIA DE APIs EXTERNAS (tokens, rotas e o que cada uma devolve) — atualizado 2026-07-01
+**Seção de consulta rápida pra não re-testar toda vez.** Todos os tokens ficam server-side no `cloud-function-hotmart/.env` (gitignored) — aqui só os **nomes das env vars**, nunca o valor.
+
+**Tokens Laravel POR VERTICAL** (mapa em `sincronizar-laravel.js` e `flashcards-po.js` → `TOKENS_POR_VERTICAL`):
+| Vertical | Env var | Conta / escopo do **banco de questões** |
+|---|---|---|
+| `anestreview` (Extensive) | `LARAVEL_TOKEN` | Anest. `/filtros` → **59 categorias**. IDs de questão **altos**. |
+| `medreview` (Extensive R1) | `LARAVEL_TOKEN_MEDREVIEW` | Conta **medmembers**. `/filtros` → **6 macro-categorias de residência** (IDs **2985–4649**: Cirurgia, Clínica, Preventiva, GO, Pediatria, Outros). IDs de questão **altos**. |
+| `oftreview` (Extensive Oft) | *(falta `LARAVEL_TOKEN_OFTREVIEW`)* → **herda `LARAVEL_TOKEN_MEDREVIEW`** | Mesmo token do R1. Lê **curso/módulos/trilhas/comentários** do Oft OK, mas o **banco de QUESTÕES do Oft NÃO** (ver bug abaixo). |
+
+**Course IDs no Laravel** (de `config/poConfig.cursos[].laravelCourseId`):
+- Extensive (Anest): `3df5bb00-db83-49a3-a334-f55af33b48f4`
+- Extensive R1 (MedReview): `43b2fb17-b7c1-4770-bb0e-0fc11355dfdb`
+- Extensive Oft (OftReview): `5a84366a-0823-4870-8b55-34f7eaf766f2`
+
+**API Laravel** — base `https://api.grupomedreview.com.br/api`, auth `Authorization: Bearer <token>`:
+| Rota | Método / corpo | Devolve | Escopo |
+|---|---|---|---|
+| `/producers` | GET | verticais | **público** |
+| `/curso/{courseId}/modulos` | GET | `[{id,nome}]` | estrutura — token medreview vê R1 **e** Oft |
+| `/modulo/{moduloId}/conteudos` | GET | aulas: `id,title,module_name,course_name,video_external_id,rating,video_duration,published_at,type,`**`trilhas[]`**`,trilhasFlashcard[],tasks`. Cada `trilha.json` (string) tem `ids[]` (IDs das questões) + `filtro_categorias` + `filtro_page_id`. | estrutura — vê R1 e Oft |
+| `/filtros` | GET | `{categorias[+incidência/peso], tipo_de_provas, anos}` | **ESCOPADO ao token** |
+| `/v2/web/questoes?page=N` | POST `{ids:[...]}` (ou `{categorias,anos}`) | `{total, data:[{id,descricao,alternativas[],escopo,ano}]}` — a QUESTÃO | **ESCOPADO ao banco do token.** R1/Anest OK; **Oft → total:0** |
+| `/web/comentario/gabarito` | POST `{model_id:<id da questão>, is_gabarito:true, model_type:'QUESTAO'}` | `{content: <comentário HTML>, user, rating}` — **só o comentário, NÃO a questão** | **NÃO escopado** — funciona pro Oft |
+| `/analise-provas/incidencia` | POST `{provas:[{escopo_id,ano}]}` | incidência oficial por prova | — |
+
+**MegaBrain API** (Cloud Function `megabrain`, consumida pelo MCG do dev) — base `https://us-central1-simulados-confirmacao.cloudfunctions.net/megabrain`, auth `X-API-Key` ou `Bearer` com `MEGABRAIN_KEY_<VERTICAL>` (escopo por vertical) ou `MEGABRAIN_API_KEY` (master, vê tudo):
+| Rota | Devolve |
+|---|---|
+| `GET /lessons?page=&course=&q=` | `{data:[{id,vertical,course,module,title,has_transcription,has_questions,updated_at}], total, page, scope}` |
+| `GET /lessons/{id}/content` | `{transcription, questions:[{label,statement,alternatives[],answer,comment}], title, course, module, ...}`. `questions` = `idsDaTrilha` → `questoesPorIds` → `anexarComentarios`. **Pro Oft vem `questions:[]` (bug).** |
+| `GET /lessons/{id}/materials` · `/materials/{attId}` | lista de materiais / download (proxy server-side) |
+
+**✅ RESOLVIDO 2026-07-01 — cada vertical tem seu PRÓPRIO token Laravel (produtor).** A causa era não haver token do Oft: o `oftreview` caía no `LARAVEL_TOKEN_MEDREVIEW` (produtor 7/residência), que lê a ESTRUTURA do curso Oft (por isso as aulas sincronizavam) mas NÃO as categorias/questões (escopadas por produtor). Correção: **adicionado `LARAVEL_TOKEN_OFTREVIEW` no `.env`** (token do produtor Oft = produtor 1; formato Sanctum `3096324|…`, o MESMO que o app `oftreview.medmembers.com.br` usa) + **redeploy das functions**. Zero mudança de código — o mapa `TOKENS_POR_VERTICAL` já preferia esse token. Verificado em prod: `/lessons/{id}/content` do Oft agora traz questões + comentários (ex.: Acomodação 39, Alergia 26, Acuidade 22). **Regra geral: cada vertical = 1 token Laravel próprio, MESMOS endpoints, MESMA ordem de chamadas; só troca o token.** (Obs.: a 1ª chamada por instância fria pode vir com `questions:[]` — cold start; repetir aquece. E a contagem de comentários pode variar entre chamadas — `anexarComentarios` é best-effort.) Histórico do diagnóstico abaixo, mantido como referência das rotas:
+
+**~~BUG~~ — OftReview não puxava as questões da trilha (diagnóstico 2026-07-01).** Sintoma: `/lessons/{id}/content` do Oft vem com **transcrição cheia mas `questions:[]`** em 100% das aulas (transcrição não é afetada). **Causa provada** (testado ponta-a-ponta): as trilhas do Oft EXISTEM (`has_questions:true` em ~181/273) e guardam `ids[]` válidos, mas essas questões estão num **banco separado** (categoria **"10"** — que **nem existe** no `/filtros` do token medreview — IDs **baixos**, `filtro_page_id:12`). O endpoint atual `POST /v2/web/questoes {ids}` **não serve esse banco** com o token medreview (retorna `total:0` por id, por categoria, por page_id e mandando o filtro inteiro); pro R1 o mesmo endpoint funciona. **O token, o curso, os módulos, as trilhas e o COMENTÁRIO do Oft funcionam** — só a QUESTÃO (enunciado+alternativas+gabarito) não vem. **Raiz confirmada (2026-07-01): o token `LARAVEL_TOKEN_MEDREVIEW` está PRESO ao `produtor_id: 7` (MED-REVIEW / residência).** `/categorias`, `/filtros`, `/v2/web/questoes` sempre retornam produtor 7 — os params `produtor_id`/`filtro_page_id`, o domínio no Origin/Referer (`oftreview.medmembers.com.br`) e headers de tenant são TODOS ignorados. A **estrutura** do curso (módulos/conteúdos/trilhas) é legível cross-produtor (por isso as aulas do Oft sincronizam com esse token), mas **categorias e questões são escopadas por produtor** — as do Oft (cat 10, IDs baixos) são de outro produtor. **O curso Extensive Oft tem produto/domínio próprio:** `/producers` → OFT-REVIEW com `auth_url: https://oftquest.grupomedreview.com.br`, `medmember_url: https://oftreview.medmembers.com.br`. **FALTA (mais provável): um token Sanctum do PRODUTOR do Oft** (`LARAVEL_TOKEN_OFTREVIEW`) — com ele, os MESMOS endpoints (`/categorias`, `/v2/web/questoes {ids}`, `/web/comentario/gabarito`) passam a devolver o Oft **sem mudar código** (só env var + redeploy), igual R1/Anest têm o deles. Alternativa: o dev liberar o produtor Oft pro token atual. **Aguardando o dev (2026-07-01):** ele disse que vai retornar as categorias do Oft — confirmar se via token novo ou liberando no backend.
+
 ### Modelo de dados real (do board Monday — export `ANEST_Aulas_*.xlsx`, ~756 aulas reais)
 Mapeamento Monday → campo da aula:
 - **Nome** ("1 - O Sangue") → nº + título · **Status Aula** → status principal (16 estados, **já embute demandas/erros**) · **Produto** → **define a qual curso(s) a aula pertence** (many-to-many) · **Módulo** ("Ponto 10…", "M1…") → módulo · **Professor** (pode ter vários) · **ANO** (2023–2026) · **Link Drive (Revisão)** → na real é o **link do vídeo (Vimeo)** · **CATEGORIA** → tópico do edital (só **22 de 765** preenchidos!) · **Trilha Questões** / **Trilha Cards** → status Pendente/Lançada/Não se aplica.
