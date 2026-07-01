@@ -8206,57 +8206,70 @@ body.pro-rt-fs-on{overflow:hidden}
   </div>
 </div>
 
-<!-- ══ MODAL: Nova Lista ══ -->
+<!-- ══ MODAL: Nova Lista (planilha de gerenciamento) ══ -->
 <div class="mo hidden" id="modal-lista">
-  <div class="md" style="max-width:600px">
-    <div class="mh"><div><div class="m-title" id="lista-title">Nova Lista de Alunos</div><div class="m-sub">Cadastre alunos com nome e e-mail</div></div><button class="m-close" onclick="CM('modal-lista')">✕</button></div>
-    <div class="m-body">
-      <div class="fg"><label class="fl">Nome da lista</label><input class="fc" id="lista-n" placeholder="Ex: Turma 2025.1"/></div>
+  <div class="md" style="max-width:min(97vw,1500px);width:97vw">
+    <div class="mh"><div><div class="m-title" id="lista-title">Nova Lista de Alunos</div><div class="m-sub">Planilha de gerenciamento — colunas, filtros e povoamento automático via Hotmart</div></div><button class="m-close" onclick="CM('modal-lista')">✕</button></div>
+    <div class="m-body" style="max-height:82vh;overflow-y:auto">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">
+        <div class="fg" style="flex:1;min-width:220px;margin:0"><label class="fl">Nome da lista</label><input class="fc" id="lista-n" placeholder="Ex: Turma 2026.2"/></div>
+        <button class="btn btn-s btn-sm" type="button" onclick="toggleHotmartBox()" id="lista-hotmart-toggle">⚡ Povoar pela Hotmart</button>
+      </div>
 
-      <!-- Import XLS -->
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:14px 16px;margin-bottom:16px">
-        <p style="font-weight:700;font-size:13px;margin-bottom:4px">📥 Importar planilha XLS/XLSX</p>
-        <p style="font-size:12px;color:var(--t2);margin-bottom:6px">A planilha deve ter cabeçalho na <strong>linha 1</strong> com as colunas na ordem:</p>
-        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
-          <span style="background:var(--accent-dim,#fdf0eb);color:var(--accent,#b5451b);border:1px solid var(--accent,#b5451b);border-radius:5px;padding:2px 10px;font-size:12px;font-weight:700">Matrícula</span>
-          <span style="color:var(--t2)">→</span>
-          <span style="background:var(--accent-dim,#fdf0eb);color:var(--accent,#b5451b);border:1px solid var(--accent,#b5451b);border-radius:5px;padding:2px 10px;font-size:12px;font-weight:700">Nome</span>
-          <span style="color:var(--t2)">→</span>
-          <span style="background:var(--accent-dim,#fdf0eb);color:var(--accent,#b5451b);border:1px solid var(--accent,#b5451b);border-radius:5px;padding:2px 10px;font-size:12px;font-weight:700">Email</span>
+      <!-- Config Hotmart (povoamento automático) -->
+      <div id="lista-hotmart-box" class="hidden" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:14px 16px;margin-bottom:14px">
+        <label style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="lista-hm-enabled" onchange="onHotmartEnabledChange()" style="width:16px;height:16px;cursor:pointer"/>
+          Preencher esta lista automaticamente quando um aluno comprar na Hotmart
+        </label>
+        <p style="font-size:12px;color:var(--t2);margin:8px 0 10px">Cada compra dos produtos abaixo cria uma linha com nome, e-mail e telefone. A coluna <strong>Simulado Presencial</strong> é marcada conforme o produto.</p>
+        <div id="lista-hm-produtos"></div>
+        <button class="btn btn-g btn-sm" type="button" onclick="addHotmartProduto()" style="margin-top:8px">+ Adicionar produto</button>
+      </div>
+
+      <!-- Toolbar -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+        <div style="position:relative;flex:1;min-width:180px">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:14px;pointer-events:none">🔍</span>
+          <input class="fc" id="lista-search" placeholder="Buscar em toda a lista..." oninput="renderListaGrid()" style="padding-left:32px;font-size:13px"/>
         </div>
-        <p style="font-size:11px;color:var(--t3)">O sistema detecta as colunas automaticamente pelo cabeçalho, independente da ordem.</p>
-        <input type="file" id="lista-xls" accept=".xlsx,.xls,.csv" class="fc btn-sm" onchange="importXLS(this)" style="cursor:pointer"/>
+        <button class="btn btn-g btn-sm" type="button" onclick="addListaAlunoLinha()">+ Aluno</button>
+        <button class="btn btn-g btn-sm" type="button" onclick="openNovaColuna()">➕ Nova coluna</button>
+        <label class="btn btn-g btn-sm" style="cursor:pointer;margin:0">📥 Importar XLS
+          <input type="file" id="lista-xls" accept=".xlsx,.xls,.csv" onchange="importXLS(this)" style="display:none"/>
+        </label>
+        <span id="lista-count" style="font-size:12px;color:var(--t2);margin-left:auto;font-weight:600"></span>
       </div>
+      <p style="font-size:11px;color:var(--t3);margin:-2px 0 8px">Planilha XLS: cabeçalho na linha 1 com colunas <strong>Matrícula · Nome · Email · Telefone</strong> (detecção automática, qualquer ordem). Botão ✕ no topo de cada coluna extra remove a coluna.</p>
 
-      <!-- Manual entry -->
-      <p style="font-size:13px;font-weight:700;margin-bottom:8px">✏️ Ou adicione manualmente:</p>
-      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-        <input class="fc" id="m-mat" placeholder="Matrícula" style="width:110px;flex-shrink:0"/>
-        <input class="fc" id="m-nome" placeholder="Nome completo" style="flex:1.5;min-width:140px"/>
-        <input class="fc" id="m-email" placeholder="email@email.com" type="email" style="flex:1;min-width:130px" onkeydown="if(event.key==='Enter')addManualAluno()"/>
-        <button class="btn btn-p btn-sm" onclick="addManualAluno()">+ Adicionar</button>
+      <!-- Grid (spreadsheet) -->
+      <div id="lista-grid-wrap" style="border:1px solid var(--border);border-radius:var(--rs);overflow:auto;max-height:56vh">
+        <table id="lista-grid" style="border-collapse:separate;border-spacing:0;width:100%;font-size:13px"></table>
       </div>
-
-      <!-- Search + Alunos table -->
-      <div style="position:relative;margin-bottom:6px">
-        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:14px;pointer-events:none">🔍</span>
-        <input class="fc" id="lista-search" placeholder="Buscar aluno na lista..." oninput="filterListaRows()"
-          style="padding-left:32px;font-size:13px"/>
-      </div>
-      <div id="lista-table-wrap" style="border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;max-height:300px;overflow-y:auto">
-        <div style="display:grid;grid-template-columns:100px 1fr 1fr auto;background:var(--bg3);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2">
-          <div style="padding:6px 10px;font-size:10px;font-weight:700;color:var(--t2);letter-spacing:.5px">MATRÍCULA</div>
-          <div style="padding:6px 10px;font-size:10px;font-weight:700;color:var(--t2);letter-spacing:.5px">NOME</div>
-          <div style="padding:6px 10px;font-size:10px;font-weight:700;color:var(--t2);letter-spacing:.5px">EMAIL</div>
-          <div style="padding:6px 10px;width:40px"></div>
-        </div>
-        <div id="lista-rows"></div>
-      </div>
-      <p style="font-size:11px;color:var(--t3);margin-top:6px">Todos os alunos precisam ter e-mail cadastrado. Clique nos campos para editar.</p>
 
       <div id="lista-err" class="al al-e hidden" style="margin-top:10px"></div>
     </div>
     <div class="m-foot"><button class="btn btn-s" onclick="CM('modal-lista')">Cancelar</button><button class="btn btn-p" onclick="saveLista()">Salvar Lista</button></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Nova Coluna ══ -->
+<div class="mo hidden" id="modal-nova-coluna">
+  <div class="md" style="max-width:440px">
+    <div class="mh"><div><div class="m-title" id="nc-title">Nova Coluna</div><div class="m-sub">Adicione uma coluna de status à planilha</div></div><button class="m-close" onclick="CM('modal-nova-coluna')">✕</button></div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">Nome da coluna</label><input class="fc" id="nc-label" placeholder="Ex: Pagou taxa"/></div>
+      <div class="fg"><label class="fl">Tipo de preenchimento</label>
+        <select class="fc" id="nc-tipo" onchange="onNcTipoChange()">
+          <option value="simnao">Sim / Não</option>
+          <option value="texto">Texto livre</option>
+          <option value="select">Lista de opções</option>
+        </select>
+      </div>
+      <div class="fg hidden" id="nc-opcoes-wrap"><label class="fl">Opções (uma por linha)</label><textarea class="fc" id="nc-opcoes" rows="4" placeholder="Opção A&#10;Opção B&#10;Opção C"></textarea></div>
+      <div id="nc-err" class="al al-e hidden"></div>
+    </div>
+    <div class="m-foot"><button class="btn btn-s" onclick="CM('modal-nova-coluna')">Cancelar</button><button class="btn btn-p" id="nc-save-btn" onclick="saveNovaColuna()">Adicionar coluna</button></div>
   </div>
 </div>
 
@@ -31635,97 +31648,225 @@ window.saveProfEmail=async(nome,email)=>{
 function renderListasPanel(){
   document.getElementById('listas-list').innerHTML=S.listas.length?S.listas.map(l=>{
     const total=(l.alunos||[]).length;
-    const semEmail=(l.alunos||[]).filter(a=>typeof a==='object'&&(!a.email||!a.email.includes('@'))).length;
-    const emailSt=semEmail>0?`<span style="color:var(--red)">⚠️ ${semEmail} sem e-mail</span>`:`<span style="color:var(--green)">✓ todos com e-mail</span>`;
-    return`<div class="list-item"><div><p style="font-weight:600">${l.nome}</p><p style="font-size:12px;color:var(--t2)">${total} alunos · ${emailSt}</p></div><div style="display:flex;gap:6px"><button class="btn btn-s btn-sm" onclick="openEditLista('${l.id}')">✏️ Editar</button><button class="btn btn-d btn-sm" onclick="deleteLista('${l.id}')">🗑️ Excluir</button></div></div>`;
+    const ncols=(l.colunas||[]).length;
+    const hm=(l.hotmart&&l.hotmart.enabled)?`<span style="color:var(--accent);font-weight:700">⚡ Hotmart automático</span> · `:'';
+    const extra=ncols?` · ${ncols} coluna(s)`:'';
+    return`<div class="list-item"><div><p style="font-weight:600">${_le(l.nome)}</p><p style="font-size:12px;color:var(--t2)">${hm}${total} aluno(s)${extra}</p></div><div style="display:flex;gap:6px"><button class="btn btn-s btn-sm" onclick="openEditLista('${l.id}')">✏️ Editar</button><button class="btn btn-d btn-sm" onclick="deleteLista('${l.id}')">🗑️ Excluir</button></div></div>`;
   }).join(''):'<div class="es" style="padding:32px"><div class="ei">👥</div><p>Nenhuma lista cadastrada.</p></div>';
 }
-// ── Lista alunos management ───────────────────────────────────────────────────
-let _listaAlunos=[]; // [{nome, email}]
+// ── Lista de alunos — planilha de gerenciamento ───────────────────────────────
+// Modelo do doc listas/{id}: { nome, colunas:[{id,label,tipo,opcoes?,auto?}],
+//   hotmart:{enabled,produtos:[{id,presencial}]},
+//   alunos:[{matricula,nome,email,telefone,produtoId,origem,addedAt,campos:{colId:val}}] }
+// Compat: listas antigas sem `colunas` abrem com só as 4 colunas fixas.
+let _listaAlunos=[];      // linhas
+let _listaColunas=[];     // colunas dinâmicas (após Telefone)
+let _listaHotmart={enabled:false,produtos:[]}; // config de povoamento automático
+let _listaFilters={};     // {colKey: valorDoFiltro}
 
-function renderListaRows(filter){
-  const c=document.getElementById('lista-rows');if(!c)return;
-  const q=(filter||'').toLowerCase();
-  const visible=_listaAlunos.map((a,i)=>({a,i})).filter(({a})=>!q||a.nome.toLowerCase().includes(q)||(a.email&&a.email.toLowerCase().includes(q)));
-  if(!_listaAlunos.length){
-    c.innerHTML='<div style="padding:14px;text-align:center;color:var(--t3);font-size:13px">Nenhum aluno adicionado ainda.</div>';
-    return;
-  }
-  if(!visible.length){
-    c.innerHTML=`<div style="padding:14px;text-align:center;color:var(--t3);font-size:13px">Nenhum resultado para "${q}".</div>`;
-    return;
-  }
-  c.innerHTML=visible.map(({a,i})=>`
-    <div style="display:grid;grid-template-columns:100px 1fr 1fr auto;border-bottom:1px solid var(--border);transition:background .15s"
-      onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
-      <div style="padding:4px 6px;display:flex;align-items:center;border-right:1px solid var(--border)">
-        <input value="${(a.matricula||'').replace(/"/g,'&quot;')}" placeholder="Ex: 2026001"
-          data-idx="${i}" data-field="matricula"
-          oninput="updateListaAluno(this)"
-          style="border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:700;color:var(--accent);width:100%;outline:none;padding:4px;border-radius:4px"
-          onfocus="this.style.background='var(--accent-dim)'"
-          onblur="this.style.background='transparent'"/>
-      </div>
-      <div style="padding:4px 6px;display:flex;align-items:center">
-        <input value="${a.nome.replace(/"/g,'&quot;')}" placeholder="Nome completo"
-          data-idx="${i}" data-field="nome"
-          oninput="updateListaAluno(this)"
-          style="border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:var(--text);width:100%;outline:none;padding:4px;border-radius:4px"
-          onfocus="this.style.background='var(--accent-dim)'"
-          onblur="this.style.background='transparent'"/>
-      </div>
-      <div style="padding:4px 6px;display:flex;align-items:center;border-left:1px solid var(--border)">
-        <input value="${(a.email||'').replace(/"/g,'&quot;')}" placeholder="email@email.com" type="email"
-          data-idx="${i}" data-field="email"
-          oninput="updateListaAluno(this)"
-          style="border:none;background:transparent;font-family:inherit;font-size:13px;color:var(--t2);width:100%;outline:none;padding:4px;border-radius:4px"
-          onfocus="this.style.background='var(--accent-dim)';this.style.color='var(--text)'"
-          onblur="this.style.background='transparent';this.style.color='var(--t2)'"/>
-      </div>
-      <div style="padding:4px 6px;display:flex;align-items:center;border-left:1px solid var(--border)">
-        <button class="btn btn-g btn-sm" title="Remover aluno"
-          data-idx="${i}" onclick="removeListaAluno(this)"
-          style="color:var(--red);opacity:.7"
-          onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">✕</button>
-      </div>
-    </div>`).join('');
+function _le(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function _genColId(){return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+function defaultColunas(){return [
+  {id:'mentor',label:'Mentor',tipo:'mentor'},
+  {id:'presencial',label:'Simulado Presencial',tipo:'simnao',auto:'presencial'},
+  {id:'grupowpp',label:'Grupo Wpp',tipo:'simnao'},
+  {id:'situacao',label:'Situação',tipo:'select',opcoes:['Ativo','Reembolsado','Cancelado'],auto:'situacao'},
+];}
+function defaultHotmart(){return {enabled:false,produtos:[{id:'2243298',presencial:true},{id:'7991340',presencial:false}]};}
+// Garante que as colunas alimentadas pelo webhook existam (usado ao ligar Hotmart em lista antiga)
+function ensureAutoCols(){
+  if(!_listaColunas.some(c=>c.auto==='presencial'))_listaColunas.push({id:_genColId(),label:'Simulado Presencial',tipo:'simnao',auto:'presencial'});
+  if(!_listaColunas.some(c=>c.auto==='situacao'))_listaColunas.push({id:_genColId(),label:'Situação',tipo:'select',opcoes:['Ativo','Reembolsado','Cancelado'],auto:'situacao'});
 }
 
-// Use real index stored in data-idx to avoid filter index mismatch
-window.updateListaAluno=(el)=>{
-  const idx=parseInt(el.dataset.idx);
-  const field=el.dataset.field;
-  if(!isNaN(idx)&&_listaAlunos[idx])_listaAlunos[idx][field]=el.value;
+// Todas as colunas na ordem de exibição: 4 fixas + dinâmicas
+function listaAllCols(){
+  const fixed=[
+    {key:'matricula',label:'Matrícula',tipo:'texto',fixed:true},
+    {key:'nome',label:'Nome',tipo:'texto',fixed:true},
+    {key:'email',label:'E-mail',tipo:'texto',fixed:true},
+    {key:'telefone',label:'Telefone',tipo:'texto',fixed:true},
+  ];
+  const dyn=(_listaColunas||[]).map(c=>({colId:c.id,label:c.label,tipo:c.tipo,opcoes:c.opcoes||[],auto:c.auto||null,fixed:false}));
+  return [...fixed,...dyn];
+}
+function _colKey(c){return c.fixed?c.key:'c:'+c.colId;}
+function _cellVal(a,key){return key.slice(0,2)==='c:'?((a.campos||{})[key.slice(2)]||''):(a[key]||'');}
+
+// Editor de célula conforme o tipo da coluna
+function cellEditor(a,idx,key,tipo,opcoes){
+  const val=_cellVal(a,key);
+  const dk=`data-idx="${idx}" data-key="${_le(key)}"`;
+  const st="border:none;background:transparent;font-family:inherit;font-size:13px;color:var(--text);width:100%;outline:none;padding:6px 8px;border-radius:4px";
+  if(tipo==='simnao'){
+    return `<select ${dk} onchange="setListaCell(this)" style="${st};cursor:pointer">`+
+      `<option value=""${val===''?' selected':''}>—</option>`+
+      `<option value="sim"${val==='sim'?' selected':''}>Sim</option>`+
+      `<option value="nao"${val==='nao'?' selected':''}>Não</option></select>`;
+  }
+  if(tipo==='select'){
+    const opts=['',...(opcoes||[])];
+    return `<select ${dk} onchange="setListaCell(this)" style="${st};cursor:pointer">`+
+      opts.map(o=>`<option value="${_le(o)}"${String(val)===String(o)?' selected':''}>${o===''?'—':_le(o)}</option>`).join('')+`</select>`;
+  }
+  if(tipo==='mentor'){
+    const profs=S.profs||[];
+    return `<select ${dk} onchange="setListaCell(this)" style="${st};cursor:pointer">`+
+      `<option value=""${val===''?' selected':''}>—</option>`+
+      profs.map(p=>`<option value="${_le(p)}"${val===p?' selected':''}>${_le(p)}</option>`).join('')+`</select>`;
+  }
+  const weight=key==='matricula'?'700':key==='nome'?'600':'400';
+  const color=key==='matricula'?'var(--accent)':(key==='email'||key==='telefone')?'var(--t2)':'var(--text)';
+  return `<input ${dk} value="${_le(val)}" placeholder="—" oninput="setListaCell(this)" style="${st};font-weight:${weight};color:${color}"/>`;
+}
+
+window.setListaCell=(el)=>{
+  const idx=parseInt(el.dataset.idx);const key=el.dataset.key;
+  if(isNaN(idx)||!_listaAlunos[idx])return;
+  if(key.slice(0,2)==='c:'){(_listaAlunos[idx].campos=_listaAlunos[idx].campos||{})[key.slice(2)]=el.value;}
+  else _listaAlunos[idx][key]=el.value;
 };
 
-window.removeListaAluno=(btn)=>{
-  const idx=parseInt(btn.dataset.idx);
-  if(isNaN(idx))return;
-  const nome=_listaAlunos[idx]?.nome||'este aluno';
-  if(!confirm(`Remover ${nome}?`))return;
-  _listaAlunos.splice(idx,1);
-  renderListaRows(document.getElementById('lista-search')?.value||'');
+// Filtro por coluna
+function filterControl(c){
+  const key=_colKey(c);const cur=_listaFilters[key]||'';
+  const st="width:100%;font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;background:var(--bg);color:var(--text);outline:none";
+  if(c.tipo==='texto')return `<input placeholder="filtrar…" value="${_le(cur)}" oninput="setListaFilter(this,'${_le(key)}')" style="${st}"/>`;
+  let opts;
+  if(c.tipo==='simnao')opts=[['','Todos'],['sim','Sim'],['nao','Não'],['__empty__','(vazio)']];
+  else if(c.tipo==='mentor')opts=[['','Todos'],...((S.profs||[]).map(p=>[p,p])),['__empty__','(sem mentor)']];
+  else opts=[['','Todos'],...((c.opcoes||[]).map(o=>[o,o])),['__empty__','(vazio)']];
+  return `<select onchange="setListaFilter(this,'${_le(key)}')" style="${st};cursor:pointer">`+
+    opts.map(([v,l])=>`<option value="${_le(v)}"${cur===v?' selected':''}>${_le(l)}</option>`).join('')+`</select>`;
+}
+window.setListaFilter=(el,key)=>{_listaFilters[key]=el.value;renderListaBody();};
+
+function alunoMatches(a,q){
+  if(q){const hay=[a.matricula,a.nome,a.email,a.telefone].concat(Object.values(a.campos||{})).join(' ').toLowerCase();if(!hay.includes(q))return false;}
+  for(const key in _listaFilters){
+    const val=_listaFilters[key];if(!val)continue;
+    let cell=_cellVal(a,key);cell=(cell==null?'':String(cell));
+    let isText=true;
+    if(key.slice(0,2)==='c:'){const c=(_listaColunas||[]).find(x=>x.id===key.slice(2));isText=!!(c&&c.tipo==='texto');}
+    if(isText){if(!cell.toLowerCase().includes(String(val).toLowerCase()))return false;}
+    else if(val==='__empty__'){if(cell!=='')return false;}
+    else if(cell!==val)return false;
+  }
+  return true;
+}
+
+function renderListaGrid(){
+  const t=document.getElementById('lista-grid');if(!t)return;
+  const cols=listaAllCols();
+  let head='<thead><tr>';
+  cols.forEach(c=>{
+    const badge=c.auto?` <span title="Preenchida automaticamente pela Hotmart" style="opacity:.65">⚡</span>`:'';
+    const ctrls=c.fixed?'':
+      `<span onclick="renameListaColuna('${c.colId}')" title="Renomear coluna" style="cursor:pointer;opacity:.45;margin-left:6px">✎</span>`+
+      `<span onclick="removeListaColuna('${c.colId}')" title="Excluir coluna" style="cursor:pointer;color:var(--red);opacity:.55;margin-left:4px;font-weight:700">✕</span>`;
+    const mw=c.fixed?(c.key==='matricula'?'96':c.key==='telefone'?'128':'150'):'128';
+    head+=`<th style="text-align:left;padding:8px 10px;background:var(--bg3);border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--t2);white-space:nowrap;min-width:${mw}px;position:sticky;top:0;z-index:2">${_le(c.label).toUpperCase()}${badge}${ctrls}</th>`;
+  });
+  head+=`<th style="background:var(--bg3);border-bottom:1px solid var(--border);width:40px;position:sticky;top:0;z-index:2"></th></tr><tr>`;
+  cols.forEach(c=>{head+=`<th style="padding:4px 6px;background:var(--bg2);border-bottom:1px solid var(--border);border-right:1px solid var(--border)">${filterControl(c)}</th>`;});
+  head+=`<th style="background:var(--bg2);border-bottom:1px solid var(--border)"></th></tr></thead>`;
+  t.innerHTML=head+'<tbody id="lista-tbody"></tbody>';
+  renderListaBody();
+}
+
+function renderListaBody(){
+  const tb=document.getElementById('lista-tbody');if(!tb)return;
+  const cols=listaAllCols();
+  const q=(document.getElementById('lista-search')?.value||'').toLowerCase();
+  const visible=_listaAlunos.map((a,i)=>({a,i})).filter(({a})=>alunoMatches(a,q));
+  const cnt=document.getElementById('lista-count');if(cnt)cnt.textContent=`${visible.length} de ${_listaAlunos.length} aluno(s)`;
+  if(!_listaAlunos.length){tb.innerHTML=`<tr><td colspan="${cols.length+1}" style="padding:22px;text-align:center;color:var(--t3);font-size:13px">Nenhum aluno. Use <strong>+ Aluno</strong>, <strong>Importar XLS</strong>, ou ative o povoamento pela Hotmart.</td></tr>`;return;}
+  if(!visible.length){tb.innerHTML=`<tr><td colspan="${cols.length+1}" style="padding:22px;text-align:center;color:var(--t3);font-size:13px">Nenhum aluno corresponde aos filtros.</td></tr>`;return;}
+  tb.innerHTML=visible.map(({a,i})=>{
+    let tds=cols.map(c=>`<td style="border-bottom:1px solid var(--border);border-right:1px solid var(--border)">${cellEditor(a,i,_colKey(c),c.tipo,c.opcoes)}</td>`).join('');
+    tds+=`<td style="border-bottom:1px solid var(--border);text-align:center"><button onclick="removeListaAluno(${i})" title="Remover aluno" style="border:none;background:transparent;color:var(--red);opacity:.55;cursor:pointer;font-weight:700;padding:4px 8px">✕</button></td>`;
+    return `<tr onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">${tds}</tr>`;
+  }).join('');
+}
+
+window.removeListaAluno=(idx)=>{
+  const a=_listaAlunos[idx];if(!a)return;
+  if(!confirm(`Remover ${a.nome||'este aluno'} da lista?`))return;
+  _listaAlunos.splice(idx,1);renderListaBody();
 };
 
-window.filterListaRows=()=>{
-  renderListaRows(document.getElementById('lista-search')?.value||'');
+window.addListaAlunoLinha=()=>{
+  _listaAlunos.unshift({matricula:'',nome:'',email:'',telefone:'',produtoId:'',origem:'manual',addedAt:new Date().toISOString(),campos:{}});
+  _listaFilters={};const s=document.getElementById('lista-search');if(s)s.value='';
+  renderListaGrid();
+  const inp=document.querySelector('#lista-tbody input[data-key="nome"]');if(inp)inp.focus();
 };
 
-window.addManualAluno=()=>{
-  const n=document.getElementById('m-nome').value.trim();
-  const e=document.getElementById('m-email').value.trim();
-  const mat=document.getElementById('m-mat')?.value.trim()||'';
-  if(!n){alert('Digite o nome do aluno.');return;}
-  _listaAlunos.push({matricula:mat,nome:n,email:e});
-  _listaAlunos.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
-  // Clear search to show new entry
-  const s=document.getElementById('lista-search');if(s)s.value='';
-  renderListaRows();
-  document.getElementById('m-mat').value='';
-  document.getElementById('m-nome').value='';
-  document.getElementById('m-email').value='';
-  document.getElementById('m-mat').focus();
+// ── Colunas: criar / renomear / excluir ──────────────────────────────────────
+window.openNovaColuna=()=>{
+  document.getElementById('nc-label').value='';
+  document.getElementById('nc-tipo').value='simnao';
+  document.getElementById('nc-opcoes').value='';
+  document.getElementById('nc-opcoes-wrap').classList.add('hidden');
+  document.getElementById('nc-err').classList.add('hidden');
+  document.getElementById('modal-nova-coluna').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('nc-label').focus(),50);
 };
+window.onNcTipoChange=()=>{document.getElementById('nc-opcoes-wrap').classList.toggle('hidden',document.getElementById('nc-tipo').value!=='select');};
+window.saveNovaColuna=()=>{
+  const label=document.getElementById('nc-label').value.trim();
+  const tipo=document.getElementById('nc-tipo').value;
+  const err=document.getElementById('nc-err');
+  if(!label){err.textContent='Digite o nome da coluna.';err.classList.remove('hidden');return;}
+  const col={id:_genColId(),label,tipo};
+  if(tipo==='select'){
+    const opcoes=document.getElementById('nc-opcoes').value.split('\n').map(s=>s.trim()).filter(Boolean);
+    if(!opcoes.length){err.textContent='Informe ao menos uma opção (uma por linha).';err.classList.remove('hidden');return;}
+    col.opcoes=opcoes;
+  }
+  _listaColunas.push(col);
+  CM('modal-nova-coluna');renderListaGrid();
+};
+window.renameListaColuna=(colId)=>{
+  const c=_listaColunas.find(x=>x.id===colId);if(!c)return;
+  const nv=prompt('Novo nome da coluna:',c.label);
+  if(nv==null)return;const t=nv.trim();if(!t)return;
+  c.label=t;renderListaGrid();
+};
+window.removeListaColuna=(colId)=>{
+  const c=_listaColunas.find(x=>x.id===colId);if(!c)return;
+  if(!confirm(`Excluir a coluna "${c.label}"? Os valores preenchidos nela serão perdidos.`))return;
+  _listaColunas=_listaColunas.filter(x=>x.id!==colId);
+  delete _listaFilters['c:'+colId];
+  renderListaGrid();
+};
+
+// ── Config Hotmart (povoamento automático) ───────────────────────────────────
+window.toggleHotmartBox=()=>{
+  const box=document.getElementById('lista-hotmart-box');
+  box.classList.toggle('hidden');
+  if(!box.classList.contains('hidden'))renderHotmartProdutos();
+};
+window.onHotmartEnabledChange=()=>{
+  _listaHotmart.enabled=document.getElementById('lista-hm-enabled').checked;
+  if(_listaHotmart.enabled){ensureAutoCols();renderListaGrid();}
+};
+function renderHotmartProdutos(){
+  const c=document.getElementById('lista-hm-produtos');if(!c)return;
+  const chk=document.getElementById('lista-hm-enabled');if(chk)chk.checked=!!_listaHotmart.enabled;
+  c.innerHTML=(_listaHotmart.produtos||[]).map((p,i)=>
+    `<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap">`+
+      `<input class="fc" value="${_le(p.id||'')}" placeholder="ID do produto Hotmart" data-i="${i}" data-field="id" oninput="setHmProduto(this)" style="width:220px;font-size:13px"/>`+
+      `<span style="font-size:12px;color:var(--t2)">Simulado Presencial:</span>`+
+      `<select data-i="${i}" data-field="presencial" onchange="setHmProduto(this)" class="fc" style="width:90px;font-size:13px">`+
+        `<option value="sim"${p.presencial?' selected':''}>Sim</option>`+
+        `<option value="nao"${!p.presencial?' selected':''}>Não</option></select>`+
+      `<button class="btn btn-g btn-sm" onclick="removeHmProduto(${i})" title="Remover produto" style="color:var(--red)">✕</button>`+
+    `</div>`).join('')||'<p style="font-size:12px;color:var(--t3)">Nenhum produto. Clique em "+ Adicionar produto".</p>';
+}
+window.setHmProduto=(el)=>{const i=+el.dataset.i,f=el.dataset.field,p=(_listaHotmart.produtos||[])[i];if(!p)return;if(f==='presencial')p.presencial=(el.value==='sim');else p[f]=el.value.trim();};
+window.addHotmartProduto=()=>{(_listaHotmart.produtos=_listaHotmart.produtos||[]).push({id:'',presencial:true});renderHotmartProdutos();};
+window.removeHmProduto=(i)=>{_listaHotmart.produtos.splice(i,1);renderHotmartProdutos();};
 
 window.importXLS=async(input)=>{
   const file=input.files[0];if(!file)return;
@@ -31744,50 +31885,65 @@ window.importXLS=async(input)=>{
   const iMat=header.findIndex(h=>h.includes('matr')||h==='ra'||h==='id');
   const iNome=header.findIndex(h=>h.includes('nome')||h.includes('name'));
   const iEmail=header.findIndex(h=>h.includes('email')||h.includes('e-mail')||h.includes('mail'));
+  const iTel=header.findIndex(h=>h.includes('tel')||h.includes('fone')||h.includes('phone')||h.includes('celular')||h.includes('whats'));
   // Fallback: if no header detected, assume cols are: Matrícula(0) | Nome(1) | Email(2)
   const colMat=iMat>=0?iMat:0;
   const colNome=iNome>=0?iNome:1;
   const colEmail=iEmail>=0?iEmail:2;
   const newAlunos=[];
   for(let i=1;i<rows.length;i++){
-    const row=rows[i];
+    const row=rows[i];if(!row)continue;
     const matricula=(row[colMat]||'').toString().trim();
     const nome=(row[colNome]||'').toString().trim();
     const email=(row[colEmail]||'').toString().trim();
-    if(nome)newAlunos.push({matricula,nome,email});
+    const telefone=iTel>=0?(row[iTel]||'').toString().trim():'';
+    if(nome)newAlunos.push({matricula,nome,email,telefone,produtoId:'',origem:'xls',addedAt:new Date().toISOString(),campos:{}});
   }
   if(!newAlunos.length){
-    alert('Nenhum aluno encontrado.\n\nVerifique se a planilha tem cabeçalho na linha 1 com as colunas:\nMatrícula | Nome | Email');
+    alert('Nenhum aluno encontrado.\n\nVerifique se a planilha tem cabeçalho na linha 1 com as colunas:\nMatrícula | Nome | Email | Telefone');
     input.value='';return;
   }
-  if(!newAlunos.length){alert('Nenhum aluno encontrado. Verifique o formato: coluna A = Nome, coluna B = Email, com cabeçalho na linha 1.');return;}
   _listaAlunos=[..._listaAlunos,...newAlunos];
-  renderListaRows();
-  alert(`${newAlunos.length} alunos importados!`);
+  renderListaGrid();
+  alert(`${newAlunos.length} aluno(s) importado(s)!`);
   input.value='';
 };
 
 window.openNewLista=()=>{
-  window._editListaId=null;_listaAlunos=[];
+  window._editListaId=null;
+  _listaAlunos=[];
+  _listaColunas=defaultColunas();
+  _listaHotmart=defaultHotmart();
+  _listaFilters={};
   document.getElementById('lista-title').textContent='Nova Lista de Alunos';
   document.getElementById('lista-n').value='';
   document.getElementById('lista-err').classList.add('hidden');
   const s=document.getElementById('lista-search');if(s)s.value='';
-  renderListaRows();
+  document.getElementById('lista-hotmart-box').classList.add('hidden');
+  renderHotmartProdutos();
+  renderListaGrid();
   document.getElementById('modal-lista').classList.remove('hidden');
 };
 
 window.openEditLista=id=>{
   const l=S.listas.find(x=>x.id===id);if(!l)return;
   window._editListaId=id;
-  _listaAlunos=(l.alunos||[]).map(a=>typeof a==='object'?a:{nome:a,email:''});
-  // Sort alphabetically when opening
-  _listaAlunos.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  _listaColunas=Array.isArray(l.colunas)?JSON.parse(JSON.stringify(l.colunas)):[];
+  _listaHotmart=(l.hotmart&&typeof l.hotmart==='object')?JSON.parse(JSON.stringify(l.hotmart)):{enabled:false,produtos:[]};
+  if(!Array.isArray(_listaHotmart.produtos))_listaHotmart.produtos=[];
+  _listaAlunos=(l.alunos||[]).map(a=>{
+    const o=(a&&typeof a==='object')?a:{nome:String(a||'')};
+    return {matricula:o.matricula||'',nome:o.nome||'',email:o.email||'',telefone:o.telefone||'',produtoId:o.produtoId||'',origem:o.origem||'',addedAt:o.addedAt||'',campos:(o.campos&&typeof o.campos==='object')?{...o.campos}:{}};
+  });
+  _listaAlunos.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
+  _listaFilters={};
   document.getElementById('lista-title').textContent='Editar Lista';
-  document.getElementById('lista-n').value=l.nome;
+  document.getElementById('lista-n').value=l.nome||'';
   document.getElementById('lista-err').classList.add('hidden');
   const s=document.getElementById('lista-search');if(s)s.value='';
-  renderListaRows();
+  document.getElementById('lista-hotmart-box').classList.toggle('hidden',!_listaHotmart.enabled);
+  renderHotmartProdutos();
+  renderListaGrid();
   document.getElementById('modal-lista').classList.remove('hidden');
 };
 
@@ -31795,13 +31951,13 @@ window.saveLista=async()=>{
   const nome=document.getElementById('lista-n').value.trim();
   const errEl=document.getElementById('lista-err');
   if(!nome){errEl.textContent='Digite o nome da lista.';errEl.classList.remove('hidden');return;}
-  const semEmail=_listaAlunos.filter(a=>!a.email||!a.email.includes('@'));
-  if(semEmail.length){
-    errEl.innerHTML=`⚠️ Os seguintes alunos estão sem e-mail cadastrado:<br><strong>${semEmail.map(a=>a.nome).join(', ')}</strong><br>Todos os alunos precisam ter e-mail.`;
-    errEl.classList.remove('hidden');return;
+  if(_listaHotmart.enabled){
+    ensureAutoCols();
+    _listaHotmart.produtos=(_listaHotmart.produtos||[]).filter(p=>String(p.id||'').trim());
+    if(!_listaHotmart.produtos.length){errEl.textContent='Povoamento pela Hotmart está ativo, mas nenhum produto foi informado. Adicione ao menos um ID de produto ou desative o povoamento.';errEl.classList.remove('hidden');return;}
   }
   const id=window._editListaId||uid();
-  await setDoc(doc(db,'listas',id),{nome,alunos:_listaAlunos,updatedAt:new Date().toISOString()});
+  await setDoc(doc(db,'listas',id),{nome,colunas:_listaColunas,hotmart:_listaHotmart,alunos:_listaAlunos,updatedAt:new Date().toISOString()});
   await loadListas();renderListasPanel();CM('modal-lista');
 };
 

@@ -52,7 +52,8 @@ exports.megabrain = require('./megabrain-api').megabrain;
 exports.sincronizarTrilhasCasos = require('./trilhas-casos').sincronizarTrilhasCasos;
 
 // Helper que faz UPSERT em alunosAprovados (Cruzar Lista) a partir do webhook Hotmart
-const { upsertAluno } = require('./hotmart-alunos');
+// + povoamento automático da lista de gerenciamento da turma (coleção `listas`)
+const { upsertAluno, povoarListasTurma } = require('./hotmart-alunos');
 
 // Tokens lidos de variáveis de ambiente (definidas em .env ou via firebase functions:secrets:set)
 const HOTMART_TOKEN = process.env.HOTMART_TOKEN || '';
@@ -98,6 +99,15 @@ exports.hotmartWebhook = onRequest(
       console.log('alunosAprovados:', r.action, r.chaveAluno || r.motivo || '');
     } catch (e) {
       console.error('alunosAprovados upsert falhou (não bloqueante):', e?.message || e);
+    }
+
+    // Povoamento automático da lista de gerenciamento da turma (coleção `listas`).
+    // Também não bloqueante: falhas aqui não podem impedir o 200 pro Hotmart.
+    try {
+      const rl = await povoarListasTurma(body, event);
+      console.log('listaTurma:', rl.action, JSON.stringify(rl.results || rl.motivo || ''));
+    } catch (e) {
+      console.error('povoarListasTurma falhou (não bloqueante):', e?.message || e);
     }
 
     // Tenta extrair xcod (id da solicitação) de vários campos possíveis

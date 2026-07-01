@@ -203,4 +203,111 @@ async function upsertAluno(body, eventName) {
   });
 }
 
-module.exports = { upsertAluno, extractAlunoData, calcChaveAluno, deriveVertical, normNome };
+// ════════════════════════════════════════════════════════════════════════════
+// POVOAMENTO AUTOMÁTICO DA LISTA DA TURMA (planilha de gerenciamento em `listas`)
+// ────────────────────────────────────────────────────────────────────────────
+// Diferente de `alunosAprovados` (base global de compradores). Aqui a compra de
+// um produto específico entra como LINHA na lista de gerenciamento da turma, que
+// a coordenação marcou como "povoar pela Hotmart". Modelo do doc listas/{id}:
+//   { hotmart:{enabled:true, produtos:[{id:'2243298',presencial:true}, ...]},
+//     colunas:[{id,label,tipo,auto?}],  // auto:'presencial'|'situacao'
+//     alunos:[{matricula,nome,email,telefone,produtoId,origem,addedAt,campos:{colId:val}}] }
+//
+// APPROVED/COMPLETE → cria/atualiza a linha (dedup por e-mail), marca a coluna
+//   auto 'presencial' (sim/nao conforme o produto) e 'situacao'='Ativo'.
+// REFUNDED/CHARGEBACK/CANCEL → marca 'situacao'='Reembolsado'/'Cancelado' (NÃO
+//   apaga a linha, pra preservar preenchimentos manuais da coordenação).
+async function povoarListasTurma(body, eventName) {
+  const db = admin.firestore();
+  const data = extractAlunoData(body);
+
+  if (!data.produtoId && !data.produtoNome) return { action: 'skipped', motivo: 'sem produto' };
+  if (!data.email && !data.nome && !data.cpf) return { action: 'skipped', motivo: 'sem identidade' };
+
+  const status = eventToStatus(eventName) || 'Completo';
+  const isCancel = status === 'reembolsado' || status === 'chargeback' || status === 'cancelado';
+  const situacaoCancel = status === 'reembolsado' ? 'Reembolsado' : 'Cancelado';
+  const nowISO = new Date().toISOString();
+  const emailLc = String(data.email || '').toLowerCase().trim();
+  const cpf = data.cpf ? String(data.cpf) : '';
+  const prodId = String(data.produtoId || '').trim();
+
+  // Só listas com povoamento automático ligado
+  const snap = await db.collection('listas').where('hotmart.enabled', '==', true).get();
+  if (snap.empty) return { action: 'skipped', motivo: 'nenhuma lista Hotmart ativa' };
+
+  const results = [];
+  for (const docSnap of snap.docs) {
+    const lista = docSnap.data() || {};
+    const produtos = (lista.hotmart && Array.isArray(lista.hotmart.produtos)) ? lista.hotmart.produtos : [];
+    // Produto da compra pertence a esta lista?
+    const prod = produtos.find(p => {
+      const pid = String((p && p.id) || '').trim();
+      return pid && prodId && pid === prodId;
+    });
+    if (!prod) continue;
+
+    const colunas = Array.isArray(lista.colunas) ? lista.colunas : [];
+    const colPres = colunas.find(c => c && c.auto === 'presencial');
+    const colSit = colunas.find(c => c && c.auto === 'situacao');
+
+    await db.runTransaction(async (tx) => {
+      const fresh = await tx.get(docSnap.ref);
+      if (!fresh.exists) return;
+      const d = fresh.data() || {};
+      const alunos = Array.isArray(d.alunos) ? d.alunos.map(a => ({ ...a })) : [];
+
+      // Dedup: e-mail (preferencial) → cpf
+      const idx = alunos.findIndex(a => {
+        const ae = String((a && a.email) || '').toLowerCase().trim();
+        if (emailLc && ae) return ae === emailLc;
+        if (cpf && a && a.cpf) return String(a.cpf) === cpf;
+        return false;
+      });
+
+      if (isCancel) {
+        if (idx >= 0 && colSit) {
+          alunos[idx].campos = alunos[idx].campos || {};
+          alunos[idx].campos[colSit.id] = situacaoCancel;
+          tx.update(docSnap.ref, { alunos, updatedAt: nowISO });
+          results.push({ lista: docSnap.ref.id, action: 'situacao:' + situacaoCancel });
+        }
+        return; // reembolso de quem nunca entrou: ignora
+      }
+
+      // APPROVED/COMPLETE
+      if (idx >= 0) {
+        const a = alunos[idx];
+        a.campos = a.campos || {};
+        if (colPres) a.campos[colPres.id] = prod.presencial ? 'sim' : 'nao';
+        if (colSit && !a.campos[colSit.id]) a.campos[colSit.id] = 'Ativo';
+        if (!a.telefone && data.telefone) a.telefone = data.telefone;
+        if (!a.email && data.email) a.email = data.email;
+        if (!a.nome && data.nome) a.nome = data.nome;
+        a.produtoId = prodId || a.produtoId || '';
+        tx.update(docSnap.ref, { alunos, updatedAt: nowISO });
+        results.push({ lista: docSnap.ref.id, action: 'atualizado' });
+      } else {
+        const campos = {};
+        if (colPres) campos[colPres.id] = prod.presencial ? 'sim' : 'nao';
+        if (colSit) campos[colSit.id] = 'Ativo';
+        alunos.push({
+          matricula: '',
+          nome: data.nome || '',
+          email: data.email || '',
+          telefone: data.telefone || '',
+          produtoId: prodId,
+          origem: 'hotmart',
+          addedAt: nowISO,
+          campos,
+        });
+        tx.update(docSnap.ref, { alunos, updatedAt: nowISO });
+        results.push({ lista: docSnap.ref.id, action: 'criado' });
+      }
+    });
+  }
+
+  return { action: results.length ? 'done' : 'skipped', results };
+}
+
+module.exports = { upsertAluno, extractAlunoData, calcChaveAluno, deriveVertical, normNome, povoarListasTurma };
