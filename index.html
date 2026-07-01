@@ -5862,7 +5862,41 @@ body.pro-rt-fs-on{overflow:hidden}
           border:1px solid color-mix(in srgb,var(--text) 11%,transparent);border-radius:13px;padding:13px 18px;cursor:pointer;overflow:hidden;
           transition:transform .25s var(--ease-out-soft,cubic-bezier(0.16,1,0.3,1)),border-color .25s,box-shadow .25s}
         #tab-cronoBib .crono-card:hover{transform:translateX(3px);border-color:color-mix(in srgb,var(--accent) 45%,transparent);box-shadow:0 8px 22px rgba(0,0,0,.24)}
+        #tab-cronoBib .crono-div-btn{background:var(--bg3);border:1px solid var(--border);color:var(--t2);border-radius:999px;padding:10px 16px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.03em;transition:all .2s}
+        #tab-cronoBib .crono-div-btn:hover{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
         #tab-cronoBib .crono-bib-bar{display:flex;justify-content:flex-end;margin:0 0 14px}
+        /* Modal de divisão de módulo (anexado ao body) */
+        #cg-div-modal .cg-div-list{display:flex;flex-direction:column;gap:7px}
+        #cg-div-modal .cg-div-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px 14px;cursor:pointer;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;transition:transform .15s,border-color .2s}
+        #cg-div-modal .cg-div-row:hover{transform:translateX(3px);border-color:var(--accent)}
+        #cg-div-modal .cg-div-row .t{font-weight:600;font-size:13.5px}
+        #cg-div-modal .cg-div-row .meta{font-size:12px;color:var(--t2);display:flex;align-items:center;gap:8px}
+        #cg-div-modal .cg-div-badge{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:2px 7px;border-radius:999px}
+        #cg-div-modal .cg-div-empty{text-align:center;padding:24px 8px;color:var(--t2);font-size:13.5px}
+        #cg-div-modal .cg-div-empty p{margin:0 0 16px;line-height:1.5}
+        #cg-div-modal .cg-div-parts{display:flex;flex-direction:column;gap:12px;margin-bottom:18px}
+        #cg-div-modal .cg-div-part{border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:12px;padding:12px 14px;background:color-mix(in srgb,var(--accent) 4%,transparent)}
+        #cg-div-modal .cg-div-part-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+        #cg-div-modal .cg-div-nome{flex:1;min-width:0;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600}
+        #cg-div-modal .cg-div-nome:focus{outline:none;border-color:var(--accent)}
+        #cg-div-modal .cg-div-min{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2);white-space:nowrap}
+        #cg-div-modal .cg-div-aula{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--text);padding:3px 0 3px 6px}
+        #cg-div-modal .cg-div-aula em{color:var(--t2);font-style:normal;font-family:'JetBrains Mono',monospace;font-size:11px}
+        #cg-div-modal .cg-div-aula.man .t{color:#a78bfa}
+        #cg-div-modal .cg-div-man-add{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
+        #cg-div-modal .cg-div-man-add input{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12.5px}
+        #cg-div-modal .cg-div-man-add input:first-child{flex:1;min-width:160px}
+        #cg-div-modal .cg-div-man-add input[type=number]{width:70px}
+        #cg-div-modal .cg-div-assign{margin-bottom:16px}
+        #cg-div-modal .cg-div-aula-assign{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 8px;border-radius:8px;border:1px solid transparent}
+        #cg-div-modal .cg-div-aula-assign.pend{border-color:color-mix(in srgb,#f59e0b 35%,transparent);background:color-mix(in srgb,#f59e0b 6%,transparent)}
+        #cg-div-modal .cg-div-aula-assign .t{flex:1;min-width:0;font-size:12.5px;color:var(--text)}
+        #cg-div-modal .cg-div-aula-assign em{color:var(--t2);font-style:normal;font-family:'JetBrains Mono',monospace;font-size:11px}
+        #cg-div-modal .cg-div-aula-assign select{flex:none;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 9px;color:var(--text);font-size:12.5px;max-width:190px}
+        #cg-div-modal .cg-div-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:14px;border-top:1px solid var(--border)}
+        #cg-div-modal .cg-add-btn{display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px dashed color-mix(in srgb,var(--accent) 42%,var(--border));color:var(--accent);border-radius:10px;padding:9px 14px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600}
+        #cg-div-modal .cg-add-btn:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+        #cg-div-modal .cg-back{background:none;border:1px solid var(--border);color:var(--t2);border-radius:9px;padding:8px 13px;cursor:pointer;font-size:13px}
         #tab-cronoBib .crono-sortprio{background:var(--bg3);border:1px solid var(--border);color:var(--t2);border-radius:999px;padding:8px 15px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.03em;transition:all .2s}
         #tab-cronoBib .crono-sortprio:hover{color:var(--text);border-color:var(--accent)}
         #tab-cronoBib .crono-sortprio.on{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 42%,transparent)}
@@ -5972,7 +6006,10 @@ body.pro-rt-fs-on{overflow:hidden}
             <p class="crono-eyebrow">Treinamento TSA Oral</p>
             <h2 class="crono-title">Biblioteca de Temas</h2>
           </div>
-          <button class="crono-refresh-btn" type="button" onclick="_cronoAtualizarBib()"><span class="ic">🔄</span><span>Atualizar</span></button>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <button class="crono-div-btn" type="button" onclick="_cronoOpenDivisoes()">✂ Dividir módulos</button>
+            <button class="crono-refresh-btn" type="button" onclick="_cronoAtualizarBib()"><span class="ic">🔄</span><span>Atualizar</span></button>
+          </div>
         </div>
         <div id="crono-bib-body"></div>
       </div>
@@ -6122,6 +6159,9 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-cronoGer .cg-tema-chip.rev em{font-style:normal;color:var(--t2);font-size:11px;font-family:'JetBrains Mono',monospace}
         #tab-cronoGer .cg-add-btn.rev{border-color:color-mix(in srgb,#8b5cf6 46%,var(--border));color:#a78bfa}
         #tab-cronoGer .cg-add-btn.rev:hover{background:color-mix(in srgb,#8b5cf6 12%,transparent)}
+        #tab-cronoGer .cg-add-btn.sobra{border-color:color-mix(in srgb,#f59e0b 46%,var(--border));color:#f59e0b}
+        #tab-cronoGer .cg-add-btn.sobra:hover{background:color-mix(in srgb,#f59e0b 12%,transparent)}
+        #tab-cronoGer .cg-tema-chip.sobra{border-left-color:#f59e0b;border-style:solid}
         #tab-cronoGer .cg-exam-box{margin-top:18px;background:color-mix(in srgb,var(--bg2) 70%,transparent);border:1px solid var(--border);border-radius:14px;padding:16px 18px}
         #tab-cronoGer .cg-exam-line{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:9px}
         #tab-cronoGer .cg-exam-t{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;flex:none;min-width:150px}
@@ -6144,6 +6184,10 @@ body.pro-rt-fs-on{overflow:hidden}
         #tab-cronoGer .cg-add-btn:hover{background:color-mix(in srgb,var(--accent) 10%,transparent);border-style:solid;transform:translateY(-1px)}
         #tab-cronoGer .cg-add-btn span{font-size:16px;line-height:1}
         /* Picker de temas (modal, anexado ao body) */
+        #cg-picker-modal .cg-pk-sort{display:flex;gap:8px;margin:0 0 16px;position:sticky;top:0;background:var(--bg2);padding-bottom:10px;z-index:1}
+        #cg-picker-modal .cg-pk-sort-b{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--t2);border-radius:9px;padding:8px 12px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.03em;transition:all .2s}
+        #cg-picker-modal .cg-pk-sort-b:hover{color:var(--text);border-color:var(--accent)}
+        #cg-picker-modal .cg-pk-sort-b.on{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 42%,transparent)}
         #cg-picker-modal .cg-pk-group{margin-bottom:18px}
         #cg-picker-modal .cg-pk-group:last-child{margin-bottom:0}
         #cg-picker-modal .cg-pk-group-h{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin:0 0 10px;color:var(--t2)}
@@ -33097,7 +33141,7 @@ S._cronoBibSortPrio=false;
 window._cronoToggleSortPrio=()=>{ S._cronoBibSortPrio=!S._cronoBibSortPrio; renderCronoBib(); };
 S.cronoTrilhas={};          // {trilhaId: {id,titulo,totalCasos,totalProblemas,totalChars,mediaCount,...}}
 S._cronoTrilhasLoaded=false;
-S.cronoConfig={ritmoCharsMin:900,multimidiaMin:2,trilhasOff:[],trilhasTempoManual:{},temasOff:[]};
+S.cronoConfig={ritmoCharsMin:900,multimidiaMin:2,trilhasOff:[],trilhasTempoManual:{},temasOff:[],divisoes:{}};
 const CRONO_TRILHAS_ENDPOINT='https://us-central1-simulados-confirmacao.cloudfunctions.net/sincronizarTrilhasCasos';
 function _cronoEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 async function loadCronoTemas(){
@@ -33124,6 +33168,7 @@ async function loadCronoTrilhas(){
       S.cronoConfig.trilhasOff=Array.isArray(c.trilhasOff)?c.trilhasOff.map(String):[];
       S.cronoConfig.trilhasTempoManual=(c.trilhasTempoManual&&typeof c.trilhasTempoManual==='object')?{...c.trilhasTempoManual}:{};
       S.cronoConfig.temasOff=Array.isArray(c.temasOff)?c.temasOff.map(String):[];
+      S.cronoConfig.divisoes=(c.divisoes&&typeof c.divisoes==='object')?c.divisoes:{};
     }
     S._cronoTrilhasLoaded=true;
   }catch(e){console.error('loadCronoTrilhas:',e);}
@@ -33166,6 +33211,7 @@ async function _cronoPersistConfig(){
     trilhasOff:(S.cronoConfig.trilhasOff||[]).map(String),
     trilhasTempoManual:S.cronoConfig.trilhasTempoManual||{},
     temasOff:(S.cronoConfig.temasOff||[]).map(String),
+    divisoes:S.cronoConfig.divisoes||{},
     updatedAt:serverTimestamp()
   },{merge:true});
 }
@@ -33318,7 +33364,8 @@ function _cronoFmtDur(min){
   return h>0?`${h}h ${m}min`:`${m}min`;
 }
 // Agrupa aulas por curso→módulo. Retorna array ordenado por curso e módulo.
-function _cronoModulos(){
+// Módulos "crus" direto do PO (1 módulo = 1 tema). Base pro editor de divisões.
+function _cronoModulosRaw(){
   const out=[];
   // Treinamento TSA Oral é exclusivo da vertical AnestReview — ignora cursos de outras verticais.
   (S.poCursos||[]).filter(c=>(c.vertical||'anestreview')==='anestreview').forEach(curso=>{
@@ -33343,6 +33390,146 @@ function _cronoModulos(){
   });
   return out;
 }
+// Aplica a camada de DIVISÃO de módulo (config.divisoes) — sobrevive ao import do PO.
+// Um módulo dividido vira N sub-temas (cada parte = tema próprio, com aulas do PO + aulas manuais).
+function _cronoModulos(){
+  const divisoes=(S.cronoConfig&&S.cronoConfig.divisoes)||{};
+  return _cronoModulosRaw().map(g=>{
+    const mods=[];
+    g.mods.forEach(m=>{
+      const div=divisoes[m.temaId];
+      if(div&&Array.isArray(div.partes)&&div.partes.length){
+        const byKey=new Map(m.aulas.map(a=>[_cronoAulaKey(a),a]));
+        div.partes.forEach(p=>{
+          const poAulas=(p.aulaKeys||[]).map(k=>byKey.get(String(k))).filter(Boolean);
+          const manuais=(p.aulasManuais||[]).map(x=>({id:x.id,titulo:x.titulo,duracao:x.duracao,ordem:null,_manual:true}));
+          const aulas=poAulas.concat(manuais);
+          mods.push({cursoId:m.cursoId,cursoNome:m.cursoNome,modulo:p.nome,temaId:p.id,
+            aulas,nAulas:aulas.length,totalMin:aulas.reduce((a,x)=>a+_cronoParseDur(x.duracao),0),
+            _divKey:m.temaId,_moduloBase:m.modulo});
+        });
+      }else{ mods.push(m); }
+    });
+    return {cursoId:g.cursoId,cursoNome:g.cursoNome,mods};
+  });
+}
+// ── Divisão de módulo (overlay em config.divisoes — não mexe no import do PO) ──
+function _cronoRawModById(divKey){ return _cronoModulosRaw().flatMap(g=>g.mods).find(m=>m.temaId===divKey)||null; }
+async function _cronoDivSave(divKey){
+  try{ await _cronoPersistConfig(); _cronoTemaMapCache=null; const b=document.getElementById('cg-div-body'); if(b)b.innerHTML=_cronoDivInner(divKey); if(typeof renderCronoBib==='function')renderCronoBib(); }
+  catch(e){ console.error('divSave:',e); arosToast('Erro ao salvar: '+(e.message||e),'err',3000); }
+}
+function _cronoDivNum(modulo){ return (String(modulo).match(/ponto\s+([\d.]+)/i)||[])[1]||''; }
+function _cronoDivMkParte(modulo,i){ const num=_cronoDivNum(modulo); return {id:'div_'+_poSlug(modulo)+'_'+i+'_'+Math.random().toString(36).slice(2,5),nome:'Ponto '+(num?num+'.'+i:(modulo+' — parte '+i)),aulaKeys:[],aulasManuais:[]}; }
+window._cronoDivCriar=async divKey=>{
+  const m=_cronoRawModById(divKey); if(!m)return;
+  (S.cronoConfig.divisoes||(S.cronoConfig.divisoes={}))[divKey]={cursoNome:m.cursoNome,modulo:m.modulo,partes:[_cronoDivMkParte(m.modulo,1),_cronoDivMkParte(m.modulo,2),_cronoDivMkParte(m.modulo,3)]};
+  audit('CRONO_MODULO_DIVIDIDO',{collection:'config',docId:'cronoConfig'},{meta:{modulo:m.modulo}});
+  await _cronoDivSave(divKey);
+};
+window._cronoDivAddParte=async divKey=>{
+  const d=S.cronoConfig.divisoes[divKey]; if(!d)return;
+  d.partes.push(_cronoDivMkParte(d.modulo,d.partes.length+1));
+  await _cronoDivSave(divKey);
+};
+window._cronoDivDelParte=async(divKey,parteId)=>{
+  const d=S.cronoConfig.divisoes[divKey]; if(!d)return;
+  const ok=await uiConfirm('Remover esta parte? As aulas dela voltam para "a classificar".',{title:'Remover parte',yesLabel:'Remover',noLabel:'Cancelar',yesClass:'btn-d'}); if(!ok)return;
+  d.partes=d.partes.filter(p=>p.id!==parteId);
+  await _cronoDivSave(divKey);
+};
+window._cronoDivParteNome=async(divKey,parteId,nome)=>{
+  const d=S.cronoConfig.divisoes[divKey]; const p=d&&d.partes.find(x=>x.id===parteId); if(!p)return;
+  p.nome=String(nome||'').trim()||p.nome;
+  await _cronoDivSave(divKey);
+};
+window._cronoDivAssign=async(divKey,aulaKey,parteId)=>{
+  const d=S.cronoConfig.divisoes[divKey]; if(!d)return;
+  d.partes.forEach(p=>{ p.aulaKeys=(p.aulaKeys||[]).filter(k=>String(k)!==String(aulaKey)); });
+  if(parteId){ const p=d.partes.find(x=>x.id===parteId); if(p){ p.aulaKeys=p.aulaKeys||[]; p.aulaKeys.push(String(aulaKey)); } }
+  await _cronoDivSave(divKey);
+};
+window._cronoDivAddManual=async(divKey,parteId)=>{
+  const tEl=document.getElementById('cgman-t-'+parteId), dEl=document.getElementById('cgman-d-'+parteId);
+  const titulo=((tEl&&tEl.value)||'').trim(); const min=Math.max(0,parseInt(dEl&&dEl.value,10)||0);
+  if(!titulo){arosToast('Dê um título à aula manual','err',2000);if(tEl)tEl.focus();return;}
+  const d=S.cronoConfig.divisoes[divKey]; const p=d&&d.partes.find(x=>x.id===parteId); if(!p)return;
+  p.aulasManuais=p.aulasManuais||[]; p.aulasManuais.push({id:'man_'+Math.random().toString(36).slice(2,7),titulo,duracao:min+':00'});
+  await _cronoDivSave(divKey);
+};
+window._cronoDivDelManual=async(divKey,parteId,manId)=>{
+  const d=S.cronoConfig.divisoes[divKey]; const p=d&&d.partes.find(x=>x.id===parteId); if(!p)return;
+  p.aulasManuais=(p.aulasManuais||[]).filter(x=>x.id!==manId);
+  await _cronoDivSave(divKey);
+};
+window._cronoDivDesfazer=async divKey=>{
+  const ok=await uiConfirm('Desfazer a divisão? O módulo volta a ser um tema único (as trilhas/hot topics das partes serão perdidas).',{title:'Desfazer divisão',yesLabel:'Desfazer',noLabel:'Cancelar',yesClass:'btn-d'}); if(!ok)return;
+  delete S.cronoConfig.divisoes[divKey];
+  await _cronoDivSave(divKey);
+};
+function _cronoDivInner(divKey){
+  const m=_cronoRawModById(divKey); if(!m)return '<div class="cg-none" style="padding:16px 0">Módulo não encontrado.</div>';
+  const div=(S.cronoConfig.divisoes||{})[divKey];
+  if(!div||!div.partes||!div.partes.length){
+    return `<div class="cg-div-empty"><p>O módulo <b>${_cronoEsc(m.modulo)}</b> está inteiro (1 tema, ${m.nAulas} aulas). Divida em partes pra separar os assuntos.</p><button class="btn btn-p btn-sm" type="button" onclick="_cronoDivCriar('${_cronoEsc(divKey)}')">✂ Dividir em 3 partes</button></div>`;
+  }
+  const assignedTo={}; div.partes.forEach(p=>(p.aulaKeys||[]).forEach(k=>assignedTo[String(k)]=p.id));
+  const parteOpts=selId=>'<option value="">A classificar</option>'+div.partes.map(p=>`<option value="${_cronoEsc(p.id)}"${p.id===selId?' selected':''}>${_cronoEsc(p.nome)}</option>`).join('');
+  let html='<div class="cg-div-parts">';
+  div.partes.forEach(p=>{
+    const poAulas=(p.aulaKeys||[]).map(k=>m.aulas.find(a=>_cronoAulaKey(a)===String(k))).filter(Boolean);
+    const min=poAulas.reduce((a,x)=>a+_cronoParseDur(x.duracao),0)+(p.aulasManuais||[]).reduce((a,x)=>a+_cronoParseDur(x.duracao),0);
+    const nAulas=poAulas.length+(p.aulasManuais||[]).length;
+    html+=`<div class="cg-div-part">
+      <div class="cg-div-part-h">
+        <input class="cg-div-nome" value="${_cronoEsc(p.nome)}" maxlength="120" onchange="_cronoDivParteNome('${_cronoEsc(divKey)}','${_cronoEsc(p.id)}',this.value)"/>
+        <span class="cg-div-min">⏱ ${_cronoFmtDur(min)} · ${nAulas} aula${nAulas!==1?'s':''}</span>
+        <button class="crono-x" type="button" title="Remover parte" onclick="_cronoDivDelParte('${_cronoEsc(divKey)}','${_cronoEsc(p.id)}')">🗑</button>
+      </div>
+      ${poAulas.map(a=>`<div class="cg-div-aula"><span class="t">${a.ordem!=null?_cronoEsc(a.ordem)+'. ':''}${_cronoEsc(a.titulo||'—')} <em>${a.duracao?_cronoEsc(a.duracao):''}</em></span></div>`).join('')}
+      ${(p.aulasManuais||[]).map(x=>`<div class="cg-div-aula man"><span class="t">📝 ${_cronoEsc(x.titulo)} <em>(manual · ${_cronoEsc(x.duracao)})</em></span><button class="crono-x" type="button" title="Remover" onclick="_cronoDivDelManual('${_cronoEsc(divKey)}','${_cronoEsc(p.id)}','${_cronoEsc(x.id)}')">✕</button></div>`).join('')}
+      <div class="cg-div-man-add">
+        <input id="cgman-t-${_cronoEsc(p.id)}" placeholder="Aula manual (produto fora do PO)" maxlength="160"/>
+        <input id="cgman-d-${_cronoEsc(p.id)}" type="number" min="0" step="1" placeholder="min"/>
+        <button class="btn btn-s btn-sm" type="button" onclick="_cronoDivAddManual('${_cronoEsc(divKey)}','${_cronoEsc(p.id)}')">+ manual</button>
+      </div>
+    </div>`;
+  });
+  html+='</div>';
+  const naoClass=m.aulas.filter(a=>!assignedTo[_cronoAulaKey(a)]).length;
+  html+=`<div class="cg-div-assign"><div class="cg-col-h">Aulas do PO — atribua cada uma a uma parte${naoClass?` · <b style="color:#f59e0b">${naoClass} a classificar</b>`:''}</div>`;
+  m.aulas.slice().sort((a,b)=>((a.ordem==null?9999:a.ordem)-(b.ordem==null?9999:b.ordem))||String(a.titulo||'').localeCompare(String(b.titulo||''),'pt-BR',{numeric:true})).forEach(a=>{
+    const k=_cronoAulaKey(a);
+    html+=`<div class="cg-div-aula-assign${assignedTo[k]?'':' pend'}"><span class="t">${a.ordem!=null?_cronoEsc(a.ordem)+'. ':''}${_cronoEsc(a.titulo||'—')} <em>${a.duracao?_cronoEsc(a.duracao):''}</em></span><select onchange="_cronoDivAssign('${_cronoEsc(divKey)}','${_cronoEsc(k)}',this.value)">${parteOpts(assignedTo[k]||'')}</select></div>`;
+  });
+  html+='</div>';
+  html+=`<div class="cg-div-foot"><button class="cg-add-btn" type="button" onclick="_cronoDivAddParte('${_cronoEsc(divKey)}')"><span>+</span> Adicionar parte</button><button class="btn btn-g btn-sm" type="button" onclick="_cronoDivDesfazer('${_cronoEsc(divKey)}')">Desfazer divisão</button></div>`;
+  return html;
+}
+window._cronoCloseDivisao=()=>{ const m=document.getElementById('cg-div-modal'); if(m)m.remove(); };
+window._cronoOpenDivisao=divKey=>{
+  const m=_cronoRawModById(divKey); if(!m){arosToast('Módulo não encontrado','err',2000);return;}
+  let modal=document.getElementById('cg-div-modal'); if(modal)modal.remove();
+  modal=document.createElement('div'); modal.className='mo'; modal.id='cg-div-modal'; modal.setAttribute('data-no-backdrop-close','');
+  modal.innerHTML=`<div class="md" style="max-width:740px;max-height:92vh;display:flex;flex-direction:column">
+    <div class="mh"><div><div class="m-title">✂ Dividir módulo</div><div class="m-sub">${_cronoEsc(m.modulo)} · ${_cronoEsc(m.cursoNome)}</div></div><button class="m-close" onclick="_cronoCloseDivisao()">✕</button></div>
+    <div class="m-body" style="overflow-y:auto" id="cg-div-body">${_cronoDivInner(divKey)}</div>
+    <div class="mh" style="border-top:1px solid var(--border);border-bottom:none;justify-content:space-between"><button class="cg-back" type="button" onclick="_cronoOpenDivisoes()">← Módulos</button><button class="btn btn-p btn-sm" type="button" onclick="_cronoCloseDivisao()">Concluir</button></div>
+  </div>`;
+  document.body.appendChild(modal);
+};
+window._cronoOpenDivisoes=()=>{
+  const raw=_cronoModulosRaw().flatMap(g=>g.mods);
+  const divs=S.cronoConfig.divisoes||{};
+  const rows=raw.map(m=>{ const d=divs[m.temaId]; const badge=(d&&d.partes&&d.partes.length)?`<span class="cg-div-badge">dividido em ${d.partes.length}</span>`:''; return `<button class="cg-div-row" type="button" onclick="_cronoOpenDivisao('${_cronoEsc(m.temaId)}')"><span class="t">${_cronoEsc(m.modulo)}</span><span class="meta">${m.nAulas} aulas ${badge}</span></button>`; }).join('');
+  let modal=document.getElementById('cg-div-modal'); if(modal)modal.remove();
+  modal=document.createElement('div'); modal.className='mo'; modal.id='cg-div-modal'; modal.setAttribute('data-no-backdrop-close','');
+  modal.innerHTML=`<div class="md" style="max-width:640px;max-height:88vh;display:flex;flex-direction:column">
+    <div class="mh"><div><div class="m-title">Dividir módulos</div><div class="m-sub">Escolha o módulo pra dividir em partes</div></div><button class="m-close" onclick="_cronoCloseDivisao()">✕</button></div>
+    <div class="m-body" style="overflow-y:auto"><div class="cg-div-list">${rows||'<div class="cg-none" style="padding:16px 0">Nenhum módulo.</div>'}</div></div>
+  </div>`;
+  document.body.appendChild(modal);
+};
 async function renderCronoBib(){
   const body=document.getElementById('crono-bib-body');
   if(!body)return;
@@ -33798,7 +33985,7 @@ function _cronoGenSemanas(dataInicio,dataFim){
   const totalDias=Math.round((e-s)/86400000)+1;
   const n=Math.max(1,Math.ceil(totalDias/7));
   const arr=[]; let rem=totalDias;
-  for(let i=0;i<n;i++){ arr.push({dias:Math.min(7,Math.max(1,rem)),temas:[],revisoes:[],nota:''}); rem-=7; }
+  for(let i=0;i<n;i++){ arr.push({dias:Math.min(7,Math.max(1,rem)),temas:[],revisoes:[],sobra:[],nota:''}); rem-=7; }
   return arr;
 }
 // Normaliza simulados p/ [{id,nome,ini,fim}] (converte formato legado de string).
@@ -33837,7 +34024,7 @@ function _cronoTurmaSemanas(turma){
     // separado no FIM (o cronograma termina no dia anterior à 1ª prova oficial).
     const eventos=[];
     sims.forEach(s=>{ const sf=s.fim||s.ini; if(s.ini<=fim&&sf>=ini)eventos.push({tipo:'simulado',nome:s.nome,data:s.ini,fim:sf}); });
-    out.push({idx:i,dias,ini,fim,eventos,temas:sm.temas||[],revisoes:sm.revisoes||[],nota:sm.nota||''});
+    out.push({idx:i,dias,ini,fim,eventos,temas:sm.temas||[],revisoes:sm.revisoes||[],sobra:sm.sobra||[],nota:sm.nota||''});
     cursor.setDate(cursor.getDate()+dias);
   });
   return out;
@@ -33948,11 +34135,10 @@ window._cronoExcluirTurma=async id=>{
 // ── Editor da turma ──
 // Só as semanas (reflow ao mudar datas/eventos, sem recriar os campos de cima — preserva o foco).
 function _cronoTemaPrio(id){ return (S.cronoTemas[id]||{}).prioridade||''; }
-function _cronoChip(id,sm,rev){
+function _cronoChip(id,sm,kind){ // kind: 'tema' | 'sobra'
   const pri=_cronoTemaPrio(id);
-  const del=rev?`_cronoSemDelRev(${sm.idx},'${_cronoEsc(id)}')`:`_cronoSemDelTema(${sm.idx},'${_cronoEsc(id)}')`;
-  const tm=rev?'':`<span class="tm">${_cronoFmtDur(_cronoTemaBlocoMin(id))}</span>`;
-  return `<span class="cg-tema-chip pri-${pri||'none'}${rev?' rev':''}"><span class="t">${_cronoEsc(_cronoTemaLabel(id))}</span>${tm}<button type="button" title="Remover" onclick="${del}">✕</button></span>`;
+  const del=kind==='sobra'?`_cronoSemDelSobra(${sm.idx},'${_cronoEsc(id)}')`:`_cronoSemDelTema(${sm.idx},'${_cronoEsc(id)}')`;
+  return `<span class="cg-tema-chip pri-${pri||'none'}${kind==='sobra'?' sobra':''}"><span class="t">${_cronoEsc(_cronoTemaLabel(id))}</span><span class="tm">${_cronoFmtDur(_cronoTemaBlocoMin(id))}</span><button type="button" title="Remover" onclick="${del}">✕</button></span>`;
 }
 // 1-based nº da 1ª semana onde o tema aparece como estudo (pra anotar na revisão).
 function _cronoTemaVistoSemana(id){
@@ -33977,7 +34163,9 @@ function _cronoWeeksHTML(turma){
       const nome=_cronoEsc((ev.nome||(ev.tipo==='prova'?'Prova':ev.tipo==='revisaoPre'?'Revisão':'Simulado')).toUpperCase());
       return `<span class="cg-ev ${ev.tipo}">${nome} · ${_cronoEsc(rng)}</span>`;
     }).join('');
-    const temaChips=sm.temas.map(id=>_cronoChip(id,sm,false)).join('')||'<span class="cg-none">nenhum tema ainda</span>';
+    const temaChips=sm.temas.map(id=>_cronoChip(id,sm,'tema')).join('')||'<span class="cg-none">nenhum tema ainda</span>';
+    const sobraChips=(sm.sobra||[]).map(id=>_cronoChip(id,sm,'sobra')).join('');
+    const sobraSec=(sm.sobra&&sm.sobra.length)?`<div class="cg-rev-sec"><div class="cg-col-h">Se sobrar tempo</div><div class="cg-chips">${sobraChips}</div></div>`:'';
     const revItems=sm.revisoes.map(id=>{
       const pri=_cronoTemaPrio(id); const vs=_cronoTemaVistoSemana(id);
       const nota=vs?('visto na semana '+vs):'ainda não estudado';
@@ -33996,9 +34184,11 @@ function _cronoWeeksHTML(turma){
       <div class="cg-week-body">
         <div class="cg-col-h">Temas de estudo</div>
         <div class="cg-chips">${temaChips}</div>
+        ${sobraSec}
         ${revSec}
         <div class="cg-week-actions">
           <button class="cg-add-btn" type="button" onclick="_cronoOpenTemaPicker(${sm.idx},'tema')"><span>+</span> Adicionar tema de estudo</button>
+          <button class="cg-add-btn sobra" type="button" onclick="_cronoOpenTemaPicker(${sm.idx},'sobra')"><span>+</span> Adicionar "se sobrar tempo"</button>
           <button class="cg-add-btn rev" type="button" onclick="_cronoOpenTemaPicker(${sm.idx},'rev')"><span>+</span> Adicionar revisão</button>
         </div>
       </div>
@@ -34007,32 +34197,48 @@ function _cronoWeeksHTML(turma){
   html+='</div><button class="btn btn-s" type="button" style="margin-top:14px" onclick="_cronoAddSemana()">+ Adicionar semana</button>';
   return html;
 }
-// ── Picker de temas em árvore por prioridade (modal) ──
-let _cronoPickerWi=null,_cronoPickerMode='tema';
-function _cronoTemasUsados(){ const t=_cronoCurTurma(); const set=new Set(); if(t)(t.semanas||[]).forEach(sm=>(sm.temas||[]).forEach(id=>set.add(id))); return set; }
+// ── Picker de temas em árvore (modal) — ordena por prioridade ou por nº do Ponto ──
+let _cronoPickerWi=null,_cronoPickerMode='tema',_cronoPickerSort='prio';
+function _cronoTemasUsados(){ const t=_cronoCurTurma(); const set=new Set(); if(t)(t.semanas||[]).forEach(sm=>{(sm.temas||[]).forEach(id=>set.add(id));(sm.sobra||[]).forEach(id=>set.add(id));}); return set; }
 window._cronoOpenTemaPicker=(wi,mode)=>{ _cronoPickerWi=wi; _cronoPickerMode=mode||'tema'; _cronoRenderPicker(); };
 window._cronoClosePicker=()=>{ const m=document.getElementById('cg-picker-modal'); if(m)m.remove(); };
+window._cronoPickerSetSort=s=>{ _cronoPickerSort=s; const body=document.getElementById('cg-picker-body'); if(body)body.innerHTML=_cronoPickerInnerHTML(); };
+// Só a lista interna (pra atualizar sem recriar o modal → não pisca).
+function _cronoPickerInnerHTML(){
+  const t=_cronoCurTurma(); const sem=t&&t.semanas&&t.semanas[_cronoPickerWi]; if(!sem)return '';
+  const mode=_cronoPickerMode;
+  // Tema/Se sobrar tempo: exclui os já usados em QUALQUER semana (não repete). Revisão: só os já nesta semana.
+  const usados=mode==='rev'?new Set(sem.revisoes||[]):_cronoTemasUsados();
+  const disp=_cronoAllTemas().filter(m=>!usados.has(m.temaId));
+  const item=m=>`<button class="cg-pk-item pri-${_cronoTemaPrio(m.temaId)||'none'}" type="button" onclick="_cronoPickerAdd('${_cronoEsc(m.temaId)}')"><span class="dot"></span><span class="t">${_cronoEsc(m.modulo)}</span><span class="tm">${_cronoFmtDur(_cronoTemaBlocoMin(m.temaId))}</span></button>`;
+  const toolbar=`<div class="cg-pk-sort"><button class="cg-pk-sort-b${_cronoPickerSort==='prio'?' on':''}" type="button" onclick="_cronoPickerSetSort('prio')">Por prioridade</button><button class="cg-pk-sort-b${_cronoPickerSort==='num'?' on':''}" type="button" onclick="_cronoPickerSetSort('num')">Por ordem numérica</button></div>`;
+  let inner='';
+  if(_cronoPickerSort==='num'){
+    // _cronoAllTemas já vem ordenado por curso + nº do Ponto → lista plana
+    inner=disp.map(item).join('');
+  }else{
+    const grupos=[{k:'alta',lbl:'Alta prioridade'},{k:'media',lbl:'Média prioridade'},{k:'baixa',lbl:'Baixa prioridade'},{k:'',lbl:'Sem prioridade definida'}];
+    grupos.forEach(g=>{
+      const items=disp.filter(m=>(_cronoTemaPrio(m.temaId))===g.k);
+      if(!items.length)return;
+      inner+=`<div class="cg-pk-group"><div class="cg-pk-group-h pri-${g.k||'none'}"><span class="dot"></span>${g.lbl}<span class="n">${items.length}</span></div>`;
+      inner+=items.map(item).join('');
+      inner+='</div>';
+    });
+  }
+  if(!inner)inner='<div class="cg-none" style="padding:20px 0;text-align:center">Nenhum tema disponível'+(mode!=='rev'?' (todos já distribuídos)':'')+'.</div>';
+  return toolbar+inner;
+}
 function _cronoRenderPicker(){
   const t=_cronoCurTurma(); if(!t)return; const sem=t.semanas&&t.semanas[_cronoPickerWi]; if(!sem)return;
   const mode=_cronoPickerMode;
-  // Tema: exclui os já usados como tema em QUALQUER semana (não repete). Revisão: só os já nesta semana.
-  const usados=mode==='tema'?_cronoTemasUsados():new Set(sem.revisoes||[]);
-  const disp=_cronoAllTemas().filter(m=>!usados.has(m.temaId));
-  const grupos=[{k:'alta',lbl:'Alta prioridade'},{k:'media',lbl:'Média prioridade'},{k:'baixa',lbl:'Baixa prioridade'},{k:'',lbl:'Sem prioridade definida'}];
-  let inner='';
-  grupos.forEach(g=>{
-    const items=disp.filter(m=>(_cronoTemaPrio(m.temaId))===g.k);
-    if(!items.length)return;
-    inner+=`<div class="cg-pk-group"><div class="cg-pk-group-h pri-${g.k||'none'}"><span class="dot"></span>${g.lbl}<span class="n">${items.length}</span></div>`;
-    inner+=items.map(m=>`<button class="cg-pk-item pri-${_cronoTemaPrio(m.temaId)||'none'}" type="button" onclick="_cronoPickerAdd('${_cronoEsc(m.temaId)}')"><span class="dot"></span><span class="t">${_cronoEsc(m.modulo)}</span><span class="tm">${_cronoFmtDur(_cronoTemaBlocoMin(m.temaId))}</span></button>`).join('');
-    inner+='</div>';
-  });
-  if(!inner)inner='<div class="cg-none" style="padding:20px 0;text-align:center">Nenhum tema disponível'+(mode==='tema'?' (todos já distribuídos)':'')+'.</div>';
+  const titulo=mode==='rev'?'Adicionar revisão':mode==='sobra'?'Adicionar tema "se sobrar tempo"':'Adicionar tema de estudo';
+  const sub=mode==='rev'?'Selecione quantos quiser e clique em Concluir':'Selecione quantos quiser · temas não se repetem entre semanas';
   let modal=document.getElementById('cg-picker-modal'); if(modal)modal.remove();
   modal=document.createElement('div'); modal.className='mo'; modal.id='cg-picker-modal';
   modal.innerHTML=`<div class="md" style="max-width:620px;max-height:88vh;display:flex;flex-direction:column">
-    <div class="mh"><div><div class="m-title">${mode==='rev'?'Adicionar revisão':'Adicionar tema'}</div><div class="m-sub">Semana ${_cronoPickerWi+1}${mode==='tema'?' · temas não se repetem entre semanas':''}</div></div><button class="m-close" onclick="_cronoClosePicker()">✕</button></div>
-    <div class="m-body" style="overflow-y:auto" id="cg-picker-body">${inner}</div>
+    <div class="mh"><div><div class="m-title">${titulo}</div><div class="m-sub">Semana ${_cronoPickerWi+1} · ${sub}</div></div><button class="m-close" onclick="_cronoClosePicker()">✕</button></div>
+    <div class="m-body" style="overflow-y:auto" id="cg-picker-body">${_cronoPickerInnerHTML()}</div>
     <div class="mh" style="border-top:1px solid var(--border);border-bottom:none;justify-content:flex-end"><button class="btn btn-p btn-sm" type="button" onclick="_cronoClosePicker()">Concluir</button></div>
   </div>`;
   modal.addEventListener('click',e=>{if(e.target===modal)_cronoClosePicker();});
@@ -34040,10 +34246,12 @@ function _cronoRenderPicker(){
 }
 window._cronoPickerAdd=async id=>{
   const t=_cronoCurTurma(); const sem=t&&t.semanas&&t.semanas[_cronoPickerWi]; if(!sem)return;
-  const key=_cronoPickerMode==='rev'?'revisoes':'temas';
+  const key=_cronoPickerMode==='rev'?'revisoes':_cronoPickerMode==='sobra'?'sobra':'temas';
   sem[key]=sem[key]||[]; if(!sem[key].includes(id))sem[key].push(id);
   const ok=await _cronoSaveTurma(t,''); if(!ok){renderCronoGer();_cronoClosePicker();return;}
-  _cronoRenderWeeks(); _cronoClosePicker();
+  // Mantém o modal aberto (seleção múltipla) — atualiza só a lista interna e as semanas.
+  const body=document.getElementById('cg-picker-body'); if(body)body.innerHTML=_cronoPickerInnerHTML();
+  _cronoRenderWeeks();
 };
 function _cronoRenderWeeks(){ const t=_cronoCurTurma(); const wrap=document.getElementById('cg-weeks-wrap'); if(t&&wrap)wrap.innerHTML=_cronoWeeksHTML(t); }
 function _cronoRenderTurmaEditor(turma){
@@ -34217,7 +34425,8 @@ window._cronoSemAddTema=async(i,id)=>{ if(!id)return; const t=_cronoCurTurma(); 
 window._cronoSemDelTema=async(i,id)=>{ const t=_cronoCurTurma(); if(!t||!t.semanas[i])return; t.semanas[i].temas=(t.semanas[i].temas||[]).filter(x=>x!==id); await _cronoSaveTurma(t,''); renderCronoGer(); };
 window._cronoSemAddRev=async(i,id)=>{ if(!id)return; const t=_cronoCurTurma(); if(!t||!t.semanas[i])return; t.semanas[i].revisoes=t.semanas[i].revisoes||[]; if(!t.semanas[i].revisoes.includes(id))t.semanas[i].revisoes.push(id); await _cronoSaveTurma(t,''); renderCronoGer(); };
 window._cronoSemDelRev=async(i,id)=>{ const t=_cronoCurTurma(); if(!t||!t.semanas[i])return; t.semanas[i].revisoes=(t.semanas[i].revisoes||[]).filter(x=>x!==id); await _cronoSaveTurma(t,''); renderCronoGer(); };
-window._cronoAddSemana=async()=>{ const t=_cronoCurTurma(); if(!t)return; t.semanas=t.semanas||[]; t.semanas.push({dias:7,temas:[],revisoes:[],nota:''}); await _cronoSaveTurma(t,'Semana adicionada'); renderCronoGer(); };
+window._cronoSemDelSobra=async(i,id)=>{ const t=_cronoCurTurma(); if(!t||!t.semanas[i])return; t.semanas[i].sobra=(t.semanas[i].sobra||[]).filter(x=>x!==id); await _cronoSaveTurma(t,''); renderCronoGer(); };
+window._cronoAddSemana=async()=>{ const t=_cronoCurTurma(); if(!t)return; t.semanas=t.semanas||[]; t.semanas.push({dias:7,temas:[],revisoes:[],sobra:[],nota:''}); await _cronoSaveTurma(t,'Semana adicionada'); renderCronoGer(); };
 window._cronoDelSemana=async i=>{ const t=_cronoCurTurma(); if(!t||!t.semanas[i])return; const ok=await uiConfirm(`Remover a Semana ${i+1}?`,{title:'Remover semana',yesLabel:'Remover',noLabel:'Cancelar',yesClass:'btn-d'}); if(!ok)return; t.semanas.splice(i,1); await _cronoSaveTurma(t,''); renderCronoGer(); };
 // ── Export PDF (jsPDF, A4 retrato, compacto, claro c/ cabeçalho escuro) ──
 window._cronoExportarPDF=async()=>{
@@ -34255,23 +34464,32 @@ window._cronoExportarPDF=async()=>{
       const bloco=(label,lines,color)=>{
         if(!lines.length)return;
         ensure(5+lines.length*4.4);
-        doc.setTextColor(...(color||dark)); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
-        doc.text(label,MX+6,y+3.5); y+=4.5;
-        doc.setFont('helvetica','normal'); doc.setTextColor(60,66,78); doc.setFontSize(8.5);
-        lines.forEach(ln=>{ const parts=wrap(ln,8.5,W-MX*2-12); parts.forEach(p=>{ ensure(4.4); doc.text(p,MX+10,y+3); y+=4.2; }); });
+        doc.setTextColor(...(color||dark)); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+        doc.text(clean(label),MX+6,y+3.5); y+=5;
+        doc.setFont('helvetica','normal'); doc.setTextColor(...dark); doc.setFontSize(8.5);
+        lines.forEach(ln=>{ wrap(ln,8.5,W-MX*2-16).forEach((p,pi)=>{ ensure(4.4); doc.text((pi===0?'• ':'   ')+p,MX+10,y+3); y+=4.2; }); });
+        y+=1.5;
+      };
+      // Temas (com trilhas e hot topics aninhados) por seção.
+      const temaSec=(titulo,ids,headColor)=>{
+        if(!ids.length)return;
+        ensure(8);
+        doc.setTextColor(...(headColor||dark)); doc.setFont('helvetica','bold'); doc.setFontSize(9.5);
+        doc.text(clean(titulo),MX+6,y+3.5); y+=5.6;
+        ids.forEach(id=>{
+          doc.setFont('helvetica','bold'); doc.setTextColor(...dark); doc.setFontSize(8.5);
+          wrap(_cronoTemaLabel(id),8.5,W-MX*2-16).forEach((p,pi)=>{ ensure(4.4); doc.text((pi===0?'• ':'   ')+p,MX+10,y+3); y+=4.2; });
+          const td=S.cronoTemas[id]||{};
+          (td.trilhaIds||[]).forEach(tid=>{ const tr=S.cronoTrilhas[tid]; if(!tr)return; doc.setFont('helvetica','normal'); doc.setTextColor(...accent); doc.setFontSize(8);
+            wrap(tr.titulo,8,W-MX*2-26).forEach((p,pi)=>{ ensure(4); doc.text((pi===0?'– ':'  ')+p,MX+18,y+2.8); y+=3.8; }); });
+          (Array.isArray(td.hotTopics)?td.hotTopics:[]).forEach(h=>{ doc.setFont('helvetica','italic'); doc.setTextColor(...gray); doc.setFontSize(7.6);
+            wrap('Hot topic: '+h.tema+(h.onde?' ('+h.onde+')':''),7.6,W-MX*2-26).forEach((p,pi)=>{ ensure(3.6); doc.text((pi===0?'· ':'  ')+p,MX+18,y+2.6); y+=3.4; }); });
+          y+=1.5;
+        });
         y+=1;
       };
-      // Módulos + suas trilhas/hot topics
-      const modLines=sm.temas.map(id=>_cronoTemaLabel(id));
-      bloco('Módulos / temas',modLines);
-      const trilhaLines=[]; const hotLines=[];
-      sm.temas.forEach(id=>{
-        const doc2=S.cronoTemas[id]||{};
-        (doc2.trilhaIds||[]).forEach(tid=>{ const tr=S.cronoTrilhas[tid]; if(tr)trilhaLines.push(tr.titulo); });
-        (Array.isArray(doc2.hotTopics)?doc2.hotTopics:[]).forEach(h=>{ hotLines.push(h.tema+(h.onde?'  ('+h.onde+')':'')); });
-      });
-      bloco('Casos clínicos recomendados',trilhaLines,accent);
-      bloco('Hot topics',hotLines,[180,83,9]);
+      temaSec('Temas prioritários para estudo',sm.temas,dark);
+      temaSec('Se sobrar tempo estude:',(sm.sobra||[]),[180,83,9]);
       if(sm.revisoes.length)bloco('Revisão',sm.revisoes.map(id=>{const vs=_cronoTemaVistoSemana(id);return _cronoTemaLabel(id)+(vs?' (visto na semana '+vs+')':' (ainda não estudado)');}),gray);
       // separador
       ensure(4); doc.setDrawColor(...line); doc.setLineWidth(0.2); doc.line(MX,y+1,W-MX,y+1); y+=5;
